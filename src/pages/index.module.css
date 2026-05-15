@@ -1,0 +1,335 @@
+/* ─── Hero ─────────────────────────────────────────────────────────── */
+
+.hero {
+  position: relative;
+  padding: 5rem 1.5rem 4rem;
+  overflow: hidden;
+  background:
+    radial-gradient(ellipse at 18% 12%, rgba(171, 71, 188, 0.18) 0%, transparent 60%),
+    radial-gradient(ellipse at 82% 88%, rgba(102, 187, 106, 0.14) 0%, transparent 60%);
+}
+
+[data-theme='dark'] .hero {
+  background:
+    radial-gradient(ellipse at 18% 12%, rgba(171, 71, 188, 0.28) 0%, transparent 55%),
+    radial-gradient(ellipse at 82% 88%, rgba(129, 199, 132, 0.18) 0%, transparent 55%),
+    radial-gradient(ellipse at 50% 100%, rgba(102, 187, 106, 0.08) 0%, transparent 65%),
+    linear-gradient(180deg, #0a0613 0%, #100822 100%);
+}
+
+.heroInner {
+  max-width: 1180px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 1.25fr 1fr;
+  gap: 3rem;
+  align-items: center;
+}
+
+.heroText {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.heroPill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.32rem 0.85rem;
+  background: rgba(171, 71, 188, 0.08);
+  border: 1px solid rgba(171, 71, 188, 0.28);
+  border-radius: 9999px;
+  font-size: 0.78rem;
+  font-family: 'JetBrains Mono', monospace;
+  color: var(--ifm-color-primary);
+  width: fit-content;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.heroPillDot {
+  width: 6px;
+  height: 6px;
+  background: var(--omni-emerald);
+  border-radius: 50%;
+  box-shadow: 0 0 8px var(--omni-emerald);
+}
+
+.heroTitle {
+  font-family: var(--omni-font-display);
+  font-size: clamp(4rem, 9vw, 7.5rem);
+  font-weight: 700;
+  letter-spacing: -0.045em;
+  line-height: 0.92;
+  margin: 0;
+}
+
+.heroTagline {
+  font-family: var(--omni-font-display);
+  font-size: 1.5rem;
+  line-height: 1.4;
+  color: var(--ifm-color-emphasis-900);
+  font-weight: 500;
+  letter-spacing: -0.012em;
+  margin: 0;
+  max-width: 56ch;
+}
+
+.heroDesc {
+  font-size: 1.02rem;
+  line-height: 1.6;
+  color: var(--ifm-color-emphasis-700);
+  margin: 0;
+  max-width: 56ch;
+}
+
+.heroDesc strong {
+  color: var(--ifm-color-emphasis-900);
+  font-weight: 600;
+}
+
+.heroButtons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-top: 0.5rem;
+}
+
+.heroVis {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* ─── Sections ─────────────────────────────────────────────────────── */
+
+.section {
+  padding: 5rem 1.5rem;
+  max-width: 1180px;
+  margin: 0 auto;
+}
+
+.sectionHeader {
+  text-align: center;
+  max-width: 780px;
+  margin: 0 auto 3rem;
+}
+
+.sectionHeader h2 {
+  font-family: var(--omni-font-display);
+  font-size: 2.5rem;
+  font-weight: 600;
+  letter-spacing: -0.025em;
+  line-height: 1.1;
+  margin: 0 0 0.85rem;
+  border-bottom: none;
+}
+
+.sectionHeader p {
+  font-size: 1.08rem;
+  line-height: 1.6;
+  color: var(--ifm-color-emphasis-700);
+  margin: 0;
+}
+
+/* ─── Pillars ──────────────────────────────────────────────────────── */
+
+.pillarGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1.5rem;
+}
+
+.pillarCard {
+  position: relative;
+  padding: 2rem;
+  border-radius: 16px;
+  background: var(--ifm-background-surface-color);
+  border: 1px solid var(--ifm-color-emphasis-200);
+  overflow: hidden;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+.pillarCard:hover {
+  transform: translateY(-3px);
+  border-color: color-mix(in srgb, var(--accent, var(--ifm-color-primary)) 50%, var(--ifm-color-emphasis-200));
+  box-shadow: 0 12px 36px color-mix(in srgb, var(--accent, var(--ifm-color-primary)) 18%, transparent);
+}
+
+.pillarAccent {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: var(--accent, var(--ifm-color-primary));
+}
+
+.pillarTitle {
+  font-family: var(--omni-font-display);
+  font-size: 1.5rem;
+  font-weight: 600;
+  letter-spacing: -0.018em;
+  margin: 0 0 0.75rem;
+  color: var(--accent, var(--ifm-color-primary));
+}
+
+.pillarBlurb {
+  font-size: 0.95rem;
+  line-height: 1.55;
+  color: var(--ifm-color-emphasis-700);
+  margin: 0 0 1rem;
+}
+
+.pillarCode {
+  margin: 0;
+}
+
+.pillarCode :global(.theme-code-block),
+.pillarCode :global(.prism-code) {
+  font-size: 0.78rem;
+  line-height: 1.55;
+  margin: 0;
+}
+
+.pillarCode :global(pre) {
+  margin: 0;
+}
+
+/* ─── Code showcase ────────────────────────────────────────────────── */
+
+.codeShowcase {
+  background: var(--omni-gradient-subtle);
+  max-width: none;
+  padding-left: 1.5rem;
+  padding-right: 1.5rem;
+}
+
+.codeWrap {
+  max-width: 920px;
+  margin: 0 auto;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.16);
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+/* ─── Features ─────────────────────────────────────────────────────── */
+
+.featureGrid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1.25rem;
+}
+
+.featureCard {
+  padding: 1.5rem;
+  background: var(--ifm-background-surface-color);
+  border: 1px solid var(--ifm-color-emphasis-200);
+  border-radius: 12px;
+  transition: transform 0.18s ease, border-color 0.18s ease;
+}
+
+.featureCard:hover {
+  transform: translateY(-2px);
+  border-color: var(--ifm-color-primary);
+}
+
+.featureIcon {
+  font-size: 1.85rem;
+  color: var(--ifm-color-primary);
+  line-height: 1;
+  margin-bottom: 0.75rem;
+}
+
+.featureCard h3 {
+  font-family: var(--omni-font-display);
+  font-size: 1.05rem;
+  font-weight: 700;
+  margin: 0 0 0.4rem;
+  letter-spacing: -0.01em;
+}
+
+.featureCard p {
+  font-size: 0.88rem;
+  line-height: 1.5;
+  color: var(--ifm-color-emphasis-700);
+  margin: 0;
+}
+
+/* ─── CTA ──────────────────────────────────────────────────────────── */
+
+.cta {
+  padding: 5rem 1.5rem;
+  background: linear-gradient(180deg, transparent 0%, rgba(171, 71, 188, 0.08) 100%);
+  text-align: center;
+}
+
+.ctaInner {
+  max-width: 680px;
+  margin: 0 auto;
+}
+
+.ctaInner h2 {
+  font-family: var(--omni-font-display);
+  font-size: 2.25rem;
+  font-weight: 600;
+  letter-spacing: -0.022em;
+  margin: 0 0 0.75rem;
+}
+
+.ctaInner p {
+  font-size: 1.05rem;
+  line-height: 1.55;
+  color: var(--ifm-color-emphasis-700);
+  margin: 0 0 2rem;
+}
+
+.ctaInner .heroButtons {
+  justify-content: center;
+}
+
+/* ─── Responsive ───────────────────────────────────────────────────── */
+
+@media (max-width: 996px) {
+  .heroInner {
+    grid-template-columns: 1fr;
+    gap: 2rem;
+  }
+
+  .heroVis {
+    order: -1;
+    max-width: 380px;
+    margin: 0 auto;
+  }
+
+  .pillarGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .featureGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .section {
+    padding: 3.5rem 1.25rem;
+  }
+
+  .sectionHeader h2 {
+    font-size: 1.75rem;
+  }
+}
+
+@media (max-width: 576px) {
+  .featureGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .heroTagline {
+    font-size: 1.1rem;
+  }
+
+  .heroDesc {
+    font-size: 0.95rem;
+  }
+}

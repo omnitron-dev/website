@@ -1,0 +1,8 @@
+omnitron-team:
+  name: Omnitron Team
+  title: Maintainers
+  url: https://github.com/omnitron-dev
+  image_url: /img/logo.png
+  page: true
+  socials:
+    github: omnitron-dev
