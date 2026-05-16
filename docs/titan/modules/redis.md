@@ -4,12 +4,10 @@ title: titan-redis
 
 # titan-redis
 
-Redis client module: connection pooling, cluster support, health
-indicator integration. Used by `titan-cache` (Redis tier),
-`titan-discovery`, `titan-lock`, `titan-ratelimit`, and
-`titan-notifications`.
-
-## Install
+Redis client module with clustering, Sentinel, TLS, multiple named
+instances, and DB index separation. The shared dependency for
+`titan-cache` (L2 tier), `titan-discovery`, `titan-lock`,
+`titan-ratelimit`, and `titan-notifications`.
 
 ```bash
 pnpm add @omnitron-dev/titan-redis
@@ -17,53 +15,139 @@ pnpm add @omnitron-dev/titan-redis
 
 ## Setup
 
+### Single client
+
 ```typescript
-import { RedisModule } from '@omnitron-dev/titan-redis';
+import { TitanRedisModule } from '@omnitron-dev/titan-redis';
 
 @Module({
   imports: [
-    RedisModule.forRoot({
-      url:    env.REDIS_URL,
-      pool:   { min: 1, max: 10 },
-      cluster: false,
+    TitanRedisModule.forRoot({
+      url:  env.REDIS_URL,                 // or host + port
+      db:   0,                             // DB index for namespace separation
     }),
   ],
 })
-export class AppModule {}
+class AppModule {}
 ```
 
-For Redis Cluster:
+### Cluster
 
 ```typescript
-RedisModule.forRoot({
-  cluster: true,
-  nodes: [
-    { host: 'redis-1', port: 6379 },
-    { host: 'redis-2', port: 6379 },
-  ],
+TitanRedisModule.forRoot({
+  cluster: {
+    nodes: [
+      { host: 'redis-1', port: 6379 },
+      { host: 'redis-2', port: 6379 },
+    ],
+    options: { /* cluster options */ },
+  },
 })
 ```
 
-## Use
-
-Inject the typed client directly:
+### Sentinel
 
 ```typescript
-@Injectable()
-export class MyService {
-  constructor(@InjectRedis() private readonly redis: RedisClient) {}
+TitanRedisModule.forRoot({
+  sentinel: {
+    name:      'mymaster',
+    sentinels: [{ host: 'sentinel-1', port: 26379 }],
+  },
+  password: env.REDIS_PASSWORD,
+})
+```
 
-  async cachedSettings() {
-    return this.redis.get('settings');
+### TLS
+
+```typescript
+TitanRedisModule.forRoot({
+  url: env.REDIS_URL,
+  tls: { ca: fs.readFileSync('./ca.pem'), rejectUnauthorized: true },
+})
+```
+
+### Multiple named clients
+
+```typescript
+TitanRedisModule.forRoot({
+  clients: {
+    cache:     { url: env.REDIS_CACHE_URL,   db: 0 },
+    messaging: { url: env.REDIS_QUEUE_URL,   db: 2 },
+    storage:   { url: env.REDIS_STORAGE_URL, db: 1 },
+  },
+})
+```
+
+Also exported: `forRootAsync(options: RedisModuleAsyncOptions)`.
+
+### `RedisModuleOptions`
+
+| Option                | Type                                          |
+| --------------------- | --------------------------------------------- |
+| `host`                | `string`                                      |
+| `port`                | `number`                                      |
+| `db`                  | `number` (DB index for separation)            |
+| `url`                 | `string` (connection URL)                     |
+| `cluster`             | `IRedisClusterOptions`                        |
+| `tls`                 | `IRedisTlsOptions`                            |
+| `sentinel`            | `{ sentinels, name }`                         |
+| `password`            | `string`                                      |
+| `maxRetriesPerRequest`| `number`                                      |
+| `enableOfflineQueue`  | `boolean`                                     |
+| `isGlobal`            | `boolean`                                     |
+| `clients`             | `Record<string, RedisClientOptions>`          |
+
+## Conventional DB-index split
+
+The repo follows a convention used across DAOS services:
+
+| DB index | Purpose      |
+| -------- | ------------ |
+| 0        | Main         |
+| 1        | Storage      |
+| 2        | Messaging    |
+| 3        | Priceverse   |
+| 4        | Paysys       |
+
+When you use multiple named clients, set `db` per client to isolate
+namespaces.
+
+## Decorators
+
+| Decorator                | Effect                                              |
+| ------------------------ | --------------------------------------------------- |
+| `@InjectRedis(namespace?)`     | Inject a named client                         |
+| `@InjectRedisManager()`        | Inject the `RedisManager`                     |
+| `@RedisCache(options)`         | Cache the method result in Redis              |
+| `@RedisLock(options)`          | Distributed lock (uses `titan-lock` if loaded) |
+| `@RedisRateLimit(options)`     | Rate limit in Redis                           |
+
+## `RedisService`
+
+```typescript
+import { RedisService, REDIS_MANAGER } from '@omnitron-dev/titan-redis';
+
+@Service({ name: 'cart' })
+class CartService {
+  constructor(@InjectRedis() private readonly redis: RedisService) {}
+
+  @Public()
+  async addItem(userId: string, item: Item) {
+    await this.redis.hset(`cart:${userId}`, item.id, JSON.stringify(item));
   }
 }
 ```
 
-## Health
+## Health indicator
 
-Register `RedisHealth` with `titan-health` to expose the connection
-status on `/healthz`:
+`RedisHealthIndicator` is exported (deprecated; prefer the version
+shipped with `titan-health` when both modules are loaded).
 
-```typescript
-HealthModule.forRoot({ indicators: [RedisHealth] })
-```
+## Exported tokens
+
+| Token                                   |
+| --------------------------------------- |
+| `REDIS_MANAGER`                         |
+| `REDIS_MODULE_OPTIONS`                  |
+| `REDIS_DEFAULT_NAMESPACE`               |
+| `getRedisClientToken(namespace)`        |

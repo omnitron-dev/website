@@ -4,10 +4,9 @@ title: titan-ratelimit
 
 # titan-ratelimit
 
-Rate limiting with Redis-backed token buckets. Apply per-user, per-IP,
-or per-arbitrary-key.
-
-## Install
+Token-bucket, sliding-window, and fixed-window rate limiting with
+Redis or in-memory storage. Supports per-user, per-IP, tier-based
+policies and queueing for delayed throttling.
 
 ```bash
 pnpm add @omnitron-dev/titan-ratelimit
@@ -15,56 +14,117 @@ pnpm add @omnitron-dev/titan-ratelimit
 
 ## Setup
 
+### In-memory
+
 ```typescript
-import { RateLimitModule } from '@omnitron-dev/titan-ratelimit';
+import { TitanRateLimitModule } from '@omnitron-dev/titan-ratelimit';
 
 @Module({
   imports: [
-    RateLimitModule.forRoot({
-      redis: { url: env.REDIS_URL },
-      defaults: {
-        capacity: 100,
-        refillPerSec: 10,
-      },
+    TitanRateLimitModule.forRoot({
+      enabled:         true,
+      strategy:        'sliding-window',
+      defaultLimit:    100,
+      defaultWindowMs: 60_000,
+      storageType:     'memory',
     }),
   ],
 })
-export class AppModule {}
+class AppModule {}
 ```
 
-## Apply
-
-### As Netron middleware
+### Redis-backed (multi-pod)
 
 ```typescript
-@Module({
-  imports: [
-    NetronModule.forRoot({ middleware: [RateLimitMiddleware] }),
-  ],
+TitanRateLimitModule.forRoot({
+  storageType:     'redis',
+  strategy:        'sliding-window',
+  defaultLimit:    100,
+  defaultWindowMs: 60_000,
+  burstLimit:      150,
+  keyPrefix:       'rl',
+  // For token bucket:
+  tokenRefillRate: 100,
+  // Optional queue
+  queueEnabled:    true,
+  maxQueueSize:    1_000,
+  queueTimeoutMs:  5_000,
+  // Tiered plans
+  tiers: {
+    free:    { limit: 10,  windowMs: 60_000 },
+    premium: { limit: 1000, windowMs: 60_000 },
+  },
 })
 ```
 
-The middleware uses the auth context (if present) for the bucket key,
-falling back to client IP.
+Also exported: `forRootAsync(options: IRateLimitModuleAsyncOptions)`.
 
-### Per-method
+### `IRateLimitModuleOptions`
+
+| Option              | Type                                                              | Default               |
+| ------------------- | ----------------------------------------------------------------- | --------------------- |
+| `enabled`           | `boolean`                                                         | `true`                |
+| `strategy`          | `'token-bucket' \| 'sliding-window' \| 'fixed-window'`            | `'sliding-window'`    |
+| `keyPrefix`         | `string`                                                          | —                     |
+| `defaultLimit`      | `number`                                                          | `100`                 |
+| `defaultWindowMs`   | `number` (ms)                                                     | `60_000`              |
+| `burstLimit`        | `number`                                                          | `0`                   |
+| `tokenRefillRate`   | `number`                                                          | `100`                 |
+| `queueEnabled`      | `boolean`                                                         | —                     |
+| `maxQueueSize`      | `number`                                                          | —                     |
+| `queueTimeoutMs`    | `number`                                                          | —                     |
+| `storageType`       | `'memory' \| 'redis'`                                             | `'memory'`            |
+| `tiers`             | `Record<string, TierConfig>`                                      | —                     |
+| `isGlobal`          | `boolean`                                                         | —                     |
+
+## Decorators
+
+### `@RateLimit({ limit, windowMs })`
+
+Apply per-method:
 
 ```typescript
+import { RateLimit } from '@omnitron-dev/titan-ratelimit';
+
 @Public()
-@RateLimited({ key: (ctx) => ctx.auth.userId, capacity: 30, refillPerSec: 1 })
+@RateLimit({ limit: 30, windowMs: 60_000 })
 async sendInvite(email: string) { /* … */ }
 ```
 
-### Manual
+### `@Throttle(requestsPerSecond)`
+
+Convenience wrapper:
 
 ```typescript
-const allowed = await this.rate.tryConsume(`charge:${userId}`, 1);
-if (!allowed) {
-  throw new RateLimitError({ message: 'too many charge attempts' });
+import { Throttle } from '@omnitron-dev/titan-ratelimit';
+
+@Public()
+@Throttle(10)
+async search(query: string) { /* … */ }
+```
+
+## Programmatic use
+
+```typescript
+import { RateLimitService, RATE_LIMIT_SERVICE_TOKEN } from '@omnitron-dev/titan-ratelimit';
+
+@Service({ name: 'charges' })
+class ChargesService {
+  constructor(@Inject(RATE_LIMIT_SERVICE_TOKEN) private readonly rate: RateLimitService) {}
+
+  @Public()
+  async charge(userId: string, amount: number) {
+    const allowed = await this.rate.tryConsume(`charge:${userId}`);
+    if (!allowed) throw Errors.rateLimit('too many charge attempts');
+    // …
+  }
 }
 ```
 
-## Headers
+## Exported tokens
 
-When applied as middleware over HTTP, the module emits the standard
-`X-RateLimit-*` headers and returns `429 Too Many Requests` on exhaustion.
+| Token                          |
+| ------------------------------ |
+| `RATE_LIMIT_SERVICE_TOKEN`     |
+| `RATE_LIMIT_OPTIONS_TOKEN`     |
+| `RATE_LIMIT_STORAGE_TOKEN`     |

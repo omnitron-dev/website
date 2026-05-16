@@ -4,10 +4,9 @@ title: titan-database
 
 # titan-database
 
-SQL access through Kysely with migrations, multi-dialect support, and
-optional row-level security helpers.
-
-## Install
+Kysely-based typed query builder with declarative migrations,
+row-level security, multi-dialect support, and rich repository
+decorators (soft-delete, timestamps, audit).
 
 ```bash
 pnpm add @omnitron-dev/titan-database
@@ -16,64 +15,130 @@ pnpm add @omnitron-dev/titan-database
 ## Setup
 
 ```typescript
-import { DatabaseModule } from '@omnitron-dev/titan-database';
+import { TitanDatabaseModule } from '@omnitron-dev/titan-database';
 
 @Module({
   imports: [
-    DatabaseModule.forRoot({
-      dialect:        'postgres',     // 'postgres' | 'mysql' | 'sqlite'
-      url:            env.DATABASE_URL,
-      migrationsDir:  './migrations',
-      pool:           { min: 2, max: 20 },
+    TitanDatabaseModule.forRoot({
+      dialect:    'postgres',                  // 'postgres' | 'sqlite' | 'mysql'
+      connection: { url: env.DATABASE_URL },
+      pool:       { min: 2, max: 20 },
+      migrations: { directory: './migrations' },
+      plugins:    {
+        softDelete: true,
+        timestamps: true,
+        audit:      true,
+        rls:        true,
+      },
     }),
   ],
 })
-export class AppModule {}
+class AppModule {}
 ```
 
-## Use
+### `DatabaseModuleOptions`
 
-Inject the typed Kysely instance:
+| Option       | Type                                                  |
+| ------------ | ----------------------------------------------------- |
+| `dialect`    | `'postgres' \| 'sqlite' \| 'mysql'`                   |
+| `connection` | `ConnectionConfig` (URL or `{ host, port, … }`)       |
+| `pool`       | `{ min?, max?, acquireTimeoutMillis?, idleTimeoutMillis? }` |
+| `migrations` | `{ directory?, table?, lock? }`                       |
+| `plugins`    | `{ softDelete?, timestamps?, audit?, rls? }`          |
+| `kysera`     | `KyseraCoreOptions`                                   |
+| `rls`        | `{ enabled: boolean }`                                |
+
+## `forFeature` — repository registration
 
 ```typescript
-import type { Database } from './schema.js';   // your generated types
+@Module({
+  imports: [TitanDatabaseModule.forFeature([UsersRepository, OrdersRepository])],
+  providers: [UsersService],
+})
+class UsersModule {}
+```
 
-@Injectable()
-export class UsersRepository {
-  constructor(private readonly db: Kysely<Database>) {}
+## Repository pattern
 
+```typescript
+import { Repository, TransactionAwareRepository } from '@omnitron-dev/titan-database';
+
+@Repository()
+export class UsersRepository extends TransactionAwareRepository<UsersTable> {
   async findById(id: string) {
-    return this.db
-      .selectFrom('users')
-      .where('id', '=', id)
-      .selectAll()
-      .executeTakeFirst();
+    return this.qb.selectFrom('users').where('id', '=', id).selectAll().executeTakeFirst();
   }
 }
 ```
 
+`TransactionAwareRepository` exposes a Kysely query builder (`this.qb`)
+that participates in the ambient transaction context.
+
+## Decorators
+
+### Schema / model
+
+| Decorator                | Purpose                                                  |
+| ------------------------ | -------------------------------------------------------- |
+| `@Repository()`          | Mark a class as a repository                             |
+| `@Migration()`           | Mark a class as a migration                              |
+| `@SoftDelete(config)`    | Enable soft-delete (sets a `deleted_at` column)          |
+| `@Timestamps(config)`    | Enable `created_at` / `updated_at` columns               |
+| `@Audit(config)`         | Track per-row audit metadata                             |
+
+### Row-level security
+
+| Decorator               | Effect                                              |
+| ----------------------- | --------------------------------------------------- |
+| `@Policy(rules)`        | Attach RLS policies to a repository                 |
+| `@Allow(rule)`          | Allow rule                                          |
+| `@Deny(rule)`           | Deny rule                                           |
+| `@Filter(predicate)`    | Restrict queries by predicate                       |
+| `@BypassRLS()`          | Bypass RLS for this method                          |
+
+### Injection
+
+| Decorator                                | Purpose                                  |
+| ---------------------------------------- | ---------------------------------------- |
+| `@InjectConnection(name?)`               | Inject a named connection                |
+| `@InjectDatabaseManager()`               | Inject the database manager              |
+| `@InjectRepository(RepositoryClass)`     | Inject a repository instance             |
+
 ## Migrations
 
-```bash
-# In your project — backed by Kysely's migrator.
-pnpm titan db:migrate up
-pnpm titan db:migrate down
-pnpm titan db:migrate status
-```
-
-Migrations live in `./migrations/` as `.ts` files implementing `up` and
-`down`.
-
-## Row-level security
-
-For Postgres, the module exposes a `withRLS()` helper that scopes a
-transaction to a session-level role:
+Migrations live in the configured `directory` as TypeScript files with
+`up`/`down` methods, marked with `@Migration()`. The framework
+auto-discovers them and runs them in order:
 
 ```typescript
-await db.withRLS({ userId, role: 'app_user' }, async (tx) => {
-  return tx.selectFrom('orders').selectAll().execute();
-});
+@Migration()
+export class CreateUsersTable {
+  async up(db: Kysely<any>) {
+    await db.schema.createTable('users')
+      .addColumn('id', 'uuid', (c) => c.primaryKey())
+      .addColumn('email', 'text', (c) => c.notNull().unique())
+      .execute();
+  }
+
+  async down(db: Kysely<any>) {
+    await db.schema.dropTable('users').execute();
+  }
+}
 ```
 
-The session sets `app.current_user_id` and `SET ROLE`, your RLS policies
-read from those.
+## Health indicator
+
+`DatabaseHealthIndicator` is exported and registers automatically with
+`TitanHealthModule` if both are loaded.
+
+## Exported tokens
+
+| Token                                  | Purpose                                       |
+| -------------------------------------- | --------------------------------------------- |
+| `DATABASE_MANAGER`                     | Resolve the database manager                  |
+| `DATABASE_MODULE_OPTIONS`              | The resolved options bundle                   |
+| `DATABASE_CONNECTION`                  | The default connection                        |
+| `DATABASE_DEFAULT_CONNECTION`          | Alias for the default connection              |
+| `DATABASE_HEALTH_INDICATOR`            | Health indicator instance                     |
+| `getDatabaseConnectionToken(name?)`    | Token for a named connection                  |
+| `getRepositoryToken(Repository)`       | Token for a specific repository class         |

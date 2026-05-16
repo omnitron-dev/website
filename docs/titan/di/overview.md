@@ -10,8 +10,11 @@ The DI container is the single source of truth for every object in a
 Titan application. It is named **Nexus** and ships in the
 `@omnitron-dev/titan/nexus` subpath.
 
-This page is the entry point. The mechanics live in the per-page
-references linked at the bottom.
+```typescript
+import { Container, createContainer } from '@omnitron-dev/titan/nexus';
+```
+
+This page is the entry point. Mechanics in the per-page references.
 
 ## What a DI container does
 
@@ -30,7 +33,7 @@ walks the constructor signature, resolves each dependency, and
 injects them.
 
 ```typescript
-@Service('users@1.0.0')
+@Service({ name: 'users' })
 export class UsersService {
   // The container resolves Database and LoggerService from the
   // module's import graph and injects them here.
@@ -41,34 +44,61 @@ export class UsersService {
 }
 ```
 
-## Why "Nexus" and not "the container"
+## What Nexus brings beyond a basic DI container
 
-Most DI containers — Angular's, NestJS's, InversifyJS — share a
-common ancestry. Nexus deviates in five places that matter:
+```mermaid
+flowchart LR
+  subgraph Core
+    Reg[Registration]
+    Res[Resolution]
+    Sc[Scoping]
+    Lc[Lifecycle]
+  end
+  subgraph Advanced
+    Mt[Multi-tokens]
+    Cx[Contextual injection]
+    Mw[DI middleware pipeline]
+    Ld[Lazy / Async / Conditional]
+  end
+  subgraph Experimental
+    Dt[DevTools graph]
+    Ms[Service Mesh]
+    Tr[Tracing hooks]
+  end
+  Core --> Advanced
+  Advanced --> Experimental
+```
 
-1. **Multi-token providers.** A single token can have multiple
-   providers, all returned together as an array. Used for plugin
-   registration, validators, middleware chains.
-2. **Contextual injection.** A token can resolve to different
-   providers based on a runtime context (current user, environment,
-   feature flag).
-3. **DI middleware.** Middleware wraps **container resolution** —
-   not Netron calls. Use it for caching expensive resolutions,
-   adding retry to construction, instrumenting instantiation.
-4. **Cross-platform.** Nexus runs unmodified on Node, Bun, Deno,
-   and the browser. Runtime detection picks the right primitives.
-5. **No `reflect-metadata` requirement at the public surface.**
-   Decorator metadata is used internally; consumers can use the
-   container without reflection support if they prefer.
+- **Multi-tokens** — a single token can hold multiple providers
+  (`createMultiToken<T[]>('Validators')`).
+- **Contextual injection** — `ContextManager` + strategies
+  (`RoleBasedStrategy`, `EnvironmentStrategy`, `FeatureFlagStrategy`,
+  `TenantStrategy`) resolve different providers per request /
+  tenant / feature flag.
+- **DI middleware** — `RetryMiddleware`, `CachingMiddleware`,
+  `LoggingMiddleware`, `RateLimitMiddleware`,
+  `CircuitBreakerMiddleware`, `ValidationMiddleware`,
+  `TransactionMiddleware` wrap resolution itself.
+- **Cross-platform** — Node, Bun, Deno, browser. Runtime detection
+  via `Runtime`, `detectRuntime()`, `isBun()`, `isNode()`, `isDeno()`,
+  `isBrowser()`.
+- **Lifecycle hooks** — `LifecycleManager`, `LifecycleEvent`,
+  `LifecycleObserver`, plus built-in observers (`AuditObserver`,
+  `MemoryObserver`, `PerformanceObserver`).
 
 You do not need to learn a new mental model — Nexus is "DI like you
-already know" — but the deeper pages (multi-injection, contextual
-injection, middleware) cover the parts that differ.
+already know" — but the deeper pages cover the parts that go beyond
+the basics.
 
 ## A complete example
 
 ```typescript
-import { Container, createToken, Scope } from '@omnitron-dev/titan/nexus';
+import {
+  Container,
+  createContainer,
+  createToken,
+  Scope,
+} from '@omnitron-dev/titan/nexus';
 
 interface ILogger {
   info(message: string): void;
@@ -85,7 +115,7 @@ class UsersService {
   list() { this.logger.info('listing users'); return []; }
 }
 
-const container = new Container();
+const container = createContainer();
 
 container.register(LOGGER, {
   useClass: ConsoleLogger,
@@ -102,28 +132,49 @@ const users = container.resolve(UsersService);
 users.list();
 ```
 
-In a Titan app, you do not write the `Container` calls — `@Module`,
-`@Service`, and `@Injectable` translate to the same registrations
-behind the scenes.
+In a Titan app, you do not write `container.register` calls —
+`@Module`, `@Service`, and `@Injectable` translate to the same
+registrations behind the scenes.
 
 ## What the container guarantees
 
 | Guarantee                                     | Explanation                                                    |
 | --------------------------------------------- | -------------------------------------------------------------- |
 | **Topological resolution**                    | Dependencies are constructed before dependents                 |
-| **Cycle detection**                           | Circular deps throw at registration time, not runtime          |
-| **Scope correctness**                         | A `Singleton` is returned the same instance every time         |
-| **Lifecycle ordering**                        | Hooks fire in dependency order (see [Lifecycle](../application/lifecycle.md)) |
-| **Disposal**                                  | `container.dispose()` calls `onShutdown` on every instance     |
+| **Cycle detection**                           | Throws `CircularDependencyError` at resolution time            |
+| **Scope correctness**                         | A `Singleton` returns the same instance every time             |
+| **Disposal**                                  | `container.dispose()` runs lifecycle teardown                  |
 | **Type safety**                               | Tokens are typed; `resolve(LOGGER)` returns `ILogger`          |
+| **Async resolution**                          | `resolveAsync<T>(token)` for async providers                   |
+
+## Error types exposed
+
+The Nexus error hierarchy (`NexusError` → specialised subclasses):
+
+| Error class                       | When                                              |
+| --------------------------------- | ------------------------------------------------- |
+| `RegistrationError`               | Invalid provider registration                     |
+| `ResolutionError`                 | Generic resolution failure                        |
+| `DependencyNotFoundError`         | Provider for token not registered                 |
+| `CircularDependencyError`         | Constructor cycle detected                        |
+| `ScopeMismatchError`              | Narrower scope captured in wider scope            |
+| `NotInjectableError`              | Class missing the `@Injectable` decoration        |
+| `DuplicateRegistrationError`      | Two providers for the same single token           |
+| `InvalidProviderError`            | Provider definition malformed                     |
+| `InitializationError`             | Provider construction threw                       |
+| `AsyncResolutionError`            | Sync `resolve()` on an async provider             |
+| `ContainerDisposedError`          | Resolve after dispose                             |
+| `DisposalError`                   | Error during teardown                             |
+| `NexusAggregateError`             | Multiple errors batched (e.g. parallel disposal)  |
+| `ModuleError`                     | Module-level configuration error                  |
 
 ## Read the deep pages
 
 | Topic                                         | When to read                                              |
 | --------------------------------------------- | --------------------------------------------------------- |
 | [Providers](./providers.md)                   | The five provider types and when to use each              |
-| [Scopes](./scopes.md)                         | Singleton / Transient / Scoped / Request                  |
-| [Tokens](./tokens.md)                         | Class tokens, symbol tokens, multi-tokens                 |
+| [Scopes](./scopes.md)                         | Transient / Singleton / Scoped / Request                  |
+| [Tokens](./tokens.md)                         | Class, symbol, multi-, lazy, async, optional tokens       |
 | [Multi-injection](./multi-injection.md)       | Plugin patterns, middleware chains                        |
 | [Contextual injection](./contextual-injection.md) | Per-request / per-tenant / per-environment              |
 | [Middleware](./middleware.md)                 | Wrapping resolution itself                                |

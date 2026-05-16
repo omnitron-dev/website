@@ -4,10 +4,8 @@ title: titan-discovery
 
 # titan-discovery
 
-Service discovery backed by Redis. Running services register themselves;
-clients resolve URLs by service name.
-
-## Install
+Redis-backed service discovery with health-based filtering and
+automatic Netron integration.
 
 ```bash
 pnpm add @omnitron-dev/titan-discovery
@@ -21,40 +19,71 @@ import { DiscoveryModule } from '@omnitron-dev/titan-discovery';
 @Module({
   imports: [
     DiscoveryModule.forRoot({
-      redis:    { url: env.REDIS_URL },
-      ttlMs:    15_000,        // Heartbeat window
-      announce: { tags: ['v1', 'eu-west'] },
+      serviceName:             'users-api',
+      nodeId:                  process.env.HOSTNAME,
+      redisUrl:                env.REDIS_URL,
+      enableNetronIntegration: true,
+      heartbeatInterval:       15_000,
+      healthCheckUrl:          '/healthz',
     }),
   ],
 })
-export class AppModule {}
+class AppModule {}
 ```
 
-The module heartbeats every running Netron transport into Redis with the
-service name, version, and reachable URL. Stale entries expire after the
-configured TTL.
+`serviceName` is **required**. Every other field is optional.
 
-## Resolving from a client
+### `DiscoveryModuleOptions`
+
+| Option                     | Type     | Default            |
+| -------------------------- | -------- | ------------------ |
+| `serviceName`              | `string` | (required)         |
+| `nodeId`                   | `string` | generated UUID     |
+| `redisUrl`                 | `string` | —                  |
+| `redisOptions`             | `any`    | —                  |
+| `enableNetronIntegration`  | `boolean`| `true`             |
+| `heartbeatInterval`        | `number` (ms) | —             |
+| `healthCheckUrl`           | `string` | —                  |
+
+## What it does
+
+- **Registration.** On startup, the service registers itself in Redis
+  with `serviceName`, `nodeId`, and reachable URL.
+- **Heartbeat.** A periodic heartbeat keeps the registration alive.
+  Missed heartbeats expire the entry.
+- **Discovery.** Clients query the registry for available instances
+  of a service.
+- **Netron integration.** When enabled, Netron's RPC machinery picks
+  up registry data automatically for client-side resolution.
+
+## Reading from the service
 
 ```typescript
-const client = new NetronClient({
-  discovery: { redis: { url: env.REDIS_URL } },
-});
+import { DiscoveryService, DISCOVERY_SERVICE_TOKEN } from '@omnitron-dev/titan-discovery';
 
-// Resolves the URL via discovery; falls back to round-robin across
-// healthy instances.
-const users = await client.queryInterface<UsersService>('users@1.0.0');
+@Service({ name: 'admin' })
+class AdminService {
+  constructor(
+    @Inject(DISCOVERY_SERVICE_TOKEN) private readonly discovery: DiscoveryService,
+  ) {}
+
+  @Public()
+  async listInstances(name: string) {
+    return this.discovery.list(name);
+  }
+}
 ```
 
-## Filtering by tags
+`DiscoveryService` exposes lookups, health-aware filtering, and
+event subscriptions for registry changes. Consult the source for the
+canonical method signatures.
 
-```typescript
-const users = await client.queryInterface<UsersService>('users@1.0.0', {
-  tags: { region: 'eu-west' },
-});
-```
+## Exported tokens
 
-## Read also
-
-- [titan-health](./health.md) — drives the heartbeat liveness signal.
-- [titan-redis](./redis.md) — the underlying client.
+| Token                                  | Purpose                                  |
+| -------------------------------------- | ---------------------------------------- |
+| `DISCOVERY_SERVICE_TOKEN`              | Resolve `DiscoveryService`               |
+| `REDIS_TOKEN`                          | Internal Redis client                    |
+| `DISCOVERY_OPTIONS_TOKEN`              | Options bundle                           |
+| `DiscoveryModuleToken`                 | Module identity token                    |
+| `NETRON_DISCOVERY_INTEGRATION_TOKEN`   | Netron integration helper                |

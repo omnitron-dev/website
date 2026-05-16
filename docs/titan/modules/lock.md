@@ -4,65 +4,91 @@ title: titan-lock
 
 # titan-lock
 
-Distributed locks over Redis. Coordinate access to shared resources
-across processes and machines.
-
-## Install
+Distributed locks over Redis using UUID ownership, atomic Lua
+scripts, TTL expiration, and configurable retries.
 
 ```bash
 pnpm add @omnitron-dev/titan-lock
 ```
 
+Requires `TitanRedisModule` (or a compatible Redis client).
+
 ## Setup
 
 ```typescript
-import { LockModule } from '@omnitron-dev/titan-lock';
+import { TitanLockModule } from '@omnitron-dev/titan-lock';
 
 @Module({
   imports: [
-    LockModule.forRoot({
-      redis:    { url: env.REDIS_URL },
-      ttlMs:    30_000,        // Lease — auto-released if process dies
-      retryMs:  100,
-      maxRetry: 50,
+    TitanRedisModule.forRoot({ url: env.REDIS_URL }),
+    TitanLockModule.forRoot({
+      defaultTtl:        30_000,        // ms
+      keyPrefix:         'lock',
+      defaultRetries:    3,
+      defaultRetryDelay: 100,           // ms (exponential backoff applied)
     }),
   ],
 })
-export class AppModule {}
+class AppModule {}
 ```
 
-## Use
+Also exported: `forRootAsync(options: ILockModuleAsyncOptions)`.
+
+### `ILockModuleOptions`
+
+| Option              | Type   | Default |
+| ------------------- | ------ | ------- |
+| `defaultTtl`        | `number` (ms) | `30_000` |
+| `keyPrefix`         | `string` | `'lock'` |
+| `defaultRetries`    | `number` | `3`     |
+| `defaultRetryDelay` | `number` (ms) | `100` |
+| `isGlobal`          | `boolean` | —     |
+
+## `DistributedLockService`
 
 ```typescript
-@Service('billing@1.0.0')
-export class BillingService {
-  constructor(private readonly locks: LockService) {}
+import { DistributedLockService, LOCK_SERVICE_TOKEN } from '@omnitron-dev/titan-lock';
+
+@Service({ name: 'billing' })
+class BillingService {
+  constructor(
+    @Inject(LOCK_SERVICE_TOKEN) private readonly locks: DistributedLockService,
+  ) {}
 
   @Public()
   async charge(invoiceId: string) {
     return this.locks.withLock(`invoice:${invoiceId}`, async () => {
-      // Exactly-once charge logic — guaranteed serialised across pods.
+      // Exactly-once across the fleet.
       return this.processCharge(invoiceId);
     });
   }
 }
 ```
 
-## Manual acquire
+Lower-level API: `acquire(key, ttl?)`, `release(key, token)`,
+`extend(key, token, ttl)`. Consult the source for the canonical
+surface.
+
+## `@WithDistributedLock` decorator
 
 ```typescript
-const lease = await this.locks.acquire('invoice:42', { ttlMs: 60_000 });
-try {
-  await this.doWork();
-} finally {
-  await lease.release();
-}
+import { WithDistributedLock } from '@omnitron-dev/titan-lock';
+
+@Public()
+@WithDistributedLock({ key: (args) => `invoice:${args[0]}`, ttl: 60_000, retries: 5 })
+async charge(invoiceId: string) { /* … */ }
 ```
 
-A lease auto-extends while the holder runs — if the process dies, the
-lease expires after `ttlMs` and another process can acquire it.
+## Safety
 
-## Read also
+- Locks are owned by UUID — only the holder can release.
+- Lua scripts guarantee atomic acquire/release semantics.
+- TTL expires the lock if the holder dies.
+- Retries use exponential backoff with the configured base delay.
 
-- The module uses a `FailureTracker` primitive to suppress log spam
-  during repeated lock failures (see `titan/FailureTracker`).
+## Exported tokens
+
+| Token                    |
+| ------------------------ |
+| `LOCK_SERVICE_TOKEN`     |
+| `LOCK_OPTIONS_TOKEN`     |

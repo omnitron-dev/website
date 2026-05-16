@@ -4,10 +4,10 @@ title: titan-metrics
 
 # titan-metrics
 
-Counters, gauges, histograms, and a time-series buffer. Pluggable
-exporters (Prometheus, OTLP, custom).
-
-## Install
+Counters, gauges, and histograms with time-series storage. No
+external metrics backend required — pluggable storage (memory,
+PostgreSQL, SQLite). A Netron RPC service exposes the metrics
+for the Omnitron console.
 
 ```bash
 pnpm add @omnitron-dev/titan-metrics
@@ -16,33 +16,50 @@ pnpm add @omnitron-dev/titan-metrics
 ## Setup
 
 ```typescript
-import { MetricsModule } from '@omnitron-dev/titan-metrics';
+import { TitanMetricsModule } from '@omnitron-dev/titan-metrics';
 
 @Module({
   imports: [
-    MetricsModule.forRoot({
-      exporter: { type: 'prometheus', port: 9090, path: '/metrics' },
-      defaultLabels: { service: 'users', env: process.env.NODE_ENV },
+    TitanMetricsModule.forRoot({
+      storage:       { type: 'memory' },     // 'memory' | 'postgres' | 'sqlite'
+      retention:     7 * 24 * 60 * 60 * 1000, // 7d in-memory retention
+      flushInterval: 30_000,
     }),
   ],
 })
-export class AppModule {}
+class AppModule {}
 ```
 
-## Use
+For SQL-backed storage:
 
 ```typescript
-@Service('users@1.0.0')
-export class UsersService {
-  constructor(private readonly metrics: MetricsService) {}
+TitanMetricsModule.forRoot({
+  storage: { type: 'postgres', /* … connection details … */ },
+})
+```
 
-  private readonly created = this.metrics.counter('users.created.total', {
-    help:   'Number of users created',
-    labels: ['source'],
-  });
+### `IMetricsModuleOptions`
 
+| Option           | Type                                                |
+| ---------------- | --------------------------------------------------- |
+| `storage`        | `{ type: 'memory' \| 'postgres' \| 'sqlite'; ... }` |
+| `retention`      | `number` (ms)                                       |
+| `flushInterval`  | `number` (ms)                                       |
+| `isGlobal`       | `boolean`                                           |
+
+Also exported: `forRootAsync(factory)`.
+
+## `MetricsService`
+
+```typescript
+import { MetricsService, METRICS_SERVICE_TOKEN } from '@omnitron-dev/titan-metrics';
+
+@Service({ name: 'users' })
+class UsersService {
+  constructor(@Inject(METRICS_SERVICE_TOKEN) private readonly metrics: MetricsService) {}
+
+  private readonly created = this.metrics.counter('users.created.total', { labels: ['source'] });
   private readonly latency = this.metrics.histogram('users.find.ms', {
-    help:    'findById latency in ms',
     buckets: [1, 5, 25, 100, 500, 2500],
   });
 
@@ -55,20 +72,49 @@ export class UsersService {
 
   @Public()
   async findById(id: string) {
-    return this.latency.timeAsync(() => this.repo.findById(id));
+    const t0 = performance.now();
+    try {
+      return await this.repo.findById(id);
+    } finally {
+      this.latency.observe(performance.now() - t0);
+    }
   }
 }
 ```
 
-## Decorator form
+## `@Metrics` decorator
 
 ```typescript
+import { Metrics } from '@omnitron-dev/titan-metrics';
+
 @Public()
-@Metered({ counter: 'orders.processed.total', histogram: 'orders.process.ms' })
+@Metrics({ counter: 'orders.processed', histogram: 'orders.process.ms' })
 async process(order: Order) { /* … */ }
 ```
 
-## In-memory time series
+## Storage backends
 
-For local dashboards, the module keeps a rolling buffer of the last N
-samples per metric. The Omnitron web console reads from it directly.
+| Backend        | When                                                    |
+| -------------- | ------------------------------------------------------- |
+| `'memory'`     | Default. In-process buffer. Console reads from it.      |
+| `'postgres'`   | Persist for cross-pod aggregation                       |
+| `'sqlite'`     | Local persistence for single-node deployments           |
+
+## RPC endpoint
+
+`MetricsRpcService` is a Netron service exposing aggregated metrics
+to the Omnitron CLI / web console.
+
+## Exposed classes
+
+`MetricsService`, `MetricsCollector`, `MetricsRegistry`,
+`MemoryMetricsStorage`, `PostgresMetricsStorage`,
+`SQLiteMetricsStorage`, `MetricsRpcService`.
+
+## Exported tokens
+
+| Token                       |
+| --------------------------- |
+| `METRICS_SERVICE_TOKEN`     |
+| `METRICS_OPTIONS_TOKEN`     |
+| `METRICS_STORAGE_TOKEN`     |

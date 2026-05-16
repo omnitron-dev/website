@@ -14,15 +14,31 @@ subclasses.
 
 ## Class hierarchy
 
-```
-Error
-└── TitanError                  (base; every framework error)
-    ├── HttpError               (status-code carrier)
-    │   ├── AuthError           (401 — authentication failed)
-    │   ├── PermissionError     (403 — authenticated but not allowed)
-    │   └── RateLimitError      (429 — throttled)
-    ├── AggregateError          (multiple errors batched together)
-    └── DomainError             (your domain-specific typed errors)
+```mermaid
+classDiagram
+  Error <|-- TitanError
+  TitanError <|-- HttpError
+  HttpError <|-- AuthError
+  HttpError <|-- PermissionError
+  HttpError <|-- RateLimitError
+  TitanError <|-- AggregateError
+  TitanError <|-- DomainError
+
+  class TitanError {
+    +code: ErrorCode | number
+    +category: ErrorCategory
+    +httpStatus: number
+    +details: object
+    +context?: ErrorContext
+    +correlationId?: string
+    +traceId?: string
+  }
+  class HttpError { +httpStatus }
+  class AuthError { 401 }
+  class PermissionError { 403 }
+  class RateLimitError { 429 }
+  class AggregateError { +errors }
+  class DomainError { +domainCode }
 ```
 
 That's the complete class tree.

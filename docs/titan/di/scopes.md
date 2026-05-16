@@ -1,28 +1,51 @@
 ---
 sidebar_position: 3
 title: Scopes
-description: Singleton, Transient, Scoped, Request — how Nexus decides when to reuse an instance.
+description: Transient, Singleton, Scoped, Request — how Nexus decides when to reuse an instance.
 ---
 
 # Scopes
 
-A scope is the container's answer to the question "when do I make a
-new instance?" Nexus has four:
+A scope is the container's answer to "when do I make a new instance?"
+Nexus has four:
+
+```typescript
+import { Scope } from '@omnitron-dev/titan/nexus';
+
+Scope.Transient   // 'transient'
+Scope.Singleton   // 'singleton'  (default)
+Scope.Scoped      // 'scoped'
+Scope.Request     // 'request'
+```
+
+```mermaid
+flowchart LR
+  Resolve[container.resolve]
+  Resolve --> CheckScope{Scope?}
+  CheckScope -->|Singleton| GlobalCache[(Global instance cache)]
+  CheckScope -->|Transient| New[Construct fresh]
+  CheckScope -->|Scoped| ChildCache[(Child-container cache)]
+  CheckScope -->|Request| ReqCache[(Per-request cache)]
+  GlobalCache --> Return
+  New --> Return
+  ChildCache --> Return
+  ReqCache --> Return
+```
 
 | Scope         | New instance per …                                 | Use for                                          |
 | ------------- | -------------------------------------------------- | ------------------------------------------------ |
 | `Singleton`   | Container (one for the whole app)                  | Stateless services, infra (logger, db pool)      |
 | `Transient`   | `resolve()` call (every time)                      | Lightweight value objects, builders              |
-| `Scoped`      | Module scope                                       | Per-feature state                                |
-| `Request`     | Request scope (when wrapped by a request scope)    | Per-request data — current user, request id      |
+| `Scoped`      | Child container scope                              | Per-feature state, request-aware factories       |
+| `Request`     | Request scope                                      | Per-request data — current user, request id      |
 
-`Singleton` is the default. If you do not pass `scope`, you get one.
+`Singleton` is the default.
 
 ## Singleton
 
 One instance for the lifetime of the container. The container caches
-the result of the first `resolve()` and returns it on every subsequent
-call.
+the result of the first `resolve()` and returns it on every
+subsequent call.
 
 ```typescript
 container.register(LOGGER, {
@@ -31,17 +54,16 @@ container.register(LOGGER, {
 });
 ```
 
-When to use: 99% of services. Stateless services, services that hold
-shared infrastructure (pool, client, registry), services with
-expensive construction.
+**Use for**: stateless services, services that hold shared
+infrastructure (pool, client, registry), services with expensive
+construction.
 
-When **not** to use: services that hold per-request state (current
-user, transaction handle). Use `Request` instead.
+**Avoid for**: services that hold per-request state (current user,
+transaction handle). Use `Request` instead.
 
 ## Transient
 
-A new instance every time the container resolves it. The container
-does not cache the instance.
+A new instance every time the container resolves the token.
 
 ```typescript
 container.register(REQUEST_BUILDER, {
@@ -54,19 +76,17 @@ const b = container.resolve(REQUEST_BUILDER);
 a === b;  // false
 ```
 
-When to use: lightweight value objects (builders, formatters,
-short-lived calculators) where instantiation is cheap and statelessness
-is preferred.
+**Use for**: lightweight value objects (builders, formatters,
+short-lived calculators) where instantiation is cheap.
 
-When **not** to use: services that allocate resources (file handles,
-sockets, large caches). Each transient instance leaks unless explicitly
+**Avoid for**: services that allocate resources (file handles,
+sockets, large caches). Each instance leaks unless explicitly
 disposed.
 
 ## Scoped
 
-One instance per *module scope*. A child container created for a
-module gets its own scoped instance; sibling modules get distinct
-instances.
+One instance per child container scope. Used to isolate state for a
+feature or for a request handler.
 
 ```typescript
 container.register(FEATURE_STATE, {
@@ -75,19 +95,16 @@ container.register(FEATURE_STATE, {
 });
 ```
 
-In day-to-day Titan code, `Scoped` overlaps heavily with the natural
-encapsulation of modules; you can usually achieve the same isolation by
+In day-to-day Titan code, `Scoped` overlaps with module-level
+encapsulation; you can usually achieve the same isolation by
 declaring the provider in the module that owns the scope and not
 exporting it.
 
-When to use: feature modules that need their own private mutable state
-that should not bleed across scopes. Rare in practice.
-
 ## Request
 
-One instance per request scope. The container creates a child scope per
-request (typically per Netron call); providers in `Request` scope live
-exactly as long as the scope.
+One instance per request scope. The container creates a child scope
+per request (typically per Netron call); providers in `Request`
+scope live exactly as long as that scope.
 
 ```typescript
 container.register(REQUEST_CONTEXT, {
@@ -96,27 +113,23 @@ container.register(REQUEST_CONTEXT, {
 });
 ```
 
-The middleware that creates the request scope is part of Netron; you do
-not wire it manually. Inside a `@Public` method, injecting a
-`Request`-scoped provider gives you a fresh instance for that call.
-
-When to use:
+**Use for**:
 - Holding the current user (set by auth middleware, read by
   business logic).
-- Carrying the trace context across handlers within one request.
+- Carrying trace context across handlers within one request.
 - Per-request transaction handles in DB modules.
 
-When **not** to use: shared infrastructure. A `Request`-scoped
-database pool would create a new connection per request — exactly what
-the pool is meant to prevent.
+**Avoid for**: shared infrastructure. A `Request`-scoped database
+pool would create a new connection per request — exactly what the
+pool is meant to prevent.
 
 ## Mixing scopes — the "narrower-into-wider" rule
 
-A wider-scoped provider **must not** depend on a narrower-scoped one.
-This compiles, but the framework will detect and warn at boot:
+A wider-scoped provider **must not** depend on a narrower-scoped
+one. This is a `ScopeMismatchError`:
 
 ```typescript
-@Service('users@1.0.0')                 // Singleton (wider)
+@Service({ name: 'users' })                 // Singleton (wider)
 class UsersService {
   constructor(private ctx: RequestContext) {}   // Request (narrower) — invalid
 }
@@ -127,61 +140,28 @@ request-scoped object, that object outlives its scope. Subsequent
 requests see stale data.
 
 The fix: inject a *factory* that resolves the narrower scope on
-demand:
-
-```typescript
-@Service('users@1.0.0')
-class UsersService {
-  constructor(@Inject(REQUEST_CONTEXT_PROVIDER) private getCtx: () => RequestContext) {}
-
-  @Public()
-  async whoAmI() {
-    const ctx = this.getCtx();           // resolved per call
-    return ctx.userId;
-  }
-}
-```
+demand, or use `Lazy` (see [Tokens](./tokens.md)).
 
 ## Lifetime by scope
 
 | Scope         | Created                       | Disposed                                            |
 | ------------- | ----------------------------- | --------------------------------------------------- |
-| `Singleton`   | First resolve                 | `container.dispose()` (calls `onShutdown`)          |
+| `Singleton`   | First resolve                 | `container.dispose()`                               |
 | `Transient`   | Every resolve                 | Never (caller's responsibility)                     |
-| `Scoped`      | First resolve in scope        | Scope disposal                                      |
+| `Scoped`      | First resolve in scope        | Child-scope disposal                                |
 | `Request`     | First resolve in request      | End of request                                      |
 
-`Transient` instances are not tracked by the container. If they hold
-resources, the caller must dispose them.
-
-## Scope tags
-
-Both `Scoped` and `Request` are tagged scopes. Tags let you create
-multiple distinct scopes of the same type, each with its own provider
-cache:
-
-```typescript
-const cartScope    = container.createScope('cart');
-const sessionScope = container.createScope('session');
-
-cartScope.resolve(CART_STATE);    // distinct instance from sessionScope's CART_STATE
-```
-
-This is the underlying mechanism behind `Request`-scoped providers in
-Netron — every incoming call creates a tagged scope, and providers
-resolve fresh against it.
+`Transient` instances are not tracked by the container. If they
+hold resources, the caller must dispose them.
 
 ## Anti-patterns
 
-- **`Singleton` for per-request state.** Easy mistake; usually fixed
-  by wrapping the state in a service that injects a `Request`-scoped
-  context.
-- **`Transient` for resource-holding services.** Each instance leaks.
-  Use `Singleton` or explicit pooling.
-- **`Request` for stateless calculators.** Wasteful — a new instance
-  per request, with no upside.
-- **Long chains of `Request`-scoped providers.** Each resolution costs
-  a scope cache lookup. Keep request-scoped surfaces thin and let
-  the bulk of business logic be `Singleton`.
+- **`Singleton` for per-request state.** Easy mistake; usually
+  fixed by wrapping the state in a service that injects a
+  `Request`-scoped context.
+- **`Transient` for resource-holding services.** Each instance
+  leaks. Use `Singleton` or explicit pooling.
+- **`Request` for stateless calculators.** Wasteful — a new
+  instance per request, with no upside.
 
 → Next: [Tokens](./tokens.md).

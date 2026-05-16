@@ -4,10 +4,9 @@ title: titan-health
 
 # titan-health
 
-Health and readiness probes with extensible indicators. Used by load
-balancers, orchestrators, and `titan-discovery`'s heartbeat.
-
-## Install
+Extensible health system with built-in indicators (memory, event
+loop, disk, database, Redis), Kubernetes probes, and a Netron RPC
+endpoint for remote inspection.
 
 ```bash
 pnpm add @omnitron-dev/titan-health
@@ -16,46 +15,112 @@ pnpm add @omnitron-dev/titan-health
 ## Setup
 
 ```typescript
-import { HealthModule } from '@omnitron-dev/titan-health';
+import { TitanHealthModule } from '@omnitron-dev/titan-health';
 
 @Module({
   imports: [
-    HealthModule.forRoot({
-      indicators: [
-        DatabaseHealth,        // From titan-database
-        RedisHealth,           // From titan-redis
-        DiskSpaceHealth,
-      ],
-      route: '/healthz',       // HTTP probe path
+    TitanHealthModule.forRoot({
+      enableMemoryIndicator:    true,
+      enableEventLoopIndicator: true,
+      enableDiskIndicator:      true,
+      enableDatabaseIndicator:  true,
+      enableRedisIndicator:     true,
+      memoryThresholds:         { heapDegradedThreshold: 0.8, heapUnhealthyThreshold: 0.95 },
+      eventLoopThresholds:      { degradedThreshold: 50, unhealthyThreshold: 200 },
+      databaseTimeoutMs:        2_000,
+      redisTimeoutMs:           1_000,
+      version:                  '1.0.0',
     }),
   ],
 })
-export class AppModule {}
+class AppModule {}
 ```
 
-## Custom indicator
+Also exported: `forRootAsync(options: HealthModuleAsyncOptions)`.
+
+### `HealthModuleOptions`
+
+| Option                       | Type                                                              |
+| ---------------------------- | ----------------------------------------------------------------- |
+| `enableMemoryIndicator`      | `boolean`                                                         |
+| `enableEventLoopIndicator`   | `boolean`                                                         |
+| `enableDiskIndicator`        | `boolean`                                                         |
+| `enableDatabaseIndicator`    | `boolean`                                                         |
+| `databaseConnection`         | `IDatabaseConnection` (required if enabled)                       |
+| `enableRedisIndicator`       | `boolean`                                                         |
+| `redisClient`                | `IRedisClient` (required if enabled)                              |
+| `memoryThresholds`           | `{ heapDegradedThreshold, heapUnhealthyThreshold }`               |
+| `eventLoopThresholds`        | `{ degradedThreshold, unhealthyThreshold }`                       |
+| `databaseTimeoutMs`          | `number`                                                          |
+| `redisTimeoutMs`             | `number`                                                          |
+| `version`                    | `string`                                                          |
+
+## Built-in indicators
+
+| Class                          | What it checks                                  |
+| ------------------------------ | ----------------------------------------------- |
+| `MemoryHealthIndicator`        | Heap usage vs thresholds                        |
+| `EventLoopHealthIndicator`     | Event loop lag                                  |
+| `HighResEventLoopIndicator`    | High-resolution event loop lag                  |
+| `DiskHealthIndicator`          | Free disk space                                 |
+| `DatabaseHealthIndicator`      | Database connectivity (ping)                    |
+| `RedisHealthIndicator`         | Redis connectivity (ping)                       |
+| `CompositeHealthIndicator`     | Combine multiple indicators with worst-wins     |
+
+## Custom indicators
+
+Extend `HealthIndicator` (the base class) and register:
 
 ```typescript
+import { HealthIndicator, HEALTH_SERVICE_TOKEN } from '@omnitron-dev/titan-health';
+
 @Injectable()
-export class StripeHealth implements HealthIndicator {
-  async check(): Promise<HealthResult> {
+class StripeHealthIndicator extends HealthIndicator {
+  constructor(private readonly stripe: Stripe) {
+    super('stripe');
+  }
+
+  async check() {
     try {
       await this.stripe.balance.retrieve();
-      return { status: 'up' };
+      return this.healthy();
     } catch (e) {
-      return { status: 'down', error: String(e) };
+      return this.degraded(String(e));
     }
   }
 }
 ```
 
-## Probes
+Register through your module's providers.
 
-| Endpoint        | Returns                                          |
-| --------------- | ------------------------------------------------ |
-| `/healthz`      | Liveness — is the process alive?                 |
-| `/readyz`       | Readiness — is the app ready to serve?           |
-| `/healthz/full` | Detailed indicator-by-indicator JSON             |
+## `HealthService`
 
-A failing indicator marks the app `not ready`; the orchestrator stops
-sending new requests until it recovers.
+```typescript
+@Service({ name: 'admin' })
+class AdminService {
+  constructor(@Inject(HEALTH_SERVICE_TOKEN) private readonly health: HealthService) {}
+
+  @Public()
+  async status() {
+    return this.health.check();
+  }
+}
+```
+
+## RPC endpoint
+
+`HealthRpcService` exposes health status as a Netron service so that
+the Omnitron CLI / web console can poll without an HTTP probe.
+
+## Exported tokens
+
+| Token                                   |
+| --------------------------------------- |
+| `HEALTH_SERVICE_TOKEN`                  |
+| `HEALTH_MODULE_OPTIONS_TOKEN`           |
+| `HEALTH_RPC_SERVICE_TOKEN`              |
+| `MEMORY_HEALTH_INDICATOR_TOKEN`         |
+| `EVENT_LOOP_HEALTH_INDICATOR_TOKEN`     |
+| `DISK_HEALTH_INDICATOR_TOKEN`           |
+| `DATABASE_HEALTH_INDICATOR_TOKEN`       |
+| `REDIS_HEALTH_INDICATOR_TOKEN`          |

@@ -1,7 +1,7 @@
 ---
 sidebar_position: 6
 title: Contextual Injection
-description: Resolve different providers based on runtime context — current user, environment, feature flags.
+description: Resolve different providers based on runtime context — current user, environment, feature flags, tenant.
 ---
 
 # Contextual Injection
@@ -10,102 +10,138 @@ Contextual injection lets a single token resolve to **different
 providers** depending on runtime context. Same dependency, different
 implementation, chosen per call or per scope.
 
-It is the Nexus answer to multi-tenancy, A/B testing, role-based
-behaviour, and per-environment overrides.
+```typescript
+import {
+  ContextManager,
+  ContextKeys,
+  createContextKey,
+  InjectContext,
+  TenantStrategy,
+  RoleBasedStrategy,
+  EnvironmentStrategy,
+  FeatureFlagStrategy,
+  DefaultContextProvider,
+  createContextAwareProvider,
+  type ContextProvider,
+  type ResolutionStrategy,
+  type ContextAwareProvider,
+} from '@omnitron-dev/titan/nexus';
+```
 
 ## When you need it
 
-Three scenarios that all reduce to "this dependency depends on who is
-asking":
+Three scenarios that all reduce to "this dependency depends on who
+is asking":
 
-1. **Multi-tenancy.** Tenant A uses a different storage backend than
-   tenant B. The service code is identical; the storage provider is
-   not.
-2. **Feature flags.** New users get the new payment processor; old
-   users get the legacy one. Both code paths exist.
+1. **Multi-tenancy.** Tenant A uses a different storage backend
+   than tenant B.
+2. **Feature flags.** New users get the new payment processor;
+   old users get the legacy one.
 3. **Per-role behaviour.** Admins see audit-aware queries; regular
-   users see plain ones. The repository class is different.
+   users see plain ones.
 
-Without contextual injection, you would write `if (tenant === 'X') {
-useA() } else { useB() }` in every consumer. Contextual injection
-moves the decision to the container.
+Without contextual injection, you would write
+`if (tenant === 'X') { useA() } else { useB() }` in every consumer.
+Contextual injection moves the decision into the container.
 
-## The strategy interface
+## The pieces
 
-A *strategy* answers "given this context, which provider should I
-return?":
-
-```typescript
-import { type ContextStrategy } from '@omnitron-dev/titan/nexus';
-
-const TenantStrategy: ContextStrategy<IStorage> = {
-  selectProvider(ctx) {
-    const tenant = ctx.get('tenantId');
-    return tenant === 'enterprise' ? S3Storage : LocalStorage;
-  },
-};
+```mermaid
+flowchart LR
+  Req[Incoming request]
+  Mw[Middleware sets ContextManager]
+  Cm[ContextManager]
+  Strat[Resolution strategy]
+  Cont[Container]
+  Resolved[Resolved provider]
+  Req --> Mw --> Cm
+  Cont -- "resolve(token)" --> Strat
+  Strat -- "read context" --> Cm
+  Strat -- "pick provider" --> Cont
+  Cont --> Resolved
 ```
 
-Three built-in strategies cover most cases:
+- **`ContextManager`** — request-scoped key/value bag.
+- **`ContextKey<T>`** — typed key for one piece of context.
+- **`ResolutionStrategy`** — the function that maps context →
+  provider choice.
+- **`ContextAwareProvider`** — a provider that uses a strategy.
 
-- **`RoleBasedStrategy`** — selects based on the current user's role.
-- **`EnvironmentStrategy`** — selects based on `NODE_ENV` or a
-  config value.
-- **`FeatureFlagStrategy`** — selects based on a flag query.
+## Built-in strategies
 
-Custom strategies implement the same interface.
+| Strategy                | What it reads                      |
+| ----------------------- | ---------------------------------- |
+| `TenantStrategy`        | Tenant id from context             |
+| `RoleBasedStrategy`     | Current user's role                |
+| `EnvironmentStrategy`   | NODE_ENV / config-driven env       |
+| `FeatureFlagStrategy`   | Flag query                         |
 
-## Registering a contextual provider
+These compose with the `ContextManager` to drive resolution.
+
+## Defining a context key
 
 ```typescript
-import { createToken, ContextManager } from '@omnitron-dev/titan/nexus';
+import { createContextKey } from '@omnitron-dev/titan/nexus';
 
-const STORAGE = createToken<IStorage>('Storage');
-
-container.register(STORAGE, {
-  contextual: {
-    strategy: TenantStrategy,
-    providers: {
-      enterprise: { useClass: S3Storage    },
-      default:    { useClass: LocalStorage },
-    },
-  },
-  scope: Scope.Request,
-});
+const TENANT_ID = createContextKey<string>('tenant.id');
+const USER_ROLE = createContextKey<string>('user.role');
 ```
 
-When a consumer resolves `STORAGE`, the strategy runs against the
-current `ContextManager` and the matching provider is constructed.
+`ContextKeys` is a registry of pre-defined keys the framework uses
+(see source for the canonical set).
 
-## Setting context
+## Setting context per request
 
-The `ContextManager` is request-scoped. Middleware sets values on it;
-strategies read them.
+The `ContextManager` interface (a `ContextProvider`) exposes
+`get`/`set`/`has`/`delete`/`clear`/`keys`/`toObject`/`createChild`:
 
 ```typescript
 import { ContextManager } from '@omnitron-dev/titan/nexus';
 
 @Injectable()
-class TenantMiddleware implements INetronMiddleware {
+class TenantMiddleware {
   constructor(private readonly context: ContextManager) {}
 
-  async handle(ctx, next) {
+  async handle(ctx: any, next: () => Promise<any>) {
     const tenantId = ctx.headers.get('x-tenant-id');
-    this.context.set('tenantId', tenantId);
+    this.context.set(TENANT_ID, tenantId);
     return next();
   }
 }
 ```
 
-Inside the request, services that depend on `STORAGE` get the right
-instance for the tenant.
+Inside the request, services that depend on a context-aware token
+get the right instance for the tenant.
+
+## Building a context-aware provider
+
+```typescript
+import { createContextAwareProvider, TenantStrategy, createToken, Scope } from '@omnitron-dev/titan/nexus';
+
+const STORAGE = createToken<IStorage>('Storage');
+
+const storageProvider = createContextAwareProvider({
+  strategy:  TenantStrategy,
+  providers: {
+    enterprise: { useClass: S3Storage    },
+    default:    { useClass: LocalStorage },
+  },
+  scope:     Scope.Request,
+});
+
+container.register(STORAGE, storageProvider);
+```
+
+When a consumer resolves `STORAGE`, the strategy reads the current
+context (via `ContextManager`), picks the matching provider entry,
+and constructs it.
 
 ## Composition with scopes
 
 Contextual providers usually live in `Request` scope — the context
 varies per request, so the resolution should too. A `Singleton`
-contextual provider would resolve once and cache the result, defeating
-the purpose.
+contextual provider would resolve once and cache the result,
+defeating the purpose.
 
 | Scope         | Behaviour with contextual                                     |
 | ------------- | ------------------------------------------------------------- |
@@ -115,71 +151,56 @@ the purpose.
 
 `Request` is almost always the right answer.
 
-## Per-environment overrides
+## `@InjectContext` decorator
 
-A common pattern — different implementations per `NODE_ENV`:
-
-```typescript
-container.register(EMAIL_SENDER, {
-  contextual: {
-    strategy: EnvironmentStrategy.fromConfig('NODE_ENV'),
-    providers: {
-      production:  { useClass: SendgridSender },
-      staging:     { useClass: MailtrapSender },
-      development: { useClass: ConsoleSender  },
-      test:        { useClass: NoopSender     },
-    },
-  },
-});
-```
-
-This is more explicit than `if (env === 'production') { … }` scattered
-in code, and it gives you one place to grep when you need to see
-"what runs where".
-
-## Strategy + multi-injection
-
-Contextual and multi can compose. A multi-token can resolve to a
-context-dependent **subset** of providers:
+Inject the `ContextManager` directly:
 
 ```typescript
-container.register(VALIDATORS, {
-  contextual: {
-    strategy: RoleBasedStrategy,
-    providers: {
-      admin:   [{ useClass: AdminValidator }, { useClass: BaseValidator }],
-      user:    [{ useClass: BaseValidator }],
-    },
-  },
-  multi: true,
-});
+import { InjectContext } from '@omnitron-dev/titan/nexus';
+
+@Service({ name: 'users' })
+class UsersService {
+  constructor(@InjectContext() private readonly context: ContextManager) {}
+
+  @Public()
+  async whoAmI() {
+    return this.context.get(TENANT_ID);
+  }
+}
 ```
 
-`admin` callers get both validators; `user` callers get one. The
-consumer is unaware.
+Use sparingly — reading the context manually in business code
+defeats the purpose of contextual injection. The point is that
+*services don't know about context*; the container does the
+swapping.
 
-## Performance
+## Custom strategies
 
-Each contextual resolution costs:
+Implement `ResolutionStrategy`:
 
-- One context lookup (`ContextManager.get(key)`).
-- One strategy call.
-- One provider resolution (cached per scope).
+```typescript
+import type { ResolutionStrategy } from '@omnitron-dev/titan/nexus';
 
-The cost is proportional to the number of `Request`-scoped contextual
-providers in the request, which is usually small.
+const PaymentTierStrategy: ResolutionStrategy = {
+  selectProvider(ctx, providers) {
+    const tier = ctx.get(USER_TIER);     // 'free' | 'premium' | …
+    return providers[tier] ?? providers['default'];
+  },
+};
+```
 
 ## Anti-patterns
 
-- **Contextual for static decisions.** If "which storage" is decided
-  at boot, use a regular provider (or `EnvironmentStrategy` at
-  registration time, not contextual). Contextual adds runtime cost.
-- **Reading the context manually inside services.** Defeats the
-  purpose. The point of contextual injection is to push the
-  decision into the container so services stay context-agnostic.
-- **Forgetting to set context.** A strategy that reads `tenantId`
-  from a context that was never set returns the default. Make sure
-  middleware that sets context runs before the consumer resolves.
+- **Contextual for static decisions.** If "which storage" is
+  decided at boot, use a regular provider (or
+  `EnvironmentStrategy` at registration time). Contextual adds
+  runtime cost.
+- **Reading context manually inside services.** The point of
+  contextual injection is to push the decision into the container.
+- **Forgetting to set context.** A strategy that reads `TENANT_ID`
+  from a context that was never set returns the default. Make
+  sure middleware that sets context runs before the consumer
+  resolves.
 - **Strategy with side effects.** Strategies are queried during
   resolution; they should be pure functions of the context.
 

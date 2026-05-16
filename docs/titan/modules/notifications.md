@@ -4,10 +4,9 @@ title: titan-notifications
 
 # titan-notifications
 
-Multi-channel notification delivery with backoff, dead-letter queues,
-and Rotif-based reliable messaging.
-
-## Install
+Multi-channel notification delivery (Email, SMS, Push, In-App,
+Webhook) with template engine, rate limiting, user preferences,
+Rotif messaging, and dead-letter queue.
 
 ```bash
 pnpm add @omnitron-dev/titan-notifications
@@ -21,25 +20,42 @@ import { NotificationsModule } from '@omnitron-dev/titan-notifications';
 @Module({
   imports: [
     NotificationsModule.forRoot({
-      channels: {
-        email:   { provider: 'smtp', config: { host, user, pass } },
-        sms:     { provider: 'twilio', config: { sid, token } },
-        webhook: { provider: 'http' },
+      redis:        { host: 'redis-host', port: 6379 },
+      channels:     ['email', 'sms', 'push', 'inapp', 'webhook'],
+      transport:    { rotif: {/* rotif transport options */} },
+      rateLimiting: { enabled: true },
+      preferences:  { enabled: true },
+      templates:    {
+        'welcome': { subject: 'Welcome', body: 'Hi {{name}}!' },
       },
-      retry: { maxAttempts: 5, baseDelayMs: 200 },
-      dlq:   { redis: { url: env.REDIS_URL } },
     }),
   ],
 })
-export class AppModule {}
+class AppModule {}
 ```
 
-## Send
+Also exported: `forRootAsync(options: NotificationsModuleAsyncOptions)`.
+
+### `NotificationsModuleOptions`
+
+| Option        | Type                                                                          |
+| ------------- | ----------------------------------------------------------------------------- |
+| `redis`       | `RedisOptions \| { host, port }`                                              |
+| `channels`    | `('email' \| 'sms' \| 'push' \| 'inapp' \| 'webhook')[]`                      |
+| `transport`   | `{ rotif?: RotifTransportOptions }`                                           |
+| `rateLimiting`| `{ enabled? }` plus integration with `titan-ratelimit`                        |
+| `preferences` | `{ enabled? }`                                                                |
+| `templates`   | `Record<string, NotificationTemplate>`                                        |
+| `isGlobal`    | `boolean`                                                                     |
+
+## `NotificationsService`
 
 ```typescript
-@Service('notifications@1.0.0')
-export class NotifyService {
-  constructor(private readonly notify: NotificationService) {}
+import { NotificationsService, NOTIFICATIONS_SERVICE } from '@omnitron-dev/titan-notifications';
+
+@Service({ name: 'notify' })
+class NotifyService {
+  constructor(@Inject(NOTIFICATIONS_SERVICE) private readonly notify: NotificationsService) {}
 
   @Public()
   async sendWelcome(user: User) {
@@ -53,12 +69,74 @@ export class NotifyService {
 }
 ```
 
-## Dead-letter inspection
+## Channels
 
-Failed deliveries land in the DLQ after `maxAttempts`. Inspect via the
-CLI or the web console:
+| Channel class            | Use                                  |
+| ------------------------ | ------------------------------------ |
+| `AbstractEmailChannel`   | Base for SMTP / Sendgrid / etc.      |
+| `AbstractSMSChannel`     | Base for Twilio / Vonage / etc.      |
+| `AbstractPushChannel`    | Base for FCM / APNS / etc.           |
+| `InAppChannel`           | In-app inbox                         |
+| `WebhookChannel`         | HTTP POST to a URL                   |
+| `MockEmailChannel`       | Test stub                            |
+| `MockSMSChannel`         | Test stub                            |
+| `MockPushChannel`        | Test stub                            |
 
-```bash
-omnitron notify dlq list
-omnitron notify dlq retry <id>
+Extend the abstract bases for your providers; register them through
+`ChannelRegistry`.
+
+## Templates
+
+`TemplateEngine` renders templates with `{{var}}` placeholders. Pass
+templates through `forRoot({ templates })` or register them at
+runtime.
+
+## Rate limiting and preferences
+
+`RedisRateLimiter` and `RedisPreferenceStore` provide per-user
+rate limiting and per-channel opt-in/out preferences when enabled.
+
+## `@OnNotification` decorator
+
+Subscribe to delivery lifecycle events:
+
+```typescript
+import { OnNotification } from '@omnitron-dev/titan-notifications';
+
+@Injectable()
+class Audit {
+  @OnNotification({ event: 'sent' })
+  async logSent(notification: any) { /* … */ }
+
+  @OnNotification({ event: 'failed' })
+  async logFailed(notification: any, error: any) { /* … */ }
+}
 ```
+
+## Health indicator
+
+`NotificationsHealthIndicator` is exported and registers with
+`TitanHealthModule` automatically.
+
+## Worker model
+
+`NotificationWorkerService` processes a Rotif-backed queue and
+performs actual delivery. `NotificationPublisher` is the producer
+side.
+
+## Exported tokens (selection)
+
+| Token                                          |
+| ---------------------------------------------- |
+| `NOTIFICATIONS_SERVICE`                        |
+| `NOTIFICATIONS_TRANSPORT`                      |
+| `NOTIFICATIONS_MODULE_OPTIONS`                 |
+| `NOTIFICATIONS_HEALTH`                         |
+| `NOTIFICATIONS_RATE_LIMITER`                   |
+| `NOTIFICATIONS_PREFERENCE_STORE`               |
+| `NOTIFICATIONS_CHANNEL_ROUTER`                 |
+| `NOTIFICATIONS_EVENT_EMITTER`                  |
+| `NOTIFICATIONS_CHANNEL_REGISTRY`               |
+| `NOTIFICATIONS_TEMPLATE_ENGINE`                |
+| `NOTIFICATIONS_REDIS_RATE_LIMITER`             |
+| `NOTIFICATIONS_REDIS_PREFERENCE_STORE`         |
