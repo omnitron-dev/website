@@ -112,7 +112,7 @@
   /* The viewBox is 500×500 but the actual figure occupies ~300×300 in
      the centre. Sizing the SVG element at ~110% of the .mark gives the
      figure roughly the same rendered size as before, while leaving a
-     ~50px buffer on every side so spin and shell-extrude motions never
+     ~50px buffer on every side so the shell-extrude motions never
      clip against the .mark bounds. */
   width: 110%;
   height: auto;
@@ -123,6 +123,13 @@
   animation: omni-float 11s ease-in-out infinite;
   will-change: transform, filter;
   overflow: visible;
+}
+
+/* Pause the constant float on hover so the shell extrusion isn't
+   visually drowned out by the ±10px bob that's always running. The
+   float resumes the moment the cursor leaves. */
+.mark:hover .svg {
+  animation-play-state: paused;
 }
 
 /* The figure is static at rest — the original matrix tilt is its
@@ -141,9 +148,14 @@
   transform-box: view-box;
   animation: omni-core-pulse 3.2s ease-in-out infinite;
   will-change: transform, filter;
-  /* The green core is the *only* hot zone. Cursor on this exact
-     triangle extrudes the shells; cursor anywhere else (the violet
-     shells themselves, the SVG corners, the bloom) does nothing. */
+  /* Cursor on any painted area of the figure (core OR shells)
+     triggers the extrusion. The hit zone is the union of all four
+     polygons — the full visible logo — which matches user intuition
+     better than restricting it to the small green core triangle. */
+  cursor: pointer;
+}
+
+.shell {
   cursor: pointer;
 }
 
@@ -184,13 +196,13 @@
   transition-delay: 240ms;
 }
 
-/* Hover keyed strictly off the core polygon — the green inner
-   triangle. Cursor in the core opens the shells; cursor out
-   (whether it leaves the SVG or just slides onto a shell) snaps
-   them back. The per-shell transition-delay staggers the extrusion;
-   the same staggers run in reverse on un-hover, so the bottom shell
-   that extruded first also retracts first. */
-.mark:has(.core:hover) .shell {
+/* Hover the entire mark — any painted polygon under the cursor opens
+   the shells (the empty SVG corners and the halo bloom have
+   pointer-events: none, so they don't count). The per-shell
+   transition-delay staggers the extrusion; the same staggers run in
+   reverse on un-hover, so the bottom shell that extruded first also
+   retracts first. */
+.mark:hover .shell {
   transform: translate(var(--shell-dx), var(--shell-dy));
 }
 
