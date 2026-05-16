@@ -65,6 +65,7 @@ const sidebars: SidebarsConfig = {
         'titan/modules-system/defining-modules',
         'titan/modules-system/dynamic-modules',
         'titan/modules-system/module-discovery',
+        'titan/modules-system/authoring-modules',
       ],
     },
     {
