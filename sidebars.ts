@@ -211,6 +211,7 @@ const sidebars: SidebarsConfig = {
         'titan/modules/tokens-reference',
         'titan/modules/observability-matrix',
         'titan/modules/security-checklist',
+        'titan/modules/errors-catalog',
         {
           type: 'category',
           label: 'Built-in',
