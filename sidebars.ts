@@ -284,7 +284,10 @@ const sidebars: SidebarsConfig = {
     'omnitron/cluster',
     'omnitron/observability',
     'omnitron/console',
+    'omnitron/auth-rbac',
+    'omnitron/mcp',
     'omnitron/best-practices',
+    'omnitron/recipes',
   ],
 
   reference: [
