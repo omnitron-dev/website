@@ -16,7 +16,7 @@ A Titan application reports three independent signals:
 
 The kernel exposes the aggregate via the application's
 `HealthCheck` event and through specific helpers exposed by the
-[`titan-health`](../modules/health.md) ecosystem module.
+[`titan-health`](../modules/health) ecosystem module.
 
 ## Reading health from inside the app
 

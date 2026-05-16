@@ -59,7 +59,7 @@ Cardinality matters: every unique combination of label values
 creates a separate time series. `tier=basic|pro|enterprise` is fine
 (3 series); `userId=…` is not (millions of series).
 
-→ See [titan-metrics](../modules/metrics.md).
+→ See [titan-metrics](../modules/metrics).
 
 ## Traces
 

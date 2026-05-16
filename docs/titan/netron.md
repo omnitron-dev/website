@@ -73,8 +73,8 @@ A few specific things, each with a deliberate scope:
   Consul Connect) for that.
 - **Not a queue.** Netron calls are request/response; the response
   may be a stream. For decoupled work, use
-  [`titan-events`](./modules/events.md) or
-  [`titan-notifications`](./modules/notifications.md).
+  [`titan-events`](./modules/events) or
+  [`titan-notifications`](./modules/notifications).
 - **Not a schema language.** The TypeScript interface is the schema.
   No `.proto` files, no OpenAPI YAML.
 

@@ -1,0 +1,122 @@
+---
+sidebar_position: 1
+title: Modules
+---
+
+import ModuleBadge from '@site/src/components/ModuleBadge';
+
+# Titan Modules
+
+The Titan ecosystem has three module tiers, each rendered with a
+colour-coded badge so you can tell at a glance where a module comes
+from and what its guarantees are.
+
+| Tier         | Badge colour | Where it lives                                | Guarantees                                          |
+| ------------ | ------------ | --------------------------------------------- | --------------------------------------------------- |
+| **Built-in** | Emerald 🟢   | `@omnitron-dev/titan/src/modules/*`           | Ships with the framework; same release cadence     |
+| **Official** | Violet 🟣    | `packages/titan-*` in the `omnitron-dev` monorepo | Maintained by the Omnitron team; independent versions |
+| **Community**| Amber 🟡     | Third-party npm packages                      | Audit before adopting; no maintenance commitment    |
+
+Every module page in this section starts with a `<ModuleBadge ... />`
+chip that reflects its tier.
+
+## Built-in modules
+
+<ModuleBadge origin="built-in" pkg="@omnitron-dev/titan" subpath="/module/*" />
+
+Shipped inside `@omnitron-dev/titan`. **Auto-loaded** by every Titan
+application unless you pass `disableCoreModules: true`. No extra
+install needed.
+
+| Module                        | Subpath                  | Purpose                                                                |
+| ----------------------------- | ------------------------ | ---------------------------------------------------------------------- |
+| [`ConfigModule`](./config.mdx) | `/module/config`         | Layered, validated, hot-reloadable configuration                       |
+| [`LoggerModule`](./logger.mdx) | `/module/logger`         | Structured pino-based logging with transports + processors             |
+
+## Official modules (`titan-*` packages)
+
+<ModuleBadge origin="official" pkg="@omnitron-dev/titan-*" />
+
+Fourteen independent packages in the `omnitron-dev` monorepo. Each is
+versioned separately; adopting one does not pin you to others.
+
+| Module                                          | Package                              | Purpose                                                          |
+| ----------------------------------------------- | ------------------------------------ | ---------------------------------------------------------------- |
+| [`TitanAuthModule`](./auth.mdx)                  | `@omnitron-dev/titan-auth`           | JWT auth (HS256 / RS256 / ES256), JWKS, token cache              |
+| [`TitanCacheModule`](./cache.mdx)                | `@omnitron-dev/titan-cache`          | Multi-tier (L1/L2) caching with LRU / LFU, Redis backing         |
+| [`TitanDatabaseModule`](./database.mdx)          | `@omnitron-dev/titan-database`       | Kysely + migrations + RLS, multi-dialect                         |
+| [`DiscoveryModule`](./discovery.mdx)             | `@omnitron-dev/titan-discovery`      | Redis-backed service discovery + Netron integration              |
+| [`EventsModule`](./events.mdx)                   | `@omnitron-dev/titan-events`         | Typed event bus, wildcard, scheduling, history                   |
+| [`TitanHealthModule`](./health.mdx)              | `@omnitron-dev/titan-health`         | Health indicators (memory, event-loop, disk, db, redis)          |
+| [`TitanLockModule`](./lock.mdx)                  | `@omnitron-dev/titan-lock`           | Distributed Redis locks with UUID ownership + Lua scripts        |
+| [`TitanMetricsModule`](./metrics.mdx)            | `@omnitron-dev/titan-metrics`        | Counters / gauges / histograms, pluggable storage                |
+| [`NotificationsModule`](./notifications.mdx)     | `@omnitron-dev/titan-notifications`  | Multi-channel delivery + templates + DLQ                         |
+| [`ProcessManagerModule`](./pm.mdx)               | `@omnitron-dev/titan-pm`             | Process supervision, worker pools, IPC                           |
+| [`TitanRateLimitModule`](./ratelimit.mdx)        | `@omnitron-dev/titan-ratelimit`      | Token-bucket, sliding-window, fixed-window strategies            |
+| [`TitanRedisModule`](./redis.mdx)                | `@omnitron-dev/titan-redis`          | Redis client (clustering, sentinel, TLS, named instances)        |
+| [`SchedulerModule`](./scheduler.mdx)             | `@omnitron-dev/titan-scheduler`      | Cron + interval + timeout with persistence                       |
+| [`TelemetryRelayService`](./telemetry-relay.mdx) | `@omnitron-dev/titan-telemetry-relay` | Store-and-forward telemetry pipeline (no module)                |
+
+## Community modules
+
+<ModuleBadge origin="community" pkg="@your-scope/titan-*" />
+
+No third-party modules registered yet. See [Community
+Modules](./community.mdx) for what counts, how to adopt safely, and
+how to publish your own.
+
+## Composition
+
+Modules compose through the standard `imports` chain — order does
+not matter, the container resolves the dependency graph:
+
+```typescript
+@Module({
+  imports: [
+    // Built-in (auto-loaded; shown explicitly here for illustration)
+    ConfigModule.forRoot({ schema: AppConfigSchema, sources: [/* … */] }),
+    LoggerModule.forRoot({ level: 'info' }),
+
+    // Official
+    TitanRedisModule.forRoot({ url: env.REDIS_URL }),
+    TitanAuthModule.forRoot({ jwtSecret: env.JWT_SECRET }),
+    TitanCacheModule.forRoot({ multiTier: true, l2: { client: redisClient, ttl: 60 } }),
+    TitanDatabaseModule.forRoot({ dialect: 'postgres', connection: env.DATABASE_URL }),
+    SchedulerModule.forRoot({ persistence: { provider: 'redis' } }),
+    TitanMetricsModule.forRoot({ storage: { type: 'memory' } }),
+  ],
+  providers: [/* your services */],
+})
+export class AppModule {}
+```
+
+## Redis dependency among official modules
+
+Five official modules depend on a Redis client provided by
+`TitanRedisModule`:
+
+- `titan-cache` (when L2 tier enabled)
+- `titan-lock`
+- `titan-discovery`
+- `titan-ratelimit` (when `storageType: 'redis'`)
+- `titan-notifications` (rate limiter, preference store, rotif
+  messaging)
+
+Register `TitanRedisModule.forRoot(...)` first; the rest pick up the
+shared client automatically.
+
+## Choosing modules
+
+Most backends start with a small set:
+
+- **Web API service**: built-in config + logger; auth + database +
+  cache + health + metrics.
+- **Worker service**: built-in config + logger; database + lock +
+  scheduler + metrics + health.
+- **Notification gateway**: built-in config + logger;
+  notifications + ratelimit + metrics.
+- **Multi-instance app**: add discovery to the above.
+
+→ Start with [`ConfigModule`](./config.mdx) for built-in config or
+jump to [`TitanAuthModule`](./auth.mdx) for the most-used official
+module.

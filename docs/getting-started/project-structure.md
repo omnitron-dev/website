@@ -83,7 +83,7 @@ my-app/
     └── app.module.ts          # ConfigModule.forRoot({ files: ['config/*'] })
 ```
 
-See [Titan / Application & DI](../titan/application.md) for the full
+See [Titan / Application & DI](../titan/application/) for the full
 config grammar.
 
 ## Conventions

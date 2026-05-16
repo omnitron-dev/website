@@ -54,7 +54,7 @@ const config: Config = {
 
   markdown: {
     mermaid: true,
-    format: 'md',
+    format: 'detect',     // .md → markdown, .mdx → MDX with JSX
     hooks: {
       onBrokenMarkdownLinks: 'warn',
     },

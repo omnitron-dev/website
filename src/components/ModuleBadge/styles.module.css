@@ -1,0 +1,121 @@
+/**
+ * ModuleBadge — the inline classifier rendered at the top of every
+ * Titan module page.
+ *
+ *   Layout: a single row with the origin chip, the install path, an
+ *   optional "since" version, and an optional status pill. A second
+ *   line carries the description of what the origin actually means.
+ */
+
+.wrapper {
+  margin: 1.25rem 0 2rem;
+  padding: 0.85rem 1rem;
+  border-radius: 10px;
+  border: 1px solid var(--ifm-color-emphasis-200);
+  background: var(--ifm-background-surface-color);
+}
+
+.row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.55rem;
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.18rem 0.6rem;
+  border-radius: 9999px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+/* Origin chips — colour-coded so a reader scanning the catalogue can
+   tell at a glance whether a module ships with Titan, is officially
+   maintained, or is third-party. */
+.chip-built-in {
+  background: rgba(102, 187, 106, 0.14);
+  color: #2e7d32;
+  border: 1px solid rgba(102, 187, 106, 0.35);
+}
+
+[data-theme='dark'] .chip-built-in {
+  background: rgba(102, 187, 106, 0.18);
+  color: #81c784;
+  border-color: rgba(102, 187, 106, 0.45);
+}
+
+.chip-official {
+  background: rgba(171, 71, 188, 0.14);
+  color: #6a1b9a;
+  border: 1px solid rgba(171, 71, 188, 0.35);
+}
+
+[data-theme='dark'] .chip-official {
+  background: rgba(171, 71, 188, 0.20);
+  color: #ce93d8;
+  border-color: rgba(171, 71, 188, 0.45);
+}
+
+.chip-community {
+  background: rgba(255, 179, 0, 0.14);
+  color: #b27200;
+  border: 1px solid rgba(255, 179, 0, 0.35);
+}
+
+[data-theme='dark'] .chip-community {
+  background: rgba(255, 179, 0, 0.18);
+  color: #ffd54f;
+  border-color: rgba(255, 179, 0, 0.45);
+}
+
+/* Status chips — secondary classification (experimental, deprecated)
+   sit alongside the origin chip. */
+.chip-status-experimental {
+  background: rgba(255, 179, 0, 0.12);
+  color: #b27200;
+  border: 1px solid rgba(255, 179, 0, 0.30);
+}
+
+[data-theme='dark'] .chip-status-experimental {
+  background: rgba(255, 179, 0, 0.18);
+  color: #ffd54f;
+}
+
+.chip-status-deprecated {
+  background: rgba(244, 67, 54, 0.12);
+  color: #b71c1c;
+  border: 1px solid rgba(244, 67, 54, 0.30);
+}
+
+[data-theme='dark'] .chip-status-deprecated {
+  background: rgba(244, 67, 54, 0.18);
+  color: #ef9a9a;
+}
+
+.pkg {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.85rem;
+  padding: 0.18rem 0.55rem;
+  border-radius: 6px;
+  background: rgba(171, 71, 188, 0.08);
+  border: 1px solid rgba(171, 71, 188, 0.20);
+  color: var(--ifm-color-primary);
+}
+
+.meta {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.78rem;
+  color: var(--ifm-color-emphasis-700);
+}
+
+.description {
+  margin: 0.55rem 0 0;
+  font-size: 0.85rem;
+  line-height: 1.5;
+  color: var(--ifm-color-emphasis-700);
+}
