@@ -212,6 +212,7 @@ const sidebars: SidebarsConfig = {
         'titan/modules/observability-matrix',
         'titan/modules/security-checklist',
         'titan/modules/errors-catalog',
+        'titan/modules/decorators-catalog',
         {
           type: 'category',
           label: 'Built-in',
