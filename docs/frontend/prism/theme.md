@@ -1,0 +1,300 @@
+---
+sidebar_position: 7
+title: Theme
+description: Palette, typography, shadows, dark mode, presets.
+---
+
+# Theme
+
+Prism's theme is MUI v7's theme + extensions (custom shadows,
+spacing presets, density tokens, brand presets). Everything is
+configurable via `createTheme`.
+
+```tsx
+import { createTheme } from '@omnitron-dev/prism/theme';
+
+const theme = createTheme({
+  mode:       'dark',
+  palette:    { primary: { main: '#7c4dff' }, secondary: { main: '#00bcd4' } },
+  typography: { fontFamily: '"Inter", "Roboto", sans-serif', fontSize: 14 },
+  shape:      { borderRadius: 8 },
+  spacing:    8,
+});
+```
+
+## Palette
+
+```typescript
+palette: {
+  mode: 'light' | 'dark',
+  primary:   { main, light?, dark?, contrastText? },
+  secondary: { main, light?, dark?, contrastText? },
+  error:     { main, light?, dark?, contrastText? },
+  warning:   { main, light?, dark?, contrastText? },
+  info:      { main, light?, dark?, contrastText? },
+  success:   { main, light?, dark?, contrastText? },
+  text: {
+    primary, secondary, disabled,
+  },
+  background: {
+    default, paper, neutral?,    // 'neutral' for subtle section bg
+  },
+  action: {
+    active, hover, selected, disabled, disabledBackground, focus,
+  },
+  divider,
+}
+```
+
+Light + dark variants are derived from the same `main` colour —
+typically you only set `main` and let Prism compute the
+contrast colour and shades.
+
+### Semantic colour tokens
+
+Avoid hex codes in app code — use theme tokens:
+
+```tsx
+<Box sx={{ color: 'primary.main', bgcolor: 'background.paper' }} />
+<Typography color="text.secondary">…</Typography>
+```
+
+This keeps dark mode working automatically and lets you re-skin
+without touching component code.
+
+## Typography
+
+```typescript
+typography: {
+  fontFamily:     '"Inter", "Roboto", sans-serif',
+  fontSize:       14,            // base px
+  htmlFontSize:   16,            // for rem conversion
+  fontWeightLight:     300,
+  fontWeightRegular:   400,
+  fontWeightMedium:    500,
+  fontWeightBold:      700,
+
+  h1: { fontSize: '2.5rem', fontWeight: 700, lineHeight: 1.2 },
+  h2: { fontSize: '2rem',   fontWeight: 700, lineHeight: 1.25 },
+  // … h3, h4, h5, h6
+  subtitle1: { fontSize: '1rem',     fontWeight: 600, lineHeight: 1.5 },
+  subtitle2: { fontSize: '0.875rem', fontWeight: 600, lineHeight: 1.5 },
+  body1:     { fontSize: '1rem',     fontWeight: 400, lineHeight: 1.5 },
+  body2:     { fontSize: '0.875rem', fontWeight: 400, lineHeight: 1.5 },
+  caption:   { fontSize: '0.75rem',  fontWeight: 400, lineHeight: 1.4 },
+  overline:  { fontSize: '0.625rem', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase' },
+  button:    { fontWeight: 600, textTransform: 'none' },     // Prism default: no SHOUTY buttons
+}
+```
+
+Apply via `<Typography>` or `sx`:
+
+```tsx
+<Typography variant="h3">Section title</Typography>
+<Box sx={{ typography: 'body2', color: 'text.secondary' }}>Small print</Box>
+```
+
+## Spacing
+
+`spacing: 8` means `theme.spacing(N) === 8 × N` pixels. The
+`sx` shorthand interprets numbers in spacing units:
+
+```tsx
+<Box sx={{ p: 2, mt: 4, gap: 1 }} />
+// padding: 16px, margin-top: 32px, gap: 8px
+```
+
+Convention: use the spacing unit (`p: 2`) not pixel values
+(`p: '16px'`) — keeps the rhythm consistent and tunable.
+
+## Shape & shadows
+
+```typescript
+shape: {
+  borderRadius: 8,           // base radius (px)
+}
+
+shadows: [
+  'none',
+  '0 1px 2px rgba(0,0,0,0.05)',
+  '0 1px 3px rgba(0,0,0,0.07), 0 1px 2px rgba(0,0,0,0.06)',
+  // … 24 steps
+]
+
+customShadows: {
+  z1:   '...',     // softer cards
+  z4:   '...',     // floating panels
+  z8:   '...',     // modals
+  z16:  '...',     // popovers
+  primary:   '...', // primary-tinted shadow
+  secondary: '...',
+  error: '...',
+  warning: '...',
+  info: '...',
+  success: '...',
+}
+```
+
+Use `<Paper elevation={N}>` for `shadows`; `boxShadow:
+'customShadows.z4'` via `sx` for the custom variants.
+
+## Dark mode
+
+```tsx
+import { PrismProvider, useColorMode } from '@omnitron-dev/prism/core';
+
+function App() {
+  return (
+    <PrismProvider mode="system">      {/* 'light' | 'dark' | 'system' */}
+      <Outlet />
+    </PrismProvider>
+  );
+}
+
+function ModeToggle() {
+  const { mode, setMode, resolvedMode } = useColorMode();
+  return (
+    <IconButton onClick={() => setMode(resolvedMode === 'dark' ? 'light' : 'dark')}>
+      {resolvedMode === 'dark' ? <SunIcon /> : <MoonIcon />}
+    </IconButton>
+  );
+}
+```
+
+| Mode | Effect |
+| ---- | ------ |
+| `'light'` | Force light |
+| `'dark'` | Force dark |
+| `'system'` | Track `prefers-color-scheme` |
+
+State is persisted via the settings store; survives reload;
+syncs across tabs.
+
+### Flash-of-wrong-theme prevention (SSR)
+
+Prism's CSS variables output (`theme/css-variables.ts`) emits
+a stylesheet that applies the correct colour scheme **before**
+React hydrates. Include in your HTML head:
+
+```html
+<style id="prism-css-vars">
+  /* Generated by prismCssVariables(theme) at build time */
+</style>
+```
+
+Or use the Vite plugin (when one is configured) to inject it
+automatically.
+
+## Presets
+
+Pre-tuned themes for common aesthetics:
+
+```tsx
+import { presets } from '@omnitron-dev/prism/theme';
+
+const theme = createTheme({
+  ...presets.cyber,        // dark + neon accents
+  // ...presets.classic,   // clean, neutral
+  // ...presets.warm,      // earthy palette
+});
+```
+
+Pick a preset, override what you want — the preset's intent
+shows through.
+
+## Density
+
+Three densities adjust spacing + typography + control sizes:
+
+```tsx
+useSettingsStore.setState({ density: 'compact' });
+// 'compact' | 'standard' | 'comfortable'
+```
+
+Tables, lists, forms, dialogs respond automatically. Useful for
+information-dense admin surfaces.
+
+## Mixins
+
+Reusable `sx` snippets:
+
+```tsx
+import { mixins } from '@omnitron-dev/prism/theme';
+
+<Box sx={mixins.textGradient('primary')}>Gradient text</Box>
+<Box sx={mixins.glassEffect()}>Backdrop blur card</Box>
+<Box sx={mixins.scrollable({ maxHeight: 400 })}>Custom scrollbar</Box>
+```
+
+Built-in mixins:
+
+| Mixin | Effect |
+| ----- | ------ |
+| `textGradient(color)` | Gradient text fill |
+| `glassEffect()` | Frosted-glass background |
+| `scrollable({ maxHeight })` | Container with Prism scrollbar |
+| `bgGradient({ direction, colors })` | Linear gradient background |
+| `bgBlur({ blur, opacity })` | Backdrop blur |
+| `truncate(lines)` | Multi-line truncation with ellipsis |
+| `flexCenter` | `{ display: 'flex', alignItems: 'center', justifyContent: 'center' }` |
+
+## Components theme overrides
+
+Override component defaults globally:
+
+```typescript
+createTheme({
+  components: {
+    MuiButton: {
+      defaultProps:  { variant: 'contained', size: 'medium' },
+      styleOverrides: {
+        root: { borderRadius: 8, textTransform: 'none' },
+      },
+    },
+    MuiTextField: {
+      defaultProps: { variant: 'outlined', size: 'small' },
+    },
+  },
+});
+```
+
+Useful for enforcing project-wide conventions (e.g., "all
+buttons are contained, no uppercase").
+
+## CSS variables export
+
+```tsx
+import { generateCssVariables } from '@omnitron-dev/prism/theme';
+
+const css = generateCssVariables(theme);
+// → :root { --palette-primary-main: #7c4dff; ... }
+```
+
+Useful for:
+- Server-side colour-scheme cookie + SSR.
+- Sharing theme tokens with non-MUI elements (e.g., plain
+  `<svg>` strokes that should track the theme).
+- Embedding in `<style>` tag at the top of `<head>` to prevent
+  flash.
+
+## Anti-patterns
+
+- **Hard-coded hex colours in components.** Use
+  `theme.palette.X` / `sx={{ color: 'primary.main' }}` so dark
+  mode + theme switches work.
+- **`px` everywhere.** Use spacing units; relative `rem` for
+  typography.
+- **Multiple `<ThemeProvider>`s in the tree.** Confused
+  inheritance, duplicate snackbar hosts.
+- **Per-component `styled()` for one-off colours.** Prefer `sx`
+  for one-offs; `styled()` for recurring patterns.
+- **Bypassing the settings store for mode persistence.**
+  Custom localStorage code drifts; use `useColorMode` /
+  `useSettingsStore`.
+
+## See also
+
+- [Components catalog](./components.md) — components themed via these tokens
+- [Layouts](./layouts.md) — `<DashboardLayout>` reads density
+- [Hooks catalog](./hooks-catalog.md) — `useColorMode`, `useSettingsStore`
+- [MUI v7 theming docs](https://mui.com/material-ui/customization/theming/) — underlying foundation

@@ -20,7 +20,7 @@ pnpm add @omnitron-dev/netron-browser
 ```
 
 For React bindings on top of this, see
-[netron-react](./netron-react.md).
+[netron-react](./react.md).
 
 ## Architecture
 
@@ -427,7 +427,7 @@ try {
 }
 ```
 
-→ See [Titan / Errors catalog](../titan/modules/errors-catalog.mdx)
+→ See [Titan / Errors catalog](../../titan/modules/errors-catalog.mdx)
 for the full code reference.
 
 ## Subpaths
@@ -506,7 +506,7 @@ The package ships runnable examples at
 
 ## See also
 
-- [netron-react](./netron-react.md) — React hooks built on this client
-- [Titan / Netron](../titan/netron) — server side
-- [Titan / Errors catalog](../titan/modules/errors-catalog.mdx) — typed errors
-- [Prism](./prism.md) — UI components that pair with this client
+- [netron-react](./react.md) — React hooks built on this client
+- [Titan / Netron](../../titan/netron.md) — server side
+- [Titan / Errors catalog](../../titan/modules/errors-catalog.mdx) — typed errors
+- [Prism](../prism/index.md) — UI components that pair with this client

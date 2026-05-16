@@ -11,9 +11,9 @@ that compose top-down:
 
 | Package | Role | Size |
 | ------- | ---- | ---- |
-| [`@omnitron-dev/netron-browser`](./netron-browser.md) | RPC transport (HTTP + WebSocket), middleware, auth, multi-backend pool | ~25 kB gz |
-| [`@omnitron-dev/netron-react`](./netron-react.md) | React hooks, query/mutation cache, auth guards, devtools | ~15 kB gz |
-| [`@omnitron-dev/prism`](./prism.md) | Design system: MUI v7 components, blocks, layouts, forms, hooks | ~80 kB gz (root); tree-shakeable |
+| [`@omnitron-dev/netron-browser`](./netron/browser.md) | RPC transport (HTTP + WebSocket), middleware, auth, multi-backend pool | ~25 kB gz |
+| [`@omnitron-dev/netron-react`](./netron/react.md) | React hooks, query/mutation cache, auth guards, devtools | ~15 kB gz |
+| [`@omnitron-dev/prism`](./prism/index.md) | Design system: MUI v7 components, blocks, layouts, forms, hooks | ~80 kB gz (root); tree-shakeable |
 
 Each builds on the next; you can use any in isolation but they
 shine when combined.
@@ -149,7 +149,7 @@ import { MultiBackendProvider, useBackendService }
 const users = useBackendService<UserService>('auth', 'users');
 ```
 
-→ [netron-react / Multi-backend](./netron-react.md#multi-backend-support).
+→ [netron-react / Multi-backend](./netron/react.md#multi-backend-support).
 
 ## What lives where
 
@@ -191,6 +191,6 @@ real-time subscriptions, devtools — see
 
 ## Read on
 
-- [Prism](./prism.md) — design system in depth
-- [netron-browser](./netron-browser.md) — the transport client
-- [netron-react](./netron-react.md) — React hooks
+- [Prism](./prism/index.md) — design system in depth
+- [netron-browser](./netron/browser.md) — the transport client
+- [netron-react](./netron/react.md) — React hooks

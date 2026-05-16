@@ -114,5 +114,5 @@ console.log(user); // { id: '...', email: 'ada@example.com' }
   multi-service Titan repo.
 - [Titan overview](../titan/overview.md) — the framework in depth.
 - [Netron RPC](../titan/netron.md) — transports, middleware, auth.
-- [Frontend hooks](../frontend/netron-react.md) — call the same service
+- [Frontend hooks](../frontend/netron/react.md) — call the same service
   from React with full type safety.

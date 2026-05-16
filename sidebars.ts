@@ -267,9 +267,36 @@ const sidebars: SidebarsConfig = {
 
   frontend: [
     'frontend/overview',
-    'frontend/prism',
-    'frontend/netron-browser',
-    'frontend/netron-react',
+    {
+      type: 'category',
+      label: 'Prism',
+      link: {type: 'doc', id: 'frontend/prism/index'},
+      items: [
+        'frontend/prism/components',
+        'frontend/prism/blocks',
+        'frontend/prism/layouts',
+        'frontend/prism/forms',
+        'frontend/prism/hooks-catalog',
+        'frontend/prism/theme',
+      ],
+    },
+    {
+      type: 'category',
+      label: 'Netron',
+      link: {type: 'doc', id: 'frontend/netron/index'},
+      items: [
+        'frontend/netron/browser',
+        'frontend/netron/react',
+        'frontend/netron/transports',
+        'frontend/netron/middleware',
+        'frontend/netron/caching',
+        'frontend/netron/auth',
+        'frontend/netron/multi-backend',
+        'frontend/netron/errors',
+        'frontend/netron/testing',
+        'frontend/netron/ssr',
+      ],
+    },
   ],
 
   omnitron: [
