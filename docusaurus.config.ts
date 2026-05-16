@@ -52,6 +52,13 @@ const config: Config = {
 
   themes: ['@docusaurus/theme-mermaid'],
 
+  // Client-side modules that run on every page. Currently only the
+  // chunk-error handler — it auto-reloads the page when an old cached
+  // HTML tries to fetch a chunk that the latest deploy has removed.
+  clientModules: [
+    require.resolve('./src/clientModules/chunk-error-handler.ts'),
+  ],
+
   markdown: {
     mermaid: true,
     format: 'detect',     // .md → markdown, .mdx → MDX with JSX
