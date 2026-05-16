@@ -410,8 +410,8 @@ function CTA() {
           <Link className="button button--secondary button--lg" to="/docs/getting-started/quickstart">
             Quickstart
           </Link>
-          <Link className="button button--link button--lg" to="/docs/foundations/philosophy">
-            Read the philosophy
+          <Link className="button button--link button--lg" to="/docs/foundations/principles">
+            Read the principles
           </Link>
         </div>
       </div>

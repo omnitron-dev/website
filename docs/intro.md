@@ -105,7 +105,7 @@ That's the entire wire format. The rest is opt-in.
 
 ### If you want to understand the design
 
-- **[Philosophy](./foundations/philosophy.md)** — why decorator DI, why one type system end-to-end.
+- **[Principles](./foundations/principles.md)** — why decorator DI, why one type system end-to-end.
 - **[Architecture](./foundations/architecture.md)** — every layer and how they compose.
 - **[Monorepo](./foundations/monorepo.md)** — how the workspace is organised.
 
@@ -167,12 +167,12 @@ That's the entire wire format. The rest is opt-in.
 
 MIT across every package.
 
-## Read the philosophy
+## The thinking
 
 If you want to know **why** the stack looks like this — why decorator DI,
 why transport-agnostic RPC, why one type system end-to-end — start with
-[Philosophy](./foundations/philosophy.md). Every other design decision
-follows from those choices.
+[Principles](./foundations/principles.md). Every other design decision
+follows from those rules.
 
 ---
 

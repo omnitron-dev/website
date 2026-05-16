@@ -18,7 +18,7 @@ const sidebars: SidebarsConfig = {
       label: 'Foundations',
       link: {type: 'generated-index', slug: '/category/foundations'},
       items: [
-        'foundations/philosophy',
+        'foundations/principles',
         'foundations/architecture',
         'foundations/monorepo',
       ],
