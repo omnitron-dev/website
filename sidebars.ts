@@ -186,6 +186,18 @@ const sidebars: SidebarsConfig = {
     },
     {
       type: 'category',
+      label: 'Recipes',
+      link: {type: 'doc', id: 'titan/recipes/index'},
+      items: [
+        'titan/recipes/api-service',
+        'titan/recipes/worker-fleet',
+        'titan/recipes/observability-stack',
+        'titan/recipes/notifications-pipeline',
+        'titan/recipes/multi-tenant-saas',
+      ],
+    },
+    {
+      type: 'category',
       label: 'Modules',
       link: {type: 'doc', id: 'titan/modules/index'},
       items: [
