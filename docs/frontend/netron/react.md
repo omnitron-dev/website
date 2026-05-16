@@ -6,17 +6,30 @@ description: Production-grade React bindings for Netron RPC — type-safe hooks,
 
 # netron-react
 
-`@omnitron-dev/netron-react` provides React 18+ / 19 bindings on
-top of [netron-browser](./browser.md). Type-safe hooks for
-queries, mutations, subscriptions, infinite queries; a query +
-mutation cache; multi-backend support; an authentication system
-with route guards; and devtools.
+`@omnitron-dev/netron-react` is the **optional React layer** on
+top of [netron-browser](./browser.md). Provides React 18+ / 19
+bindings: type-safe hooks for queries, mutations, subscriptions,
+infinite queries; a query + mutation cache; multi-backend
+support; an authentication system with route guards; and
+devtools.
+
+> **Install only if your frontend uses React.** For Vue / Svelte
+> / Solid / Angular / Lit / vanilla JS — use
+> [`netron-browser`](./browser.md) directly and wrap calls in
+> your framework's reactivity primitives.
+>
+> **Don't confuse with server-side Netron** at
+> `@omnitron-dev/titan/netron` — that's part of the Titan
+> framework. This package consumes the server through
+> `netron-browser`.
 
 Verified against `packages/netron-react/src/`.
 
 ```bash
 pnpm add @omnitron-dev/netron-react @omnitron-dev/netron-browser
 ```
+
+`netron-browser` is a peer dependency — install both.
 
 ## Provider
 

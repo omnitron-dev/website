@@ -6,15 +6,28 @@ description: Browser-side Netron RPC — netron-browser + netron-react.
 
 # Netron in the browser
 
+> **Note about server-side Netron:** the server lives inside
+> Titan itself at `@omnitron-dev/titan/netron` — including all
+> four transports (HTTP / WebSocket / TCP / Unix). You don't
+> install a separate package for the server. This section
+> covers the **browser-side** clients only.
+
 Two packages cover the browser side of Netron RPC:
 
-| Package | Role |
-| ------- | ---- |
-| [`@omnitron-dev/netron-browser`](./browser.md) | Transport layer — HTTP, WebSocket, middleware, auth, multi-backend |
-| [`@omnitron-dev/netron-react`](./react.md) | React bindings — hooks, providers, cache, devtools, multi-backend hooks |
+| Package | Role | Framework |
+| ------- | ---- | --------- |
+| [`@omnitron-dev/netron-browser`](./browser.md) | Transport layer — HTTP, WebSocket, middleware, auth, multi-backend | **Framework-agnostic** — vanilla JS, Vue, Svelte, Solid, Angular, Lit, React, Web Workers, Electron |
+| [`@omnitron-dev/netron-react`](./react.md) | React-specific hooks, providers, cache, devtools | **React-only** |
+
+For React apps you install both. For non-React apps install
+just `netron-browser`:
 
 ```bash
+# React apps:
 pnpm add @omnitron-dev/netron-browser @omnitron-dev/netron-react
+
+# Vue / Svelte / Solid / Angular / Lit / vanilla JS:
+pnpm add @omnitron-dev/netron-browser
 ```
 
 ## How they relate
@@ -32,9 +45,12 @@ flowchart LR
   App --> Hook --> Cache --> Client --> MW --> Wire --> Server
 ```
 
-netron-browser is usable on its own (vanilla JS / web workers /
-non-React frameworks). netron-react adds the React glue: cache,
-suspense, providers, devtools, multi-backend routing.
+**`netron-browser` is the foundation** and works in any
+JavaScript environment. **`netron-react` is an optional layer**
+that adds React glue: cache, suspense, providers, devtools,
+multi-backend hooks. For Vue / Svelte / Solid / Angular / Lit
+apps, wrap `netron-browser` calls in your framework's
+reactivity primitives directly.
 
 ## Deep dives
 
