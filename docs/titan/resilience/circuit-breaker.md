@@ -28,11 +28,13 @@ enum CircuitState {
 
 Transitions:
 
-```
-Closed   ──[N failures]──→ Open
-Open     ──[timeout elapsed]──→ HalfOpen
-HalfOpen ──[probe success]──→ Closed
-HalfOpen ──[probe failure]──→ Open
+```mermaid
+stateDiagram-v2
+  [*] --> Closed
+  Closed --> Open: N consecutive failures
+  Open --> HalfOpen: timeout elapsed
+  HalfOpen --> Closed: probe success
+  HalfOpen --> Open: probe failure
 ```
 
 ## Basic usage

@@ -10,6 +10,24 @@ A `MultiBackendClient` is a Netron client that fans out to multiple
 servers. It exposes the same interface as a single-backend client;
 the backend selection is internal.
 
+```mermaid
+flowchart LR
+  Caller[Caller: users.findById]
+  Client[MultiBackendClient]
+  Router[ServiceRouter<br/>rule match]
+  Pool[BackendPool<br/>health-aware]
+  B1[backend-1]
+  B2[backend-2]
+  B3[backend-3]
+
+  Caller --> Client --> Router
+  Router -->|matched rule| Pool
+  Pool -->|pick by strategy| B1
+  Pool -.->|round-robin| B2
+  Pool -.->|sticky / weighted| B3
+  Pool -.->|fail → retry| Pool
+```
+
 Use when you have:
 
 - **Read replicas.** Round-robin reads across replicas; writes go

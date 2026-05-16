@@ -4,10 +4,8 @@ title: titan-pm
 
 # titan-pm
 
-Process manager: supervisors, worker pools, and worker handles for
-running CPU-bound or isolated work in child processes.
-
-## Install
+Process supervision, worker pools, IPC, graceful shutdown, restart
+policies, and metrics/health monitoring.
 
 ```bash
 pnpm add @omnitron-dev/titan-pm
@@ -16,52 +14,131 @@ pnpm add @omnitron-dev/titan-pm
 ## Setup
 
 ```typescript
-import { PmModule } from '@omnitron-dev/titan-pm';
+import { ProcessManagerModule } from '@omnitron-dev/titan-pm';
 
 @Module({
   imports: [
-    PmModule.forRoot({
-      workers: {
-        imageProcessor: {
-          path:   './workers/image.worker.js',
-          pool:   { min: 2, max: 8 },
-          restartPolicy: 'on-failure',
-        },
+    ProcessManagerModule.forRoot({
+      isolation:     'worker',          // 'worker' | 'fork'
+      transport:     'unix',            // 'unix' | 'tcp'
+      restartPolicy: {
+        enabled:     true,
+        maxRestarts: 5,
+        window:      60_000,
+        delay:       1_000,
+        backoff:     'exponential',
+      },
+      resources: {
+        maxMemory: 512 * 1024 * 1024,   // 512 MB
+        maxCpu:    80,                  // %
+        timeout:   30_000,
+      },
+      monitoring: {
+        healthCheck: true,
+        metrics:     true,
+        tracing:     true,
+      },
+      advanced: {
+        gracefulShutdownTimeout: 30_000,
       },
     }),
   ],
 })
-export class AppModule {}
+class AppModule {}
 ```
 
-## Use
+### `IProcessManagerConfig`
+
+| Option         | Type / Default                                                  |
+| -------------- | --------------------------------------------------------------- |
+| `isolation`    | `'worker' \| 'fork'` (default `'worker'`)                       |
+| `transport`    | `'unix' \| 'tcp'` (default `'unix'`)                            |
+| `restartPolicy`| `{ enabled, maxRestarts, window, delay, backoff }`              |
+| `resources`    | `{ maxMemory, maxCpu, timeout }`                                |
+| `monitoring`   | `{ healthCheck, metrics, tracing }`                             |
+| `testing`      | `{ useMockSpawner }`                                            |
+| `advanced`     | `{ gracefulShutdownTimeout }`                                   |
+
+## Decorators (16 in total)
+
+### Process classes
+
+| Decorator           | Effect                                              |
+| ------------------- | --------------------------------------------------- |
+| `@Process(options)` | Mark a class as a runnable process                  |
+| `@Workflow(options)`| Mark a class as a workflow (orchestrates processes) |
+| `@Actor()`          | Mark a class as an actor (message-passing)          |
+| `@Supervisor(options)` | Mark a class as a supervisor                     |
+
+### Method-level — process behaviour
+
+| Decorator              | Effect                                                  |
+| ---------------------- | ------------------------------------------------------- |
+| `@Public()`            | Expose method over IPC                                  |
+| `@Stage()`             | Workflow stage                                          |
+| `@Compensate()`        | Workflow compensation handler                           |
+| `@HealthCheck()`       | Mark a method as a health-check                         |
+| `@OnShutdown()`        | Cleanup hook                                            |
+| `@Child()`             | Mark a method that spawns child processes               |
+| `@Trace()`             | Auto-trace span                                         |
+| `@Metric()`            | Auto-instrument metric                                  |
+
+### Method-level — resilience
+
+| Decorator              | Effect                                                  |
+| ---------------------- | ------------------------------------------------------- |
+| `@CircuitBreaker()`    | Circuit-break the method                                |
+| `@RateLimit()`         | Rate-limit the method                                   |
+| `@Idempotent()`        | Idempotent method (safe to retry)                       |
+| `@Validate()`          | Validate input                                          |
+| `@Cache()`             | Cache the result                                        |
+
+## Example — a worker pool
 
 ```typescript
-@Service('media@1.0.0')
-export class MediaService {
-  constructor(private readonly pm: PmService) {}
+import { Process, Public, OnShutdown } from '@omnitron-dev/titan-pm';
 
+@Process({ pool: { min: 2, max: 8 } })
+export class ImageWorker {
   @Public()
   async resize(input: Buffer, width: number) {
-    return this.pm.invoke('imageProcessor', 'resize', [input, width]);
+    return sharp(input).resize(width).toBuffer();
+  }
+
+  @OnShutdown()
+  async cleanup() {
+    // close handles, flush state
   }
 }
 ```
 
-The PM service routes the call to a free worker, queues if all workers
-are busy, and surfaces errors back to the caller as typed `WorkerError`.
+```typescript
+import { ProcessManager, PM_MANAGER_TOKEN } from '@omnitron-dev/titan-pm';
 
-## Lifecycle
+@Service({ name: 'media' })
+class MediaService {
+  constructor(@Inject(PM_MANAGER_TOKEN) private readonly pm: ProcessManager) {}
 
-- **Crash chain** — when a worker exits unexpectedly, the supervisor
-  fires `onWorkerExit` and (if `restartPolicy: 'on-failure'`) restarts
-  it with backoff.
-- **PID liveness sweep** — the supervisor periodically reaps dead PIDs
-  it can no longer reach, releasing their leases.
-- **Bounded maps** — internal caches are size-bounded to prevent
-  memory leaks under crash loops.
+  @Public()
+  async resize(input: Buffer, width: number) {
+    return this.pm.invoke('ImageWorker', 'resize', [input, width]);
+  }
+}
+```
 
-## Read also
+## Exposed services
 
-- [titan-scheduler](./scheduler.md) — for time-based work, not pool-based.
-- [titan-cache](./cache.md) — uses the same bounded-map and getOrSet primitives.
+`ProcessManager`, `ProcessRegistry`, `ProcessSpawner`,
+`ProcessSpawnerFactory`, `ProcessPool`, `ProcessSupervisor`,
+`ProcessMetricsCollector`, `ProcessHealthChecker`.
+
+## Exported tokens
+
+| Token                  |
+| ---------------------- |
+| `PM_CONFIG_TOKEN`      |
+| `PM_MANAGER_TOKEN`     |
+| `PM_REGISTRY_TOKEN`    |
+| `PM_SPAWNER_TOKEN`     |
+| `PM_METRICS_TOKEN`     |
+| `PM_HEALTH_TOKEN`      |

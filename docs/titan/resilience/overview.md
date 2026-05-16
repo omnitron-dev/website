@@ -40,8 +40,18 @@ classifier). For sophisticated resilience, use the primitives from
 
 These compose. A typical "outbound call" pattern:
 
-```
-withTimeout → CircuitBreaker.execute → retry → the actual call
+```mermaid
+flowchart LR
+  Call[Outbound call]
+  Call --> T{withTimeout}
+  T --> CB{CircuitBreaker}
+  CB -- closed --> R{retry}
+  R --> Op[the actual operation]
+  CB -- open --> Fail1[fail fast]
+  T -. deadline elapsed .-> Fail2[TimeoutError]
+  Op -- success --> Result[result]
+  Op -- transient err --> R
+  R -- exhausted --> Fail3[last error]
 ```
 
 - Timeout outermost — even retries shouldn't extend the deadline.

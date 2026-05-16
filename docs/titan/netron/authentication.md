@@ -28,6 +28,17 @@ import {
 | `AuthenticationManager`  | Validate credentials, produce an auth context               |
 | `AuthorizationManager`   | Evaluate policies against the auth context                  |
 
+```mermaid
+flowchart LR
+  Req[Incoming RPC call]
+  Req --> Authn[AuthenticationManager<br/>validate JWT / token]
+  Authn -->|valid| Ctx[AuthContext<br/>userId, roles, scopes]
+  Authn -->|invalid| F1[AuthError 401]
+  Ctx --> Authz[AuthorizationManager<br/>evaluate policies]
+  Authz -->|allowed| Method[Method body]
+  Authz -->|denied| F2[PermissionError 403]
+```
+
 These are wired by the `titan-auth` ecosystem module (or by your own
 integration). You rarely construct them directly.
 

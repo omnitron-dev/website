@@ -4,64 +4,96 @@ title: titan-telemetry-relay
 
 # titan-telemetry-relay
 
-Store-and-forward telemetry pipeline. Buffers metrics, traces, and logs
-locally; ships them to your collector when reachable; survives collector
-outages without dropping data.
-
-## Install
+Store-and-forward telemetry pipeline (logs, metrics, traces) for
+distributed services. **Not a Titan module** — exposes a service
+class you instantiate directly. Producer nodes buffer telemetry to a
+write-ahead log; aggregator nodes drain the buffer and persist to a
+backend. Handles network interruptions without data loss.
 
 ```bash
 pnpm add @omnitron-dev/titan-telemetry-relay
 ```
 
-## Setup
+## Why it isn't a module
+
+Unlike the other ecosystem packages, `titan-telemetry-relay` doesn't
+register itself as a Titan module. Reasons:
+
+- The service can run as either a producer or an aggregator (often
+  in different processes).
+- The buffer (with write-ahead log) is process-state, not
+  application-state.
+- Different deployments wire it differently — sidecar, in-process,
+  centralised collector.
+
+You construct `TelemetryRelayService` directly and feed it into
+whatever orchestration suits your topology.
+
+## Setup — producer
 
 ```typescript
-import { TelemetryRelayModule } from '@omnitron-dev/titan-telemetry-relay';
+import { TelemetryRelayService } from '@omnitron-dev/titan-telemetry-relay';
 
-@Module({
-  imports: [
-    TelemetryRelayModule.forRoot({
-      buffer: {
-        type:    'sqlite',                  // 'memory' | 'sqlite'
-        path:    './var/telemetry.db',
-        maxSize: 100 * 1024 * 1024,         // 100 MB cap
-      },
-      sinks: [
-        { type: 'otlp', endpoint: 'https://collector.internal/v1/traces' },
-        { type: 'prometheus-remote-write', url: 'https://prom.internal/api/v1/write' },
-      ],
-      retry: { baseDelayMs: 1_000, maxDelayMs: 60_000 },
-    }),
-  ],
-})
-export class AppModule {}
+const relay = new TelemetryRelayService({
+  role:    'producer',
+  nodeId:  process.env.HOSTNAME,
+  // …buffer config
+});
+
+await relay.start();
+
+// In your services, push telemetry:
+relay.log({ level: 'info', message: 'order placed', orderId });
+relay.metric({ name: 'orders.placed', value: 1 });
+relay.span(span);
 ```
 
-## Why a relay
-
-A direct OTLP exporter loses spans during collector outages. The relay:
-
-1. Writes telemetry to a local buffer first (SQLite by default for
-   crash safety).
-2. Ships to configured sinks in the background.
-3. Backs off when sinks fail; never blocks the producer.
-4. Surfaces buffer pressure as a metric you can alert on.
-
-## Integration
-
-The relay registers as the default exporter for `titan-metrics`,
-`LoggerModule`, and the Netron tracing middleware automatically. You
-can also write to it directly:
+## Setup — aggregator
 
 ```typescript
-@Service('audit@1.0.0')
-export class AuditService {
-  constructor(private readonly relay: TelemetryRelay) {}
+const relay = new TelemetryRelayService({
+  role: 'aggregator',
+  // …downstream sinks
+});
 
-  @Public()
-  async record(event: AuditEvent) {
-    this.relay.log({ kind: 'audit', event });
-  }
-}
+await relay.start();
 ```
+
+The aggregator drains incoming telemetry and persists / forwards it
+to your chosen sink (OpenTelemetry collector, Loki, Prometheus,
+ClickHouse, etc.). Sink configuration is implementation-specific.
+
+## Setup — both (sidecar pattern)
+
+```typescript
+const relay = new TelemetryRelayService({ role: 'both', /* … */ });
+```
+
+The same process buffers and forwards. Useful for sidecar
+deployments where the service that produces telemetry also ships it.
+
+### `TelemetryRelayModuleOptions`
+
+| Option   | Type                                              |
+| -------- | ------------------------------------------------- |
+| `role`   | `'producer' \| 'aggregator' \| 'both'`            |
+| `nodeId` | `string`                                          |
+| (buffer) | `TelemetryBufferConfig` — `maxSize`, `flushInterval`, etc. |
+
+## Exposed classes
+
+- `TelemetryRelayService` — the main service.
+- `TelemetryBuffer` — bounded in-memory buffer with backpressure.
+- `TelemetryWal` — write-ahead log; persists buffer contents to disk
+  for crash safety.
+
+## When to use this
+
+- You operate a fleet of services that emit telemetry and need to
+  ship it without losing data on network glitches.
+- You want a uniform pipeline for logs, metrics, and traces
+  (instead of three separate exporters).
+- You need a sidecar that buffers locally and forwards in batches.
+
+For single-node or low-volume services, the standard logger
+(`titan/module/logger`) + a direct metrics exporter is simpler.

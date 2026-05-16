@@ -1,43 +1,63 @@
 ---
 sidebar_position: 1
 title: Logging
-description: Structured, contextual, transport-agnostic logging built on pino.
+description: Structured pino-based logging with child loggers, transports, and processors.
 ---
 
 # Logging
 
-`LoggerModule` is the second core module auto-loaded by every Titan
-app (the other is `ConfigModule`). It wraps pino, adds structured
-context, and routes through pluggable transports and processors.
+`LoggerModule` is one of the two core modules auto-loaded with every
+Titan app (the other is `ConfigModule`). Disable with
+`disableCoreModules: true` if you need to provide your own.
 
-This page is the entry point. Detail in:
+```typescript
+import {
+  LoggerModule,
+  LoggerService,
+  ConsoleTransport,
+  RedactionProcessor,
+  Logger,
+  Log,
+  Monitor,
+  LOGGER_TOKEN,
+  LOGGER_SERVICE_TOKEN,
+  type ILogger,
+  type ILoggerOptions,
+  type ILoggerModuleOptions,
+  type ITransport,
+  type ILogProcessor,
+} from '@omnitron-dev/titan/module/logger';
+```
 
-- [Transports](./transports.md) — destinations (console, file,
-  remote).
-- [Processors](./processors.md) — transformations (redaction,
-  enrichment, filtering).
-- [Child Loggers](./child-loggers.md) — bound context per service.
+## The `ILogger` interface
 
-## Why a structured logger
+```typescript
+interface ILogger {
+  // Levels — only four
+  debug(msg: string | object, meta?: Record<string, any>): void;
+  info(msg: string | object,  meta?: Record<string, any>): void;
+  warn(msg: string | object,  meta?: Record<string, any>): void;
+  error(msg: string | object | Error, meta?: Record<string, any>): void;
 
-Three reasons:
+  // Child logger with bound context
+  child(meta: Record<string, any>): ILogger;
 
-1. **Searchability.** A log line is a JSON object with named fields.
-   `level=error service=users method=findById userId=u_42` is
-   queryable; a free-text string is not.
-2. **Context propagation.** A child logger inherits its parent's
-   context. A request-scoped logger automatically tags every log
-   with the trace ID, the user ID, the call ID.
-3. **Performance.** pino is asynchronous and avoids JSON
-   serialisation in the hot path (it writes already-serialised
-   strings).
+  // Underlying pino instance (escape hatch)
+  pino?: any;
+}
+```
+
+> **Four levels only.** Unlike some loggers that ship `trace` and
+> `fatal`, `ILogger` exposes `debug`, `info`, `warn`, `error`. Map
+> "trace" needs to `debug`; map "fatal" needs to `error` plus an
+> explicit shutdown.
 
 ## The minimal usage
 
 ```typescript
 import { LoggerService } from '@omnitron-dev/titan/module/logger';
 
-@Service('users@1.0.0')
+@Service({ name: 'users' })
 class UsersService {
   constructor(private readonly logger: LoggerService) {}
 
@@ -49,28 +69,24 @@ class UsersService {
 }
 ```
 
-Output:
+Output (JSON, with pino formatting):
 
 ```json
-{"level":"info","time":"2026-05-15T20:00:00.000Z","service":"users","method":"findById","msg":"findById","id":"u_42"}
+{"level":"info","time":"2026-05-15T20:00:00.000Z","service":"users","msg":"findById","id":"u_42"}
 ```
 
-Two contextual fields appear automatically: `service` (from the class
-name) and `time` (UTC timestamp).
+## Why a structured logger
 
-## Levels
+Three reasons:
 
-| Level    | Use for                                                          |
-| -------- | ---------------------------------------------------------------- |
-| `trace`  | Verbose detail for one specific debugging session                |
-| `debug`  | Diagnostic info; off in production by default                    |
-| `info`   | Normal operational events; on in production                     |
-| `warn`   | Recoverable issues that someone should look at                  |
-| `error`  | Failures that affected at least one user / call                 |
-| `fatal`  | Process-level failures; usually accompanied by shutdown         |
-
-The `info` level is the right default for production. Promote to
-`debug` only when investigating.
+1. **Searchability.** A log line is a JSON object with named
+   fields. `level=error service=users method=findById userId=u_42`
+   is queryable; a free-text string is not.
+2. **Context propagation.** A child logger inherits its parent's
+   context. A request-scoped logger automatically tags every log
+   with the trace ID, the user ID, the call ID.
+3. **Performance.** Pino is asynchronous and avoids JSON
+   serialisation in the hot path.
 
 ## Setting the level
 
@@ -80,52 +96,85 @@ LoggerModule.forRoot({
 })
 ```
 
-Per-service level overrides:
+Per-context level overrides through child loggers (`child` accepts
+an options bag that includes `level` on pino).
+
+## Pretty mode (dev)
+
+The console transport accepts a `pretty` flag for development:
 
 ```typescript
 LoggerModule.forRoot({
-  level: 'info',
-  levelOverrides: {
-    'users':  'debug',     // verbose for users service only
-    'redis':  'warn',      // quiet down a chatty integration
-  },
+  transports: [
+    new ConsoleTransport({ pretty: process.env.NODE_ENV !== 'production' }),
+  ],
 })
 ```
 
-## Hot-reloading the level
+`pretty: false` (production default) writes JSON one-per-line —
+what log shippers expect. `pretty: true` renders human-friendly
+lines (colours, indentation).
 
-The logger subscribes to `config:changed` for `logging.level`. Bump
-the level via config without restarting:
+## Decorators
 
-```yaml
-# config/development.yaml
-logging:
-  level: debug
+```typescript
+import { Logger, Log, Monitor } from '@omnitron-dev/titan/module/logger';
+
+@Service({ name: 'users' })
+class UsersService {
+  @Logger() private readonly logger!: ILogger;          // property injection
+
+  @Public()
+  @Log()                                                 // auto-log entry/exit
+  async findById(id: string) { /* … */ }
+
+  @Public()
+  @Monitor()                                             // track performance
+  async heavyMethod(input: Input) { /* … */ }
+}
 ```
-
-Edit the file → ConfigWatcher re-reads → emits `config:changed` →
-LoggerService updates → next log line uses the new level.
-
-## Integration with the lifecycle
-
-Log lines from inside lifecycle hooks carry a `phase` field:
-
-```json
-{"level":"info","phase":"onInit","service":"DatabaseService","msg":"connected","durationMs":120}
-```
-
-Useful for finding slow boots and dependency-order surprises.
 
 ## Integration with tracing
 
-If a trace context is active, every log line in the same async scope
-carries `traceId` and `spanId`:
+If a trace context is active, every log line in the same async
+scope can carry `traceId` and `spanId`. Wire this up via a
+`ILogProcessor` that reads `currentTrace()`:
 
-```json
-{"level":"info","traceId":"4bf92f3577b34da6a3ce929d0e0e4736","spanId":"00f067aa0ba902b7","service":"orders","msg":"created"}
+```typescript
+import { currentTrace } from '@omnitron-dev/titan/tracing';
+import type { ILogProcessor } from '@omnitron-dev/titan/module/logger';
+
+const TraceContextProcessor: ILogProcessor = {
+  process(record) {
+    const trace = currentTrace();
+    if (trace) {
+      record.traceId = trace.traceId;
+      record.spanId  = trace.spanId;
+    }
+    return record;
+  },
+};
+
+LoggerModule.forRoot({ processors: [TraceContextProcessor] });
 ```
 
 Correlate logs across services by `traceId` in your log aggregator.
+
+## Helpers
+
+- `createNullLogger()` — returns an `ILogger` that discards
+  everything. Useful in tests.
+- `isLogger(value)` — type guard.
+
+## Tokens
+
+| Token                          | Purpose                              |
+| ------------------------------ | ------------------------------------ |
+| `LOGGER_TOKEN`                 | The default `ILogger`                |
+| `LOGGER_SERVICE_TOKEN`         | The `LoggerService` wrapper          |
+| `LOGGER_OPTIONS_TOKEN`         | Resolved options bundle              |
+| `LOGGER_TRANSPORTS_TOKEN`      | Registered transports                |
+| `LOGGER_PROCESSORS_TOKEN`      | Registered processors                |
 
 ## Read on
 

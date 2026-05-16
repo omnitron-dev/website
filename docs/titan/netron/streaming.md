@@ -10,6 +10,29 @@ Netron supports server-streaming methods — methods that return
 `AsyncIterable<T>` instead of `Promise<T>`. The client iterates the
 stream as values arrive.
 
+```mermaid
+sequenceDiagram
+  participant C as Client
+  participant T as Transport (WS/TCP/Unix)
+  participant S as Server (async generator)
+
+  C->>T: queryInterface + call watchAll()
+  T->>S: open stream
+  loop while server yields
+    S-->>T: yield event
+    T-->>C: chunk
+    C->>C: process
+  end
+  alt client break
+    C->>T: close iterator
+    T->>S: cancel (return signal)
+    S->>S: finally { release resources }
+  else server done
+    S-->>T: close
+    T-->>C: end of stream
+  end
+```
+
 Streaming requires WebSocket, TCP, or Unix transport. HTTP cannot
 stream Netron values (HTTP/1.1 chunked is a stream of bytes, not of
 typed objects).

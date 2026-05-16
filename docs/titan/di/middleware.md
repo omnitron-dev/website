@@ -1,7 +1,7 @@
 ---
 sidebar_position: 7
 title: DI Middleware
-description: Wrap container resolution itself — caching, retry, instrumentation, circuit breakers.
+description: Wrap container resolution itself — retry, caching, rate-limit, circuit-breaker, logging, validation, transactions.
 ---
 
 # DI Middleware
@@ -10,141 +10,159 @@ DI middleware wraps **container resolution**. It runs at construction
 time, not at call time. Use it to add cross-cutting behaviour to how
 providers are constructed, not to how their methods are called.
 
-> Do not confuse this with **Netron RPC middleware**, which wraps
-> per-call dispatch. The two are independent.
-> See [Netron Middleware](../netron/middleware.md) for the per-call form.
+```typescript
+import {
+  type Middleware,
+  type MiddlewareFunction,
+  type MiddlewareNext,
+  type MiddlewareResult,
+  createMiddleware,
+  composeMiddleware,
+  MiddlewarePipeline,
+  // Built-ins
+  RetryMiddleware,
+  LoggingMiddleware,
+  CachingMiddleware,
+  RateLimitMiddleware,
+  ValidationMiddleware,
+  TransactionMiddleware,
+  CircuitBreakerMiddleware,
+} from '@omnitron-dev/titan/nexus';
+```
 
-## When DI middleware is the right tool
+> **DI middleware ≠ Netron middleware.** This page covers wrapping
+> the resolution of providers. For wrapping per-call RPC dispatch,
+> see [Netron Middleware](../netron/middleware.md).
 
-| Concern                                                       | DI middleware? |
-| ------------------------------------------------------------- | -------------- |
-| Cache an expensive provider construction                      | Yes            |
-| Retry a flaky factory (e.g. async setup that occasionally fails) | Yes         |
-| Log every resolution for diagnostics                          | Yes            |
-| Apply a circuit breaker to a remote-construction factory      | Yes            |
-| Validate input parameters of a method                         | No (use Validation) |
-| Authorise a method call                                        | No (use Netron auth) |
-| Time a method execution                                        | No (use Netron middleware) |
+## The `Middleware` interface
+
+```typescript
+interface Middleware<T = unknown> {
+  name:     string;
+  execute:  (context: MiddlewareContext<T>, next: () => T | Promise<T>) => T | Promise<T>;
+  priority?: number;
+  condition?: (context: MiddlewareContext<T>) => boolean;
+  onError?:   (error: Error, context: MiddlewareContext<T>) => void;
+}
+```
+
+`context` carries:
+
+- `token` — the token being resolved.
+- `scope` — current resolution scope.
+- `parent` — the resolution that triggered this one (depth +
+  cycle tracking).
+
+`next()` resolves the provider; call exactly once and return the
+value.
 
 ## Built-in middleware
 
-Nexus ships with five common patterns:
+```mermaid
+flowchart LR
+  Resolve[container.resolve]
+  Resolve --> M1[Logging]
+  M1 --> M2[Retry]
+  M2 --> M3[Caching]
+  M3 --> M4[CircuitBreaker]
+  M4 --> M5[Provider executes]
+```
 
-| Middleware                  | Purpose                                                   |
-| --------------------------- | --------------------------------------------------------- |
-| `RetryMiddleware`           | Retry resolution if construction throws                   |
-| `CachingMiddleware`         | Cache resolved instances by token + context               |
-| `RateLimitMiddleware`       | Reject resolutions exceeding a threshold                  |
-| `CircuitBreakerMiddleware`  | Open a circuit after consecutive resolution failures      |
-| `LoggingMiddleware`         | Log every resolution with timing                          |
+| Middleware                 | Purpose                                                   |
+| -------------------------- | --------------------------------------------------------- |
+| `RetryMiddleware`          | Retry construction if it throws                           |
+| `LoggingMiddleware`        | Log every resolution with timing                          |
+| `CachingMiddleware`        | Cache resolved instances by token + context               |
+| `RateLimitMiddleware`      | Reject resolutions exceeding a threshold                  |
+| `ValidationMiddleware`     | Validate resolved instance against a schema               |
+| `TransactionMiddleware`    | Wrap resolution in a transaction (DB-aware contexts)      |
+| `CircuitBreakerMiddleware` | Open a circuit after consecutive resolution failures      |
 
-Apply by registering with the container. The exact registration API
-lives in `@omnitron-dev/titan/nexus`; consult the source for the
-canonical surface — typically along the lines of:
+The built-ins are factory functions or pre-built middleware objects
+exported from `nexus/middleware`. Consult the source for the
+constructor signature of each (they accept knob-based options).
+
+## Applying middleware
 
 ```typescript
-import { Container } from '@omnitron-dev/titan/nexus';
-
-const container = new Container();
+const container = createContainer();
 
 container.useMiddleware([
-  /* logging, retry, caching middleware … */
+  LoggingMiddleware({ level: 'debug' }),
+  RetryMiddleware({ /* options */ }),
+  CachingMiddleware({ /* options */ }),
 ]);
 ```
 
-The order is the *outer-to-inner* execution order — the first
-middleware runs first, then delegates to the next, until the
-provider itself is invoked.
+The order in the array is the **outer-to-inner execution order**:
+`Logging` runs first, then `Retry`, then `Caching`, then the
+provider. The `priority` field on each middleware can override the
+array order.
 
-## Custom middleware
+## Custom middleware via `createMiddleware`
 
 ```typescript
-import { type DIMiddleware } from '@omnitron-dev/titan/nexus';
+import { createMiddleware } from '@omnitron-dev/titan/nexus';
 
-const InstrumentationMiddleware: DIMiddleware = async (ctx, next) => {
-  const t0 = performance.now();
-  try {
-    const instance = await next();
-    metrics.histogram('di.resolve.ms', { token: ctx.token.name })
-      .observe(performance.now() - t0);
-    return instance;
-  } catch (e) {
-    metrics.counter('di.resolve.errors', { token: ctx.token.name }).inc();
-    throw e;
-  }
-};
+const InstrumentationMiddleware = createMiddleware({
+  name:    'instrumentation',
+  execute: async (ctx, next) => {
+    const t0 = performance.now();
+    try {
+      const instance = await next();
+      metrics.histogram('di.resolve.ms', { token: ctx.token.name })
+        .observe(performance.now() - t0);
+      return instance;
+    } catch (e) {
+      metrics.counter('di.resolve.errors', { token: ctx.token.name }).inc();
+      throw e;
+    }
+  },
+});
 
 container.useMiddleware([InstrumentationMiddleware]);
 ```
 
-`ctx` carries:
+## Composing middleware
 
-- `token` — the token being resolved.
-- `provider` — the provider definition.
-- `scope` — the scope being resolved within.
-- `parent` — the resolution context that triggered this one (for
-  detecting circular and tracking depth).
+`composeMiddleware(middlewares)` produces a single middleware that
+chains the inputs. Useful for grouping related middleware as a
+single unit.
 
-`next()` returns the resolved instance. Call it exactly once.
+`MiddlewarePipeline` is the class that drives execution; the
+container creates one internally, but you can construct one
+yourself if you need to test middleware in isolation.
 
-## Per-token middleware
+## Conditional execution
 
-Sometimes you want middleware applied only to specific tokens (e.g.
-retry only for the database pool). Register middleware on the
-provider:
+Middleware can opt out per resolution via `condition`:
 
 ```typescript
-container.register(DB_POOL, {
-  useFactory: createPool,
-  inject:     [ConfigService],
-  middleware: [
-    /* per-token middleware instances */
-  ],
-});
-```
-
-Per-token middleware runs *after* container-wide middleware in the
-chain. This means container-wide policy (e.g. `LoggingMiddleware`)
-wraps everything, including the per-token resilience.
-
-## Resolution context
-
-The middleware runs within a `ResolutionContext` that tracks:
-
-- The token being resolved.
-- The dependency chain that led here.
-- Any open scopes.
-- Resolution timing.
-
-Inspect it from inside middleware:
-
-```typescript
-const TimingMiddleware: DIMiddleware = async (ctx, next) => {
-  if (ctx.depth > 5) {
-    log.warn('deep resolution chain', {
-      token: ctx.token.name,
-      chain: ctx.parent?.token.name,
-    });
-  }
-  return next();
+const ExpensiveMiddleware: Middleware = {
+  name: 'expensive',
+  condition: (ctx) => ctx.token === MY_TOKEN,
+  execute: async (ctx, next) => { /* … */ return next(); },
 };
 ```
 
-## Async middleware
+`condition: false` means skip — `next()` runs directly.
 
-All middleware is async. The container awaits each `next()` call.
-Sync middleware works (return a value instead of a Promise) but the
-chain is still treated as async.
+## Per-token middleware
 
-## When to write your own
+Some middleware suites support per-token application. Check the
+specific built-in for whether it accepts a `tokens` filter, and the
+provider definition for a `middleware:` field. The exact surface
+varies and is documented in the source for each middleware.
 
-Custom DI middleware is *rare*. The built-ins cover most cases. Write
-your own when you need:
+## When to write DI middleware
+
+Custom DI middleware is *rare*. The built-ins cover most cases.
+Write your own when you need:
 
 - **Project-specific telemetry** — emit to a metrics backend the
   built-ins don't know about.
-- **Cross-cutting validation** — assert that every resolved provider
-  matches a schema.
+- **Cross-cutting validation** — assert that every resolved
+  provider matches a schema.
 - **Tracing instrumentation** — attach a span to every resolution.
 - **Test-only middleware** — capture the resolution graph for a
   test assertion.
@@ -154,14 +172,12 @@ Most application code does not need DI middleware at all.
 ## Anti-patterns
 
 - **Putting business logic in DI middleware.** It runs at
-  construction time, not per call. Authorisation, validation,
-  rate-limiting *of method calls* belong in Netron middleware.
+  construction time, not per call. Method-call concerns belong in
+  Netron middleware.
 - **Side effects in middleware.** Middleware should observe and
-  decorate, not mutate the application. A middleware that logs is
-  fine; a middleware that registers more providers is a smell.
+  decorate, not mutate the application. A middleware that
+  registers more providers is a smell.
 - **Async work that should be in `onStart`.** Heavy setup belongs
-  in lifecycle hooks, where the framework can sequence it. DI
-  middleware should not do "open the database connection" — that's
-  what `onStart` is for.
+  in lifecycle hooks where the framework can sequence it.
 
 → Next: [Circular Dependencies](./circular-dependencies.md).

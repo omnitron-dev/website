@@ -58,6 +58,19 @@ field-level error messages.
 
 ## How validation runs
 
+```mermaid
+flowchart LR
+  Wire[Bytes arrive] --> Decode[msgpack decode]
+  Decode --> Lookup[Service descriptor lookup]
+  Lookup --> Validate{@Validate / @Contract}
+  Validate -- valid --> Body[Method body runs]
+  Validate -- invalid --> Err[ValidationError 422]
+  Body --> Output[Result]
+  Output --> Encode[msgpack encode]
+  Err --> Encode
+  Encode --> WireOut[Bytes sent]
+```
+
 Validation happens **before** the method body, as part of the
 Netron call dispatch:
 

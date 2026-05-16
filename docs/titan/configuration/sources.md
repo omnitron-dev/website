@@ -94,6 +94,17 @@ behaviour.
 
 ## Source ordering
 
+```mermaid
+flowchart LR
+  S1[file: default.yaml] --> Merge[deep merge]
+  S2[file: local.yaml] --> Merge
+  S3[env: APP_*] --> Merge
+  S4[argv: --app-*] --> Merge
+  Merge --> Validate{schema?}
+  Validate -- valid --> Frozen[(frozen config)]
+  Validate -- invalid --> Throw[/throw ConfigValidationError/]
+```
+
 Sources merge in the order listed (deep merge — later wins per
 leaf key):
 

@@ -4,9 +4,8 @@ title: titan-auth
 
 # titan-auth
 
-JWT authentication and claims-based authorisation as Netron middleware.
-
-## Install
+JWT authentication with multi-algorithm support (HS256 / RS256 /
+ES256), remote JWKS, in-memory token cache, and HTTP middleware.
 
 ```bash
 pnpm add @omnitron-dev/titan-auth
@@ -15,76 +14,103 @@ pnpm add @omnitron-dev/titan-auth
 ## Setup
 
 ```typescript
-import { AuthModule } from '@omnitron-dev/titan-auth';
+import { TitanAuthModule } from '@omnitron-dev/titan-auth';
 
 @Module({
   imports: [
-    AuthModule.forRoot({
-      jwt: {
-        secret:    env.JWT_SECRET,
-        algorithm: 'HS256',
-        issuer:    'my-app',
-      },
+    TitanAuthModule.forRoot({
+      algorithm:    'HS256',
+      jwtSecret:    env.JWT_SECRET,
+      issuer:       'my-app',
+      audience:     'my-api',
+      cacheEnabled: true,
+      cacheMaxSize: 1_000,
+      cacheTTL:     300_000,
     }),
   ],
 })
-export class AppModule {}
+class AppModule {}
 ```
 
-The module registers an auth middleware on Netron. Every call carries an
-`Authorization: Bearer <token>` header (HTTP/WS) or an inline token field
-(TCP/Unix). Decoded claims attach to the `NetronContext`.
-
-## Decorators
+For asymmetric signing or external identity providers:
 
 ```typescript
-@Service('orders@1.0.0')
-export class OrdersService {
-  // Method-level: requires a valid token, no scope check.
-  @Public()
-  @RequireAuth()
-  async list(@Context() ctx: NetronContext) {
-    return this.repo.listForUser(ctx.auth.userId);
-  }
+TitanAuthModule.forRoot({
+  algorithm: 'RS256',
+  jwksUrl:   'https://auth.example.com/.well-known/jwks.json',
+  issuer:    'https://auth.example.com',
+  audience:  'my-api',
+})
+```
 
-  // Method-level: requires a specific scope claim.
+### `IAuthModuleOptions`
+
+| Option         | Type                                     | Default      |
+| -------------- | ---------------------------------------- | ------------ |
+| `algorithm`    | `'HS256' \| 'RS256' \| 'ES256'`          | `'HS256'`    |
+| `jwtSecret`    | `string`                                 | —            |
+| `serviceKey`   | `string`                                 | —            |
+| `anonKey`      | `string`                                 | —            |
+| `jwksUrl`      | `string`                                 | —            |
+| `issuer`       | `string`                                 | —            |
+| `audience`     | `string`                                 | —            |
+| `cacheEnabled` | `boolean`                                | `true`       |
+| `cacheMaxSize` | `number`                                 | `1_000`      |
+| `cacheTTL`     | `number` (ms)                            | `300_000`    |
+| `defaultTenantId` | `string`                              | —            |
+| `isGlobal`     | `boolean`                                | —            |
+
+## Exposed services and tokens
+
+| Symbol                      | Notes                                       |
+| --------------------------- | ------------------------------------------- |
+| `JWTService`                | Sign / verify tokens                        |
+| `AuthMiddleware`            | HTTP middleware to validate the Authorization header |
+| `JWT_SERVICE_TOKEN`         | DI token for `JWTService`                   |
+| `AUTH_MIDDLEWARE_TOKEN`     | DI token for `AuthMiddleware`               |
+| `SIGNED_URL_SERVICE_TOKEN`  | DI token for signed-URL helper              |
+| `AUTH_OPTIONS_TOKEN`        | DI token for the resolved options bundle    |
+
+## `@RequireAuth` decorator
+
+Protect a method:
+
+```typescript
+import { RequireAuth } from '@omnitron-dev/titan-auth';
+
+@Service({ name: 'orders' })
+class OrdersService {
   @Public()
-  @RequireAuth({ scope: 'orders:write' })
+  @RequireAuth({ roles: ['admin'], permissions: ['orders:write'] })
   async cancel(orderId: string) { /* … */ }
-
-  // Method-level: anonymous; no auth check.
-  @Public()
-  async healthCheck() { return 'ok'; }
 }
 ```
 
-## Custom claim verification
-
-Inject `AuthService` to verify claims manually inside a method:
+Options:
 
 ```typescript
-@Service('reports@1.0.0')
-export class ReportsService {
-  constructor(private readonly auth: AuthService) {}
-
-  @Public()
-  @RequireAuth()
-  async export(@Context() ctx: NetronContext, format: 'pdf' | 'csv') {
-    if (format === 'pdf' && !this.auth.hasScope(ctx, 'reports:premium')) {
-      throw Errors.forbidden('PDF export requires premium scope');
-    }
-    // …
-  }
-}
+@RequireAuth({
+  roles?:       string[],
+  permissions?: string[],
+  policies?:    string[] | { all?: string[] } | { any?: string[] },
+})
 ```
 
-## Token issuing
+The policy framework comes from the Netron auth layer
+(`@omnitron-dev/titan/netron/auth` — `BuiltInPolicies`,
+`PolicyEngine`, etc.). See
+[Netron Authentication](../netron/authentication.md) for the
+underlying primitives.
 
-`AuthService.sign()` issues tokens for tests or first-party flows:
+## JWT issuing
+
+`JWTService.sign(payload, options?)` returns a signed token.
+`JWTService.verify(token, options?)` validates and returns the
+decoded claims (cached if `cacheEnabled`).
 
 ```typescript
-const token = await this.auth.sign({ userId, scopes: ['orders:read'] });
-```
+constructor(@Inject(JWT_SERVICE_TOKEN) private readonly jwt: JWTService) {}
 
-For production identity providers, use a separate IDP and feed the
-public key (or JWKS URL) into `AuthModule.forRoot({ jwt: { jwksUri } })`.
+const token = await this.jwt.sign({ userId, roles: ['user'] }, { expiresIn: '15m' });
+const claims = await this.jwt.verify(token);
+```

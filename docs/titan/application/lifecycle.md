@@ -19,6 +19,20 @@ order, with typed contracts.
 | `OnStop`      | `onStop()`        | When `app.stop()` runs; **reverse** dependency order                    |
 | `OnDestroy`   | `onDestroy()`     | Final cleanup phase; after `onStop`                                     |
 
+```mermaid
+stateDiagram-v2
+  [*] --> Created: Application.create()
+  Created --> Starting: app.start()
+  Starting --> Initialized: onInit (dep order)
+  Initialized --> Started: onStart (dep order)
+  Started --> Stopping: app.stop() | signal
+  Stopping --> Stopped: onStop (reverse) + onDestroy
+  Stopped --> [*]
+  Starting --> Failed: hook throws
+  Started --> Failed: uncaught
+  Failed --> [*]
+```
+
 ```typescript
 import type { OnInit, OnStart, OnStop, OnDestroy } from '@omnitron-dev/titan';
 ```

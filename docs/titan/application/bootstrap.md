@@ -9,6 +9,30 @@ description: How Application.create + start actually run.
 Bootstrap is the bridge between "I have a class" and "I have a
 running service". Three steps, in this order.
 
+```mermaid
+sequenceDiagram
+  participant Code as Your code
+  participant App as Application
+  participant Cont as Container
+  participant Mods as Modules
+  participant Prov as Providers
+  participant Net as Netron / Transports
+
+  Code->>App: Application.create({ modules: [AppModule] })
+  App->>Cont: new Container()
+  App->>Mods: register core + AppModule + transitive imports
+  Mods->>Cont: register providers
+  Cont->>Cont: analyse graph, detect cycles
+  App->>Prov: eagerly init singletons
+  App-->>Code: Application (state: Created)
+
+  Code->>App: app.start()
+  App->>Prov: onInit (dep order)
+  App->>Prov: onStart (dep order)
+  App->>Net: bind transports (if configured)
+  App-->>Code: state: Started
+```
+
 ## Step 1 — `Application.create(...)`
 
 Two overloads:
