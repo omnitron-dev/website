@@ -1,148 +1,99 @@
 ---
-sidebar_position: 3
+sidebar_position: 1
 title: Netron RPC
+description: A transport-agnostic RPC plane — same service surface across HTTP, WebSocket, TCP, Unix.
 ---
 
 # Netron RPC
 
-Netron is Titan's transport-agnostic RPC plane. The same `@Service`
-surface is reachable over four transports with the same calling convention
-and the same middleware stack.
+Netron is the RPC plane Titan ships. It does one thing: take a
+TypeScript class, expose its methods over the wire, dispatch incoming
+calls back to the methods. The wire format is binary msgpack; the
+contract is the TypeScript interface.
 
-## Transports
+This page is the Netron entry point. The mechanics live in:
 
-| Transport  | Use case                                  | Default port |
-| ---------- | ----------------------------------------- | ------------ |
-| HTTP       | Browsers, REST-style integrations         | 3000         |
-| WebSocket  | Browser subscriptions, streaming          | 3001         |
-| TCP        | Service-to-service inside a cluster       | 4001         |
-| Unix       | Sidecars, CLI ↔ daemon, low-overhead IPC  | n/a (path)   |
+| Page                                              | Topic                                                  |
+| ------------------------------------------------- | ------------------------------------------------------ |
+| [Services](./netron/services.md)                  | Defining `@Service` classes, descriptors, peers        |
+| [Transports](./netron/transports.md)              | HTTP / WebSocket / TCP / Unix — when to choose what    |
+| [Middleware](./netron/middleware.md)              | Per-call wrapping (auth, rate limit, tracing)          |
+| [Authentication](./netron/authentication.md)      | Identity, claims, policies                             |
+| [Streaming](./netron/streaming.md)                 | AsyncIterable methods, backpressure                   |
+| [Multi-backend](./netron/multi-backend.md)        | Client → many servers, failover, load balancing       |
+| [Serialization](./netron/serialization.md)        | Wire format, msgpack, custom codecs                    |
 
-Configure them at boot:
+## The five-line tour
 
-```typescript
-const app = await Application.create(AppModule, {
-  netron: {
-    http:      { port: 3000 },
-    websocket: { port: 3001 },
-    tcp:       { port: 4001 },
-    unix:      { path: '/run/myapp.sock' },
-  },
-});
-```
-
-A service does not know which transport it is being called over. The
-method body sees a normal TypeScript invocation; the wire format is
-the framework's concern.
-
-## Service descriptors
-
-Every `@Service` registers a *descriptor* — a typed record of the
-service's name, version, methods, and parameter schemas. The descriptor
-is what the client resolves against `queryInterface<T>()`.
+Server:
 
 ```typescript
-const users = await client.queryInterface<UsersService>('users@1.0.0');
-//    ^? UsersService — full method signatures, fully typed
-```
-
-Versioning is part of the identity: `users@1.0.0` and `users@2.0.0` can
-coexist on the same app, and clients pin to one explicitly.
-
-## Middleware
-
-Middleware runs around every Netron call. The same middleware stack
-applies to every transport.
-
-```typescript
-@Module({
-  imports: [
-    NetronModule.forRoot({
-      middleware: [
-        AuthMiddleware,            // From titan-auth
-        RateLimitMiddleware,        // From titan-ratelimit
-        TracingMiddleware,
-      ],
-    }),
-  ],
-})
-export class AppModule {}
-```
-
-Custom middleware:
-
-```typescript
-@Injectable()
-export class TimingMiddleware implements NetronMiddleware {
-  async handle(ctx: NetronContext, next: () => Promise<unknown>) {
-    const start = performance.now();
-    try {
-      return await next();
-    } finally {
-      Logger.info('netron.call', {
-        service: ctx.service,
-        method:  ctx.method,
-        ms:      performance.now() - start,
-      });
-    }
-  }
+@Service('users@1.0.0')
+class UsersService {
+  @Public() async findById(id: string): Promise<User | null> { /* … */ }
 }
+
+await Application.create(AppModule, { netron: { http: { port: 3000 } } }).then(a => a.start());
 ```
 
-## Authentication
-
-`titan-auth` provides JWT validation as a middleware. The decoded claims
-are attached to the `NetronContext`.
+Client:
 
 ```typescript
-@Service('orders@1.0.0')
-export class OrdersService {
-  @Public()
-  @RequireAuth({ scope: 'orders:read' })
-  async list(@Context() ctx: NetronContext) {
-    return this.repo.listForUser(ctx.auth.userId);
-  }
-}
+const client = new NetronClient({ url: 'http://localhost:3000' });
+const users  = await client.queryInterface<UsersService>('users@1.0.0');
+const user   = await users.findById('u_42');
 ```
 
-## Discovery
+That is the whole API surface for a typical service. Versioning,
+routing, serialisation, error mapping, and trace propagation all
+happen behind it.
 
-`titan-discovery` registers running services in Redis so clients can
-locate them by name without hardcoded URLs.
+## What Netron is
 
-```typescript
-const client = new NetronClient({
-  discovery: { redis: { url: process.env.REDIS_URL } },
-});
+A few specific things, each with a deliberate scope:
 
-const users = await client.queryInterface<UsersService>('users@1.0.0');
-//                          // resolves the URL via discovery
-```
+- **A service descriptor system.** `@Service` registers a typed
+  contract; clients resolve it by name and version.
+- **A transport abstraction.** Four transports built in, all sharing
+  the same service surface; pluggable for custom ones.
+- **A middleware stack.** Per-call wrapping for cross-cutting
+  concerns — auth, rate limiting, tracing, logging.
+- **An auth policy framework.** Authentication and authorisation are
+  separate concerns with composable policies via `BuiltInPolicies`
+  (`requireRole`, `requireAnyRole`, `requirePermission`, …).
+- **A multi-backend client.** One client can route to many servers
+  with health-aware failover and method-level rules.
+- **A streaming primitive.** `AsyncIterable<T>` return types map to
+  long-lived streams over WebSocket / TCP.
 
-## Multi-backend services
+## What Netron is not
 
-A single `queryInterface` call can fan out to multiple service instances
-for read-side replication or partitioning. See the `multi-backend`
-sub-module of `titan/netron`.
+- **Not a service mesh.** Discovery, mTLS, traffic shaping at
+  cluster scope are out of scope. Use a real mesh (Linkerd, Istio,
+  Consul Connect) for that.
+- **Not a queue.** Netron calls are request/response; the response
+  may be a stream. For decoupled work, use
+  [`titan-events`](./modules/events.md) or
+  [`titan-notifications`](./modules/notifications.md).
+- **Not a schema language.** The TypeScript interface is the schema.
+  No `.proto` files, no OpenAPI YAML.
 
-## Error mapping
+## Performance characteristics
 
-Server-side errors travel as typed `NetronError` subclasses. The client
-receives them as the same class:
+Per-call cost on a warmed-up connection (HTTP/1.1, localhost,
+no middleware):
 
-```typescript
-try {
-  await users.findById('missing');
-} catch (e) {
-  if (e instanceof NotFoundError) {
-    // typed
-  }
-}
-```
+| Op                              | Approx cost       |
+| ------------------------------- | ----------------- |
+| msgpack encode (small payload)  | 5–10 µs           |
+| Service descriptor lookup       | <1 µs             |
+| Validation (typical schema)     | 1–5 µs            |
+| Method invocation (your code)   | varies            |
+| msgpack decode                  | 5–10 µs           |
+| HTTP framing                    | 50–200 µs         |
 
-## Read next
+For sustained throughput, use WebSocket (no per-call HTTP framing
+cost) or TCP. For bursty short-lived clients, HTTP is fine and works
+through any reverse proxy.
 
-- [netron-browser](../frontend/netron-browser.md) — browser-side client.
-- [netron-react](../frontend/netron-react.md) — React hooks.
-- [titan-auth module](./modules/auth.md) — JWT middleware.
-- [titan-discovery module](./modules/discovery.md) — Redis discovery.
+→ Read on: [Services](./netron/services.md).

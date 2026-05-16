@@ -71,7 +71,7 @@ export class ReportsService {
   @RequireAuth()
   async export(@Context() ctx: NetronContext, format: 'pdf' | 'csv') {
     if (format === 'pdf' && !this.auth.hasScope(ctx, 'reports:premium')) {
-      throw new ForbiddenError('PDF export requires premium scope');
+      throw Errors.forbidden('PDF export requires premium scope');
     }
     // …
   }
