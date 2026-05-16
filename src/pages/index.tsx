@@ -104,7 +104,7 @@ export class AppModule {}`,
   },
   {
     title: 'Netron — one service, four transports',
-    accent: 'var(--omni-cyan)',
+    accent: 'var(--omni-violet-300)',
     blurb:
       'The same @Service is reachable over HTTP, WebSocket, TCP, and Unix ' +
       'sockets. Auth, middleware, rate limits, and tracing layer once and ' +
@@ -146,7 +146,7 @@ const { data } = users.findById.useQuery([id]);
   },
   {
     title: 'Prism — 50+ components, three layers',
-    accent: 'var(--omni-magenta)',
+    accent: 'var(--omni-violet-700)',
     blurb:
       'MUI v7 foundation; schema-aware forms (react-hook-form + zod); three ' +
       'pre-built layouts; three full-page blocks; 25+ React hooks. Tree-shaken ' +
@@ -188,7 +188,7 @@ const { data } = users.findById.useQuery([id]);
   },
   {
     title: 'Omnitron — supervisor + console + CLI',
-    accent: 'var(--omni-rose)',
+    accent: 'var(--omni-violet-500)',
     blurb:
       'One daemon supervises N apps × M projects × K stacks. 19 RPC services ' +
       'on the management plane. Web console (React + Vite + Prism). 90+ CLI ' +

@@ -237,7 +237,7 @@
   border-radius: 20px;
   background: linear-gradient(135deg,
     color-mix(in srgb, var(--omni-violet) 12%, transparent) 0%,
-    color-mix(in srgb, var(--omni-cyan) 8%, transparent) 100%);
+    color-mix(in srgb, var(--omni-emerald) 8%, transparent) 100%);
   border: 1px solid color-mix(in srgb, var(--omni-violet) 22%, transparent);
   position: relative;
   overflow: hidden;
@@ -250,7 +250,7 @@
   border-radius: 20px;
   background: linear-gradient(135deg,
     color-mix(in srgb, var(--omni-violet) 50%, transparent),
-    color-mix(in srgb, var(--omni-cyan) 50%, transparent));
+    color-mix(in srgb, var(--omni-emerald) 50%, transparent));
   z-index: -1;
   opacity: 0;
   filter: blur(20px);
@@ -278,15 +278,27 @@
 
 .numberValue {
   font-family: var(--omni-font-display);
-  font-size: 2.5rem;
+  font-size: 2.75rem;
   font-weight: 700;
   letter-spacing: -0.03em;
   line-height: 1;
-  background: linear-gradient(135deg, var(--omni-violet), var(--omni-cyan));
+  color: var(--omni-violet);                         /* solid fallback — always visible */
+  background: linear-gradient(135deg, var(--omni-violet) 0%, var(--omni-emerald) 100%);
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
-  margin-bottom: 0.4rem;
+  /* If background-clip isn't supported, color wins; with text-fill-color
+     transparent + visible gradient, gradient wins. Either way — text renders. */
+  margin-bottom: 0.5rem;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Browsers without working background-clip:text — keep solid colour. */
+@supports not ((-webkit-background-clip: text) or (background-clip: text)) {
+  .numberValue {
+    background: none;
+    -webkit-text-fill-color: var(--omni-violet);
+  }
 }
 
 .numberLabel {
