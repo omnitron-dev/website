@@ -8,96 +8,201 @@ import ModuleBadge from '@site/src/components/ModuleBadge';
 
 <ModuleBadge origin="official" pkg="@omnitron-dev/titan-telemetry-relay" status="stable" />
 
-Store-and-forward telemetry pipeline (logs, metrics, traces) for
-distributed services. **Not a Titan module** — exposes a service
-class you instantiate directly. Producer nodes buffer telemetry to a
-write-ahead log; aggregator nodes drain the buffer and persist to a
-backend. Handles network interruptions without data loss.
+Store-and-forward telemetry pipeline for distributed Titan
+applications. Three operational roles — **producer**, **aggregator**,
+**both** — with a circular in-memory buffer, optional write-ahead
+log for crash safety, Netron RPC transport between roles, and
+optional compression.
 
 ```bash
 pnpm add @omnitron-dev/titan-telemetry-relay
 ```
 
-## Why it isn't a module
+> **Not a Titan module.** Unlike most ecosystem packages, this one
+> doesn't expose `forRoot`. You instantiate `TelemetryRelayService`
+> directly because the relay's role (producer / aggregator / both)
+> is a deployment concern, not application-level configuration.
 
-Unlike the other ecosystem packages, `titan-telemetry-relay` doesn't
-register itself as a Titan module. Reasons:
+## When you need it
 
-- The service can run as either a producer or an aggregator (often
-  in different processes).
-- The buffer (with write-ahead log) is process-state, not
-  application-state.
-- Different deployments wire it differently — sidecar, in-process,
-  centralised collector.
+- **Services that emit telemetry but shouldn't ship it directly.**
+  Producer pods buffer locally; aggregator pods take the hit of
+  shipping to the long-term backend.
+- **Network outages without data loss.** Buffer + WAL keep
+  telemetry alive across collector outages.
+- **Sidecar pattern.** Producer in your app pod; aggregator in a
+  sidecar; both forward to the canonical sink.
 
-You construct `TelemetryRelayService` directly and feed it into
-whatever orchestration suits your topology.
+## Three roles
 
-## Setup — producer
+```mermaid
+flowchart LR
+  P1[Producer pod] -- log / metric / span --> Buf1[Buffer]
+  Buf1 -- flush --> Wal1[WAL]
+  Buf1 -- transport --> Agg[Aggregator pod]
+  P2[Producer pod] -- transport --> Agg
+  Agg -- write --> Sink[(Backend / OTel / Loki / …)]
+```
+
+| Role        | Receives                                           | Forwards to                   |
+| ----------- | -------------------------------------------------- | ----------------------------- |
+| `producer`  | Local app via `emitLog` / `emitMetric` / `emitTrace` | Aggregator (via transport)  |
+| `aggregator`| Producers via `receive()` Netron RPC               | Persistent sink (via aggregator) |
+| `both`      | Local app + remote producers                       | Persistent sink                |
+
+## Quickstart — producer
 
 ```typescript
 import { TelemetryRelayService } from '@omnitron-dev/titan-telemetry-relay';
 
 const relay = new TelemetryRelayService({
-  role:    'producer',
-  nodeId:  process.env.HOSTNAME,
-  // …buffer config
+  role:   'producer',
+  nodeId: process.env.HOSTNAME,
+  bufferConfig: { maxSize: 10_000, flushInterval: 5_000, compressionEnabled: true },
+  walConfig:    { enabled: true,  directory: './.wal', maxFileSize: 10 * 1024 * 1024, retentionDays: 7 },
 });
 
+relay.setTransport(myNetronTransport);   // Netron transport to aggregator
 await relay.start();
 
-// In your services, push telemetry:
-relay.log({ level: 'info', message: 'order placed', orderId });
-relay.metric({ name: 'orders.placed', value: 1 });
-relay.span(span);
+// Then in your services:
+relay.emitLog('users', 'info', 'user created', { userId: 'u_42' });
+relay.emitMetric('users.created.total', 1, { source: 'web' });
+relay.emitTrace(traceId, spanId, parentSpanId, 'users.create');
 ```
 
-## Setup — aggregator
+## Quickstart — aggregator
 
 ```typescript
 const relay = new TelemetryRelayService({
   role: 'aggregator',
-  // …downstream sinks
 });
 
+relay.setAggregator(myPersistenceAggregator);   // writes to your long-term sink
+await relay.start();
+
+// Netron RPC entry point (called by producers):
+// relay.receive(nodeId, entries)
+```
+
+## Quickstart — both (sidecar)
+
+```typescript
+const relay = new TelemetryRelayService({
+  role: 'both',
+  // …
+});
+
+relay.setTransport(/* optional — forward to another aggregator */);
+relay.setAggregator(myAggregator);
 await relay.start();
 ```
 
-The aggregator drains incoming telemetry and persists / forwards it
-to your chosen sink (OpenTelemetry collector, Loki, Prometheus,
-ClickHouse, etc.). Sink configuration is implementation-specific.
+## Constructor options — `TelemetryRelayModuleOptions`
 
-## Setup — both (sidecar pattern)
+| Option         | Type                                              |
+| -------------- | ------------------------------------------------- |
+| `role`         | `'producer' \| 'aggregator' \| 'both'`            |
+| `nodeId`       | `string` (producers)                              |
+| `bufferConfig` | `TelemetryBufferConfig`                           |
+| `walConfig`    | `TelemetryWalConfig`                              |
+
+### `TelemetryBufferConfig`
+
+| Field                | Type    | Default       |
+| -------------------- | ------- | ------------- |
+| `maxSize`            | `number`| `10_000`      |
+| `flushInterval`      | `number` (ms) | `5_000` |
+| `compressionEnabled` | `boolean` | `true`      |
+
+### `TelemetryWalConfig`
+
+| Field          | Type    | Default          |
+| -------------- | ------- | ---------------- |
+| `enabled`      | `boolean` | `true`         |
+| `directory`    | `string` | `'./.wal'`      |
+| `maxFileSize`  | `number` (bytes) | 10 MB   |
+| `retentionDays`| `number` | `7`             |
+
+## Public API
+
+### `TelemetryRelayService`
+
+| Method                                                                 | Purpose                                          |
+| ---------------------------------------------------------------------- | ------------------------------------------------ |
+| `setTransport(transport)`                                              | Producer → aggregator transport                  |
+| `setAggregator(aggregator)`                                            | Aggregator → sink writer                         |
+| `start()`                                                              | Start buffers / pollers / RPC                    |
+| `stop()`                                                               | Drain + shutdown                                 |
+| `emitLog(app, level, message, metadata?)`                              | Push a log entry                                 |
+| `emitMetric(name, value, labels?)`                                     | Push a metric sample                             |
+| `emitTrace(traceId, spanId, parentSpanId?, name?, metadata?)`          | Push a span                                      |
+| `receive(nodeId, entries[])`                                           | Aggregator: accept entries from a producer       |
+
+### Interfaces
 
 ```typescript
-const relay = new TelemetryRelayService({ role: 'both', /* … */ });
+interface TelemetryTransport {
+  send(nodeId: string, entries: TelemetryEntry[]): Promise<void>;
+}
+
+interface TelemetryAggregator {
+  write(entries: TelemetryEntry[]): Promise<void>;
+  query(filter: TelemetryQueryFilter): Promise<TelemetryEntry[]>;
+}
+
+interface TelemetryEntry {
+  id:         string;
+  timestamp:  number;
+  type:       'log' | 'metric' | 'trace';
+  app:        string;
+  nodeId?:    string;
+  data:       any;
+  metadata?:  Record<string, any>;
+}
 ```
 
-The same process buffers and forwards. Useful for sidecar
-deployments where the service that produces telemetry also ships it.
+Implement these interfaces to connect to your specific transport
+(Netron, gRPC, HTTP) and your specific sink (OTLP collector, Loki,
+Tempo, ClickHouse, S3, …).
 
-### `TelemetryRelayModuleOptions`
+## Buffer + WAL semantics
 
-| Option   | Type                                              |
-| -------- | ------------------------------------------------- |
-| `role`   | `'producer' \| 'aggregator' \| 'both'`            |
-| `nodeId` | `string`                                          |
-| (buffer) | `TelemetryBufferConfig` — `maxSize`, `flushInterval`, etc. |
+The buffer is a bounded ring; on overflow, oldest entries are
+written to the WAL before being dropped from memory.
 
-## Exposed classes
+- **Buffer flush** (`flushInterval`) sends in batches over the
+  transport.
+- **WAL** (when enabled) writes any unsent entry to disk so a crash
+  does not lose them; on restart, the WAL is replayed before
+  resuming normal operation.
+- **Retention** removes WAL files older than `retentionDays`.
 
-- `TelemetryRelayService` — the main service.
-- `TelemetryBuffer` — bounded in-memory buffer with backpressure.
-- `TelemetryWal` — write-ahead log; persists buffer contents to disk
-  for crash safety.
+## When to use this vs the built-in logger
 
-## When to use this
+| Need                                              | Use                                              |
+| ------------------------------------------------- | ------------------------------------------------ |
+| Local console output during development           | `@omnitron-dev/titan/module/logger` (built-in)   |
+| Single-pod, ship logs via host log shipper        | Built-in logger + stdout                         |
+| Multi-pod, want one pipeline for logs/metrics/traces with at-least-once delivery | This module |
+| Sidecar pattern (one collector per host)          | This module with `role: 'both'`                  |
+| OTel-compatible sink                              | Build a `TelemetryAggregator` wrapping the OTLP exporter |
 
-- You operate a fleet of services that emit telemetry and need to
-  ship it without losing data on network glitches.
-- You want a uniform pipeline for logs, metrics, and traces
-  (instead of three separate exporters).
-- You need a sidecar that buffers locally and forwards in batches.
+## Anti-patterns
 
-For single-node or low-volume services, the standard logger
-(`titan/module/logger`) + a direct metrics exporter is simpler.
+- **Tiny `flushInterval`.** Flushing every 100 ms with N producer
+  pods saturates the aggregator. Defaults are tuned for typical
+  loads.
+- **No WAL in production.** Without `walConfig.enabled: true`, a
+  crash loses everything in the buffer.
+- **Producer with no transport.** Without `setTransport`, the
+  buffer fills, then drops to WAL until disk fills. Set a transport
+  before `start()`.
+- **Aggregator without aggregator.** Symmetric — without
+  `setAggregator`, received entries pile in the buffer.
+
+## See also
+
+- [`titan-metrics`](./metrics.mdx) — emit metrics that this relay
+  can ship
+- [Best Practices / Observability](../best-practices/observability.md)

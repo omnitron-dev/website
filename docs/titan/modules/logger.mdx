@@ -8,24 +8,30 @@ import ModuleBadge from '@site/src/components/ModuleBadge';
 
 <ModuleBadge origin="built-in" pkg="@omnitron-dev/titan" subpath="/module/logger" status="stable" />
 
-Structured pino-based logging with four levels, child loggers,
-pluggable transports and processors. **Auto-loaded** as a core
-module by every Titan application (unless `disableCoreModules:
-true`).
+Structured pino-based logging with four levels, child loggers with
+bound context, pluggable transports and processors, automatic
+per-service binding, decorator-based property injection, and
+method-level auto-instrumentation. **Auto-loaded** as a core module
+by every Titan application (unless `disableCoreModules: true`).
+No extra install required — ships inside `@omnitron-dev/titan`.
 
-## Install
+## When you need it
 
-No extra install — ships inside `@omnitron-dev/titan`:
-
-```typescript
-import { LoggerModule } from '@omnitron-dev/titan/module/logger';
-```
+- **Every backend service.** A structured logger is non-negotiable
+  for production.
+- **Per-call context propagation.** Trace IDs, request IDs, user
+  IDs attached to every log line automatically via child loggers.
+- **Multiple destinations.** Console for dev, JSON for production
+  ingestion, custom transports for ClickHouse / Loki / OTLP.
+- **Selective redaction.** Strip auth headers and PII before they
+  hit the transport.
 
 ## Quickstart
 
 ```typescript
-import { LoggerModule, ConsoleTransport, RedactionProcessor }
-  from '@omnitron-dev/titan/module/logger';
+import {
+  LoggerModule, ConsoleTransport, RedactionProcessor,
+} from '@omnitron-dev/titan/module/logger';
 
 @Module({
   imports: [
@@ -35,7 +41,9 @@ import { LoggerModule, ConsoleTransport, RedactionProcessor }
         new ConsoleTransport({ pretty: process.env.NODE_ENV !== 'production' }),
       ],
       processors: [
-        new RedactionProcessor({ paths: ['password', 'token', 'headers.authorization'] }),
+        new RedactionProcessor({
+          paths: ['password', 'token', 'headers.authorization', 'creditCard.*'],
+        }),
       ],
     }),
   ],
@@ -43,46 +51,193 @@ import { LoggerModule, ConsoleTransport, RedactionProcessor }
 class AppModule {}
 ```
 
-## Levels
+## The `ILogger` interface
 
 ```typescript
 interface ILogger {
-  debug(msg, meta?): void;
-  info(msg,  meta?): void;
-  warn(msg,  meta?): void;
-  error(msg, meta?): void;
-  child(meta): ILogger;
-  pino?: any;       // escape hatch to the underlying pino instance
+  // Levels — only four
+  debug(msg: string | object, meta?: Record<string, any>): void;
+  info(msg: string | object,  meta?: Record<string, any>): void;
+  warn(msg: string | object,  meta?: Record<string, any>): void;
+  error(msg: string | object | Error, meta?: Record<string, any>): void;
+
+  // Child logger with bound context — inherits transports + processors,
+  // adds the supplied fields to every log line through it
+  child(meta: Record<string, any>): ILogger;
+
+  // Escape hatch — underlying pino instance for advanced options
+  pino?: any;
 }
 ```
 
-Four levels only. There is no `trace` or `fatal` — log `trace`-style
-content at `debug`, and pair `error` with explicit shutdown for the
-"fatal" cases.
+> **Four levels only.** Map "trace"-style content to `debug` and
+> pair `error` with explicit shutdown for "fatal" cases. The
+> framework deliberately avoids `trace` / `fatal` distinct levels
+> to keep handler logic simple.
 
-## Services
+## Usage in a service
 
-| Class                | Purpose                                     |
-| -------------------- | ------------------------------------------- |
-| `LoggerService`      | Wrapper around an `ILogger`; the injected default |
-| `ConsoleTransport`   | Built-in transport — stdout / stderr        |
-| `RedactionProcessor` | Built-in processor — redact secret paths    |
+```typescript
+import { Service, Public } from '@omnitron-dev/titan';
+import { LoggerService } from '@omnitron-dev/titan/module/logger';
+
+@Service({ name: 'users' })
+class UsersService {
+  constructor(private readonly logger: LoggerService) {}
+
+  @Public()
+  async findById(id: string) {
+    this.logger.info('findById', { id });
+    try {
+      return await this.repo.findById(id);
+    } catch (e) {
+      this.logger.error('repo failed', { id, error: e });
+      throw e;
+    }
+  }
+}
+```
+
+The injected `LoggerService` is **automatically bound** to the
+service's class name, so every log line carries
+`{ service: 'UsersService', ... }`.
+
+## Per-request child loggers
+
+For request-scoped context (trace IDs, user IDs):
+
+```typescript
+@Public()
+async findById(id: string, @Context() ctx: NetronContext) {
+  const log = this.logger.child({
+    traceId:   ctx.traceId,
+    userId:    ctx.auth?.userId,
+    requestId: ctx.requestId,
+  });
+
+  log.info('findById', { id });
+  return this.repo.findById(id);
+}
+```
+
+→ See [Logging / Child Loggers](../logging/child-loggers.md) for
+the full reference.
 
 ## Decorators
 
-| Decorator       | Effect                                          |
-| --------------- | ----------------------------------------------- |
-| `@Logger()`     | Property decorator — inject a contextual `ILogger` |
-| `@Log()`        | Method decorator — auto-log entry/exit          |
-| `@Monitor()`    | Method decorator — track performance            |
+```typescript
+import { Logger, Log, Monitor } from '@omnitron-dev/titan/module/logger';
+```
 
-## Helpers
+### `@Logger()` — property injection
 
 ```typescript
-import { createNullLogger, isLogger } from '@omnitron-dev/titan/module/logger';
+@Service({ name: 'users' })
+class UsersService {
+  @Logger() private readonly logger!: ILogger;
 
-const noop = createNullLogger();  // ILogger that discards everything (tests)
-isLogger(value);                  // type guard
+  @Public()
+  async findById(id: string) {
+    this.logger.info('findById', { id });
+  }
+}
+```
+
+### `@Log()` — method auto-logging
+
+```typescript
+@Public()
+@Log()                                  // logs entry + exit at debug
+async findById(id: string) { /* … */ }
+
+@Public()
+@Log({ level: 'info', args: true, result: false })
+async create(input: CreateInput) { /* … */ }
+```
+
+### `@Monitor()` — performance instrumentation
+
+```typescript
+@Public()
+@Monitor()                              // logs duration + outcome
+async heavyComputation(input: Input) { /* … */ }
+```
+
+## Services and helpers
+
+| Symbol                | Purpose                                                |
+| --------------------- | ------------------------------------------------------ |
+| `LoggerService`       | DI-injected wrapper around an `ILogger`               |
+| `ConsoleTransport`    | Built-in transport — stdout / stderr                  |
+| `RedactionProcessor`  | Built-in processor — redact secret paths              |
+| `createNullLogger()`  | Returns an `ILogger` that discards everything (tests) |
+| `isLogger(value)`     | Type guard                                            |
+
+## Custom transports
+
+A transport receives log records and writes them somewhere:
+
+```typescript
+import type { ITransport } from '@omnitron-dev/titan/module/logger';
+
+class OtlpTransport implements ITransport {
+  constructor(private readonly endpoint: string) {}
+
+  async write(record: any): Promise<void> {
+    await fetch(this.endpoint, {
+      method: 'POST',
+      body:   JSON.stringify(record),
+    });
+  }
+}
+
+LoggerModule.forRoot({
+  transports: [
+    new ConsoleTransport({ pretty: false }),
+    new OtlpTransport('https://otel.internal/v1/logs'),
+  ],
+})
+```
+
+→ See [Logging / Transports](../logging/transports.md).
+
+## Custom processors
+
+A processor transforms a log record before transports see it. The
+`RedactionProcessor` is the canonical example; custom ones can add
+trace context, scrub PII, sample to reduce volume:
+
+```typescript
+import { currentTrace } from '@omnitron-dev/titan/tracing';
+import type { ILogProcessor } from '@omnitron-dev/titan/module/logger';
+
+const TraceContextProcessor: ILogProcessor = {
+  process(record) {
+    const trace = currentTrace();
+    if (trace) {
+      record.traceId = trace.traceId;
+      record.spanId  = trace.spanId;
+    }
+    return record;
+  },
+};
+
+LoggerModule.forRoot({ processors: [TraceContextProcessor] });
+```
+
+→ See [Logging / Processors](../logging/processors.md).
+
+## Pipeline
+
+```mermaid
+flowchart LR
+  Code[Service.logger.info]
+  Code --> Bind[LoggerService<br/>class-name bound]
+  Bind --> Pino[pino instance]
+  Pino --> Proc[Processors<br/>redact / enrich / sample]
+  Proc --> Trans1[Transport: console]
+  Proc --> Trans2[Transport: OTLP]
+  Proc --> Trans3[Transport: file / etc.]
 ```
 
 ## Tokens
@@ -95,11 +250,36 @@ isLogger(value);                  // type guard
 | `LOGGER_TRANSPORTS_TOKEN`   | Registered transports                |
 | `LOGGER_PROCESSORS_TOKEN`   | Registered processors                |
 
+## Hot-reloading the level
+
+The logger subscribes to `config:changed` for `logging.level` (when
+ConfigModule is loaded). Edit `config/local.yaml` while the dev
+server is running:
+
+```yaml
+logging:
+  level: debug
+```
+
+… and the next log line uses the new level — no restart.
+
+## Anti-patterns
+
+- **`console.log` in services.** Bypasses the framework — no
+  per-service context, no level, no transport routing. Always use
+  the injected logger.
+- **Logging in tight loops.** A `debug` log inside a 100 K-iteration
+  loop floods the transport even if it's filtered out. Hoist the
+  log outside the loop, or sample.
+- **PII in logs without redaction.** Always wire
+  `RedactionProcessor` for any transport shipping off-host.
+- **Synchronous transports blocking the event loop.** Custom
+  transports must be async / non-blocking.
+
 ## See also
 
-- [Logging / Overview](../logging/overview) — conceptual guide.
-- [Logging / Transports](../logging/transports) — destinations.
-- [Logging / Processors](../logging/processors) —
-  transform / filter pipeline.
-- [Logging / Child Loggers](../logging/child-loggers) — bound
-  context.
+- [Logging / Overview](../logging/overview.md) — conceptual guide
+- [Logging / Transports](../logging/transports.md) — destinations
+- [Logging / Processors](../logging/processors.md) — transform pipeline
+- [Logging / Child Loggers](../logging/child-loggers.md) — bound context
+- [Tracing](../tracing.md) — automatic correlation with log lines
