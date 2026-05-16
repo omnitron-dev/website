@@ -284,6 +284,7 @@ const sidebars: SidebarsConfig = {
     'omnitron/cluster',
     'omnitron/observability',
     'omnitron/console',
+    'omnitron/best-practices',
   ],
 
   reference: [
