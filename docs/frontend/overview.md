@@ -6,17 +6,22 @@ description: Three packages that cover everything browser-side in a Titan app.
 
 # Frontend overview
 
-The browser side of a Titan app is built from three packages
-that compose top-down:
+> The **server-side** Netron lives inside Titan itself
+> (`@omnitron-dev/titan/netron`, including all four
+> transports). This section covers the **browser side**.
 
-| Package | Role | Size |
-| ------- | ---- | ---- |
-| [`@omnitron-dev/netron-browser`](./netron/browser.md) | RPC transport (HTTP + WebSocket), middleware, auth, multi-backend pool | ~25 kB gz |
-| [`@omnitron-dev/netron-react`](./netron/react.md) | React hooks, query/mutation cache, auth guards, devtools | ~15 kB gz |
-| [`@omnitron-dev/prism`](./prism/index.md) | Design system: MUI v7 components, blocks, layouts, forms, hooks | ~80 kB gz (root); tree-shakeable |
+Browser-side packages:
 
-Each builds on the next; you can use any in isolation but they
-shine when combined.
+| Package | Role | Framework | Size |
+| ------- | ---- | --------- | ---- |
+| [`@omnitron-dev/netron-browser`](./netron/browser.md) | RPC transport (HTTP + WebSocket), middleware, auth, multi-backend pool | **Framework-agnostic** — vanilla JS, Vue, Svelte, Solid, Angular, Lit, React, Web Workers | ~25 kB gz |
+| [`@omnitron-dev/netron-react`](./netron/react.md) | React hooks, query/mutation cache, auth guards, devtools | **React-only** — optional layer on top of netron-browser | ~15 kB gz |
+| [`@omnitron-dev/prism`](./prism/index.md) | Design system: MUI v7 components, blocks, layouts, forms, hooks | **React-only** (MUI v7 is React) — optional | ~80 kB gz (root); tree-shakeable |
+
+`netron-browser` works everywhere. Add `netron-react` + `prism`
+**only** for React apps. For Vue / Svelte / Solid / Angular / Lit,
+use `netron-browser` directly and wrap calls in your framework's
+reactivity primitives.
 
 ## How they compose
 

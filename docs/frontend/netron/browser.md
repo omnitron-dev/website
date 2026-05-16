@@ -6,21 +6,29 @@ description: Browser-optimized Netron RPC client — HTTP / WebSocket / multi-ba
 
 # netron-browser
 
-`@omnitron-dev/netron-browser` is the **transport layer** for
-Titan RPC in the browser. Dual transport (HTTP + WebSocket),
-type-safe service proxies, full middleware pipeline, LRU
-caching, retry + circuit breaker, auth manager with cross-tab
-sync, and a multi-backend pool when you talk to more than one
-Netron server.
+`@omnitron-dev/netron-browser` is the **framework-agnostic
+browser RPC client** for Titan services. Dual transport
+(HTTP + WebSocket), type-safe service proxies, full middleware
+pipeline, LRU caching, retry + circuit breaker, auth manager
+with cross-tab sync, and a multi-backend pool when you talk to
+more than one Netron server.
+
+> **Works with any frontend.** Vanilla JS, Vue, Svelte, Solid,
+> Angular, Lit, React, Web Workers, Electron renderers —
+> anywhere you can `import` an ES module. Not tied to React.
+> For React-specific hooks / providers / cache integration, see
+> [netron-react](./react.md) — an **optional** layer on top of
+> this package.
+>
+> The **server side** lives inside Titan at
+> `@omnitron-dev/titan/netron` (with all four transports). Pair
+> this client with that server.
 
 Verified against `packages/netron-browser/src/`.
 
 ```bash
 pnpm add @omnitron-dev/netron-browser
 ```
-
-For React bindings on top of this, see
-[netron-react](./react.md).
 
 ## Architecture
 

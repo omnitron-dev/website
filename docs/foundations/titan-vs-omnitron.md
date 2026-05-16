@@ -99,7 +99,9 @@ You get **everything**:
 | Feature | Where it comes from |
 | ------- | ------------------- |
 | Decorator DI | core Titan |
-| Netron RPC (HTTP/WS/TCP/Unix) | core Titan |
+| **Server-side Netron RPC** with all 4 transports (HTTP/WS/TCP/Unix) | core Titan (subpath exports: `titan/netron`, `titan/netron/transport/{http,websocket,tcp,unix}`) |
+| Server-side auth middleware (JWT, RLS context, rate-limit) | core Titan (`titan/netron/auth`, `titan/netron/transport/http/middleware`) |
+| Multi-backend server-side routing | core Titan (`titan/netron/multi-backend`) |
 | Module system | core Titan |
 | Lifecycle hooks (`onInit` / `onStart` / `onStop` / `onDestroy`) | core Titan |
 | Graceful shutdown | core Titan |
