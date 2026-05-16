@@ -274,8 +274,11 @@ const sidebars: SidebarsConfig = {
 
   omnitron: [
     'omnitron/overview',
+    'omnitron/architecture',
     'omnitron/cli',
+    'omnitron/daemon',
     'omnitron/orchestrator',
+    'omnitron/services-reference',
     'omnitron/console',
   ],
 
