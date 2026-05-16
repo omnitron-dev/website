@@ -1,0 +1,333 @@
+---
+sidebar_position: 8
+title: Errors catalog
+description: What every module throws, error codes, and handling patterns.
+---
+
+import ModuleBadge from '@site/src/components/ModuleBadge';
+
+# Errors catalog
+
+Per-module catalog of the errors a Titan service may emit, the
+codes they carry on the wire, and the recommended handling
+pattern. Useful when designing error-handling middleware or
+writing retry / fallback logic.
+
+All claims here are verified against module source (greps in
+`packages/titan-*/src` for `Errors.X(`, `throw new XError`, and
+class declarations).
+
+## Two flavours of error
+
+| Source                              | Shape                                                     | Wire-friendly |
+| ----------------------------------- | --------------------------------------------------------- | :-----------: |
+| `Errors.X(...)` from `@omnitron-dev/titan/errors` | `TitanError` with `code: ErrorCode` enum     |       ✓       |
+| Dedicated subclass per module       | `class FooError extends Error` (sometimes `TitanError`)   |   varies      |
+
+The framework prefers the `Errors` namespace — these errors
+serialise across Netron transports with the class name and code
+preserved. Bespoke subclasses are reserved for cases where the
+extra fields (e.g., `retryAfter` on `RateLimitExceededError`) make
+the API clearer.
+
+## `ErrorCode` cheat sheet
+
+The most commonly thrown codes across all modules:
+
+| Code                          | Numeric | When used                                  |
+| ----------------------------- | :-----: | ------------------------------------------ |
+| `BAD_REQUEST`                 |   400   | Caller-supplied input invalid              |
+| `UNAUTHORIZED`                |   401   | Missing or invalid credentials             |
+| `FORBIDDEN`                   |   403   | Authenticated but disallowed               |
+| `NOT_FOUND`                   |   404   | Target identifier doesn't exist            |
+| `CONFLICT`                    |   409   | Resource state contradicts the request     |
+| `TOO_MANY_REQUESTS`           |   429   | Rate limit / quota exceeded                |
+| `INTERNAL_ERROR`              |   500   | Unexpected; investigate                    |
+| `NOT_IMPLEMENTED`             |   501   | Feature flag off / variant missing         |
+| `SERVICE_UNAVAILABLE`         |   503   | Transient — downstream dep failed          |
+| `REQUEST_TIMEOUT`             |   408   | Operation exceeded configured timeout      |
+| `VALIDATION_ERROR`            |   422   | Schema validation failed                   |
+
+These behave like HTTP status codes on the wire but are
+transport-agnostic — the same codes ride TCP / Unix / WS / HTTP.
+
+## Aggregate count per module
+
+What each module raises most often:
+
+<ModuleBadge origin="official" pkg="@omnitron-dev/titan-*" />
+
+| Module                | Top errors raised                                       | Count* |
+| --------------------- | ------------------------------------------------------- | :----: |
+| `titan-pm`            | conflict (19), timeout (9), notFound (9), internal (5), badRequest (5), unavailable (3) |   50   |
+| `titan-database`      | badRequest (8), notFound (6), unavailable (4), timeout (1)                              |   19   |
+| `titan-scheduler`     | notFound (7), badRequest (3), timeout (2), conflict (2)                                 |   14   |
+| `titan-events`        | timeout (3), badRequest (3), notFound (2), internal (2), tooManyRequests (1)            |   11   |
+| `titan-redis`         | notFound (5), tooManyRequests (2), timeout (2), conflict (1), badRequest (1)            |   11   |
+| `titan-health`        | internal (6), notFound (1), conflict (1), badRequest (1)                                |    9   |
+| `titan-discovery`     | conflict (1), badRequest (1)                                                            |    2   |
+| `titan-notifications` | notFound (1)                                                                            |    1   |
+| `titan-auth`          | — (uses bespoke subclasses below)                                                       |    0   |
+| `titan-cache`         | — (uses bespoke subclasses below)                                                       |    0   |
+| `titan-lock`          | — (uses FailureTracker windows + log)                                                  |    0   |
+| `titan-metrics`       | — (records and continues, doesn't throw)                                                |    0   |
+| `titan-ratelimit`     | — (bespoke `RateLimitExceededError`)                                                   |    0   |
+| `titan-telemetry-relay` | — (relays observability; doesn't throw user-visible)                                  |    0   |
+
+*Counts are static `throw Errors.X(...)` callsites in source; per-
+request error rate depends entirely on input.
+
+## Bespoke error classes per module
+
+Some modules export dedicated `Error` subclasses for cases where
+extra fields aid programmatic handling.
+
+### `titan-auth`
+
+<ModuleBadge origin="official" pkg="@omnitron-dev/titan-auth" />
+
+| Class                          | Parent            | When thrown                                              |
+| ------------------------------ | ----------------- | -------------------------------------------------------- |
+| `InvalidTokenError`            | `Error`           | JWT verification fails (bad signature, malformed)        |
+| `TokenExpiredError`            | `InvalidTokenError` | Token's `exp` is in the past                            |
+| `UnauthorizedError`            | `Error`           | Middleware ran but no credentials presented              |
+| `SessionRevokedAuthError`      | `Error`           | Shared-session preset detected revocation                |
+| `InvalidTokenClaimError`       | `Error`           | Token decoded but claims don't match the expected shape  |
+
+```typescript
+import { InvalidTokenError, TokenExpiredError, UnauthorizedError }
+  from '@omnitron-dev/titan-auth';
+
+try {
+  await jwt.verify(rawToken);
+} catch (e) {
+  if (e instanceof TokenExpiredError)   return refresh();
+  if (e instanceof InvalidTokenError)   return reject(401);
+  throw e;
+}
+```
+
+### `titan-database`
+
+<ModuleBadge origin="official" pkg="@omnitron-dev/titan-database" />
+
+| Class                          | When thrown                                                       |
+| ------------------------------ | ----------------------------------------------------------------- |
+| `MigrationLockError`           | Migrations can't acquire the advisory lock (another pod running) |
+| `MigrationChecksumError`       | A migration file's checksum doesn't match what was applied        |
+
+Both signal "don't proceed with the deploy" — the operator must
+investigate before retry.
+
+### `titan-pm`
+
+<ModuleBadge origin="official" pkg="@omnitron-dev/titan-pm" />
+
+| Class                          | When thrown                                                       |
+| ------------------------------ | ----------------------------------------------------------------- |
+| `PoolBackpressureError`        | Pool queue is full; caller must back off                          |
+
+```typescript
+import { PoolBackpressureError } from '@omnitron-dev/titan-pm';
+
+try {
+  await pool.exec('compress', payload);
+} catch (e) {
+  if (e instanceof PoolBackpressureError) {
+    await sleep(100);
+    return retry();
+  }
+  throw e;
+}
+```
+
+### `titan-ratelimit`
+
+<ModuleBadge origin="official" pkg="@omnitron-dev/titan-ratelimit" />
+
+| Class                          | When thrown                                                       |
+| ------------------------------ | ----------------------------------------------------------------- |
+| `RateLimitExceededError`       | `enforce(key)` rejected — caller exceeded limit                   |
+
+Carries:
+
+| Field         | Type    | Meaning                                          |
+| ------------- | ------- | ------------------------------------------------ |
+| `retryAfter`  | `number`(ms) | Suggested back-off before next attempt      |
+| `remaining`   | `number`     | Remaining capacity at error time             |
+| `resetAt`     | `number`     | Epoch ms when the window resets              |
+
+Surface this to clients as a 429 with a `Retry-After` header.
+
+## Common patterns per error kind
+
+### `notFound` (404 / `NOT_FOUND`)
+
+The most-thrown family. Typical handlers:
+
+```typescript
+import { TitanError, ErrorCode } from '@omnitron-dev/titan/errors';
+
+try {
+  return await users.findById(id);
+} catch (e) {
+  if (e instanceof TitanError && e.code === ErrorCode.NOT_FOUND) {
+    return null;                                          // null-on-miss
+  }
+  throw e;
+}
+```
+
+Modules that throw it: `titan-pm` (process not found), `titan-
+scheduler` (job not found), `titan-redis` (key namespace not
+configured), `titan-database` (connection name missing), `titan-
+health` (indicator name missing), `titan-discovery` (node id),
+`titan-events` (history entry), `titan-notifications`
+(template / channel).
+
+### `conflict` (409 / `CONFLICT`)
+
+State-change refused because something already exists or is in an
+incompatible state. Not retryable without resolving the conflict.
+
+Typical sources: `titan-pm` (process already running), `titan-
+discovery` (lifecycle violation — `Cannot start a stopped
+DiscoveryService`), `titan-health` (indicator name collision),
+`titan-scheduler` (job already registered), `titan-redis` (named
+client already exists).
+
+### `timeout` (408 / `REQUEST_TIMEOUT`)
+
+Operation exceeded its configured timeout. **Sometimes retryable**
+(if the work is idempotent) — usually surface to caller.
+
+Sources: `titan-pm` (`exec()` timeout, health-check timeout),
+`titan-events` (handler timeout), `titan-scheduler` (job timeout),
+`titan-redis` (script timeout).
+
+### `unavailable` (503 / `SERVICE_UNAVAILABLE`)
+
+Transient dependency failure. Retry with exponential backoff.
+
+Sources: `titan-database` (pool exhausted / connection lost),
+`titan-pm` (worker pool empty for class).
+
+### `tooManyRequests` (429 / `TOO_MANY_REQUESTS`)
+
+Rate / quota exceeded. Always honour `retryAfter` if provided.
+
+Sources: `titan-events` (subscription quota), `titan-redis`
+(connection backoff).
+
+### `internal` (500 / `INTERNAL_ERROR`)
+
+Unexpected — usually a bug or environmental anomaly. Log loudly,
+surface as 500.
+
+Sources: `titan-health` (indicator output parsing — e.g., `df` /
+`wmic` output), `titan-pm` (supervisor internal state),
+`titan-events` (handler dispatch internal failure).
+
+### `badRequest` (400 / `BAD_REQUEST`)
+
+Caller-side mistake. Never retry; fix the caller.
+
+Sources: every module — most commonly `titan-database` (invalid
+dialect, bad schema name), `titan-pm` (bad spawn options), `titan-
+scheduler` (invalid cron expression).
+
+## Handling errors generically
+
+The `TitanError` class is the unifying shape:
+
+```typescript
+import { TitanError, ErrorCode, Errors } from '@omnitron-dev/titan/errors';
+
+try {
+  return await someService.doWork(input);
+} catch (e) {
+  if (!(e instanceof TitanError)) throw e;       // not a framework error
+
+  switch (e.code) {
+    case ErrorCode.NOT_FOUND:           return null;
+    case ErrorCode.UNAUTHORIZED:        return reject(401);
+    case ErrorCode.FORBIDDEN:           return reject(403);
+    case ErrorCode.TOO_MANY_REQUESTS:   return scheduleRetry(e);
+    case ErrorCode.REQUEST_TIMEOUT:     return idempotent ? retry() : reject(408);
+    case ErrorCode.SERVICE_UNAVAILABLE: return retryWithBackoff();
+    default:                            throw e;
+  }
+}
+```
+
+Per-call error metadata travels in `e.details`:
+
+```typescript
+catch (e) {
+  if (e instanceof TitanError && e.code === ErrorCode.NOT_FOUND) {
+    logger.warn({ resource: e.details?.resource }, 'lookup miss');
+  }
+}
+```
+
+## Throwing your own
+
+In your own services, prefer the `Errors` namespace over bespoke
+subclasses unless you need extra fields:
+
+```typescript
+import { Errors } from '@omnitron-dev/titan/errors';
+
+if (!user) throw Errors.notFound('user', id);
+if (user.locked) throw Errors.conflict('user account is locked');
+if (input.amount <= 0) throw Errors.badRequest('amount must be > 0');
+```
+
+Cross-the-wire serialisation, class identity, and code-based
+routing all work out of the box.
+
+## Retryability matrix
+
+A field guide for your retry middleware:
+
+| Code                          | Retryable? | Backoff             |
+| ----------------------------- | :--------: | ------------------- |
+| `BAD_REQUEST`                 |     ✗      | —                   |
+| `UNAUTHORIZED`                |     ✗      | —                   |
+| `FORBIDDEN`                   |     ✗      | —                   |
+| `NOT_FOUND`                   |     ✗      | —                   |
+| `CONFLICT`                    |     ✗      | resolve state first |
+| `VALIDATION_ERROR`            |     ✗      | —                   |
+| `TOO_MANY_REQUESTS`           |     ✓      | honour `retryAfter` |
+| `REQUEST_TIMEOUT`             |     ⚠      | only if idempotent  |
+| `SERVICE_UNAVAILABLE`         |     ✓      | exponential         |
+| `INTERNAL_ERROR`              |     ⚠      | with budget         |
+| `NOT_IMPLEMENTED`             |     ✗      | —                   |
+
+`titan-resilience` ships pre-built [retry](../resilience/retry.md)
+and [circuit-breaker](../resilience/circuit-breaker.md) primitives
+that already encode this matrix — wire one of those rather than
+hand-rolling.
+
+## Anti-patterns
+
+- **Catching `Error` and swallowing.** Loses the typed error
+  identity. Always narrow to `TitanError` and inspect `code`.
+- **Mapping every error to 500.** The whole point of typed codes
+  is that the client gets actionable status. Forward `code`.
+- **Throwing `Errors.internal` for user mistakes.** A bad input
+  is `badRequest` or `validation`, not `internal`. `internal`
+  should mean *the developer is surprised*.
+- **Logging the full token in `InvalidTokenError`.** Log `kid` /
+  `code` only; the token may be re-usable elsewhere.
+- **Treating `MigrationLockError` as transient.** It usually means
+  another deploy is mid-flight; resolve manually, don't retry.
+
+## See also
+
+- [Errors / Overview](../errors/overview.md) — framework-level guide
+- [Errors / Hierarchy](../errors/hierarchy.md) — the class graph
+- [Errors / Factories](../errors/factories.md) — full `Errors.*` reference
+- [Errors / Classification](../errors/classification.md) — retryable vs not
+- [Resilience / Retry](../resilience/retry.md) — automatic handling
+- [Observability matrix](./observability-matrix.mdx) — how errors surface as events
