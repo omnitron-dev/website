@@ -8,29 +8,43 @@ import ModuleBadge from '@site/src/components/ModuleBadge';
 
 <ModuleBadge origin="official" pkg="@omnitron-dev/titan-notifications" status="stable" />
 
-Multi-channel notification delivery (Email, SMS, Push, In-App,
-Webhook) with template engine, rate limiting, user preferences,
-Rotif messaging, and dead-letter queue.
+Multi-channel notification delivery (in-app, webhook, plus extensible
+email / SMS / push abstractions) with a template engine, Redis-backed
+rate limiting, per-user preferences, channel routing, scheduled and
+broadcast send, and a separate **worker mode** for consuming
+notification events from Rotif.
 
 ```bash
-pnpm add @omnitron-dev/titan-notifications
+pnpm add @omnitron-dev/titan-notifications @omnitron-dev/titan-events @omnitron-dev/titan-redis
 ```
 
-## Setup
+## When you need it
+
+- **Multi-channel delivery.** Same payload, different channels per
+  user (email + push for some, in-app only for others).
+- **Templated messages.** Render once, send via any channel.
+- **Preference-respecting workflow.** Users opt out of certain
+  channels; rate limits stop you spamming.
+- **Producer/worker split.** API pod publishes, worker pod consumes
+  and delivers — `forRoot` and `forWorker` cover both ends.
+
+## Quickstart — producer (the app that emits notifications)
 
 ```typescript
 import { NotificationsModule } from '@omnitron-dev/titan-notifications';
 
 @Module({
   imports: [
+    TitanRedisModule.forRoot({ config: { url: env.REDIS_URL } }),
     NotificationsModule.forRoot({
-      redis:        { host: 'redis-host', port: 6379 },
-      channels:     ['email', 'sms', 'push', 'inapp', 'webhook'],
-      transport:    { rotif: {/* rotif transport options */} },
-      rateLimiting: { enabled: true },
-      preferences:  { enabled: true },
-      templates:    {
-        'welcome': { subject: 'Welcome', body: 'Hi {{name}}!' },
+      redis:           env.REDIS_URL,
+      enableInApp:     true,
+      enableWebhook:   true,
+      defaultChannels: ['inapp', 'email'],
+      templates:       { enabled: true, cacheEnabled: true },
+      rateLimiterConfig: {
+        defaultLimits: { perMinute: 10, perHour: 100, perDay: 1_000 },
+        channelLimits: { sms: { perMinute: 1, perHour: 10 } },
       },
     }),
   ],
@@ -38,97 +52,184 @@ import { NotificationsModule } from '@omnitron-dev/titan-notifications';
 class AppModule {}
 ```
 
-Also exported: `forRootAsync(options: NotificationsModuleAsyncOptions)`.
-
-### `NotificationsModuleOptions`
-
-| Option        | Type                                                                          |
-| ------------- | ----------------------------------------------------------------------------- |
-| `redis`       | `RedisOptions \| { host, port }`                                              |
-| `channels`    | `('email' \| 'sms' \| 'push' \| 'inapp' \| 'webhook')[]`                      |
-| `transport`   | `{ rotif?: RotifTransportOptions }`                                           |
-| `rateLimiting`| `{ enabled? }` plus integration with `titan-ratelimit`                        |
-| `preferences` | `{ enabled? }`                                                                |
-| `templates`   | `Record<string, NotificationTemplate>`                                        |
-| `isGlobal`    | `boolean`                                                                     |
-
-## `NotificationsService`
+## Quickstart — worker (the pod that consumes and delivers)
 
 ```typescript
-import { NotificationsService, NOTIFICATIONS_SERVICE } from '@omnitron-dev/titan-notifications';
+import { NotificationsModule } from '@omnitron-dev/titan-notifications';
+
+@Module({
+  imports: [
+    NotificationsModule.forWorker({
+      targetResolver:   USER_TARGET_RESOLVER_TOKEN,
+      persister:        NOTIFICATION_PERSISTER_TOKEN,
+      realtimeSignaler: REALTIME_SIGNALER_TOKEN,
+      workerOptions:    { concurrency: 8 },
+    }),
+  ],
+  providers: [
+    { provide: USER_TARGET_RESOLVER_TOKEN, useClass: MyUserResolver },
+    { provide: NOTIFICATION_PERSISTER_TOKEN, useClass: MyPersister },
+    { provide: REALTIME_SIGNALER_TOKEN, useClass: MyRealtimeSignaler },
+  ],
+})
+class WorkerModule {}
+```
+
+The worker consumes events emitted by the producer (typically via
+Rotif), looks up channel targets, persists the notification, and
+signals realtime channels (WebSocket / SSE).
+
+## `NotificationsModuleOptions`
+
+| Option                    | Type                                                                                  |
+| ------------------------- | ------------------------------------------------------------------------------------- |
+| `transport`               | `{ useTransport?: MessagingTransport, rotif?: RotifTransportOptions }`                |
+| `redis`                   | `RedisOptions \| string`                                                              |
+| `rateLimiter`             | `IRateLimiter`                                                                        |
+| `preferenceStore`         | `IPreferenceStore`                                                                    |
+| `channelRouter`           | `IChannelRouter`                                                                      |
+| `defaultChannels`         | `string[]`                                                                            |
+| `channels`                | `NotificationChannel[]`                                                               |
+| `enableInApp`             | `boolean` (default `true`; needs Redis)                                               |
+| `enableWebhook`           | `boolean` (default `true`)                                                            |
+| `inAppConfig`             | `{ keyPrefix?, defaultTTL?, maxNotificationsPerUser?, enableRealtime? }`              |
+| `webhookConfig`           | `{ timeout?, retries?, signatureSecret?, signatureHeader? }`                          |
+| `templates`               | `{ enabled?, cacheEnabled?, cacheTTL? }`                                              |
+| `rateLimiterConfig`       | `{ keyPrefix?, defaultLimits, channelLimits?, enableBurstDetection? }`                |
+| `preferenceStoreConfig`   | `{ keyPrefix?, defaultPreferences? }`                                                 |
+| `isGlobal`                | `boolean`                                                                             |
+
+Also: `forRootAsync({ useFactory, inject?, useExisting?, useClass?, imports?, isGlobal? })`.
+
+## `NotificationsService` — the producer API
+
+```typescript
+import { NotificationsService, NOTIFICATIONS_SERVICE }
+  from '@omnitron-dev/titan-notifications';
 
 @Service({ name: 'notify' })
 class NotifyService {
   constructor(@Inject(NOTIFICATIONS_SERVICE) private readonly notify: NotificationsService) {}
 
   @Public()
-  async sendWelcome(user: User) {
-    await this.notify.send({
-      to:       user.email,
-      channel:  'email',
-      template: 'welcome',
-      data:     { name: user.name },
-    });
+  async welcome(user: User) {
+    await this.notify.send(
+      { userId: user.id, email: user.email },
+      { template: 'welcome', data: { name: user.name } },
+      { channels: ['email', 'inapp'] },
+    );
   }
 }
 ```
 
+| Method                                                                   | Returns                  |
+| ------------------------------------------------------------------------ | ------------------------ |
+| `send(recipient, payload, options?)`                                     | `Promise<SendResult>`    |
+| `broadcast(recipients[], payload, options?)`                             | `Promise<BroadcastResult>` |
+| `schedule(recipient, payload, scheduledAt)`                              | `Promise<ScheduleResult>`  |
+
+The service:
+1. Checks rate limits per channel per recipient.
+2. Checks preferences (does the user opt in to this channel?).
+3. Routes to the right channel via `IChannelRouter`.
+4. Renders the template (if `template` is in the payload).
+5. Hands off to the channel implementation.
+
 ## Channels
 
-| Channel class            | Use                                  |
-| ------------------------ | ------------------------------------ |
-| `AbstractEmailChannel`   | Base for SMTP / Sendgrid / etc.      |
-| `AbstractSMSChannel`     | Base for Twilio / Vonage / etc.      |
-| `AbstractPushChannel`    | Base for FCM / APNS / etc.           |
-| `InAppChannel`           | In-app inbox                         |
-| `WebhookChannel`         | HTTP POST to a URL                   |
-| `MockEmailChannel`       | Test stub                            |
-| `MockSMSChannel`         | Test stub                            |
-| `MockPushChannel`        | Test stub                            |
+Out-of-the-box implementations + extensible bases:
 
-Extend the abstract bases for your providers; register them through
-`ChannelRegistry`.
+| Channel class                | Purpose                                            |
+| ---------------------------- | -------------------------------------------------- |
+| `InAppChannel`               | In-app inbox; Redis-backed list per user           |
+| `WebhookChannel`             | HMAC-signed HTTP POST to a URL                     |
+| `AbstractEmailChannel`       | Base — extend for SMTP / Sendgrid / SES / etc.     |
+| `AbstractSMSChannel`         | Base — extend for Twilio / Vonage / etc.           |
+| `AbstractPushChannel`        | Base — extend for FCM / APNS / etc.                |
+| `MockEmailChannel` / `MockSMSChannel` / `MockPushChannel` | Test doubles      |
+
+A concrete channel typically implements just `deliver(recipient,
+rendered, options)` plus optional `validate()`.
 
 ## Templates
 
-`TemplateEngine` renders templates with `{{var}}` placeholders. Pass
-templates through `forRoot({ templates })` or register them at
-runtime.
+```typescript
+NotificationsModule.forRoot({
+  templates: { enabled: true, cacheEnabled: true, cacheTTL: 60_000 },
+})
+
+// Use:
+await this.notify.send(
+  { userId, email },
+  { template: 'welcome', data: { name: 'Ada' } },
+);
+```
+
+`TemplateEngine` supports variable substitution via `{{name}}`
+placeholders. Templates can be passed at boot or registered at
+runtime. `DEFAULT_TEMPLATES` is exported as a starting set.
 
 ## Rate limiting and preferences
 
-`RedisRateLimiter` and `RedisPreferenceStore` provide per-user
-rate limiting and per-channel opt-in/out preferences when enabled.
+`RedisRateLimiter` enforces per-minute / per-hour / per-day limits
+globally or per-channel; `RedisPreferenceStore` tracks per-user
+opt-in/out per channel. Wired automatically when `redis:` is set.
+
+```typescript
+rateLimiterConfig: {
+  defaultLimits:        { perMinute: 10, perHour: 100, perDay: 1_000, burstLimit: 5 },
+  channelLimits:        { sms: { perMinute: 1, perHour: 10 } },
+  enableBurstDetection: true,
+}
+
+preferenceStoreConfig: {
+  defaultPreferences: { channels: { email: true, sms: false, push: true } },
+}
+```
+
+## Worker model
+
+```mermaid
+flowchart LR
+  Api[API pod<br/>NotificationsService.send]
+  Api -- emits notification event --> Rotif[(Rotif / queue)]
+  Worker[Worker pod<br/>NotificationsModule.forWorker]
+  Rotif --> Worker
+  Worker --> Resolver[TargetResolver]
+  Worker --> Persister[Persister<br/>store the notification]
+  Worker --> Channel[Channel.deliver]
+  Worker --> Realtime[RealtimeSignaler<br/>push to WS / SSE]
+```
+
+Producer/worker split lets you scale delivery independently from the
+request path and isolate flaky external providers (email, SMS) from
+the API tier.
 
 ## `@OnNotification` decorator
-
-Subscribe to delivery lifecycle events:
 
 ```typescript
 import { OnNotification } from '@omnitron-dev/titan-notifications';
 
 @Injectable()
-class Audit {
-  @OnNotification({ event: 'sent' })
-  async logSent(notification: any) { /* … */ }
+class AuditListener {
+  @OnNotification({ pattern: 'sent', priority: 10 })
+  async onSent(notification: any) { /* … */ }
 
-  @OnNotification({ event: 'failed' })
-  async logFailed(notification: any, error: any) { /* … */ }
+  @OnNotification({ pattern: 'failed' })
+  async onFailed(notification: any) { /* … */ }
 }
 ```
 
+Subscribe to delivery lifecycle events for observability, audit,
+metrics.
+
 ## Health indicator
 
-`NotificationsHealthIndicator` is exported and registers with
-`TitanHealthModule` automatically.
+`NotificationsHealthIndicator` is exported and registers
+automatically with [`titan-health`](./health.mdx) if both modules
+are loaded.
 
-## Worker model
-
-`NotificationWorkerService` processes a Rotif-backed queue and
-performs actual delivery. `NotificationPublisher` is the producer
-side.
-
-## Exported tokens (selection)
+## Tokens (selection)
 
 | Token                                          |
 | ---------------------------------------------- |
@@ -142,5 +243,34 @@ side.
 | `NOTIFICATIONS_EVENT_EMITTER`                  |
 | `NOTIFICATIONS_CHANNEL_REGISTRY`               |
 | `NOTIFICATIONS_TEMPLATE_ENGINE`                |
-| `NOTIFICATIONS_REDIS_RATE_LIMITER`             |
-| `NOTIFICATIONS_REDIS_PREFERENCE_STORE`         |
+| `NOTIFICATION_TARGET_RESOLVER`                 |
+| `NOTIFICATION_PERSISTER`                       |
+| `NOTIFICATION_REALTIME_SIGNALER`               |
+
+## Lifecycle
+
+The service is registered as a Titan provider; standard lifecycle
+hooks apply. The worker mode (`forWorker`) starts a Rotif consumer
+during the application `onStart` phase and stops it on `onStop`.
+
+## Anti-patterns
+
+- **Sending from the request path.** Heavy channels (SMS / email)
+  can take seconds. Send via the worker pattern, not directly in
+  the request handler.
+- **Skipping preferences.** Sending to users who opted out is a
+  compliance risk in many jurisdictions. Always wire
+  `preferenceStore`.
+- **Per-user templates.** Templates are content; per-user data goes
+  in the `data` payload. Pre-render with the engine, not in code.
+- **No rate limits.** Without limits, a runaway loop can spam every
+  user in your database in minutes.
+
+## See also
+
+- [`titan-events`](./events.mdx) — in-process events; this module
+  bridges them to multi-channel delivery
+- [`titan-redis`](./redis.mdx) — backs rate limiter, preference
+  store, and Rotif
+- [`titan-ratelimit`](./ratelimit.mdx) — pluggable rate limiter
+  for the producer side
