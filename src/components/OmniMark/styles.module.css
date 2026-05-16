@@ -160,11 +160,9 @@
 }
 
 /* Each shell sits still at rest. On hover, all three execute a
-   "robotic sequence" — they jut outward one after another in a sharp
-   step (steps() timing function so it snaps, not glides), hold, then
-   snap back in the same staggered order. The direction of motion is
-   the shell's outward normal in the local figure frame — taken from
-   the holon source's makeGap() coordinates:
+   staggered extrusion — they jut outward one after another, hold,
+   then retract in the same staggered order. The direction of motion
+   is the shell's outward normal in the local figure frame:
      idx 0 (bottom shell)  → +x  +y
      idx 1 (left shell)    → -x   0
      idx 2 (right shell)   → +x  -y */

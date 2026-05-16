@@ -77,18 +77,3 @@ The Titan modules (`titan-*`) all depend on `@omnitron-dev/titan` itself
 but are independent of each other. You can use `titan-cache` without
 ever touching `titan-database`.
 
-## Internal symlinks
-
-The repo uses an `internal/` directory of symlinks for cross-project
-references during local development:
-
-```text
-omni/internal/
-├── daos/      → /Users/.../dao/daos
-├── holon/     → /Users/.../oldman/uhm-theory/holon
-├── verum/     → /Users/.../oldman/verum-lang/verum
-└── website/   → /Users/.../luxquant/omnitron-dev/website
-```
-
-These symlinks are developer-local; nothing in the published packages
-depends on them.

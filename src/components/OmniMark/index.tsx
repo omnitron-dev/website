@@ -7,24 +7,22 @@ interface OmniMarkProps {
 }
 
 /**
- * Omnitron hero mark — a cyberpunk-styled reconstruction of the original
- * holon spinner.
+ * Omnitron hero mark — animated logo with cyberpunk-styled atmospheric
+ * bloom.
  *
  * The mark is four polygons: a green core surrounded by three violet
- * triangles. The original implementation used svg.js to imperatively
- * "explode" each triangle outward from the core, then snap them back, then
- * rotate the whole figure. This component does the same thing with a static
- * inline SVG and pure CSS keyframes — no JS animation loop needed.
+ * triangles. Hovering the figure extrudes the three shells outward in
+ * a staggered sequence while the ambient float animation pauses, so
+ * the extrusion reads cleanly without competing motion.
  *
  * Layered behind the mark:
- *   1. Outer atmospheric cloud (cyan / violet, slow breathe)
- *   2. Mid chromatic aberration halo (magenta / cyan slide)
- *   3. Warm core glow (emerald / amber pulse)
+ *   1. Outer atmospheric cloud (slow breathe)
+ *   2. Mid chromatic aberration halo (drift)
+ *   3. Inner donut-shaped glow (pulse)
  *
- * The polygon coordinates are taken verbatim from the holon source, then
- * placed inside a 300×300 viewBox with the same skew matrix the original
- * applied. The matrix is folded into a `<g transform>` so we don't have to
- * recompute coordinates.
+ * The figure sits inside a 500×500 viewBox with a skew matrix that
+ * tilts the polygons into the resting pose. Animations are pure CSS
+ * keyframes — no JS animation loop.
  */
 export default function OmniMark({size = 460, className}: OmniMarkProps) {
   return (
@@ -55,11 +53,10 @@ export default function OmniMark({size = 460, className}: OmniMarkProps) {
           </filter>
         </defs>
 
-        {/* This group reproduces the holon source's affine transform exactly:
-            matrix(1.0218979, -0.29499649, 0.29499649, 1.0218979, -46.5122, 80.4943).
-            That tilts the figure ~16° clockwise and shifts it back so the
-            rotated mark stays centred. The expanded viewBox gives the spin
-            and shell-extrude motions room to play without clipping. */}
+        {/* The affine transform tilts the figure ~16° clockwise and
+            re-centres it inside the viewBox. The expanded viewBox
+            leaves room around the figure so the shell-extrude motions
+            don't clip. */}
         <g
           className={styles.figure}
           transform="matrix(1.0218979,-0.29499649,0.29499649,1.0218979,-46.512249,80.494299)"
