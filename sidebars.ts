@@ -35,6 +35,7 @@ const sidebars: SidebarsConfig = {
       items: [
         'foundations/principles',
         'foundations/architecture',
+        'foundations/titan-vs-omnitron',
         'foundations/monorepo',
       ],
     },
