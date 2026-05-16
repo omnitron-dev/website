@@ -167,7 +167,7 @@ const { data } = users.findById.useQuery([id]);
 />`,
   },
   {
-    title: '16 modules. Pick what you need.',
+    title: '16+ modules. Pick what you need.',
     accent: 'var(--omni-amber)',
     blurb:
       'Auth, cache, database, discovery, events, health, lock, metrics, ' +
@@ -190,8 +190,8 @@ const { data } = users.findById.useQuery([id]);
     title: 'Omnitron — supervisor + console + CLI',
     accent: 'var(--omni-violet-500)',
     blurb:
-      'One daemon supervises N apps × M projects × K stacks. 19 RPC services ' +
-      'on the management plane. Web console (React + Vite + Prism). 90+ CLI ' +
+      'One daemon supervises N apps × M projects × K stacks. 20+ RPC services ' +
+      'on the management plane. Web console (React + Vite + Prism). 75+ CLI ' +
       'subcommands. Declarative infrastructure (Postgres, Redis, MinIO, custom) ' +
       'via Docker or bare-metal. MCP server for AI agents.',
     code: `# Boot the daemon + provision infra + start all apps.
@@ -364,13 +364,13 @@ function Features() {
 // ---------------------------------------------------------------------------
 
 const NUMBERS = [
-  { value: '16', label: 'modules' },
-  { value: '19', label: 'daemon RPC services' },
-  { value: '90+', label: 'CLI subcommands' },
+  { value: '16+', label: 'modules' },
+  { value: '20+', label: 'daemon RPC services' },
+  { value: '75+', label: 'CLI subcommands' },
   { value: '50+', label: 'Prism components' },
-  { value: '4', label: 'transports' },
-  { value: '3', label: 'RBAC roles' },
-  { value: '0', label: 'codegen steps' },
+  { value: '4',   label: 'transports' },
+  { value: '3',   label: 'RBAC roles' },
+  { value: '0',   label: 'codegen steps' },
 ];
 
 function Numbers() {
