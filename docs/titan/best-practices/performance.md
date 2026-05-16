@@ -147,8 +147,8 @@ scaling is the easy path.
 
 ## Read also
 
-- [titan-cache](../modules/cache.md) — caching strategies.
-- [titan-pm](../modules/pm.md) — worker pools for CPU work.
+- [titan-cache](../modules/cache) — caching strategies.
+- [titan-pm](../modules/pm) — worker pools for CPU work.
 - [Resilience / Timeout](../resilience/timeout.md) — bounded
   external calls.
 

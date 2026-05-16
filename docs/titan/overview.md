@@ -107,7 +107,7 @@ and assumes you have read the
 | [Resilience](./resilience/overview.md)                        | When you defend against partial failure               |
 | [Testing](./testing/overview.md)                              | When you write fast, deterministic tests              |
 | [Best Practices](./best-practices/structuring-services.md)    | When you want the team to converge on conventions     |
-| [Modules Catalogue](./modules/index.md)                       | The 14 ecosystem modules in detail                    |
+| [Modules Catalogue](./modules/index.mdx)                       | The 14 ecosystem modules in detail                    |
 
 ## Versioning and stability
 

@@ -1,0 +1,114 @@
+---
+title: ConfigModule
+---
+
+import ModuleBadge from '@site/src/components/ModuleBadge';
+
+# ConfigModule
+
+<ModuleBadge origin="built-in" pkg="@omnitron-dev/titan" subpath="/module/config" status="stable" />
+
+Layered, validated, hot-reloadable configuration. **Auto-loaded** as
+a core module by every Titan application (unless
+`disableCoreModules: true`).
+
+## Install
+
+No extra install — ships inside `@omnitron-dev/titan`:
+
+```typescript
+import { ConfigModule } from '@omnitron-dev/titan/module/config';
+```
+
+## Quickstart
+
+```typescript
+import { z } from '@omnitron-dev/titan/validation';
+
+const AppConfigSchema = z.object({
+  port:     z.number().int().min(1).max(65535),
+  database: z.object({ url: z.string().url() }),
+});
+
+@Module({
+  imports: [
+    ConfigModule.forRoot({
+      schema:  AppConfigSchema,
+      sources: [
+        { type: 'file', path: 'config/default.yaml' },
+        { type: 'env',  prefix: 'APP_' },
+      ],
+      validateOnStartup: true,
+      watchForChanges:   true,
+    }),
+  ],
+})
+class AppModule {}
+```
+
+## `IConfigModuleOptions`
+
+| Option              | Type                                                |
+| ------------------- | --------------------------------------------------- |
+| `sources`           | `ConfigSource[]`                                    |
+| `schema`            | `AnyZodSchema`                                      |
+| `environment`       | `string`                                            |
+| `validateOnStartup` | `boolean`                                           |
+| `watchForChanges`   | `boolean`                                           |
+| `cache`             | `{ enabled, ttl? }`                                 |
+| `strict`            | `boolean`                                           |
+| `logger`            | `any`                                               |
+| `global`            | `boolean`                                           |
+
+## `ConfigSource` union
+
+| Type      | Shape                                                          |
+| --------- | -------------------------------------------------------------- |
+| `'file'`  | `{ path, format?, encoding?, transform?, optional? }`          |
+| `'env'`   | `{ prefix?, separator?, transform? }`                          |
+| `'argv'`  | `{ prefix? }`                                                  |
+| `'object'`| `{ data }`                                                     |
+| `'remote'`| `{ url, headers?, timeout?, retry? }`                          |
+
+## Services
+
+| Class                       | Purpose                                                |
+| --------------------------- | ------------------------------------------------------ |
+| `ConfigService`             | Main API — `get`, `set`, `has`, `delete`, `watch`, etc. |
+| `ConfigLoaderService`       | Loads from sources                                     |
+| `ConfigValidatorService`    | Runs schema validation                                 |
+| `ConfigWatcherService`      | Hot-reload watcher                                     |
+
+## Decorators
+
+| Decorator                                | Effect                                  |
+| ---------------------------------------- | --------------------------------------- |
+| `@Config(path?, defaultValue?)`          | Inject one config value                 |
+| `@InjectConfig()`                        | Inject the whole `ConfigService`        |
+| `@ConfigSchema(schema)`                  | Class-level schema for a subtree        |
+| `@Configuration(prefix?)`                | Bind a class to a config subtree        |
+| `@ConfigWatch(path)`                     | Method runs when the path changes       |
+| `@ConfigDefaults({...})`                 | Provide defaults at class level         |
+| `@ConfigProvider(name)`                  | Mark a class as a custom config provider |
+
+## Tokens
+
+| Token                              | Purpose                              |
+| ---------------------------------- | ------------------------------------ |
+| `CONFIG_SERVICE_TOKEN`             | Inject `ConfigService`               |
+| `CONFIG_LOADER_SERVICE_TOKEN`      | Inject `ConfigLoaderService`         |
+| `CONFIG_VALIDATOR_SERVICE_TOKEN`   | Inject `ConfigValidatorService`      |
+| `CONFIG_WATCHER_SERVICE_TOKEN`     | Inject `ConfigWatcherService`        |
+| `CONFIG_OPTIONS_TOKEN`             | Resolved options bundle              |
+| `CONFIG_SCHEMA_TOKEN`              | Global schema                        |
+
+## See also
+
+- [Configuration / Overview](../configuration/overview) — conceptual
+  guide.
+- [Configuration / Sources](../configuration/sources) — every
+  source shape.
+- [Configuration / Validation](../configuration/validation) —
+  schema patterns.
+- [Configuration / Hot Reload](../configuration/hot-reload) —
+  `config:changed` event flow.

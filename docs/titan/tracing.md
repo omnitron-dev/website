@@ -12,7 +12,7 @@ No OpenTelemetry SDK is required.
 
 This is the foundation. For full observability (spans exported to a
 collector, exemplars, sampling), layer the
-[`titan-telemetry-relay`](./modules/telemetry-relay.md) or your own
+[`titan-telemetry-relay`](./modules/telemetry-relay) or your own
 OTel integration on top.
 
 ## Public surface

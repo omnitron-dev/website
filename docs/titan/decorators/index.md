@@ -203,7 +203,7 @@ async searchDocuments(query: string) { /* … */ }
 The actual `RateLimitConfig` lives in
 `@omnitron-dev/titan/netron/auth/rate-limiter.ts`.
 
-→ [titan-ratelimit](../modules/ratelimit.md)
+→ [titan-ratelimit](../modules/ratelimit.mdx)
 
 ### `@Cache(config)`
 
@@ -220,7 +220,7 @@ Caches the method result. The shape:
 async findById(id: string) { /* … */ }
 ```
 
-→ [titan-cache](../modules/cache.md)
+→ [titan-cache](../modules/cache.mdx)
 
 ### `@Validate(schema, options?)` and `@Contract(contract)`
 

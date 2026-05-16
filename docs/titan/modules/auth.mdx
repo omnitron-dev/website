@@ -2,7 +2,11 @@
 title: titan-auth
 ---
 
+import ModuleBadge from '@site/src/components/ModuleBadge';
+
 # titan-auth
+
+<ModuleBadge origin="official" pkg="@omnitron-dev/titan-auth" status="stable" />
 
 JWT authentication with multi-algorithm support (HS256 / RS256 /
 ES256), remote JWKS, in-memory token cache, and HTTP middleware.
@@ -99,7 +103,7 @@ Options:
 The policy framework comes from the Netron auth layer
 (`@omnitron-dev/titan/netron/auth` — `BuiltInPolicies`,
 `PolicyEngine`, etc.). See
-[Netron Authentication](../netron/authentication.md) for the
+[Netron Authentication](../netron/authentication) for the
 underlying primitives.
 
 ## JWT issuing

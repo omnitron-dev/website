@@ -1,0 +1,105 @@
+---
+title: LoggerModule
+---
+
+import ModuleBadge from '@site/src/components/ModuleBadge';
+
+# LoggerModule
+
+<ModuleBadge origin="built-in" pkg="@omnitron-dev/titan" subpath="/module/logger" status="stable" />
+
+Structured pino-based logging with four levels, child loggers,
+pluggable transports and processors. **Auto-loaded** as a core
+module by every Titan application (unless `disableCoreModules:
+true`).
+
+## Install
+
+No extra install — ships inside `@omnitron-dev/titan`:
+
+```typescript
+import { LoggerModule } from '@omnitron-dev/titan/module/logger';
+```
+
+## Quickstart
+
+```typescript
+import { LoggerModule, ConsoleTransport, RedactionProcessor }
+  from '@omnitron-dev/titan/module/logger';
+
+@Module({
+  imports: [
+    LoggerModule.forRoot({
+      level:      'info',
+      transports: [
+        new ConsoleTransport({ pretty: process.env.NODE_ENV !== 'production' }),
+      ],
+      processors: [
+        new RedactionProcessor({ paths: ['password', 'token', 'headers.authorization'] }),
+      ],
+    }),
+  ],
+})
+class AppModule {}
+```
+
+## Levels
+
+```typescript
+interface ILogger {
+  debug(msg, meta?): void;
+  info(msg,  meta?): void;
+  warn(msg,  meta?): void;
+  error(msg, meta?): void;
+  child(meta): ILogger;
+  pino?: any;       // escape hatch to the underlying pino instance
+}
+```
+
+Four levels only. There is no `trace` or `fatal` — log `trace`-style
+content at `debug`, and pair `error` with explicit shutdown for the
+"fatal" cases.
+
+## Services
+
+| Class                | Purpose                                     |
+| -------------------- | ------------------------------------------- |
+| `LoggerService`      | Wrapper around an `ILogger`; the injected default |
+| `ConsoleTransport`   | Built-in transport — stdout / stderr        |
+| `RedactionProcessor` | Built-in processor — redact secret paths    |
+
+## Decorators
+
+| Decorator       | Effect                                          |
+| --------------- | ----------------------------------------------- |
+| `@Logger()`     | Property decorator — inject a contextual `ILogger` |
+| `@Log()`        | Method decorator — auto-log entry/exit          |
+| `@Monitor()`    | Method decorator — track performance            |
+
+## Helpers
+
+```typescript
+import { createNullLogger, isLogger } from '@omnitron-dev/titan/module/logger';
+
+const noop = createNullLogger();  // ILogger that discards everything (tests)
+isLogger(value);                  // type guard
+```
+
+## Tokens
+
+| Token                       | Purpose                              |
+| --------------------------- | ------------------------------------ |
+| `LOGGER_TOKEN`              | Default `ILogger`                    |
+| `LOGGER_SERVICE_TOKEN`      | `LoggerService` wrapper              |
+| `LOGGER_OPTIONS_TOKEN`      | Resolved options                     |
+| `LOGGER_TRANSPORTS_TOKEN`   | Registered transports                |
+| `LOGGER_PROCESSORS_TOKEN`   | Registered processors                |
+
+## See also
+
+- [Logging / Overview](../logging/overview) — conceptual guide.
+- [Logging / Transports](../logging/transports) — destinations.
+- [Logging / Processors](../logging/processors) —
+  transform / filter pipeline.
+- [Logging / Child Loggers](../logging/child-loggers) — bound
+  context.

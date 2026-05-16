@@ -79,7 +79,7 @@ app.on('user.created', (data) => { /* … */ });
 ```
 
 Use sparingly. For domain events between services, prefer the
-[`titan-events`](../modules/events.md) module — it gives you schema
+[`titan-events`](../modules/events) module — it gives you schema
 validation, scheduled delivery, and structured handler composition.
 The application event bus is for *framework-level* signalling and
 ad-hoc lightweight notifications, not for business workflows.
