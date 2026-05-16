@@ -6,9 +6,17 @@ description: What Omnitron is, what ships with it, and where to go for what you 
 
 # Introduction
 
-**Omnitron** is a unified TypeScript stack for building, shipping, and operating
-real systems. One toolchain across every layer — from a decorator on a service
-class to a supervised pod cluster — with no codegen step in between.
+A unified TypeScript stack for building, shipping, and operating
+real systems. One toolchain across every layer — from a
+decorator on a service class to a supervised pod cluster —
+with no codegen step in between.
+
+> **Read first:** [Titan vs Omnitron](./foundations/titan-vs-omnitron.md) —
+> the stack is two layers. **Titan** is the runtime (you'll
+> almost always use it). **Omnitron** is an opt-in supervisor +
+> control plane on top (you may or may not need it). Most
+> projects start with Titan alone; add Omnitron when complexity
+> demands it.
 
 ## The stack
 
@@ -18,7 +26,7 @@ class to a supervised pod cluster — with no codegen step in between.
 | **RPC plane** | `titan/netron` + `@omnitron-dev/netron-browser` | Same `@Service` reachable over HTTP / WebSocket / TCP / Unix sockets. Middleware pipeline (auth, retry, cache, rate-limit, tracing). AsyncIterable streaming |
 | **Frontend hooks** | `@omnitron-dev/netron-react` | Typed `useQuery` / `useMutation` / `useSubscription` / `useService` driven by the backend interface itself — no schema sync |
 | **Design system** | `@omnitron-dev/prism` | 50+ MUI v7 components, 3 layouts, 3 blocks, schema-aware forms, 25+ React hooks, dark mode without flicker |
-| **Supervisor** | `@omnitron-dev/omnitron` | Long-running daemon, 20+ RPC services, 75+ CLI subcommands, React+Vite web console, declarative infrastructure provisioning, MCP server for agents |
+| **Supervisor (opt-in)** | `@omnitron-dev/omnitron` | Long-running daemon, 20+ RPC services, 75+ CLI subcommands, React+Vite web console, declarative infrastructure provisioning, MCP server for agents |
 
 Add a row to your stack incrementally — Titan alone for a backend, `+ netron-browser`
 for a JS client, `+ netron-react` + Prism for React, `+ omnitron` when you scale to

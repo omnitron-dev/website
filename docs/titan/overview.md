@@ -6,9 +6,21 @@ description: A composable TypeScript backend framework — DI, lifecycle, valida
 
 # Titan Framework
 
-Titan is the backend framework at the heart of Omnitron. It is intentionally
-small at its core and large at its surface — a focused application kernel
-plus a deep catalogue of opt-in modules.
+Titan is **the backend framework**. It runs standalone — no
+daemon, no supervisor, no extra runtime. Build a backend with
+Titan + the modules you need, then `node dist/main.js`. That's
+the entire production deploy.
+
+> **Titan is self-sufficient.** [Omnitron](../omnitron/overview.md)
+> is a separate opt-in layer on top — useful for multi-app fleets,
+> web console, declarative infra provisioning, MCP server for AI
+> agents. For a single backend service you don't need it. See
+> [Titan vs Omnitron](../foundations/titan-vs-omnitron.md) for
+> the precise boundary.
+
+It is intentionally small at its core and large at its surface —
+a focused application kernel plus a deep catalogue of opt-in
+modules.
 
 ## What Titan is
 

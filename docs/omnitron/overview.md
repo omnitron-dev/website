@@ -6,11 +6,20 @@ description: What Omnitron is, what it solves, and how the pieces fit together.
 
 # Omnitron
 
+> **Omnitron is opt-in.** Titan apps run perfectly well without
+> it as plain Node processes — see
+> [Titan vs Omnitron](../foundations/titan-vs-omnitron.md) for
+> the precise boundary. This page describes what you gain by
+> adding the Omnitron supervisor on top.
+
 **Omnitron is the supervisor, control plane, and operator surface
 for Titan applications.** One long-running daemon manages many
 processes across many apps across many projects, exposes a typed
 RPC plane for inspection, ships a CLI and a web console, and
 provisions the infrastructure your apps need.
+
+It's itself a Titan app — supervising other Titan apps. Built on
+the same primitives the apps it supervises use.
 
 ```bash
 pnpm add -g @omnitron-dev/omnitron
