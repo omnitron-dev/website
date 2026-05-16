@@ -245,6 +245,16 @@ const sidebars: SidebarsConfig = {
         },
       ],
     },
+    {
+      type: 'category',
+      label: 'Migrations',
+      link: {type: 'doc', id: 'titan/migrations/index'},
+      items: [
+        'titan/migrations/from-nestjs',
+        'titan/migrations/from-express',
+        'titan/migrations/from-prom-client',
+      ],
+    },
   ],
 
   frontend: [
