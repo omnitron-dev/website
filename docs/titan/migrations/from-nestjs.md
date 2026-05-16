@@ -7,7 +7,7 @@ description: Concept-by-concept mapping from NestJS to Titan.
 # From NestJS
 
 NestJS and Titan share a decorator-driven, container-centric
-philosophy — most concepts map directly. The genuine deltas are
+approach — most concepts map directly. The genuine deltas are
 where Titan made different decisions; this page calls them out
 explicitly so you don't fight the framework.
 

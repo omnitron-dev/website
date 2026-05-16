@@ -164,7 +164,7 @@ const config: Config = {
             {label: 'Quickstart', to: '/docs/getting-started/quickstart'},
             {label: 'Project structure', to: '/docs/getting-started/project-structure'},
             {label: 'Architecture', to: '/docs/foundations/architecture'},
-            {label: 'Philosophy', to: '/docs/foundations/philosophy'},
+            {label: 'Principles', to: '/docs/foundations/principles'},
           ],
         },
         {
