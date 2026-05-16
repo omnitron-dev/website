@@ -6,26 +6,35 @@ import CodeBlock from '@theme/CodeBlock';
 import OmniMark from '@site/src/components/OmniMark';
 import styles from './index.module.css';
 
-const HERO_CODE = `// 1. Define a service with a decorator. That's the whole interface.
+// ---------------------------------------------------------------------------
+// HERO — end-to-end in one screen of code, verified APIs.
+// ---------------------------------------------------------------------------
+
+const HERO_CODE = `// 1. Declare a service. The decorator is the contract.
 @Service('users@1.0.0')
 export class UsersService {
+  constructor(private readonly repo: UserRepo) {}
+
   @Public()
+  @Validate(IdSchema)
   async findById(id: string): Promise<User> {
     return this.repo.findById(id);
   }
 }
 
-// 2. Bind the module. DI, lifecycle, and Netron exposure are wired in.
-@Module({ providers: [UsersService] })
-export class UsersModule {}
+// 2. Compose modules. DI, lifecycle, RPC exposure — wired by the container.
+@Module({ imports: [DatabaseModule], providers: [UserRepo, UsersService] })
+export class AppModule {}
 
-// 3. Boot the application. HTTP, WS, TCP, Unix — same service surface.
-const app = await Application.create(UsersModule, { netron: { http: 3000 } });
+// 3. Boot. One module, multiple transports.
+const app = await Application.create(AppModule);
 await app.start();
 
-// 4. Call from the browser as if it were local. End-to-end types preserved.
-const users = await client.queryInterface<UsersService>('users@1.0.0');
-const user  = await users.findById('u_42');`;
+// 4. Call from React. The interface IS the hook.
+const users = useService<UsersService>('users');
+const { data, isLoading } = users.findById.useQuery(['u_42']);
+
+// → No codegen. No schema sync. No drift. Pure TypeScript.`;
 
 function Hero() {
   return (
@@ -36,23 +45,24 @@ function Hero() {
             <span className="omni-gradient-text">Omnitron</span>
           </h1>
           <p className={styles.heroTagline}>
-            One TypeScript stack across backend, RPC, UI, and orchestration.
+            One TypeScript stack. Backend, RPC, UI, supervision.
+            <br/>No bridges. No codegen. No drift.
           </p>
           <p className={styles.heroDesc}>
-            <strong>Titan</strong> gives you a decorator-driven backend with
-            dependency injection, structured concurrency, and{' '}
-            <strong>Netron</strong>&nbsp;— a transport-agnostic RPC plane that
-            speaks HTTP, WebSocket, TCP, and Unix sockets with the same
-            service surface. <strong>Prism</strong> renders the frontend on
-            top of it. <strong>Omnitron</strong> the app supervises it all.
-            Same types, end to end. No hidden runtime.
+            <strong>Titan</strong> is the backend framework — DI, lifecycle,
+            modules, decorators. <strong>Netron</strong> is the RPC plane —
+            HTTP, WebSocket, TCP, Unix sockets, one service contract.
+            <strong> Prism</strong> renders the frontend.
+            <strong> Omnitron</strong> the daemon supervises the fleet.
+            Same types from the database row to the React hook. Zero
+            generated code.
           </p>
           <div className={styles.heroButtons}>
-            <Link className="button button--primary button--lg" to="/docs/intro">
-              Get Started
+            <Link className="button button--primary button--lg" to="/docs/getting-started/quickstart">
+              Quickstart
             </Link>
-            <Link className="button button--secondary button--lg" to="/docs/getting-started/quickstart">
-              Quick Start
+            <Link className="button button--secondary button--lg" to="/docs/foundations/architecture">
+              Architecture
             </Link>
           </div>
         </div>
@@ -64,134 +74,137 @@ function Hero() {
   );
 }
 
+// ---------------------------------------------------------------------------
+// PILLARS — one paragraph + one verified code block per layer.
+// Every API shown here matches current source.
+// ---------------------------------------------------------------------------
+
 const PILLARS = [
   {
-    title: 'Titan — backend in one decorator',
+    title: 'Titan — backend in a decorator',
     accent: 'var(--omni-violet)',
     blurb:
-      'A decorator-driven application framework: declare services, modules, ' +
-      'middleware, and lifecycle hooks; the container wires the rest. ' +
-      'Structured concurrency by default, no ambient state, no thread-locals. ' +
-      'Validation, configuration, logging, and tracing are first-class — opt ' +
-      'into them per module, never globally.',
+      'Decorator-driven services, container-based DI (Nexus), structured ' +
+      'lifecycle (onInit / onStart / onStop / onDestroy), zod-validated ' +
+      'configuration, typed error classes that travel across the wire. ' +
+      'No ambient state, no thread-locals, no surprises.',
     code: `@Module({
-  imports: [ConfigModule.forRoot(), LoggerModule],
-  providers: [UsersService, AuthService],
-})
-export class AppModule {}
-
-@Service('users@1.0.0')
-export class UsersService {
-  constructor(private readonly db: Database) {}
-
-  @Public()
-  async findById(@Validate(IdSchema) id: string) {
-    return this.db.users.findById(id);
-  }
-}`,
-  },
-  {
-    title: 'Netron — transport-agnostic RPC',
-    accent: 'var(--omni-cyan)',
-    blurb:
-      'One service, four transports. The same @Service surface is reachable ' +
-      'over HTTP for browsers, WebSocket for live subscriptions, TCP for ' +
-      'service-to-service, and Unix sockets for sidecars. Discovery, auth, ' +
-      'and middleware are layered uniformly across every transport.',
-    code: `// Server — exposes the same service over every wired transport.
-const app = await Application.create(UsersModule, {
-  netron: {
-    http:      { port: 3000 },
-    websocket: { port: 3001 },
-    tcp:       { port: 4001 },
-    unix:      { path: '/run/users.sock' },
-  },
-});
-
-// Client — pick a transport, the contract is identical.
-const wsClient = new NetronClient({ url: 'ws://api/users' });
-const users = await wsClient.queryInterface<UsersService>('users@1.0.0');`,
-  },
-  {
-    title: 'End-to-end type safety',
-    accent: 'var(--omni-emerald)',
-    blurb:
-      'Service signatures defined on the backend become hooks on the frontend ' +
-      'with no codegen step. netron-react gives you typed query and mutation ' +
-      'hooks; netron-browser handles transport, retries, and middleware. ' +
-      'Refactor a service signature and TypeScript fails the build on every ' +
-      'caller — server, client, console, mobile.',
-    code: `// React — the service interface is the hook contract.
-function UserCard({ id }: { id: string }) {
-  const { data, isLoading } = useNetronQuery(
-    UsersService,
-    'findById',
-    [id],
-  );
-
-  if (isLoading) return <Spinner />;
-  return <h3>{data.displayName}</h3>;
-}`,
-  },
-  {
-    title: 'Prism — design system, not a component dump',
-    accent: 'var(--omni-magenta)',
-    blurb:
-      'Prism is a constructor of UIs, not a list of widgets. Theme tokens, ' +
-      'layout primitives, semantic blocks, and forms compose into entire ' +
-      'screens with consistent spacing, focus, and accessibility behaviour. ' +
-      'Built on top of netron-react, so a screen is a thin orchestration of ' +
-      'service calls and Prism blocks.',
-    code: `<Page title="Users">
-  <DataTable
-    query={useNetronQuery(UsersService, 'list', [])}
-    columns={[
-      col('id'),
-      col('email'),
-      col('createdAt', { format: 'relative' }),
-    ]}
-    onRowClick={(u) => navigate(\`/users/\${u.id}\`)}
-  />
-</Page>`,
-  },
-  {
-    title: 'Modules you would have built anyway',
-    accent: 'var(--omni-amber)',
-    blurb:
-      'Auth, cache, database, discovery, events, health, lock, metrics, ' +
-      'notifications, process management, rate limiting, redis, scheduler, ' +
-      'telemetry — fourteen Titan modules covering the workhorse layer of ' +
-      'every backend. Each is opt-in, each ships with the same DI grammar, ' +
-      'each is independently versionable.',
-    code: `// Compose the modules you need; skip the ones you don't.
-@Module({
   imports: [
-    AuthModule.forRoot({ jwt: { secret: env.JWT_SECRET } }),
-    CacheModule.forRoot({ tier: 'redis-lru' }),
-    DatabaseModule.forRoot({ dialect: 'postgres' }),
-    SchedulerModule,
-    MetricsModule,
+    ConfigModule.forRoot({ schema: AppConfigSchema }),
+    LoggerModule.forRoot({ level: 'info' }),
+    TitanDatabaseModule.forRoot({ dialect: 'postgres' }),
+    TitanAuthModule.forRootAsync({
+      useFactory: (cfg: ConfigService) => ({ jwtSecret: cfg.get('jwt.secret') }),
+      inject: [CONFIG_SERVICE_TOKEN],
+    }),
   ],
+  providers: [UsersService],
 })
 export class AppModule {}`,
   },
   {
-    title: 'Omnitron — the supervisor',
+    title: 'Netron — one service, four transports',
+    accent: 'var(--omni-cyan)',
+    blurb:
+      'The same @Service is reachable over HTTP, WebSocket, TCP, and Unix ' +
+      'sockets. Auth, middleware, rate limits, and tracing layer once and ' +
+      'apply uniformly. Subscriptions stream over WS; everything else takes ' +
+      'the cheapest path that fits.',
+    code: `@Service('orders@1.0.0')
+export class OrdersService {
+  @Public() @Auth({ roles: ['user'] })
+  async create(input: CreateOrder) { /* ... */ }
+
+  @Public()
+  async *watch(filter: OrderFilter): AsyncIterable<OrderEvent> {
+    for await (const event of this.bus.subscribe(filter)) yield event;
+  }
+}
+
+// Client picks the transport; the contract is identical.
+const ws = new NetronClient({ url: 'wss://api', transport: 'websocket' });
+for await (const evt of (await ws.queryInterface<OrdersService>('orders@1.0.0'))
+                          .watch({ tier: 'pro' })) handle(evt);`,
+  },
+  {
+    title: 'End-to-end types — no codegen',
+    accent: 'var(--omni-emerald)',
+    blurb:
+      'The service interface IS the hook contract. Refactor a method ' +
+      'signature on the server, TypeScript fails the build on every client ' +
+      'caller in the same `tsc` pass. No OpenAPI, no protobuf, no .d.ts ' +
+      'sync step. The compiler is the source of truth.',
+    code: `// Backend signature changes —
+@Public() async findById(id: string, opts?: GetOpts): Promise<User | null>
+
+// Frontend breaks loudly until you migrate:
+const users = useService<UsersService>('users');
+const { data } = users.findById.useQuery([id]);
+//      ^? User | null | undefined  ✓ traced through
+
+// Forget the new opts arg? Type error. No drift. No runtime surprise.`,
+  },
+  {
+    title: 'Prism — 50+ components, three layers',
+    accent: 'var(--omni-magenta)',
+    blurb:
+      'MUI v7 foundation; schema-aware forms (react-hook-form + zod); three ' +
+      'pre-built layouts; three full-page blocks; 25+ React hooks. Tree-shaken ' +
+      'per subpath. Dark mode without flicker. Accessibility built in, ' +
+      'never bolted on.',
+    code: `<DataGridBlock
+  title="Users"
+  columns={[
+    { field: 'email',  header: 'Email',  sortable: true },
+    { field: 'role',   header: 'Role',   filterable: { type: 'select', options: ROLES } },
+    { field: 'status', header: 'Status', render: (r) => <StatusChip status={r.status} /> },
+  ]}
+  query={({ page, sort, filter }) =>
+    users.list.useQuery([{ page, sort, filter }])
+  }
+  rowActions={[{ id: 'remove', label: 'Remove', danger: true,
+                 confirm: { title: 'Remove user?' }, onClick: onRemove }]}
+/>`,
+  },
+  {
+    title: '16 modules. Pick what you need.',
+    accent: 'var(--omni-amber)',
+    blurb:
+      'Auth, cache, database, discovery, events, health, lock, metrics, ' +
+      'notifications, process-manager, rate-limit, redis, scheduler, telemetry ' +
+      '— plus built-in config + logger. Each independently versioned, each ' +
+      'opt-in. No invisible runtime tax.',
+    code: `// Compose the modules you need. Skip the rest.
+@Module({
+  imports: [
+    TitanRedisModule.forRoot({ config: { url: env.REDIS_URL } }),
+    TitanCacheModule.forRoot({ multiTier: true }),
+    TitanRateLimitModule.forRoot({ strategy: 'sliding-window', defaultLimit: 100 }),
+    TitanLockModule.forRoot(),
+    SchedulerModule.forRoot({ persistence: { provider: 'redis' } }),
+    TitanHealthModule.forRoot({ enableMemoryIndicator: true }),
+  ],
+})`,
+  },
+  {
+    title: 'Omnitron — supervisor + console + CLI',
     accent: 'var(--omni-rose)',
     blurb:
-      'A production-grade Titan application supervisor and CLI. Run, watch, ' +
-      'log, and orchestrate Titan services across machines and projects. The ' +
-      'web console aggregates dashboards over multiple stacks. Same ' +
-      'observability primitives whether you are running a single dev box or ' +
-      'a fleet.',
-    code: `# Bring up a Titan service in dev mode with hot reload.
-$ omnitron dev ./apps/users
+      'One daemon supervises N apps × M projects × K stacks. 19 RPC services ' +
+      'on the management plane. Web console (React + Vite + Prism). 90+ CLI ' +
+      'subcommands. Declarative infrastructure (Postgres, Redis, MinIO, custom) ' +
+      'via Docker or bare-metal. MCP server for AI agents.',
+    code: `# Boot the daemon + provision infra + start all apps.
+$ omnitron up
 
-# Tail structured logs across all running services.
-$ omnitron logs --follow
+# Stream logs across the fleet with filters.
+$ omnitron logs api -f -l warn -g 'payment'
 
-# Inspect a remote orchestrator from the CLI.
-$ omnitron status --host production.internal`,
+# Inspect the live DI graph of any running app.
+$ omnitron inspect api --graph --format mermaid
+
+# Drive everything from MCP — agents speak the same surface.
+$ omnitron kb mcp`,
   },
 ];
 
@@ -212,11 +225,10 @@ function Pillars() {
   return (
     <section className={styles.section}>
       <div className={styles.sectionHeader}>
-        <h2>What Omnitron gives you</h2>
+        <h2>The stack</h2>
         <p>
-          Six engineering decisions that change how you write, ship, and operate
-          a TypeScript stack — without giving up the editor's type-checker or
-          the platform's debugger.
+          Six layers, one toolchain. Each one shipped, documented, and used
+          in production. Nothing aspirational, nothing roadmap.
         </p>
       </div>
       <div className={styles.pillarGrid}>
@@ -230,12 +242,11 @@ function CodeShowcase() {
   return (
     <section className={clsx(styles.section, styles.codeShowcase)}>
       <div className={styles.sectionHeader}>
-        <h2>One service, four lines apart from the browser</h2>
+        <h2>Four steps. One language. Zero glue.</h2>
         <p>
-          Define the service. Bind the module. Boot the app. Call it from the
-          frontend. The wire format, the validation, the discovery, the
-          retries — all defaults you can override, never boilerplate you
-          have to write.
+          Declare. Compose. Boot. Call. From a Postgres row to a React hook —
+          one type system end-to-end. No OpenAPI, no protobuf, no client-server
+          drift. <strong>This is the entire wire format.</strong>
         </p>
       </div>
       <div className={styles.codeWrap}>
@@ -245,46 +256,83 @@ function CodeShowcase() {
   );
 }
 
+// ---------------------------------------------------------------------------
+// CAPABILITIES — what the platform actually delivers, by role.
+// Numbers and primitives, not adjectives.
+// ---------------------------------------------------------------------------
+
 const FEATURES = [
   {
     icon: '◆',
-    title: 'For backend engineers',
-    body: 'Decorator-driven services, container DI, structured concurrency, configuration with schema validation, structured logging with trace propagation. No magic globals, no ambient state.',
+    title: 'Backend',
+    body:
+      'Decorators (@Service, @Module, @Injectable, @Public, @Validate, @Auth, ' +
+      '@Cron, @Cached, @WithDistributedLock, @Metrics, @CircuitBreaker). ' +
+      'Container DI with scopes + contextual injection. Lifecycle hooks. ' +
+      'Typed errors travel the wire intact.',
   },
   {
     icon: '↔',
-    title: 'For platform engineers',
-    body: 'Process supervision, multi-transport RPC, health and readiness probes, distributed locks, rate limiting, cache tiers, scheduled jobs, metrics, telemetry relay. Operate a fleet, not just a service.',
+    title: 'RPC',
+    body:
+      'Four transports, one service contract. Middleware pipeline (auth, ' +
+      'rate-limit, validation, instrumentation). Token cache + JWKS rotation. ' +
+      'AsyncIterable streaming over WS. Multi-backend client routing. ' +
+      'Cross-tab auth sync via BroadcastChannel.',
   },
   {
     icon: '◊',
-    title: 'For frontend engineers',
-    body: 'Service interfaces become hooks. Prism gives you tokens, layouts, blocks, forms, and accessibility scaffolding. Same TypeScript types from the database row to the form field.',
+    title: 'Frontend',
+    body:
+      'Prism: 50+ MUI v7 components, 3 layouts, 3 blocks, schema-aware ' +
+      'forms, 25+ hooks, dark mode without flicker. netron-react: ' +
+      'useQuery / useMutation / useSubscription / useInfiniteQuery / useService — ' +
+      'all typed from the backend interface.',
   },
   {
-    icon: '∑',
-    title: 'For full-stack teams',
-    body: 'One language, one toolchain, one type system. The contract between server and client is the service signature itself. No OpenAPI generation, no protobuf step, no client-server type drift.',
+    icon: '⟁',
+    title: 'Observability',
+    body:
+      'pino logs with rotation. titan-metrics with Prometheus exposition + ' +
+      'pluggable storage (memory / SQLite / Postgres). titan-health with k8s ' +
+      'probes. titan-telemetry-relay store-and-forward over WAL. Per-app ' +
+      'distributed traces. All aggregated by the daemon.',
   },
   {
     icon: '✦',
-    title: 'For SREs and operators',
-    body: 'Omnitron the app: dev mode with hot reload, structured logs, dashboards, web console, MCP integration. Inspect, restart, scale, and audit any Titan service from one CLI.',
+    title: 'Supervision',
+    body:
+      'Process pools with P2C balancing. Crash-restart with exponential ' +
+      'backoff. Graceful shutdown in dependency order. File-watch hot ' +
+      'reload in dev. Multi-app, multi-process, multi-instance topology. ' +
+      'Persistent state across daemon restart.',
   },
   {
-    icon: '⊡',
-    title: 'For library authors',
-    body: 'Independently versioned packages with explicit DI surfaces. Build a Titan module, expose a Netron service, ship a Prism block — each composes without forcing the consumer to adopt the rest of the stack.',
+    icon: '⌬',
+    title: 'Infrastructure',
+    body:
+      'Declarative app requirements: database / redis / s3 / custom daemons. ' +
+      'Docker provider for dev/test; bare-metal hooks for prod. Reconcile ' +
+      'loop. Env-var templating with secrets (${host}, ${port:name}, ' +
+      '${secret:name}). One declaration, every environment.',
   },
   {
-    icon: 'λ',
-    title: 'Cross-runtime testing',
-    body: 'The @omnitron-dev/testing package targets Node, Bun, and Deno from the same test source. Validate behaviour across runtimes before you commit to one.',
+    icon: '⊞',
+    title: 'Cluster + Fleet',
+    body:
+      'Multi-node cluster with simplified Raft leader election (5–15 s ' +
+      'timeouts, 2 s heartbeat). Master-slave state sync via batch ' +
+      'replication. Per-node uptime bars with 90-day retention. Remote ' +
+      'daemons addressed by alias. Cross-region patterns.',
   },
   {
-    icon: '⚙',
-    title: 'Knowledge built in',
-    body: 'The @omnitron-dev/kb package powers semantic code intelligence and the omnitron-kb MCP server. Your AI tooling reasons about the codebase using the same primitives Omnitron does.',
+    icon: '🜂',
+    title: 'Agent-ready',
+    body:
+      'omnitron-kb MCP server exposes ~9 KB tools + ~30 management tools ' +
+      'to AI agents. Semantic + full-text hybrid search over the codebase. ' +
+      'Agents read/write the same RPC surface as the CLI. Authoring + ' +
+      'invocation through one protocol.',
   },
 ];
 
@@ -292,11 +340,10 @@ function Features() {
   return (
     <section className={styles.section}>
       <div className={styles.sectionHeader}>
-        <h2>Who Omnitron is for</h2>
+        <h2>Capabilities</h2>
         <p>
-          A single stack across the full systems-engineering spectrum.
-          Each role gets the surface it needs; the layers below stay out
-          of the way until you ask for them.
+          What the platform delivers, by layer. Every primitive verified
+          against shipping source — no roadmap, no "coming soon".
         </p>
       </div>
       <div className={styles.featureGrid}>
@@ -312,26 +359,59 @@ function Features() {
   );
 }
 
+// ---------------------------------------------------------------------------
+// NUMBERS — concrete scale signal.
+// ---------------------------------------------------------------------------
+
+const NUMBERS = [
+  { value: '16', label: 'modules' },
+  { value: '19', label: 'daemon RPC services' },
+  { value: '90+', label: 'CLI subcommands' },
+  { value: '50+', label: 'Prism components' },
+  { value: '4', label: 'transports' },
+  { value: '3', label: 'RBAC roles' },
+  { value: '0', label: 'codegen steps' },
+];
+
+function Numbers() {
+  return (
+    <section className={clsx(styles.section, styles.numbers)}>
+      <div className={styles.numbersGrid}>
+        {NUMBERS.map((n) => (
+          <div key={n.label} className={styles.numberCell}>
+            <div className={styles.numberValue}>{n.value}</div>
+            <div className={styles.numberLabel}>{n.label}</div>
+          </div>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// CTA — short, decisive.
+// ---------------------------------------------------------------------------
+
 function CTA() {
   return (
     <section className={styles.cta}>
       <div className={styles.ctaInner}>
-        <h2>Start with one service. Grow into a stack.</h2>
+        <h2>One stack. Ship.</h2>
         <p>
-          Install <code>@omnitron-dev/titan</code>, write a decorated class,
-          boot it. Add Netron when you need a client. Add Prism when you
-          need a frontend. Add Omnitron when you need to run a fleet.
-          Each step is the next decorator, not the next framework.
+          <code>pnpm add @omnitron-dev/titan</code>. Write a decorated class.
+          Boot. Add Netron when a client wants in. Add Prism when you render.
+          Add Omnitron when you scale. Each step is the next import —
+          never the next framework.
         </p>
         <div className={styles.heroButtons}>
           <Link className="button button--primary button--lg" to="/docs/getting-started/installation">
-            Install Titan
+            Install
           </Link>
           <Link className="button button--secondary button--lg" to="/docs/getting-started/quickstart">
-            Quick Start
+            Quickstart
           </Link>
-          <Link className="button button--link button--lg" to="/docs/foundations/architecture">
-            Architecture
+          <Link className="button button--link button--lg" to="/docs/foundations/philosophy">
+            Read the philosophy
           </Link>
         </div>
       </div>
@@ -342,13 +422,14 @@ function CTA() {
 export default function Home(): React.ReactElement {
   return (
     <Layout
-      title="Omnitron — A unified TypeScript stack for backend, RPC, UI, and orchestration"
-      description="Omnitron: Titan backend framework, Netron type-safe RPC, Prism design system, and orchestrator app. One toolchain, end-to-end TypeScript, no hidden runtime."
+      title="Omnitron — TypeScript stack: Titan backend · Netron RPC · Prism UI · Omnitron supervisor"
+      description="One TypeScript stack: Titan (decorator-driven backend), Netron (transport-agnostic RPC over HTTP/WS/TCP/Unix), Prism (50+ component design system), Omnitron (production supervisor with 19 RPC services, 90+ CLI commands, web console, MCP server)."
     >
       <Hero />
       <main>
         <Pillars />
         <CodeShowcase />
+        <Numbers />
         <Features />
         <CTA />
       </main>
