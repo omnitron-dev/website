@@ -1,120 +1,127 @@
 ---
 sidebar_position: 1
-title: Titan Overview
+title: Titan Framework
+description: A composable TypeScript backend framework — DI, lifecycle, validation, and a transport-agnostic RPC plane.
 ---
 
-# Titan Overview
+# Titan Framework
 
-**Titan** is the backend framework at the heart of Omnitron. It packages a
-dependency-injection container, a module system, a lifecycle, validation,
-structured logging, and the Netron RPC plane — all reachable from a small
-set of decorators.
+Titan is the backend framework at the heart of Omnitron. It is intentionally
+small at its core and large at its surface — a focused application kernel
+plus a deep catalogue of opt-in modules.
 
-## Why Titan exists
+## What Titan is
 
-The TypeScript backend ecosystem fragments along a familiar fault line:
-heavyweight all-in-one frameworks on one side, raw Node.js on the other.
-Either you adopt a runtime that owns your app's structure, or you
-hand-wire DI, config, validation, logging, and transport every project.
+A backend framework gives you four things you would otherwise build by hand:
 
-Titan is the in-between point: a small, composable framework where every
-moving part is opt-in. The base export gives you `Application`, `Module`,
-`Service`, and the container. Everything else — auth, cache, database,
-metrics — is a separate package you import when you need it.
+1. **A way to declare structure** — what services exist, how they depend on
+   each other, when they start and stop.
+2. **A way to expose them** — over the network, behind authentication,
+   with observability built in.
+3. **A way to operate** — configuration, logging, health, metrics,
+   traces, scheduled work.
+4. **A way to recover** — typed errors, graceful shutdown, retries,
+   circuit breakers, locks.
 
-## The four primitives
+Titan provides all four with a deliberately minimal core (the
+`Application`, the `Container`, the `Lifecycle`) and a library of modules
+that compose into the runtime you actually want.
 
-### `@Service('name@version')`
+## What Titan is not
 
-Marks a class as a Netron service. The version is part of the identity:
-`users@1.0.0` and `users@2.0.0` are distinct services that can coexist
-on the same app.
+- **Not a "do everything" runtime.** Modules are independently versioned
+  packages. You can run a Titan app with one of them.
+- **Not opinion-free.** Titan has strong opinions about explicitness:
+  no ambient state, no thread-locals, no auto-discovery from the
+  filesystem. Every dependency is declared.
+- **Not a NestJS clone.** Titan shares the decorator-driven aesthetic
+  with NestJS, but the underlying container (Nexus) is a different
+  design — multi-token providers, contextual injection, middleware
+  pipelines, runtime-portable across Node/Bun/Deno/browser.
 
-```typescript
-@Service('users@1.0.0')
-export class UsersService {
-  // …
-}
+## The mental model
+
+```mermaid
+flowchart TB
+  subgraph App["Application (kernel)"]
+    Bootstrap[Bootstrap]
+    Container[Nexus DI Container]
+    Lifecycle[Lifecycle State Machine]
+    Events[Application Event Bus]
+  end
+
+  subgraph Modules["Your modules + ecosystem modules"]
+    UserMod[User Modules]
+    Auth[titan-auth]
+    DB[titan-database]
+    Cache[titan-cache]
+    Etc[…]
+  end
+
+  subgraph Netron["Netron RPC Plane"]
+    Services[Your @Service classes]
+    Transports[HTTP / WS / TCP / Unix]
+    Auth2[Authn + Authz]
+    Middleware[Middleware Stack]
+  end
+
+  Bootstrap --> Container
+  Container --> Modules
+  Container --> Services
+  Lifecycle --> Modules
+  Modules --> Container
+  Services --> Transports
+  Auth2 --> Middleware
+  Middleware --> Services
 ```
 
-### `@Public()`
+The Application kernel owns the container, the lifecycle, and the event
+bus. Modules register providers in the container. Services are providers
+that also register themselves with Netron. Netron exposes them over
+transports. Middleware wraps every call.
 
-Marks a method as exposed over the configured RPC transports. Methods
-without `@Public` are internal — callable from inside the container,
-invisible from the wire.
+That is it. Everything else — the 14 ecosystem modules, the validation
+decorators, the resilience helpers — is built on top of these four
+primitives.
 
-```typescript
-@Public()
-async findById(id: string): Promise<User> { /* … */ }
-```
+## What this section covers
 
-### `@Module({...})`
+This is the reference section for Titan itself. It is dense, technical,
+and assumes you have read the
+[introduction](../intro.md) and worked through the
+[quickstart](../getting-started/quickstart.md).
 
-Declares a unit of composition: providers (classes the container
-instantiates), imports (other modules), exports (providers visible to
-importers).
+| Area                                                          | When to read                                          |
+| ------------------------------------------------------------- | ----------------------------------------------------- |
+| [Concepts](./concepts/design-principles.md)                   | Before designing a new Titan-based system             |
+| [Application](./application/bootstrap.md)                     | When you start, stop, or supervise an app             |
+| [Modules](./modules-system/defining-modules.md)               | When you organise services into reusable units        |
+| [Dependency Injection](./di/overview.md)                      | When you need to control how things are constructed   |
+| [Decorators](./decorators/index.md)                           | Reference for every decorator the framework ships     |
+| [Validation](./validation/overview.md)                        | When inputs cross a trust boundary                    |
+| [Errors](./errors/overview.md)                                | When you need typed, classifiable failures            |
+| [Netron RPC](./netron.md)                                     | When you expose services over the network             |
+| [Configuration](./configuration/overview.md)                  | When the runtime needs to read settings               |
+| [Logging](./logging/overview.md)                              | When you need structured, context-aware logs          |
+| [Tracing](./tracing.md)                                       | When you correlate work across services               |
+| [Resilience](./resilience/overview.md)                        | When you defend against partial failure               |
+| [Testing](./testing/overview.md)                              | When you write fast, deterministic tests              |
+| [Best Practices](./best-practices/structuring-services.md)    | When you want the team to converge on conventions     |
+| [Modules Catalogue](./modules/index.md)                       | The 14 ecosystem modules in detail                    |
 
-```typescript
-@Module({
-  imports:   [LoggerModule, ConfigModule],
-  providers: [UsersService, UsersRepository],
-  exports:   [UsersService],
-})
-export class UsersModule {}
-```
+## Versioning and stability
 
-### `Application.create(RootModule, options)`
+Titan follows semver. Every public API is annotated in source with a
+stability marker:
 
-Builds the container, runs the lifecycle, exposes Netron transports.
-Returns an `Application` instance you `.start()` and `.stop()`.
+| Marker          | Meaning                                                     |
+| --------------- | ----------------------------------------------------------- |
+| `@stable`       | Public API. Breaking changes are major-version only.        |
+| `@experimental` | Public API but may change in minor versions. Opt in.        |
+| `@internal`     | Not part of the public API. Do not import.                  |
+| `@deprecated`   | Slated for removal. Documented migration path provided.     |
 
-```typescript
-const app = await Application.create(AppModule, {
-  netron: { http: { port: 3000 } },
-});
-await app.start();
-```
+Internal subpaths (`@omnitron-dev/titan/internal/*`) are explicitly
+unstable and reserved for the framework itself.
 
-## What you get out of the box
-
-- **Container with explicit DI** — providers resolved by class
-  reference; no string-based lookups by default.
-- **Lifecycle** — `onInit`, `onStart`, `onStop`, `onShutdown` hooks
-  fired in dependency order.
-- **Validation** — `@Validate(Schema)` decorator on method
-  parameters; backed by Zod or a compatible schema library.
-- **Errors** — `NetronError` hierarchy with typed subclasses for
-  client/server distinction.
-- **Logging** — `LoggerModule` for structured JSON with trace
-  context propagation.
-- **Configuration** — `ConfigModule.forRoot({...})` with file +
-  env + override sources, schema-validated.
-- **Tracing** — built-in trace ID propagation through Netron calls.
-
-## What's optional
-
-| Need                  | Module                      |
-| --------------------- | --------------------------- |
-| JWT auth              | `titan-auth`                |
-| Caching               | `titan-cache`               |
-| SQL database          | `titan-database`            |
-| Service discovery     | `titan-discovery`           |
-| Event bus             | `titan-events`              |
-| Health checks         | `titan-health`              |
-| Distributed locks     | `titan-lock`                |
-| Metrics               | `titan-metrics`             |
-| Notifications         | `titan-notifications`       |
-| Process management    | `titan-pm`                  |
-| Rate limiting         | `titan-ratelimit`           |
-| Redis client          | `titan-redis`               |
-| Scheduled jobs        | `titan-scheduler`           |
-| Telemetry shipping    | `titan-telemetry-relay`     |
-
-See [Modules](./modules/index.md) for a per-module reference.
-
-## Read next
-
-- [Application & DI](./application.md) — the container, providers,
-  modules, lifecycle.
-- [Netron RPC](./netron.md) — transports, middleware, auth.
-- [Modules](./modules/index.md) — the 14 ecosystem modules.
+Read on: [Design Principles](./concepts/design-principles.md).

@@ -60,7 +60,7 @@ async sendInvite(email: string) { /* … */ }
 ```typescript
 const allowed = await this.rate.tryConsume(`charge:${userId}`, 1);
 if (!allowed) {
-  throw new RateLimitedError('too many charge attempts');
+  throw new RateLimitError({ message: 'too many charge attempts' });
 }
 ```
 
