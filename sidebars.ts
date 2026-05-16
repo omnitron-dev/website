@@ -205,6 +205,12 @@ const sidebars: SidebarsConfig = {
       label: 'Modules',
       link: {type: 'doc', id: 'titan/modules/index'},
       items: [
+        'titan/modules/module-map',
+        'titan/modules/options-patterns',
+        'titan/modules/lifecycle-reference',
+        'titan/modules/tokens-reference',
+        'titan/modules/observability-matrix',
+        'titan/modules/security-checklist',
         {
           type: 'category',
           label: 'Built-in',

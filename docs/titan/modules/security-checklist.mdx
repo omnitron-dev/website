@@ -1,0 +1,356 @@
+---
+sidebar_position: 7
+title: Security checklist
+description: Per-module hardening guidance for production deployments.
+---
+
+import ModuleBadge from '@site/src/components/ModuleBadge';
+
+# Security checklist
+
+A per-module audit checklist focused on what an attacker or
+careless operator could exploit. Use it before exposing a Titan
+backend publicly, during a pen-test prep, or as compliance
+evidence.
+
+The checklist below treats each module as independently hostile —
+the box ticks the same whether you're securing a single API pod
+or a 50-pod fleet.
+
+## Surface-area overview
+
+| Module                     | External attack surface                              | Primary risk                                   |
+| -------------------------- | ---------------------------------------------------- | ---------------------------------------------- |
+| `titan-auth`               | JWT verification endpoint, JWKS URL                  | Algorithm confusion, key rotation              |
+| `titan-cache`              | None directly (L1/L2 reads)                          | Sensitive data persistence in L2 (Redis)       |
+| `titan-database`           | SQL execution path                                   | Injection, missing RLS, leaked DSN             |
+| `titan-discovery`          | Registry writes via Redis                            | Spoofed registration, registry pollution       |
+| `titan-events`             | Event payload deserialization                        | PII leakage, untrusted handlers                |
+| `titan-health`             | `/healthz/full` JSON (stack info)                    | Information disclosure                         |
+| `titan-lock`               | Lock keys in Redis                                   | Lock pinning, ownership spoofing               |
+| `titan-metrics`            | `/metrics` exposition + storage                      | Cardinality abuse, label PII                   |
+| `titan-notifications`      | Outbound webhooks, channel queue                     | Webhook forgery, template injection            |
+| `titan-pm`                 | Child process spawn parameters                       | Argv-leaked secrets, file-descriptor inherit   |
+| `titan-ratelimit`          | Per-key state                                        | IP spoofing without trusted proxy              |
+| `titan-redis`              | Direct Redis client                                  | Plaintext AUTH, shared keyspaces               |
+| `titan-scheduler`          | Stored cron expressions                              | Untrusted cron → forced load                   |
+| `titan-telemetry-relay`    | WAL file, transport messages                         | File permissions, unsigned transport           |
+| `config` (built-in)        | Config sources                                       | Secrets in committed defaults                  |
+| `logger` (built-in)        | Log sinks                                            | PII in structured logs                         |
+
+## Per-module hardening
+
+### `titan-auth`
+
+<ModuleBadge origin="official" pkg="@omnitron-dev/titan-auth" />
+
+- [ ] **Algorithm pinned explicitly.** Never accept whatever the
+  incoming JWT declares; configure `algorithm: 'RS256'` (or
+  `'ES256'` / `'HS256'`) and enforce it. JWT spec history is
+  littered with algorithm-confusion CVEs.
+- [ ] **JWT secret length & source.** HS256 secrets ≥ 32 bytes,
+  loaded from secret manager — never from a committed file or
+  default value.
+- [ ] **JWKS rotation supported.** For RS256/ES256, configure
+  `jwksUrl` with a short cache TTL (≤ 1 h) so revoked keys
+  propagate.
+- [ ] **`verificationKeys` registry for HS256 rotation.** Add new
+  keys before issuing tokens with them; remove old keys only after
+  all in-flight tokens expire.
+- [ ] **Token cache TTL ≤ token lifetime.** Cached verifications
+  bypass JWKS fetch; never cache longer than the token's `exp`.
+- [ ] **Clock skew bounded.** Use the smallest workable
+  `clockTolerance` (default 5 s is usually right). Wider windows
+  enable replay-after-expiry.
+- [ ] **`audience` and `issuer` enforced.** Both options must be
+  populated; otherwise any well-signed token from any service
+  authenticates.
+- [ ] **`InvalidTokenError` / `TokenExpiredError` not logged with
+  the token body.** Log `code` and `kid` only.
+- [ ] **No JWT in URLs.** Use the `Authorization: Bearer` header.
+  URLs end up in proxy logs, browser history, referer headers.
+
+### `titan-cache`
+
+<ModuleBadge origin="official" pkg="@omnitron-dev/titan-cache" />
+
+- [ ] **Don't cache sensitive payloads in L2.** L2 is Redis;
+  Redis persistence means caches survive process restart and may
+  be backed up. Use L1-only for PII / auth state.
+- [ ] **Key namespacing per tenant.** `users:{tenantId}:{userId}` —
+  never a bare `users:{userId}` if you have multi-tenant data.
+- [ ] **TTL always set.** Default to `defaultTTL`; unbounded keys
+  drift forever.
+- [ ] **Cache stampede protection.** Use `getOrSet` (singleflight)
+  not `get` + manual `set` on miss.
+- [ ] **No cache-key from user input without hashing/length cap.**
+  Multi-MB keys are a DOS vector against the cache itself.
+
+### `titan-database`
+
+<ModuleBadge origin="official" pkg="@omnitron-dev/titan-database" />
+
+- [ ] **Parameterised queries only.** Kysely query builder is
+  parameterised by default. If you reach for `sql.raw()`,
+  whitelist inputs.
+- [ ] **RLS enabled on multi-tenant tables.** Use
+  `defineRLSSchema` + `rlsPlugin` — don't rely on application-layer
+  WHERE clauses to enforce isolation.
+- [ ] **`validateColumnNames` on dynamic queries.** When column
+  names come from a request, use
+  [`validateColumnNames`](./database.mdx) to block injection.
+- [ ] **DSN from secret manager.** `connectionString` should
+  resolve via `ConfigService` from a secrets source, not a literal
+  in code.
+- [ ] **Least-privileged DB user.** App connects as a role with
+  only the privileges it needs; migrations run as a separate role.
+- [ ] **`enableDatabaseIndicator: true`** on `titan-health` so the
+  probe surfaces a dead DB before the load balancer keeps routing.
+- [ ] **Backup encryption.** Out of scope here but: rotated
+  encryption keys, off-site copies, restore drills.
+
+### `titan-discovery`
+
+<ModuleBadge origin="official" pkg="@omnitron-dev/titan-discovery" />
+
+- [ ] **Redis ACL on the discovery prefix.** The pod's Redis user
+  has `HSET`/`EXPIRE`/`PUBLISH` on `titan:discovery:*` only — no
+  full-keyspace access.
+- [ ] **Network segmentation.** Discovery's Redis is
+  cluster-internal; never reachable from the public network.
+- [ ] **Heartbeat TTL ≥ 3 × interval.** Premature ejection from
+  the registry causes thundering reconnects when a pod is slow,
+  not dead.
+- [ ] **`clientMode: true` for read-only consumers.** Any pod that
+  doesn't host services shouldn't be able to register fake nodes.
+- [ ] **Don't expose `discovery@…` over public RPC.** Internal
+  topology is sensitive information.
+
+### `titan-events`
+
+<ModuleBadge origin="official" pkg="@omnitron-dev/titan-events" />
+
+- [ ] **Schema validation on every event channel.** Untyped
+  payloads from one service to another are a wide attack surface.
+- [ ] **No PII in events.** Events are often logged or persisted
+  in history — assume any payload may end up in a SIEM.
+- [ ] **Bounded handler concurrency.** A slow handler shouldn't
+  back-pressure the entire bus — use the per-handler concurrency
+  option.
+- [ ] **History TTL bounded.** `enableHistory: true` with no TTL
+  is an unbounded memory growth path.
+
+### `titan-health`
+
+<ModuleBadge origin="official" pkg="@omnitron-dev/titan-health" />
+
+- [ ] **`/healthz` and `/readyz` exposed; full JSON gated.** The
+  detailed `check()` output reveals component names, error
+  messages, and the topology — operator-only.
+- [ ] **`enableRpcService: false`** if you serve probes via HTTP
+  and don't want RPC inspection.
+- [ ] **Indicator timeout configured.** A hung indicator blocks
+  the whole probe — set `timeout` ≤ probe period (default 5 s).
+- [ ] **No secrets in indicator messages.** Don't return the DSN
+  in a "database unhealthy" message.
+
+### `titan-lock`
+
+<ModuleBadge origin="official" pkg="@omnitron-dev/titan-lock" />
+
+- [ ] **TTL always set.** A crashed holder shouldn't pin the lock
+  forever. Set TTL to the longest credible work time + margin.
+- [ ] **Ownership UUID enforced.** Use `tryAcquire(key, { owner })`
+  — the included Lua scripts verify ownership on release. Never
+  release with `DEL key` directly.
+- [ ] **Refresh extends, doesn't reset.** Use `refresh()` to push
+  the TTL out periodically while still holding; don't release-and-
+  reacquire which is racy.
+- [ ] **Lock granularity.** A single global lock per resource is
+  cleaner than a hierarchy; deep lock chains invite deadlocks.
+
+### `titan-metrics`
+
+<ModuleBadge origin="official" pkg="@omnitron-dev/titan-metrics" />
+
+- [ ] **`/metrics` endpoint authenticated.** Prometheus exposition
+  reveals throughput, error rates, internal endpoints — gate
+  behind an operator token.
+- [ ] **No PII in label values.** `{ userId }` creates a fresh
+  series per user — both a cardinality explosion and a PII leak.
+  Keep labels to `tier`, `region`, `status`.
+- [ ] **`appName` set.** Untagged metrics from multiple services
+  collide.
+- [ ] **Storage backend access controlled.** Postgres-backed
+  metrics give whoever has DB access full historical visibility.
+
+### `titan-notifications`
+
+<ModuleBadge origin="official" pkg="@omnitron-dev/titan-notifications" />
+
+- [ ] **Webhook signature secret rotated.** Configure
+  `webhookConfig.signatureSecret` and verify on the receiver.
+- [ ] **Webhook timeout bounded.** Default 5 s; never wait
+  indefinitely on a third-party endpoint.
+- [ ] **Template engine input escaped.** Templates receive
+  attacker-controlled data via `payload.data`; ensure the
+  template engine escapes context-appropriately (HTML for email,
+  plain for SMS).
+- [ ] **Per-recipient rate limit.** Set
+  `rateLimiterConfig.defaultLimits` so a compromised account can't
+  spam the world via your service.
+- [ ] **Preferences honoured before send.** `IPreferenceStore`
+  must check unsubscribes / DND windows before delivery, not
+  after.
+- [ ] **DLQ access controlled.** `listDLQ()` reveals undelivered
+  payloads — operator-only.
+
+### `titan-pm`
+
+<ModuleBadge origin="official" pkg="@omnitron-dev/titan-pm" />
+
+- [ ] **Secrets via env, not argv.** Process arguments appear in
+  `ps`, `/proc/<pid>/cmdline`, and crash dumps. Pass secrets via
+  `env: { SECRET: '...' }`.
+- [ ] **`stdio` ignored or piped, never `'inherit'` for children
+  handling secrets.** Inheritance leaks the child's output into the
+  parent's stdout.
+- [ ] **Restart limits set.** Without `maxRestarts`, a crash loop
+  is a CPU DoS vector against the supervisor.
+- [ ] **Health-check command bounded.** A hanging health-check
+  starves the supervisor; set `healthCheckTimeout`.
+- [ ] **No untrusted command paths.** `command` must resolve to
+  a known binary — never to a user-supplied path.
+- [ ] **Audit `pm@1.0.0` if exposed.** PM control = code
+  execution. Admin role minimum, mutual TLS preferred.
+
+### `titan-ratelimit`
+
+<ModuleBadge origin="official" pkg="@omnitron-dev/titan-ratelimit" />
+
+- [ ] **Per-IP keys behind trusted proxy.** Use the
+  proxy-supplied client IP (e.g., `X-Forwarded-For` parsed by a
+  trusted-proxies middleware), not the socket peer.
+- [ ] **Key includes user / API key when authenticated.** A bare
+  IP key punishes shared NATs.
+- [ ] **`queueEnabled: false` for unauthenticated endpoints.**
+  Queueing turns rejections into work — a DoS amplifier.
+- [ ] **Redis-backed for multi-pod.** In-memory limits are
+  per-pod; rotating pods lets the attacker reset.
+- [ ] **Distinct keyspaces per app.** Configure `keyPrefix` so
+  different services don't share counters.
+
+### `titan-redis`
+
+<ModuleBadge origin="official" pkg="@omnitron-dev/titan-redis" />
+
+- [ ] **TLS to managed Redis.** Configure `tls: {}` in the client
+  options; verify the certificate.
+- [ ] **`AUTH` password set, rotated.** From secret manager, not
+  hardcoded.
+- [ ] **DB-per-concern split.** Cache, queues, rate limits, locks,
+  discovery — separate `db:` indexes (see the
+  [module map](./module-map.mdx#where-redis-sits) table).
+- [ ] **`enableReadyCheck` and `lazyConnect` aligned with
+  reconnect policy.**
+- [ ] **`commandQueueMaxLength` set.** Prevents memory blow-up
+  when Redis is unreachable.
+- [ ] **Disable dangerous commands.** Server-side `rename-command`
+  for `FLUSHALL`, `FLUSHDB`, `KEYS`, `CONFIG` in shared
+  environments.
+
+### `titan-scheduler`
+
+<ModuleBadge origin="official" pkg="@omnitron-dev/titan-scheduler" />
+
+- [ ] **No user-supplied cron expressions.** `@Cron` strings are
+  developer-authored. If you accept schedules from users (multi-
+  tenant SaaS), validate against an allow-list of patterns.
+- [ ] **Job runtime bounded.** Long-running jobs without a
+  timeout pile up missed-fires; configure `timeout` per job.
+- [ ] **Persistence backend access controlled.** Same access
+  story as the database: persisted job rows reveal what runs and
+  when.
+- [ ] **`@Cron` handlers idempotent.** Missed-fire replay
+  semantics make some jobs run twice; design for it.
+
+### `titan-telemetry-relay`
+
+<ModuleBadge origin="official" pkg="@omnitron-dev/titan-telemetry-relay" />
+
+- [ ] **WAL file permissions `0600`.** WAL contains buffered
+  metric / log payloads — readable WAL = readable observability.
+- [ ] **Signed transport between producer and aggregator.** Run
+  over a TLS Netron transport or a mutually authenticated
+  channel.
+- [ ] **Aggregator access controlled.** Whoever can read the
+  aggregator's storage can read everyone's telemetry.
+
+### `config` (built-in)
+
+<ModuleBadge origin="built-in" pkg="@omnitron-dev/titan/module/config" />
+
+- [ ] **No secrets in committed files.** `config/default.yaml` is
+  defaults; `config/local.yaml` is git-ignored; secrets come from
+  env or a secret-manager source.
+- [ ] **Schema covers every required key.** Misconfiguration must
+  fail at boot, not at the first dependent call.
+- [ ] **`watchForChanges: false` in production for connection
+  strings.** Hot-reloading a DB URL won't rebind an open pool —
+  reserve hot-reload for safe-to-swap values (log level, flags).
+- [ ] **Read through `ConfigService`, never `process.env`
+  directly.** Bypasses layered sources and breaks tests.
+
+### `logger` (built-in)
+
+<ModuleBadge origin="built-in" pkg="@omnitron-dev/titan/module/logger" />
+
+- [ ] **PII redaction processor enabled.** Configure the
+  redaction processor for fields that may carry email / phone /
+  card data.
+- [ ] **Log level production-appropriate.** `info` or `warn` in
+  production; `debug` only for time-bounded investigations.
+- [ ] **No raw secrets in `error.message`.** Errors are caught
+  and logged; ensure secret-laden messages are sanitised before
+  throwing.
+- [ ] **Sink configured for tamper-evident transport.** Append-only,
+  signed transports for compliance scenarios.
+
+## Cross-cutting
+
+### Transport / network
+
+- [ ] **Netron port not publicly exposed** without auth + TLS.
+- [ ] **Cluster-internal services pinned to private VPC.**
+- [ ] **Egress controlled.** Outbound webhooks / JWKS fetches
+  whitelisted.
+
+### Secrets management
+
+- [ ] **All secrets via secret manager** (AWS Secrets Manager,
+  Vault, etc.). Not in env vars at rest in container images.
+- [ ] **Secret rotation runbook tested.** Rotating without
+  downtime requires the multi-key support of `titan-auth`,
+  `titan-redis` ACL renaming, and `ConfigService` reload.
+
+### Audit logging
+
+- [ ] **Admin actions logged with actor + outcome.** Lock force-
+  release, PM admin RPC, manual notification sends, scheduler
+  trigger.
+- [ ] **Logs ship to an append-only sink.** Local files alone are
+  insufficient for compliance.
+
+### Dependency hygiene
+
+- [ ] **`pnpm audit` clean.** Known CVEs in transitive deps
+  patched within SLA.
+- [ ] **Modules pinned to known versions.** `^` ranges are fine
+  for dev; freeze on lockfile in CI.
+
+## See also
+
+- [Best Practices / Observability](../best-practices/observability.md) — pairs with this checklist
+- [Tokens & RPC reference](./tokens-reference.mdx#hardening-checklist) — RPC surface specifics
+- [Netron / Authentication](../netron/authentication.md)
+- [Lifecycle reference](./lifecycle-reference.mdx) — knowing what runs when helps audit

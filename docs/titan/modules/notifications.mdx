@@ -60,16 +60,16 @@ import { NotificationsModule } from '@omnitron-dev/titan-notifications';
 @Module({
   imports: [
     NotificationsModule.forWorker({
-      targetResolver:   USER_TARGET_RESOLVER_TOKEN,
-      persister:        NOTIFICATION_PERSISTER_TOKEN,
-      realtimeSignaler: REALTIME_SIGNALER_TOKEN,
+      targetResolver:   NOTIFICATION_TARGET_RESOLVER,
+      persister:        NOTIFICATION_PERSISTER,
+      realtimeSignaler: NOTIFICATION_REALTIME_SIGNALER,
       workerOptions:    { concurrency: 8 },
     }),
   ],
   providers: [
-    { provide: USER_TARGET_RESOLVER_TOKEN, useClass: MyUserResolver },
-    { provide: NOTIFICATION_PERSISTER_TOKEN, useClass: MyPersister },
-    { provide: REALTIME_SIGNALER_TOKEN, useClass: MyRealtimeSignaler },
+    { provide: NOTIFICATION_TARGET_RESOLVER, useClass: MyUserResolver },
+    { provide: NOTIFICATION_PERSISTER,        useClass: MyPersister },
+    { provide: NOTIFICATION_REALTIME_SIGNALER,useClass: MyRealtimeSignaler },
   ],
 })
 class WorkerModule {}
