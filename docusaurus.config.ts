@@ -178,8 +178,8 @@ const config: Config = {
           title: 'Frontend',
           items: [
             {label: 'Prism', to: '/docs/frontend/prism'},
-            {label: 'Netron Browser', to: '/docs/frontend/netron-browser'},
-            {label: 'Netron React', to: '/docs/frontend/netron-react'},
+            {label: 'Netron Browser', to: '/docs/frontend/netron/browser'},
+            {label: 'Netron React', to: '/docs/frontend/netron/react'},
           ],
         },
         {

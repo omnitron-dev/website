@@ -7,7 +7,7 @@ description: Production-grade React bindings for Netron RPC — type-safe hooks,
 # netron-react
 
 `@omnitron-dev/netron-react` provides React 18+ / 19 bindings on
-top of [netron-browser](./netron-browser.md). Type-safe hooks for
+top of [netron-browser](./browser.md). Type-safe hooks for
 queries, mutations, subscriptions, infinite queries; a query +
 mutation cache; multi-backend support; an authentication system
 with route guards; and devtools.
@@ -610,7 +610,7 @@ The suspense variant skips the `isLoading` branch — wrap in
 
 ## See also
 
-- [netron-browser](./netron-browser.md) — the underlying transport
-- [Prism](./prism.md) — UI components that pair with these hooks
-- [Frontend overview](./overview.md) — the three-package picture
-- [Console](../omnitron/console.md) — real production app using these hooks
+- [netron-browser](./browser.md) — the underlying transport
+- [Prism](../prism/index.md) — UI components that pair with these hooks
+- [Frontend overview](../overview.md) — the three-package picture
+- [Console](../../omnitron/console.md) — real production app using these hooks

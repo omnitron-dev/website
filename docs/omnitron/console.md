@@ -381,6 +381,6 @@ everything.
 - [Services reference](./services-reference.md) — every RPC the
   webapp consumes
 - [Architecture](./architecture.md) — where the webapp sits
-- [Prism](../frontend/prism.md) — the design system the webapp uses
-- [netron-browser](../frontend/netron-browser.md) — the RPC client
-- [netron-react](../frontend/netron-react.md) — React hooks for RPC
+- [Prism](../frontend/prism/index.md) — the design system the webapp uses
+- [netron-browser](../frontend/netron/browser.md) — the RPC client
+- [netron-react](../frontend/netron/react.md) — React hooks for RPC
