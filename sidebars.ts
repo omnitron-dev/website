@@ -171,6 +171,7 @@ const sidebars: SidebarsConfig = {
         'titan/testing/overview',
         'titan/testing/di-overrides',
         'titan/testing/integration',
+        'titan/testing/modules',
       ],
     },
     {
@@ -194,6 +195,8 @@ const sidebars: SidebarsConfig = {
         'titan/recipes/observability-stack',
         'titan/recipes/notifications-pipeline',
         'titan/recipes/multi-tenant-saas',
+        'titan/recipes/webhook-receiver',
+        'titan/recipes/oauth-callback',
       ],
     },
     {
