@@ -1,0 +1,382 @@
+---
+sidebar_position: 9
+title: Decorators catalog
+description: Every decorator exported by every module — what it does, where it comes from.
+---
+
+import ModuleBadge from '@site/src/components/ModuleBadge';
+
+# Decorators catalog
+
+Titan and its ecosystem ship a lot of decorators. This page is the
+single-source-of-truth lookup: what each decorator does, which
+package to import it from, and which decorators share a name
+across packages (so you don't accidentally import the wrong one).
+
+All entries verified against source via grep for `^export
+(function|const) [A-Z]` returning a decorator type.
+
+## Quick lookup by purpose
+
+| You want to…                                  | Reach for                                                |
+| --------------------------------------------- | -------------------------------------------------------- |
+| Mark a class as DI-injectable                 | `@Injectable()` *(core)*                                 |
+| Expose a class as RPC service                 | `@Service('name@version')` *(core)*                      |
+| Expose a method on the wire                   | `@Public()` *(core)*                                     |
+| Validate a method's args / return             | `@Validate(schema)` *(core)*                             |
+| Require authenticated caller                  | `@RequireAuth()` *(titan-auth)*                          |
+| Skip auth for one method                      | `@Public()` *(titan-auth — opts out of auth)*            |
+| Memoise an idempotent method                  | `@Cacheable()` *(titan-cache)*                           |
+| Throttle calls per key                        | `@RateLimit({ key, limit })` *(titan-ratelimit)*         |
+| Run at a cron schedule                        | `@Cron('0 * * * *')` *(titan-scheduler)*                 |
+| Run on an interval                            | `@Interval(60_000)` *(titan-scheduler)*                  |
+| Subscribe to a typed event                    | `@OnEvent('user.created')` *(titan-events)*              |
+| Auto-emit an event from a method              | `@EmitEvent('user.created')` *(titan-events)*            |
+| Wrap a method in a distributed lock           | `@WithDistributedLock(key, ttl)` *(titan-lock)*          |
+| Instrument a method with counter + histogram  | `@Metrics({ counter, histogram })` *(titan-metrics)*     |
+| Define a worker process class                 | `@Process()` *(titan-pm)*                                |
+| Define a supervised hierarchy                 | `@Supervisor()` + `@Child()` *(titan-pm)*                |
+| Bind a class to a config subtree              | `@Configuration('cache')` *(config built-in)*            |
+| Read one config value                         | `@Config('cache.ttlMs', 60_000)` *(config built-in)*     |
+| Apply RLS to a repository                     | `@Policy(...)` + `@Allow`/`@Deny`/`@Filter` *(titan-database)* |
+| Soft-delete a repository's rows               | `@SoftDelete()` *(titan-database)*                       |
+| Auto-add `created_at`/`updated_at`            | `@Timestamps()` *(titan-database)*                       |
+| Audit row changes                             | `@Audit()` *(titan-database)*                            |
+
+## Core decorators
+
+<ModuleBadge origin="built-in" pkg="@omnitron-dev/titan" />
+
+Imported from the package root (`@omnitron-dev/titan`) unless
+noted.
+
+### DI
+
+| Decorator                  | Targets               | Effect                                                       |
+| -------------------------- | --------------------- | ------------------------------------------------------------ |
+| `@Injectable(opts?)`       | class                 | Marks a class as a DI provider                               |
+| `@Service(name)`           | class                 | Marks a class as a Netron RPC service                        |
+| `@Inject(token)`           | parameter / property  | Resolves a token from the container                          |
+| `@Optional()`              | parameter / property  | Allow undefined if the token isn't registered                |
+| `@Global()`                | class (on Module)     | Makes the module's exports visible everywhere                |
+
+### RPC surface
+
+| Decorator                  | Targets               | Effect                                                       |
+| -------------------------- | --------------------- | ------------------------------------------------------------ |
+| `@Public(opts?)`           | method / property     | Exposes the method on the wire                               |
+| `@Contract(class)`         | class                 | Binds a Zod-based input/output contract                      |
+| `@Validate({input, output})` | method              | Runs Zod schemas around the call                             |
+| `@NoValidation()`          | method                | Opts out of class-level validation                           |
+| `@WithValidationOptions(opts)` | class             | Sets default validation behaviour for the class              |
+| `@ValidateInput(schema)`   | method                | Input-only validation                                        |
+| `@ValidateOutput(schema)`  | method                | Output-only validation                                       |
+
+> The core `@Public()` exposes; the *titan-auth* `@Public()`
+> further marks the same method as auth-bypass. They compose:
+> `@Public() @RequireAuth()` for an exposed-but-protected method
+> is the common pattern.
+
+### Lifecycle
+
+| Decorator             | Targets    | Effect                                          |
+| --------------------- | ---------- | ----------------------------------------------- |
+| `@PostConstruct()`    | method     | Run after construction, before `onInit`         |
+| `@PreDestroy()`       | method     | Run during `onDestroy`                          |
+
+For full hooks (`onInit`, `onStart`, `onStop`, `onDestroy`)
+implement the interfaces instead — they're more discoverable than
+decorators. See [Lifecycle reference](./lifecycle-reference.mdx).
+
+### Method utilities
+
+Most utility decorators are method interceptors that compose
+freely with other decorators.
+
+| Decorator                                  | Effect                                                       |
+| ------------------------------------------ | ------------------------------------------------------------ |
+| `@Memoize`                                 | Cache the result of a function in-memory by arg fingerprint  |
+| `@Retry({ attempts, delay })`              | Retry on throw with linear delay                             |
+| `@Retryable({...})`                        | More configurable retry (backoff curve, predicate)           |
+| `@Timeout({ ms })`                         | Reject if the method doesn't resolve within `ms`             |
+| `@Log({...})`                              | Log entry / exit / error                                     |
+| `@Monitor({...})`                          | Emit metric samples around the call                          |
+| `@Deprecated({ message, version })`        | Warn callers; metadata for tooling                           |
+
+> The core `@Timeout` clashes with `titan-scheduler.@Timeout` —
+> distinguish by import path (`@omnitron-dev/titan` vs
+> `@omnitron-dev/titan-scheduler`).
+
+## Built-in module decorators
+
+### `config`
+
+<ModuleBadge origin="built-in" pkg="@omnitron-dev/titan/module/config" />
+
+| Decorator                  | Targets               | Effect                                                       |
+| -------------------------- | --------------------- | ------------------------------------------------------------ |
+| `@Config(path, default?)`  | property              | Inject one config value at a dotted path                     |
+| `@InjectConfig()`          | property              | Inject the whole `ConfigService`                             |
+| `@Configuration(prefix?)`  | class                 | Bind the class as a typed view of a config subtree           |
+| `@ConfigSchema(schema)`    | class                 | Class-level Zod schema for the bound subtree                 |
+| `@ConfigWatch(path)`       | method                | Method runs when the watched path changes                    |
+| `@ConfigDefaults({...})`   | class                 | Provide class-level defaults                                 |
+| `@ConfigProvider(name)`    | class                 | Custom config provider class                                 |
+
+```typescript
+@Configuration('cache')
+class CacheConfig {
+  @Config('ttlMs', 60_000)  ttlMs!: number;
+  @Config('maxItems', 1024) maxItems!: number;
+}
+```
+
+### `logger`
+
+<ModuleBadge origin="built-in" pkg="@omnitron-dev/titan/module/logger" />
+
+The logger module exports no decorators — instances are injected
+via token / interface (`LOGGER_SERVICE_TOKEN`, `LOGGER_TOKEN`).
+See [`logger`](./logger.mdx).
+
+## Official module decorators
+
+### `titan-auth`
+
+<ModuleBadge origin="official" pkg="@omnitron-dev/titan-auth" />
+
+| Decorator                          | Targets         | Effect                                                       |
+| ---------------------------------- | --------------- | ------------------------------------------------------------ |
+| `@RequireAuth(opts?)`              | method          | Caller must present a valid JWT                              |
+| `@RequireServiceAuth()`            | method          | Caller must hold the `service` role                          |
+| `@RequireAdminAuth()`              | method          | Caller must hold the `admin` role                            |
+| `@RequireRole(roles[], message?)`  | method          | Caller must hold at least one of the listed roles            |
+| `@Public()`                        | class / method  | Auth bypass — explicitly mark as anonymous-allowed           |
+
+> **Two `@Public()` decorators exist.** The core one exposes the
+> method on Netron. The titan-auth one opts it out of authentication.
+> Import path determines which: `@omnitron-dev/titan` (expose) vs
+> `@omnitron-dev/titan-auth` (auth bypass).
+
+### `titan-cache`
+
+<ModuleBadge origin="official" pkg="@omnitron-dev/titan-cache" />
+
+| Decorator                          | Targets             | Effect                                                       |
+| ---------------------------------- | ------------------- | ------------------------------------------------------------ |
+| `@Cacheable(opts?)`                | method              | Memoise return value; key derived from args                  |
+| `@CachePut(opts?)`                 | method              | Always run the method, but update cache with result          |
+| `@CacheInvalidate(opts?)`          | method              | Remove cache entry / key pattern after method runs           |
+| `@CacheKey()`                      | parameter           | Mark one parameter as the cache key seed                     |
+| `@InjectCacheService()`            | property            | Inject the `ICacheService` directly                          |
+| `@InjectCacheLogger()`             | property            | Inject the cache-scoped logger                               |
+
+### `titan-database`
+
+<ModuleBadge origin="official" pkg="@omnitron-dev/titan-database" />
+
+| Decorator                                       | Targets         | Effect                                                       |
+| ----------------------------------------------- | --------------- | ------------------------------------------------------------ |
+| `@InjectConnection(name?)`                      | parameter       | Inject a named database connection                           |
+| `@InjectDatabaseManager()`                      | parameter       | Inject the global `DatabaseManager`                          |
+| `@SoftDelete(config?)`                          | class           | Apply Kysera soft-delete plugin                              |
+| `@Timestamps(config?)`                          | class           | Apply Kysera timestamps plugin                               |
+| `@Audit(config?)`                               | class           | Apply Kysera audit plugin                                    |
+| `@Policy(config?)`                              | class           | Declare RLS policy for the repository                        |
+| `@Allow(rule)`                                  | method          | RLS rule that ALLOWS access                                  |
+| `@Deny(rule)`                                   | method          | RLS rule that DENIES access                                  |
+| `@Filter(filter?)`                              | method          | RLS row-level filter                                         |
+| `@BypassRLS()`                                  | method          | Skip RLS for an admin-only operation                         |
+| `@AutoTransactional(opts?)`                     | method          | Run the method in a transaction; commit on success           |
+
+### `titan-discovery`
+
+<ModuleBadge origin="official" pkg="@omnitron-dev/titan-discovery" />
+
+`titan-discovery` does not export decorators — it integrates
+transparently with Netron via the module's `enableNetronIntegration`
+option. Service announce / lookup is automatic.
+
+### `titan-events`
+
+<ModuleBadge origin="official" pkg="@omnitron-dev/titan-events" />
+
+| Decorator                                  | Targets   | Effect                                                       |
+| ------------------------------------------ | --------- | ------------------------------------------------------------ |
+| `@OnEvent(event, opts?)`                   | method    | Subscribe to a named event                                   |
+| `@OnceEvent(event, opts?)`                 | method    | Subscribe once, then unsubscribe                             |
+| `@OnAnyEvent(opts?)`                       | method    | Subscribe to every event (firehose — use with care)          |
+| `@OnModuleEvent(module, event, opts?)`     | method    | Subscribe across module boundaries                           |
+| `@EmitEvent(event, opts?)`                 | method    | Auto-emit the event after a successful return                |
+| `@ScheduleEvent(event, opts?)`             | method    | Emit on a schedule (cron-like, via this module's scheduler)  |
+| `@BatchEvents(event, opts?)`               | method    | Batch handler — invoked once per batch                       |
+| `@EventEmitter(opts?)`                     | class     | Marks the class as a typed event source                      |
+
+### `titan-health`
+
+<ModuleBadge origin="official" pkg="@omnitron-dev/titan-health" />
+
+`titan-health` doesn't export decorators — indicators are
+registered as classes via `forFeature([...])`.
+
+### `titan-lock`
+
+<ModuleBadge origin="official" pkg="@omnitron-dev/titan-lock" />
+
+| Decorator                                       | Targets   | Effect                                                       |
+| ----------------------------------------------- | --------- | ------------------------------------------------------------ |
+| `@WithDistributedLock(key, ttlMs?)`             | method    | Acquire a distributed Redis lock around the call             |
+| `@Lock(key, ttlMs?)`                            | method    | Alias of `@WithDistributedLock`                              |
+
+The decorator releases the lock in `finally` — even on throw.
+
+### `titan-metrics`
+
+<ModuleBadge origin="official" pkg="@omnitron-dev/titan-metrics" />
+
+| Decorator                                                       | Targets | Effect                                                  |
+| --------------------------------------------------------------- | ------- | ------------------------------------------------------- |
+| `@Metrics({ counter?, histogram?, ... })`                       | method  | Auto-instrument the method with the listed metrics      |
+
+### `titan-notifications`
+
+<ModuleBadge origin="official" pkg="@omnitron-dev/titan-notifications" />
+
+| Decorator                                | Targets | Effect                                                       |
+| ---------------------------------------- | ------- | ------------------------------------------------------------ |
+| `@OnNotification(pattern, opts?)`        | method  | Worker-side handler for notifications matching a pattern     |
+
+### `titan-pm`
+
+<ModuleBadge origin="official" pkg="@omnitron-dev/titan-pm" />
+
+| Decorator                                | Targets         | Effect                                                       |
+| ---------------------------------------- | --------------- | ------------------------------------------------------------ |
+| `@Process(opts?)`                        | class           | Marks the class as a spawnable worker process                |
+| `@Public(opts?)`                         | method/property | Expose method to the process supervisor / IPC                |
+| `@RateLimit(opts)`                       | method          | Worker-runtime rate limiter (pm-internal)                    |
+| `@Cache(opts?)`                          | method          | Worker-runtime cache (pm-internal)                           |
+| `@Validate(opts)`                        | method          | Worker-runtime validation (pm-internal)                      |
+| `@Trace()`                               | method          | Add tracing span around method                               |
+| `@Metric(name?)`                         | method          | Emit a metric per call                                       |
+| `@Supervisor(opts?)`                     | class           | Class describing a supervised hierarchy                      |
+| `@Child(opts?)`                          | property        | Declare a child within a supervisor                          |
+| `@Workflow()`                            | class           | Workflow orchestration class                                 |
+| `@Stage(opts?)`                          | method          | A stage within a workflow                                    |
+| `@Compensate(stageName)`                 | method          | Compensating action if a stage fails                         |
+| `@Actor(opts?)`                          | class           | Actor-style stateful entity                                  |
+| `@CircuitBreaker(opts)`                  | method          | Circuit-breaker around external calls                        |
+| `@SelfHeal(action)`                      | method          | Auto-remediation action on failure                           |
+| `@Idempotent({ key, ttl? })`             | method          | Idempotency key-based deduplication                          |
+
+> `titan-pm` re-exports several decorator names (`@Public`,
+> `@RateLimit`, `@Cache`, `@Validate`) for its **worker runtime**.
+> They operate within the worker process, not on the supervisor's
+> Netron surface. Don't confuse them with the same-named
+> decorators in `@omnitron-dev/titan` / `titan-ratelimit` /
+> `titan-cache`.
+
+### `titan-ratelimit`
+
+<ModuleBadge origin="official" pkg="@omnitron-dev/titan-ratelimit" />
+
+| Decorator                                | Targets | Effect                                                       |
+| ---------------------------------------- | ------- | ------------------------------------------------------------ |
+| `@RateLimit(opts?)`                      | method  | Apply rate limit to the method (uses key derived from opts)  |
+| `@Throttle(rps)`                         | method  | Convenience for "N requests per second"                      |
+
+### `titan-redis`
+
+<ModuleBadge origin="official" pkg="@omnitron-dev/titan-redis" />
+
+`titan-redis` exports no decorators — inject the `Redis` client
+via `REDIS_TOKEN` or `getRedisClientToken(name)`. See
+[`titan-redis`](./redis.mdx).
+
+### `titan-scheduler`
+
+<ModuleBadge origin="official" pkg="@omnitron-dev/titan-scheduler" />
+
+| Decorator                                | Targets | Effect                                                       |
+| ---------------------------------------- | ------- | ------------------------------------------------------------ |
+| `@Cron(expression, opts?)`               | method  | Run on a cron schedule                                       |
+| `@Interval(ms, opts?)`                   | method  | Run every `ms` milliseconds                                  |
+| `@Timeout(ms, opts?)`                    | method  | Run once after `ms` milliseconds                             |
+| `@Schedulable()`                         | class   | Marks the class for scheduler discovery (when not auto-found) |
+
+> `titan-scheduler.@Timeout` schedules a **one-shot deferred call**.
+> Core `@Timeout` *aborts* a method if it doesn't return in time.
+> Different decorators with the same name — distinguish by import.
+
+### `titan-telemetry-relay`
+
+<ModuleBadge origin="official" pkg="@omnitron-dev/titan-telemetry-relay" />
+
+No decorators — instantiate `TelemetryRelayService` and wire it
+in directly.
+
+## Name collisions — which one to import
+
+When the same decorator name lives in multiple packages, import
+path resolves the ambiguity. Quick table:
+
+| Name             | Available in                                                                | Default expectation                            |
+| ---------------- | --------------------------------------------------------------------------- | ---------------------------------------------- |
+| `@Public`        | `@omnitron-dev/titan` (expose) + `titan-auth` (auth bypass) + `titan-pm` (worker IPC) | Pick by purpose; compose if needed     |
+| `@Validate`      | `@omnitron-dev/titan` + `titan-pm`                                          | Core for Netron methods; pm for workers        |
+| `@Timeout`       | `@omnitron-dev/titan` (abort) + `titan-scheduler` (one-shot)                | Read the verb — abort vs defer                 |
+| `@RateLimit`     | `titan-ratelimit` + `titan-pm`                                              | Use ratelimit for service methods              |
+| `@Cache`         | `titan-pm` (worker)                                                          | Compare with `@Cacheable` from titan-cache     |
+
+When in doubt, the import path is authoritative.
+
+## Composability rules
+
+Decorators apply **outside-in** — outermost runs last. The framework
+order normally arranges:
+
+```typescript
+@Public()                  // Netron exposure (outermost)
+@RequireAuth()             // auth check
+@RateLimit({ ... })        // rate limit
+@Validate({ input })       // input validation
+@Metrics({ counter, hist })// instrumentation
+@WithDistributedLock(key)  // lock
+async create(input) {/*…*/}
+```
+
+The runtime order at call-time:
+- enter Public → enter auth → enter rate limit → enter validate →
+  enter metrics → enter lock → **method body** → exit lock → exit
+  metrics → exit validate → exit rate limit → exit auth → exit Public
+
+This is the *only* order that makes sense:
+- Exposure outside auth (auth runs after the request enters the surface).
+- Rate limit before validate (cheaper to reject early).
+- Metrics around the lock (so you measure lock contention).
+
+## Anti-patterns
+
+- **`@Cacheable` on a non-idempotent method.** Cache returns the
+  same value forever; the side-effect runs once. Use `@CachePut`
+  or `@CacheInvalidate` if you have side-effects.
+- **`@RateLimit` without a per-caller key.** All callers share one
+  bucket. Include the user / IP / api-key in the key template.
+- **`@WithDistributedLock` without a TTL.** A crashed holder pins
+  the lock forever. Always set a TTL ≥ the longest credible work
+  time.
+- **`@OnEvent` handler that throws.** Throws don't propagate
+  through the bus by default; the bus may log and continue. Wrap
+  in try/catch if you need to ensure recovery.
+- **Two `@Public()` decorators on the same method.** Each from a
+  different package — they don't conflict, but the duplication is
+  noise. Pick one (the one you import explicitly) or import a
+  re-export alias.
+
+## See also
+
+- [Decorators / Index](../decorators/index.md) — framework-level guide
+- [Decorators / Lifecycle](../decorators/lifecycle.md)
+- [Decorators / Method traits](../decorators/method-traits.md)
+- [Tokens & RPC reference](./tokens-reference.mdx) — companion lookup for DI tokens
+- [Options patterns](./options-patterns.mdx) — module configuration recipes
