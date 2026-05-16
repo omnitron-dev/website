@@ -1,0 +1,305 @@
+---
+sidebar_position: 3
+title: Tokens & RPC reference
+description: All injection tokens and exposed RPC services across every module.
+---
+
+import ModuleBadge from '@site/src/components/ModuleBadge';
+
+# Tokens & RPC reference
+
+A single-page lookup for every DI token a Titan module exports and
+every Netron RPC service a module registers. Useful when you can't
+remember which token you need to inject, or when reviewing the
+external RPC surface of an app for security/audit purposes.
+
+## Built-in module tokens
+
+<ModuleBadge origin="built-in" pkg="@omnitron-dev/titan" />
+
+### `config` (`@omnitron-dev/titan/module/config`)
+
+| Token                              | Type                              |
+| ---------------------------------- | --------------------------------- |
+| `CONFIG_SERVICE_TOKEN`             | `ConfigService`                   |
+| `CONFIG_OPTIONS_TOKEN`             | `IConfigModuleOptions`            |
+| `CONFIG_SCHEMA_TOKEN`              | `unknown` (Zod schema)            |
+| `CONFIG_LOADER_SERVICE_TOKEN`      | `ConfigLoaderService`             |
+| `CONFIG_VALIDATOR_SERVICE_TOKEN`   | `ConfigValidatorService`          |
+| `CONFIG_WATCHER_SERVICE_TOKEN`     | `ConfigWatcherService`            |
+
+### `logger` (`@omnitron-dev/titan/module/logger`)
+
+| Token                       | Type                              |
+| --------------------------- | --------------------------------- |
+| `LOGGER_SERVICE_TOKEN`      | `ILoggerModule`                   |
+| `LOGGER_TOKEN`              | `ILogger` (root logger instance)  |
+| `LOGGER_OPTIONS_TOKEN`      | `ILoggerOptions`                  |
+| `LOGGER_TRANSPORTS_TOKEN`   | `ITransport[]`                    |
+| `LOGGER_PROCESSORS_TOKEN`   | `ILogProcessor[]`                 |
+
+## Official module tokens
+
+<ModuleBadge origin="official" pkg="@omnitron-dev/titan-*" />
+
+### `titan-auth`
+
+| Token                            | Type                          |
+| -------------------------------- | ----------------------------- |
+| `AUTH_OPTIONS_TOKEN`             | `IAuthModuleOptions`          |
+| `AUTH_MIDDLEWARE_TOKEN`          | `IAuthMiddleware`             |
+| `JWT_SERVICE_TOKEN`              | `IJWTService`                 |
+| `SIGNED_URL_SERVICE_TOKEN`       | `ISignedUrlService`           |
+
+### `titan-cache`
+
+| Token                            | Type                                |
+| -------------------------------- | ----------------------------------- |
+| `CACHE_SERVICE_TOKEN`            | `ICacheService`                     |
+| `CACHE_OPTIONS_TOKEN`            | `ICacheModuleOptions`               |
+| `CACHE_DEFAULT_TOKEN`            | `ICache` (default cache instance)   |
+| `CACHE_ADAPTER_TOKEN`            | `CacheAdapter`                      |
+| `CACHE_ADAPTER_OPTIONS_TOKEN`    | `ICacheAdapterOptions`              |
+
+### `titan-database`
+
+`titan-database` does **not** define dedicated DI tokens. The
+`TitanDatabaseModule` registers `DatabaseManager` and
+`DatabaseHealthIndicator` as classes — inject them by class
+reference:
+
+```typescript
+constructor(private readonly db: DatabaseManager) {}
+```
+
+For `forFeature(...)` repository registration, the per-repository
+tokens are generated from the repository class name. See the
+[`titan-database`](./database.mdx) page for `forFeature` patterns.
+
+### `titan-discovery`
+
+| Token                                  | Type                          |
+| -------------------------------------- | ----------------------------- |
+| `DISCOVERY_SERVICE_TOKEN`              | `IDiscoveryService`           |
+| `DISCOVERY_OPTIONS_TOKEN`              | `DiscoveryOptions`            |
+| `NETRON_DISCOVERY_INTEGRATION_TOKEN`   | `NetronDiscoveryIntegration`  |
+| `REDIS_TOKEN` (re-exported)            | `Redis`                       |
+
+### `titan-events`
+
+| Token                                  | Type                          |
+| -------------------------------------- | ----------------------------- |
+| `EVENTS_SERVICE_TOKEN`                 | `EventsService`               |
+| `EVENT_OPTIONS_TOKEN`                  | `IEventEmitterOptions`        |
+| `EVENT_EMITTER_TOKEN`                  | `EnhancedEventEmitter`        |
+| `EVENT_BUS_SERVICE_TOKEN`              | `EventBusService`             |
+| `EVENT_HISTORY_SERVICE_TOKEN`          | `EventHistoryService`         |
+| `EVENT_METADATA_SERVICE_TOKEN`         | `EventMetadataService`        |
+| `EVENT_SCHEDULER_SERVICE_TOKEN`        | `EventSchedulerService`       |
+| `EVENT_DISCOVERY_SERVICE_TOKEN`        | `EventDiscoveryService`       |
+| `EVENT_VALIDATION_SERVICE_TOKEN`       | `EventValidationService`      |
+
+### `titan-health`
+
+| Token                                   | Type                          |
+| --------------------------------------- | ----------------------------- |
+| `HEALTH_SERVICE_TOKEN`                  | `IHealthService`              |
+| `HEALTH_MODULE_OPTIONS_TOKEN`           | `HealthModuleOptions`         |
+| `HEALTH_RPC_SERVICE_TOKEN`              | `HealthRpcService`            |
+| `MEMORY_HEALTH_INDICATOR_TOKEN`         | `MemoryHealthIndicator`       |
+| `EVENT_LOOP_HEALTH_INDICATOR_TOKEN`     | `EventLoopHealthIndicator`    |
+| `DISK_HEALTH_INDICATOR_TOKEN`           | `DiskHealthIndicator`         |
+| `DATABASE_HEALTH_INDICATOR_TOKEN`       | `DatabaseHealthIndicator`     |
+| `REDIS_HEALTH_INDICATOR_TOKEN`          | `RedisHealthIndicator`        |
+
+### `titan-lock`
+
+| Token                            | Type                          |
+| -------------------------------- | ----------------------------- |
+| `LOCK_SERVICE_TOKEN`             | `IDistributedLockService`     |
+| `LOCK_OPTIONS_TOKEN`             | `ILockModuleOptions`          |
+
+### `titan-metrics`
+
+| Token                       | Type                          |
+| --------------------------- | ----------------------------- |
+| `METRICS_SERVICE_TOKEN`     | `IMetricsService`             |
+| `METRICS_OPTIONS_TOKEN`     | `IMetricsModuleOptions`       |
+| `METRICS_STORAGE_TOKEN`     | `IMetricsStorage`             |
+
+### `titan-notifications`
+
+Note the trailing `_TOKEN` is **omitted** in this package's naming
+convention — symbols are bare:
+
+| Token                                       | Type                                    |
+| ------------------------------------------- | --------------------------------------- |
+| `NOTIFICATIONS_SERVICE`                     | `NotificationsService`                  |
+| `NOTIFICATIONS_MODULE_OPTIONS`              | `NotificationsModuleOptions`            |
+| `NOTIFICATIONS_TRANSPORT`                   | `MessagingTransport`                    |
+| `NOTIFICATIONS_CHANNEL_REGISTRY`            | `ChannelRegistry`                       |
+| `NOTIFICATIONS_CHANNEL_ROUTER`              | `IChannelRouter`                        |
+| `NOTIFICATIONS_TEMPLATE_ENGINE`             | `TemplateEngine`                        |
+| `NOTIFICATIONS_PREFERENCE_STORE`            | `IPreferenceStore`                      |
+| `NOTIFICATIONS_REDIS_PREFERENCE_STORE`      | `RedisPreferenceStore`                  |
+| `NOTIFICATIONS_RATE_LIMITER`                | `IRateLimiter`                          |
+| `NOTIFICATIONS_REDIS_RATE_LIMITER`          | `RedisRateLimiter`                      |
+| `NOTIFICATIONS_EVENT_EMITTER`               | `NotificationsEventEmitter`             |
+| `NOTIFICATIONS_HEALTH`                      | `NotificationsHealthIndicator`          |
+| `NOTIFICATION_PERSISTER`                    | `INotificationPersister`                |
+| `NOTIFICATION_REALTIME_SIGNALER`            | `INotificationRealtimeSignaler`         |
+| `NOTIFICATION_TARGET_RESOLVER`              | `INotificationTargetResolver`           |
+
+### `titan-pm`
+
+| Token                            | Type                          |
+| -------------------------------- | ----------------------------- |
+| `PM_CONFIG_TOKEN`                | `IProcessManagerConfig`       |
+| `PM_MANAGER_TOKEN`               | `ProcessManager`              |
+| `PM_REGISTRY_TOKEN`              | `ProcessRegistry`             |
+| `PM_SPAWNER_TOKEN`               | `ProcessSpawnerFactory`       |
+| `PM_HEALTH_TOKEN`                | `ProcessHealthChecker`        |
+| `PM_METRICS_TOKEN`               | `ProcessMetricsCollector`     |
+
+### `titan-ratelimit`
+
+| Token                          | Type                          |
+| ------------------------------ | ----------------------------- |
+| `RATE_LIMIT_SERVICE_TOKEN`     | `IRateLimitService`           |
+| `RATE_LIMIT_OPTIONS_TOKEN`     | `IRateLimitModuleOptions`     |
+| `RATE_LIMIT_STORAGE_TOKEN`     | `IRateLimitStorage`           |
+
+### `titan-redis`
+
+| Symbol                                    | Type                          |
+| ----------------------------------------- | ----------------------------- |
+| `REDIS_TOKEN`                             | `Redis`                       |
+| `getRedisClientToken(namespace?)` factory | `Redis` (named instance)      |
+| `getRedisOptionsToken(namespace?)` factory| `RedisModuleOptions`          |
+
+Multi-client setups use the factory form:
+
+```typescript
+import { Redis } from 'ioredis';
+import { getRedisClientToken } from '@omnitron-dev/titan-redis';
+
+@Inject(getRedisClientToken('cache'))   cacheRedis: Redis;
+@Inject(getRedisClientToken('queue'))   queueRedis: Redis;
+```
+
+### `titan-scheduler`
+
+| Token                                   | Type                          |
+| --------------------------------------- | ----------------------------- |
+| `SCHEDULER_SERVICE_TOKEN`               | `SchedulerService`            |
+| `SCHEDULER_CONFIG_TOKEN`                | `ISchedulerConfig`            |
+| `SCHEDULER_REGISTRY_TOKEN`              | `SchedulerRegistry`           |
+| `SCHEDULER_EXECUTOR_TOKEN`              | `SchedulerExecutor`           |
+| `SCHEDULER_PERSISTENCE_TOKEN`           | `ISchedulerPersistence`       |
+| `SCHEDULER_DISCOVERY_TOKEN`             | `SchedulerDiscovery`          |
+| `SCHEDULER_METRICS_TOKEN`               | `SchedulerMetricsCollector`   |
+| `SCHEDULER_LISTENERS_TOKEN`             | `IJobListener[]`              |
+
+### `titan-telemetry-relay`
+
+`titan-telemetry-relay` does **not** define DI tokens. Instantiate
+`TelemetryRelayService` directly with config; wire it into the
+container as a `useValue` provider if you want DI-style injection.
+
+## Importing tokens — the convention
+
+Every module exports both the token and its type from the package
+root so you can pull them in one line:
+
+```typescript
+import {
+  CACHE_SERVICE_TOKEN,
+  type CacheService,
+} from '@omnitron-dev/titan-cache';
+
+class UsersService {
+  constructor(
+    @Inject(CACHE_SERVICE_TOKEN) private readonly cache: CacheService,
+  ) {}
+}
+```
+
+> **Why named tokens, not classes?** Tokens decouple the *contract*
+> from the *implementation*. Test code can register a fake
+> `CacheService` against the same token without subclassing the
+> production class.
+
+## RPC services — what's reachable from the wire
+
+Most modules expose their API only via DI inside the same process.
+Two modules also register a Netron `@Service` so the Omnitron CLI /
+web console (or any remote peer) can call them.
+
+| Module                                  | RPC service name      | When                                                |
+| --------------------------------------- | --------------------- | --------------------------------------------------- |
+| [`titan-health`](./health.mdx)          | `Health@1.0.0`        | When `enableRpcService: true` (default)             |
+| [`titan-metrics`](./metrics.mdx)        | `OmnitronMetrics`     | Auto-registered when the module loads               |
+
+Everything else (`titan-auth`, `titan-cache`, `titan-database`,
+`titan-discovery`, `titan-events`, `titan-lock`, `titan-notifications`,
+`titan-pm`, `titan-ratelimit`, `titan-redis`, `titan-scheduler`,
+`titan-telemetry-relay`) **does not contribute an RPC surface**. It's
+your own `@Service` classes that own the wire contract; the modules
+provide infrastructure consumed via DI.
+
+**Note about `titan-pm`** — it does not expose a `pm@…` service; it
+calls `netron.peer.exposeService(...)` on your worker instances when
+they boot. The exposed services are the ones you wrote.
+
+**Note about `titan-discovery`** — its `registerService` method is
+internal API for adding entries to the Redis registry, not an RPC
+endpoint. Discovery lookups happen in-process via DI.
+
+**Disabling the health RPC surface** — pass `enableRpcService: false`:
+
+```typescript
+TitanHealthModule.forRoot({
+  enableRpcService: false,        // local checks still work
+})
+```
+
+`OmnitronMetrics` does not have a feature flag for unregistering —
+if you don't want it on the wire, control exposure at the transport
+layer (don't expose the Netron port externally, or front it with
+auth-only middleware).
+
+## Health RPC surface — `Health@1.0.0`
+
+The single canonical example. Source:
+[`packages/titan-health/src/health.rpc-service.ts`](https://github.com/omnitron-dev/omni/tree/main/packages/titan-health/src/health.rpc-service.ts).
+
+```typescript
+const health = await peer.queryInterface<HealthRpcService>('Health@1.0.0');
+
+await health.check();   // full report
+await health.live();    // liveness
+await health.ready();   // readiness
+```
+
+The exact method set is `HealthRpcService` — refer to its
+`@Public()` decorators in source for the current surface.
+
+## Hardening checklist
+
+Before exposing the Netron port outside the cluster:
+
+- [ ] Configure `titan-auth` with a strong JWT secret / JWKS endpoint.
+- [ ] Apply `@Auth(...)` on every `@Public()` method that touches state.
+- [ ] Front the port with TLS termination (transport options).
+- [ ] Run `titan-ratelimit` middleware globally on Netron.
+- [ ] Set `enableRpcService: false` on `titan-health` if probes are
+      served via plain HTTP routes and you don't want the JSON
+      endpoint reachable as RPC.
+- [ ] Review every `@Service` *you* wrote — those are the actual
+      external surface.
+
+## See also
+
+- [Netron / Authentication](../netron/authentication.md)
+- [Best Practices / Security](../best-practices/observability.md)
+- [Module map](./module-map.mdx) — visual dependency graph
