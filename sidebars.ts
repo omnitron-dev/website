@@ -3,6 +3,8 @@ import type {SidebarsConfig} from '@docusaurus/plugin-content-docs';
 const sidebars: SidebarsConfig = {
   docs: [
     'intro',
+    'comparison',
+    'troubleshooting',
     {
       type: 'category',
       label: 'Getting Started',
@@ -11,6 +13,19 @@ const sidebars: SidebarsConfig = {
         'getting-started/installation',
         'getting-started/quickstart',
         'getting-started/project-structure',
+      ],
+    },
+    {
+      type: 'category',
+      label: 'Tutorial',
+      link: {type: 'doc', id: 'tutorial/index'},
+      items: [
+        'tutorial/scaffold',
+        'tutorial/service',
+        'tutorial/auth',
+        'tutorial/frontend',
+        'tutorial/tests',
+        'tutorial/deploy',
       ],
     },
     {
@@ -25,10 +40,46 @@ const sidebars: SidebarsConfig = {
     },
     {
       type: 'category',
+      label: 'Utilities',
+      link: {type: 'doc', id: 'utilities/index'},
+      items: [
+        'utilities/common',
+        'utilities/cuid',
+        'utilities/eventemitter',
+        'utilities/msgpack',
+        'utilities/kb',
+      ],
+    },
+    {
+      type: 'category',
+      label: 'Testing',
+      link: {type: 'doc', id: 'testing/index'},
+      items: [
+        'testing/testing-package',
+        'testing/integration',
+        'testing/cross-runtime',
+        'testing/react',
+      ],
+    },
+    {
+      type: 'category',
+      label: 'Deployment',
+      link: {type: 'doc', id: 'deployment/index'},
+      items: [
+        'deployment/docker',
+        'deployment/kubernetes',
+        'deployment/paas',
+        'deployment/bare-metal',
+      ],
+    },
+    {
+      type: 'category',
       label: 'Community',
       link: {type: 'generated-index', slug: '/category/community'},
       items: [
         'community/contributing',
+        'community/security',
+        'community/changelog',
       ],
     },
   ],
