@@ -132,21 +132,28 @@ Talking to several Netron servers? Swap `NetronProvider` for
 `MultiBackendProvider`:
 
 ```tsx
+import { createMultiBackendClient }
+  from '@omnitron-dev/netron-browser';
 import { MultiBackendProvider, useBackendService }
   from '@omnitron-dev/netron-react';
 
-<MultiBackendProvider
-  backends={{
-    auth:      { url: 'https://auth.example.com',      transport: 'auto' },
-    media:     { url: 'https://media.example.com',     transport: 'auto' },
-    analytics: { url: 'https://analytics.example.com', transport: 'http' },
-  }}
-  routes={{
-    'users.*':   'auth',
-    'objects.*': 'media',
-    'reports.*': 'analytics',
-  }}
->
+const client = createMultiBackendClient({
+  baseUrl: 'https://api.example.com',
+  backends: {
+    auth:      { path: '/auth',      transport: 'http' },
+    media:     { path: '/media',     transport: 'http' },
+    analytics: { path: '/analytics', transport: 'http' },
+  },
+  routing: {
+    patterns: [
+      { pattern: 'users.',   backend: 'auth' },
+      { pattern: 'objects.', backend: 'media' },
+      { pattern: 'reports.', backend: 'analytics' },
+    ],
+  },
+});
+
+<MultiBackendProvider client={client}>
   <Outlet />
 </MultiBackendProvider>
 

@@ -92,7 +92,7 @@ import { NetronClient } from '@omnitron-dev/netron-browser';
 import type { UsersService } from './users.service.js';
 
 const client = new NetronClient({ url: 'http://localhost:3000' });
-const users  = await client.queryInterface<UsersService>('users@1.0.0');
+const users  = client.service<UsersService>('users@1.0.0');
 
 const user = await users.create('ada@example.com');
 console.log(user); // { id: '...', email: 'ada@example.com' }

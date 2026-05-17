@@ -61,7 +61,7 @@ flowchart LR
 | **Module** | Package or feature module | `titan-auth`, `omnitron/orchestrator` |
 | **Pattern** | Canonical development recipe | "service-rpc-module", "preset-infrastructure" |
 | **Gotcha** | Known pitfall + critical warning | "Don't await inside @PostConstruct" |
-| **Spec** | Specification document | "Aletheia engine spec v0.2" |
+| **Spec** | Specification document | "Payments engine spec v0.2" |
 | **Doc** | Long-form markdown | README, CONTRIBUTING, design docs |
 
 Each entry has: id, type, name, summary, body, related (cross-

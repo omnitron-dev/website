@@ -54,8 +54,9 @@ Three observations:
 
 ## A request, end to end
 
-1. **Browser** — a React component renders, calls
-   `useNetronQuery(UsersService, 'findById', [id])`.
+1. **Browser** — a React component renders, gets the typed
+   service with `const users = useService<UsersService>('users')`,
+   and calls `users.findById.useQuery([id])`.
 2. **Hook** — `netron-react` looks up the cached result; if missing,
    asks the `netron-browser` client for the call.
 3. **Client** — serialises the call as a Netron packet, sends it over

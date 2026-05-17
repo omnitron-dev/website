@@ -5,6 +5,10 @@ sidebar_position: 0
 
 # Authentication & Authorisation
 
+:::caution Design RFC
+The roles + permissions + ABAC + RLS-bridge stack documented in this section is an in-progress architectural target. The current Omnitron build ships only the base auth surface — JWT issuance, session lifecycle, and a single `admin` role (see `OmnitronAuth` in [services-reference](../omnitron/services-reference.md#omnitronauth--authrpc-servicets)). Treat these pages as the design reference, not a feature you can flip on today.
+:::
+
 The Titan/Omnitron auth surface is split into four layers. Each
 layer is independently composable; the page you're reading next
 should be picked by what you're trying to do.
