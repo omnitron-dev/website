@@ -8,6 +8,17 @@ import ModuleBadge from '@site/src/components/ModuleBadge';
 
 <ModuleBadge origin="official" pkg="@omnitron-dev/titan-auth" status="stable" />
 
+:::info
+This page covers the JWT primitives (issuance, verification,
+rotation, caching). For the **authorisation** surface
+(permissions, roles, ABAC, per-user overrides, RLS bridge,
+audit), start at the [Authentication & Authorisation](../../auth/index.md)
+section — `titan-auth` is the foundation it builds on.
+
+For migrating from a pre-`pv`-claim deployment, see the
+[Auth v1 → v2 migration guide](../migrations/auth-1-to-2.md).
+:::
+
 JWT authentication with HS256 / RS256 / ES256 support, remote JWKS,
 multi-key rotation via the `kid` header, an LRU token cache, signed-URL
 service, and Bearer/API-key middleware. Single self-contained module

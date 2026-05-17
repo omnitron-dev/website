@@ -6,6 +6,17 @@ description: AuthenticationManager, AuthorizationManager, BuiltInPolicies, AuthC
 
 # Authentication
 
+:::info
+This page is the Netron-layer reference for `AuthConfig`,
+PolicyEngine, and the `BuiltInPolicies` library. For the
+end-to-end authorisation surface (permission grammar,
+per-user overrides, RLS bridge, audit), start at
+[Authentication & Authorisation](../../auth/index.md). For
+the higher-level façade decorators that compile to the
+`@Auth({policies})` form below, see [Permissions →
+Scopes](../../auth/permissions.md#scopes).
+:::
+
 Netron separates **authentication** (who is the caller?) from
 **authorisation** (is this caller allowed to do this?). Two
 managers, one shared policy engine, composable policies.

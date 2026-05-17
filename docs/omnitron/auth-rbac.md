@@ -6,6 +6,14 @@ description: Authentication, sessions, JWT, RBAC roles, RLS context propagation.
 
 # Auth & RBAC
 
+:::info
+This page covers the **operator-flavoured** auth surface
+(CLI, webapp, MCP, service-to-service). For the framework-
+agnostic authorisation primitives (permission grammar,
+per-user overrides, ABAC conditions, RLS bridge, audit
+trail), start at [Authentication & Authorisation](../auth/index.md).
+:::
+
 Omnitron ships a complete authentication and authorization model
 that covers operator surfaces (CLI, webapp, MCP), service-to-
 service calls, and your applications' own user-facing endpoints.
