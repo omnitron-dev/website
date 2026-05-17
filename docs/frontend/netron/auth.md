@@ -6,13 +6,25 @@ description: Token storage, auto-refresh, cross-tab sync, inactivity timeout.
 
 # Auth manager
 
+:::info
+For the framework-wide authorisation model (permission strings,
+ABAC, RLS bridge) start at [Authentication & Authorisation](../../auth/index.md).
+This page is the browser-side **token-lifecycle** reference.
+:::
+
 `AuthManager` (from `@omnitron-dev/netron-browser/auth`) owns
 browser-side authentication state: where tokens live, when to
 refresh, how to propagate sign-in/out across tabs, and when to
 time out an idle session.
 
 It's used by `AuthMiddleware` to attach tokens to every RPC
-call and to refresh on 401.
+call and to refresh on 401. The middleware also handles the
+`PERMISSION_VERSION_STALE` (401) error introduced in the v2
+auth surface — same refresh-then-retry path as `TOKEN_EXPIRED`;
+the new JWT carries the up-to-date permission set so live
+guards re-render correctly without forcing a sign-in. See the
+[migration guide](../../titan/migrations/auth-1-to-2.md) for
+the wire-level shape.
 
 ## Wiring
 
