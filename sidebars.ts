@@ -17,6 +17,19 @@ const sidebars: SidebarsConfig = {
     },
     {
       type: 'category',
+      label: 'Authentication & Authorisation',
+      link: {type: 'doc', id: 'auth/index'},
+      items: [
+        'auth/mental-model',
+        'auth/permissions',
+        'auth/overrides',
+        'auth/abac-conditions',
+        'auth/rls-bridge',
+        'auth/audit-trail',
+      ],
+    },
+    {
+      type: 'category',
       label: 'Tutorial',
       link: {type: 'doc', id: 'tutorial/index'},
       items: [
@@ -313,6 +326,7 @@ const sidebars: SidebarsConfig = {
         'titan/migrations/from-nestjs',
         'titan/migrations/from-express',
         'titan/migrations/from-prom-client',
+        'titan/migrations/auth-1-to-2',
       ],
     },
   ],
