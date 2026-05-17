@@ -17,7 +17,7 @@ Verified against `src/orchestrator/`:
 
 ```
 orchestrator/
-├── orchestrator.service.ts   (1957 lines) — top-level service
+├── orchestrator.service.ts   (~2k lines)  — top-level service
 ├── app-handle.ts                    — per-app supervisor state
 ├── bootstrap-loader.ts              — locates + loads bootstrap.{js,ts}
 ├── bootstrap-process.ts             — per-app bootstrap entrypoint (classic)

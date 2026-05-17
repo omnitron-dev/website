@@ -5,6 +5,10 @@ sidebar_position: 6
 
 # Mental Model
 
+:::caution Design RFC
+This page describes the target authorisation model. Omnitron today ships only the base auth surface; the role/permission/condition/RLS layering shown below is a design reference.
+:::
+
 ```
 ┌─────────────────────────────────────────────────────────────┐
 │                       JWT (per request)                      │
@@ -14,7 +18,7 @@ sidebar_position: 6
              ▼                           ▼
    ┌────────────────────┐     ┌─────────────────────────┐
    │  Invocation        │     │  PermVer counter (Redis)│
-   │  wrapper           │     │  omni:perm-v:{userId}   │
+   │  wrapper           │     │  perm-v:{userId}   │
    │  (per-RPC)         │◄────┤                         │
    └──────┬─────────────┘     └─────────────────────────┘
           │  pass → propagate AuthContext into:
@@ -37,7 +41,7 @@ sidebar_position: 6
 
 Four layers. They share **one** identity (the JWT-resolved
 `AuthContext`), **one** permission grammar (`shared/permission-engine.ts`),
-**one** counter (`omni:perm-v:{userId}`), and **one** audit
+**one** counter (`perm-v:{userId}`), and **one** audit
 sink (`audit_logs`).
 
 ## Layer 1 — Roles
@@ -45,7 +49,7 @@ sink (`audit_logs`).
 A user has one or more roles. Each role names a default
 permission set. Roles are coarse — fewer than ten platform-
 wide and a handful per organisation. Tier predicates
-(`canModerateUserWithRole`) live in `@daos/auth-utils/role-hierarchy`
+(`canModerateUserWithRole`) live in `@yourorg/auth-utils/role-hierarchy`
 and are the only consumer of role-priority numbers; gates that
 care about specific capabilities check **permissions**, not
 roles.
@@ -81,7 +85,7 @@ through. Other tables run permissive for anonymous reads.
 ## Live propagation
 
 Every mutation to a user's effective permission set bumps
-`omni:perm-v:{userId}`. The invocation wrapper compares the
+`perm-v:{userId}`. The invocation wrapper compares the
 JWT's `pv` snapshot against the live counter on every call;
 mismatch ⇒ refresh-token flow ⇒ new JWT with the updated set.
 The propagation window is bounded by one RPC round-trip —

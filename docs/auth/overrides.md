@@ -5,6 +5,10 @@ sidebar_position: 2
 
 # Per-User Overrides
 
+:::caution Design RFC
+Per-user permission overrides on top of role defaults are part of the planned authorisation stack. Today's Omnitron stores `(user, role)` only; the override table and merge rules below are the target design.
+:::
+
 A user's **effective permission set** is the union of:
 
 1. The default permissions of every role they hold, AND

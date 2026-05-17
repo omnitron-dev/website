@@ -20,7 +20,7 @@ Netron service id, purpose, and key methods. Verified against
 | File | Service id (Netron) | Methods | Role gate (typical) |
 | ---- | ------------------- | ------- | ------------------- |
 | `alert.rpc-service.ts` | `OmnitronAlerts` | 7 | operator + viewer |
-| `auth.rpc-service.ts` | `OmnitronAuth` | 10 | mixed (some allowAnonymous for signIn) |
+| `auth.rpc-service.ts` | `OmnitronAuth` | 7 | mixed (some allowAnonymous for signIn) |
 | `backup.rpc-service.ts` | `OmnitronBackups` | 6 | operator |
 | `deploy.rpc-service.ts` | `OmnitronDeploy` | 3 | operator + admin |
 | `discovery.rpc-service.ts` | `OmnitronDiscovery` | 3 | viewer |
@@ -43,7 +43,7 @@ Plus the core supervisor:
 
 | File | Service id | Methods | Role gate |
 | ---- | ---------- | ------- | --------- |
-| `daemon/daemon.rpc-service.ts` | `OmnitronDaemon` | 26 | mixed — see [Daemon](./daemon.md#rpc-surface--omnitrondaemon-service) |
+| `daemon/daemon.rpc-service.ts` | `OmnitronDaemon` | 25 | mixed — see [Daemon](./daemon.md#rpc-surface--omnitrondaemon-service) |
 
 ## Naming convention
 
@@ -228,7 +228,7 @@ beyond `OmnitronDaemon`).
 | Inventory | `listNodes`, `getNode`, `addNode`, `updateNode`, `removeNode` |
 | Checks | `checkNodeStatus`, `checkAllNodes`, `triggerNodeCheck` |
 | History | `getCheckHistory`, `getUptimeBar`, `getNodeHealthSummaries` |
-| Misc | `listSshKeys`, `ping`, `getStats` |
+| Misc | `listSshKeys`, `getCheckConfig`, `setCheckConfig` |
 
 Includes the uptime-bar machinery the webapp uses to draw
 green/yellow/red availability bars.

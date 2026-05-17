@@ -351,23 +351,34 @@ identity, one for media, one for analytics — use
 `MultiBackendProvider`:
 
 ```tsx
+import { createMultiBackendClient }
+  from '@omnitron-dev/netron-browser';
 import { MultiBackendProvider, useBackendService }
   from '@omnitron-dev/netron-react';
 
+// 1. Build a client. `backends` keys → path prefixes under
+//    `baseUrl`; `routing` maps service-name patterns to a
+//    specific backend.
+const client = createMultiBackendClient({
+  baseUrl: 'https://api.example.com',
+  backends: {
+    auth:      { path: '/auth',      transport: 'http' },
+    media:     { path: '/media',     transport: 'http' },
+    analytics: { path: '/analytics', transport: 'http' },
+  },
+  routing: {
+    patterns: [
+      { pattern: 'users.',   backend: 'auth' },
+      { pattern: 'objects.', backend: 'media' },
+      { pattern: 'reports.', backend: 'analytics' },
+    ],
+  },
+});
+
+// 2. Pass the client (not the backend map) to the provider.
 function App() {
   return (
-    <MultiBackendProvider
-      backends={{
-        auth:      { url: 'https://auth.example.com',      transport: 'auto' },
-        media:     { url: 'https://media.example.com',     transport: 'auto' },
-        analytics: { url: 'https://analytics.example.com', transport: 'http' },
-      }}
-      routes={{
-        'users.*':   'auth',
-        'objects.*': 'media',
-        'reports.*': 'analytics',
-      }}
-    >
+    <MultiBackendProvider client={client}>
       <Routes />
     </MultiBackendProvider>
   );

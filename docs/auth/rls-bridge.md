@@ -5,6 +5,10 @@ sidebar_position: 4
 
 # RLS Bridge
 
+:::caution Design RFC
+The RLS-bridge stack documented here (wrapper, `permVer` enforcement, generic policy projection) is a planned architecture, not what Omnitron ships today. Treat the code excerpts as reference shapes you'd implement in your own auth-utils package.
+:::
+
 The auth layer above gates **calls**. `@kysera/rls` gates
 **rows**. They use the same identity — the user's
 `AuthContext` — bridged from the Netron invocation wrapper
@@ -16,10 +20,10 @@ shares the wrapper's hot path.
 
 ## The shared wrapper
 
-Every daos backend (`main`, `paysys`, `storage`, `messaging`,
-`priceverse`) wires the SAME `createRlsInvocationWrapper` from
-`@daos/auth-utils`. The wrapper does **four** things on every
-authenticated RPC:
+Every backend in the fleet (e.g. `main`, `accounting`, `storage`,
+`messaging`, `analytics`) wires the SAME
+`createRlsInvocationWrapper` from `@yourorg/auth-utils`. The
+wrapper does **four** things on every authenticated RPC:
 
 ```ts
 // packages/auth-utils/src/rls-invocation-wrapper.ts
@@ -28,10 +32,10 @@ export function createRlsInvocationWrapper(options) {
     const authCtx = metadata.get('authContext');
     if (!authCtx) return fn();                               // 1. anon → no RLS scope
 
-    // 2. permVer check (HIGH-5 / #173 / #174)
+    // 2. permVer check (stale-permissions defence)
     if (options.permVerRedis) {
       const tokenPv = authCtx.metadata?.pv ?? 0;
-      const currentPv = parseInt(await options.permVerRedis.get(`omni:perm-v:${authCtx.userId}`) ?? '0', 10);
+      const currentPv = parseInt(await options.permVerRedis.get(`perm-v:${authCtx.userId}`) ?? '0', 10);
       if (currentPv > tokenPv) {
         throw Object.assign(new Error('Permission version stale'), {
           code: 'PERMISSION_VERSION_STALE',
@@ -118,7 +122,7 @@ same shape the application-side gates check.
 ## STRICT vs PERMISSIVE plugin tiers
 
 A single plugin instance with `allowUnfilteredQueries: true`
-was the source of CRIT-2 (RLS effectively advisory). The
+historically reduces RLS to an advisory hint. The
 schema is split into two tiers via two plugin instances:
 
 ```ts
@@ -152,7 +156,7 @@ service-layer transactions.
 
 ## permVer counter
 
-The `omni:perm-v:{userId}` Redis key is bumped by any code path
+The `perm-v:{userId}` Redis key is bumped by any code path
 that mutates a user's effective permission set:
 
 ```ts

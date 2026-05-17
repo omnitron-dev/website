@@ -98,21 +98,28 @@ function UserCard({ userId }: { userId: string }) {
 ## Quick start — multi-backend
 
 ```tsx
+import { createMultiBackendClient }
+  from '@omnitron-dev/netron-browser';
 import { MultiBackendProvider, useBackendService }
   from '@omnitron-dev/netron-react';
 
-<MultiBackendProvider
-  backends={{
-    auth:    { url: 'https://auth.example.com',    transport: 'auto' },
-    media:   { url: 'https://media.example.com',   transport: 'auto' },
-    streams: { url: 'wss://streams.example.com',   transport: 'websocket' },
-  }}
-  routes={{
-    'users.*':   'auth',
-    'objects.*': 'media',
-    'events.*':  'streams',
-  }}
->
+const client = createMultiBackendClient({
+  baseUrl: 'https://api.example.com',
+  backends: {
+    auth:    { path: '/auth',    transport: 'http' },
+    media:   { path: '/media',   transport: 'http' },
+    streams: { path: '/streams', transport: 'websocket' },
+  },
+  routing: {
+    patterns: [
+      { pattern: 'users.',   backend: 'auth' },
+      { pattern: 'objects.', backend: 'media' },
+      { pattern: 'events.',  backend: 'streams' },
+    ],
+  },
+});
+
+<MultiBackendProvider client={client}>
   <Outlet />
 </MultiBackendProvider>
 

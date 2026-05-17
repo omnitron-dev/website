@@ -5,6 +5,10 @@ sidebar_position: 5
 
 # Audit Trail
 
+:::caution Design RFC
+The structured `audit_logs` + actor-from-JWT discipline described here is part of the planned auth stack. Today's Omnitron emits operator activity into the daemon log only; the typed audit table and the helpers below are reference designs.
+:::
+
 Every authorisation-relevant mutation lands in the platform's
 `audit_logs` table. The trail is the platform's accountability
 substrate — without it, post-incident reconstruction is
@@ -27,9 +31,10 @@ interface NewAuditLog {
 Two invariants the platform protects mechanically:
 
 1. **`actorId` is always taken from the verified JWT**
-   (`actorId()` helper in `@daos/auth-utils`). It is NEVER
-   read from a request DTO. This closes the audit-log
-   spoofing class of bugs (see CRIT-1 fix).
+   (`actorId()` helper in `@yourorg/auth-utils`). It is NEVER
+   read from a request DTO. This closes the actor-spoofing
+   class of bugs (forge the DTO, get someone else's name on
+   your action).
 2. **The `audit_logs` table is in the STRICT RLS tier**
    (`requireContext: true, allowUnfilteredQueries: false`).
    A raw `sql\`SELECT …\`` without an authenticated context

@@ -5,6 +5,10 @@ sidebar_position: 50
 
 # Migration: Auth v1 → v2
 
+:::caution Design RFC
+This migration plan accompanies the planned authorisation stack documented under [Authentication & Authorisation](../../auth/index.md). The unified permission engine, the `pv` claim, and the RLS bridge are target shapes — not changes the current Omnitron build has actually rolled out. Treat the steps below as the upgrade contract you'd hand to a platform team adopting that stack.
+:::
+
 The Auth surface gained a unified permission engine, decorator
 façades, per-user overrides, live `permVer` propagation, and a
 stricter RLS tiering. The wire-level JWT shape grew one new
@@ -69,16 +73,15 @@ The access token gained one claim:
 
 Verifiers that **don't** check `pv` continue to work; the
 field is ignored. Verifiers that consume the
-`createRlsInvocationWrapper` from `@daos/auth-utils` get
+`createRlsInvocationWrapper` from `@yourorg/auth-utils` get
 `pv` enforcement out of the box once they pass a `permVerRedis`
 client.
 
 A client-side handler should treat
 `PERMISSION_VERSION_STALE` (401) the same as `TOKEN_EXPIRED` —
-trigger the refresh flow, retry the call. See
-[`portal/netron/rpc.ts`](https://github.com/daos/…) for the
-canonical implementation; it adds three lines to the
-existing refresh-on-401 logic.
+trigger the refresh flow, retry the call. The canonical
+implementation adds three lines to the existing refresh-on-401
+logic in your Netron RPC wrapper.
 
 ## Per-user permission overrides
 

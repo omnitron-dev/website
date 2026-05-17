@@ -5,6 +5,10 @@ sidebar_position: 1
 
 # Permissions
 
+:::caution Design RFC
+Permission strings, hierarchical wildcards, and the `@Auth({permissions})` gate described here are part of the planned authorisation stack. Today's Omnitron gates RPCs by role only (`viewer` / `operator` / `admin`); permission-string evaluation is the target design.
+:::
+
 A **permission** is a dot-separated string that names a
 capability. Every gate in the platform — `@Auth({permissions})`,
 `@kysera/rls` policy, frontend `usePermission()` hook —
