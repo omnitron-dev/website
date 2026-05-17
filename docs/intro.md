@@ -25,7 +25,7 @@ with no codegen step in between.
 | **Backend framework** | `@omnitron-dev/titan` | Decorator-driven DI (Nexus container), lifecycle hooks, modules, validation (zod), structured logging (pino), typed errors that travel the wire. **Server-side Netron with all 4 transports (HTTP / WebSocket / TCP / Unix) is built in.** |
 | **Browser RPC client** | `@omnitron-dev/netron-browser` | **Framework-agnostic** — works with vanilla JS, Vue, Svelte, Solid, Angular, Lit, React, anywhere. Middleware pipeline (auth, retry, cache, rate-limit, tracing). AsyncIterable streaming. `AuthManager` with cross-tab sync |
 | **React bindings** | `@omnitron-dev/netron-react` | **Optional, React-only.** Typed `useQuery` / `useMutation` / `useSubscription` / `useService` hooks on top of netron-browser. Don't install if your frontend isn't React |
-| **Design system** | `@omnitron-dev/prism` | **Optional, React-only.** 50+ MUI v7 components, 3 layouts, 3 blocks, schema-aware forms, 25+ React hooks, dark mode without flicker |
+| **Design system** | `@omnitron-dev/prism` | **Optional, React-only.** 50+ MUI v9 components, 3 layouts, 3 blocks, schema-aware forms, 25+ React hooks, dark mode without flicker |
 | **Supervisor (opt-in)** | `@omnitron-dev/omnitron` | **Optional.** Long-running daemon, 20+ RPC services, 75+ CLI subcommands, React+Vite web console, declarative infrastructure provisioning, MCP server for agents |
 
 Add a row to your stack incrementally — Titan alone for a backend, `+ netron-browser`

@@ -977,8 +977,66 @@ Every interactive component:
   buttons and stateful indicators.
 - **Reduced motion** — animations respect `prefers-reduced-motion`.
 
-Buttons / inputs / selects inherit MUI v7's accessibility
+Buttons / inputs / selects inherit MUI v9's accessibility
 foundation, which is WCAG 2.1 AA-compliant out of the box.
+
+## Refs (React 19)
+
+Every prism component exposes its underlying DOM element through
+the standard `ref` prop. React 19 routes `ref` through props
+directly — there is **no `forwardRef` wrapper** to layer through,
+and consumer call sites do not need `React.forwardRef` either.
+
+```tsx
+import { useRef, useEffect } from 'react';
+import { Card } from '@omnitron-dev/prism';
+
+function ScrollIntoViewExample() {
+  const cardRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    cardRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, []);
+
+  return <Card ref={cardRef}>…</Card>;
+}
+```
+
+Components that expose an imperative handle (e.g. `<CaptchaInput>`
+with `getData()` / `refresh()`) attach the handle type via a
+`ref?: Ref<HandleType>` field on their props interface — identical
+call-site ergonomics, no `useImperativeHandle` ceremony on the
+consumer side.
+
+## MUI v9 slot props
+
+For slot-bearing components (`<TextField>`, `<Select>`,
+`<Autocomplete>`, …) prism re-exports MUI v9's `slotProps` API.
+The legacy `InputProps={…}` / `InputLabelProps={…}` / `MenuProps={…}`
+forms still work for backwards compatibility but emit a deprecation
+warning in MUI v9 dev mode — migrate to `slotProps={{ input: { … } }}`
+etc. as you touch each consumer.
+
+```tsx
+// ❌ Legacy (deprecated in MUI v9)
+<TextField
+  InputProps={{ endAdornment: <PasswordToggle /> }}
+  FormHelperTextProps={{ sx: { ml: 0 } }}
+/>
+
+// ✅ MUI v9 idiom
+<TextField
+  slotProps={{
+    input: { endAdornment: <PasswordToggle /> },
+    formHelperText: { sx: { ml: 0 } },
+  }}
+/>
+```
+
+The same migration applies to Tabs (`TabIndicatorProps` →
+`slotProps.indicator`), Modal/Drawer/Popover
+(`BackdropProps` → `slotProps.backdrop`), and Autocomplete
+(`componentsProps` → `slotProps`).
 
 ## Per-component subpaths
 

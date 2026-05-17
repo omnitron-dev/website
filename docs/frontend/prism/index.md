@@ -1,20 +1,41 @@
 ---
 sidebar_position: 1
 title: Overview
-description: Design system for production React frontends — MUI v7 + Prism.
+description: Design system for production React frontends — MUI v9 + Prism.
 ---
 
 # Prism
 
 <code>@omnitron-dev/prism</code> is the design system. Pre-composed,
 theme-aware components and entire UI blocks for building
-production React frontends — built on **MUI v7**, integrated
-with **react-hook-form + zod**, ready for **Vite / Next /
-Remix** out of the box.
+production React frontends — built on **MUI v9** + **React 19**,
+integrated with **react-hook-form + zod**, ready for **Vite /
+Next / Remix** out of the box.
 
 ```bash
 pnpm add @omnitron-dev/prism
 ```
+
+:::tip React 19 + MUI v9 idioms
+Prism uses the latest patterns from both upstreams:
+
+- **No `forwardRef`** — React 19 routes `ref` through props
+  directly, so every component takes `ref` as a normal prop.
+- **`slotProps` API** — the v9 replacement for the legacy
+  `InputProps={...}` / `MenuProps={...}` / `TabIndicatorProps={...}` /
+  `BackdropProps={...}` / `componentsProps={...}` families.
+- **Unified `<Grid>` with `size={{ xs, sm, md }}`** — v1's
+  `<Grid item xs={...}>` shorthand is gone.
+- **Position classes for grouped controls** —
+  `ToggleButtonGroup` and `ButtonGroup` mark children with
+  `firstButton` / `middleButton` / `lastButton`; theme overrides
+  target those classes instead of the deprecated
+  `:not(:first-of-type)` sibling selector.
+
+See [Components → Refs (React 19)](./components.md#refs-react-19)
+and [Components → MUI v9 slot props](./components.md#mui-v9-slot-props)
+for the consumer-side migration cheat sheet.
+:::
 
 ## Three layers of API
 

@@ -18,7 +18,7 @@ shares the wrapper's hot path.
 
 Every daos backend (`main`, `paysys`, `storage`, `messaging`,
 `priceverse`) wires the SAME `createRlsInvocationWrapper` from
-`@daos/auth-utils`. The wrapper does three things on every
+`@daos/auth-utils`. The wrapper does **four** things on every
 authenticated RPC:
 
 ```ts
@@ -40,7 +40,15 @@ export function createRlsInvocationWrapper(options) {
       }
     }
 
-    // 3. RLS context propagation
+    // 3. User-activity touch — debounced Redis marker that
+    //    the flusher worker in `main` batches into
+    //    `users.last_active_at`. Fire-and-forget; a Redis
+    //    hiccup must never delay the request.
+    if (options.activityRedis) {
+      void touchUserActivity(options.activityRedis, authCtx.userId).catch(() => undefined);
+    }
+
+    // 4. RLS context propagation
     const rlsCtx = mapAuthToRLSContext(authCtx, { defaultTenantId: authCtx.metadata?.tenantId ?? 'default' });
     return rlsContext.runAsync(rlsCtx, fn);
   };
@@ -54,12 +62,31 @@ auth: {
   jwt: { enabled: true, tokenCacheTtl: 60_000 },
   invocationWrapper: createRlsInvocationWrapper({
     permVerRedis: deferredPermVerRedis.ref,
+    activityRedis: deferredPermVerRedis.activityRef,
   }),
 }
 ```
 
 The `deferredPermVerRedis` ref is populated in `afterCreate`
-once Redis is resolvable from the DI container.
+once Redis is resolvable from the DI container; the same
+underlying client doubles as both the permVer lookup and the
+activity-touch sink.
+
+### User activity
+
+The `touchUserActivity` helper performs an atomic
+`SET omni:activity:dirty:{userId} <iso-now> NX EX 60` — at most
+one Redis write per user per 60 seconds, regardless of request
+volume across all five backends. A dedicated
+`UserActivityFlusherService` in `main` runs on a 30-second
+interval to SCAN the dirty namespace, batch-update
+`users.last_active_at` with a `GREATEST()`-clamped UPDATE FROM
+VALUES (monotonic and idempotent), then UNLINK the keys.
+
+Worst-case lag from "user did something" to "`users.last_active_at`
+advances" is `windowSeconds + flushIntervalMs` ≈ 90 seconds.
+No new inter-backend RPC traffic — each backend writes to the
+shared Redis namespace; only `main` reads.
 
 ## RLS policies
 

@@ -51,7 +51,7 @@ Independently versioned. Add only what your app uses.
 | ------- | --------- | ------------- |
 | `@omnitron-dev/netron-browser` | **Framework-agnostic** — vanilla JS, Vue, Svelte, Solid, Angular, Lit, React, Web Workers | You build a browser client that calls a Titan backend |
 | `@omnitron-dev/netron-react` | **React-only** — optional layer on top of netron-browser | Your frontend uses React |
-| `@omnitron-dev/prism` | **React-only** — MUI v7 design system | Your frontend uses React and you want pre-built components |
+| `@omnitron-dev/prism` | **React-only** — MUI v9 design system | Your frontend uses React and you want pre-built components |
 
 **Use matrix:**
 

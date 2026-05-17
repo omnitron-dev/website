@@ -255,8 +255,8 @@ from `netron-browser` works in any framework.
 
 ## Design system — `@omnitron-dev/prism` (optional, React)
 
-50+ MUI v7 components, schema-aware forms, theme. **React-only**
-because MUI v7 is React.
+50+ MUI v9 components, schema-aware forms, theme. **React-only**
+because MUI v9 is React.
 
 ```bash
 pnpm add @omnitron-dev/prism
