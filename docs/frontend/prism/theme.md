@@ -6,7 +6,7 @@ description: Palette, typography, shadows, dark mode, presets.
 
 # Theme
 
-Prism's theme is MUI v7's theme + extensions (custom shadows,
+Prism's theme is MUI v9's theme + extensions (custom shadows,
 spacing presets, density tokens, brand presets). Everything is
 configurable via `createTheme`.
 
@@ -291,10 +291,23 @@ Useful for:
 - **Bypassing the settings store for mode persistence.**
   Custom localStorage code drifts; use `useColorMode` /
   `useSettingsStore`.
+- **`:not(:first-of-type)` / `:nth-of-type` sibling selectors
+  in `styleOverrides`.** MUI v9 dropped the legacy of-type
+  pattern in favour of explicit position classes
+  (`firstButton` / `middleButton` / `lastButton` on
+  `ToggleButtonGroup`, similar tags on other grouped
+  components). The of-type form silently misfires once
+  consumers add wrapper elements or fragments; child-position
+  (`:first-child` / `:last-child` / `:nth-child`) is the
+  general-purpose replacement when no position class exists.
+- **`forwardRef` wrappers in component code.** React 19
+  threads `ref` through props automatically — declare
+  `ref?: Ref<HTMLElement>` on the props interface and use
+  it directly. No `forwardRef`, no `displayName` follow-up.
 
 ## See also
 
 - [Components catalog](./components.md) — components themed via these tokens
 - [Layouts](./layouts.md) — `<DashboardLayout>` reads density
 - [Hooks catalog](./hooks-catalog.md) — `useColorMode`, `useSettingsStore`
-- [MUI v7 theming docs](https://mui.com/material-ui/customization/theming/) — underlying foundation
+- [MUI v9 theming docs](https://mui.com/material-ui/customization/theming/) — underlying foundation

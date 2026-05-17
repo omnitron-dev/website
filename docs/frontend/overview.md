@@ -16,7 +16,7 @@ Browser-side packages:
 | ------- | ---- | --------- | ---- |
 | [`@omnitron-dev/netron-browser`](./netron/browser.md) | RPC transport (HTTP + WebSocket), middleware, auth, multi-backend pool | **Framework-agnostic** — vanilla JS, Vue, Svelte, Solid, Angular, Lit, React, Web Workers | ~25 kB gz |
 | [`@omnitron-dev/netron-react`](./netron/react.md) | React hooks, query/mutation cache, auth guards, devtools | **React-only** — optional layer on top of netron-browser | ~15 kB gz |
-| [`@omnitron-dev/prism`](./prism/index.md) | Design system: MUI v7 components, blocks, layouts, forms, hooks | **React-only** (MUI v7 is React) — optional | ~80 kB gz (root); tree-shakeable |
+| [`@omnitron-dev/prism`](./prism/index.md) | Design system: MUI v9 components, blocks, layouts, forms, hooks | **React-only** (MUI v9 is React) — optional | ~80 kB gz (root); tree-shakeable |
 
 `netron-browser` works everywhere. Add `netron-react` + `prism`
 **only** for React apps. For Vue / Svelte / Solid / Angular / Lit,

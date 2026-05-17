@@ -195,7 +195,7 @@ A typical Next.js + Prisma + tRPC + Tailwind setup:
 | Backend framework | Next.js API routes / Hono / tRPC server | Titan |
 | RPC | tRPC | Netron |
 | Frontend | Next.js / Vite + React | Vite + React (Prism + netron-react) |
-| Design system | shadcn/ui or Material-UI | Prism (built on MUI v7) |
+| Design system | shadcn/ui or Material-UI | Prism (built on MUI v9) |
 | DB layer | Prisma / Drizzle | titan-database (Kysely + Kysera plugins) |
 | Auth | NextAuth / Clerk | titan-auth |
 | Form lib | react-hook-form + zod | react-hook-form + zod (via Prism `<Field>`) |
