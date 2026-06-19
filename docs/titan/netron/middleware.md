@@ -6,19 +6,22 @@ description: Per-call wrapping for cross-cutting concerns.
 
 # RPC Middleware
 
-:::warning Middleware is an HTTP-transport pipeline
-The Netron middleware pipeline lives in the **HTTP transport**
-(`netron/transport/http/middleware/`). The persistent transports
-(WebSocket / TCP / Unix) do **not** run this pipeline — they enforce
-auth and access control inline at dispatch (`remote-peer.ts`). There
-is no `INetronMiddleware` interface, no `NetronContext` type, and no
-`netron.use()` method; the real surface is the `MiddlewarePipeline`
-described below.
-:::
-
 RPC middleware wraps Netron calls over HTTP. It runs on the server
 side, around dispatch. Use it for cross-cutting concerns that apply
 uniformly — auth checks, rate limiting, tracing, logging, metrics.
+
+Middleware is **an HTTP-transport feature**. The pipeline lives in
+`netron/transport/http/middleware/`, and the real surface is the
+`MiddlewarePipeline` class (`pipeline.ts:22`) — there is no
+`INetronMiddleware` interface and no `netron.use()` method. The
+persistent transports (WebSocket / TCP / Unix) do **not** instantiate
+this pipeline; they enforce auth and access control inline at dispatch
+(via the `invocationWrapper` that receives the resolved `authContext`,
+and `IAuthorizationManager` checks in `service-stub.ts` /
+`remote-peer.ts`). So the patterns on this page apply when you serve
+over HTTP. (The transport-agnostic *context* type used below,
+`NetronMiddlewareContext`, is defined once in
+`middleware/types.ts:20` and reused by the HTTP-specific extension.)
 
 > Do not confuse with **DI middleware**, which wraps container
 > resolution. See [DI Middleware](../di/middleware.md) for the
@@ -136,21 +139,27 @@ headers).
 ## Per-method policy via decorators
 
 Method decorators (`@Auth`, `@RateLimit`, `@Cache`) are **not**
-middleware classes — they stamp `reflect-metadata` onto the method.
-The auth middleware (and, on WS/TCP, the inline dispatch path) reads
-that metadata and enforces it:
+middleware classes — they stamp `reflect-metadata` onto the method
+(`decorators/core.ts:788`, `:805`, `:822`, storing `METHOD_AUTH` /
+`METHOD_RATE_LIMIT` / `METHOD_CACHE`). The auth middleware (and, on
+WS/TCP, the inline dispatch path) reads that metadata and enforces it:
 
 ```typescript
 @Public()
-@Auth({ roles: ['admin'] })
-@RateLimit({ defaultTier: { name: 'admin', limit: 5 }, window: 60_000 })
+@Auth({ roles: ['admin'], scopes: ['write:users'] })
+@RateLimit({ limit: 5, window: 60_000 })
 async dangerousOp() { /* … */ }
 ```
 
-So enforcement runs *inside* the auth/rate-limit step of the pipeline
-(or inline on WS/TCP) — there is no separate per-method middleware
-instance. The global step does the heavy lifting (validate token,
-resolve user); the decorator metadata supplies the specific policy.
+The same policy can be expressed inline on `@Public` itself
+(`@Public({ auth: { roles: ['admin'] }, rateLimit: { limit: 5, window: 60_000 } })`);
+the standalone decorators just keep the concerns visually separate.
+
+Either way, enforcement runs *inside* the auth/rate-limit step of the
+pipeline (or inline on WS/TCP) — there is no separate per-method
+middleware instance. The global step does the heavy lifting (validate
+token, resolve user); the decorator metadata supplies the specific
+policy.
 
 ## Scoping middleware to specific methods
 
@@ -165,9 +174,11 @@ pipeline.use(authMiddleware, {
 });
 ```
 
-The built-in `NetronAuthMiddleware` also accepts `skipServices` /
-`skipMethods` options, and any middleware can set `ctx.skipRemaining`
-to short-circuit the rest of its stage.
+The built-in auth middleware (`createAuthMiddleware` /
+`NetronAuthMiddleware`, `middleware/auth.ts:164`) also accepts
+`skipServices` / `skipMethods` options (`auth.ts:37`), and any
+middleware can set `ctx.skipRemaining` to short-circuit the rest of its
+stage (honoured by the pipeline at `pipeline.ts:325`).
 
 ## Modifying the request
 

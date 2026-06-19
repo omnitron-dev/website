@@ -10,14 +10,6 @@ A `Contract` bundles per-method input/output schemas (plus optional
 metadata) for a whole service. `@Contract` applies it to the service
 **class**, mapping each method name to its `{ input, output, … }`.
 
-> ⚠️ **NEEDS REWRITE.** This page previously described `@Contract` as
-> a *method* decorator wrapping a single method's input/output, and a
-> contract as `contract({ name, version, input, output })`. Both are
-> wrong: `contract(definition, metadata?)` takes a **map of method
-> name → `MethodContract`**, and `@Contract(c)` is a **class**
-> decorator (`src/decorators/validation.ts`). The corrected shape is
-> below; the per-method narrative further down still needs reworking.
-
 ## Basic shape
 
 ```typescript
@@ -46,26 +38,39 @@ class UsersService {
 ```
 
 Each `MethodContract` may declare `input`, `output`,
-`errors` (a `Record<httpStatus, ZodSchema>`), `stream`, `options`,
-and an `http` extension (`{ status?, contentType?, streaming?,
-openapi? }`). What happens when the contract is applied:
+`errors` (a `Record<httpStatus, ZodSchema>`), `stream`, `options`
+(`ValidationOptions`), and an `http` extension
+(`{ status?, contentType?, streaming?, responseHeaders?, openapi? }`).
+What happens when the contract is applied — the `ValidationMiddleware`
+wraps each method whose contract declares an `input` or `output`
+(`src/validation/validation-middleware.ts`):
 
 1. **Input validation.** The first argument is parsed against the
-   method's `input`. Failures throw `ValidationError`.
+   method's `input` before the method body runs. Failures throw
+   `ValidationError` (status 422).
 2. **Output validation.** The return value is parsed against
-   `output`. Failures throw `ContractError`.
-3. **Metadata exposure.** The contract is stored in service metadata
-   so clients (and the Omnitron console) can introspect it.
+   `output` after the method body runs. Failures throw the same
+   `ValidationError` — output validation runs through the identical
+   `validateAsync` path as input. For a `stream` method, each yielded
+   item is validated against `output`.
+3. **Metadata exposure.** The decorator stores the contract in
+   reflection metadata (`validation:contract`) and merges it into the
+   service's `netron:service` metadata, so clients (and the Omnitron
+   console) can introspect it.
 
 ## Why contracts, not just schemas
 
-A method-level `@Validate({ input })` validates one method's input. A
+A method-level `@Validate(mc)` validates one method in place. A
 class-level `@Contract` adds:
 
-- **Output validation in development.** Catches "I returned
-  `undefined` when I promised a `User`" bugs at the boundary.
-- **Wire-format introspection.** The Omnitron console can render
-  the contract for any registered service.
+- **One contract object for the whole service.** Define every method's
+  `input`/`output` in a single map, import it, reuse it on the client.
+- **Output validation at the boundary.** Catches "I returned
+  `undefined` when I promised a `User`" bugs before the value leaves
+  the service. (Runs in dev and prod alike — see below.)
+- **Wire-format introspection.** Because the contract is stored in the
+  service's metadata, the Omnitron console can render it for any
+  registered service.
 - **Versioning.** A contract carries metadata including `version`,
   alongside the service version.
 - **Per-status error schemas.** A `MethodContract`'s `errors` map
@@ -95,16 +100,27 @@ The `Contracts` namespace ships ready-made shapes:
 ```typescript
 import { Contracts } from '@omnitron-dev/titan/validation';
 
-const UserContract = Contracts.crud(UserSchema);              // create/read/update/delete/list
-const FeedContract = Contracts.streaming(PostSchema);          // subscribe (stream)/unsubscribe
-const CalcContract = Contracts.rpc(InputSchema, OutputSchema); // single execute() method
+// create/read/update/delete/list; second arg overrides the id schema
+// (default z.string().uuid()). Ships 409 on create, 404 on update/delete,
+// and a paginated { items, total, offset, limit } list output.
+const UserContract = Contracts.crud(UserSchema);
+const KeyedContract = Contracts.crud(UserSchema, z.number());
+
+// subscribe (stream: true) + unsubscribe; second arg is the filter schema
+const FeedContract = Contracts.streaming(PostSchema);
+
+// single execute(input) -> output method
+const CalcContract = Contracts.rpc(InputSchema, OutputSchema);
 ```
 
-There is also a fluent `contractBuilder()` (`.method(name, mc).build()`).
+For a fully custom contract there is also a fluent `contractBuilder()`:
+`contractBuilder().method(name, mc).withMetadata({ … }).build()`.
 
 ## Per-status error schemas
 
-A `MethodContract` can declare the error payload for each status:
+A `MethodContract` can declare the error payload for each status (the
+`errors` field is `Record<number, ZodSchema>` — HTTP status → payload
+schema):
 
 ```typescript
 const UsersContract = contract({
@@ -118,17 +134,53 @@ const UsersContract = contract({
 });
 ```
 
+These schemas are *typed contracts for the errors you emit*, not an
+automatic interceptor. Throw a contract-validated error with
+`ContractError.create(contract, method, status, payload)` — it looks
+up the schema for that method+status and parses `payload` against it,
+so a malformed error payload fails fast at the source:
+
+```typescript
+import { ContractError } from '@omnitron-dev/titan/errors';
+
+async create(input: CreateUser) {
+  if (await this.repo.exists(input.email)) {
+    // payload is type-checked against the 409 schema above
+    throw ContractError.create(UsersContract, 'create', 409, {
+      code: 'ALREADY_EXISTS',
+      message: 'A user with that email already exists',
+    });
+  }
+  return this.repo.create(input);
+}
+```
+
+The static type of `payload` is inferred from the contract via
+`ContractTypes.Errors`, so an unlisted status or a payload that
+doesn't match the schema is a compile-time error.
+
 ## When to use `@Validate` vs `@Contract`
 
-| Use `@Validate({ input })` (method) when …       | Use `@Contract(c)` (class) when …             |
-| ------------------------------------------------- | --------------------------------------------- |
-| You want to annotate one method in place          | You want input + output for many methods       |
-| The method is internal (no `@Public`)             | The methods are public                         |
-| The output is implicit from the TypeScript type   | You want runtime output validation             |
-| The contract surface is small                     | The contract is stable and worth versioning    |
+Both decorators carry the **same `MethodContract` shape** — `@Validate`
+takes one `MethodContract` and `@Contract` takes a map of them. So the
+choice is not about *which validation features* you get (both support
+`input`, `output`, `errors`, `stream`, `options`); it is about *where
+the schema lives* and whether you want a single named, versioned,
+introspectable contract object.
+
+| Use `@Validate(mc)` (method) when …                 | Use `@Contract(c)` (class) when …               |
+| --------------------------------------------------- | ----------------------------------------------- |
+| You want to annotate one method in place            | You want one contract covering many methods     |
+| The schema is local to that method                  | You want a single reusable contract object       |
+| You don't need a named/versioned contract           | The contract is stable and worth versioning      |
+| The contract surface is small / ad hoc              | Clients/console should introspect the whole API  |
 
 `@Validate` is the per-method method decorator; `@Contract` is the
-service-wide class decorator.
+service-wide class decorator. When both are present, the method-level
+`@Validate` wins for that method (the middleware checks
+`validation:method` before the class contract). Convenience aliases
+`@ValidateInput(schema)` and `@ValidateOutput(schema)` wrap `@Validate`
+for the input-only / output-only cases.
 
 ## Output validation
 

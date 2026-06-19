@@ -10,13 +10,11 @@ An integration test boots a real Titan `Application` with selectively
 faked infrastructure. It catches wiring, lifecycle, and module-
 composition bugs that pure unit tests cannot.
 
-> ⚠️ NEEDS REWRITE — the `overrides: [...]` option used in the
-> examples below is not a real `Application.create` option (see
-> [DI Overrides](./di-overrides.md) for the full explanation). Use
-> the `providers: [[token, def]]` tuple array — or the
-> `@omnitron-dev/testing/titan` helpers — to inject fakes. The
-> first example is corrected; the `bootTestApp` helper and other
-> snippets that still show `overrides:` need the same swap.
+Fakes are injected through the `providers` option — an array of
+`[token, providerDefinition]` tuples that `Application.create`
+registers after your modules, so they win over the modules' own
+providers. See [DI Overrides](./di-overrides.md) for the full
+mechanism.
 
 ## The pattern
 
@@ -73,7 +71,7 @@ What you skip:
 - The transport. Calls go directly through the container, not over
   the wire.
 - Real backends (database, redis, third-party APIs). Fake those
-  with `overrides`.
+  through the `providers` tuple array.
 
 ## Fixture lifetime
 
@@ -117,10 +115,14 @@ The right balance for most suites.
 
 ## Helpers
 
-Common test setup deserves a helper:
+Common test setup deserves a helper. The `providers` option is typed
+as `Array<[InjectionToken<unknown>, Provider<unknown>]>`
+(`CreateOptions`, `packages/titan/src/application/application.ts:117`),
+so a per-suite booter just spreads in any extra tuples:
 
 ```typescript
 // test/setup.ts
+import { Application } from '@omnitron-dev/titan';
 import type { InjectionToken, Provider } from '@omnitron-dev/titan/nexus';
 
 export async function bootTestApp(
@@ -139,7 +141,17 @@ export async function bootTestApp(
 }
 ```
 
-Reduces boilerplate per test file.
+Reduces boilerplate per test file:
+
+```typescript
+const app = await bootTestApp([[REDIS, { useValue: fakeRedis }]]);
+```
+
+For container-level mocking, spying, and interaction recording
+without booting the full lifecycle, reach for the
+`@omnitron-dev/testing/titan` helpers (`createTestModule`,
+`MockProvider`, `createMockProvider`) documented in
+[DI Overrides](./di-overrides.md).
 
 ## Testing lifecycle hooks
 
@@ -183,7 +195,10 @@ it('aborts start when onInit throws', async () => {
 
   const app = await Application.create(TestModule, { disableGracefulShutdown: true });
   await expect(app.start()).rejects.toThrow('boom');
-  // Application is in 'error' state; can be inspected.
+
+  // Failed start rolls back started modules and disposes the
+  // container; the app settles in ApplicationState.Failed ('failed').
+  expect(app.state).toBe('failed');
 });
 ```
 

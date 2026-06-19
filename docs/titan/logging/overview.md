@@ -114,21 +114,21 @@ LoggerModule.forRoot({
 Per-context level overrides through child loggers (`child` accepts
 an options bag that includes `level` on pino).
 
-## Pretty mode (dev)
+## Output format (always JSON)
 
-Pretty printing is a module option (`prettyPrint`), resolved at
-`forRoot` time — not a per-transport flag:
+The logger always writes **structured JSON**, one record per line —
+what log shippers (Loki, ELK, Datadog) expect. There is no built-in
+pretty renderer: the `prettyPrint` option (and the
+`logger.prettyPrint` ConfigService key) is accepted but **not
+currently wired** to anything, so it has no effect on output.
 
-```typescript
-LoggerModule.forRoot({
-  prettyPrint: process.env.NODE_ENV !== 'production',
-})
+For human-friendly output in local dev, pipe the process through
+[`pino-pretty`](https://github.com/pinojs/pino-pretty) — the logger is
+built on pino, so its JSON is `pino-pretty`-compatible:
+
+```bash
+node dist/main.js | npx pino-pretty
 ```
-
-`prettyPrint: false` (production default) writes JSON one-per-line —
-what log shippers expect. `prettyPrint: true` renders human-friendly
-lines. The module also reads `logger.prettyPrint` from `ConfigService`
-when present.
 
 ## Decorators
 

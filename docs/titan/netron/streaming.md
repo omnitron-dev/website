@@ -6,23 +6,23 @@ description: AsyncIterable methods, server-push, backpressure.
 
 # Streaming
 
-Netron supports server-streaming methods. On the server you can write
-an `async *` generator (or return a `NetronReadableStream`); for a
-remote caller Netron auto-wraps the generator into a
-`NetronWritableStream` and sends a stream reference over the wire. The
-underlying primitives are **Node Web Streams**
-(`NetronReadableStream extends Readable`,
-`NetronWritableStream extends Writable`), not native async iterables —
-so the *received* stream is consumed with stream events
-(`.on('data')` / `.on('end')`), though a `Readable` is also
-`for await`-iterable.
+Netron supports server-streaming methods. On the server you write an
+`async *` generator (or return a `NetronReadableStream` directly). When
+a method returns an async generator and the caller is remote, the
+service stub wraps the generator in a `NetronWritableStream` and pipes
+it (`stream.pipeFrom(generator)`), returning a `StreamReference` over
+the wire (`netron/service-stub.ts:151`). The receiving peer rebuilds
+the other half as a `NetronReadableStream` (`netron/remote-peer.ts:982`).
 
-:::note
-The "define with `async *`" pattern below is real and works. The
-consumption examples in this page show `for await` for brevity, but
-the demonstrated/tested API consumes the received stream via Node
-stream events. See `netron/streams/` for the concrete classes.
-:::
+The stream primitives are built on the **`readable-stream` package**
+(the userland Node.js streams implementation), not the WHATWG Web
+Streams API and not native async iterables: `NetronReadableStream
+extends Readable` and `NetronWritableStream extends Writable`, both in
+`objectMode` (`netron/streams/readable-stream.ts:48`,
+`netron/streams/writable-stream.ts:49`). Because the received stream is
+a `Readable`, you can consume it either with stream events
+(`.on('data')` / `.on('end')`) or with `for await` — a `Readable` is
+async-iterable. The examples below use `for await` for brevity.
 
 ```mermaid
 sequenceDiagram
@@ -49,10 +49,15 @@ sequenceDiagram
 
 Streaming requires WebSocket, TCP, or Unix transport. The HTTP
 transport does not open a streaming channel — instead it **collects an
-`async *` generator into an array** (capped by `maxAsyncGeneratorItems`,
-default 10000; over that it throws `PAYLOAD_TOO_LARGE`). So over HTTP
-you get a bounded batch, not a live stream; use WS/TCP/Unix for true
-streaming.
+`async *` generator into an array** before sending the response
+(`netron/transport/http/server.ts:2566` `collectAsyncGeneratorValues`).
+Collection is bounded by `maxAsyncGeneratorItems` (a server option,
+default `10000` — `server.ts:148`). When the generator exceeds that
+limit the server throws a `TitanError` with code `PAYLOAD_TOO_LARGE`
+(`server.ts:2591`); other (non-`TitanError`) iteration failures return
+the partial results collected so far rather than failing the whole
+request. So over HTTP you get a bounded batch, not a live stream — use
+WS/TCP/Unix for true streaming, or paginate.
 
 ## Defining a streaming method
 
@@ -118,18 +123,34 @@ async *watchAll(): AsyncIterable<Order> {
 
 ## Cancellation
 
-:::warning Consumer-initiated cancellation does not signal the server
-The server→consumer direction sends a close packet when the producer
-ends or is destroyed. But the **consumer** destroying its received
-stream does *not* currently send a close signal upstream — so a clean
-client `break` does **not** reliably trigger the server generator's
-`finally`. The server keeps pulling its source until it errors writing
-to the now-dead socket. Don't rely on prompt server-side teardown from
-a client `break`.
-:::
+Cancellation is **one-directional on the wire**, and the direction
+matters.
 
-You should still release resources in a `finally`, since the generator
-*does* unwind when the write side fails (or the connection drops):
+The **producer → consumer** direction is wired. When the server's
+`NetronWritableStream` finishes (`end()`) it sends an end-of-stream
+final chunk; when it is `destroy()`ed it sends an explicit
+`TYPE_STREAM_CLOSE` packet (`netron/streams/writable-stream.ts:254`),
+and the consumer's readable reacts by force-closing
+(`netron/remote-peer.ts:998` → `stream.forceClose(reason)`). The two
+are mutually exclusive — a graceful end uses the EOS chunk, a destroy
+uses the close packet (the `finalizing` guard in `writable-stream.ts`
+prevents emitting both).
+
+The **consumer → producer** direction is *not* wired. The received
+stream is a `NetronReadableStream`, and its `destroy()`
+(`netron/streams/readable-stream.ts:280`) only tears down locally — it
+sends **no** packet back to the producer. There is no code path where a
+broken/destroyed readable notifies the writable upstream. So a clean
+client `break` out of the `for await` loop does **not** signal the
+server: the generator keeps being pulled until the next
+`sendStreamChunk` write fails against the dead socket (or the
+connection drops), at which point `pipeFrom` catches the error and
+destroys the writable. Don't rely on prompt server-side teardown from a
+client `break` — treat teardown as eventual, driven by the failed
+write, not immediate.
+
+Because the generator *does* unwind when the write side fails (or the
+connection drops), always release resources in a `finally`:
 
 ```typescript
 @Public()

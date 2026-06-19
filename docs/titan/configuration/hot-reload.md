@@ -8,18 +8,22 @@ description: Change config without restarting — when, how, and the gotchas.
 
 The `ConfigWatcherService` watches file sources for changes. On a
 change it triggers `ConfigService.reload()`, which re-loads **all**
-sources, re-validates against the schema, and notifies subscribers
-registered via `ConfigService.onChange()`.
+sources, optionally re-validates against the schema, and notifies
+subscribers registered via `ConfigService.onChange()`.
 
-> ⚠️ NEEDS REWRITE — earlier drafts of this page described a
-> `config:changed` application-bus event with per-leaf-key diffing
-> and `watch: { pollIntervalMs, debounceMs }` options. None of that
-> exists in the current implementation
-> (`packages/titan/src/modules/config/`). The corrected behaviour
-> below reflects `config.service.ts` / `config-watcher.service.ts`:
-> subscription is through the `onChange()` callback, the watcher uses
-> `fs.watch` (no polling/debounce knobs), and a reload re-loads and
-> re-validates the **whole** config — there is no leaf-key diff.
+The model is deliberately simple, and it pays to know its shape before
+you build on it:
+
+- Subscription is the `onChange(listener)` callback — there is **no**
+  `config:changed` event on the application bus.
+- The watcher uses Node's `fs.watch`; there are **no** polling or
+  debounce options.
+- A file change reloads and re-validates the **whole** config and
+  fires **one** event — there is no per-leaf-key diffing.
+
+The rest of this page walks through each of those in detail, with
+source references into
+[`packages/titan/src/modules/config/`](https://github.com/omnitron-dev/omni/tree/main/packages/titan/src/modules/config).
 
 ## When hot reload is the right tool
 
@@ -53,13 +57,21 @@ ConfigModule.forRoot({
 })
 ```
 
-Omit it (or set it `false`) to disable watching.
+Omit it (or set it `false`) to disable watching. On `onInit`,
+`ConfigService` only attaches the watcher when both `watchForChanges`
+is truthy and a watcher service is present; the watcher's change
+handler is what calls `reload()` (`config.service.ts:103-107`,
+`309-316`). Only `file` sources are watched — `ConfigWatcherService`
+filters the source list to `type === 'file'` and ignores the rest
+(`config-watcher.service.ts:22-23`).
 
 ## Subscribing to changes
 
-Register a listener with `ConfigService.onChange()`. It returns an
-unsubscribe function — call it in `onDestroy` to avoid leaks. There
-is **no** `config:changed` event on the application bus.
+Register a listener with `ConfigService.onChange()`. It adds the
+listener to an internal `Set` and returns an unsubscribe function that
+removes it (`config.service.ts:231-234`) — call it in `onDestroy` to
+avoid leaks. There is **no** `config:changed` event on the application
+bus; the callback is the only subscription path.
 
 ```typescript
 @Service('cache@1.0.0')
@@ -105,20 +117,26 @@ interface IConfigChangeEvent {
 A file change triggers a full `reload()`, which fires **one** event
 with `path: ''`, `source: 'reload'`, and `oldValue` / `newValue`
 holding the entire previous / new config object — it does **not**
-diff and emit per leaf key. A programmatic `config.set(path, value)`
-fires a targeted event for that `path` with `source: 'runtime'`.
+diff and emit per leaf key (`config.service.ts:266-272`). A
+programmatic `config.set(path, value)` is the other emit path: it
+fires a targeted event for that `path` with `source: 'runtime'`,
+carrying the old and new value at that path (`config.service.ts:179-186`).
 
-So inside an `onChange` handler, re-read the specific keys you care
-about from `ConfigService` rather than relying on a per-key payload.
+So inside an `onChange` handler, branch on `event.source` (or on
+`event.path === ''`) and re-read the specific keys you care about from
+`ConfigService` rather than relying on a per-key payload from a file
+reload.
 
 ## Validation on reload
 
 `reload()` only re-validates when `validateOnStartup` is set and a
-schema is present. In that case a reload that fails validation is
-**rejected** — `reload()` restores the previous config and throws,
-so the running app keeps its last-known-good values. The reload is
-triggered from the watcher's change handler, which logs the failure
-rather than propagating it.
+schema is present (`config.service.ts:251`). In that case a reload
+that fails validation is **rejected** — `reload()` restores the
+previous config and throws, so the running app keeps its
+last-known-good values (`config.service.ts:251-260`). The reload is
+triggered from the watcher's change handler (`handleConfigChange`),
+which `await`s `reload()` inside a `try/catch` and logs the failure
+rather than propagating it (`config.service.ts:309-316`).
 
 This means a typo in a config file does not crash the running app.
 You see the error in the logs, fix the file, and the next change
@@ -137,12 +155,17 @@ whole-config `onChange` event fires after the swap.
 
 ## Watch mechanism
 
-The watcher uses Node's `fs.watch` on each file source (see
-`config-watcher.service.ts`). There are no polling-interval or
-debounce options — the change event from `fs.watch` triggers a
-reload directly. On filesystems where `fs.watch` is unreliable
-(some NFS mounts), prefer a restart-on-change deployment or a
-`remote` source instead.
+The watcher resolves each file source's path and opens a Node
+`fs.watch` on it, de-duplicating already-watched paths
+(`config-watcher.service.ts:21-55`). It reacts to `fs.watch` events
+whose `eventType` is `'change'`, calling back into `ConfigService` to
+reload. There are no polling-interval or debounce options — the change
+event triggers a reload directly, so a rapid burst of writes can drive
+several reloads. `unwatch()` closes every `FSWatcher` and clears the
+tracked set (`config-watcher.service.ts:60-66`); `ConfigService`
+calls it on both `onStop` and `onDestroy`. On filesystems where
+`fs.watch` is unreliable (some NFS mounts), prefer a restart-on-change
+deployment or a `remote` source instead.
 
 ## Multi-pod considerations
 

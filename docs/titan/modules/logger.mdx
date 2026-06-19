@@ -8,12 +8,18 @@ import ModuleBadge from '@site/src/components/ModuleBadge';
 
 <ModuleBadge origin="built-in" pkg="@omnitron-dev/titan" subpath="/module/logger" status="stable" />
 
-Structured pino-based logging with four levels, child loggers with
-bound context, pluggable transports and processors, automatic
+Structured pino-based logging with six levels, child loggers with
+bound context, pino-native redaction, extra-stream fan-out, automatic
 per-service binding, decorator-based property injection, and
 method-level auto-instrumentation. **Auto-loaded** as a core module
 by every Titan application (unless `disableCoreModules: true`).
 No extra install required — ships inside `@omnitron-dev/titan`.
+
+The logger always writes **structured JSON**, one record per line, to
+an async stdout destination (or a pino `multistream` over stdout plus
+any extra `destinations` you supply). It is built on
+[pino](https://getpino.io); its JSON is what log shippers (Loki, ELK,
+Datadog) expect.
 
 ## When you need it
 
@@ -21,35 +27,43 @@ No extra install required — ships inside `@omnitron-dev/titan`.
   for production.
 - **Per-call context propagation.** Trace IDs, request IDs, user
   IDs attached to every log line automatically via child loggers.
-- **Multiple destinations.** Console for dev, JSON for production
-  ingestion, custom transports for ClickHouse / Loki / OTLP.
-- **Selective redaction.** Strip auth headers and PII before they
-  hit the transport.
+- **Multiple destinations.** Async stdout for ingestion, plus extra
+  `destinations` streams (file, socket, ClickHouse / Loki / OTLP sink).
+- **Selective redaction.** Strip auth headers and PII via pino's
+  native `redact` before they hit the output.
 
 ## Quickstart
 
 ```typescript
-import {
-  LoggerModule, ConsoleTransport, RedactionProcessor,
-} from '@omnitron-dev/titan/module/logger';
+import { createWriteStream } from 'node:fs';
+import { LoggerModule } from '@omnitron-dev/titan/module/logger';
 
 @Module({
   imports: [
     LoggerModule.forRoot({
-      level:       'info',
-      prettyPrint: process.env.NODE_ENV !== 'production',   // pretty console in dev
-      transports: [
-        new ConsoleTransport(),                             // ctor takes an optional ILogger, not options
-      ],
-      processors: [
-        // RedactionProcessor takes a positional string[] of dotted paths
-        new RedactionProcessor(['password', 'token', 'headers.authorization']),
+      level: 'info',
+      // pino-native redaction — the real, working mechanism (forwarded
+      // straight to pino). Supports path syntax + `*` wildcards.
+      redact: ['password', 'token', 'headers.authorization'],
+      // Optional: fan structured JSON out to extra streams besides
+      // stdout (stdout is always included as the first stream).
+      destinations: [
+        { stream: createWriteStream('/var/log/myapp/app.log'), level: 'info' },
       ],
     }),
   ],
 })
 class AppModule {}
 ```
+
+> **No pretty-print, no transport hot path.** The logger always emits
+> JSON. For human-friendly local output, pipe the process through
+> [`pino-pretty`](https://github.com/pinojs/pino-pretty)
+> (`node dist/main.js | npx pino-pretty`) — there is no in-process
+> pretty renderer (the `prettyPrint` option is inert; see below).
+> Likewise, extra log sinks go through `destinations`, not through
+> `transports`: a registered `ITransport`'s `write()` is never called
+> on the log path (see [Extra destinations](#extra-destinations-the-real-fan-out)).
 
 ## The `ILogger` interface
 
@@ -73,8 +87,9 @@ interface ILogger {
   fatal(obj: object, msg?: string, ...args: any[]): void;
   fatal(msg: string, ...args: any[]): void;
 
-  // Child logger with bound context — inherits transports + processors,
-  // adds the supplied bindings to every log line through it
+  // Child logger with bound context — inherits the parent's pino
+  // config (level, redact, destinations) and adds the supplied
+  // bindings to every log line through it
   child(bindings: object): ILogger;
 
   // Timing helper — returns a stop() that logs the elapsed duration
@@ -197,64 +212,89 @@ async heavyComputation(input: Input) { /* … */ }
 | Symbol                | Purpose                                                |
 | --------------------- | ------------------------------------------------------ |
 | `LoggerService`       | DI-injected logger manager (`ILoggerModule`): `create` / `child` / `setLevel` / `logger` getter |
-| `ConsoleTransport`    | Built-in `ITransport` (forwards records to an `ILogger`; mainly for tests) |
-| `RedactionProcessor`  | Built-in `ILogProcessor` — redacts the given dotted paths (positional `string[]`) |
+| `ConsoleTransport`    | Built-in `ITransport`; ctor takes an optional `ILogger` (positional), test-oriented. Its `write()` is **not** driven on the log path — use `destinations` for real sinks |
+| `RedactionProcessor`  | Built-in `ILogProcessor`; redacts dotted paths (positional `string[]`). **Inert as a processor** — the service never runs processors; use the `redact` option for real redaction |
 | `createNullLogger()`  | Returns an `ILogger` that discards everything (tests) |
 | `isLogger(value)`     | Type guard                                            |
 
-## Custom transports
+## Extra destinations (the real fan-out)
 
-A transport receives log records and writes them somewhere:
+To send the same JSON log lines somewhere besides stdout — a file, a
+socket, an OTLP/Loki sink — register a writable stream via
+`destinations`. Pino writes to it directly through `multistream`;
+stdout is always included as the first stream, and each user stream is
+async-wrapped so a slow consumer can't stall the hot path
+(`logger.service.ts:203-249`, `:23-44`):
 
 ```typescript
-import type { ITransport } from '@omnitron-dev/titan/module/logger';
+import { Writable } from 'node:stream';
 
-class OtlpTransport implements ITransport {
-  readonly name = 'otlp';                 // ITransport requires a `name`
-
-  constructor(private readonly endpoint: string) {}
-
-  async write(record: any): Promise<void> {
-    await fetch(this.endpoint, {
-      method: 'POST',
-      body:   JSON.stringify(record),
-    });
+class OtlpSink extends Writable {
+  constructor(private readonly endpoint: string) { super(); }
+  _write(chunk: Buffer, _enc: BufferEncoding, cb: (e?: Error | null) => void) {
+    fetch(this.endpoint, { method: 'POST', body: chunk }).then(() => cb(), cb);
   }
 }
 
 LoggerModule.forRoot({
-  transports: [
-    new ConsoleTransport(),
-    new OtlpTransport('https://otel.internal/v1/logs'),
+  destinations: [
+    { stream: new OtlpSink('https://otel.internal/v1/logs'), level: 'info' },
   ],
 })
 ```
 
+> **`ITransport` is not a log sink today.** The `ITransport` interface
+> (`{ name, write, flush? }`) and `ConsoleTransport` are exported, and
+> you can register transports via `forRoot({ transports })` /
+> `addTransport`, but the service **never calls a transport's
+> `write()`** on the log path — logging goes straight through pino.
+> Only `flush()` is awaited, on shutdown via `LoggerService.flush()`
+> (`logger.service.ts:423-425`). Treat `ITransport` as a flush-lifecycle
+> hook, not a sink; for real fan-out use `destinations` (above). There
+> is **no `FileTransport`** and no built-in rotation — use a rotating
+> `destinations` stream, or ship stdout with an OS-level log shipper.
+
 → See [Logging / Transports](../logging/transports.md).
 
-## Custom processors
+## Redaction and enrichment
 
-A processor transforms a log record before transports see it. The
-`RedactionProcessor` is the canonical example; custom ones can add
-trace context, scrub PII, sample to reduce volume:
+Redaction is real and works — through **pino's native `redact`
+option**, which `LoggerService` forwards straight to pino when it
+builds the root logger (`logger.service.ts:186`). It runs inside pino's
+serialisation, on the hot path, for every line including child loggers.
+Use pino path syntax (`*` wildcards, bracket notation), and the object
+form for a custom censor:
 
 ```typescript
-import { currentTrace } from '@omnitron-dev/titan/tracing';
-import type { ILogProcessor } from '@omnitron-dev/titan/module/logger';
-
-const TraceContextProcessor: ILogProcessor = {
-  process(record) {
-    const trace = currentTrace();
-    if (trace) {
-      record.traceId = trace.traceId;
-      record.spanId  = trace.spanId;
-    }
-    return record;
-  },
-};
-
-LoggerModule.forRoot({ processors: [TraceContextProcessor] });
+LoggerModule.forRoot({
+  redact: ['password', 'token', 'apiKey', 'headers.authorization', '*.creditCard'],
+})
 ```
+
+The list can also come from `ConfigService` under `logger.redact`
+(read at startup, `logger.service.ts:318`). Titan redacts nothing by
+default (`redact: config.redact || []`) — set the list per app.
+
+For the other shaping needs, the supported, wired extension points are:
+
+- **Static fields on every line** → `base`
+  (`forRoot({ base: { region, version } })`) or `setContext(...)`, both
+  of which flow into pino's bindings.
+- **Per-request context** (trace ID, user ID) → a **child logger** —
+  see [Per-request child loggers](#per-request-child-loggers). This is
+  the idiomatic, fully-wired way to attach contextual fields.
+- **Filtering by level** → set the level (`forRoot({ level })` or
+  `setLevel`); pino drops below-threshold records before serialising.
+
+> **`ILogProcessor` is inert today.** The `ILogProcessor` interface
+> (`{ process(log) }`) and `RedactionProcessor` are exported, and you
+> can register processors via `forRoot({ processors })` /
+> `addProcessor`, but the service **never calls `process()`** on the
+> log path (grep-confirmed; logging goes straight through pino).
+> So a `RedactionProcessor` registered as a processor does **not**
+> redact — use the `redact` option above (it is also more capable:
+> wildcards, custom censor). The processor classes are usable only if
+> you call `process()` yourself.
 
 → See [Logging / Processors](../logging/processors.md).
 
@@ -263,13 +303,16 @@ LoggerModule.forRoot({ processors: [TraceContextProcessor] });
 ```mermaid
 flowchart LR
   Code[Service.logger.info]
-  Code --> Bind[LoggerService<br/>root + child bindings]
-  Bind --> Pino[pino instance]
-  Pino --> Proc[Processors<br/>redact / enrich / sample]
-  Proc --> Trans1[Transport: console]
-  Proc --> Trans2[Transport: OTLP]
-  Proc --> Trans3[Transport: file / etc.]
+  Code --> Bind[LoggerService<br/>base + child bindings]
+  Bind --> Pino[pino instance<br/>redact + serialise]
+  Pino --> Out1[async stdout]
+  Pino --> Out2[destinations: file]
+  Pino --> Out3[destinations: OTLP / etc.]
 ```
+
+The fan-out is pino's `multistream` over stdout plus any `destinations`
+streams; redaction happens inside pino's serialisation. Registered
+`processors`/`transports` are **not** on this path (see above).
 
 ## Tokens
 
@@ -285,7 +328,8 @@ flowchart LR
 
 When ConfigModule is loaded, the logger reads its initial settings from
 the `logger.*` namespace **once at construction** — `logger.level`,
-`logger.prettyPrint`, `logger.redact`, `logger.base`, and so on:
+`logger.redact`, `logger.base`, and so on (`logger.prettyPrint` is read
+too, but it is **inert** — see the redaction/pretty notes above):
 
 ```yaml
 logger:
@@ -304,20 +348,22 @@ loggerService.setLevel('debug');   // or: logger.setLevel('debug')
 ## Anti-patterns
 
 - **`console.log` in services.** Bypasses the framework — no
-  per-service context, no level, no transport routing. Always use
+  per-service context, no level, no JSON formatting. Always use
   the injected logger.
 - **Logging in tight loops.** A `debug` log inside a 100 K-iteration
-  loop floods the transport even if it's filtered out. Hoist the
-  log outside the loop, or sample.
-- **PII in logs without redaction.** Always wire
-  `RedactionProcessor` for any transport shipping off-host.
-- **Synchronous transports blocking the event loop.** Custom
-  transports must be async / non-blocking.
+  loop floods the output even if it's filtered out. Hoist the
+  log outside the loop, or raise the level.
+- **PII in logs without redaction.** Set the `redact` option (pino
+  native) for anything shipping off-host — not a `RedactionProcessor`,
+  which the service never runs.
+- **Synchronous `destinations` streams blocking the event loop.** Each
+  user stream is async-wrapped, but a stream that does a blocking
+  syscall in `_write` still stalls; keep extra sinks async / non-blocking.
 
 ## See also
 
 - [Logging / Overview](../logging/overview.md) — conceptual guide
-- [Logging / Transports](../logging/transports.md) — destinations
-- [Logging / Processors](../logging/processors.md) — transform pipeline
+- [Logging / Transports](../logging/transports.md) — async stdout + `destinations`
+- [Logging / Processors](../logging/processors.md) — redaction via `redact`
 - [Logging / Child Loggers](../logging/child-loggers.md) — bound context
 - [Tracing](../tracing.md) — automatic correlation with log lines

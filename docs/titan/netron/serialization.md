@@ -6,22 +6,16 @@ description: msgpack as the wire format — types, custom codecs, when to overri
 
 # Serialization
 
-:::warning Verify before relying on specifics
-Netron uses a custom binary serializer
-(`@omnitron-dev/msgpack`), **not** the npm `@msgpack/msgpack`
-library. The custom-codec API and the extension-code table below were
-corrected against source on review, but the registration surface is
-low-level; confirm against `packages/msgpack/src/serializer.ts` and
-`packages/titan/src/netron/packet/serializer.ts` for the version you
-target.
-:::
-
 Netron serialises every payload (arguments, return values, errors)
-into a compact binary form via `@omnitron-dev/msgpack` — an in-house
-serializer (SmartBuffer-based, msgpack-style). It is **not**
-wire-compatible with the standard `@msgpack/msgpack` package. The
-serializer is binary, self-describing, and shared across every runtime
-Titan targets.
+into a compact binary form via `@omnitron-dev/msgpack` — an in-house,
+`SmartBuffer`-based serializer that follows the msgpack format. It is
+**not** the npm `@msgpack/msgpack` library and is **not**
+wire-compatible with it. The serializer is binary, self-describing, and
+shared across every runtime Titan targets. Netron's wire layer keeps a
+single shared instance, `serializer`, in
+`packages/titan/src/netron/packet/serializer.ts`; the core
+encode/decode and the common-type registrations live in
+`packages/msgpack/src/`.
 
 ## What the serializer handles natively
 
@@ -40,36 +34,74 @@ is handled through *registered types* (below).
 
 ## Registered types Titan ships
 
-Titan registers extension types for common cases. Type codes are a
-single byte in the range `0..127`; the standard library types occupy
-the high band (`119..126`) and Netron's own types sit at `100..118`:
+A registered ("extension") type is a single-byte code paired with an
+`encode`/`decode` callback. Codes are a single byte, `0..127`, and the
+registration map (`packages/msgpack/src/index.ts:11`) partitions the
+range like this:
 
-| Type           | Type code | Notes                                          |
-| -------------- | --------- | ---------------------------------------------- |
-| `TitanError`   | `110`     | Full structured error, preserving class + code |
-| `Long`         | `119`     | 64-bit integer (the `long` package)            |
-| `BigInt`       | `120`     | Encoded as a decimal string                    |
-| `RegExp`       | `121`     | `source` + `flags`                             |
-| `Set`          | `123`     | Encoded as `value[]`                            |
-| `Map`          | `124`     | Encoded as `[key, value][]`                     |
-| `Date`         | `125`     | Epoch millis as `UInt64` (not ISO)              |
-| `Error`        | `126`     | `name` / `message` / `stack` + own fields       |
+- **`119..126`** — standard library / runtime types (the common-type
+  registrations).
+- **`110..118`** — reserved (`TitanError` is registered here, at
+  `110`, by the Titan wire layer).
+- **`100..109`** — Netron's own proxy/stream wiring.
+- **`1..99`** — free for your own custom types.
 
-(Netron also registers `Reference` = `108`, `Definition` = `109`, and
-`StreamReference` = `107` for its internal proxy/stream wiring.)
+The common types registered by
+`registerCommonTypesFor` (`packages/msgpack/src/index.ts:7`):
 
-The `TitanError` type (code `110`) is what makes typed errors travel
-across the wire intact, and it is registered **before** `Error` so the
-more specific handler wins. When the receiver decodes a value tagged
-`110`, it reconstructs the matching error class with its `code`.
+| Type    | Code  | Wire form                                                       |
+| ------- | ----- | --------------------------------------------------------------- |
+| `Long`  | `119` | unsigned flag + 64-bit int (the `long` package)                 |
+| `BigInt`| `120` | encoded as a decimal string                                     |
+| `RegExp`| `121` | `source` + `flags`                                              |
+| `Set`   | `123` | size prefix + each value                                        |
+| `Map`   | `124` | size prefix + each `key`, `value`                               |
+| `Date`  | `125` | epoch millis as `UInt64` (not ISO)                              |
+| `Error` | `126` | std-error id + `name` / `stack` / `message` + own custom fields |
+
+(`122` is reserved and unused.)
+
+The Titan wire layer
+(`packages/titan/src/netron/packet/serializer.ts`) registers the rest:
+
+| Type              | Code  | Notes                                              |
+| ----------------- | ----- | -------------------------------------------------- |
+| `TitanError`      | `110` | Full structured error, preserving class + code     |
+| `Definition`      | `109` | Service definition metadata (internal)             |
+| `Reference`       | `108` | Service reference (internal proxy wiring)           |
+| `StreamReference` | `107` | Stream handle (internal; see [Streaming](./streaming.md)) |
+
+`TitanError` (code `110`) is what makes typed errors travel across the
+wire intact. It is registered **before** the common types
+(`serializer.ts:113`) precisely so its handler is checked ahead of the
+generic `Error` handler (`126`) — `TitanError` extends `Error`, so the
+more specific codec must win. On decode it reconstructs the matching
+error with its `code`, `message`, tracing fields, `cause` chain, and
+any subclass-specific fields (`serviceId`, `requiredPermission`,
+`retryAfter`, …). Stack traces are **omitted on the wire by default**
+(`serializer.ts:150`, security policy T#38) to avoid leaking
+server-internal paths; dev tooling can opt in via
+`setSerializerErrorOptions({ includeStackTraces: true })`.
 
 ## Custom types
 
 For domain types you want to send as themselves (preserving class
 identity on the receiver), register a type on the shared `serializer`.
-The API is `serializer.register(typeCode, constructor, encode, decode)`
-— **positional args**, and the `encode`/`decode` callbacks read and
-write a `SmartBuffer` (they do not return bytes):
+The signature is **positional**:
+
+```
+serializer.register(typeCode, constructor, encode, decode)
+```
+
+(`packages/msgpack/src/serializer.ts:41`). `typeCode` must be in
+`0..127` or `register` throws a `RangeError`; pick one in the
+**`1..99`** user band, since `100..126` are reserved (see the tables
+above). The `encode` callback is `(value, buf) => void` and the
+`decode` callback is `(buf) => value` — neither returns bytes. `buf` is
+a `SmartBuffer`: write fields with `serializer.encode(field, buf)` and
+read them back, in the **same order**, with `serializer.decode(buf)`
+(or use the buffer's typed primitives directly, like the built-in
+`Date` codec does with `writeUInt64BE`/`readUInt64BE`).
 
 ```typescript
 import { serializer } from '@omnitron-dev/titan/netron';
@@ -79,13 +111,13 @@ class Money {
 }
 
 serializer.register(
-  32,                                  // user-defined code in the 1..99 band
+  32,                                       // user-defined code in the 1..99 band
   Money,
-  (m: Money, buf) => {                 // encode: write into buf
+  (m: Money, buf) => {                      // encode: write fields into buf
     serializer.encode(m.amount.toString(), buf);
     serializer.encode(m.currency, buf);
   },
-  (buf) => {                           // decode: read from buf
+  (buf) => {                                // decode: read fields back, same order
     const amount   = serializer.decode(buf) as string;
     const currency = serializer.decode(buf) as string;
     return new Money(BigInt(amount), currency);
@@ -93,9 +125,9 @@ serializer.register(
 );
 ```
 
-Pick a code in the **`1..99`** user band (the `100..126` range is
-reserved). Both sides must register the same type with the same code.
-Otherwise the receiver cannot reconstruct the value.
+Both peers must register the same constructor against the same code,
+with codecs that agree on field order. If only one side registers it,
+or the codes differ, the receiver cannot reconstruct the value.
 
 ## When NOT to use a custom codec
 
@@ -110,13 +142,22 @@ Otherwise the receiver cannot reconstruct the value.
 
 ## Payload limits
 
-The default packet ceiling is **16 MiB** (`maxPacketSize`), checked at
-`decodePacket` before the decoder runs so an oversized frame can't
-force a matching scratch allocation. Over the limit, decoding throws a
-`TitanError` with code `PAYLOAD_TOO_LARGE` (HTTP 413). The HTTP
-transport additionally caps request bodies at 10 MB (`maxRequestSize`,
-e.g. `'10mb'`); WebSocket has its own `maxPayload`. There is no
-`maxPayloadBytes` option.
+The default packet ceiling is **16 MiB**
+(`DEFAULT_MAX_PACKET_SIZE`, `packet/index.ts:204`), overridable per
+transport via the `maxPacketSize` option (`transport/types.ts:107`). It
+is checked inside `decodePacket` **before** the msgpack decoder runs
+(`packet/index.ts:209`), so an oversized frame can't force a matching
+scratch allocation and OOM the host. Over the limit, decoding throws a
+`TitanError` with code `PAYLOAD_TOO_LARGE` (HTTP 413). TCP additionally
+rejects on the *declared* length before reading the body
+(`tcp-transport.ts:148`).
+
+Each transport also has its own body/frame cap layered on top: the
+HTTP transport caps request bodies (default **10 MB**; the public
+option is `maxRequestSize` as a human string like `'10mb'` —
+`transport/types.ts:152`), and WebSocket has its own numeric
+`maxPayload` (`websocket/types.ts:25`). There is no `maxPayloadBytes`
+option.
 
 For larger transfers (file uploads, bulk data), use:
 

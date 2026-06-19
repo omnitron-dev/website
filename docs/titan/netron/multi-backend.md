@@ -6,19 +6,12 @@ description: One client, many servers — pools, failover, method-level routing.
 
 # Multi-Backend
 
-:::warning Config shape corrected against source
-An earlier version of this page documented a config surface
-(`strategy`, `stickyKey`, `routing`, nested `health`/`failover`,
-per-backend `pool`) that **does not exist** in the implementation. The
-examples below are rewritten against
-`packages/titan/src/netron/multi-backend/types.ts`. Confirm there for
-the version you target.
-:::
-
 A `MultiBackendClient` is a Netron client that fans out to multiple
-servers. It exposes the same interface as a single-backend client;
-the backend selection is internal. The server-side implementation is
-exported from `@omnitron-dev/titan/netron/multi-backend`.
+servers. It exposes the same interface as a single-backend client; the
+backend selection is internal. It is exported from
+`@omnitron-dev/titan/netron/multi-backend`, and its option shape is the
+`MultiBackendClientOptions` interface in
+`packages/titan/src/netron/multi-backend/types.ts:256`.
 
 ```mermaid
 flowchart LR
@@ -71,20 +64,23 @@ retries on another backend (up to `maxFailoverAttempts`, default 2).
 
 ## Strategies
 
-The load-balancing strategy is a `LoadBalancingStrategy`, set on a
-route (`router.routes[].strategy`) or as `router.defaultStrategy`
-(default `round-robin`):
+The load-balancing strategy is a `LoadBalancingStrategy` (`types.ts:25`),
+set on a route (`router.routes[].strategy`) or as
+`router.defaultStrategy` (default `round-robin`). The router dispatches
+on it in `service-router.ts:236`:
 
 | Strategy             | Behaviour                                              |
 | -------------------- | ------------------------------------------------------ |
 | `round-robin`        | Cycle through backends evenly (default)                |
 | `random`             | Pick a backend at random                               |
 | `least-connections`  | Send to the backend with the fewest active connections |
-| `weighted`           | Intended to weight by `BackendConfig.weight` — **currently falls back to random** (weights not yet wired) |
+| `weighted`           | Intended to weight by `BackendConfig.weight`, but **currently falls back to random** — `selectWeighted` delegates to `selectRandom` (`service-router.ts:286`) because `weight` is not carried on the per-backend status it selects from |
 
-There is no `sticky`, `least-busy`, or `primary` strategy, and no
-`stickyKey` hook. "Primary/fallback" semantics are expressed through a
-route's `backends` vs `fallback` lists, not a strategy name.
+Those four are the only values the type and the dispatch allow. There
+is no `sticky`, `least-busy`, or `primary` strategy, and no
+`stickyKey`/`sessionAffinity` hook. "Primary/fallback" semantics are
+expressed through a route's `backends` vs `fallback` lists
+(`service-router.ts:110`), not a strategy name.
 
 ## Service-level routing rules
 
@@ -116,8 +112,8 @@ method, expose them as separate services (e.g. `orders` and
 
 ## Health monitoring
 
-Health-check options are **flat** top-level fields (not a nested
-`health` object):
+Health-check options are **flat** top-level fields (`types.ts:288`),
+not a nested `health` object:
 
 ```typescript
 new MultiBackendClient({
@@ -129,13 +125,11 @@ new MultiBackendClient({
 });
 ```
 
-(There is no per-check `timeoutMs` field.) Unhealthy backends are
-removed from the rotation; they keep being polled and re-enter when
-they recover.
-
-The Omnitron orchestrator's `MultiBackendClient` consumes
-`titan-discovery` data instead of a static list — backends register
-themselves; the client picks them up automatically.
+There is no per-check `timeoutMs` field. The router filters out any
+backend whose `health` is `'unhealthy'` before selecting
+(`service-router.ts:112`), so unhealthy backends drop out of the
+rotation; the pool keeps polling them and they re-enter once the
+`healthyThreshold` of consecutive successes is met.
 
 ## Failover
 
@@ -150,17 +144,22 @@ new MultiBackendClient({
 });
 ```
 
-The current implementation retries on **any** thrown error (there is
-no `retriableErrors` classifier hook). A single call can opt out via a
-per-request `hints.noFailover`.
+The failover loop (`multi-backend-client.ts:271`) retries on **any**
+thrown error — there is no `retriableErrors` classifier hook, so the
+catch block does not inspect the error before retrying. It will,
+however, skip a candidate whose circuit breaker is open
+(`multi-backend-client.ts:287`). A single call can opt out of failover
+entirely via a per-request `hints.noFailover` (`types.ts:407`).
 
-For failure *isolation*, configure the **circuit breaker** (this is
-the real mechanism for shedding a bad backend):
+For failure *isolation*, configure the **circuit breaker** (`types.ts:323`)
+— this is the real mechanism for shedding a bad backend. It tracks
+per-backend failures and transitions closed → open → half-open
+(`multi-backend-client.ts:359`):
 
 ```typescript
 circuitBreaker: {
   enabled:      true,
-  threshold:    5,                    // errors before opening (default 5)
+  threshold:    5,                    // failures before opening (default 5)
   window:       60_000,               // error-tracking window (default 60s)
   resetTimeout: 30_000,               // wait before half-open (default 30s)
 }
@@ -168,8 +167,11 @@ circuitBreaker: {
 
 ## Connection model
 
-There is no sized connection pool. Each backend is fronted by a single
-`BackendClient` holding one HTTP client (or one WebSocket connection).
+There is no sized connection pool. The `BackendPool` holds one
+`BackendClient` per backend id (`backend-pool.ts:39`), and each
+`BackendClient` holds at most one transport — a single
+`HttpTransportClient` *or* a single `WebSocketConnection`
+(`backend-client.ts:53`), chosen by the backend's `transport` field.
 Per-backend `pool: { min, max, idleTimeoutMs }` is not a real option.
 
 ## Observability

@@ -91,40 +91,48 @@ runs before every `@Service` method.
 
 ## Per-tenant DI — contextual providers
 
-> ⚠️ **NEEDS REWRITE** — the snippet below does not match the real
-> `createContextAwareProvider` API. The function takes a single
-> provider object (a `factory`/`provide(context)` plus strategy
-> *instances*), and the tenant is read from the resolution scope's
-> `metadata`, not a `providers`-by-tier map with a `scope` option.
-> The real shape (per `@omnitron-dev/titan/nexus`) is closer to:
->
-> ```typescript
-> import { createContextAwareProvider, TenantStrategy, createToken }
->   from '@omnitron-dev/titan/nexus';
->
-> const STORAGE = createToken<IStorage>('Storage');
->
-> const storageProvider = createContextAwareProvider({
->   strategies: [new TenantStrategy()],        // strategy INSTANCES
->   factory: (context) => {
->     const tenant = context.get('tenant');     // from scope metadata
->     return tenant?.tier === 'free' ? new LocalDiskStorage() : new S3Storage();
->   },
-> });
->
-> container.register(STORAGE, storageProvider);
->
-> // Resolve within a per-request scope carrying the tenant:
-> const scope = container.createScope({ metadata: { tenant: { id, tier } } });
-> const storage = scope.resolve(STORAGE);
-> ```
->
-> Verify the exact factory/strategy signature against
-> [DI / Contextual Injection](../di/contextual-injection.md) before shipping.
-
-The intent: `@Inject(STORAGE)` resolves to S3 for enterprise tenants
-and local disk for the free tier — same service code, different
+The intent: a single `STORAGE` token resolves to S3 for enterprise
+tenants and local disk for the free tier — same service code, different
 backend, no `if` statements leaking into business logic.
+
+`createContextAwareProvider` is an identity helper over the
+`ContextAwareProvider` interface — a single object with a
+`provide(context)` method and an optional `canProvide(context)` guard
+(`packages/titan/src/nexus/context.ts:437-454`). There is **no**
+`strategies` array and **no** `factory` key; the branching lives inside
+`provide`, and the tenant is read from the resolution context's
+`metadata`:
+
+```typescript
+import { createContextAwareProvider, createToken }
+  from '@omnitron-dev/titan/nexus';
+
+const STORAGE = createToken<IStorage>('Storage');
+
+const storageProvider = createContextAwareProvider<IStorage>({
+  // `context` is the active ResolutionContext; read tenant from its metadata.
+  provide(context) {
+    const tenant = context.metadata?.['tenant'] as { id: string; tier: string } | undefined;
+    return tenant?.tier === 'enterprise' ? new S3Storage() : new LocalDiskStorage();
+  },
+});
+```
+
+The tenant lands in `context.metadata` because
+`ContextManager.createResolutionContext` folds the active
+`ContextProvider` into `metadata` (so the `TENANT_ID` your middleware
+set, plus the built-in `ContextKeys.Tenant`, are visible there). The
+built-in `ResolutionStrategy` classes (`TenantStrategy`, etc.) are a
+**separate** mechanism — `ContextManager.selectProvider()` uses them to
+pick among *several* registered providers; they are not passed into
+`createContextAwareProvider`.
+
+Resolve `storageProvider` in **`Scope.Request`** so the `provide`
+callback re-runs per request (a `Singleton` would cache the first
+tenant's backend for everyone). See
+[DI / Contextual Injection](../di/contextual-injection.md) for the full
+contextual-provider model, `@InjectContext`, and writing a custom
+`ResolutionStrategy`.
 
 ## RLS on every repository
 
@@ -254,7 +262,7 @@ async create(tenantId: string, input: CreateInput) { /* … */ }
 | Per-tenant database (advanced)   | For physical isolation, register multiple named connections (`TitanDatabaseModule.forRoot({ connections: { tenantA, tenantB }})`) + contextual provider picks the right one |
 | Rate-limit key                   | Tenant-scoped key prevents one tenant from exhausting another's allowance                            |
 | JWT claims                       | `tenantId` and `tier` must be signed claims on the JWT — they cannot be supplied by the client      |
-| Strategy purity                  | `ResolutionStrategy.selectProvider` must be a pure function of the context — side effects make it untestable |
+| Strategy purity                  | A `ResolutionStrategy`'s `applies`/`select` (and a provider's `provide`) must be pure functions of the context — side effects make them untestable and order-dependent |
 
 ## Production checklist
 
