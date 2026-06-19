@@ -51,7 +51,7 @@ import { LoggerModule } from '@omnitron-dev/titan/module/logger';
 
 import { TitanRedisModule } from '@omnitron-dev/titan-redis';
 import { TitanRateLimitModule } from '@omnitron-dev/titan-ratelimit';
-import { TitanEventsModule } from '@omnitron-dev/titan-events';
+import { EventsModule } from '@omnitron-dev/titan-events';
 import { TitanMetricsModule } from '@omnitron-dev/titan-metrics';
 
 @Module({
@@ -66,7 +66,7 @@ import { TitanMetricsModule } from '@omnitron-dev/titan-metrics';
       defaultLimit:    500,
       defaultWindowMs: 60_000,
     }),
-    TitanEventsModule.forRoot({ wildcard: true, maxListeners: 50 }),
+    EventsModule.forRoot({ wildcard: true, maxListeners: 50 }),
     TitanMetricsModule.forRoot({ appName: 'webhooks' }),
     WebhooksModule,                          // your handlers
   ],
@@ -77,11 +77,14 @@ export class AppModule {}
 ## Handler — verify, deduplicate, enqueue
 
 ```typescript
-import { Service, Public, Inject } from '@omnitron-dev/titan';
+import { Service, Inject } from '@omnitron-dev/titan';
+import { Public } from '@omnitron-dev/titan/netron';
 import { Errors } from '@omnitron-dev/titan/errors';
-import { RateLimit } from '@omnitron-dev/titan-ratelimit';
+import { InjectRedis, type IRedisClient } from '@omnitron-dev/titan-redis';
+import { RateLimit, RATE_LIMIT_SERVICE_TOKEN, type IRateLimitService } from '@omnitron-dev/titan-ratelimit';
 import { EVENTS_SERVICE_TOKEN, type EventsService }
   from '@omnitron-dev/titan-events';
+import { LOGGER_SERVICE_TOKEN, type ILoggerModule } from '@omnitron-dev/titan/module/logger';
 import { createHmac, timingSafeEqual } from 'node:crypto';
 
 const SIGNING_SECRET = process.env.WEBHOOK_SIGNING_SECRET!;
@@ -89,14 +92,19 @@ const DEDUP_TTL_S    = 7 * 24 * 60 * 60;     // 7 days
 
 @Service({ name: 'webhooks' })
 class WebhooksService {
+  // ILoggerModule exposes create(); the child ILogger is what has .info/.warn/.error.
+  private readonly logger = this.loggerModule.create('webhooks');
+
   constructor(
     @InjectRedis() private readonly redis: IRedisClient,
     @Inject(EVENTS_SERVICE_TOKEN) private readonly events: EventsService,
-    private readonly logger: LoggerService,
+    @Inject(LOGGER_SERVICE_TOKEN) private readonly loggerModule: ILoggerModule,
+    // @RateLimit reads the limiter off this exact property name.
+    @Inject(RATE_LIMIT_SERVICE_TOKEN) private readonly __rateLimitService__: IRateLimitService,
   ) {}
 
   @Public()
-  @RateLimit('webhooks:receive', { limit: 1_000, windowMs: 60_000 })
+  @RateLimit({ limit: 1_000, windowMs: 60_000 })   // options object only; no string key
   async receive(
     body:      string,                       // raw body for signature verification
     signature: string,

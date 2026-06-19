@@ -73,12 +73,13 @@ LRU tier:
 
 ```typescript
 @Public()
-@Cache({ key: (id) => `user:${id}`, ttlMs: 30_000 })
+@Cacheable({ keyPrefix: 'user', keyGenerator: (id) => `${id}`, ttl: 30 })
 async findById(id: string) { /* … */ }
 ```
 
-A 95% cache hit rate cuts your database load by 20×. Worth the
-ceremony.
+`@Cacheable` takes `ttl` in **seconds** (not milliseconds) and a
+`keyGenerator` for the cache key. A 95% cache hit rate cuts your
+database load by 20×. Worth the ceremony.
 
 ## Measuring
 
@@ -86,29 +87,31 @@ You can't optimise what you don't measure.
 
 ### Per-method latency
 
-`titan-metrics` emits `rpc.duration_ms` per method by default. Look
-at p99 / p99.9 — averages hide tail behaviour.
+`titan-metrics` emits an `rpc_request_duration_seconds` histogram per
+method by default (labelled by `method`). Look at p99 / p99.9 —
+averages hide tail behaviour.
 
 ### Per-call profiling
 
-For a specific slow method, use the trace:
+For a specific slow method, wrap sub-operations in child spans so the
+trace context propagates to each one:
 
 ```typescript
+import { startSpan, withTrace } from '@omnitron-dev/titan/tracing';
+
 @Public()
 async findById(id: string) {
-  const dbSpan = startSpan('db.query');
-  const user = await this.repo.findById(id);
-  dbSpan.end();
-
-  const cacheSpan = startSpan('cache.set');
-  await this.cache.set(id, user);
-  cacheSpan.end();
-
+  const user = await withTrace(startSpan(), () => this.repo.findById(id));
+  await withTrace(startSpan(), () => this.cache.set(id, user));
   return user;
 }
 ```
 
-The trace shows where time goes. Find the longest span; investigate.
+`startSpan(parent?)` returns a child `TraceContext`; `withTrace`
+installs it for the wrapped work. Titan's tracing layer is
+propagation-only — span timing and export come from a telemetry layer
+(the relay module or an OTel sink) layered on top, which is what
+shows where time goes.
 
 ### Process-level profiling
 

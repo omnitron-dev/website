@@ -93,11 +93,9 @@ const AppConfigSchema = z.object({
 
     LoggerModule.forRoot({
       level: process.env.NODE_ENV === 'production' ? 'info' : 'debug',
-      transports: [new ConsoleTransport({ pretty: process.env.NODE_ENV !== 'production' })],
+      transports: [new ConsoleTransport()],
       processors: [
-        new RedactionProcessor({
-          paths: ['password', 'token', 'headers.authorization', 'creditCard.*'],
-        }),
+        new RedactionProcessor(['password', 'token', 'headers.authorization', 'creditCard.*']),
       ],
     }),
 
@@ -123,12 +121,12 @@ const AppConfigSchema = z.object({
           migrationsPath: './migrations',
           coerceBigint:   true,
         },
-        plugins: {
-          softDelete: true,
-          timestamps: true,
-          audit:      true,
-          rls:        true,
+        // Global plugins are a Kysera plugin list, not a boolean map.
+        kysera: {
+          plugins: ['soft-delete', 'timestamps', 'audit'],
         },
+        // RLS is enabled per-repository via @Policy/@Filter decorators
+        // (see the Multi-tenant SaaS recipe), not a global plugin toggle.
       }),
       inject: [ConfigService],
     }),
@@ -168,9 +166,9 @@ const AppConfigSchema = z.object({
         defaultWindowMs: config.get('rateLimit.defaultWindowMs'),
         keyPrefix:       'rl',
         tiers: {
-          free:       { limit: 60,    windowMs: 60_000 },
-          pro:        { limit: 1_000, windowMs: 60_000 },
-          enterprise: { limit: 10_000, windowMs: 60_000 },
+          free:       { name: 'free',       limit: 60,     windowMs: 60_000 },
+          pro:        { name: 'pro',        limit: 1_000,  windowMs: 60_000 },
+          enterprise: { name: 'enterprise', limit: 10_000, windowMs: 60_000 },
         },
       }),
       inject: [ConfigService],
@@ -178,11 +176,13 @@ const AppConfigSchema = z.object({
 
     // ── Health probes ──────────────────────────────────────────────────
     TitanHealthModule.forRootAsync({
-      useFactory: (db: DatabaseManager, redis: RedisService) => ({
+      // DatabaseManager.getConnection() is async — await it in the factory
+      // so the indicator gets a live Kysely instance, not a Promise.
+      useFactory: async (db: DatabaseManager, redis: RedisService) => ({
         enableMemoryIndicator:    true,
         enableEventLoopIndicator: true,
         enableDatabaseIndicator:  true,
-        databaseConnection:       db.getConnection(),
+        databaseConnection:       await db.getConnection(),
         enableRedisIndicator:     true,
         redisClient:              redis.getClient('default'),
         memoryThresholds:         { heapDegradedThreshold: 0.8, heapUnhealthyThreshold: 0.95 },
@@ -222,23 +222,27 @@ export class AppModule {}
 ## A typical `@Service`
 
 ```typescript
-import { Service, Public } from '@omnitron-dev/titan';
+import { Service, Inject } from '@omnitron-dev/titan';
+import { Public } from '@omnitron-dev/titan/netron';
 import { Cacheable, CacheInvalidate } from '@omnitron-dev/titan-cache';
+import { InjectRepository } from '@omnitron-dev/titan-database';
 import { RequireAuth } from '@omnitron-dev/titan-auth';
-import { RateLimit }   from '@omnitron-dev/titan-ratelimit';
+import { RateLimit, RATE_LIMIT_SERVICE_TOKEN, type IRateLimitService } from '@omnitron-dev/titan-ratelimit';
 import { Metrics }     from '@omnitron-dev/titan-metrics';
 
 @Service('users@1.0.0')
 class UsersService {
   constructor(
     @InjectRepository(UsersRepository) private readonly repo: UsersRepository,
+    // @RateLimit reads the service off this exact property name.
+    @Inject(RATE_LIMIT_SERVICE_TOKEN) private readonly __rateLimitService__: IRateLimitService,
   ) {}
 
   @Public()
   @RequireAuth({ allowAnonymous: false })
-  @RateLimit('users:read', { limit: 100, windowMs: 60_000 })
+  @RateLimit({ limit: 100, windowMs: 60_000 })   // key = {class}:{method}:{arg0} by default
   @Cacheable({ cacheName: 'users', keyPrefix: 'u', ttl: 60, tags: (id) => [`user:${id}`] })
-  @Metrics({ counter: { name: 'users.findById.total' }, histogram: { name: 'users.findById.ms' } })
+  @Metrics('users.findById')                      // tracks total + duration + errors
   async findById(id: string) {
     return this.repo.find(id);
   }
@@ -258,11 +262,11 @@ class UsersService {
 | --------------------- | ----------------------------------------------------------------------------------------------- |
 | Redis namespaces      | `default` (general), `cache` (L2), `rl` (rate limits) — isolate per DB index to prevent collisions |
 | Cache L2 client       | `TitanCacheModule.forRootAsync` injects `RedisService` and gets the `cache` namespace explicitly |
-| Health → database     | Use `db.getConnection()` (a `Kysely` instance) directly — `DatabaseHealthIndicator` accepts it  |
+| Health → database     | `await db.getConnection()` — `getConnection()` is async; the awaited `Kysely` instance is what `DatabaseHealthIndicator` accepts |
 | Health → redis        | Pass `redis.getClient('default')` — uses `.ping()` for liveness                                  |
 | Auth cache vs JWT TTL | `cacheTTL: 300_000` < typical JWT expiry; revoked tokens stay valid until cache expires. Lower for high-churn revocation. |
-| Rate limit key shape  | The decorator's first arg is a static prefix; combined automatically with the user identity from the auth context |
-| Metrics + Netron      | `collection.rpc: true` auto-instruments every `@Public` method — no per-method `@Metrics` needed unless you want custom histograms |
+| Rate limit key shape  | `@RateLimit` takes an options object only. The key defaults to `{class}:{method}:{arg0}`; pass `keyGenerator: (...args) => ...` to fold in the auth identity. The service must inject the limiter as `__rateLimitService__` or the decorator silently no-ops |
+| Metrics + Netron      | `collection.rpc: true` auto-instruments every `@Public` method — no per-method `@Metrics` needed unless you want a custom metric name (`@Metrics('users.findById')`) |
 
 ## Production checklist
 

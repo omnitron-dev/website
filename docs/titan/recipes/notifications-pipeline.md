@@ -60,7 +60,7 @@ import { ConfigModule } from '@omnitron-dev/titan/module/config';
 import { LoggerModule } from '@omnitron-dev/titan/module/logger';
 
 import { TitanRedisModule } from '@omnitron-dev/titan-redis';
-import { TitanEventsModule } from '@omnitron-dev/titan-events';
+import { EventsModule } from '@omnitron-dev/titan-events';
 import { NotificationsModule } from '@omnitron-dev/titan-notifications';
 
 @Module({
@@ -72,7 +72,7 @@ import { NotificationsModule } from '@omnitron-dev/titan-notifications';
       config: { url: process.env.REDIS_URL, db: 0 },
     }),
 
-    TitanEventsModule.forRoot({
+    EventsModule.forRoot({
       wildcard:     true,
       maxListeners: 100,
       history:      { enabled: false },
@@ -86,7 +86,7 @@ import { NotificationsModule } from '@omnitron-dev/titan-notifications';
         rotif: { /* rotif transport options */ },
       },
 
-      defaultChannels: ['inapp', 'email'],
+      defaultChannels: ['inApp', 'email'],   // channel ids are camelCase: 'inApp', not 'inapp'
       enableInApp:     true,
       enableWebhook:   true,
 
@@ -103,8 +103,15 @@ import { NotificationsModule } from '@omnitron-dev/titan-notifications';
       },
 
       preferenceStoreConfig: {
+        // Each channel maps to an object, not a bare boolean.
+        // Channel ids are camelCase: 'inApp', not 'inapp'.
         defaultPreferences: {
-          channels: { email: true, sms: false, push: true, inapp: true },
+          channels: {
+            email: { enabled: true },
+            sms:   { enabled: false },
+            push:  { enabled: true },
+            inApp: { enabled: true },
+          },
         },
       },
     }),
@@ -118,7 +125,8 @@ export class AppModule {}
 ## Producer side — emitting a notification
 
 ```typescript
-import { Service, Public, Inject } from '@omnitron-dev/titan';
+import { Service, Inject } from '@omnitron-dev/titan';
+import { Public } from '@omnitron-dev/titan/netron';
 import {
   NOTIFICATIONS_SERVICE,
   type NotificationsService,
@@ -135,10 +143,11 @@ class UsersService {
     const user = await this.repo.create(input);
 
     // Returns immediately — actual delivery happens on a worker pod.
+    // Recipient keys on `id` (not `userId`); payload needs `type`/`title`/`message`.
     await this.notify.send(
-      { userId: user.id, email: user.email },
-      { template: 'welcome', data: { name: user.name } },
-      { channels: ['email', 'inapp'] },
+      { id: user.id, email: user.email },
+      { type: 'announcement', title: 'Welcome', message: `Welcome, ${user.name}!`, data: { name: user.name } },
+      { channels: ['email', 'inApp'] },
     );
 
     return user;
@@ -149,8 +158,13 @@ class UsersService {
 ## Worker pod — consuming and delivering
 
 ```typescript
-import { Module } from '@omnitron-dev/titan';
-import { NotificationsModule } from '@omnitron-dev/titan-notifications';
+import { Module, createToken } from '@omnitron-dev/titan';
+import {
+  NotificationsModule,
+  type INotificationTargetResolver,
+  type INotificationPersister,
+  type INotificationRealtimeSignaler,
+} from '@omnitron-dev/titan-notifications';
 
 const USER_TARGET_RESOLVER_TOKEN = createToken<INotificationTargetResolver>('UserTargetResolver');
 const NOTIFICATION_PERSISTER_TOKEN = createToken<INotificationPersister>('NotificationPersister');
@@ -188,20 +202,22 @@ inbox storage, and your realtime channel.
 ## A custom channel — e.g. SMTP email
 
 ```typescript
-import { AbstractEmailChannel } from '@omnitron-dev/titan-notifications';
+import { AbstractEmailChannel, type EmailContent } from '@omnitron-dev/titan-notifications';
 import nodemailer from 'nodemailer';
 
+// AbstractEmailChannel fixes `name = 'email'` / `type = ChannelType.Email`
+// and renders the payload; you only implement the transport.
 class SmtpEmailChannel extends AbstractEmailChannel {
-  name = 'email-smtp';
-
   private readonly transport = nodemailer.createTransport({/* … */});
 
-  async deliver(recipient, rendered, options) {
-    return this.transport.sendMail({
-      to:      recipient.email,
-      subject: rendered.subject,
-      html:    rendered.body,
+  async sendEmail(to: string, content: EmailContent): Promise<{ messageId: string }> {
+    const info = await this.transport.sendMail({
+      to,
+      subject: content.subject,
+      html:    content.html,
+      text:    content.text,
     });
+    return { messageId: info.messageId };
   }
 }
 ```

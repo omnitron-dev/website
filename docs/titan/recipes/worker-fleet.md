@@ -90,7 +90,7 @@ const WorkerConfigSchema = z.object({
 
     LoggerModule.forRoot({
       level:      'info',
-      transports: [new ConsoleTransport({ pretty: false })],   // JSON in prod
+      transports: [new ConsoleTransport()],
     }),
 
     // ── Foundation ─────────────────────────────────────────────────────
@@ -190,11 +190,14 @@ export class AppModule {}
 ## A scheduled task (exactly-once)
 
 ```typescript
-import { Injectable } from '@omnitron-dev/titan';
+import { Injectable, Inject } from '@omnitron-dev/titan';
 import { Schedulable, Cron, CronExpression } from '@omnitron-dev/titan-scheduler';
-import { WithDistributedLock } from '@omnitron-dev/titan-lock';
-import { LOCK_SERVICE_TOKEN } from '@omnitron-dev/titan-lock';
-import { LOGGER_SERVICE_TOKEN } from '@omnitron-dev/titan/module/logger';
+import {
+  WithDistributedLock,
+  LOCK_SERVICE_TOKEN,
+  type IDistributedLockService,
+} from '@omnitron-dev/titan-lock';
+import { LOGGER_SERVICE_TOKEN, type ILoggerModule } from '@omnitron-dev/titan/module/logger';
 
 @Injectable()
 @Schedulable()
@@ -211,7 +214,7 @@ class CleanupTasks {
     await this.deleteExpired();
   }
 
-  @Cron('0 3 * * *')
+  @Cron(CronExpression.EVERY_DAY_AT_3AM)                 // typed; raw strings must match a CronExpression value
   @WithDistributedLock('cleanup:nightly', 60 * 60_000)   // up to 1 hour
   async nightlyCleanup() {
     await this.archiveOldRecords();
@@ -224,17 +227,19 @@ class CleanupTasks {
 ```typescript
 import {
   Process, Public, OnShutdown, Trace, Metric, CircuitBreaker, Idempotent,
+  PM_MANAGER_TOKEN, ProcessManager,
 } from '@omnitron-dev/titan-pm';
+import { Service, Inject } from '@omnitron-dev/titan';
 
 @Process({ name: 'image-worker' })
 class ImageWorker {
   @Public()
   @Trace()
-  @Metric({ counter: 'images.resized', histogram: 'images.resize.ms' })
-  @CircuitBreaker({ failureThreshold: 5, timeout: 30_000 })
-  @Idempotent({ keyFn: (input, w) => `${hash(input)}:${w}` })
-  async resize(input: Buffer, width: number): Promise<Buffer> {
-    return sharp(input).resize(width).toBuffer();
+  @Metric('images.resize')                            // metric name (or omit for default)
+  @CircuitBreaker({ threshold: 5, timeout: 30_000 })  // `threshold`, not `failureThreshold`
+  @Idempotent({ key: 'jobId', ttl: '1h' })            // dedup on input.jobId for 1h
+  async resize(input: { jobId: string; data: Buffer; width: number }): Promise<Buffer> {
+    return sharp(input.data).resize(input.width).toBuffer();
   }
 
   @OnShutdown()
@@ -248,9 +253,9 @@ class MediaService {
   constructor(@Inject(PM_MANAGER_TOKEN) private readonly pm: ProcessManager) {}
 
   @Public()
-  async resize(input: Buffer, width: number) {
-    const pool = this.pm.createPool(ImageWorker, { min: 2, max: 8 });
-    return pool.invoke('resize', [input, width]);
+  async resize(input: { jobId: string; data: Buffer; width: number }) {
+    const pool = await this.pm.pool(ImageWorker, { min: 2, max: 8 });
+    return pool.execute('resize', input);            // .execute(method, ...args)
   }
 }
 ```

@@ -71,9 +71,9 @@ shell.
 
 ```typescript
 @Public()
-@Validate(CreateOrderSchema)
-async create(input: CreateOrder, @Context() ctx: NetronContext): Promise<Order> {
-  await this.validateOwnership(ctx.auth!.userId, input.cartId);
+@Validate({ input: CreateOrderSchema })
+async create(input: CreateOrder): Promise<Order> {
+  await this.validateOwnership(input.userId, input.cartId);
   const order = await this.repo.create(input);
   await this.events.emit('order.created', { orderId: order.id });
   return order;

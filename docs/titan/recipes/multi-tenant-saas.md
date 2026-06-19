@@ -73,12 +73,13 @@ class TenantContextMiddleware {
     private readonly context:                            ContextManager,
   ) {}
 
-  async handle(request: IRequestLike, next: () => Promise<unknown>) {
+  async handle(request: { headers: Record<string, string> }, next: () => Promise<unknown>) {
     const token = request.headers['authorization']?.replace(/^Bearer /, '');
     if (token) {
+      // IJWTPayload uses snake_case `tenant_id`; `tier` is a custom claim.
       const claims = await this.jwt.verify(token);
-      this.context.set(TENANT_ID, claims.tenantId);
-      this.context.set(USER_TIER, claims.tier);
+      this.context.set(TENANT_ID, claims.tenant_id as string);
+      this.context.set(USER_TIER, claims.tier as string);
     }
     return next();
   }
@@ -90,62 +91,94 @@ runs before every `@Service` method.
 
 ## Per-tenant DI — contextual providers
 
-```typescript
-import {
-  createContextAwareProvider,
-  TenantStrategy,
-  createToken,
-  Scope,
-} from '@omnitron-dev/titan/nexus';
+> ⚠️ **NEEDS REWRITE** — the snippet below does not match the real
+> `createContextAwareProvider` API. The function takes a single
+> provider object (a `factory`/`provide(context)` plus strategy
+> *instances*), and the tenant is read from the resolution scope's
+> `metadata`, not a `providers`-by-tier map with a `scope` option.
+> The real shape (per `@omnitron-dev/titan/nexus`) is closer to:
+>
+> ```typescript
+> import { createContextAwareProvider, TenantStrategy, createToken }
+>   from '@omnitron-dev/titan/nexus';
+>
+> const STORAGE = createToken<IStorage>('Storage');
+>
+> const storageProvider = createContextAwareProvider({
+>   strategies: [new TenantStrategy()],        // strategy INSTANCES
+>   factory: (context) => {
+>     const tenant = context.get('tenant');     // from scope metadata
+>     return tenant?.tier === 'free' ? new LocalDiskStorage() : new S3Storage();
+>   },
+> });
+>
+> container.register(STORAGE, storageProvider);
+>
+> // Resolve within a per-request scope carrying the tenant:
+> const scope = container.createScope({ metadata: { tenant: { id, tier } } });
+> const storage = scope.resolve(STORAGE);
+> ```
+>
+> Verify the exact factory/strategy signature against
+> [DI / Contextual Injection](../di/contextual-injection.md) before shipping.
 
-const STORAGE = createToken<IStorage>('Storage');
-
-const storageProvider = createContextAwareProvider({
-  strategy:  TenantStrategy,                  // reads TENANT_ID from context
-  providers: {
-    enterprise: { useClass: S3Storage },      // enterprise tenants → S3
-    pro:        { useClass: S3Storage },
-    free:       { useClass: LocalDiskStorage },
-    default:    { useClass: LocalDiskStorage },
-  },
-  scope: Scope.Request,                       // resolved per request
-});
-
-container.register(STORAGE, storageProvider);
-```
-
-Now `@Inject(STORAGE)` returns S3 for enterprise tenants and local
-disk for free tenants — same service code, different backend, no
-`if` statements in your business logic.
+The intent: `@Inject(STORAGE)` resolves to S3 for enterprise tenants
+and local disk for the free tier — same service code, different
+backend, no `if` statements leaking into business logic.
 
 ## RLS on every repository
 
 ```typescript
-import { TransactionAwareRepository, Repository, Policy, Filter, BypassRLS }
+import { BaseRepository, Repository, Policy, Filter, BypassRLS }
   from '@omnitron-dev/titan-database';
+import { rlsContext } from '@kysera/rls';
 
-@Repository('orders')
-@Policy({ skipFor: ['admin', 'service_role'] })
-class OrdersRepository extends TransactionAwareRepository<Database, 'orders'> {
+@Repository<Order>({ table: 'orders' })
+@Policy({ skipFor: ['admin', 'service_role'] })       // these roles bypass RLS
+class OrdersRepository extends BaseRepository<Database, 'orders', Order> {
+  // Filter: auto-adds a WHERE clause to reads. The context is the
+  // @kysera/rls auth context (ctx.auth), NOT the DI ContextManager.
   @Filter({ operations: ['select', 'update', 'delete'] })
-  tenantFilter(ctx: ExecutionContext) {
-    return { tenant_id: ctx.context.get(TENANT_ID) };
+  tenantFilter(ctx: { auth: { tenantId: string } }) {
+    return { tenant_id: ctx.auth.tenantId };
   }
 
   @BypassRLS()
   async adminListAllAcrossTenants() {
     // Reserved for admin / system flows
-    return this.executor.selectFrom('orders').selectAll().execute();
+    return this.findAll();
   }
 }
 ```
 
-Every regular query through `OrdersRepository` is constrained to
-the tenant in the active context. `@BypassRLS` is the explicit
+The RLS context is established with `rlsContext.runAsync(...)` (from
+`@kysera/rls`) around the query — wire it from your auth middleware so
+every request runs inside its tenant's context:
+
+```typescript
+import { rlsContext } from '@kysera/rls';
+
+return rlsContext.runAsync(
+  { auth: { userId, tenantId, roles, isSystem: false }, timestamp: new Date() },
+  async () => this.ordersRepo.findAll(),   // automatically filtered by tenant_id
+);
+```
+
+Every regular query through `OrdersRepository` is then constrained to
+the tenant in the active RLS context. `@BypassRLS` is the explicit
 escape hatch for cross-tenant operations — every use should be
 audited.
 
+> RLS enforcement requires the Kysera `rlsPlugin` to be active on the
+> connection (add it to `kysera.plugins`). The `@Policy`/`@Filter`/
+> `@Allow`/`@Deny` decorators declare the rules; the plugin enforces them.
+
 ## Tenant-scoped cache keys
+
+`@Cacheable`'s `keyGenerator`/`tags` callbacks receive the **method
+arguments** (`(...args)`), not an ambient context. So the `tenantId`
+the key is prefixed with must be reachable from the args — the simplest
+contract is to pass it explicitly:
 
 ```typescript
 import { Cacheable, CacheInvalidate } from '@omnitron-dev/titan-cache';
@@ -155,26 +188,29 @@ class UsersService {
   @Public()
   @Cacheable({
     cacheName:    'users',
-    keyGenerator: (ctx, id) => `${ctx.context.get(TENANT_ID)}:u:${id}`,
+    keyGenerator: (tenantId: string, id: string) => `${tenantId}:u:${id}`,
     ttl:          60,
-    tags:         (ctx, id) => [`tenant:${ctx.context.get(TENANT_ID)}:user:${id}`],
+    tags:         (tenantId: string, id: string) => [`tenant:${tenantId}:user:${id}`],
   })
-  async findById(ctx: ExecutionContext, id: string) {
+  async findById(tenantId: string, id: string) {
     return this.repo.find(id);            // RLS applies inside the repo
   }
 
   @CacheInvalidate({
     cacheName: 'users',
-    tags:      (ctx, input) => [`tenant:${ctx.context.get(TENANT_ID)}:user:${input.id}`],
+    tags:      (tenantId: string, input: { id: string }) => [`tenant:${tenantId}:user:${input.id}`],
   })
-  async update(ctx: ExecutionContext, input: { id: string; patch: Partial<User> }) {
+  async update(tenantId: string, input: { id: string; patch: Partial<User> }) {
     return this.repo.update(input.id, input.patch);
   }
 }
 ```
 
 Cache keys are prefixed with `tenantId`; a cache hit for tenant A
-**cannot** be returned to tenant B.
+**cannot** be returned to tenant B. (If you prefer to derive the
+tenant from the request context instead of a parameter, read it from
+the nexus `ContextManager` inside the method body and build the key
+with `keyPrefix` + a per-call cache handle rather than `keyGenerator`.)
 
 ## Tenant-tier rate limits
 
@@ -183,32 +219,38 @@ TitanRateLimitModule.forRoot({
   storageType: 'redis',
   strategy:    'sliding-window',
   defaultTier: { name: 'free', limit: 100, windowMs: 60_000 },
-  tiers: {
-    free:       { limit: 100,     windowMs: 60_000 },
-    pro:        { limit: 1_000,   windowMs: 60_000 },
-    enterprise: { limit: 100_000, windowMs: 60_000 },
+  tiers: {                                          // each tier needs a `name`
+    free:       { name: 'free',       limit: 100,     windowMs: 60_000 },
+    pro:        { name: 'pro',        limit: 1_000,   windowMs: 60_000 },
+    enterprise: { name: 'enterprise', limit: 100_000, windowMs: 60_000 },
   },
 })
 ```
 
-In your service:
+In your service. `@RateLimit` takes an options object only; `keyGenerator`
+receives the method args (not a context), and `tier` is a tier-name
+string. Pass the tenant (and its resolved tier) as arguments:
 
 ```typescript
 @Public()
-@RateLimit((ctx) => `tenant:${ctx.context.get(TENANT_ID)}`, {
-  // tier inferred from USER_TIER in context, or pass explicit:
-  tier: (ctx) => ctx.context.get(USER_TIER),
+@RateLimit({
+  tier:         'pro',                              // tier name from this tenant's plan
+  keyGenerator: (tenantId: string) => `tenant:${tenantId}`,
 })
-async create(ctx: ExecutionContext, input: CreateInput) { /* … */ }
+async create(tenantId: string, input: CreateInput) { /* … */ }
 ```
+
+> The decorator also needs the limiter injected as `__rateLimitService__`
+> (`@Inject(RATE_LIMIT_SERVICE_TOKEN)`) — see the API service stack — or it
+> silently allows every request.
 
 ## Cross-module wiring notes
 
 | Concern                          | Wiring detail                                                                                       |
 | -------------------------------- | --------------------------------------------------------------------------------------------------- |
-| Context propagation              | `ContextManager` set in middleware; read by `ResolutionStrategy`, RLS filters, cache keys, rate-limit keys |
+| Context propagation              | Two distinct contexts: the nexus `ContextManager` (set in middleware) feeds `ResolutionStrategy` + per-tenant DI; the `@kysera/rls` auth context (set via `rlsContext.runAsync`) feeds RLS `@Filter`/`@Allow` rules. Cache/rate-limit keys come from method args |
 | RLS bypass                       | `@BypassRLS` is structural — every use case needs a written justification; pair with an audit log    |
-| Cache key prefix                 | Always include `TENANT_ID` in `keyGenerator` — never a raw id                                       |
+| Cache key prefix                 | Always fold the tenant into the `keyGenerator` (from a method arg) — never key on a raw id           |
 | Per-tenant database (advanced)   | For physical isolation, register multiple named connections (`TitanDatabaseModule.forRoot({ connections: { tenantA, tenantB }})`) + contextual provider picks the right one |
 | Rate-limit key                   | Tenant-scoped key prevents one tenant from exhausting another's allowance                            |
 | JWT claims                       | `tenantId` and `tier` must be signed claims on the JWT — they cannot be supplied by the client      |
@@ -220,7 +262,7 @@ async create(ctx: ExecutionContext, input: CreateInput) { /* … */ }
 - [ ] **Every repository has `@Filter` for tenant scope** OR `@BypassRLS` justified
 - [ ] **Every cache key includes the tenant prefix** — no exceptions
 - [ ] **Rate-limit keys include the tenant prefix** — same
-- [ ] **`STORAGE` (or other tenant-conditional providers) registered with `Scope.Request`** — `Singleton` would cache the first tenant's instance for everyone
+- [ ] **`STORAGE` (or other tenant-conditional providers) resolved per request** (per-request scope) — a `Singleton` would cache the first tenant's instance for everyone
 - [ ] **Cross-tenant queries (admin flows) audited** — every `@BypassRLS` call logged
 - [ ] **`TENANT_ID` and `USER_TIER` context keys defined in one place** and imported everywhere — typos in keys silently break isolation
 - [ ] **Integration tests cover cross-tenant attempts** — assert leakage attempts get empty results, not access
