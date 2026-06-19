@@ -8,10 +8,11 @@ description: Browser-optimized Netron RPC client — HTTP / WebSocket / multi-ba
 
 `@omnitron-dev/netron-browser` is the **framework-agnostic
 browser RPC client** for Titan services. Dual transport
-(HTTP + WebSocket), type-safe service proxies, full middleware
-pipeline, LRU caching, retry + circuit breaker, auth manager
-with cross-tab sync, and a multi-backend pool when you talk to
-more than one Netron server.
+(HTTP + WebSocket), type-safe service proxies, a middleware
+pipeline (auth / logging / timing / error-transform / CSRF), an
+optional fluent HTTP interface for caching / retry / circuit
+breaking, an `AuthenticationClient` with cross-tab sync, and a
+multi-backend pool when you talk to more than one Netron server.
 
 > **Works with any frontend.** Vanilla JS, Vue, Svelte, Solid,
 > Angular, Lit, React, Web Workers, Electron renderers —
@@ -40,23 +41,19 @@ flowchart TB
 
   subgraph Client["NetronClient"]
     Proxy[Service proxy]
-    MW[Middleware pipeline]
-    Cache[LRU cache]
-    Retry[Retry + circuit breaker]
-    Auth[Auth manager]
+    MW[Middleware pipeline<br/>auth / logging / timing / CSRF]
+    Auth[AuthenticationClient]
     Transport{Transport selector}
   end
 
   subgraph Transports
-    HTTP[HttpClient<br/>fetch + batch + cache]
+    HTTP[HttpClient<br/>fetch + retry option]
     WS[WebSocketClient<br/>persistent + reconnect]
   end
 
   Code --> Proxy
   Proxy --> MW
-  MW --> Cache
-  Cache --> Retry
-  Retry --> Auth
+  MW --> Auth
   Auth --> Transport
   Transport -- 'http' --> HTTP
   Transport -- 'websocket' --> WS
@@ -64,6 +61,11 @@ flowchart TB
   HTTP --> Server[(Netron server<br/>HTTP transport)]
   WS --> Server2[(Netron server<br/>WS transport)]
 ```
+
+> Caching, richer retry, and circuit breaking are **not** in the
+> invocation pipeline — they live in the optional [fluent HTTP
+> interface](#fluent-http-interface--caching-retry-circuit-breaking)
+> reached via `peer.queryFluentInterface(...)`.
 
 ## Quick start
 
@@ -122,22 +124,24 @@ interface NetronClientOptions {
 The default. One fetch per call. Works through any reverse
 proxy, no special routing required. Supports:
 
-- **Request batching** — concurrent calls in the same tick
-  coalesce into one HTTP request.
-- **Server-side caching headers** — the server's `Cache-Control`
-  is honoured client-side via the LRU cache.
-- **Retry on transient failures** — `network`/`5xx` errors retry
-  with exponential backoff.
-- **Idempotency keys** — generated for safe retries on mutating
-  calls.
+- **Retry on transient failures** — set `retry: true` and the
+  client re-sends on network/timeout errors with exponential
+  backoff (`2^n × 1000ms`), up to `maxRetries` attempts.
+- **Auth re-invocation** — when an auth-error middleware refreshes
+  the token after a 401, the request is automatically re-sent
+  once with the new credentials.
+
+For response caching, deduplication, richer retry strategies, and
+circuit breaking, use the [fluent HTTP
+interface](#fluent-http-interface--caching-retry-circuit-breaking).
 
 ```typescript
 const client = createClient({
   url:       '/api',
   transport: 'http',
   http: {
-    retry:      true,
-    maxRetries: 3,
+    retry:      true,    // default false
+    maxRetries: 3,       // default 3 when retry is enabled
   },
 });
 ```
@@ -227,142 +231,230 @@ stage.
 
 ### Built-in middleware
 
+All built-in middleware are **factory functions** (`create*`):
+
 | Middleware | Stage | Purpose |
 | ---------- | ----- | ------- |
-| `AuthMiddleware` | pre | Attach `Authorization: Bearer ...` from auth manager |
-| `RetryMiddleware` | error | Retry transient failures with exponential backoff |
-| `CacheMiddleware` | pre + post | LRU cache with stale-while-revalidate |
-| `LoggingMiddleware` | pre + post + error | Structured request/response logging |
-| `TracingMiddleware` | pre + post | OpenTelemetry-style trace context |
-| `CircuitBreakerMiddleware` | error | Trip after N failures; half-open after cooldown |
+| `createAuthMiddleware` | pre | Attach `Authorization: Bearer ...` from a token provider |
+| `createLoggingMiddleware` | pre + post + error | Structured request/response logging |
+| `createTimingMiddleware` | pre + post | Per-call duration metrics |
+| `createErrorTransformMiddleware` | error | Normalise transport errors into a consistent shape |
+| `createCsrfMiddleware` | pre | Attach the CSRF double-submit header (cookie mode) |
+
+> There is **no** retry, cache, or circuit-breaker middleware.
+> Retry is an `HttpClient` option; caching and circuit breaking
+> live in the [fluent HTTP
+> interface](#fluent-http-interface--caching-retry-circuit-breaking).
+> See [Middleware → Not middleware](./middleware.md#not-middleware).
 
 ```typescript
-client.use(AuthMiddleware({ getToken: () => localStorage.getItem('token') }));
-client.use(RetryMiddleware({ attempts: 3, on: ['network', '5xx'] }));
-client.use(CacheMiddleware({ ttl: 60_000, maxSize: 500 }));
+import {
+  createAuthMiddleware,
+  createLoggingMiddleware,
+} from '@omnitron-dev/netron-browser';
+
+client.use(createAuthMiddleware({ tokenProvider: { getToken: () => localStorage.getItem('token') } }));
+client.use(createLoggingMiddleware({ logRequestPayload: false }));
 ```
 
 ### Custom middleware
 
-```typescript
-import type { NetronMiddleware } from '@omnitron-dev/netron-browser';
+A middleware is a plain `(ctx, next) => Promise<void>` function;
+register it with `client.use(fn, config?, stage?)`:
 
-const TimingMiddleware: NetronMiddleware = {
-  stage:    'post',
-  priority: 100,
-  handler:  async (ctx, next) => {
-    const start = performance.now();
-    try {
-      return await next();
-    } finally {
-      console.debug(`${ctx.service}.${ctx.method}`, performance.now() - start, 'ms');
-    }
-  },
+```typescript
+import {
+  type MiddlewareFunction,
+  MiddlewareStage,
+} from '@omnitron-dev/netron-browser';
+
+const timingMiddleware: MiddlewareFunction = async (ctx, next) => {
+  const start = performance.now();
+  try {
+    await next();
+  } finally {
+    console.debug(`${ctx.service}.${ctx.method}`, performance.now() - start, 'ms');
+  }
 };
 
-client.use(TimingMiddleware);
+client.use(timingMiddleware, { name: 'timing', priority: 100 }, MiddlewareStage.POST_RESPONSE);
 ```
 
-## Fluent interface — chainable per-call config
+See [Middleware](./middleware.md) for the full context shape,
+stages, and registration rules.
 
-Configure middleware behaviour on a single call without
-adding it globally:
+## Fluent HTTP interface — caching, retry, circuit breaking
+
+For HTTP-transport calls you can opt into a **fluent interface**
+that adds per-call caching, retry, deduplication, timeout, and
+more — without touching the middleware pipeline. It is reached
+through the HTTP peer's `queryFluentInterface<T>(...)` (HTTP
+transport only; not available over WebSocket):
 
 ```typescript
-const user = await client
-  .cache({ ttl: 60_000 })
-  .retry({ attempts: 5 })
+import { HttpRemotePeer } from '@omnitron-dev/netron-browser';
+
+// `peer` is the HttpRemotePeer for an HTTP connection.
+const users = await peer.queryFluentInterface<UserService>('users@1.0.0');
+
+// Chainable per-call configuration, then call the method:
+const user = await users
+  .cache(60_000)              // cache for 60s (number → { maxAge })
+  .retry({ attempts: 5 })     // fluent RetryOptions
   .timeout(3_000)
-  .service<UserService>('users')
-  .findById('u_42');
+  .api.findById('u_42');
 ```
 
-Per-call config wins over global middleware config. Useful when
-99% of calls use defaults but one hot path needs longer cache
-or more retries.
+Each chainable method (`.cache()`, `.retry()`, `.timeout()`,
+`.priority()`, `.dedupe()`, `.transform()`, `.fallback()`, …)
+returns a configurable proxy; access the method through `.api`
+(or call it directly on the proxy) to execute. Configuration
+applies to that one call.
 
-## Caching
+> The fluent primitives (`FluentInterface`, `HttpCacheManager`,
+> `RetryManager`, `QueryBuilder`, `CircuitBreakerOptions`,
+> `CacheOptions`, `RetryOptions`) are re-exported from the package
+> root and shared with `@omnitron-dev/netron-http-core`.
 
-The LRU cache is bounded; tagged for granular invalidation:
+### Caching
+
+Caching is provided by the fluent interface's `HttpCacheManager`,
+not by a middleware. Configure it per call with `.cache(...)`:
 
 ```typescript
-import { LRUCache } from '@omnitron-dev/netron-browser';
+// CacheOptions:
+//   { maxAge, staleWhileRevalidate?, tags?, cacheOnError?, key? }
+const user = await users
+  .cache({
+    maxAge:               60_000,
+    staleWhileRevalidate: 10_000,        // serve stale up to 10s while refreshing
+    tags:                 ['user:u_42', 'tier:pro'],
+  })
+  .api.findById('u_42');
 
-const cache = new LRUCache({
-  maxSize:     1_000,
-  defaultTTL:  60_000,
-  staleWhileRevalidate: 10_000,    // serve stale up to 10s extra; refresh in bg
+// Invalidate by cache-key pattern (string = exact/prefix, or a RegExp):
+users.invalidate('user:u_42*');
+users.clearCache();
+```
+
+A shared `HttpCacheManager` can be attached to the peer so every
+fluent interface it creates uses the same cache + stats — and so
+you can invalidate by **tag** (the array form of `invalidate()`
+matches tags, not keys):
+
+```typescript
+import { HttpCacheManager } from '@omnitron-dev/netron-browser';
+
+const cache = new HttpCacheManager({ maxEntries: 1_000 });
+peer.setCacheManager(cache);
+
+// …after a tagged .cache({ tags: ['user:u_42'] }) call:
+cache.invalidate(['user:u_42']);     // invalidate everything tagged user:u_42
+```
+
+> **Note:** `createClient`'s `http.caching` / `http.cacheTTL`
+> options are currently inert — the basic `HttpClient` does not
+> cache. Use the fluent interface (or netron-react's query cache —
+> see [Caching](./caching.md)) for response caching.
+
+`LRUCache` (from `@omnitron-dev/netron-browser/utils`) is a
+general-purpose bounded cache utility — not a request cache
+middleware.
+
+### Retry & circuit breaking
+
+The fluent `.retry(...)` takes a `RetryOptions`:
+
+```typescript
+// RetryOptions:
+//   { attempts, backoff?, initialDelay?, maxDelay?, jitter?,
+//     shouldRetry?, onRetry?, attemptTimeout?, factor?, idempotent? }
+const user = await users
+  .retry({
+    attempts:     3,
+    backoff:      'exponential',         // 'exponential' | 'linear' | 'constant'
+    initialDelay: 500,
+    maxDelay:     8_000,
+    jitter:       0.1,
+    idempotent:   true,                  // allow retrying ambiguous failures
+  })
+  .api.findById('u_42');
+```
+
+Circuit breaking is configured on a `RetryManager` via
+`CircuitBreakerOptions` and attached to the peer:
+
+```typescript
+import { RetryManager } from '@omnitron-dev/netron-browser';
+
+// CircuitBreakerOptions:
+//   { threshold, windowTime, cooldownTime, successThreshold? }
+const retryManager = new RetryManager({
+  circuitBreaker: {
+    threshold:    5,           // open after 5 failures…
+    windowTime:   10_000,      // …within a 10s window
+    cooldownTime: 30_000,      // try half-open after 30s
+  },
 });
 
-client.use(CacheMiddleware({ cache }));
-
-// Tag a query for selective invalidation:
-await client
-  .cache({ tags: ['user:u_42', 'tier:pro'] })
-  .service<UserService>('users')
-  .findById('u_42');
-
-// Later — invalidate everything tagged with that user:
-cache.invalidateByTag('user:u_42');
+peer.setRetryManager(retryManager);
 ```
 
-Stats are exposed via `cache.getStats()` — hits, misses,
-evictions, hit ratio.
+When the breaker is open, calls fail fast with a `TitanError`
+(`code: ErrorCode.SERVICE_UNAVAILABLE`, message
+`"Circuit breaker is open"`) until the cooldown elapses; after
+cooldown one probe runs and success closes the breaker. There is
+no `CircuitOpenError` class — check `e.code ===
+ErrorCode.SERVICE_UNAVAILABLE`.
 
-## Retry + circuit breaker
+## Authentication
 
-```typescript
-client.use(RetryMiddleware({
-  attempts:    3,
-  on:          ['network', '5xx', 'timeout'],
-  backoff:     { type: 'exponential', base: 500, max: 8_000, jitter: true },
-}));
-
-client.use(CircuitBreakerMiddleware({
-  threshold:    5,             // open after 5 failures
-  resetTimeout: 30_000,        // try half-open after 30s
-  on:           ['5xx', 'timeout'],
-}));
-```
-
-The breaker prevents a flapping backend from being hammered —
-once tripped, calls fail-fast with `CircuitOpenError` until the
-reset window. After cooldown, one probe request runs; success
-closes the breaker.
-
-## Auth manager
+The real class is **`AuthenticationClient`** (from
+`@omnitron-dev/netron-browser/auth`) — there is no `AuthManager`.
+Construct one, attach it to the transport client, then drive it
+with `setAuth()` / `clearAuth()` / `logout()`:
 
 ```typescript
-import { AuthManager } from '@omnitron-dev/netron-browser';
+import { HttpClient } from '@omnitron-dev/netron-browser';
+import { AuthenticationClient, LocalTokenStorage } from '@omnitron-dev/netron-browser/auth';
 
-const auth = new AuthManager({
-  storage:           'localStorage',     // 'session' | 'memory'
-  tokenKey:          'platform:token',
-  refreshEndpoint:   '/auth/refresh',
-  inactivityTimeout: 30 * 60_000,        // 30 min
-  crossTabSync:      true,               // BroadcastChannel
+const auth = new AuthenticationClient({
+  storage:           new LocalTokenStorage('platform:token'),  // or Session/Memory/Noop
+  refreshConfig:     { endpoint: '/auth/refresh' },
+  inactivityConfig:  { timeout: 30 * 60_000 },                 // 30 min
+  crossTabSync:      { enabled: true },                        // storage-event sync
 });
 
-client.use(AuthMiddleware({ authManager: auth }));
+// Attach to the transport (HttpClient / WebSocketClient accept `auth`):
+const client = new HttpClient({ url: '/api', auth });
 
-// On sign-in:
-await auth.setTokens({ accessToken, refreshToken, sessionId });
+// On sign-in — pass the server's AuthResult:
+auth.setAuth(result);
 
 // On sign-out:
-await auth.clear();
+await auth.logout();   // POSTs logoutConfig.endpoint if set, then clears state
+auth.clearAuth();      // local-only clear (no server call)
 ```
 
-Auth manager features:
+`AuthenticationClient` features:
 
-- **Token storage** — localStorage / sessionStorage / memory.
-- **Auto-refresh** — on 401, call refresh endpoint, retry the
-  original request transparently.
+- **Token storage** — `LocalTokenStorage` / `SessionTokenStorage`
+  / `MemoryTokenStorage` (default) / `NoopTokenStorage` (cookie
+  mode).
+- **Auto-refresh** — schedules a refresh before expiry via
+  `refreshConfig`; `refreshToken()` coalesces concurrent calls.
 - **Cross-tab sync** — sign-in / sign-out in one tab propagates
-  to all open tabs (BroadcastChannel under the hood).
-- **Inactivity timeout** — auto-sign-out after N ms of no
-  activity.
-- **Token rotation hooks** — `auth.on('rotated', cb)` for app-
-  level reactions.
+  to all open tabs (via the `storage` event).
+- **Inactivity timeout** — auto-`clearAuth()` after N ms of no
+  activity (`inactivityConfig`).
+- **Events** — `auth.on('authenticated' | 'token-refreshed' |
+  'unauthenticated' | 'error' | 'inactivity', cb)`.
+
+Read the current token with `auth.getToken()` (synchronous,
+`string | undefined`) and check status with
+`auth.isAuthenticated()`. For the full reference — storage
+backends, token transports, cookie mode — see
+[Auth](./auth.md).
 
 ## Multi-backend client
 
@@ -444,7 +536,7 @@ for the full code reference.
 | ------- | -------- |
 | `@omnitron-dev/netron-browser` | Everything; convenient root |
 | `@omnitron-dev/netron-browser/client` | `NetronClient`, `HttpClient`, `WebSocketClient`, `BackendPool` |
-| `@omnitron-dev/netron-browser/auth` | `AuthManager`, token storage helpers |
+| `@omnitron-dev/netron-browser/auth` | `AuthenticationClient`, token storage + token-transport helpers |
 | `@omnitron-dev/netron-browser/middleware` | All built-in middleware |
 | `@omnitron-dev/netron-browser/core` | Types, defaults, factory helpers |
 | `@omnitron-dev/netron-browser/core-tasks` | Built-in service tasks (`$system.describe`, etc.) |
@@ -476,7 +568,7 @@ The package ships runnable examples at
 
 - Basic HTTP usage
 - WebSocket subscriptions
-- Auth manager flow
+- Authentication flow
 - Multi-backend routing
 - Custom middleware
 
@@ -486,12 +578,14 @@ The package ships runnable examples at
   refactors stay safe.
 - **One client per backend.** Don't recreate on every render —
   treat the client as a long-lived singleton.
-- **Wire AuthManager once.** Cross-tab sync requires a single
-  manager instance to share state via BroadcastChannel.
+- **Wire `AuthenticationClient` once.** Cross-tab sync requires a
+  single instance to share state via the `storage` event.
 - **Cache idempotent reads, not writes.** Mutations should
   invalidate by tag, not cache.
-- **Circuit breaker before retry.** Order matters — the breaker
-  prevents the retry loop from hammering a dead backend.
+- **Circuit breaker before retry.** A `RetryManager` configured
+  with `circuitBreaker` checks the breaker before each attempt,
+  so a tripped breaker prevents the retry loop from hammering a
+  dead backend.
 - **Set `timeout`** explicitly. Browser fetch defaults are
   effectively no-timeout; surface as `TimeoutError` for clean
   client UX.
@@ -502,13 +596,14 @@ The package ships runnable examples at
 
 - **Storing tokens in cookies + localStorage.** Pick one. Cross-
   site contexts work better with HttpOnly cookies; same-site
-  apps work better with localStorage + AuthManager.
+  apps work better with localStorage + `AuthenticationClient`.
 - **Per-call new client.** Defeats caching, breaks WS reconnect,
   wastes connections.
 - **Catching `Error` generically.** Lose the typed `code`;
   always check `instanceof TitanError`.
-- **Custom retry logic on top of `RetryMiddleware`.** Double
-  retries amplify failure load; disable one or the other.
+- **Stacking the `HttpClient` `retry` option with fluent
+  `.retry(...)`.** Double retries amplify failure load; pick one
+  layer.
 - **`maxReconnectAttempts: Infinity`.** A genuinely-dead server
   has open connections from every tab forever.
 

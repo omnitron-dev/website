@@ -47,12 +47,22 @@ Errors that don't come from the server's `TitanError` system:
 | `NetworkError` | DNS failure, connection refused, browser offline | ✓ (often) |
 | `TimeoutError` | Request exceeded `timeout` | ⚠ (sometimes) |
 | `ConnectionError` | WS upgrade failed; HTTP cert invalid | ✗ |
-| `CircuitOpenError` | CircuitBreakerMiddleware tripped | ✓ (after reset) |
-| `BackendNotConfiguredError` | Multi-backend: no route matches | ✗ (config bug) |
+| `TransportError` | Generic transport-layer failure | ⚠ |
+
+These are exported from the package root alongside the other
+Netron error classes (`NetronError`, `ProtocolError`,
+`ServiceError`, `MethodNotFoundError`, `InvalidArgumentsError`,
+`SerializationError`).
+
+> There is **no** `CircuitOpenError` class. When the fluent HTTP
+> interface's circuit breaker is open it throws a `TitanError`
+> with `code: ErrorCode.SERVICE_UNAVAILABLE` (message
+> `"Circuit breaker is open"`) — check the code, not a class.
 
 ```typescript
 import {
-  NetworkError, TimeoutError, ConnectionError, CircuitOpenError
+  NetworkError, TimeoutError, ConnectionError,
+  TitanError, ErrorCode,
 } from '@omnitron-dev/netron-browser';
 
 try {
@@ -64,7 +74,8 @@ try {
   if (e instanceof TimeoutError) {
     return showSlowNetworkWarning();
   }
-  if (e instanceof CircuitOpenError) {
+  // Circuit breaker open (fluent HTTP interface):
+  if (e instanceof TitanError && e.code === ErrorCode.SERVICE_UNAVAILABLE) {
     return showServiceUnavailable();
   }
   throw e;
@@ -139,58 +150,74 @@ client-side errors — no special UI path.
 
 ## Retry classification
 
-`RetryMiddleware`'s default `on` list classifies failures as
-retryable vs not:
+The fluent HTTP interface's retry (`RetryOptions`, via
+`.retry({ ... })`) ships a default `shouldRetry` that classifies
+failures by whether the request provably never reached the
+server vs. an *ambiguous* failure where it may have been
+processed. Ambiguous failures are retried **only when you mark
+the call `idempotent: true`**, so a mutation is never silently
+re-executed:
 
-| Error | Retryable? | Why |
-| ----- | :--------: | --- |
-| `NetworkError` | ✓ | Transient |
-| `TimeoutError` | ⚠ | Only if idempotent |
-| `5xx` (server) | ✓ | Server may recover |
-| `429 TOO_MANY_REQUESTS` | ✓ | Honour `retryAfter` |
-| `503 SERVICE_UNAVAILABLE` | ✓ | Transient downstream |
-| `408 REQUEST_TIMEOUT` | ⚠ | Only if idempotent |
-| `4xx` (other) | ✗ | Client mistake — won't change |
-| `401 UNAUTHORIZED` | special | Auth middleware refreshes + retries |
-| `403 FORBIDDEN` | ✗ | Permission issue |
-| `404 NOT_FOUND` | ✗ | Resource doesn't exist |
-| `409 CONFLICT` | ✗ | State mismatch — needs resolution |
-| `422 VALIDATION_ERROR` | ✗ | Input bug |
-| `501 NOT_IMPLEMENTED` | ✗ | Server doesn't have this |
+| Failure | Retried by default? | Why |
+| ------- | :-----------------: | --- |
+| Connection refused / DNS / unreachable | ✓ | Request provably never reached the server |
+| `429 TOO_MANY_REQUESTS` | ✓ | Server rejected without processing; honours `Retry-After` |
+| Connection reset / timeout | only if `idempotent` | Ambiguous — may have been processed |
+| `5xx` (server) / `408` | only if `idempotent` | Ambiguous |
+| `SERVICE_UNAVAILABLE` / `REQUEST_TIMEOUT` / `INTERNAL_ERROR` | only if `idempotent` | Ambiguous |
+| Other `4xx` (`400`/`403`/`404`/`409`/`422`) | ✗ | Deterministic client error — won't change |
+| `TypeError` / `ReferenceError` | ✗ | Programming bug |
+| `401 UNAUTHORIZED` | special | An auth-error middleware refreshes the token and re-invokes once (separate from retry) |
 
-Custom retry predicate:
+A custom `shouldRetry` overrides the gate entirely — you own the
+decision (signature `(error, attempt) => boolean | Promise<boolean>`):
 
 ```typescript
-client.use(RetryMiddleware({
-  attempts: 3,
-  shouldRetry: (error, attempt, ctx) => {
-    // Never retry mutating calls automatically:
-    if (ctx.method.match(/^(create|update|delete)/)) return false;
-    // Cap retries on timeout (it may have succeeded server-side):
-    if (error instanceof TimeoutError && attempt >= 2) return false;
-    // Default rules:
-    return error instanceof NetworkError ||
-           (error instanceof TitanError && error.code >= 500);
-  },
-}));
+const users = await peer.queryFluentInterface<UserService>('users@1.0.0');
+
+await users
+  .retry({
+    attempts: 3,
+    shouldRetry: (error, attempt) => {
+      // Cap retries on timeout (it may have succeeded server-side):
+      if (error instanceof TimeoutError && attempt >= 2) return false;
+      // Retry network failures and 5xx:
+      return error instanceof NetworkError ||
+             (error instanceof TitanError && error.code >= 500);
+    },
+  })
+  .api.findById(id);
 ```
 
 ## Circuit breaker integration
 
-```typescript
-client.use(CircuitBreakerMiddleware({
-  threshold:    5,
-  resetTimeout: 30_000,
-  on:           ['5xx', 'network', 'timeout'],
-  perService:   true,        // separate breaker per service
-}));
+The circuit breaker is **not** a middleware — it lives on a
+`RetryManager` (the fluent HTTP interface) configured with
+`CircuitBreakerOptions`:
 
-client.use(RetryMiddleware({ attempts: 3 }));
+```typescript
+import { RetryManager } from '@omnitron-dev/netron-browser';
+
+const retryManager = new RetryManager({
+  circuitBreaker: {
+    threshold:    5,         // open after 5 failures…
+    windowTime:   10_000,    // …within a 10s window
+    cooldownTime: 30_000,    // try half-open after 30s
+  },
+});
+
+peer.setRetryManager(retryManager);
+
+const users = await peer.queryFluentInterface<UserService>('users@1.0.0');
+await users.retry({ attempts: 3 }).api.findById(id);
 ```
 
-Order matters — the breaker runs **first** in the error stage.
-A tripped breaker short-circuits to `CircuitOpenError` without
-even attempting the retry.
+The breaker is checked **before each attempt**: while it is open,
+calls fail fast — the `RetryManager` throws a `TitanError` with
+`code: ErrorCode.SERVICE_UNAVAILABLE` (message `"Circuit breaker
+is open"`) without attempting the request. After `cooldownTime`
+one probe runs; success closes the breaker. There is no
+`CircuitOpenError` class — match on the code.
 
 ## Error UI patterns
 
@@ -286,21 +313,23 @@ where the context is richer.
 ## Reporting to Sentry
 
 ```typescript
-const SentryMiddleware: NetronMiddleware = {
-  stage:    'error',
-  priority: 200,
-  handler:  async (ctx, next) => {
-    Sentry.withScope((scope) => {
-      scope.setTag('rpc.service', ctx.service);
-      scope.setTag('rpc.method',  ctx.method);
-      scope.setContext('rpc',     { args: ctx.args, attempt: ctx.attempt });
-      Sentry.captureException(ctx.error);
-    });
-    return next();        // re-throw
-  },
+import {
+  type MiddlewareFunction,
+  MiddlewareStage,
+} from '@omnitron-dev/netron-browser';
+
+const sentryMiddleware: MiddlewareFunction = async (ctx, next) => {
+  Sentry.withScope((scope) => {
+    scope.setTag('rpc.service', ctx.service);
+    scope.setTag('rpc.method',  ctx.method);
+    scope.setContext('rpc',     { args: ctx.args });
+    Sentry.captureException(ctx.error);   // populated in the error stage
+  });
+  await next();        // re-throw
 };
 
-client.use(SentryMiddleware);
+// Register on the error stage:
+client.use(sentryMiddleware, { name: 'sentry', priority: 200 }, MiddlewareStage.ERROR);
 ```
 
 Filter noise — don't report `NOT_FOUND` or `UNAUTHORIZED`,
@@ -331,15 +360,19 @@ they're not bugs.
   errors above the form; transient/background errors in toasts.
 - **Wire `SentryMiddleware` once** for global reporting; let
   call sites handle UI.
-- **Pair retry with circuit breaker.** Without the breaker,
-  retries amplify failure load on a sick backend.
-- **Honour `retryAfter`** on `TOO_MANY_REQUESTS` — auto-retry
-  middleware does this; do it manually if you implement custom
-  retry.
+- **Pair retry with circuit breaker.** Configure the
+  `RetryManager` with `circuitBreaker` so retries don't amplify
+  failure load on a sick backend.
+- **Mark idempotent calls `idempotent: true`.** The default
+  fluent retry only retries ambiguous failures (5xx / reset /
+  timeout) for idempotent calls — mutations stay safe.
+- **Honour `Retry-After`** on `TOO_MANY_REQUESTS` — the fluent
+  `RetryManager` reads it automatically; do it manually if you
+  write your own retry loop.
 
 ## See also
 
 - [Titan / Errors catalog](../../titan/modules/errors-catalog.mdx) — full server-side error reference
-- [Middleware / RetryMiddleware](./middleware.md#retrymiddleware)
-- [Middleware / CircuitBreakerMiddleware](./middleware.md#circuitbreakermiddleware)
-- [Auth manager / 401 handling](./auth.md#auto-refresh-flow)
+- [Browser client / Fluent HTTP interface](./browser.md#fluent-http-interface--caching-retry-circuit-breaking) — fluent retry & circuit breaking
+- [Middleware / Not middleware](./middleware.md#not-middleware) — why retry/cache/circuit-breaking aren't middleware
+- [Auth / 401 handling](./auth.md#auto-refresh-flow)

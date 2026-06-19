@@ -178,7 +178,7 @@ Carries:
 
 - HTTP + WebSocket transports with auto-reconnect.
 - Middleware pipeline (auth, retry, cache, circuit breaker, tracing).
-- `AuthManager` with token rotation, cross-tab sync.
+- `AuthenticationClient` with token refresh, cross-tab sync.
 - `BackendPool` for multi-backend routing.
 - LRU cache with stale-while-revalidate.
 - Typed errors that round-trip from the server intact.
@@ -189,7 +189,7 @@ Subpaths:
 | ------- | -------- |
 | `@omnitron-dev/netron-browser` | Root — convenient `createClient` |
 | `@omnitron-dev/netron-browser/client` | `NetronClient`, `HttpClient`, `WebSocketClient`, `BackendPool` |
-| `@omnitron-dev/netron-browser/auth` | `AuthManager` |
+| `@omnitron-dev/netron-browser/auth` | `AuthenticationClient`, token storage + transports |
 | `@omnitron-dev/netron-browser/middleware` | All built-in middleware |
 | `@omnitron-dev/netron-browser/errors` | Typed error hierarchy |
 

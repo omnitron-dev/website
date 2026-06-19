@@ -1,10 +1,10 @@
 ---
 sidebar_position: 7
-title: Auth manager
-description: Token storage, auto-refresh, cross-tab sync, inactivity timeout.
+title: Auth client
+description: AuthenticationClient — token storage, auto-refresh, cross-tab sync, inactivity timeout.
 ---
 
-# Auth manager
+# Auth client
 
 :::info
 For the framework-wide authorisation model (permission strings,
@@ -12,110 +12,170 @@ ABAC, RLS bridge) start at [Authentication & Authorisation](../../auth/index.md)
 This page is the browser-side **token-lifecycle** reference.
 :::
 
-`AuthManager` (from `@omnitron-dev/netron-browser/auth`) owns
-browser-side authentication state: where tokens live, when to
-refresh, how to propagate sign-in/out across tabs, and when to
-time out an idle session.
+`AuthenticationClient` (from `@omnitron-dev/netron-browser/auth`)
+owns browser-side authentication state: where the token lives,
+when to refresh, how to propagate sign-in/out across tabs, and
+when to time out an idle session.
 
-It's used by `AuthMiddleware` to attach tokens to every RPC
-call and to refresh on 401. The middleware also handles the
-`PERMISSION_VERSION_STALE` (401) error introduced in the v2
-auth surface — same refresh-then-retry path as `TOKEN_EXPIRED`;
-the new JWT carries the up-to-date permission set so live
-guards re-render correctly without forcing a sign-in. See the
-[migration guide](../../titan/migrations/auth-1-to-2.md) for
-the wire-level shape.
+You attach it to a transport client (HTTP or WebSocket) so every
+RPC call carries the token, and a refresh fires automatically on
+401. In React apps it's usually wrapped by netron-react's
+[`AuthProvider`](./react.md#authentication) — but the client
+works standalone.
+
+Verified against `packages/netron-browser/src/auth/`.
 
 ## Wiring
 
-```typescript
-import { AuthManager } from '@omnitron-dev/netron-browser/auth';
-import { AuthMiddleware } from '@omnitron-dev/netron-browser/middleware';
+Pass an `AuthenticationClient` to the transport client. The
+client attaches the token to every request and the built-in
+`auth-error-handler` middleware refreshes + retries on 401:
 
-const auth = new AuthManager({
-  storage:           'localStorage',
-  tokenKey:          'platform:tokens',
-  refreshEndpoint:   '/auth/refresh',
-  inactivityTimeout: 30 * 60_000,         // 30 min
-  crossTabSync:      true,
+```typescript
+import { HttpClient } from '@omnitron-dev/netron-browser';
+import { AuthenticationClient, LocalTokenStorage } from '@omnitron-dev/netron-browser/auth';
+import { createAuthErrorMiddleware } from '@omnitron-dev/netron-browser/middleware';
+
+const auth = new AuthenticationClient({
+  storage:          new LocalTokenStorage('platform:token'),
+  autoRefresh:      true,
+  refreshThreshold: 5 * 60_000,                 // refresh 5 min before expiry
+  refreshConfig:    { endpoint: '/auth/refresh' },
+  inactivityConfig: { timeout: 30 * 60_000 },   // 30 min
+  crossTabSync:     { enabled: true },
 });
 
-const client = createClient({ url: 'https://api.example.com' });
-client.use(AuthMiddleware({ authManager: auth }));
+const client = new HttpClient({ url: 'https://api.example.com', auth });
 
-// On sign-in success:
-await auth.setTokens({ accessToken, refreshToken, sessionId, expiresAt });
+// Refresh-then-retry on 401 (and surface 403 / 429):
+client.use(createAuthErrorMiddleware({
+  authClient:        auth,
+  onSessionExpired:  () => location.assign('/sign-in?reason=expired'),
+}));
+
+// On sign-in success (an AuthResult from your authenticate call):
+auth.setAuth(result);
 
 // On sign-out:
-await auth.clear();
+await auth.logout();   // POSTs logoutConfig.endpoint if set, then clearAuth()
 ```
 
-## Options
+> `AuthenticationClient` is the real class — there is no
+> `AuthManager`, no `setTokens`, no `clear()`. Use `setAuth()` /
+> `clearAuth()` / `logout()` and `getToken()`.
+
+## Constructor options
+
+`new AuthenticationClient(options: AuthOptions)` — all fields optional:
 
 | Option | Default | Notes |
 | ------ | ------- | ----- |
-| `storage` | `'localStorage'` | `'localStorage'` \| `'sessionStorage'` \| `'memory'` |
-| `tokenKey` | `'netron:tokens'` | Storage key |
-| `refreshEndpoint` | — | Path / URL to call on 401 |
-| `refreshFn` | — | Custom refresh function (overrides endpoint) |
-| `inactivityTimeout` | `0` (disabled) | Auto-sign-out after N ms idle |
-| `crossTabSync` | `true` | Use BroadcastChannel to sync sign-in/out across tabs |
-| `channelName` | `'netron-auth'` | BroadcastChannel name |
-| `tokenExpiryBuffer` | `30_000` | Refresh N ms before exp |
+| `storage` | `new MemoryTokenStorage()` | A `TokenStorage` instance (see below). **Secure-by-default** — memory, not localStorage. |
+| `storageKey` | `'netron_auth_token'` | Convenience: if `storage` is omitted but `storageKey` is set, a `LocalTokenStorage(storageKey)` is created |
+| `autoRefresh` | `true` | Schedule a refresh before expiry |
+| `refreshThreshold` | `5 * 60_000` | Refresh this many ms before `expiresAt` |
+| `autoAttach` | `true` | Attach the token to outgoing requests |
+| `refreshConfig` | — | `{ endpoint, method?, headers?, buildBody? }` |
+| `logoutConfig` | — | `{ endpoint, method?, headers?, includeToken? }` |
+| `inactivityConfig` | `{ timeout: 30*60_000, events: ['click','keypress','mousemove'] }` | Idle auto-sign-out |
+| `crossTabSync` | `{ enabled: true, syncKey: 'netron_auth_sync' }` | Sync sign-in/out across tabs |
+| `transport` | — | A token transport strategy (Bearer / Cookie / Hybrid — see below) |
 
 ## Storage backends
 
-| Backend | Survives | Use case |
-| ------- | -------- | -------- |
-| `'localStorage'` | Tab close + reload | Long-lived sessions; most apps |
-| `'sessionStorage'` | Tab close (per-tab) | "Remember me off" |
-| `'memory'` | Reload | Highest security; user re-auths on every refresh |
+`storage` takes a `TokenStorage` **instance** (not a string).
+Four implementations ship from `@omnitron-dev/netron-browser/auth`:
 
-For HttpOnly-cookie auth, set `storage: 'memory'` (or skip the
-manager entirely) — the browser handles the cookie.
-
-## Token shape
+| Class | Survives | Use case |
+| ----- | -------- | -------- |
+| `MemoryTokenStorage` | nothing (reload clears) | **Default.** Highest security; user re-auths on reload |
+| `LocalTokenStorage(key?)` | tab close + reload | Long-lived sessions; most apps |
+| `SessionTokenStorage(key?)` | tab close (per-tab) | "Remember me off" |
+| `NoopTokenStorage` | — | Cookie-mode — the browser holds an HttpOnly cookie, nothing is stored client-side |
 
 ```typescript
-interface AuthTokens {
-  accessToken:    string;
-  refreshToken?:  string;
-  sessionId?:     string;
-  expiresAt?:     number;          // epoch ms — used for proactive refresh
-  user?:          Partial<User>;    // optional cached profile
+import { LocalTokenStorage, MemoryTokenStorage, NoopTokenStorage }
+  from '@omnitron-dev/netron-browser/auth';
+
+new AuthenticationClient({ storage: new LocalTokenStorage('myapp:token') });
+```
+
+The `TokenStorage` interface is `getToken() / setToken() /
+removeToken() / hasToken()` plus generic `getValue() / setValue()
+/ removeValue()` (the client persists a serialized context
+alongside the token).
+
+### Token transports (Bearer / Cookie / Hybrid)
+
+How the token reaches the server is a pluggable
+`IClientTokenTransport` (T#176). Pass one as `transport`:
+
+| Transport | Sends | Use |
+| --------- | ----- | --- |
+| `BearerClientTokenTransport` | `Authorization: Bearer <token>` header (+ `?token=` on WS) | Default bearer-token model |
+| `CookieClientTokenTransport` | nothing — sets `credentials: 'include'` so the browser sends the HttpOnly cookie | Cookie-mode auth (pair with `NoopTokenStorage`) |
+| `HybridClientTokenTransport` | both — cookie credentials + bearer header | Migration / dual-mode |
+
+```typescript
+import { AuthenticationClient, NoopTokenStorage } from '@omnitron-dev/netron-browser/auth';
+import { CookieClientTokenTransport } from '@omnitron-dev/netron-browser/auth';
+
+// HttpOnly-cookie auth: no client-side token, browser sends the cookie.
+const auth = new AuthenticationClient({
+  storage:   new NoopTokenStorage(),
+  transport: new CookieClientTokenTransport(),
+});
+```
+
+## Token + result shapes
+
+After authenticating, you hand the client an `AuthResult` (the
+shape your server's authenticate task returns):
+
+```typescript
+interface AuthResult {
+  success:   boolean;
+  context?:  AuthContext;            // user identity + roles/permissions
+  error?:    string;
+  metadata?: Record<string, any>;    // tokens live here: { accessToken, refreshToken, refreshTokenExpiresAt }
+}
+
+interface AuthContext {
+  userId:       string;
+  roles:        string[];
+  permissions:  string[];
+  scopes?:      string[];
+  token?:       { type: 'bearer' | 'mac' | 'custom'; expiresAt?: Date; issuer?: string; audience?: string[] };
+  metadata?:    Record<string, any>;
 }
 ```
 
-`expiresAt` lets the manager refresh **proactively** —
-`tokenExpiryBuffer` ms before expiry — rather than waiting for
-401.
+`setAuth(result)` reads the access token from
+`metadata.accessToken` and the refresh token from
+`metadata.refreshToken`, and uses `context.token.expiresAt` for
+proactive refresh. For a bare token (no full result) use
+`setToken(token, context?)`.
 
 ## Auto-refresh flow
 
 ```mermaid
 sequenceDiagram
   participant App
-  participant MW as AuthMiddleware
-  participant Auth as AuthManager
+  participant MW as auth-error-handler
+  participant Auth as AuthenticationClient
   participant Server
 
-  App->>MW: invoke()
-  MW->>Auth: getAccessToken()
-  alt token fresh (not near exp)
-    Auth-->>MW: token
-  else token near exp
-    Auth->>Server: POST refreshEndpoint(refreshToken)
-    Server-->>Auth: { accessToken, refreshToken' }
-    Auth->>Auth: setTokens(...)
-    Auth-->>MW: new token
-  end
-  MW->>Server: invoke with Authorization
+  App->>Auth: getAuthHeaders()  (attached to every call)
+  Note over Auth: a timer fires refreshToken() ~refreshThreshold before expiry
+  Auth->>Server: POST refreshConfig.endpoint(refreshToken)
+  Server-->>Auth: AuthResult { metadata.accessToken' }
+  Auth->>Auth: setAuth(...)  → emits 'token-refreshed'
+  App->>Server: invoke with Authorization
   alt 401 from server
     Server--xMW: 401 Unauthorized
-    MW->>Auth: refresh()
-    Auth->>Server: POST refreshEndpoint
-    Server-->>Auth: { accessToken' }
-    Auth->>Auth: setTokens(...)
+    MW->>Auth: refreshToken()
+    Auth->>Server: POST refreshConfig.endpoint
+    Server-->>Auth: AuthResult { accessToken' }
     MW->>Server: retry invoke
     Server-->>App: 200
   else 200
@@ -123,115 +183,115 @@ sequenceDiagram
   end
 ```
 
-Proactive + reactive — the buffer covers clock skew + slow
-networks; the 401 handler covers refresh that fired
-mid-request.
+Proactive (`autoRefresh` + `refreshThreshold`) covers clock skew
+and slow networks; the reactive `auth-error-handler` middleware
+covers a refresh that fired mid-request.
 
 ### Concurrent-request deduplication
 
-Multiple in-flight requests that 401 simultaneously share one
-refresh call — they don't all hit the refresh endpoint. The
-manager queues subsequent calls and resolves them with the
-refreshed token.
+`refreshToken()` coalesces concurrent calls via a single shared
+`refreshPromise` — multiple requests that 401 simultaneously
+share one refresh call rather than all hitting the endpoint.
 
 ## Cross-tab sync
 
-When `crossTabSync: true`, sign-in / sign-out in one tab
-propagates to all open tabs via `BroadcastChannel`:
+With `crossTabSync: { enabled: true }`, sign-in / sign-out in one
+tab propagates to others via the storage `storage` event (the
+client writes a record to `crossTabSync.syncKey`):
 
 ```mermaid
 sequenceDiagram
   participant Tab1
-  participant BC as BroadcastChannel
+  participant LS as localStorage (storage event)
   participant Tab2
-  participant Tab3
 
-  Tab1->>Tab1: auth.setTokens(...)
-  Tab1->>BC: postMessage({type: 'sign-in', tokens})
-  BC-->>Tab2: message
-  BC-->>Tab3: message
-  Tab2->>Tab2: update local state
-  Tab3->>Tab3: update local state
+  Tab1->>Tab1: setAuth(...)
+  Tab1->>LS: write syncKey record
+  LS-->>Tab2: 'storage' event
+  Tab2->>Tab2: re-read state → emit 'cross-tab-sync'
 
-  Note over Tab1: user clicks sign-out
-  Tab1->>Tab1: auth.clear()
-  Tab1->>BC: postMessage({type: 'sign-out'})
-  BC-->>Tab2: message
-  BC-->>Tab3: message
-  Tab2->>Tab2: clear local; redirect to /sign-in
-  Tab3->>Tab3: clear local; redirect to /sign-in
+  Note over Tab1: user signs out
+  Tab1->>Tab1: clearAuth()
+  Tab1->>LS: write syncKey record
+  LS-->>Tab2: 'storage' event
+  Tab2->>Tab2: clear local state
 ```
 
-Falls back to localStorage `storage` events on browsers without
-BroadcastChannel.
+(`enableCrossTabSync()` / `disableCrossTabSync()` toggle it at
+runtime.) Cross-tab auth sync uses `storage` events; the separate
+multi-tab WebSocket leader-election feature is unrelated.
 
 ## Inactivity timeout
 
 ```typescript
-new AuthManager({
-  inactivityTimeout: 30 * 60_000,
-  // ...
+new AuthenticationClient({
+  inactivityConfig: {
+    timeout: 30 * 60_000,
+    events:  ['click', 'keypress', 'mousemove'],   // activity resets the timer
+    onInactivity: () => { /* optional callback */ },
+  },
 });
 ```
 
-Resets on:
-- Any user input (`mousemove`, `keydown`, `click`, `touchstart`,
-  `scroll`).
-- Any RPC call (proves activity).
-- Cross-tab activity (one active tab keeps all alive).
-
-When the timeout expires:
+When the timeout expires the client emits `'inactivity'`, calls
+`onInactivity` (if given), then `clearAuth()`. Subscribe to react
+in your app:
 
 ```typescript
-auth.on('inactivity-timeout', async () => {
-  await auth.clear();
-  navigate('/sign-in?reason=timeout');
-});
+auth.on('inactivity', () => navigate('/sign-in?reason=timeout'));
 ```
-
-The manager just **fires the event**; your app decides what to
-do (sign out, lock screen with PIN unlock, ...).
 
 ## Event subscriptions
 
-```typescript
-auth.on('sign-in',  ({ user, source })  => { /* sync local state */ });
-auth.on('sign-out', ({ source })        => { /* redirect */ });
-auth.on('refresh',  ({ accessToken })   => { /* update header banner */ });
-auth.on('refresh-failed', ({ error })   => { /* probably show sign-in */ });
-auth.on('inactivity-timeout', () => { /* lock or sign out */ });
-```
+Subscribe with `on(event, handler)` / unsubscribe with
+`off(event, handler)`. The six event types:
 
-`source` is `'self'` for actions originated in this tab,
-`'remote'` for cross-tab broadcasts.
+```typescript
+auth.on('authenticated',   ({ context })      => { /* signed in */ });
+auth.on('unauthenticated', ()                 => { /* signed out / cleared */ });
+auth.on('token-refreshed', ({ context })      => { /* token rotated */ });
+auth.on('error',           ({ error, context })=> { /* refresh/logout failed */ });
+auth.on('inactivity',      ({ lastActivity }) => { /* idle timeout */ });
+auth.on('cross-tab-sync',  ({ type })         => { /* another tab changed auth */ });
+```
 
 ## React integration
 
-netron-react's `AuthProvider` wraps `AuthManager` and exposes
-`useAuth()`:
+netron-react's `AuthProvider` wraps the auth lifecycle and
+exposes `useAuth()`. Sign-in runs through the provider's
+`onLogin` handler; components call `login` / `logout` (see the
+[netron-react auth section](./react.md#authentication) for the
+full provider API):
 
 ```tsx
 import { AuthProvider, useAuth } from '@omnitron-dev/netron-react/auth';
 
-<AuthProvider>
+<AuthProvider
+  config={{ refreshEndpoint: '/auth/refresh', storage: 'local', autoRefresh: true }}
+  onLogin={(credentials) => client.invoke('auth', 'signIn', [credentials])}
+>
   <Outlet />
 </AuthProvider>
 
 function UserMenu() {
-  const { user, isAuthenticated, signIn, signOut, refresh } = useAuth();
+  const { user, isAuthenticated, login, logout } = useAuth();
 
   if (!isAuthenticated) {
-    return <Button onClick={() => signIn(credentials)}>Sign in</Button>;
+    return <Button onClick={() => login(credentials)}>Sign in</Button>;
   }
   return (
     <Menu>
-      <MenuItem disabled>{user.email}</MenuItem>
+      <MenuItem disabled>{user?.userId}</MenuItem>
       <MenuDivider />
-      <MenuItem onClick={signOut}>Sign out</MenuItem>
+      <MenuItem onClick={() => logout()}>Sign out</MenuItem>
     </Menu>
   );
 }
 ```
+
+`useAuth()` returns `{ isAuthenticated, user, login, logout,
+refresh, getAuthHeaders, hasRole, hasPermission, hasAnyRole,
+hasAllRoles }`.
 
 ### Route guards
 
@@ -239,18 +299,19 @@ function UserMenu() {
 import { AuthGuard, GuestGuard } from '@omnitron-dev/netron-react/auth';
 
 <Routes>
-  <Route element={<GuestGuard><AuthLayout /></GuestGuard>}>
+  <Route element={<GuestGuard redirectTo="/"><AuthLayout /></GuestGuard>}>
     <Route path="/sign-in" element={<SignInPage />} />
   </Route>
-  <Route element={<AuthGuard><DashboardLayout /></AuthGuard>}>
+  <Route element={<AuthGuard redirectTo="/sign-in"><DashboardLayout /></AuthGuard>}>
     <Route path="/" element={<Dashboard />} />
   </Route>
 </Routes>
 ```
 
-`<AuthGuard>` redirects unauthenticated users to `/sign-in`
-(configurable); `<GuestGuard>` redirects authenticated users to
-`/` (configurable).
+`<AuthGuard>` renders children when authenticated, else its
+`fallback` (and can `redirectTo`); `<GuestGuard>` is the inverse.
+`<RoleGuard role="…">` / `<PermissionGuard permission="…">` gate
+on RBAC.
 
 ### Role-gated content
 
@@ -258,138 +319,120 @@ import { AuthGuard, GuestGuard } from '@omnitron-dev/netron-react/auth';
 import { useAuth } from '@omnitron-dev/netron-react/auth';
 
 function AdminPanel() {
-  const { user, hasRole } = useAuth();
+  const { hasRole } = useAuth();
   if (!hasRole('admin')) return null;
   return <DestructiveOperations />;
 }
 ```
 
-`hasRole` checks `user.roles` against the argument; supports
-arrays for "any of":
-
-```tsx
-hasRole(['admin', 'moderator'])
-```
+`hasRole(role)` checks the context's `roles`; `hasAnyRole(roles)`
+/ `hasAllRoles(roles)` cover the array cases.
 
 ## Sign-in flow with 2FA
 
 ```tsx
 async function handleSignIn(values: { email: string; password: string; totpCode?: string }) {
   try {
-    const result = await authService.signIn(values);
+    const result = await client.invoke('auth', 'signIn', [values]);   // returns AuthResult
 
-    if (result.requires2fa) {
-      setPendingMfa(true);                  // show 2FA input
+    if (result.metadata?.requires2fa) {
+      setPendingMfa(true);                  // show 2FA input, call signIn again with totpCode
       return;
     }
 
-    await auth.setTokens({
-      accessToken:  result.accessToken,
-      refreshToken: result.refreshToken,
-      sessionId:    result.sessionId,
-      expiresAt:    Date.now() + result.expiresIn * 1_000,
-      user:         result.user,
-    });
-
+    auth.setAuth(result);                   // stores token + context, emits 'authenticated'
     navigate('/');
   } catch (e) {
-    form.setError('root', { message: e.message });
+    form.setError('root', { message: (e as Error).message });
   }
 }
 ```
 
 The two-step flow keeps the 2FA input out of the password form
-until needed.
+until needed. (Through React, prefer `useAuth().login(values)` —
+it runs the provider's `onLogin` and calls `setAuth` for you.)
 
 ## Sign-in flow with WebAuthn / passkey
 
 ```typescript
-const challenge = await authService.getWebAuthnChallenge({ email });
+const challenge  = await client.invoke('auth', 'getWebAuthnChallenge', [{ email }]);
 const credential = await navigator.credentials.get({ publicKey: challenge });
-const result     = await authService.verifyWebAuthn({ credential });
-await auth.setTokens(result);
+const result     = await client.invoke('auth', 'verifyWebAuthn', [{ credential }]);
+auth.setAuth(result);
 ```
 
-The manager doesn't care about the source — it stores tokens
-the same way regardless of method.
+The client doesn't care about the source — `setAuth` stores the
+result the same way regardless of method.
 
 ## Programmatic token access (advanced)
 
 ```typescript
-const token = await auth.getAccessToken();
-const isAuth = auth.isAuthenticated();
-const user = auth.getUser();
-const session = auth.getSessionId();
+const token   = auth.getToken();              // string | undefined (synchronous)
+const isAuth  = auth.isAuthenticated();
+const context = auth.getContext();            // AuthContext | undefined (userId, roles, …)
+const session = auth.getSessionMetadata();    // { sessionId, loginTime, … } | undefined
+const headers = auth.getAuthHeaders();        // e.g. { Authorization: 'Bearer …' }
 ```
 
 Useful for direct `fetch` calls outside the RPC client (file
-uploads, third-party SDKs).
+uploads, third-party SDKs) — merge `getAuthHeaders()` into your
+request.
 
-## Custom refresh function
+## Custom refresh
+
+`refreshConfig` shapes the refresh request — use `buildBody` /
+`headers` / `method` when refresh isn't a plain
+`POST { refreshToken }`:
 
 ```typescript
-new AuthManager({
-  refreshFn: async (refreshToken) => {
-    const response = await fetch('/auth/refresh', {
-      method:  'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body:    JSON.stringify({ refreshToken }),
-    });
-    if (!response.ok) throw new Error('refresh failed');
-    return await response.json();    // { accessToken, refreshToken?, expiresAt? }
+new AuthenticationClient({
+  refreshConfig: {
+    endpoint:  '/auth/refresh',
+    method:    'POST',
+    headers:   { 'X-CSRF-Token': readCsrfCookie() },
+    buildBody: (refreshToken) => JSON.stringify({ refreshToken }),
   },
 });
 ```
 
-Use when refresh isn't a simple POST — e.g., when you must
-include a CSRF token, when you sign the refresh request, or
-when the endpoint lives on a different domain.
-
 ## Security considerations
 
-- **localStorage tokens** are accessible to all scripts on the
-  origin — XSS = token compromise. Mitigations: CSP, no
-  user-controlled HTML, monitor for XSS reports.
-- **HttpOnly cookies** are immune to XSS but require CSRF
-  protection. Pick one model and stick to it.
-- **Don't log tokens.** Even at `debug` level — log `kid` /
-  `code` only.
-- **Inactivity timeout** matters for shared / public computers.
-  Default to 30 min for admin surfaces; longer for personal
-  apps.
-- **Token rotation hooks** (`auth.on('refresh', ...)`) can
-  notify the user when sessions rotate — useful for security
-  dashboards.
+- **Default storage is memory** — secure-by-default. Opt into
+  `LocalTokenStorage` only when you need persistence across
+  reloads, and understand that localStorage tokens are reachable
+  by any script on the origin (XSS = token compromise).
+- **HttpOnly cookies** are immune to XSS but need CSRF
+  protection — use `CookieClientTokenTransport` + `NoopTokenStorage`
+  and the `csrf` middleware (`createCsrfMiddleware`). Pick one
+  model and stick to it.
+- **Don't log tokens.** Even at `debug` level.
+- **Inactivity timeout** matters for shared / public computers —
+  default 30 min; keep it short for admin surfaces.
+- **Token rotation hooks** (`auth.on('token-refreshed', …)`) can
+  surface session rotation in a security dashboard.
 
 ## Best practices
 
-- **One `AuthManager` per app.** Multiple managers means
-  multiple BroadcastChannels and possible state divergence.
-- **Wire the manager once at boot**, before any RPC calls fire.
-- **Use `expiresAt` for proactive refresh.** Reactive-only
-  refresh produces one failed request per token cycle.
-- **Always `await auth.setTokens(...)`** before navigating —
-  the first post-sign-in render needs valid auth.
-- **`crossTabSync: true`** unless you have a specific reason
-  not to.
+- **One `AuthenticationClient` per app**, wired before any RPC
+  calls fire.
+- **Attach it to the transport** (`new HttpClient({ url, auth })`)
+  so tokens flow automatically; add `createAuthErrorMiddleware`
+  for refresh-on-401.
+- **Use a real `expiresAt`** (via the result's
+  `context.token.expiresAt`) so `autoRefresh` fires proactively
+  instead of one-failed-request-per-cycle.
+- **`crossTabSync: { enabled: true }`** unless you have a
+  specific reason not to.
 
 ## Anti-patterns
 
-- **Storing tokens in both cookies and localStorage.** Pick
-  one. Mixed approaches cause refresh / clear bugs.
-- **Setting `inactivityTimeout`** on a "watch-only" dashboard
-  embedded in a kiosk. The user is the screen, not someone
-  typing.
-- **Custom inactivity timer alongside `AuthManager`'s.**
-  Conflicting timers; one wins, one doesn't.
-- **Skipping `await` on `auth.refresh()`.** The refresh fires
-  but the next call still uses the old token.
+- **Storing tokens in both cookies and localStorage.** Pick one
+  transport model; mixed approaches cause refresh / clear bugs.
+- **Reaching for `AuthManager` / `setTokens`.** Those don't
+  exist — it's `AuthenticationClient` + `setAuth` / `clearAuth`.
 
 ## See also
 
-- [Middleware / AuthMiddleware](./middleware.md#authmiddleware) —
-  how the manager wires into RPC calls
-- [netron-react / Auth](./react.md#authentication) — React glue
-- [Omnitron / Auth & RBAC](../../omnitron/auth-rbac.md) — full
-  cross-stack auth model
-- [Titan / titan-auth](../../titan/modules/auth.mdx) — server side
+- [netron-react auth](./react.md#authentication) — the React provider + guards
+- [Middleware](./middleware.md) — `createAuthMiddleware`, `createAuthErrorMiddleware`, `createCsrfMiddleware`
+- [Cookie-mode auth](../../auth/index.md) — the closed-platform cookie model

@@ -7,8 +7,14 @@ description: Three-stage middleware pipeline, built-ins, custom middleware.
 # Middleware
 
 The middleware pipeline runs around every RPC invocation —
-auth, retry, cache, logging, tracing, circuit breaking, custom
-hooks. Three stages, prioritised within each.
+auth, logging, timing, error transformation, CSRF, custom hooks.
+Three stages, prioritised within each.
+
+Middleware in `@omnitron-dev/netron-browser` are **factory
+functions that return a `MiddlewareFunction`** — there are no
+middleware classes. You register them on an `HttpClient` or
+`WebSocketClient` (not on `NetronClient` — see
+[Registering middleware](#registering-middleware)).
 
 ## Three-stage pipeline
 
@@ -20,365 +26,521 @@ flowchart LR
   Send -- throws --> Err[error stage]
   Post --> Out[return value]
   Err --> Out
-  Err -. recovered .-> Post
 ```
 
-| Stage | Runs | Typical uses |
-| ----- | ---- | ------------ |
-| **pre-request** | Before transport call | Attach auth header, check cache, trace context start |
-| **post-response** | After successful transport call | Cache the response, emit metrics, end trace |
-| **error** | After transport throws | Retry, circuit-break, refresh token + retry, transform errors |
+| Stage | Constant | Runs | Typical uses |
+| ----- | -------- | ---- | ------------ |
+| `pre-request` | `MiddlewareStage.PRE_REQUEST` | Before transport call | Attach auth header, attach CSRF token, start timing |
+| `post-response` | `MiddlewareStage.POST_RESPONSE` | After successful transport call | Log/measure the response, read response headers |
+| `error` | `MiddlewareStage.ERROR` | After transport throws | Refresh-token-and-retry (auth), transform errors |
 
-Within a stage, lower `priority` runs first. The error stage can
-re-enter the pipeline (e.g., RetryMiddleware calling `next()`
-again) — bounded by max attempts.
+Within a stage, lower `priority` runs first (default `100`). The
+error stage runs your error middleware; on the HTTP transport, a
+middleware that signals an auth retry triggers exactly **one**
+re-send of the request (see
+[`createAuthErrorMiddleware`](#createautherrormiddleware)).
+
+> Retry, caching, and circuit-breaking are **not** middleware in
+> this package — see [Not middleware](#not-middleware).
 
 ## Middleware shape
 
-```typescript
-interface NetronMiddleware {
-  name?:    string;             // for devtools display
-  stage:    'pre' | 'post' | 'error' | 'all';
-  priority: number;             // lower runs first
-  handler:  (ctx: MiddlewareContext, next: () => Promise<unknown>) => Promise<unknown>;
-}
+A middleware is a plain function: `(ctx, next) => …`. Call
+`await next()` to run the rest of the chain.
 
-interface MiddlewareContext {
-  service:   string;
-  method:    string;
-  args:      unknown[];
-  request:   { headers: Record<string, string>; hints?: RequestHints };
-  response?: unknown;           // populated in post / error stages
-  error?:    unknown;           // populated in error stage
-  attempt:   number;            // 1-based; retry middleware increments
-  metadata:  Map<string, unknown>;   // arbitrary state passed between middleware
+```typescript
+import type {
+  MiddlewareFunction,
+  ClientMiddlewareContext,
+} from '@omnitron-dev/netron-browser';
+
+// type MiddlewareFunction =
+//   (ctx: ClientMiddlewareContext, next: () => Promise<void>)
+//     => Promise<void> | void;
+
+const myMiddleware: MiddlewareFunction = async (ctx, next) => {
+  // ...before
+  await next();
+  // ...after
+};
+```
+
+The context (`ClientMiddlewareContext`):
+
+```typescript
+interface ClientMiddlewareContext {
+  service: string;
+  method: string;
+  args: any[];
+
+  request?: {
+    headers?: Record<string, string>;
+    timeout?: number;
+    metadata?: Record<string, any>;
+    credentials?: RequestCredentials; // cookie/hybrid mode → 'include'
+  };
+
+  response?: {
+    data?: any;
+    headers?: Record<string, string>;
+    metadata?: Record<string, any>;
+  };
+
+  error?: Error;                       // populated in the error stage
+
+  timing: {
+    start: number;
+    end?: number;
+    middlewareTimes: Map<string, number>;
+  };
+
+  metadata: Map<string, any>;          // shared state across middleware
+  skipRemaining?: boolean;             // set to short-circuit the chain
+  transport: 'http' | 'websocket';
+}
+```
+
+The per-middleware config (`MiddlewareConfig`, all optional except
+`name`):
+
+```typescript
+interface MiddlewareConfig {
+  name: string;                                       // for metrics/debug
+  priority?: number;                                  // default 100; lower runs first
+  condition?: (ctx: ClientMiddlewareContext) => boolean;
+  onError?: (error: Error, ctx: ClientMiddlewareContext) => void;
+  services?: string[] | RegExp;                       // restrict to services
+  methods?: string[] | RegExp;                        // restrict to methods
 }
 ```
 
 ## Registering middleware
 
+`client.use(middleware, config?, stage?)` registers a middleware
+and returns `this` (chainable). Available on `HttpClient` and
+`WebSocketClient`. `stage` defaults to
+`MiddlewareStage.PRE_REQUEST`.
+
 ```typescript
-client.use(AuthMiddleware({ getToken: () => localStorage.getItem('token') }));
-client.use(RetryMiddleware({ attempts: 3 }));
-client.use(CacheMiddleware({ ttl: 60_000 }));
+import { HttpClient } from '@omnitron-dev/netron-browser/client';
+import {
+  createAuthMiddleware,
+  createLoggingMiddleware,
+  StorageTokenProvider,
+  MiddlewareStage,
+} from '@omnitron-dev/netron-browser';
+
+const client = new HttpClient({ url: 'https://api.example.com' });
+
+client
+  .use(createAuthMiddleware({
+    tokenProvider: new StorageTokenProvider(localStorage, 'token'),
+  }))
+  .use(createLoggingMiddleware({ logRequestPayload: true }));
 ```
 
-Or pass via options:
+Or build a pipeline up front and pass it in. The `middleware`
+option is a **single** `IMiddlewareManager` (a `MiddlewarePipeline`
+instance) — **not an array**:
 
 ```typescript
-const client = createClient({
+import {
+  MiddlewarePipeline,
+  createLoggingMiddleware,
+  createTimingMiddleware,
+} from '@omnitron-dev/netron-browser';
+
+const pipeline = new MiddlewarePipeline();
+pipeline.use(createLoggingMiddleware());
+pipeline.use(createTimingMiddleware());
+
+const client = new HttpClient({
   url: 'https://api.example.com',
-  middleware: [
-    AuthMiddleware({ ... }),
-    RetryMiddleware({ ... }),
-    CacheMiddleware({ ... }),
-  ],
+  middleware: pipeline,
 });
 ```
 
+:::warning `createClient` / `NetronClient` has no middleware option
+The high-level `createClient()` / `NetronClient` API exposes **no**
+middleware option. To register middleware, construct an
+`HttpClient` or `WebSocketClient` directly and use `.use(...)` (or
+the `middleware` pipeline option above).
+:::
+
 ## Built-in middleware
 
-### `AuthMiddleware`
+Most factories are importable from the package root
+(`@omnitron-dev/netron-browser`). The two auth **error** helpers
+live only on the `/middleware` subpath — they are noted inline.
+
+### `createAuthMiddleware`
+
+Attaches the auth token to outgoing requests in the **pre-request**
+stage. `tokenProvider` is required; everything else is optional.
+A `transport` strategy (bearer / cookie / hybrid) can be supplied
+for T#176 cookie-mode; if omitted, a bearer transport is
+synthesised from the legacy `headerName` / `tokenPrefix` options.
 
 ```typescript
-import { AuthMiddleware } from '@omnitron-dev/netron-browser/middleware';
+import {
+  createAuthMiddleware,
+  StorageTokenProvider,
+  SimpleTokenProvider,
+} from '@omnitron-dev/netron-browser';
 
-client.use(AuthMiddleware({
-  getToken:     () => authManager.getAccessToken(),
-  headerName:   'Authorization',
-  scheme:       'Bearer',
-  onUnauthorized: async () => {
-    await authManager.refresh();
-  },
+client.use(createAuthMiddleware({
+  tokenProvider: new StorageTokenProvider(localStorage, 'access_token'),
+  // headerName:  'Authorization',  // default
+  // tokenPrefix: 'Bearer ',        // default
+  skipServices: ['public'],
+  skipMethods:  ['auth@1.0.0.signin'],
 }));
 ```
 
 | Option | Default | Notes |
 | ------ | ------- | ----- |
-| `getToken` | — | Sync or async function |
-| `headerName` | `'Authorization'` | |
-| `scheme` | `'Bearer'` | Set to `''` for raw token |
-| `onUnauthorized` | — | Called on 401; if it returns, the call is retried with refreshed token |
-| `skipFor` | `[]` | Service patterns to skip (`['public.*']`) |
+| `tokenProvider` | — | **Required.** `{ getToken(): string \| null \| Promise<string \| null>; getTokenType?(): string }` |
+| `transport` | bearer (synthesised) | `IClientTokenTransport` strategy; cookie/hybrid set `credentials: 'include'` |
+| `headerName` | `'Authorization'` | Legacy bearer-only; ignored when `transport` is given |
+| `tokenPrefix` | `'Bearer '` | Legacy bearer-only; ignored when `transport` is given |
+| `skipServices` | `[]` | Service names to skip |
+| `skipMethods` | `[]` | `service.method` pairs to skip |
 
-When integrated with `AuthManager` (see [Auth](./auth.md)), the
-middleware reads from there directly — no manual `getToken`
-needed.
+Token-provider helpers:
 
-### `RetryMiddleware`
+- `SimpleTokenProvider(token | () => string | null)` — wrap a
+  static string or getter.
+- `StorageTokenProvider(storage, key)` — read from
+  `localStorage` / `sessionStorage`.
+
+### `createAuthErrorMiddleware`
+
+> Import from the **`/middleware` subpath** —
+> `@omnitron-dev/netron-browser/middleware`. These two helpers are
+> not re-exported from the package root.
+
+An **error**-stage middleware that handles auth failures: on 401
+it refreshes the token via the `AuthenticationClient` and signals
+a retry (the HTTP transport re-sends once); 403 and 429 surface
+through callbacks. Register it on the `ERROR` stage.
 
 ```typescript
-client.use(RetryMiddleware({
-  attempts:    3,
-  on:          ['network', '5xx', 'timeout', 'ECONNRESET'],
-  backoff: {
-    type:   'exponential',
-    base:   500,
-    max:    8_000,
-    jitter: true,
-  },
-  shouldRetry: (error, attempt, ctx) => {
-    if (ctx.method.startsWith('delete')) return false;   // skip mutating calls
-    return true;
-  },
+import { AuthenticationClient } from '@omnitron-dev/netron-browser/auth';
+import {
+  createAuthErrorMiddleware,
+  MiddlewareStage,
+} from '@omnitron-dev/netron-browser/middleware';
+
+const authClient = new AuthenticationClient({ autoRefresh: true });
+
+client.use(
+  createAuthErrorMiddleware({
+    authClient,
+    onSessionExpired: () => { window.location.href = '/login'; },
+    onAccessDenied:   (details) => showNotification(details),
+    onRateLimited:    (retryAfter) => warn(`Retry after ${retryAfter}s`),
+    maxRetries: 1,
+  }),
+  { name: 'auth-error-handler', priority: 10 },
+  MiddlewareStage.ERROR,
+);
+```
+
+| Option | Default | Notes |
+| ------ | ------- | ----- |
+| `authClient` | — | **Required.** `AuthenticationClient` used for refresh |
+| `onSessionExpired` | — | Called on 401 when refresh fails |
+| `onAccessDenied` | — | Called on 403 with `{ service, method, userId?, requiredPermissions?, details? }` |
+| `onRateLimited` | — | Called on 429 with `retryAfter` seconds |
+| `maxRetries` | `1` | Max refresh-and-retry attempts |
+| `retryStatusCodes` | `[401]` | Codes that trigger refresh+retry |
+| `emitEvents` | `true` | Emit events on the auth client |
+
+There is also a shorthand:
+
+```typescript
+import { createSimpleAuthErrorMiddleware } from '@omnitron-dev/netron-browser/middleware';
+
+client.use(
+  createSimpleAuthErrorMiddleware(authClient, {
+    onSessionExpired: () => { window.location.href = '/login'; },
+  }),
+  undefined,
+  MiddlewareStage.ERROR,
+);
+```
+
+### `createLoggingMiddleware`
+
+Logs requests, responses, and errors. Wraps all three stages
+around `next()`.
+
+```typescript
+import {
+  createLoggingMiddleware,
+  ConsoleLogger,
+} from '@omnitron-dev/netron-browser';
+
+client.use(createLoggingMiddleware({
+  logger: new ConsoleLogger('[netron]'),
+  logRequestPayload:  true,
+  logResponsePayload: false,
 }));
 ```
 
-`on` accepts:
-- `'network'` — any `NetworkError`
-- `'timeout'` — `TimeoutError`
-- `'5xx'` — any error with `code >= 500`
-- specific `ErrorCode` values
-- specific error class names
+| Option | Default | Notes |
+| ------ | ------- | ----- |
+| `logger` | `new ConsoleLogger()` | Any `Logger` (`debug`/`info`/`warn`/`error`) |
+| `requestLogLevel` | `'info'` | `LogLevel` |
+| `responseLogLevel` | `'info'` | `LogLevel` |
+| `errorLogLevel` | `'error'` | `LogLevel` |
+| `logRequestPayload` | `false` | Include `ctx.args` — avoid in prod |
+| `logResponsePayload` | `false` | Include `ctx.response.data` |
+| `skipServices` / `skipMethods` | `[]` | Skip lists |
 
-The breaker check (see below) takes precedence — if the breaker
-is open, no retry is attempted.
+Also exported: the `Logger` interface, `ConsoleLogger` class, and
+`LogLevel` type.
 
-### `CircuitBreakerMiddleware`
+### `createTimingMiddleware`
+
+Measures call duration via the `performance` API, records to a
+collector, and can flag slow calls.
 
 ```typescript
-client.use(CircuitBreakerMiddleware({
-  threshold:    5,             // open after 5 consecutive failures
-  resetTimeout: 30_000,        // try half-open after 30s
-  on:           ['5xx', 'timeout', 'network'],
-  perService:   true,          // separate breakers per service name
+import {
+  createTimingMiddleware,
+  InMemoryMetricsCollector,
+} from '@omnitron-dev/netron-browser';
+
+const collector = new InMemoryMetricsCollector(1000);
+
+client.use(createTimingMiddleware({
+  collector,
+  slowThreshold: 1000,
+  onSlowRequest: (m) => console.warn('slow', m.service, m.method, m.duration),
+  onMeasure:     (m) => analytics.record(m),
+}));
+
+collector.getAverageDuration('users', 'findById');
+collector.getSlowestCalls(10);
+```
+
+| Option | Default | Notes |
+| ------ | ------- | ----- |
+| `collector` | — | `MetricsCollector`; `InMemoryMetricsCollector` provided |
+| `onMeasure` | — | `(metrics: PerformanceMetrics) => void` per call |
+| `slowThreshold` | — | ms threshold for the slow-call callback |
+| `onSlowRequest` | console.warn | Called when `duration > slowThreshold` |
+| `skipServices` / `skipMethods` | `[]` | Skip lists |
+
+Also exported: `MetricsCollector` / `PerformanceMetrics` types,
+`InMemoryMetricsCollector`, and `createPerformanceObserver(cb)`
+for observing the emitted `performance.measure` entries.
+
+### `createErrorTransformMiddleware`
+
+An **error**-stage middleware that normalises thrown errors into a
+consistent `NormalizedError` shape and (optionally) maps codes to
+user-facing messages.
+
+```typescript
+import {
+  createErrorTransformMiddleware,
+  CommonErrorMessages,
+} from '@omnitron-dev/netron-browser';
+
+client.use(createErrorTransformMiddleware({
+  errorMessages: CommonErrorMessages,
+  includeStack:  false,
+  onError: (normalized) => Sentry.captureException(normalized),
 }));
 ```
 
-States:
+| Option | Default | Notes |
+| ------ | ------- | ----- |
+| `transformer` | `defaultErrorTransformer` | `(error, { service, method, transport }) => NormalizedError \| Error` |
+| `onError` | — | Called with the normalised error |
+| `includeStack` | `true` | Include `error.stack` |
+| `includeContext` | `true` | Include `service` / `method` |
+| `errorMessages` | `{}` | Map of error code → message |
+| `skipServices` / `skipMethods` | `[]` | Skip lists |
 
-```mermaid
-stateDiagram-v2
-  [*] --> closed
-  closed --> open: threshold consecutive failures
-  open --> halfOpen: after resetTimeout
-  halfOpen --> closed: probe succeeds
-  halfOpen --> open: probe fails
-```
+Also exported: `defaultErrorTransformer`, `CommonErrorMessages`,
+and the guards `isRetryableError`, `isClientError`,
+`isServerError`.
 
-When **open**, calls fail-fast with `CircuitOpenError` — never
-hitting the network. After `resetTimeout` the breaker enters
-**half-open**: one probe call is allowed; success closes,
-failure re-opens.
+### `createCsrfMiddleware`
 
-### `CacheMiddleware`
+Pre-request middleware for cookie-mode auth (T#176). Reads the
+CSRF cookie and echoes it in the `X-CSRF-Token` header
+(double-submit). No-ops outside the browser or before the cookie
+is set.
 
 ```typescript
-client.use(CacheMiddleware({
-  ttl:                 60_000,
-  staleWhileRevalidate: 10_000,
-  maxSize:             500,
-  skipFor:             ['*.create', '*.update', '*.delete'],
-  keyBy: (ctx) => `${ctx.service}.${ctx.method}.${JSON.stringify(ctx.args)}`,
+import { createCsrfMiddleware } from '@omnitron-dev/netron-browser';
+
+client.use(createCsrfMiddleware({
+  // cookieName: 'omni_csrf',   // default
+  // headerName: 'X-CSRF-Token', // default
+  skipMethods: ['auth@1.0.0.signin', 'auth@1.0.0.refresh'],
 }));
 ```
 
-Cache hits return immediately. Stale-while-revalidate serves
-the stale value and refreshes in the background up to
-`staleWhileRevalidate` ms past the TTL.
+| Option | Default | Notes |
+| ------ | ------- | ----- |
+| `cookieName` | `'omni_csrf'` | CSRF cookie to read |
+| `headerName` | `'X-CSRF-Token'` | Header to echo it in |
+| `skipMethods` | `[]` | `service.method` pairs the server has exempted |
 
-See [Caching](./caching.md) for the full LRU + tag-invalidation
-API.
-
-### `LoggingMiddleware`
-
-```typescript
-client.use(LoggingMiddleware({
-  logger: (entry) => console.debug('[netron]', entry),
-  stages: ['pre', 'post', 'error'],
-  redact: ['args.0.password', 'args.0.secret'],
-}));
-```
-
-Each log entry:
-
-```typescript
-{
-  service:    string;
-  method:     string;
-  attempt:    number;
-  stage:      'pre' | 'post' | 'error';
-  durationMs: number;
-  args?:      unknown[];        // redacted
-  result?:    unknown;
-  error?:     unknown;
-}
-```
-
-### `TracingMiddleware`
-
-```typescript
-client.use(TracingMiddleware({
-  tracer:        otelTracer,
-  serviceName:   'web',
-  propagator:    'w3c',         // 'w3c' | 'jaeger'
-}));
-```
-
-Starts a span per RPC call; injects W3C `traceparent` header so
-the server's spans connect to the client's.
-
-### `MetricsMiddleware`
-
-```typescript
-client.use(MetricsMiddleware({
-  onMetric: (metric) => {
-    if (metric.name === 'rpc.call.duration') {
-      analytics.recordTiming(metric.value, metric.labels);
-    }
-  },
-}));
-```
-
-Emits standard metrics:
-- `rpc.call.total` (counter, labels: service, method, status)
-- `rpc.call.duration` (histogram, labels: service, method)
-- `rpc.call.error.total` (counter, labels: service, method, code)
+Register this alongside `createAuthMiddleware` when using the
+cookie token transport; bearer mode does not need it.
 
 ## Custom middleware
 
-```typescript
-import type { NetronMiddleware } from '@omnitron-dev/netron-browser';
+Any `(ctx, next)` function works. Read/write `ctx.request.headers`
+before `next()`; inspect `ctx.response` / `ctx.error` after.
 
-const TimingMiddleware: NetronMiddleware = {
-  name:     'timing',
-  stage:    'all',
-  priority: 100,
-  handler:  async (ctx, next) => {
-    const start = performance.now();
-    try {
-      const result = await next();
-      console.debug(`[ok] ${ctx.service}.${ctx.method}`, performance.now() - start, 'ms');
-      return result;
-    } catch (e) {
-      console.debug(`[err] ${ctx.service}.${ctx.method}`, performance.now() - start, 'ms', e);
-      throw e;
-    }
-  },
+```typescript
+import type { MiddlewareFunction } from '@omnitron-dev/netron-browser';
+
+const tenantMiddleware: MiddlewareFunction = async (ctx, next) => {
+  if (!ctx.request) ctx.request = {};
+  if (!ctx.request.headers) ctx.request.headers = {};
+  ctx.request.headers['X-Tenant-ID'] = getCurrentTenant();
+  await next();
 };
 
-client.use(TimingMiddleware);
+client.use(tenantMiddleware, { name: 'tenant', priority: 50 });
 ```
 
 ### Useful patterns
 
-**Tenant scoping**:
+**Skip transport on a cache hit** (set `skipRemaining` and
+populate `ctx.response`):
 
 ```typescript
-const TenantMiddleware: NetronMiddleware = {
-  stage:    'pre',
-  priority: 50,
-  handler:  async (ctx, next) => {
-    ctx.request.headers['X-Tenant-ID'] = getCurrentTenant();
-    return next();
-  },
+const cacheReadMiddleware: MiddlewareFunction = async (ctx, next) => {
+  const key = `${ctx.service}.${ctx.method}:${JSON.stringify(ctx.args)}`;
+  const hit = memoryCache.get(key);
+  if (hit !== undefined) {
+    ctx.response = { data: hit };
+    ctx.skipRemaining = true;     // short-circuits the chain
+    return;                        // do not call next()
+  }
+  await next();
 };
 ```
 
-**Conditional fall-back to mock**:
+**Error tagging for Sentry** (register on the `ERROR` stage):
 
 ```typescript
-const MockFallbackMiddleware: NetronMiddleware = {
-  stage:    'error',
-  priority: 1_000,         // run last
-  handler:  async (ctx, next) => {
-    if (import.meta.env.MODE === 'development' && ctx.error instanceof NetworkError) {
-      const mock = mocks[`${ctx.service}.${ctx.method}`];
-      if (mock) return mock(ctx.args);
-    }
-    return next();        // re-throw
-  },
-};
-```
+import { MiddlewareStage } from '@omnitron-dev/netron-browser';
 
-**Error tagging for Sentry**:
-
-```typescript
-const SentryMiddleware: NetronMiddleware = {
-  stage:    'error',
-  priority: 200,
-  handler:  async (ctx, next) => {
+const sentryMiddleware: MiddlewareFunction = async (ctx, next) => {
+  try {
+    await next();
+  } catch (error) {
     Sentry.withScope((scope) => {
       scope.setTag('rpc.service', ctx.service);
       scope.setTag('rpc.method',  ctx.method);
-      scope.setContext('rpc',     { args: ctx.args, attempt: ctx.attempt });
-      Sentry.captureException(ctx.error);
+      scope.setContext('rpc', { args: ctx.args });
+      Sentry.captureException(error);
     });
-    return next();        // re-throw
-  },
+    throw error;                   // re-throw
+  }
 };
+
+client.use(sentryMiddleware, { name: 'sentry', priority: 200 }, MiddlewareStage.ERROR);
 ```
 
-## Per-call middleware via fluent API
-
-Override middleware behaviour for one call without registering
-globally:
+**Restrict to specific services/methods** via config:
 
 ```typescript
-const user = await client
-  .cache({ ttl: 5 * 60_000, tags: ['users'] })
-  .retry({ attempts: 5, on: ['network', 'timeout'] })
-  .timeout(3_000)
-  .skipMiddleware(['logging'])
-  .service<UserService>('users')
-  .findById(id);
+client.use(myMiddleware, {
+  name: 'mutations-only',
+  methods: /\.(create|update|delete)$/,
+});
 ```
-
-Per-call config wins over global config.
 
 ## Ordering rules
 
-Within a stage, lower priority runs first. Typical ordering:
+Within a stage, lower `priority` runs first (default `100`).
+Service- and method-scoped middleware are merged with global
+middleware and the whole set is re-sorted by priority. A typical
+ordering:
 
-| Priority | Middleware | Why |
-| -------- | ---------- | --- |
-| 0–10 | Tracing (pre) | Start span before everything else |
-| 10–30 | Auth | Attach header before transport |
-| 30–50 | Tenant / context | Other request-context attributes |
-| 50–80 | Cache (pre check) | Skip transport on hit |
-| 80–100 | Custom hooks | App-specific |
-| (transport runs) | | |
-| 0–10 | Cache (post write) | Capture response |
-| 10–30 | Metrics | Record latency / status |
-| 30–50 | Logging | Final log |
-| 50–80 | Tracing (post end) | End span |
+| Stage | Priority | Middleware | Why |
+| ----- | -------- | ---------- | --- |
+| pre-request | 10 | Auth | Attach token before transport |
+| pre-request | 20 | CSRF | Attach CSRF header (cookie mode) |
+| pre-request | 30 | Timing (start) | Bracket the call |
+| pre-request | 50 | Tenant / context | Other request attributes |
+| post-response | 30 | Logging | Final log |
+| post-response | 50 | Timing (record) | Record latency |
+| error | 10 | Auth error handler | Refresh + retry on 401 |
+| error | 100 | Error transform | Normalise the thrown error |
+| error | 200 | Sentry | Report, then re-throw |
 
-Error stage: retry → circuit-breaker (after) → error transform
-→ sentry → re-throw.
+## Not middleware
 
-## Devtools
+Some capabilities that *look* like middleware are configured
+elsewhere in this package — do not look for middleware factories
+for them.
 
-When `<NetronDevtools>` is mounted, the middleware chain for
-each call is visible in the panel — useful for debugging
-ordering issues.
+### Retry — an `HttpClient` option
+
+Request retry is **not** middleware. It is a built-in
+`HttpClient` option: set `retry: true` and `maxRetries`. Backoff
+is exponential (`2^n × 1000ms`) and it applies to the **HTTP
+transport only**.
+
+```typescript
+const client = new HttpClient({
+  url: 'https://api.example.com',
+  retry: true,
+  maxRetries: 3,   // default 3 when retry is enabled
+});
+```
+
+See [Browser client](./browser.md) for the full client options.
+
+### Circuit-breaking & caching — the fluent HTTP interface
+
+Circuit-breaking and response caching live in the **advanced
+fluent HTTP interface** (`HttpRemotePeer` / `FluentInterface`,
+the same surface as `@omnitron-dev/netron-http-core`), not in the
+middleware pipeline:
+
+- **Caching** — `HttpCacheManager`, `CacheOptions` (and the
+  per-call `.cache({ ... })` fluent builder).
+- **Circuit breaking** — `CircuitBreakerOptions`.
+- **Fluent retry** — `RetryOptions` with an `attempts` field
+  (e.g. `.retry({ attempts: 3 })`). Note this `attempts` field is
+  the *fluent* retry option — it is unrelated to the
+  `HttpClient` `retry`/`maxRetries` options above, and there is
+  no retry middleware.
+
+These are exported from the package root for advanced use
+(`HttpCacheManager`, `RetryManager`, `FluentInterface`,
+`CircuitBreakerOptions`, `CacheOptions`, `RetryOptions`). They are
+documented with the fluent interface, not here.
 
 ## Best practices
 
-- **Idempotent middleware.** Re-entry from retry should
-  produce the same effect.
-- **Don't mutate `ctx.args` after `next()`.** Other middleware
-  in the chain may have captured them.
-- **Bound everything.** Retry has max attempts; cache has TTL;
-  circuit breaker has reset timeout.
-- **Skip mutating calls in retry.** Use `shouldRetry` or
-  `skipFor` to keep deletes/updates safe.
-- **Devtools-friendly `name`.** Helps when the chain grows
-  past 5 middlewares.
-
-## Anti-patterns
-
-- **Logging full request body in production.** Sensitive
-  values leak; use `redact`.
-- **Retry without circuit breaker.** A flapping backend gets
-  hammered; the breaker prevents amplification.
-- **Cache mutating calls.** `update` should never read from
-  cache; use `skipFor` patterns.
-- **Async work in `pre` stage that doesn't `await`.** Fires
-  and forgets — middleware ordering breaks.
+- **Always `await next()`.** Fire-and-forget breaks ordering and
+  loses the response/error.
+- **Initialise `ctx.request.headers` before writing.** Both may be
+  `undefined` (`ctx.request ??= {}; ctx.request.headers ??= {}`).
+- **Re-throw in error middleware** unless you genuinely recover —
+  swallowing the error hides failures.
+- **Name your middleware.** `config.name` shows up in the
+  pipeline's per-middleware metrics (`getMetrics()`).
+- **Don't log payloads in production.** Keep `logRequestPayload`
+  off, or use `skipServices` / `skipMethods` for sensitive calls.
 
 ## See also
 
-- [Caching](./caching.md) — `CacheMiddleware` deep-dive
-- [Auth manager](./auth.md) — `AuthMiddleware` + auto-refresh
-- [Error handling](./errors.md) — retry classification
+- [Browser client](./browser.md) — `HttpClient` options including `retry` / `maxRetries`
+- [Auth](./auth.md) — `AuthenticationClient`, token transports, cookie mode
+- [Error handling](./errors.md) — error types and codes
 - [Transports](./transports.md) — what middleware wraps
