@@ -35,7 +35,7 @@ to do X" answers in milliseconds.
 ```mermaid
 flowchart LR
   TS[TypeScript source files]
-  Manifest[kb.config.ts<br/>per-package]
+  Manifest[kb/kb.config.ts<br/>per-package]
   Extr[Extractors<br/>symbols, specs, gotchas, patterns]
   Embed[Embeddings<br/>optional]
   Store[(SurrealKV store<br/>~/.omnitron/kb.db)]
@@ -67,28 +67,37 @@ flowchart LR
 Each entry has: id, type, name, summary, body, related (cross-
 references), source-location (file + line).
 
-## Per-package configuration — `kb.config.ts`
+## Per-package configuration — `kb/kb.config.ts`
 
-Each package contributes its own extraction rules:
+Each package contributes its own extraction rules from a
+`kb/kb.config.ts` file:
 
 ```typescript
-// packages/titan/kb.config.ts
-import { defineKbConfig } from '@omnitron-dev/kb';
+// packages/titan/kb/kb.config.ts
+import { defineKnowledge } from '@omnitron-dev/kb';
 
-export default defineKbConfig({
-  scope: 'titan',
+export default defineKnowledge({
+  module: 'titan',
+  name: 'Titan Framework',
+  tags: ['di', 'modules', 'lifecycle'],
   extract: {
-    symbols: { include: ['src/**/*.ts'], exclude: ['**/*.test.ts'] },
-    modules: { paths: ['src/modules/*'] },
-    gotchas: { file: 'kb/gotchas.md' },
-    patterns: { file: 'kb/patterns.md' },
+    symbols: true,                                   // or an array of entry points
+    decorators: ['Injectable', 'Module', 'Inject'],
+    entryPoints: ['src/index.ts'],
   },
-  dependencies: ['common', 'eventemitter', 'msgpack'],
+  specs: './specs',
+  relationships: {
+    extends: ['titan/nexus'],
+    integrates: ['titan/netron'],
+  },
 });
 ```
 
-The `kb extract` command runs every package's config and merges
-the results into the central store.
+`defineKnowledge` fills in sensible defaults (`symbols: true`, a
+standard decorator set, `entryPoints: ['src/index.ts']`,
+`specs: './specs'`). Discovery walks the workspace for every
+`kb/kb.config.ts` and the indexer merges the results into the
+central store.
 
 ## CLI
 
@@ -113,31 +122,34 @@ integration in full.
 ## Programmatic API
 
 ```typescript
-import { KnowledgeBase, SurrealKbStore } from '@omnitron-dev/kb';
+import { KnowledgeBase } from '@omnitron-dev/kb';
+import { SurrealKbStore } from '@omnitron-dev/kb/surreal';   // store lives on a subpath
 
 const store = new SurrealKbStore({ url: 'surrealkv://./.omnitron/kb.db' });
 const kb    = new KnowledgeBase({ store, root: process.cwd() });
 await kb.initialize();
 
 // Build:
-await kb.indexAll({ full: false });
+await kb.reindex({ full: false });   // { indexed, skipped }
 
-// Query:
-const results = await kb.query({
-  question:   'how do I make a service stream events to the browser',
-  maxResults: 10,
-  scope:      'titan',
-});
+// Query (question is a positional string; options are optional):
+const results = await kb.query(
+  'how do I make a service stream events to the browser',
+  { maxResults: 10, scope: 'titan' },
+);
 
 // Direct lookups:
-const api      = await kb.getApi('TitanAuthModule');
-const moduleEntry = await kb.getModule('titan-auth');
-const gotchas  = await kb.getGotchas({ module: 'titan-events' });
-const pattern  = await kb.getPattern('service-rpc-module');
-const repoMap  = await kb.getRepoMap({ scope: 'titan', detail: 'signatures' });
+const api        = await kb.getApi('TitanAuthModule');     // ISymbolDoc | null
+const moduleInfo = await kb.getModule('packages/titan-auth');
+const gotchas    = await kb.getGotchas('titan-events');    // module is a positional arg
+const pattern    = await kb.getPattern('service-rpc-module');
+const patterns   = await kb.listPatterns();
+const repoMap    = await kb.getRepoMap({ scope: 'titan', detail: 'signatures' });
+const stats      = await kb.status();
+await kb.close();
 ```
 
-The return shapes mirror the MCP tool responses one-to-one — see
+The return shapes mirror the MCP tool responses — see
 [Omnitron MCP](../omnitron/mcp.md#kb-tools).
 
 ## Store backends
@@ -148,20 +160,34 @@ The return shapes mirror the MCP tool responses one-to-one — see
 | **SurrealDB** (remote) | Shared team index | Requires a running SurrealDB instance |
 | **In-memory** | CI / tests | Volatile |
 
-The store interface is pluggable:
+The store interface (`IKbStore`) is pluggable — type-specific
+upsert methods plus a hybrid `query`:
 
 ```typescript
-interface KbStore {
-  upsert(entry: KbEntry): Promise<void>;
-  get(id: string):       Promise<KbEntry | null>;
-  query(filter: KbFilter): Promise<KbEntry[]>;
-  search(text: string, opts?: SearchOpts): Promise<KbEntry[]>;
-  delete(id: string):    Promise<void>;
-  clear():               Promise<void>;
+interface IKbStore {
+  initialize(): Promise<void>;
+  upsertModule(m: IModuleInfo): Promise<void>;
+  upsertSymbols(s: ISymbolDoc[]): Promise<void>;
+  upsertSpecs(s: ISpecDoc[]): Promise<void>;
+  upsertChunks(c: ICodeChunk[]): Promise<void>;
+  upsertGotchas(g: IGotchaDoc[]): Promise<void>;
+  upsertPatterns(p: IPatternDoc[]): Promise<void>;
+  upsertDependencies(d: IDependency[]): Promise<void>;
+  query(question: string, embedding: number[] | null, options: IQueryOptions): Promise<IQueryResult>;
+  getSymbol(name: string): Promise<ISymbolDoc | null>;
+  getModule(path: string): Promise<IModuleInfo | null>;
+  getGotchas(modulePath?: string): Promise<IGotchaDoc[]>;
+  getPattern(name: string): Promise<IPatternDoc | null>;
+  searchSymbols(query: string, kind?: SymbolKind | SymbolKind[]): Promise<ISymbolDoc[]>;
+  getStats(): Promise<IKbStats>;
+  close(): Promise<void>;
+  // …plus getModuleSpecs / getDependencies / getDependents / manifest helpers
 }
 ```
 
-Implement to point kb at any backing store you prefer.
+`SurrealKbStore` (from `@omnitron-dev/kb/surreal`) is the only
+shipped implementation; implement `IKbStore` to point kb at any
+backing store you prefer.
 
 ## Hybrid search
 
@@ -178,36 +204,42 @@ embedding model wired up.
 
 ### Embedding model setup
 
-```typescript
-import { KnowledgeBase, OnnxEmbeddings } from '@omnitron-dev/kb';
+`KnowledgeBase` defaults to `NullEmbeddingProvider` (no semantic
+vectors). To enable semantic search, pass a real provider — the
+embedding providers live on the `@omnitron-dev/kb/embeddings`
+subpath:
 
-const embeddings = new OnnxEmbeddings({
-  model:    'all-MiniLM-L6-v2',
-  cacheDir: './.omnitron/models',
+```typescript
+import { KnowledgeBase } from '@omnitron-dev/kb';
+import { OllamaEmbeddingProvider } from '@omnitron-dev/kb/embeddings';
+
+const embeddings = new OllamaEmbeddingProvider({
+  model: 'nomic-embed-text',          // local, free; 768-dim by default
+  url:   'http://localhost:11434',
 });
 
 const kb = new KnowledgeBase({ store, root, embeddings });
 ```
 
-Without embeddings, semantic search is a no-op — full-text
-still works.
+Shipped providers: `NullEmbeddingProvider` (default, also exported
+from the package root), `OllamaEmbeddingProvider`,
+`OpenAIEmbeddingProvider`, and `VoyageEmbeddingProvider`. Without a
+real provider, semantic search is a no-op — full-text still works.
 
 ## Discovery
 
 ```typescript
-import { KbDiscovery } from '@omnitron-dev/kb';
+import { KnowledgeDiscovery } from '@omnitron-dev/kb';
 
-const discovery = new KbDiscovery({
-  root:       process.cwd(),
-  configFile: 'kb.config.ts',
-});
-
-const packages = await discovery.findConfigs();
-// → [{ path: 'packages/titan/kb.config.ts', scope: 'titan', ... }, ...]
+const discovery = new KnowledgeDiscovery('/path/to/builtin/specs');
+const sources   = await discovery.discover(process.cwd());
+// → IKbSource[] — every package with a kb/kb.config.ts, plus built-in specs
 ```
 
-The CLI uses this to find every `kb.config.ts` in the monorepo
-without you listing them manually.
+`KnowledgeBase` runs this internally during `reindex()`. The
+constructor takes the path to the built-in cross-cutting specs; the
+`discover(workspaceRoot)` method finds every `kb/kb.config.ts` in
+the workspace without you listing them manually.
 
 ## When you'd use this directly
 

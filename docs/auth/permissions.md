@@ -46,14 +46,15 @@ Granting a wildcard authorises every key matching the prefix.
 | Granted              | Authorises                                                          |
 |----------------------|---------------------------------------------------------------------|
 | `*`                  | Every permission in every scope (reserved for the owner role)       |
-| `admin.*`            | Every `admin.<resource>.<action>` key                                |
+| `admin.*`            | Every key starting with `admin.` (`admin.users.list`, `admin.users.ban`, …) |
 | `admin.users.*`      | `admin.users.list`, `admin.users.ban`, …                             |
-| `admin.users`        | (hierarchical) — same effect as `admin.users.*`                      |
 
-The trailing `.*` is the explicit form. A granted entry without
-a trailing star also authorises every key one level below it —
-this **hierarchical prefix grant** lets short policy lists
-expand naturally as the registry grows.
+The trailing `.*` is the explicit (and only) wildcard form: the
+granted entry must end in `.*` for prefix expansion to apply. A
+bare prefix without the star (`admin.users`) authorises **only**
+the exact key `admin.users` — it does not implicitly grant the
+keys below it. Spell out the `.*` when you mean "everything under
+here".
 
 ## Composition
 
@@ -64,10 +65,20 @@ requires *both* by default:
 @Auth({ permissions: ['admin.orders.view', 'admin.users.view'] })
 ```
 
-For *either-of* semantics, use `BuiltInPolicies.requireAnyPermission`:
+For *either-of* semantics, register `BuiltInPolicies.requireAnyPermission`
+on the `PolicyEngine` and reference it by its generated name. The
+`policies` field of `@Auth` takes policy **name strings** (or an
+`{ all } / { any }` / `and|or|not` expression of them), never
+inline policy objects:
 
 ```ts
-@Auth({ policies: [BuiltInPolicies.requireAnyPermission(['admin.orders.view', 'admin.users.view'])] })
+// bootstrap
+policyEngine.registerPolicy(
+  BuiltInPolicies.requireAnyPermission(['admin.orders.view', 'admin.users.view']),
+);
+
+// service — the factory names itself `permission:any:admin.orders.view,admin.users.view`
+@Auth({ policies: ['permission:any:admin.orders.view,admin.users.view'] })
 ```
 
 See [ABAC conditions](./abac-conditions.md) for richer
@@ -75,23 +86,27 @@ composition (and / or / not, time-of-day, MFA gates).
 
 ## Matcher
 
-`permissionGrants(granted, required)` returns true when:
+`permissionMatches(granted, required)` returns true when:
 
 1. `granted === '*'` (full wildcard)
 2. `granted === required` (exact match)
 3. `granted` ends in `.*` and `required` starts with the prefix
-4. `required` starts with `granted + '.'` (hierarchical prefix grant)
+   (e.g. `admin.users.*` covers `admin.users.ban`)
 
 ```ts
-permissionGrants('admin.*', 'admin.users.ban')          // true
-permissionGrants('admin.users.*', 'admin.users.ban')    // true
-permissionGrants('admin.users', 'admin.users.ban')      // true (hierarchical)
-permissionGrants('admin.users.list', 'admin.users.ban') // false
-permissionGrants('admin.*', 'site.posts.create')        // false
+permissionMatches('admin.*', 'admin.users.ban')          // true
+permissionMatches('admin.users.*', 'admin.users.ban')    // true
+permissionMatches('admin.users', 'admin.users.ban')      // false (no trailing .*)
+permissionMatches('admin.users.list', 'admin.users.ban') // false
+permissionMatches('admin.*', 'site.posts.create')        // false
 ```
 
-The matcher lives in `shared/permission-engine.ts` and is used
-unchanged on both the platform and the organisation scopes.
+The matcher lives in
+[`@omnitron-dev/titan/netron/auth`](../titan/netron/authentication.md)
+(`netron/auth/utils.ts`). `hasPermission(grantedPermissions, required)`
+applies it across a granted set (true when any granted entry
+covers `required`). `@Auth({ permissions })` requires **all** of
+the listed permissions, each resolved through this matcher.
 
 ## Scopes
 

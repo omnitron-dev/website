@@ -16,7 +16,7 @@ non-Omnitron projects.
 | [`@omnitron-dev/common`](./common.md) | Type predicates, promise helpers, object tools, data structures | ~12 kB gz |
 | [`@omnitron-dev/cuid`](./cuid.md) | Collision-resistant URL-safe IDs | <1 kB gz |
 | [`@omnitron-dev/eventemitter`](./eventemitter.md) | Async event emitter with parallel/serial/reduce patterns | ~3 kB gz |
-| [`@omnitron-dev/msgpack`](./msgpack.md) | Extensible MessagePack with custom types + streaming | ~8 kB gz |
+| [`@omnitron-dev/msgpack`](./msgpack.md) | Extensible MessagePack with native JS types + a custom type registry | ~8 kB gz |
 | [`@omnitron-dev/kb`](./kb.md) | Knowledge-base framework for code intelligence | server-side |
 
 ## Where they're used

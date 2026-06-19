@@ -28,6 +28,7 @@ interface PolicyDefinition {
 interface PolicyDecision {
   allowed: boolean;
   reason?: string;
+  metadata?: Record<string, unknown>;
 }
 ```
 
@@ -45,7 +46,7 @@ interface PolicyDecision {
 | `requireResourceOwner()`                          | `auth.userId === resource.owner`                                |
 | `requireTimeWindow(start, end, tz?)`              | Time-of-day window                                              |
 | `requireIP([…])` / `blockIP([…])`                 | IP allow / block lists                                          |
-| `requireAttribute(path, value)`                   | Arbitrary `auth.metadata[path] === value` match                 |
+| `requireAttribute(path, value)`                   | Arbitrary dotted-path match against the `ExecutionContext` (e.g. `auth.metadata.tier`) `=== value` |
 | `requireScope(scope)` / `requireAnyScope([…])`    | OAuth2/OIDC scope                                                |
 | `rateLimit(maxRequests, windowMs)`                | Per-caller rate limit (policy returns deny when over budget)    |
 | `requireTenantIsolation()`                        | Multi-tenant invariant: actor's tenant === resource's tenant    |
@@ -121,21 +122,33 @@ the caller — it's an information leak.
 
 ## Per-call configuration
 
-A few of the built-ins take parameters specific to the gate;
-prefer the factory form in `@Auth`:
+A few of the built-ins take parameters specific to the gate.
+`@Auth({ policies })` resolves **policy name strings** against the
+`PolicyEngine` registry — it does not accept inline policy
+objects — so register the parametrised factory once at bootstrap,
+then reference it by the name the factory generates:
 
 ```ts
+// bootstrap — register the parametrised instances
+policyEngine.registerPolicies([
+  BuiltInPolicies.rateLimit(100, 60_000),                                   // name: ratelimit:100/60000
+  BuiltInPolicies.requireTimeWindow('09:00', '18:00', 'Europe/Berlin'),     // name: time:09:00-18:00:Europe/Berlin
+  BuiltInPolicies.requireFeatureFlag('beta-checkout-v2', true),             // name: feature:beta-checkout-v2:true
+]);
+
+// service — reference by generated name
 @Auth({
   policies: [
-    BuiltInPolicies.rateLimit(100, 60_000),
-    BuiltInPolicies.requireTimeWindow('09:00', '18:00', 'Europe/Berlin'),
-    BuiltInPolicies.requireFeatureFlag('beta-checkout-v2', true),
+    'ratelimit:100/60000',
+    'time:09:00-18:00:Europe/Berlin',
+    'feature:beta-checkout-v2:true',
   ],
 })
 ```
 
-These don't need to be pre-registered on the engine — Titan
-materialises and caches them per-method at decoration time.
+Each factory derives its `name` deterministically from its
+arguments (see the `BuiltInPolicies` source), so the registered
+instance and the `@Auth` reference stay in sync.
 
 ## See also
 

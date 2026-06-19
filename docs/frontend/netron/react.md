@@ -777,8 +777,9 @@ render.
 (An earlier unexported `state/` atom module was removed — there is
 no `@omnitron-dev/netron-react/state` subpath.) For local UI state
 use React's own primitives; for app-level stores prefer Prism's
-`createStore` from `@omnitron-dev/prism/state` (version-aware
-persistence). Server state belongs in the query cache, not a
+`createPrismStore` / `createPersistedStore` from
+`@omnitron-dev/prism/state` (version-aware persistence). Server state
+belongs in the query cache, not a
 separate store.
 
 ## Devtools

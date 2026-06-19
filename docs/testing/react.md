@@ -349,7 +349,7 @@ test('signs in', async ({ page }) => {
 });
 ```
 
-The webapp's E2E suite lives at `apps/omnitron/webapp/e2e/`.
+Playwright E2E suites live at `packages/prism/tests/e2e/` and `packages/netron-browser/tests/e2e/`.
 
 ## Best practices
 

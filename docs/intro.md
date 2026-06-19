@@ -63,7 +63,7 @@ cannot remove.
 
 | Want minimal | Want batteries |
 | ------------ | -------------- |
-| One `@Module({ providers: [...] })` over plain classes | All 16+ modules: auth, cache, db, discovery, events, health, lock, metrics, notifications, pm, ratelimit, redis, scheduler, telemetry-relay + config + logger |
+| One `@Module({ providers: [...] })` over plain classes | All 14 official modules: auth, cache, database, discovery, events, health, lock, metrics, notifications, pm, ratelimit, redis, scheduler, telemetry-relay (+ config + logger built into titan core) |
 | HTTP-only Netron client (~12 kB gz) | Full client with cache + retry + circuit-breaker + auth manager (~25 kB gz) |
 | Per-component Prism import | Root `import * from '@omnitron-dev/prism'` |
 | One Titan app, `node dist/index.js` | Omnitron daemon supervising N apps × M projects × K stacks across a fleet |
@@ -124,7 +124,7 @@ That's the entire wire format. The rest is opt-in.
 | Backend | [Titan overview](./titan/overview.md) → [Application & DI](./titan/application) → [Modules](./titan/modules) |
 | RPC | [Netron](./titan/netron) — server side; [netron-browser](./frontend/netron/browser.md) + [netron-react](./frontend/netron/react.md) — client side |
 | Frontend | [Prism overview](./frontend/prism) → [Components catalog](./frontend/prism/components.md) → [Layouts + Blocks](./frontend/prism/blocks.md) |
-| Modules | [Module map](./titan/modules/module-map.mdx) — visual dependency graph of all 16+ modules |
+| Modules | [Module map](./titan/modules/module-map.mdx) — visual dependency graph of all 14 modules |
 | Operate | [Omnitron overview](./omnitron/overview.md) → [CLI reference](./omnitron/cli.md) → [Recipes](./omnitron/recipes.md) |
 
 ### Reference by task
@@ -163,7 +163,7 @@ That's the entire wire format. The rest is opt-in.
 
 | Component | Requirement |
 | --------- | ----------- |
-| **Node.js** | 22.x or 23.x (CI runs both) |
+| **Node.js** | 22+ (engines require `>=22`; CI runs 22 and 24) |
 | **TypeScript** | 5.x; strict mode recommended |
 | **Bun / Deno** | App-level support (test matrix covers Node + Bun + Deno); Omnitron daemon expects Node |
 | **OS** | macOS, Linux. Windows: CLI + apps OK; Omnitron daemon assumes Unix sockets |

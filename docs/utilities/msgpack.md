@@ -62,75 +62,85 @@ Every native type survives the round-trip unchanged.
 
 ## Built-in native types
 
-| Type | Wire | Notes |
-| ---- | ---- | ----- |
-| `Date` | ext type 0 (uint64 ms epoch + ns) | Sub-millisecond precision optional |
-| `Map<K, V>` | ext type 1 | Keys can be any encodable type |
-| `Set<T>` | ext type 2 | |
-| `RegExp` | ext type 3 | Source + flags |
-| `BigInt` | ext type 4 | Arbitrary precision |
-| `Error` (incl. subclasses) | ext type 5 | Message + name + stack + custom fields |
+| Type | Ext id | Notes |
+| ---- | ------ | ----- |
+| `Error` (incl. subclasses) | 126 | name + stack + message + custom own-fields |
+| `Date` | 125 | uint64 ms epoch |
+| `Map<K, V>` | 124 | Keys can be any encodable type |
+| `Set<T>` | 123 | |
+| `RegExp` | 121 | Source + flags |
+| `BigInt` | 120 | Arbitrary precision (encoded as string) |
+| `Long` | 119 | 64-bit ints via the `long` library |
 | `Buffer` / `Uint8Array` | bin format | Native — no wrapping |
-| `undefined` | nil + ext flag | Preserved (distinct from `null`) |
+
+Registered by `registerCommonTypesFor()` on the default `serializer`
+at import time, so `encode`/`decode` handle them out of the box.
 
 ## Custom extensions
 
-Register your own type with a unique ext-type id (16–127):
+Register your own type on a `Serializer` with a unique id. User
+types use **1–99** (100–109 are reserved for Netron, 110–118 for
+internal types, 119–126 for the built-ins above; the valid range is
+0–127). The `encode` callback **writes into the provided buffer**;
+`decode` reads from it:
 
 ```typescript
-import { Serializer } from '@omnitron-dev/msgpack';
+import { Serializer, registerCommonTypesFor } from '@omnitron-dev/msgpack';
 
 class GeoPoint {
   constructor(public lat: number, public lng: number) {}
 }
 
 const serializer = new Serializer();
+registerCommonTypesFor(serializer);    // keep Date/Map/Set/Error/… support
+
 serializer.register(
-  20,                                          // ext type id (you choose 16-127)
+  20,                                          // user ext id (1–99)
   GeoPoint,                                    // class constructor
-  (point) => Buffer.from(`${point.lat},${point.lng}`),         // encode
-  (buf)   => {
-    const [lat, lng] = buf.toString().split(',').map(parseFloat);
+  (point, buf) => {                            // encode: write into buf
+    serializer.encode(point.lat, buf);
+    serializer.encode(point.lng, buf);
+  },
+  (buf) => {                                   // decode: read from buf
+    const lat = serializer.decode(buf);
+    const lng = serializer.decode(buf);
     return new GeoPoint(lat, lng);
   },
 );
 
-const buf = serializer.encode(new GeoPoint(51.5, -0.12));
-const point = serializer.decode(buf);   // GeoPoint { lat: 51.5, lng: -0.12 }
+const data = serializer.encode(new GeoPoint(51.5, -0.12));   // Uint8Array
+const point = serializer.decode(data);   // GeoPoint { lat: 51.5, lng: -0.12 }
 ```
 
-The receiver needs the same registration to decode the type
-correctly — otherwise it sees an opaque ext object.
+A bare `new Serializer()` starts empty — call `registerCommonTypesFor`
+if you also need the native types. The receiver needs the same
+registration to decode the type correctly.
 
-## Streaming / incremental decoding
+## Safe decoding — `tryDecode`
 
-For partial buffers (incoming network chunks):
+A non-throwing decode wrapper:
 
 ```typescript
 import { tryDecode } from '@omnitron-dev/msgpack';
 
-let buf = Buffer.alloc(0);
-
-socket.on('data', (chunk) => {
-  buf = Buffer.concat([buf, chunk]);
-
-  let result;
-  while ((result = tryDecode(buf)) !== undefined) {
-    const { value, bytesRead } = result;
-    handleMessage(value);
-    buf = buf.subarray(bytesRead);
-  }
-});
+const result = tryDecode(buf);
+if (result) {
+  const { value, bytesConsumed } = result;
+  handleMessage(value);
+}
+// result is null if the buffer could not be decoded
 ```
 
 `tryDecode`:
-- Returns `{ value, bytesRead }` if a complete message is at the
-  buffer start.
-- Returns `undefined` if more bytes are needed.
-- Throws on malformed data.
+- Returns `{ value, bytesConsumed }` on success (`bytesConsumed` is
+  the input buffer length).
+- Returns `null` on any decode failure (it swallows the error rather
+  than throwing).
 
-Used by Netron's WebSocket / TCP transports for the
-length-prefixed wire framing.
+Note: this is a whole-buffer decode that won't throw — it is **not**
+an incremental parser that resumes across partial network chunks.
+Netron's transports do their own length-prefixed framing and hand a
+complete frame to `decode`.
 
 ## Performance
 
@@ -147,75 +157,84 @@ not in the spec); strictly spec-compliant in exchange.
 
 ## Error round-trips
 
-The killer feature for RPC:
+`Error` (and its standard subclasses) are encoded by the built-in
+ext-type 126 handler — `name`, `message`, `stack`, and any custom
+**own** fields all survive:
 
 ```typescript
-class ValidationError extends Error {
-  constructor(public field: string, message: string) {
-    super(message);
-    this.name = 'ValidationError';
-  }
-}
+const err = new TypeError('must be a valid email');
+(err as any).field = 'email';
 
-const serializer = new Serializer();
-serializer.registerError(ValidationError, 50);
+const wire    = encode(err);
+const decoded = decode(wire) as any;
 
-// Server throws:
-throw new ValidationError('email', 'must be a valid email');
-
-// Wire — encoded by serializer ↓
-
-// Client decodes:
-catch (e) {
-  e instanceof ValidationError;   // true — class identity preserved
-  e.field === 'email';            // true
-  e.stack;                         // server-side stack (with frame markers)
-}
+decoded instanceof TypeError;   // true — standard error classes reconstruct
+decoded.message;                // 'must be a valid email'
+decoded.field;                  // 'email' — custom field preserved
+decoded.stack;                  // original server-side stack string
 ```
 
-The stack is preserved with server-side path markers — useful
-for distributed debugging.
+The server-side stack string is preserved — useful for distributed
+debugging. Note the constructor is matched against a small table of
+**built-in** error classes (`Error`, `TypeError`, `RangeError`,
+`SyntaxError`, `ReferenceError`, `EvalError`, `URIError`); a custom
+`class FooError extends Error` round-trips its data and `.name` but
+decodes back as a plain `Error`, not as `FooError`. There is no
+`registerError` method on `Serializer`.
 
 ## SmartBuffer
 
-Internal buffer-builder optimised for incremental writes:
+Internal auto-growing buffer-builder, exported from the
+`./smart-buffer` subpath:
 
 ```typescript
-import { SmartBuffer } from '@omnitron-dev/msgpack';
+import { SmartBuffer } from '@omnitron-dev/msgpack/smart-buffer';
 
-const buf = new SmartBuffer();
+const buf = new SmartBuffer();        // optional initialCapacity arg
 buf.writeUInt32BE(0xdeadbeef);
-buf.writeString('hello');
-buf.writeBuffer(Buffer.from([1, 2, 3]));
+buf.writeUInt8(0x2a);
+buf.writeInt64BE(123n);
 const out = buf.toBuffer();
+
+// Reading back:
+const reader = SmartBuffer.wrap(out);
+reader.readUInt32BE();                // 0xdeadbeef
 ```
 
-Auto-grows; no upfront sizing needed; faster than chained
-`Buffer.concat`.
+Provides typed `writeXxx` / `readXxx` methods (UInt8/Int8,
+16/32-bit BE, 64-bit BE via `long`, float/double) plus `toBuffer()`,
+`getRemainingBuffer()`, and the static `SmartBuffer.wrap()` /
+`SmartBuffer.fromBuffer()` constructors. Auto-grows; no upfront
+sizing needed.
 
 ## API surface
 
 ```typescript
-// Stateless top-level (uses default serializer):
-function encode(value: unknown):      Uint8Array;
-function decode<T = unknown>(buf):    T;
-function tryDecode<T = unknown>(buf): { value: T; bytesRead: number } | undefined;
+// Top-level, from '@omnitron-dev/msgpack' (uses the default `serializer`):
+function encode(obj: any): Uint8Array;            // enhanced Buffer (has .toBuffer())
+function decode(buf: Buffer | SmartBuffer): any;
+function tryDecode(buf: any): { value: any; bytesConsumed: number } | null;
 
-// Stateful (custom types):
+const serializer: Serializer;                     // the pre-configured default instance
+function registerCommonTypesFor(s: Serializer): void;   // register native types on a Serializer
+
+// Stateful (custom types) — `Serializer` is the default export of the package:
 class Serializer {
-  register<T>(id: number, ctor: Constructor<T>, encode: (v: T) => Buffer, decode: (b: Buffer) => T): this;
-  registerError<E extends Error>(ctor: Constructor<E>, id: number): this;
-  unregister(id: number): this;
-  encode(value: unknown): Uint8Array;
-  decode<T>(buf): T;
-  tryDecode<T>(buf): { value: T; bytesRead: number } | undefined;
+  constructor(initialCapacity?: number);          // starts EMPTY; call registerCommonTypesFor()
+  register(type: number, ctor: any, encode: (obj, buf) => void, decode: (buf) => any): Serializer;
+  registerEncoder(type: number, check: (obj) => boolean, encode: (obj) => Buffer): Serializer;
+  registerDecoder(type: number, decode: (buf) => any): Serializer;
+  encode(x: any): any;                            // → buffer
+  encode(x: any, buf: SmartBuffer): void;         // → writes into buf
+  decode(buf: Buffer | SmartBuffer): any;
 }
 
-// Low-level (advanced):
-class Encoder { /* ... */ }
-class Decoder { /* ... */ }
-class SmartBuffer { /* ... */ }
+// Buffer builder, from '@omnitron-dev/msgpack/smart-buffer':
+class SmartBuffer { /* writeXxx / readXxx / toBuffer / static wrap, fromBuffer */ }
 ```
+
+There is no `registerError`, `unregister`, or `tryDecode` method on
+`Serializer`, and no top-level `Encoder` / `Decoder` export.
 
 ## Where it's used in the stack
 

@@ -26,26 +26,27 @@ primary_region = "fra"
   dockerfile = "Dockerfile"
 
 [env]
-  NODE_ENV       = "production"
-  OMNITRON_HOME  = "/var/lib/omnitron"
+  NODE_ENV = "production"
+  HOME     = "/var/lib/omnitron"   # daemon state → $HOME/.omnitron (no OMNITRON_HOME var)
 
 [mounts]
   source      = "omnitron_data"
   destination = "/var/lib/omnitron"
 
 [http_service]
-  internal_port = 9800
+  internal_port = 3001                 # public app (Titan HTTP transport)
   force_https   = true
   auto_stop_machines  = false
   auto_start_machines = true
   min_machines_running = 1
-
-[[services]]
-  internal_port = 3001                 # api
-  protocol      = "tcp"
-  [[services.ports]]
-    handlers = ["http"]
-    port     = 8080
+  # The app transport serves /health (JSON {status:"online"}); use that for the
+  # HTTP check below. There is no /healthz on this port — the daemon's /healthz
+  # lives on port 9803, bound to loopback by default.
+  [[http_service.checks]]
+    method   = "GET"
+    path     = "/health"
+    interval = "15s"
+    timeout  = "5s"
 
 [[vm]]
   cpu_kind = "shared"
@@ -93,13 +94,18 @@ to the Fly internal DNS names.
   "build":   { "builder": "DOCKERFILE" },
   "deploy": {
     "startCommand":         "pnpm omnitron up --foreground",
-    "healthcheckPath":      "/healthz",
+    "healthcheckPath":      "/health",
     "healthcheckTimeout":   30,
     "restartPolicyType":    "ON_FAILURE",
     "restartPolicyMaxRetries": 10
   }
 }
 ```
+
+Railway probes the published port, so `healthcheckPath` must hit
+a route on the app's HTTP transport — that's **`/health`** (JSON
+`{"status":"online"}`), not `/healthz`. The `/healthz` route only
+exists on the daemon's separate metrics port (`9803`).
 
 Workflow:
 
@@ -113,11 +119,14 @@ Env vars (auto-injected):
 
 - `DATABASE_URL` — from the linked Postgres
 - `REDIS_URL` — from the linked Redis
-- `PORT` — Railway-assigned; map to `3001` in `omnitron.config.ts`
-  or override via env in `defineSystem`.
+- `PORT` — Railway-assigned. Omnitron doesn't read `PORT`; each
+  process declares an explicit port in its `transports.http.port`
+  (e.g. `3001`). Pin the published port to that, or template the
+  port into the process config from an env var you set yourself.
 
 For persistent volumes (Omnitron state), add a Volume in the
-dashboard and mount at `/var/lib/omnitron`.
+dashboard, mount it at `/var/lib/omnitron`, and set `HOME` to the
+same path so the daemon writes its `~/.omnitron` state there.
 
 ## Render
 
@@ -132,10 +141,10 @@ services:
     plan: standard
     region: oregon
     autoDeploy: true
-    healthCheckPath: /healthz
+    healthCheckPath: /health          # app transport route; /healthz is daemon-only (port 9803)
     envVars:
       - { key: NODE_ENV, value: production }
-      - { key: OMNITRON_HOME, value: /var/lib/omnitron }
+      - { key: HOME, value: /var/lib/omnitron }   # daemon state → $HOME/.omnitron
       - { key: JWT_SECRET, generateValue: true }
       - { fromDatabase: { name: platform-pg, property: connectionString }, key: DATABASE_URL }
       - { fromService:  { name: platform-redis, type: redis, property: connectionString }, key: REDIS_URL }
@@ -177,14 +186,22 @@ running process; the daemon takes over signal handling.
 
 ### Health check path
 
-Always `/healthz` (or `/readyz` if the PaaS distinguishes
-startup from runtime checks).
+For a check against the **published app port**, use `/health` —
+the Titan HTTP transport returns `200` `{"status":"online"}`
+there. The Prometheus-style `/healthz` (plain `200 ok`) lives
+only on the **daemon's metrics port** (`9803`); target it with a
+port-aware check (Fly `[checks]`) if your PaaS allows one.
+Neither `/readyz` nor an HTTP readiness route exists out of the
+box — see the [k8s note](./kubernetes.md#per-app-deployment) for
+adding one via `customRoutes`.
 
 ### Persistent volume
 
-Mount `~/.omnitron/` for the daemon's PID, state, and secrets
-store. Without it, every deploy is a fresh daemon — fine for
-stateless workloads, loses uptime history + secrets on restart.
+Mount a volume at, e.g., `/var/lib/omnitron` and set `HOME` to
+the same path so the daemon's `~/.omnitron` (PID, SQLite state,
+secrets store) persists. Without it, every deploy is a fresh
+daemon — fine for stateless workloads, loses uptime history +
+secrets on restart.
 
 ### Secrets
 
@@ -215,8 +232,10 @@ Runs once per deploy, before the new image takes traffic.
 | Render | Plan-based; auto-scaling on paid plans |
 
 PaaS scaling is **horizontal** (more pods). Omnitron-level
-scaling (worker pools within a pod) configured in
-`defineSystem`'s `scaling` block.
+scaling (worker pools within a pod) is configured **per process**
+in `defineSystem` — set `instances` on a process and give it a
+`scaling` block (`{ strategy, maxInstances, targetCPU, ... }`).
+There is no app-level `scaling` block.
 
 ### Logs
 

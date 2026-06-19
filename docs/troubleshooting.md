@@ -254,10 +254,10 @@ invocation.
 
 Old HTML cached in user's browser tries to fetch deleted JS chunks.
 
-Fix: ship a `clientModule` that catches `ChunkLoadError` and
-reloads once per session. The Omnitron webapp does this; copy
-the pattern from
-`apps/omnitron/webapp/src/clientModules/chunk-error-handler.ts`.
+Fix: catch `ChunkLoadError` in the app shell (e.g. a global
+`error`/`unhandledrejection` listener or a React error boundary)
+and reload the page once per session so the browser fetches the
+new HTML and chunk manifest.
 
 ### Redis "ECONNREFUSED" on dev boot
 
@@ -290,8 +290,8 @@ The health endpoint takes longer than `health.timeout`
 Causes:
 - Probe does a real DB query — should use the cached health
   summary.
-- One indicator hangs — check `inspect <app>` for the slow
-  indicator.
+- One indicator hangs — run `omnitron health-check <app>` for the
+  detailed per-probe report and find the slow indicator.
 
 Fix: pre-cache the health result; set per-indicator timeouts.
 

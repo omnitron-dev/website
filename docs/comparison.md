@@ -58,7 +58,7 @@ them under one TypeScript codebase.
 | **Transport** | Express / Fastify under the hood (HTTP only by default; microservices add-on for TCP/Redis/NATS) | Native: HTTP / WS / TCP / Unix — same service surface |
 | **Type safety client ↔ server** | OpenAPI codegen or separate `.d.ts` sync | Service interface IS the type; no codegen |
 | **Validation** | class-validator + class-transformer (decorator-heavy DTOs) | Zod schemas inline via `@Validate(schema)` |
-| **Module ecosystem** | Huge — most things have a `@nestjs/*` package | 16 focused official modules + community |
+| **Module ecosystem** | Huge — most things have a `@nestjs/*` package | 14 focused official modules + community |
 | **Testing** | `Test.createTestingModule()` | `createTestApp()` (similar shape) |
 | **Lifecycle** | `OnModuleInit`, `OnApplicationBootstrap`, `OnApplicationShutdown` | `OnInit`, `OnStart`, `OnStop`, `OnDestroy` (semantically similar) |
 | **Supervisor / fleet** | Not included; you run it under PM2 / systemd / k8s | Omnitron daemon — supervised processes, 19+ RPC services, web console, MCP server |
@@ -111,7 +111,7 @@ them under one TypeScript codebase.
 
 ### Pick Omnitron when…
 
-- You want the full stack (DI + lifecycle + 16+ modules), not
+- You want the full stack (DI + lifecycle + 14 official modules), not
   just the RPC layer.
 - You need transports beyond HTTP/WS (TCP / Unix for
   service-to-service).
@@ -200,7 +200,7 @@ A typical Next.js + Prisma + tRPC + Tailwind setup:
 | Auth | NextAuth / Clerk | titan-auth |
 | Form lib | react-hook-form + zod | react-hook-form + zod (via Prism `<Field>`) |
 | Cache | React Query | netron-react QueryCache |
-| State | Zustand / Jotai | Zustand (via Prism `createStore`) |
+| State | Zustand / Jotai | Zustand (via Prism `createPrismStore`) |
 | Deployment | Vercel / Cloudflare / Render | Docker + supervised by Omnitron |
 
 If you're already deep in the typical stack, the migration cost
@@ -226,7 +226,7 @@ What you **get back**:
 - One language end-to-end with no codegen.
 - One decorator grammar across DI / RPC / auth / validation.
 - One operator surface (CLI + web console + MCP) for any app.
-- Per-module independence (16+ modules, opt-in each).
+- Per-module independence (14 modules, opt-in each).
 - Built-in fleet primitives (cluster, fleet, replication).
 
 ## See also

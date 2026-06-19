@@ -15,7 +15,7 @@ PRs welcome at every layer — module, framework, docs, examples.
 ### Prerequisites
 
 - Node.js 22+ (24 also tested in CI)
-- pnpm 9+ (`corepack enable && corepack prepare pnpm@latest --activate`)
+- pnpm 10+ (`corepack enable && corepack prepare pnpm@latest --activate`)
 - Docker (for integration tests)
 - A Unix-like shell (macOS / Linux). Windows works via WSL.
 
@@ -34,16 +34,19 @@ takes ~30–60 s cold, ~10 s warm.
 ### Run the test suite
 
 ```bash
-pnpm test                          # all packages, unit + module
-pnpm -F titan-cache test           # one package
-pnpm -F titan-cache test --watch   # watch mode
-pnpm test:integration              # docker-backed integration suite
-pnpm test:e2e                       # Playwright (webapp + prism)
+pnpm test                          # all packages (turbo test)
+pnpm -F @omnitron-dev/titan-cache test   # one package
+pnpm test:up                       # start docker infra (Postgres + Redis + MinIO)
+pnpm test:down                     # tear down docker infra (+ volumes)
+pnpm test:ci                       # test:up → turbo test → test:down
 ```
 
-`pnpm test:integration` starts a Docker Compose stack with
-Postgres + Redis + MinIO. First run pulls images; subsequent
-runs reuse the containers.
+Integration tests that need real infra rely on the Docker
+Compose stack defined in `docker-compose.test.yml`. `pnpm
+test:up` starts it (Postgres + Redis + MinIO) and `pnpm
+test:down` tears it down; `pnpm test:ci` does both around the
+test run. First run pulls images; subsequent runs reuse the
+containers.
 
 ### Run the docs site locally
 
@@ -79,11 +82,16 @@ omni/
 
 ```bash
 cd packages/titan-cache
-pnpm dev          # tsup --watch — rebuilds on save
-pnpm test --watch # vitest --watch
+pnpm build        # tsc — compile to dist/
+pnpm test         # vitest run
 pnpm typecheck    # tsc --noEmit
-pnpm lint         # eslint
 ```
+
+The `titan-*` modules expose `build`, `test`, `typecheck`, and
+`clean`. Linting and formatting are workspace-root concerns —
+run `pnpm lint` / `pnpm fm:fix` from the repo root. A few
+packages (`titan`, `prism`, `netron-react`) also expose a
+`pnpm dev` watch script.
 
 Changes in a dependent package surface through pnpm workspace
 symlinks — you don't need to publish or `pnpm install` between
@@ -111,7 +119,7 @@ ESLint + Prettier; configured at the workspace root:
 ```bash
 pnpm lint           # check
 pnpm lint:fix       # autofix
-pnpm fm             # check formatting
+pnpm fm:check       # check formatting
 pnpm fm:fix         # apply formatting
 ```
 
@@ -172,7 +180,7 @@ Avoid:
 | Unit | Plain class / function | `src/__tests__/*.test.ts` |
 | Module | DI graph with mocks | `src/__tests__/*.test.ts` |
 | Integration | Real Application + in-memory infra | `<package>/test/*.test.ts` |
-| E2E | Real daemon / browser | `apps/omnitron/webapp/e2e/` |
+| E2E | Real daemon / browser (Playwright) | `packages/prism/tests/e2e/`, `packages/netron-browser/tests/e2e/` |
 | Cross-runtime | Node + Bun + Deno | per-package `test/cross/*.test.ts` |
 
 See [Testing](../testing/index.md) for patterns.
@@ -193,7 +201,7 @@ Without a regression test, the bug returns within 6 months.
 ### Before opening a PR
 
 - Branch from `main`.
-- Run `pnpm lint && pnpm fm && pnpm test` locally.
+- Run `pnpm lint && pnpm fm:check && pnpm test` locally.
 - For docs: `cd internal/website && pnpm build`.
 - Commit with conventional-commits format:
   - `feat(titan-cache): add LFU eviction strategy`

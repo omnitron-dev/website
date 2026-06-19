@@ -83,19 +83,19 @@ spec:
             requests: { cpu: '500m', memory: '512Mi' }
             limits:   { cpu: '2000m', memory: '2Gi' }
           livenessProbe:
-            httpGet: { path: /healthz, port: http }
+            httpGet: { path: /health, port: http }
             initialDelaySeconds: 30
             periodSeconds:       10
             timeoutSeconds:      5
             failureThreshold:    3
           readinessProbe:
-            httpGet: { path: /readyz, port: http }
+            httpGet: { path: /health, port: http }
             initialDelaySeconds: 5
             periodSeconds:       3
             timeoutSeconds:      3
             failureThreshold:    2
           startupProbe:
-            httpGet: { path: /healthz, port: http }
+            httpGet: { path: /health, port: http }
             initialDelaySeconds: 0
             periodSeconds:       2
             timeoutSeconds:      2
@@ -119,14 +119,26 @@ spec:
 
 Key points:
 
-- **Three probes**: liveness, readiness, startup.
-  - **Liveness** → `/healthz` from `titan-health`. Kill if it
-    fails persistently.
-  - **Readiness** → `/readyz`. Stop sending traffic when
+- **Three probes**: liveness, readiness, startup. The Titan
+  Netron HTTP transport serves **`/health`** on each process's
+  HTTP port — it returns `200` with `{"status":"online"}` once the
+  transport is up, `503` otherwise. That single endpoint backs all
+  three probes here.
+  - **Liveness** → `/health`. Kill if it fails persistently.
+  - **Readiness** → `/health`. Stop sending traffic when
     failing; resume when passing.
-  - **Startup** → `/healthz` with longer `failureThreshold` —
+  - **Startup** → `/health` with longer `failureThreshold` —
     masks liveness during cold-start (especially when
     eager-loading heavy services).
+
+  > ⚠️ **NEEDS REWRITE** — there are **no `/healthz` or `/readyz`
+  > HTTP routes**. Richer health (the `live()` / `ready()` probes
+  > from `titan-health`, dependency checks) is exposed over Netron
+  > RPC, not HTTP, so it isn't directly reachable by a k8s
+  > `httpGet` probe. If you need a true readiness signal that
+  > reflects DB/Redis health, add a `customRoutes` HTTP handler in
+  > the process's `transports.http` config that calls the health
+  > service, and point `readinessProbe` at it.
 - **`preStop` sleep 10 s** — lets the load balancer's endpoint
   list update before SIGTERM. Avoids 502s during pod rotation.
 - **`terminationGracePeriodSeconds: 45`** — > app's
@@ -157,11 +169,14 @@ spec:
         - name: omnitron
           image: registry.example.com/platform-omnitron:v1.4.2
           ports:
-            - { name: tcp,  containerPort: 9700 }
-            - { name: http, containerPort: 9800 }
+            - { name: tcp,     containerPort: 9700 }   # fleet RPC
+            - { name: http,    containerPort: 9801 }   # Netron HTTP RPC
+            - { name: ws,      containerPort: 9802 }   # Netron WebSocket
+            - { name: metrics, containerPort: 9803 }   # /metrics + /healthz
           env:
-            - { name: OMNITRON_HOME, value: /var/lib/omnitron }
-            - { name: NODE_ENV,      value: production }
+            # Daemon state lives under $HOME/.omnitron — point HOME at the PVC.
+            - { name: HOME,     value: /var/lib/omnitron }
+            - { name: NODE_ENV, value: production }
           volumeMounts:
             - { name: state, mountPath: /var/lib/omnitron }
           resources:
@@ -182,12 +197,18 @@ metadata:
 spec:
   selector: { app: omnitron }
   ports:
-    - { name: tcp,  port: 9700, targetPort: tcp }
-    - { name: http, port: 9800, targetPort: http }
+    - { name: tcp,     port: 9700, targetPort: tcp }
+    - { name: http,    port: 9801, targetPort: http }
+    - { name: ws,      port: 9802, targetPort: ws }
+    - { name: metrics, port: 9803, targetPort: metrics }
 ```
 
-Operators can `kubectl port-forward svc/omnitron 9800` and open
-the webapp on their machine.
+The daemon does **not** serve the Console UI itself — that's the
+separate [`webapp` Deployment](#webapp-deployment) (an nginx
+container that proxies to the daemon's `9801`/`9802`). To reach
+the daemon's RPC directly, operators can
+`kubectl port-forward svc/omnitron 9801`; to open the Console,
+port-forward the `webapp` service instead.
 
 ## Ingress
 
@@ -214,10 +235,12 @@ spec:
     - host: app.example.com
       http:
         paths:
-          - { path: /, pathType: Prefix, backend: { service: { name: omnitron, port: { number: 9800 } } } }
+          - { path: /, pathType: Prefix, backend: { service: { name: webapp, port: { number: 80 } } } }
 ```
 
-Two hosts — one for the API (Titan apps), one for the webapp.
+Two hosts — one for the API (Titan apps), one for the Console
+webapp (the nginx-served [`webapp` Deployment](#webapp-deployment),
+**not** the daemon).
 
 ## Secrets
 
@@ -379,22 +402,33 @@ spec:
           # Built static; nginx serves it
 ```
 
-Or — simpler — let the Omnitron daemon serve the webapp from
-its HTTP port (9800) and point ingress there.
+This mirrors what `omnitron webapp` does on a single host: an
+`nginx:alpine` container serving the built Console SPA from
+`/usr/share/nginx/html` and proxying `/netron/`, `/ws`,
+`/api/health`, `/api/metrics` to the daemon. In k8s, point its
+upstream at the `omnitron` Service (`9801` HTTP, `9802` WS)
+instead of `host.docker.internal`.
 
 ## Observability
 
 - **Logs** → stdout → cluster log aggregator (Loki / Datadog /
   ELK).
-- **Metrics** → scrape `/metrics` from each pod via
-  Prometheus annotations:
+- **Metrics** → scrape the **daemon's** Prometheus endpoint on
+  port `9803` (`/metrics`), which aggregates per-app gauges:
   ```yaml
+  # On the omnitron StatefulSet pod template:
   annotations:
     prometheus.io/scrape: 'true'
-    prometheus.io/port:   '3001'
+    prometheus.io/port:   '9803'
     prometheus.io/path:   '/metrics'
   ```
-- **Traces** → OTel collector as DaemonSet; apps export to it.
+  The per-app HTTP transport port (e.g. `3001`) also has a
+  `/metrics` route, but it returns **JSON transport stats and is
+  bearer-token gated** — it is not Prometheus exposition text, so
+  don't point a scrape config at it. Bind the daemon metrics port
+  to `0.0.0.0` and set a bearer token if Prometheus runs off-host.
+- **Traces** → OTel collector as DaemonSet; apps export to it (via
+  `titan-telemetry-relay`).
 - **Alerts** → `OmnitronAlerts` + PrometheusRules.
 
 ## Disaster recovery

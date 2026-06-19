@@ -10,35 +10,33 @@ description: Async event emitter with parallel/serial/reduce patterns.
 pnpm add @omnitron-dev/eventemitter
 ```
 
-An async-first event emitter built on top of `eventemitter3`,
-adding parallel/serial/reduce emission patterns, wildcard
-subscriptions, history, and metrics.
+An async-first event emitter (custom implementation — no
+`eventemitter3` dependency) that works in Node, Bun, and the
+browser. Adds parallel/serial/reduce emission patterns on top of a
+standard sync emitter, plus an `EnhancedEventEmitter` subclass with
+wildcards, history, metrics, and scheduling.
 
 Verified against `packages/eventemitter/src/`.
 
-## Why not just use `eventemitter3`?
+## Why not just a plain sync emitter?
 
-`eventemitter3` (and the Node built-in `EventEmitter`) call
-handlers **synchronously** in registration order. That's wrong
-for two common cases:
+The Node built-in `EventEmitter` calls handlers **synchronously** in
+registration order. That's wrong for two common cases:
 
 1. **Async handlers that need to run in parallel** — synchronous
    emit doesn't await; promises slip through `.emit()`.
 2. **Async handlers that produce a derived result** — there's no
    built-in way to reduce.
 
-This package solves both. Drop-in API-compatible with the
-`eventemitter3` surface; adds new methods.
+This package solves both. The standard `on` / `once` / `emit` /
+`off` surface is preserved; the async `emit*` methods are additive.
 
 ## Quick start
 
 ```typescript
 import { EventEmitter } from '@omnitron-dev/eventemitter';
 
-const bus = new EventEmitter<{
-  'user.created':  [user: User];
-  'order.placed':  [order: Order, source: string];
-}>();
+const bus = new EventEmitter();
 
 bus.on('user.created', async (user) => {
   await sendWelcomeEmail(user);
@@ -47,15 +45,20 @@ bus.on('user.created', async (user) => {
 await bus.emitParallel('user.created', newUser);
 ```
 
+> The base `EventEmitter` is **not** generic over an event map and
+> uses loose `(event, ...args)` typing. For type-safe mapped events
+> (`emitTyped`), wildcards, history, and metrics, use
+> `EnhancedEventEmitter<TEventMap>` (below).
+
 ## Four emission patterns
 
 | Method | Behaviour | Use case |
 | ------ | --------- | -------- |
-| `emit(event, ...args)` | Synchronous (inherited from eventemitter3) | Fire-and-forget, sync handlers |
-| `emitParallel(event, ...args)` | Awaits all handlers concurrently | Independent side-effects (email + log + analytics) |
-| `emitSerial(event, ...args)` | Awaits handlers one-by-one in registration order | Order-sensitive pipelines |
-| `emitReduce(event, init, ...args)` | Chains handlers; each receives the prior return | Building up a result through middleware |
-| `emitReduceRight(event, init, ...args)` | Like `emitReduce` but reverse order | Right-associative pipelines |
+| `emit(event, ...args)` | Synchronous, returns `boolean` | Fire-and-forget, sync handlers |
+| `emitParallel(event, ...args)` | Awaits all handlers concurrently; resolves to an array of results | Independent side-effects (email + log + analytics) |
+| `emitSerial(event, ...args)` | Awaits handlers one-by-one in registration order; resolves to an array of results | Order-sensitive pipelines |
+| `emitReduce(event, ...args)` | Chains handlers; each receives the prior return | Building up a result through middleware |
+| `emitReduceRight(event, ...args)` | Like `emitReduce` but reverse order | Right-associative pipelines |
 
 ### `emitParallel`
 
@@ -92,13 +95,14 @@ const final = await bus.emitReduce('request.transform', initialReq);
 // final = { ...initialReq, signed: true, compressed: true, retries: 3 }
 ```
 
-Each handler receives the **return value** of the previous one
-as its first argument. Middleware-style.
+The seed is the argument(s) you pass after the event name; each
+handler receives the **return value** of the previous one as its
+argument. Middleware-style.
 
 ## Concurrency control
 
 ```typescript
-const bus = new EventEmitter({ concurrency: 3 });
+const bus = new EventEmitter(3);     // or: bus.setConcurrency(3)
 
 bus.on('image.process', heavyTransform);
 
@@ -131,10 +135,12 @@ React `useEffect` cleanup.
 ```typescript
 import { EnhancedEventEmitter } from '@omnitron-dev/eventemitter';
 
-const bus = new EnhancedEventEmitter();
+const bus = new EnhancedEventEmitter();   // wildcards on by default; delimiter '.'
 
-bus.on('user.*', (event, ...args) => {
-  console.log(`user event: ${event}`, args);
+bus.on('user.*', (data, metadata) => {
+  // wildcard handlers receive (data, metadata); the matched event
+  // name is in metadata.event
+  console.log(`user event: ${metadata.event}`, data);
 });
 
 bus.emit('user.created', user);    // matches
@@ -142,65 +148,81 @@ bus.emit('user.deleted', user);    // matches
 bus.emit('order.placed', order);   // doesn't match
 ```
 
-`EnhancedEventEmitter` adds wildcard + namespace handling on top
-of the standard `EventEmitter` interface.
+`EnhancedEventEmitter` (a subclass of `EventEmitter`) adds wildcard
++ namespace handling, plus history, metrics, and scheduling. Its
+constructor takes `{ wildcard?, delimiter?, concurrency? }` —
+wildcards are enabled unless `wildcard: false`. Use `**` to match
+across delimiter levels.
 
 ## History
 
-```typescript
-import { EventHistory } from '@omnitron-dev/eventemitter';
+History is built into `EnhancedEventEmitter` — enable it, then
+query or replay:
 
-const history = new EventHistory({ maxSize: 1_000, ttlMs: 60_000 });
-bus.use(history);
+```typescript
+import { EnhancedEventEmitter } from '@omnitron-dev/eventemitter';
+
+const bus = new EnhancedEventEmitter();
+bus.enableHistory({ maxSize: 1_000, ttl: 60_000 });   // options: { maxSize?, ttl?, filter?, storage? }
 
 bus.emit('user.created', user);
 
-history.query({ event: 'user.*' });
-history.replay({ event: 'user.created' });
-// Re-fires the events through the bus (useful for debugging / disaster recovery)
+await bus.getHistory({ event: 'user.*' });   // EventFilter: { event?, from?, to?, tags?, correlationId? }
+await bus.replay({ event: 'user.created' });
+// Re-fires matching events through the bus (useful for debugging / disaster recovery)
 ```
 
-Bounded ring buffer with TTL eviction. Used by `titan-events`'s
-`EventHistoryService`.
+Backed by `MemoryEventStorage` (a bounded buffer) by default; pass
+a custom `storage` implementing the `EventStorage` interface. The
+`EventHistory` / `MemoryEventStorage` classes are also exported if
+you want to wire history up by hand.
 
 ## Metrics
 
-```typescript
-import { EventMetrics } from '@omnitron-dev/eventemitter';
+Metrics are likewise built into `EnhancedEventEmitter`:
 
-const metrics = new EventMetrics();
-bus.use(metrics);
+```typescript
+const bus = new EnhancedEventEmitter();
+bus.enableMetrics({ slowThreshold: 100, sampleRate: 1 });
 
 // Some time later:
-metrics.snapshot();
+const m = bus.getMetrics();
 // {
-//   'user.created': { emissions: 1234, errors: 2, avgDurationMs: 12.3 },
-//   'order.placed': { emissions: 567,  errors: 0, avgDurationMs: 45.1 },
+//   eventsEmitted, eventsFailed,
+//   eventCounts:       Map<event, count>,
+//   errorCounts:       Map<event, count>,
+//   avgProcessingTime: Map<event, ms>,
+//   slowestEvents:     Array<{ event, duration }>,
+//   listenerCount:     Map<event, count>,
+//   memoryUsage,
 // }
+
+bus.getMetricsSummary();   // human-readable string
 ```
 
-Per-event counts, error counts, latency. Used by
-`titan-telemetry-relay` for internal observability.
+Per-event counts, error counts, latency. The underlying collector
+class is exported as `MetricsCollector`.
 
 ## Scheduled emissions
 
-```typescript
-import { EventScheduler } from '@omnitron-dev/eventemitter';
+Scheduling is built into `EnhancedEventEmitter` via `schedule()`:
 
-const scheduler = new EventScheduler(bus);
+```typescript
+const bus = new EnhancedEventEmitter();
 
 // Fire once in 5 seconds:
-scheduler.scheduleAt(Date.now() + 5_000, 'reminder.fire', { userId });
+bus.schedule('reminder.fire', { userId }, { delay: 5_000 });
 
-// Every 10 minutes:
-scheduler.scheduleInterval(10 * 60_000, 'cache.refresh');
+// Fire at a specific time:
+const id = bus.schedule('report.run', {}, { at: new Date('2026-01-01T00:00:00Z') });
 
 // Cancel:
-const id = scheduler.scheduleAt(...);
-scheduler.cancel(id);
+bus.cancelSchedule(id);
 ```
 
-Used internally by `titan-events`'s `EventSchedulerService`.
+`ScheduleOptions` is `{ delay?, at?, cron?, retry?, persistent? }`.
+The standalone `EventScheduler` class — `schedule(event, data,
+options, emitFn)`, `cancel(id)`, `cancelAll()` — is also exported.
 
 ## Where it's used in the stack
 
@@ -227,7 +249,7 @@ framework integration around it.
 
 | Op | Time |
 | -- | ---- |
-| Single sync `emit()` | < 1 μs (eventemitter3 baseline) |
+| Single sync `emit()` | < 1 μs (Map-backed listener lookup) |
 | `emitParallel` with N async handlers | dominated by the slowest handler |
 | `emitSerial` with N async handlers | sum of all handlers + Promise overhead |
 | Wildcard match | O(handlers) per emission (linear scan) |
@@ -236,5 +258,4 @@ framework integration around it.
 ## See also
 
 - [titan-events](../titan/modules/events.mdx) — Titan module built on this
-- [common](./common.md) — sibling utility
-- [eventemitter3](https://github.com/primus/eventemitter3) — underlying base
+- [common](./common.md) — sibling utility (`pLimit` powers the concurrency limiter)
