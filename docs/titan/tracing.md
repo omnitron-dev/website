@@ -44,21 +44,25 @@ import {
 
 ```typescript
 interface TraceContext {
-  traceId:       string;     // 16 bytes, hex
-  spanId:        string;     // 8 bytes, hex
-  parentSpanId?: string;
-  traceFlags:    number;     // bit 0 = sampled
-  traceState?:   string;     // W3C tracestate header
+  readonly traceId:       string;   // 32 hex chars (16 bytes)
+  readonly spanId:        string;   // 16 hex chars (8 bytes)
+  readonly parentSpanId?: string;   // undefined for a root span
+  readonly flags:         number;   // W3C trace-flags byte; bit 0 = sampled
 }
 ```
+
+The field is `flags` (not `traceFlags`), and there is **no**
+`traceState` field — the type ships only the identifier portion of
+W3C trace context. It is immutable; produce children with
+`startSpan()` rather than mutating it.
 
 Constants:
 
 ```typescript
-INVALID_TRACE_ID    // '00000000000000000000000000000000'
-INVALID_SPAN_ID     // '0000000000000000'
-TRACE_FLAGS.SAMPLED // 1
-TRACE_FLAGS.NOT_SAMPLED // 0
+INVALID_TRACE_ID     // '00000000000000000000000000000000'
+INVALID_SPAN_ID      // '0000000000000000'
+TRACE_FLAGS.SAMPLED  // 0x01
+TRACE_FLAGS.NONE     // 0x00   (there is no TRACE_FLAGS.NOT_SAMPLED)
 ```
 
 ## Reading the active context
@@ -73,31 +77,42 @@ scope.
 ## Establishing a context
 
 ```typescript
+import { makeTraceContext, withTrace, TRACE_FLAGS } from '@omnitron-dev/titan/tracing';
+
 await withTrace(
-  { traceId, spanId, traceFlags: TRACE_FLAGS.SAMPLED },
+  makeTraceContext({ traceId, spanId, flags: TRACE_FLAGS.SAMPLED }),
   async () => {
     await this.doWork();    // currentTrace() returns the bound context inside this scope
   }
 );
 ```
 
+`withTrace(ctx, fn)` installs `ctx` for the duration of `fn` (sync or
+async) via `AsyncLocalStorage`, then restores the previous context.
+`makeTraceContext` is a convenience for building a context literal
+with `flags` defaulted to `SAMPLED`.
+
 ## Starting a span
 
 ```typescript
-const { traceContext, end } = startSpan('database.query', {
-  // attributes (implementation-defined)
-});
+import { startSpan, withTrace } from '@omnitron-dev/titan/tracing';
 
-try {
+// startSpan(parent?) returns a NEW TraceContext (a child of the
+// current trace, or of `parent` if given). It does not take a name
+// or attributes, and does not return an `end()` callback.
+const span = startSpan();
+
+await withTrace(span, async () => {
   await this.db.query(...);
-} finally {
-  end('ok');                    // or end('error')
-}
+});
 ```
 
-`startSpan` returns `{ traceContext, end }`. The span is in-memory
-— no automatic export. A telemetry exporter (the relay module or
-an OTel sink) is responsible for shipping it.
+`startSpan(parent?)` returns a fresh `TraceContext`: same `traceId`,
+a new `spanId`, and `parentSpanId` set to the inherited span. If no
+parent (and no current trace) exists, it mints a new root trace.
+There is **no** span lifecycle, attributes, or `end()` here — this
+module is propagation-only. Span timing/attributes/export belong to
+a telemetry layer (the relay module or an OTel sink) on top.
 
 ## W3C `traceparent` header
 

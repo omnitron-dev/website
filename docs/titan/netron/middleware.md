@@ -6,160 +6,181 @@ description: Per-call wrapping for cross-cutting concerns.
 
 # RPC Middleware
 
-RPC middleware wraps every Netron call. It runs once per call, on the
-server side, around your method body. Use it for cross-cutting
-concerns that apply uniformly across services — auth checks, rate
-limiting, tracing, logging, metrics.
+:::warning Middleware is an HTTP-transport pipeline
+The Netron middleware pipeline lives in the **HTTP transport**
+(`netron/transport/http/middleware/`). The persistent transports
+(WebSocket / TCP / Unix) do **not** run this pipeline — they enforce
+auth and access control inline at dispatch (`remote-peer.ts`). There
+is no `INetronMiddleware` interface, no `NetronContext` type, and no
+`netron.use()` method; the real surface is the `MiddlewarePipeline`
+described below.
+:::
+
+RPC middleware wraps Netron calls over HTTP. It runs on the server
+side, around dispatch. Use it for cross-cutting concerns that apply
+uniformly — auth checks, rate limiting, tracing, logging, metrics.
 
 > Do not confuse with **DI middleware**, which wraps container
 > resolution. See [DI Middleware](../di/middleware.md) for the
 > distinction.
 
-## The interface
+## The middleware function
+
+A middleware is a plain function, not a class with `handle()`:
 
 ```typescript
-import { type INetronMiddleware, type NetronContext } from '@omnitron-dev/titan/netron';
+import {
+  type MiddlewareFunction,
+  type NetronMiddlewareContext,
+  MiddlewareStage,
+} from '@omnitron-dev/titan/netron/transport/http/middleware';
 
-interface INetronMiddleware {
-  handle(ctx: NetronContext, next: () => Promise<unknown>): Promise<unknown>;
-}
+const timing: MiddlewareFunction = async (ctx, next) => {
+  const t0 = performance.now();
+  await next();                       // returns void; result lives on ctx.result
+  record(ctx.serviceName, ctx.methodName, performance.now() - t0);
+};
 ```
 
-`ctx` carries:
+`ctx` (`NetronMiddlewareContext`) carries:
 
-- `service` — the service identifier (`'users@1.0.0'`).
-- `method` — the method name being called.
-- `args` — the parsed argument array.
-- `headers` — the transport headers (`Map<string, string>`).
-- `auth` — the resolved auth context (set by auth middleware).
-- `traceId` / `spanId` — the trace context.
-- `metadata` — free-form per-call metadata for downstream middleware.
+- `peer` — the `LocalPeer | RemotePeer` handling the call.
+- `serviceName` / `methodName` — what's being invoked.
+- `input` — the call input; `result` — the return value (set around `next()`).
+- `error` — set if dispatch threw.
+- `metadata` — a `Map<string, unknown>` for per-call data; the auth
+  context and authorization header live here
+  (`ctx.metadata.get('authContext')`).
+- `timing` — `{ start, middlewareTimes }`.
+- `skipRemaining` — set `true` to short-circuit the rest of the stage.
 
-`next()` invokes the next middleware in the chain (or the method body
-if this is the last). Always call exactly once. Return the result.
+The HTTP-specific `HttpMiddlewareContext` extends this with `request`,
+`response`, `route`, `params`, `query`, `body`, `cookies`.
+
+`next()` invokes the next middleware (or dispatch). It returns
+`Promise<void>` — there is no result to return; read/write `ctx.result`
+instead.
 
 ## Registering middleware
 
-Netron middleware is registered with the running `Netron` instance
-(typically constructed by the ecosystem module that owns it). The
-canonical path is via the `LocalPeer.middleware` registration API
-exposed in `@omnitron-dev/titan/netron`. The shape generally looks
-like:
+Middleware is registered on the HTTP server's `MiddlewarePipeline`,
+not on `Netron`. The pipeline exposes:
 
 ```typescript
-import { Netron } from '@omnitron-dev/titan/netron';
-
-const netron = new Netron(/* options */);
-netron.use(TracingMiddleware);
-netron.use(AuthMiddleware);
-netron.use(RateLimitMiddleware);
+pipeline.use(fn, config?, stage?);                    // global
+pipeline.useForService('users@1.0.0', fn, config?);   // one service
+pipeline.useForMethod('users@1.0.0', 'findById', fn); // one method
 ```
 
-Order in registration is the **execution order**. The first
-middleware runs first, calls `next()`, and the call propagates
-inward. Consult `netron/netron.ts` for the canonical registration
-surface in the version you are using; ecosystem modules
-(`titan-auth`, `titan-ratelimit`) handle this wiring on your
-behalf.
+Each registration takes an optional `MiddlewareConfig`
+(`{ name, priority?, condition?, onError?, services?, methods? }`) and
+a `MiddlewareStage`. In practice the HTTP server wires its own
+defaults (request-id, token extraction, the `NetronAuthMiddleware`);
+app bootstrap code adds custom middleware where it constructs the
+transport.
 
-## Order matters
+## Stages and order
 
-The conventional outer-to-inner order:
+The pipeline runs in five **stages** (`MiddlewareStage`), and within a
+stage middleware is ordered by `priority` (lower runs first, default
+`100`):
 
 ```
-Tracing → Auth → RateLimit → Validation → Logging → method body
+PRE_PROCESS → PRE_INVOKE → [dispatch] → POST_INVOKE → POST_PROCESS
+                                                          ↘ ERROR (on throw)
 ```
 
-- **Tracing first.** Establishes the trace context so everything
-  downstream can attach to it.
-- **Auth before rate limit.** So that authenticated callers don't
-  share a rate bucket with anonymous abusers.
-- **RateLimit before validation.** Cheap rate-limit lookup before
-  the expensive Zod parse.
-- **Validation in the middleware stack via** `@Validate` — runs
-  inline as the first thing inside the method body's wrapper.
-- **Logging last (outermost) for inbound** or **innermost for the
-  method body** depending on what you want to observe.
+- **`PRE_PROCESS`** — earliest; the HTTP server registers request-id
+  and token extraction here.
+- **`PRE_INVOKE`** — before the method runs; auth/authorization
+  (`NetronAuthMiddleware`), rate limiting, validation belong here.
+- **`POST_INVOKE` / `POST_PROCESS`** — after dispatch; response
+  shaping, compression, logging.
+- **`ERROR`** — runs when a stage throws.
+
+Put cheaper checks before expensive ones (rate-limit lookup before a
+heavy parse) by giving them a lower `priority`.
 
 ## A custom middleware — timing
 
 ```typescript
-@Injectable()
-class TimingMiddleware implements INetronMiddleware {
-  async handle(ctx: NetronContext, next: () => Promise<unknown>) {
-    const t0 = performance.now();
-    try {
-      const result = await next();
-      metrics.histogram('rpc.duration_ms', {
-        service: ctx.service,
-        method:  ctx.method,
-        outcome: 'ok',
-      }).observe(performance.now() - t0);
-      return result;
-    } catch (e) {
-      metrics.histogram('rpc.duration_ms', {
-        service: ctx.service,
-        method:  ctx.method,
-        outcome: 'error',
-      }).observe(performance.now() - t0);
-      throw e;
-    }
+import { type MiddlewareFunction, MiddlewareStage } from '@omnitron-dev/titan/netron/transport/http/middleware';
+
+const timingMiddleware: MiddlewareFunction = async (ctx, next) => {
+  const t0 = performance.now();
+  try {
+    await next();
+    metrics.histogram('rpc.duration_ms', {
+      service: ctx.serviceName,
+      method:  ctx.methodName,
+      outcome: 'ok',
+    }).observe(performance.now() - t0);
+  } catch (e) {
+    metrics.histogram('rpc.duration_ms', {
+      service: ctx.serviceName,
+      method:  ctx.methodName,
+      outcome: 'error',
+    }).observe(performance.now() - t0);
+    throw e;
   }
-}
+};
+
+pipeline.use(timingMiddleware, { name: 'timing', priority: 5 }, MiddlewareStage.PRE_INVOKE);
 ```
 
-Register via the multi-token pattern (see
-[Multi-injection](../di/multi-injection.md)) and Netron picks it up.
+Titan also ships ready-made factories on `NetronBuiltinMiddleware`
+(metrics, logging, circuit-breaker, retry, caching, …) and
+`HttpBuiltinMiddleware` (CORS, compression, body parsing, security
+headers).
 
-## Per-method middleware
+## Per-method policy via decorators
 
-Decorators on individual methods (e.g. `@RateLimit`, `@Auth`) are
-also middleware — applied only to the decorated method. They compose
-with the global middleware stack, running after the global ones.
+Method decorators (`@Auth`, `@RateLimit`, `@Cache`) are **not**
+middleware classes — they stamp `reflect-metadata` onto the method.
+The auth middleware (and, on WS/TCP, the inline dispatch path) reads
+that metadata and enforces it:
 
 ```typescript
 @Public()
-@Auth({ scope: 'admin' })
-@RateLimit({ capacity: 5, refillPerSec: 1 })
+@Auth({ roles: ['admin'] })
+@RateLimit({ defaultTier: { name: 'admin', limit: 5 }, window: 60_000 })
 async dangerousOp() { /* … */ }
 ```
 
-Effective order:
+So enforcement runs *inside* the auth/rate-limit step of the pipeline
+(or inline on WS/TCP) — there is no separate per-method middleware
+instance. The global step does the heavy lifting (validate token,
+resolve user); the decorator metadata supplies the specific policy.
 
-```
-[Global] Tracing → [Global] Auth → [Global] RateLimit → 
-  [Method] Auth (scope check) → [Method] RateLimit → 
-    method body
-```
+## Scoping middleware to specific methods
 
-The global ones do the heavy lifting (validate token, resolve user);
-the method-level ones add specific policy.
-
-## Skipping middleware for specific methods
-
-For methods that bypass a middleware (health checks, public
-introspection), use the `@Skip(MiddlewareClass)` decorator:
+There is no `@Skip` decorator. To limit (or exclude) middleware, use
+the registration filters on `MiddlewareConfig` — `services` /
+`methods` (string list or `RegExp`) and `condition`:
 
 ```typescript
-@Public()
-@Skip(AuthMiddleware)
-async ping() { return 'pong'; }
+pipeline.use(authMiddleware, {
+  name: 'auth',
+  methods: /^(?!ping$).*/,        // everything except `ping`
+});
 ```
 
-The middleware class is still registered globally; the decorator
-opts this method out.
+The built-in `NetronAuthMiddleware` also accepts `skipServices` /
+`skipMethods` options, and any middleware can set `ctx.skipRemaining`
+to short-circuit the rest of its stage.
 
 ## Modifying the request
 
-Middleware can mutate the `args` array before calling `next()` — for
+Middleware can mutate `ctx.input` before calling `next()` — for
 example, normalising input or injecting derived data:
 
 ```typescript
-async handle(ctx, next) {
-  // Trim leading/trailing whitespace from string args.
-  ctx.args = ctx.args.map(a => typeof a === 'string' ? a.trim() : a);
-  return next();
-}
+const trim: MiddlewareFunction = async (ctx, next) => {
+  if (Array.isArray(ctx.input)) {
+    ctx.input = ctx.input.map(a => typeof a === 'string' ? a.trim() : a);
+  }
+  await next();
+};
 ```
 
 Mutate sparingly. Per-method validation is a better fit for
@@ -168,28 +189,28 @@ content rules; middleware should handle cross-cutting transforms
 
 ## Modifying the response
 
-Wrap the result of `next()` to transform it:
+`next()` runs dispatch and populates `ctx.result`; transform it after:
 
 ```typescript
-async handle(ctx, next) {
-  const result = await next();
-  if (typeof result === 'object' && result !== null) {
-    return { ...result, _serverTimeMs: Date.now() };
+const stamp: MiddlewareFunction = async (ctx, next) => {
+  await next();
+  if (typeof ctx.result === 'object' && ctx.result !== null) {
+    ctx.result = { ...ctx.result, _serverTimeMs: Date.now() };
   }
-  return result;
-}
+};
 ```
 
 Useful for response envelopes, version stamping, redaction.
 
 ## Error interception
 
-Middleware sees errors from `next()`. Common patterns:
+Dispatch errors surface as a throw from `next()` (and are also set on
+`ctx.error`). Common pattern:
 
 ```typescript
-async handle(ctx, next) {
+const mapErrors: MiddlewareFunction = async (ctx, next) => {
   try {
-    return await next();
+    await next();
   } catch (e) {
     if (e instanceof NotFoundError) {
       // Convert framework error to project-specific shape.
@@ -197,7 +218,7 @@ async handle(ctx, next) {
     }
     throw e;
   }
-}
+};
 ```
 
 Avoid swallowing. Errors that middleware suppresses become silent

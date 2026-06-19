@@ -19,25 +19,25 @@ Netron service id, purpose, and key methods. Verified against
 
 | File | Service id (Netron) | Methods | Role gate (typical) |
 | ---- | ------------------- | ------- | ------------------- |
-| `alert.rpc-service.ts` | `OmnitronAlerts` | 7 | operator + viewer |
-| `auth.rpc-service.ts` | `OmnitronAuth` | 7 | mixed (some allowAnonymous for signIn) |
-| `backup.rpc-service.ts` | `OmnitronBackups` | 6 | operator |
-| `deploy.rpc-service.ts` | `OmnitronDeploy` | 3 | operator + admin |
+| `alert.rpc-service.ts` | `OmnitronAlerts` | 7 | viewer (read) + operator (mutate) |
+| `auth.rpc-service.ts` | `OmnitronAuth` | 7 | mixed (5 allowAnonymous; 2 authenticated) |
+| `backup.rpc-service.ts` | `OmnitronBackups` | 6 | viewer (read) + admin (mutate) |
+| `deploy.rpc-service.ts` | `OmnitronDeploy` | 3 | viewer (history) + operator (deploy/rollback) |
 | `discovery.rpc-service.ts` | `OmnitronDiscovery` | 3 | viewer |
-| `event-broadcaster.rpc-service.ts` | `OmnitronEvents` | 4 | mixed |
-| `fleet.rpc-service.ts` | `OmnitronFleet` | 8 | operator |
+| `event-broadcaster.rpc-service.ts` | `OmnitronEvents` | 4 | viewer (sub/stats) + admin (pushEvent) |
+| `fleet.rpc-service.ts` | `OmnitronFleet` | 8 | viewer (read) + operator (mutate); heartbeat anonymous |
 | `health-check.rpc-service.ts` | `OmnitronHealth` | 4 | viewer |
 | `infrastructure.rpc-service.ts` | `OmnitronInfra` | 3 | viewer |
-| `kubernetes.rpc-service.ts` | `OmnitronKubernetes` | 9 | operator |
+| `kubernetes.rpc-service.ts` | `OmnitronKubernetes` | 9 | admin |
 | `log-collector.rpc-service.ts` | `OmnitronLogs` | 3 | viewer |
-| `node-manager.rpc-service.ts` | `OmnitronNodes` | 14 | operator |
-| `pipeline.rpc-service.ts` | `OmnitronPipelines` | 8 | operator |
-| `project.rpc-service.ts` | `OmnitronProject` | 14 | operator + viewer |
+| `node-manager.rpc-service.ts` | `OmnitronNodes` | 14 | viewer (read) + operator (mutate) |
+| `pipeline.rpc-service.ts` | `OmnitronPipelines` | 8 | viewer (read) + operator (mutate) |
+| `project.rpc-service.ts` | `OmnitronProject` | 14 | viewer (read) + operator (start/stop) + admin (CRUD) |
 | `secrets.rpc-service.ts` | `OmnitronSecrets` | 4 | admin |
-| `sync.rpc-service.ts` | `OmnitronSync` | 3 | service-to-service |
+| `sync.rpc-service.ts` | `OmnitronSync` | 3 | service-to-service (getSyncStatus is viewer) |
 | `system-info.rpc-service.ts` | `OmnitronSystemInfo` | 1 | viewer |
-| `telemetry.rpc-service.ts` | `OmnitronTelemetry` | 2 | service-to-service |
-| `trace-collector.rpc-service.ts` | `OmnitronTraces` | 5 | viewer + operator |
+| `telemetry.rpc-service.ts` | `OmnitronTelemetry` | 2 | pushBatch anonymous; getRelayStats viewer |
+| `trace-collector.rpc-service.ts` | `OmnitronTraces` | 5 | viewer |
 
 Plus the core supervisor:
 
@@ -52,14 +52,18 @@ Service ids all use the `Omnitron<Subsystem>` PascalCase shape
 mechanism:
 
 ```typescript
-import type { IDeployService } from '@omnitron-dev/omnitron/services';
+import type { IProjectRpcService } from '@omnitron-dev/omnitron/dto/services';
 
-const peer = await client.connect('unix://~/.omnitron/daemon.sock');
-const deploy = await peer.queryInterface<IDeployService>('OmnitronDeploy');
-await deploy.deployApp({ app: 'api', version: 'v1.2.3' });
+const peer = await netron.connect('unix://~/.omnitron/daemon.sock');
+const project = await peer.queryInterface<IProjectRpcService>('OmnitronProject');
+const projects = await project.listProjects();
 ```
 
-The CLI and webapp do exactly this under the hood.
+The CLI and webapp do exactly this under the hood. Typed client
+interfaces are published from the `@omnitron-dev/omnitron/dto/services`
+subpath (`IDaemonService`, `IProjectRpcService`, `IOmnitronAuthService`,
+`IOmnitronLogsService`, `IInfraService`); other services can be queried
+untyped via `queryInterface(serviceId)`.
 
 ## Per-service summary
 
@@ -93,11 +97,14 @@ User authentication, session management, JWT issuance.
 | `validateSession({sessionId})` | Verify a session id |
 | `refreshSession({sessionId})` | Renew session expiry |
 | `signOut({sessionId})` | Drop session |
-| `getActiveSessions()` | List active sessions (admin) |
-| `changePassword({...})` | Self-service password change |
+| `getActiveSessions()` | List the caller's own active sessions |
+| `changePassword({oldPassword, newPassword})` | Self-service password change |
 
-`signIn` and `validateToken` are typically `allowAnonymous`; the
-rest gate on the session's role.
+`signIn`, `validateToken`, `validateSession`, `refreshSession`, and
+`signOut` are all `allowAnonymous` (the session id / token is the
+credential). `getActiveSessions` and `changePassword` are
+`@Public({ auth: true })` — any authenticated caller, operating on
+its own identity (not admin-gated).
 
 ### `OmnitronBackups` — `backup.rpc-service.ts`
 
@@ -112,7 +119,9 @@ Database backup, restore, scheduling.
 | `setSchedule({database, cron})` | Configure recurring backups |
 | `getSchedule({database})` | Read current schedule |
 
-Driven by `omnitron backup` commands.
+Driven by `omnitron backup` commands. Reads (`listBackups`,
+`getSchedule`) gate on `viewer`; all mutations (`createBackup`,
+`restoreBackup`, `deleteBackup`, `setSchedule`) require `admin`.
 
 ### `OmnitronDeploy` — `deploy.rpc-service.ts`
 
@@ -147,8 +156,11 @@ live UI updates.
 | ------ | ------ |
 | `subscribe({channels, ...})` | Register a subscriber; returns `subscriberId` |
 | `unsubscribe({subscriberId})` | Drop subscription |
-| `pushEvent({channel, payload})` | Publish an event |
+| `pushEvent({channel, payload})` | Publish an event (admin-only; test/admin path) |
 | `getStats()` | Subscriber count + per-channel stats |
+
+`subscribe` / `unsubscribe` / `getStats` gate on `viewer`;
+`pushEvent` requires `admin`.
 
 ### `OmnitronFleet` — `fleet.rpc-service.ts`
 
@@ -164,6 +176,11 @@ Cross-node fleet operations: register nodes, drain, set roles.
 | `setRole({nodeId, role})` | Promote / demote a node |
 | `drainNode({nodeId})` | Drain workloads off a node |
 | `heartbeat({nodeId})` | Node liveness ping (called by remote daemons) |
+
+Reads (`listNodes`, `getNode`, `getSummary`) gate on `viewer`;
+mutations (`registerNode`, `removeNode`, `setRole`, `drainNode`)
+on `operator`. `heartbeat` is `allowAnonymous` — follower daemons
+call it before they hold a token.
 
 ### `OmnitronHealth` — `health-check.rpc-service.ts`
 
@@ -204,7 +221,7 @@ Kubernetes integration.
 | `listServices({namespace?})` | List services |
 | `execInPod({pod, command, namespace?})` | Run command in pod |
 
-Driven by `omnitron k8s ...`.
+Driven by `omnitron k8s ...`. Every method requires `admin`.
 
 ### `OmnitronLogs` — `log-collector.rpc-service.ts`
 
@@ -258,6 +275,12 @@ Project + stack registry. 14 methods covering both layers.
 | Project apps | `getProjectApps` |
 | Stacks | `listStacks`, `getStack`, `getStackStatus`, `createStack`, `deleteStack`, `startStack`, `stopStack` |
 
+Roles: all reads (`listProjects`, `getProject`, `scanRequirements`,
+`getProjectApps`, `listStacks`, `getStack`, `getStackStatus`) gate on
+`viewer`; `startStack` / `stopStack` on `operator`; project CRUD
+(`addProject`, `updateProject`, `removeProject`) and stack CRUD
+(`createStack`, `deleteStack`) on `admin`.
+
 ### `OmnitronSecrets` — `secrets.rpc-service.ts`
 
 Encrypted secret CRUD.
@@ -282,7 +305,10 @@ cluster mode).
 | `drainBuffer({limit?})` | Pull pending sync data |
 | `getSyncStatus()` | Current sync state |
 
-Not typically called directly by operators.
+`receiveBatch` / `drainBuffer` gate on `['admin', 'operator',
+'service_role']` (daemon-to-daemon over TCP); `getSyncStatus` is
+`viewer` (webapp monitoring). Not typically called directly by
+operators.
 
 ### `OmnitronSystemInfo` — `system-info.rpc-service.ts`
 
@@ -302,8 +328,12 @@ aggregates.
 
 | Method | Effect |
 | ------ | ------ |
-| `pushBatch({nodeId, entries})` | Producer pushes batch; returns ack count |
+| `pushBatch({nodeId, entries})` | Follower daemon pushes batch; returns `{ ackd }` count |
 | `getRelayStats()` | Internal relay stats |
+
+`pushBatch` is `allowAnonymous` (follower daemons call it over TCP
+before holding a token); `getRelayStats` gates on `viewer` (webapp
+monitoring).
 
 ### `OmnitronTraces` — `trace-collector.rpc-service.ts`
 
@@ -324,31 +354,34 @@ Distributed trace ingestion + query.
 | `viewer`    | `viewer`, `operator`, `admin`      | Read-only inspection |
 | `operator`  | `operator`, `admin`                | Lifecycle + scale + exec |
 | `admin`     | `admin` only                       | Destructive: shutdown, secrets, role changes |
-| anonymous   | anyone with socket access          | `ping`, `signIn`, `validateToken` |
+| anonymous   | anyone with socket access          | `ping`, the `OmnitronAuth` endpoints, `OmnitronFleet.heartbeat`, `OmnitronTelemetry.pushBatch` |
 
 Methods on the same service can vary in role:
 - `OmnitronAuth.signIn` is anonymous;
-  `OmnitronAuth.getActiveSessions` is admin-only.
+  `OmnitronAuth.getActiveSessions` requires any authenticated caller
+  (`@Public({ auth: true })`), operating on the caller's own identity
+  — not admin-gated.
 - `OmnitronProject.listProjects` is viewer;
-  `OmnitronProject.deleteStack` is operator.
+  `OmnitronProject.startStack` is operator; `OmnitronProject.deleteStack`
+  is admin.
 
 ## Querying a service from your code
 
 ```typescript
 import { Netron } from '@omnitron-dev/titan/netron';
 import type {
-  IProjectService,
-  IDeployService,
-  IFleetService,
-} from '@omnitron-dev/omnitron/services';
+  IProjectRpcService,
+  IDaemonService,
+} from '@omnitron-dev/omnitron/dto/services';
 
 const netron = new Netron();
 const peer   = await netron.connect('unix://~/.omnitron/daemon.sock');
 
-const project = await peer.queryInterface<IProjectService>('OmnitronProject');
+const project = await peer.queryInterface<IProjectRpcService>('OmnitronProject');
 const projects = await project.listProjects();
 
-const deploy = await peer.queryInterface<IDeployService>('OmnitronDeploy');
+// Services without a published interface are queried untyped:
+const deploy = await peer.queryInterface('OmnitronDeploy');
 await deploy.deployApp({ app: 'api', version: 'v1.2.3', strategy: 'rolling' });
 ```
 

@@ -62,14 +62,18 @@ reason, hints for the client about how to re-authenticate).
 ```typescript
 import { AuthError } from '@omnitron-dev/titan/errors';
 
-throw new AuthError({
-  message:  'session expired',
-  details:  { reason: 'token_expired', refreshable: true },
-});
+// Constructor is positional: (message?, details?, options?)
+throw new AuthError('session expired', { reason: 'token_expired', refreshable: true });
+
+// Or use a static factory:
+throw AuthError.tokenExpired();
+throw AuthError.bearerTokenRequired('api');
+throw AuthError.invalidToken('signature mismatch');
 ```
 
 Catch by `instanceof AuthError` when you want auth-specific
-handling (e.g. redirect to login).
+handling (e.g. redirect to login). The third `options` argument
+carries `{ authType, realm }` for the `WWW-Authenticate` header.
 
 ### `PermissionError` (403)
 
@@ -79,10 +83,14 @@ role. Carries the missing capability for diagnostics.
 ```typescript
 import { PermissionError } from '@omnitron-dev/titan/errors';
 
-throw new PermissionError({
-  message: 'users:write scope required',
-  details: { required: ['users:write'], userScopes: ['users:read'] },
+// Constructor is positional: (message?, details?, options?)
+throw new PermissionError('users:write scope required', undefined, {
+  requiredPermission: 'users:write',
+  userPermissions:    ['users:read'],
 });
+
+// Or use the static factory:
+throw PermissionError.insufficientPermissions('users:write', ['users:read']);
 ```
 
 ### `RateLimitError` (429)
@@ -92,11 +100,17 @@ Throttling. Carries the retry-after hint:
 ```typescript
 import { RateLimitError } from '@omnitron-dev/titan/errors';
 
-throw new RateLimitError({
-  message: 'too many requests',
-  details: { retryAfter: 60 },     // seconds
-});
+// Constructor is positional: (message?, details?, options?)
+throw new RateLimitError('too many requests', undefined, { retryAfter: 60 }); // seconds
+
+// Or, most commonly, via the factory:
+import { Errors } from '@omnitron-dev/titan/errors';
+throw Errors.tooManyRequests(60);
 ```
+
+`options` accepts `{ limit, remaining, resetTime, retryAfter }`;
+`getRateLimitHeaders()` renders the matching `X-RateLimit-*` /
+`Retry-After` response headers.
 
 ### `AggregateError`
 
@@ -104,7 +118,7 @@ Multiple errors batched into one. Useful when a batch operation
 partially fails:
 
 ```typescript
-import { AggregateError, Errors } from '@omnitron-dev/titan/errors';
+import { AggregateError, toTitanError, type TitanError } from '@omnitron-dev/titan/errors';
 
 const errors: TitanError[] = [];
 for (const item of batch) {
@@ -115,12 +129,16 @@ for (const item of batch) {
   }
 }
 if (errors.length > 0) {
-  throw new AggregateError({
-    message: `${errors.length} items failed`,
-    errors,
-  });
+  // Constructor is positional: (errors[], options?). Code is MULTIPLE_ERRORS (600),
+  // message is auto-generated ("N errors occurred"); pass { deduplicate: true } to
+  // collapse identical code+message pairs.
+  throw new AggregateError(errors, { deduplicate: true });
 }
 ```
+
+The batched errors are exposed on `.errors`, and a one-line
+`.summary`. `TitanError.aggregate(errors, opts?)` is an equivalent
+static shortcut.
 
 ### `DomainError`
 
@@ -130,16 +148,20 @@ helper to declare a typed code namespace, then create errors from it:
 ```typescript
 import { defineDomainCodes, DomainError } from '@omnitron-dev/titan/errors';
 
+// Code config keys are `status` (HTTP) + `message` (+ optional `retryable`).
 const BillingCodes = defineDomainCodes('BILLING', {
-  CARD_DECLINED:        { httpStatus: 402, message: 'Payment declined' },
-  INSUFFICIENT_BALANCE: { httpStatus: 409, message: 'Insufficient balance' },
-  FRAUD_DETECTED:       { httpStatus: 403, message: 'Fraudulent activity detected' },
+  CARD_DECLINED:        { status: 402, message: 'Payment declined' },
+  INSUFFICIENT_BALANCE: { status: 409, message: 'Insufficient balance' },
+  FRAUD_DETECTED:       { status: 403, message: 'Fraudulent activity detected' },
 });
 
+// BillingCodes.CARD_DECLINED is the string 'BILLING_CARD_DECLINED'.
+// DomainError takes { domainCode, httpStatus?, message, details? }.
 throw new DomainError({
-  code:    BillingCodes.CARD_DECLINED,
-  message: 'Card 4242 declined',
-  details: { last4: '4242', reason: 'do_not_honor' },
+  domainCode: BillingCodes.CARD_DECLINED,
+  httpStatus: 402,
+  message:    'Card 4242 declined',
+  details:    { last4: '4242', reason: 'do_not_honor' },
 });
 ```
 
@@ -160,15 +182,18 @@ For everything *not* in the class tree above, use the appropriate
 | 403    | `FORBIDDEN`                | `Errors.forbidden(...)` or `new PermissionError(...)` |
 | 404    | `NOT_FOUND`                | `Errors.notFound(resource, id?)`   |
 | 409    | `CONFLICT`                 | `Errors.conflict(...)` / `Errors.alreadyExists(...)` |
-| 422    | `VALIDATION_ERROR`         | `Errors.validation(...)`           |
-| 429    | `RATE_LIMITED`             | `Errors.rateLimit(...)` or `new RateLimitError(...)` |
+| 422    | `VALIDATION_ERROR`         | `Errors.validation(fields, opts?)` |
+| 429    | `TOO_MANY_REQUESTS`        | `Errors.tooManyRequests(retryAfter?)` or `new RateLimitError(...)` |
 | 500    | `INTERNAL_ERROR`           | `Errors.internal(...)` (rare; framework usually wraps) |
 | 503    | `SERVICE_UNAVAILABLE`      | `Errors.unavailable(...)`          |
 
-The `NetronErrors` namespace covers transport-specific codes:
-`serviceNotFound`, `methodNotFound`, `transportError`, `timeout`,
-`protocolError`. They produce `TitanError` instances with the
-appropriate code.
+The `NetronErrors` namespace covers transport-specific failures:
+`serviceNotFound`, `methodNotFound`, `connectionFailed`,
+`connectionTimeout`, `connectionClosed`, `transportLost`,
+`peerNotFound`, `rpcTimeout`, `invalidRequest`, `streamClosed`,
+`serializeEncode`/`serializeDecode`. They produce the matching
+`NetronError` subclass (`ServiceNotFoundError`, `TransportError`,
+`RpcError`, …) with the appropriate code.
 
 ## Discrimination on the client
 

@@ -6,10 +6,11 @@ description: The Omnitron webapp — React + Vite + Prism, every page, every pla
 
 # Web console
 
-The Omnitron webapp at `apps/omnitron/webapp/` is the visual
-counterpart of the CLI. It's a React 19 + Vite + Prism SPA that
-talks to the daemon via `@omnitron-dev/netron-browser` — the same
-RPC surface the CLI uses.
+The Omnitron webapp at `apps/omnitron/webapp/` (package
+`@omnitron/console`) is the visual counterpart of the CLI. It's a
+React 19 + Vite + MUI SPA that talks to the daemon via the
+`@omnitron-dev/prism/netron` client — the same Netron RPC surface
+the CLI uses.
 
 Verified against `apps/omnitron/webapp/src/`.
 
@@ -20,11 +21,11 @@ Verified against `apps/omnitron/webapp/src/`.
 | Framework | React 19 |
 | Build | Vite 8 with `@vitejs/plugin-react-swc` |
 | Routing | `react-router-dom` 7 |
-| Design system | `@omnitron-dev/prism` (workspace) |
-| RPC client | `@omnitron-dev/netron-browser` over WebSocket |
+| UI components | `@mui/material` (Emotion), with select components from `@omnitron-dev/prism` |
+| RPC client | `@omnitron-dev/prism/netron` (`createMultiBackendClient`) over HTTP + WebSocket |
 | Charts | `react-apexcharts` |
 | Graphs | `@xyflow/react` (topology, dependency graphs) |
-| State | Local stores in `src/stores/` |
+| State | `zustand` stores in `src/stores/` |
 | Code splitting | Per-page `React.lazy()` |
 
 ## Filesystem layout
@@ -43,11 +44,12 @@ webapp/
     ├── pages/                # 20+ pages, lazy-loaded
     ├── components/           # shared UI building blocks
     ├── hooks/                # custom React hooks
-    ├── netron/               # browser RPC client wiring
-    ├── auth/                 # AuthGuard, GuestGuard, ProjectGuard
-    ├── stores/               # state stores
+    ├── netron/               # RPC client + DaemonWsClient wiring
+    ├── auth/                 # AuthGuard, GuestGuard, ProjectGuard, auth store
+    ├── stores/               # zustand state stores
+    ├── assets/               # icons
     ├── utils/
-    └── stubs/                # dev-mode mock data
+    └── stubs/                # fs/path stubs for Node builtins pulled in by Prism
 ```
 
 ## Route map
@@ -70,7 +72,7 @@ sidebar.
 | `/apps/:name` | `AppDetailPage` | project | `OmnitronDaemon.getApp` + many |
 | `/stacks` | `StacksPage` | project | `OmnitronProject.listStacks` |
 | `/stacks/:name` | `StackDetailPage` | project | `OmnitronProject.getStackStatus` |
-| `/metrics` | `MetricsPage` | project | `OmnitronDaemon.getMetrics` |
+| `/metrics` | `MetricsPage` | project | `OmnitronMetrics` (`getSnapshot` / `querySeries`) |
 | `/topology` | `TopologyPage` | project | derived from `OmnitronDiscovery` + services |
 | `/containers` | `ContainersPage` | project | `OmnitronInfra` |
 | `/deployments` | `DeploymentsPage` | project | `OmnitronDeploy` |
@@ -93,7 +95,11 @@ The landing page after sign-in. Shows:
 - Recent deployments.
 - Cluster status when cluster mode is enabled.
 
-Refreshes every 5 s via React Query.
+Pages fetch through the typed Netron client directly (the
+`daemon` / `metrics` proxies from `src/netron/client.ts`) inside
+`useEffect` + polling intervals, and subscribe to a shared
+`zustand` realtime store (`src/stores/realtime.store.ts`) for
+live pushes. There is no TanStack/React Query layer.
 
 ### Apps list & detail
 
@@ -238,9 +244,11 @@ sequenceDiagram
   A-->>D: claims | reject
 ```
 
-The token is held in `localStorage` (default) or `sessionStorage`
-when "remember me" is off. Logout clears it and calls
-`OmnitronAuth.signOut`.
+The access token is held in `sessionStorage` under the key
+`omnitron_token` (via Prism's `SessionTokenStorage`). Logout
+clears it and calls `OmnitronAuth.signOut({ sessionId })`. The
+`signIn` / `validateToken` / `refreshSession` methods are the
+only ones that don't require a bearer token.
 
 ## RBAC in the UI
 
@@ -256,9 +264,10 @@ The webapp respects the same three roles as the daemon
 | Shutdown daemon, Reload config | admin | non-admin (hidden) |
 | Settings → users | admin | non-admin (hidden) |
 
-Buttons consult `useAuth()` and disable / hide accordingly. The
-daemon still enforces server-side — UI gating is convenience, not
-security.
+Surface elements consult the `useAuthStore` (zustand) auth state
+and disable / hide accordingly. The daemon still enforces
+server-side via `@Public({ auth: { roles } })` on each RPC method
+— UI gating is convenience, not security.
 
 ## Real-time event flow
 
@@ -275,14 +284,17 @@ sequenceDiagram
   loop while connected
     D->>E: pushEvent('app.status', { name: 'api', status: 'online' })
     E-->>W: push to socket
-    W->>W: invalidate React Query cache or update store
+    W->>W: update the zustand realtime store
   end
   Note over W: page unmount or sign-out
   W->>E: unsubscribe(subscriberId)
 ```
 
-Combined with React Query's `refetchOnWindowFocus`, the
-dashboard refreshes essentially instantly when state changes.
+The webapp subscribes through a single `DaemonWsClient`
+(`src/netron/ws-client.ts`) that feeds the shared realtime store,
+so the dashboard reflects state changes essentially instantly —
+without per-component polling for the events that the daemon
+already pushes.
 
 ## Build / run modes
 
@@ -290,12 +302,15 @@ dashboard refreshes essentially instantly when state changes.
 
 ```bash
 cd apps/omnitron/webapp
-pnpm dev                    # Vite dev server with HMR
+pnpm dev                    # Vite dev server with HMR (port 9802)
 ```
 
-Daemon address resolves from `VITE_OMNITRON_URL` env (default
-`http://localhost:9800`). Auth credentials come from your
-`omnitron auth` setup.
+The RPC client uses a relative `baseUrl`, so the Vite dev server
+proxies the daemon for it (see `vite.config.ts`): `/netron/*` →
+`http://localhost:9801` (daemon HTTP) and `/ws` → the daemon's
+Netron WebSocket transport. The daemon must already be running
+(`omnitron up`). Auth credentials come from your `omnitron auth`
+setup.
 
 ### Production build
 
@@ -304,19 +319,21 @@ cd apps/omnitron/webapp
 pnpm build                  # tsc -b && vite build → dist/
 ```
 
-The compiled bundle lands in `webapp/dist/`. The daemon serves it
-directly from its HTTP listener at `:9800` (when configured) — no
-separate nginx is required for the basic case. For the nginx
-deployment (the `omnitron webapp start` path), the container
-mounts `dist/` and proxies `/netron/*` to the daemon.
+The compiled bundle lands in `webapp/dist/`. It is **not** served
+by the daemon directly — `omnitron webapp start` launches an
+`omnitron-nginx` container that mounts `dist/`, serves it on
+`:9800`, and reverse-proxies `/netron/*` to the daemon's HTTP
+listener (`:9801`) and `/ws` to its WebSocket transport (`:9802`).
 
 ### Open the webapp
 
 | Command | Effect |
 | ------- | ------ |
-| `omnitron webapp build` | Compile the bundle |
-| `omnitron webapp start [-f]` | Start nginx container serving static + gateway |
-| `omnitron webapp open` | Open the running webapp in the system browser |
+| `omnitron webapp build` | Compile the bundle (`vite build` → `dist/`) |
+| `omnitron webapp start [-f]` | Start the `omnitron-nginx` container serving static + gateway (`-f`/`--force` recreates it) |
+| `omnitron webapp stop` | Stop and remove the nginx container |
+| `omnitron webapp status` | Report whether the console container is running / healthy |
+| `omnitron webapp open` | Open the running webapp in the system browser (starts it first if stopped) |
 
 ## Project switcher
 
@@ -338,27 +355,31 @@ Every page is built around three states:
 
 ## Performance characteristics
 
-- **Code-splitting** — each page is `React.lazy`'d; initial
-  bundle ~ 250 kB gzipped.
+- **Code-splitting** — each page is `React.lazy`'d.
 - **HMR** — Vite + SWC; instant in dev.
-- **React Query** caches RPC results; default 30 s stale time.
-- **WebSocket** for `OmnitronEvents` subscribers — one socket per
-  tab.
+- **Polling + push** — pages poll the daemon on an interval and
+  the shared `zustand` realtime store applies pushed events; no
+  TanStack/React Query cache layer.
+- **WebSocket** for `OmnitronEvents` subscribers — one
+  `DaemonWsClient` socket per tab.
 
 ## Adding a new page
 
 The pattern is mechanical:
 
-1. Add `apps/omnitron/webapp/src/pages/my-page.tsx` exporting
+1. Add `apps/omnitron/webapp/src/pages/my-page.tsx` exporting a
    default React component.
-2. Add a lazy import + `<Route path="my-page" ...>` in
-   `src/routes/index.tsx`.
+2. Add a lazy import + `<Route path="my-page" ...>` in the router
+   (`src/routes/index.tsx`), wrapping in `<ProjectRoute>` if the
+   page is project-scoped.
 3. Add a nav entry in `src/layouts/console-layout.tsx`.
-4. Use existing hooks (`useNetronQuery`, `useNetronMutation`)
-   from `src/netron/` to call the relevant RPC service.
+4. Import the typed service proxy from `src/netron/client.ts`
+   (e.g. `import { daemon, metrics } from 'src/netron/client'`)
+   and call it from `useEffect`; for live updates, read from the
+   `src/stores/realtime.store.ts` zustand store.
 
 No separate API layer to wire — the daemon already exposes
-everything.
+everything as typed Netron services.
 
 ## Anti-patterns
 
@@ -372,8 +393,8 @@ everything.
   under the `<AuthGuard>` wrapper; ad-hoc auth checks per page
   drift.
 - **Calling the daemon directly with `fetch`.** Use the typed
-  `useNetronQuery` / `useNetronMutation` hooks — they handle
-  auth, retries, types.
+  service proxies from `src/netron/client.ts` — they carry the
+  bearer token and give you end-to-end types from the daemon DTOs.
 
 ## See also
 
@@ -381,6 +402,8 @@ everything.
 - [Services reference](./services-reference.md) — every RPC the
   webapp consumes
 - [Architecture](./architecture.md) — where the webapp sits
-- [Prism](../frontend/prism/index.md) — the design system the webapp uses
-- [netron-browser](../frontend/netron/browser.md) — the RPC client
-- [netron-react](../frontend/netron/react.md) — React hooks for RPC
+- [Prism](../frontend/prism/index.md) — provides the
+  `@omnitron-dev/prism/netron` RPC client the webapp uses, plus
+  select UI components (the bulk of the UI is MUI)
+- [netron-browser](../frontend/netron/browser.md) — the underlying
+  browser RPC transport that Prism's netron client builds on

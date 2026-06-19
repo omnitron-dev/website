@@ -27,29 +27,29 @@ carries event metadata. Handler return values are ignored.
 
 ## Framework-emitted events
 
-| Enum                              | String value             | Payload (typical)                                |
+| Enum                              | String value             | Payload (as emitted by the kernel)               |
 | --------------------------------- | ------------------------ | ------------------------------------------------ |
-| `ApplicationEvent.Starting`       | `'starting'`             | `{}`                                             |
-| `ApplicationEvent.Started`        | `'started'`              | `{ durationMs }`                                 |
-| `ApplicationEvent.Stopping`       | `'stopping'`             | `{ reason }`                                     |
-| `ApplicationEvent.Stopped`        | `'stopped'`              | `{ durationMs }`                                 |
-| `ApplicationEvent.Error`          | `'error'`                | `{ error, phase?, providerName? }`               |
-| `ApplicationEvent.ModuleRegistered` | `'module:registered'`  | `{ name, version }`                              |
-| `ApplicationEvent.ModuleStarted`  | `'module:started'`       | `{ name }`                                       |
-| `ApplicationEvent.ModuleStopped`  | `'module:stopped'`       | `{ name }`                                       |
-| `ApplicationEvent.ConfigChanged`  | `'config:changed'`       | `{ key, oldValue, newValue, source }`            |
-| `ApplicationEvent.HealthCheck`    | `'health:check'`         | `{ status, modules, details }`                   |
+| `ApplicationEvent.Starting`       | `'starting'`             | _(none)_                                         |
+| `ApplicationEvent.Started`        | `'started'`              | _(none)_                                         |
+| `ApplicationEvent.Stopping`       | `'stopping'`             | _(none)_                                         |
+| `ApplicationEvent.Stopped`        | `'stopped'`              | _(none)_                                         |
+| `ApplicationEvent.Error`          | `'error'`                | the raw `Error` (or `{ error }` from the bus)    |
+| `ApplicationEvent.ModuleRegistered` | `'module:registered'`  | `{ module }`                                     |
+| `ApplicationEvent.ModuleStarted`  | `'module:started'`       | `{ module }`                                     |
+| `ApplicationEvent.ModuleStopped`  | `'module:stopped'`       | `{ module }`                                     |
+| `ApplicationEvent.ConfigChanged`  | `'config:changed'`       | `{ config }` (full reconfigure) or `{ key, value }` (`setConfig`) |
+| `ApplicationEvent.HealthCheck`    | `'health:check'`         | _(reserved; not emitted by the kernel itself)_   |
 | `ApplicationEvent.Signal`         | `'signal'`               | `{ signal }`                                     |
-| `ApplicationEvent.UncaughtException` | `'uncaughtException'` | `{ error }`                                      |
-| `ApplicationEvent.UnhandledRejection` | `'unhandledRejection'` | `{ reason }`                                    |
-| `ApplicationEvent.StateSave`      | `'state:save'`           | `{ state }`                                      |
-| `ApplicationEvent.ShutdownStart`  | `'shutdown:start'`       | `{ reason }`                                     |
-| `ApplicationEvent.ShutdownComplete` | `'shutdown:complete'`  | `{ totalDurationMs, hardExit? }`                 |
-| `ApplicationEvent.ShutdownError`  | `'shutdown:error'`       | `{ error }`                                      |
-| `ApplicationEvent.ShutdownTaskComplete` | `'shutdown:task:complete'` | `{ taskId, name, durationMs }`           |
-| `ApplicationEvent.ShutdownTaskError` | `'shutdown:task:error'` | `{ taskId, name, error }`                       |
-| `ApplicationEvent.LifecyclePhaseEvent` | `'lifecycle:phase'`   | `{ phase, providerName?, durationMs, status }`   |
-| `ApplicationEvent.ProcessExit`    | `'process:exit'`         | `{ code, signal? }`                              |
+| `ApplicationEvent.UncaughtException` | `'uncaughtException'` | `{ error }` (or `{ error, recovered: true }`)    |
+| `ApplicationEvent.UnhandledRejection` | `'unhandledRejection'` | `{ reason, promise }`                          |
+| `ApplicationEvent.StateSave`      | `'state:save'`           | _(none)_                                         |
+| `ApplicationEvent.ShutdownStart`  | `'shutdown:start'`       | `{ reason, details }`                            |
+| `ApplicationEvent.ShutdownComplete` | `'shutdown:complete'`  | `{ reason, success }`                            |
+| `ApplicationEvent.ShutdownError`  | `'shutdown:error'`       | `{ reason, error }`                              |
+| `ApplicationEvent.ShutdownTaskComplete` | `'shutdown:task:complete'` | `{ task }`                               |
+| `ApplicationEvent.ShutdownTaskError` | `'shutdown:task:error'` | `{ task, error }`                               |
+| `ApplicationEvent.LifecyclePhaseEvent` | `'lifecycle:phase'`   | `LifecyclePhaseEvent` (`{ phase, kind, taskName?, error?, … }`) |
+| `ApplicationEvent.ProcessExit`    | `'process:exit'`         | `{ code }`                                       |
 | `ApplicationEvent.Custom`         | `'custom'`               | depends on the emitter                           |
 
 The full enum is exported as `ApplicationEvent` from
@@ -58,8 +58,8 @@ The full enum is exported as `ApplicationEvent` from
 ## Typed handlers
 
 ```typescript
-app.on(ApplicationEvent.ShutdownComplete, (data) => {
-  metrics.histogram('app.shutdown.ms').observe(data.totalDurationMs);
+app.on(ApplicationEvent.ShutdownComplete, ({ reason, success }) => {
+  metrics.counter('app.shutdown', { reason, success: String(success) }).inc();
 });
 ```
 
@@ -86,35 +86,43 @@ ad-hoc lightweight notifications, not for business workflows.
 
 ## Common subscriptions
 
-### Boot SLA
+### Boot timing
+
+`Started` carries no payload — read `app.uptime` (ms since start) at
+the moment it fires:
 
 ```typescript
-app.on(ApplicationEvent.Started, ({ durationMs }) => {
-  metrics.histogram('app.boot.ms').observe(durationMs);
+app.on(ApplicationEvent.Started, () => {
+  metrics.histogram('app.boot.ms').observe(app.uptime);
 });
 ```
 
 ### Crash signals
 
+`Error` delivers the raw `Error` (the in-process event bus may wrap it
+as `{ error }` — be defensive):
+
 ```typescript
-app.on(ApplicationEvent.Error, ({ error, phase, providerName }) => {
-  oncall.page({ message: `Titan crashed in ${phase}`, providerName, error });
+app.on(ApplicationEvent.Error, (data) => {
+  const error = data instanceof Error ? data : (data as { error?: Error }).error;
+  oncall.page({ message: 'Titan lifecycle error', error });
 });
 ```
 
-### Config hot-reload audit
+### Config-change audit
 
 ```typescript
-app.on(ApplicationEvent.ConfigChanged, ({ key, oldValue, newValue, source }) => {
-  audit.log('config.changed', { key, oldValue, newValue, source });
+app.on(ApplicationEvent.ConfigChanged, (data) => {
+  // `{ config }` on a full reconfigure, `{ key, value }` on setConfig().
+  audit.log('config.changed', data);
 });
 ```
 
-### Shutdown SLA
+### Shutdown bookkeeping
 
 ```typescript
-app.on(ApplicationEvent.ShutdownComplete, ({ totalDurationMs }) => {
-  metrics.histogram('app.shutdown.ms').observe(totalDurationMs);
+app.on(ApplicationEvent.ShutdownComplete, ({ reason, success }) => {
+  metrics.counter('app.shutdown', { reason, success: String(success) }).inc();
 });
 ```
 

@@ -13,21 +13,33 @@ client-facing shape.
 
 ## Default error shape
 
+The canonical `ValidationError` (from `@omnitron-dev/titan/errors`)
+extends `TitanError`, so it carries `code` / `httpStatus` / `details`
+like any other. The validation issues live in `details.errors`, and
+each issue's location is a **dotted-string `path`**:
+
 ```typescript
 {
   name:       'ValidationError',
-  code:       'VALIDATION_FAILED',
-  statusCode: 422,
-  message:    'Input validation failed',
+  code:       422,                       // ErrorCode.VALIDATION_ERROR
+  httpStatus: 422,
+  message:    'Validation failed',
   details: {
-    fields: [
-      { path: ['email'], message: 'Invalid email format', code: 'invalid_string' },
-      { path: ['age'],   message: 'Number must be greater than 12', code: 'too_small' },
+    errors: [
+      { path: 'email', message: 'Invalid email format', code: 'invalid_string' },
+      { path: 'age',   message: 'Number must be greater than 12', code: 'too_small' },
     ],
   },
-  timestamp:  '2026-05-15T20:00:00.000Z',
+  timestamp:  1747339200000,
 }
 ```
+
+> The lightweight `ValidationError` from
+> `@omnitron-dev/titan/validation` (used by `ValidationEngine`)
+> differs: there, `code` is the string `'VALIDATION_ERROR'` and
+> `statusCode` is `422`, and its `toJSON()` emits `{ code, message,
+> errors }`. Both expose the issues under an `errors` array, not
+> `fields`.
 
 Status code `422` follows REST convention for "syntactically valid but
 semantically wrong". For requests that fail to parse at all (malformed
@@ -36,42 +48,44 @@ msgpack, unknown service), the framework uses `400`.
 ## On the client side
 
 ```typescript
-import { ValidationError } from '@omnitron-dev/netron-browser';
+import { ValidationError } from '@omnitron-dev/titan/errors';
 
 try {
   await users.create(input);
 } catch (e) {
   if (e instanceof ValidationError) {
-    for (const f of e.details.fields) {
-      console.log(`field=${f.path.join('.')}: ${f.message}`);
+    for (const err of e.validationErrors) {       // also at e.details.errors
+      console.log(`field=${err.path}: ${err.message}`);
     }
   }
 }
 ```
 
-The error class is identical on both sides — Netron preserves the
-constructor name, status code, and details when serialising/deserialising
-across the wire.
+The error is preserved across the wire — Netron serialises the
+`TitanError` and rehydrates it as the same class (the hierarchy is
+shared via `@omnitron-dev/netron-protocol`), so `code`, `httpStatus`,
+and `details` survive intact.
 
 ## Structured field errors
 
-The `fields` array is the contract:
+Each entry in `validationErrors` (mirrored at `details.errors`):
 
 | Field      | Type       | Meaning                                       |
 | ---------- | ---------- | --------------------------------------------- |
-| `path`     | `string[]` | Path to the bad field (`['address', 'zip']`)  |
+| `path`     | `string`   | Dotted path to the bad field (`'address.zip'`)|
 | `message`  | `string`   | Human-readable message (from Zod or override) |
 | `code`     | `string`   | Zod issue code (`invalid_string`, `too_small`)|
 | `expected` | `unknown?` | What was expected (when applicable)           |
 | `received` | `unknown?` | What was received (when applicable)           |
 
-Frontend forms can map `path` directly to form fields:
+`path` is built by joining the Zod issue path with `.` — so nested
+fields read like `'address.zip'`. Frontend forms can use it directly:
 
 ```typescript
 catch (e) {
   if (e instanceof ValidationError) {
-    e.details.fields.forEach((f) => {
-      form.setFieldError(f.path.join('.'), f.message);
+    e.validationErrors.forEach((err) => {
+      form.setFieldError(err.path, err.message);
     });
   }
 }
@@ -103,20 +117,24 @@ z.setErrorMap((issue, ctx) => {
 
 ## Translating to client formats
 
-`ValidationError` has helper methods that produce common error formats:
+The canonical `ValidationError` has helper methods for common
+formats and per-field queries:
 
 ```typescript
 const e = ...; // ValidationError instance
 
-e.toFormErrors();
-// { 'email': 'Invalid email format', 'age': 'Number must be greater than 12' }
-
-e.toFlatList();
-// ['email: Invalid email format', 'age: Number must be greater than 12']
+e.getSimpleFormat();
+// { code: 'VALIDATION_ERROR', message, errors: ['Invalid email format', …] }
 
 e.getDetailedFormat();
-// Full structured detail (useful in API responses)
+// { code: 'VALIDATION_ERROR', message, errors: [{ path, message, code, expected?, received? }, …] }
+
+e.hasFieldError('email');   // boolean
+e.getFieldErrors('email');  // [{ message, code }, …]
 ```
+
+(`getSimpleFormat` / `getDetailedFormat` are also the right things to
+put in an API response body.)
 
 ## Validation vs domain errors
 
@@ -124,17 +142,18 @@ Two error categories are easy to confuse:
 
 - **`ValidationError`** — the input does not match the schema. Status
   422. Client should fix the input.
-- **`ConflictError`** (or other `DomainError`) — the input matches the
-  schema but cannot be applied (email already taken, order already
-  shipped). Status 409. Client should retry with different input or
-  show a domain message.
+- **A conflict / domain error** — the input matches the schema but
+  cannot be applied (email already taken, order already shipped).
+  Status 409, thrown via `Errors.conflict(...)` (a `TitanError` with
+  `ErrorCode.CONFLICT`) or a `DomainError`. Client should retry with
+  different input or show a domain message.
 
 Use the right one. Throwing `ValidationError` for "email already
 taken" tells the client "your email is malformed", which is wrong.
 
 ```typescript
 @Public()
-@Validate(CreateUserSchema)
+@Validate({ input: CreateUserSchema })
 async create(input: z.infer<typeof CreateUserSchema>) {
   const existing = await this.repo.findByEmail(input.email);
   if (existing) throw Errors.conflict('email already registered', { email: input.email });

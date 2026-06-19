@@ -73,7 +73,8 @@ contract. Otherwise, importers should import what they need directly.
 ## A complete example
 
 ```typescript
-import { Module, Service, Injectable, Public, Inject } from '@omnitron-dev/titan';
+import { Module, Service, Injectable, Inject } from '@omnitron-dev/titan';
+import { Public } from '@omnitron-dev/titan/decorators';
 import { LoggerModule, type LoggerService } from '@omnitron-dev/titan/module/logger';
 import { ConfigModule, type ConfigService } from '@omnitron-dev/titan/module/config';
 

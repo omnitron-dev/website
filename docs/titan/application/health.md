@@ -14,8 +14,10 @@ A Titan application reports three independent signals:
 | **Readiness**| Should the load balancer send me traffic right now?         | Take me out of rotation, leave me running  |
 | **Healthy**  | Is every dependency I rely on currently working?            | Investigate; possibly degraded service     |
 
-The kernel exposes the aggregate via the application's
-`HealthCheck` event and through specific helpers exposed by the
+The kernel exposes an aggregate roll-up directly: `app.health()`
+returns an `IHealthStatus` combining every registered module's health,
+and `app.checkHealth(moduleName)` returns one module's status. Richer
+indicator registration and HTTP probes come from the
 [`titan-health`](../modules/health) ecosystem module.
 
 ## Reading health from inside the app
@@ -128,17 +130,20 @@ readinessProbe:
 ## Programmatic shutdown on unhealthy
 
 ```typescript
-import { ApplicationEvent, ShutdownReason } from '@omnitron-dev/titan';
-
-app.on(ApplicationEvent.HealthCheck, (status) => {
-  if (status.status === 'unhealthy' && status.modules?.database === 'unhealthy') {
-    void app.stop({ reason: ShutdownReason.Error });
-  }
-});
+const status = await app.health();   // aggregate IHealthStatus
+if (status.status === 'unhealthy' && status.modules?.['database']?.status === 'unhealthy') {
+  void app.stop();   // graceful stop; supervisor restarts the process
+}
 ```
 
-This pattern is rare — usually you want the readiness probe to handle
-this transparently — but it is available when you need it.
+`app.health()` returns the aggregate `IHealthStatus`
+(`{ status, message?, modules?, details? }`); `app.checkHealth(name)`
+returns the status for a single module. Note `HealthCheck`
+(`'health:check'`) is a reserved event the kernel does not emit on its
+own — drive health checks by calling `app.health()` (e.g. from a
+readiness probe or an interval), not by subscribing to it. This pattern
+is rare — usually you want the readiness probe to handle this
+transparently — but it is available when you need it.
 
 ## Anti-patterns
 

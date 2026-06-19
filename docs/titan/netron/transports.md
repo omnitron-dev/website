@@ -22,19 +22,30 @@ middleware stack.
 
 ## Configuring transports
 
+Transports are bound imperatively on the running `Netron` instance.
+Each one is *registered* (its factory added to the registry) and then
+a *server* is started for it via `registerTransportServer`:
+
 ```typescript
-const app = await Application.create(AppModule, {
-  netron: {
-    http:      { port: 3000 },
-    websocket: { port: 3001 },
-    tcp:       { port: 4001 },
-    unix:      { path: '/run/myapp.sock' },
-  },
-});
+import { HttpTransport } from '@omnitron-dev/titan/netron/transport/http';
+// WebSocket / TCP / Unix transports auto-register in Node; HTTP must be
+// registered explicitly.
+
+const app = await Application.create(AppModule);
+await app.start();
+const netron = app.netron!;
+
+netron.registerTransport('http', () => new HttpTransport());
+await netron.registerTransportServer('http',      { name: 'api',  options: { port: 3000 } });
+await netron.registerTransportServer('websocket', { name: 'ws',   options: { port: 3001 } });
+await netron.registerTransportServer('tcp',       { name: 'tcp',  options: { port: 4001 } });
+await netron.registerTransportServer('unix',      { name: 'sock', options: { path: '/run/myapp.sock' } });
 ```
 
-Only the transports you list are bound. A service is reachable over
-*every* listed transport — no per-method or per-service binding.
+`registerTransportServer(name, { name, options })` takes a transport
+key, a server label, and an `options` bag (`{ host?, port?, path?, … }`).
+Only the transports you start are bound. A service is reachable over
+*every* bound transport — no per-method or per-service binding.
 
 ## When to choose what
 
@@ -90,37 +101,42 @@ talk to local supervisors.
 
 ## Transport options — common
 
-All four transports share these options:
+All transports extend a shared `TransportOptions` base
+(`netron/transport/types.ts`). The most-used fields:
 
-| Option              | Default              | Effect                                          |
-| ------------------- | -------------------- | ----------------------------------------------- |
-| `port` / `path`     | (required)           | Where to listen                                 |
-| `host`              | `'0.0.0.0'`          | Interface to bind (HTTP / WS / TCP only)        |
-| `tls`               | `undefined`          | TLS config — see below                          |
-| `maxPayloadBytes`   | `10_000_000` (10 MB) | Reject payloads above this size                 |
-| `keepAliveMs`       | varies               | TCP/WS keepalive interval                       |
-| `connectionTimeoutMs` | `30_000`           | Drop connections that idle this long            |
+| Option              | Default                | Effect                                          |
+| ------------------- | ---------------------- | ----------------------------------------------- |
+| `port` / `path`     | —                      | Where to listen (set via the server `options`)  |
+| `host`              | `'0.0.0.0'` (TCP/WS), `'localhost'` (HTTP) | Interface to bind             |
+| `maxPacketSize`     | `16 * 1024 * 1024` (16 MiB) | Hard ceiling on an inbound packet, checked before decode |
+| `connectTimeout`    | `10_000`               | Connection establishment timeout                |
+| `requestTimeout`    | `5_000`                | Per-request timeout                             |
+| `streamTimeout`     | `30_000`               | Idle-stream timeout                             |
+| `keepAlive`         | `{ enabled?, interval?, timeout? }` | Keepalive config object            |
+| `compression`       | `false`                | Enable message compression                      |
+
+Transport-specific options layer on top:
+
+- **WebSocket** — `maxPayload`, `perMessageDeflate`, `handshakeTimeout`,
+  `protocols`, `pathPrefix`.
+- **TCP** — `noDelay` (disable Nagle), `keepAliveDelay`, `allowHalfOpen`.
+- **HTTP** — `cors`, `maxRequestSize` (e.g. `'10mb'`),
+  `keepAliveTimeout`, `customRoutes`, `maxAsyncGeneratorItems`,
+  `pathPrefix`.
+
+There is **no** unified `maxPayloadBytes` / `keepAliveMs` /
+`connectionTimeoutMs` option — those names do not exist; use the real
+ones above.
 
 ## TLS
 
-```typescript
-http: {
-  port: 443,
-  tls: {
-    cert: fs.readFileSync('./cert.pem'),
-    key:  fs.readFileSync('./key.pem'),
-    // Optional client cert verification:
-    requestClientCert: true,
-    ca: fs.readFileSync('./ca.pem'),
-  },
-}
-```
+The Netron transports do not currently expose a built-in TLS/`tls`
+option. Terminate TLS at the load balancer, ingress, or reverse proxy
+in front of the process — HTTP and WebSocket traverse those cleanly.
+For TCP between hosts, run it over a private network or a tunnel.
 
-Same shape across HTTP / WS / TCP. Unix sockets do not use TLS;
-their access control is filesystem permissions.
-
-For production, terminate TLS at the load balancer or ingress when
-possible. Application-level TLS is heavier and harder to rotate.
+Unix sockets need no transport encryption; their access control is
+filesystem permissions.
 
 ## Same service, multiple transports — what changes?
 
@@ -143,17 +159,21 @@ built-ins; you can add your own by implementing the transport
 interface and registering with `TransportRegistry`.
 
 ```typescript
-import { TransportRegistry, type ITransport } from '@omnitron-dev/titan/netron/transport';
+import { registerTransport, type ITransport } from '@omnitron-dev/titan/netron/transport';
 
 class QuicTransport implements ITransport {
   // …
 }
 
-TransportRegistry.register('quic', QuicTransport);
+// register() takes a *factory*, not the class itself.
+registerTransport('quic', () => new QuicTransport());
 ```
 
-Most apps never touch the registry. It exists for adapter packages
-(WebTransport, QUIC, message queues exposed as Netron transports).
+`registerTransport(name, factory)` is the convenience export over the
+global `TransportRegistry`; the registry's `register` rejects a
+non-function argument. Most apps never touch it — it exists for
+adapter packages (WebTransport, QUIC, message queues exposed as
+Netron transports).
 
 ## Cross-runtime transport availability
 
@@ -164,8 +184,11 @@ Most apps never touch the registry. It exists for adapter packages
 | Deno    | ✓    | ✓         | ✓   | ✓    |
 | Browser | ✓    | ✓         | —   | —    |
 
-The transport registry detects runtime and registers what's available.
-A browser-side `NetronClient` will refuse a TCP URL with a clear error.
+On import, the registry auto-registers `ws`/`tcp`/`unix` under Node
+(just `ws` in a browser context). **HTTP is never auto-registered** —
+register it explicitly with `registerTransport('http', () => new HttpTransport())`
+before starting an HTTP server. The browser RPC client lives in the
+separate `@omnitron-dev/netron-browser` package.
 
 ## Anti-patterns
 
@@ -176,8 +199,9 @@ A browser-side `NetronClient` will refuse a TCP URL with a clear error.
 - **WebSocket for short-lived clients.** A short-lived client that
   connects, makes one call, disconnects pays for the connection
   setup over and over. HTTP is simpler.
-- **No `maxPayloadBytes` set.** A 10 MB default is generous for
-  most services. Size it down if your contract enforces small
-  payloads — defends against accidental memory amplification.
+- **Leaving the packet ceiling at the 16 MiB default.** Size
+  `maxPacketSize` (and HTTP's `maxRequestSize`) down to what your
+  contract actually needs — it defends against accidental memory
+  amplification on untrusted-peer transports.
 
 → Next: [Middleware](./middleware.md).

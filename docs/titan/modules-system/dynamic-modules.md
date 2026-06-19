@@ -159,19 +159,24 @@ The implementation usually:
 A canonical template:
 
 ```typescript
-import {
-  Module,
-  type DynamicModule,
-  type IAsyncOptions,
-  createOptionsToken,
-} from '@omnitron-dev/titan';
+import { Module, type DynamicModule } from '@omnitron-dev/titan';
+import { createToken } from '@omnitron-dev/titan/nexus';
 
 export interface IMyModuleOptions {
   apiKey: string;
   timeout?: number;
 }
 
-const MY_MODULE_OPTIONS = createOptionsToken<IMyModuleOptions>('MyModuleOptions');
+// Hand-write the async-options shape, or use ModuleAsyncOptions from
+// '@omnitron-dev/titan/nexus'. There is no IAsyncOptions / createOptionsToken
+// export — use createToken<T>(name) for the options token.
+export interface IMyModuleAsyncOptions {
+  imports?: any[];
+  useFactory: (...args: any[]) => IMyModuleOptions | Promise<IMyModuleOptions>;
+  inject?: any[];
+}
+
+const MY_MODULE_OPTIONS = createToken<IMyModuleOptions>('MyModuleOptions');
 
 @Module({})
 export class MyModule {
@@ -186,7 +191,7 @@ export class MyModule {
     };
   }
 
-  static forRootAsync(options: IAsyncOptions<IMyModuleOptions>): DynamicModule {
+  static forRootAsync(options: IMyModuleAsyncOptions): DynamicModule {
     return {
       module: MyModule,
       imports: options.imports ?? [],

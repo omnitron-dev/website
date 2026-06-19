@@ -19,12 +19,16 @@ order, with typed contracts.
 | `OnStop`      | `onStop()`        | When `app.stop()` runs; **reverse** dependency order                    |
 | `OnDestroy`   | `onDestroy()`     | Final cleanup phase; after `onStop`                                     |
 
+The diagram below shows the hook phases against the public
+`ApplicationState` axis (`created → starting → started → stopping →
+stopped`, plus `failed`). `onInit` runs within the `starting`
+transition (mostly during eager init — see [Bootstrap](./bootstrap.md)):
+
 ```mermaid
 stateDiagram-v2
   [*] --> Created: Application.create()
   Created --> Starting: app.start()
-  Starting --> Initialized: onInit (dep order)
-  Initialized --> Started: onStart (dep order)
+  Starting --> Started: onInit then onStart (dep order)
   Started --> Stopping: app.stop() | signal
   Stopping --> Stopped: onStop (reverse) + onDestroy
   Stopped --> [*]
@@ -136,11 +140,11 @@ be called before any provider your constructor depends on has its
 
 ## Failure semantics
 
-- **Failure in `onInit` or `onStart`** — startup is aborted. Every
-  provider that already completed its `onInit`/`onStart` is rolled
-  back via `onStop`/`onDestroy` in reverse order. The `start()`
-  promise rejects with a typed error naming the failed provider
-  and phase.
+- **Failure in `onInit` or `onStart`** — startup is aborted. Modules
+  that already completed `onStart` are rolled back via their `onStop`
+  in reverse order, the container is disposed, the app transitions to
+  `Failed`, and `start()` rejects with the originating error (module
+  failures are wrapped with the module name and the phase that failed).
 - **Failure in `onStop`** — shutdown continues. The failure is
   logged with the failing provider's name; the next provider's
   `onStop` runs. A failed `onStop` should not strand resources held

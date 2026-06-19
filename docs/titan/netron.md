@@ -23,30 +23,41 @@ This page is the Netron entry point. The mechanics live in:
 | [Multi-backend](./netron/multi-backend.md)        | Client → many servers, failover, load balancing       |
 | [Serialization](./netron/serialization.md)        | Wire format, msgpack, custom codecs                    |
 
-## The five-line tour
+## The short tour
 
-Server:
+Server — define the service, then bind a transport server on the
+running `Netron` instance:
 
 ```typescript
+import { Service, Public } from '@omnitron-dev/titan/decorators';
+import { HttpTransport } from '@omnitron-dev/titan/netron/transport/http';
+
 @Service('users@1.0.0')
 class UsersService {
   @Public() async findById(id: string): Promise<User | null> { /* … */ }
 }
 
-await Application.create(AppModule, { netron: { http: { port: 3000 } } }).then(a => a.start());
+const app = await Application.create(AppModule);
+await app.start();
+
+app.netron!.registerTransport('http', () => new HttpTransport());
+await app.netron!.registerTransportServer('http', { name: 'api', options: { port: 3000 } });
 ```
 
-Client:
+Client — connect to get a `RemotePeer`, then resolve a typed proxy:
 
 ```typescript
-const client = new NetronClient({ url: 'http://localhost:3000' });
-const users  = await client.queryInterface<UsersService>('users@1.0.0');
-const user   = await users.findById('u_42');
+const peer  = await app.netron!.connect('ws://localhost:3001');
+const users = await peer.queryInterface<UsersService>('users@1.0.0');
+const user  = await users.findById('u_42');
 ```
 
-That is the whole API surface for a typical service. Versioning,
-routing, serialisation, error mapping, and trace propagation all
-happen behind it.
+That is the core API surface. Versioning, routing, serialisation,
+error mapping, and trace propagation all happen behind it.
+
+> The in-browser client is a separate package
+> (`@omnitron-dev/netron-browser`) with its own connection API; this
+> page covers the server-side `@omnitron-dev/titan/netron` runtime.
 
 ## What Netron is
 
@@ -56,15 +67,20 @@ A few specific things, each with a deliberate scope:
   contract; clients resolve it by name and version.
 - **A transport abstraction.** Four transports built in, all sharing
   the same service surface; pluggable for custom ones.
-- **A middleware stack.** Per-call wrapping for cross-cutting
-  concerns — auth, rate limiting, tracing, logging.
+- **A middleware pipeline (HTTP transport).** Per-call wrapping for
+  cross-cutting concerns — auth, rate limiting, tracing, logging. The
+  persistent transports (WS/TCP/Unix) enforce auth inline at dispatch
+  rather than through the pipeline.
 - **An auth policy framework.** Authentication and authorisation are
   separate concerns with composable policies via `BuiltInPolicies`
   (`requireRole`, `requireAnyRole`, `requirePermission`, …).
 - **A multi-backend client.** One client can route to many servers
-  with health-aware failover and method-level rules.
-- **A streaming primitive.** `AsyncIterable<T>` return types map to
-  long-lived streams over WebSocket / TCP.
+  with health-aware failover, circuit breaking, and per-service
+  routing rules.
+- **A streaming primitive.** `NetronReadableStream` /
+  `NetronWritableStream` (Node Web Streams) carry long-lived data over
+  WebSocket / TCP / Unix. An `async *` generator method is
+  auto-wrapped into a stream for remote callers.
 
 ## What Netron is not
 

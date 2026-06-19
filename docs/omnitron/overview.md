@@ -37,7 +37,7 @@ omnitron webapp open                 # open the web console
 | **Daemon** | Long-running supervisor that owns the process tree, exposes a typed Netron RPC surface, and persists state under `~/.omnitron/` |
 | **Orchestrator** | Per-app launch pipeline: TS compile / module load / fork process / wire DI / start lifecycle / watch files in dev |
 | **Process tree** | One OS process per `IProcessEntry` you declare; ≥ 1 instances per process; auto-restart with exponential backoff |
-| **Services** | Nineteen built-in RPC services (auth, deploy, fleet, secrets, k8s, …) exposed from the daemon |
+| **Services** | 21 built-in RPC services on a master daemon — 22 with cluster (auth, deploy, fleet, secrets, k8s, …) exposed from the daemon |
 | **Webapp** | React + Vite single-page console — same RPC surface; lives at `apps/omnitron/webapp/` |
 | **Infrastructure** | Provisions Postgres / Redis / S3-compatible / custom containers via Docker (dev) or bare-metal hooks (prod) |
 | **MCP** | Built-in Model Context Protocol surface — let agents (IDE assistants, CI bots) read state and trigger operations |
@@ -78,7 +78,7 @@ flowchart TB
 
   subgraph Daemon["Omnitron daemon &#40;one per node&#41;"]
     direction TB
-    RPC[Netron RPC<br/>19 services]
+    RPC[Netron RPC<br/>21 services]
     State[(state.json<br/>PID + status)]
     Sched[Daemon scheduler]
   end
@@ -138,7 +138,7 @@ paths.
 
 | Plane | Endpoint | Purpose |
 | ----- | -------- | ------- |
-| Management | `unix://~/.omnitron/daemon.sock` (mode `0o600`, owner-only) | CLI ↔ daemon — `OmnitronDaemon` service + 19 others |
+| Management | `unix://~/.omnitron/daemon.sock` (mode `0o600`, owner-only) | CLI ↔ daemon — `OmnitronDaemon` service + the rest of the built-in services |
 | Public TCP | `tcp://0.0.0.0:9700` (opt-in) | Remote daemons + fleet operations |
 | Web/HTTP | `http://0.0.0.0:9800` (opt-in) | Webapp + REST gateway |
 
@@ -251,9 +251,9 @@ separate metrics agent to deploy.
 
 ## Webapp (Omnitron Console)
 
-The console is a React + Vite SPA that lives at
-`apps/omnitron/webapp/` and talks to the daemon via
-`@omnitron-dev/netron-browser`. It gives you:
+The console is a React + Vite + MUI SPA that lives at
+`apps/omnitron/webapp/` and talks to the daemon via the
+`@omnitron-dev/prism/netron` client. It gives you:
 
 - Project + stack view with per-app status cards
 - Live log streams with filtering
@@ -263,8 +263,11 @@ The console is a React + Vite SPA that lives at
 - Secret editor (against the daemon's encrypted store)
 - Fleet view across remote daemons
 
-Launch via `omnitron webapp open` — runs Vite dev server with
-HMR, opens the browser.
+Serve it with `omnitron webapp build` then `omnitron webapp start`
+(an `omnitron-nginx` container fronting the built bundle on
+`:9800`); `omnitron webapp open` launches the browser at that
+URL. For development, run `pnpm dev` in `apps/omnitron/webapp/`
+for a Vite dev server with HMR.
 
 → Full webapp reference: [console](./console.md).
 
@@ -287,5 +290,5 @@ HMR, opens the browser.
 - **Orchestrator:** [Orchestrator](./orchestrator.md) —
   bootstrap, file watcher, dependency resolver.
 - **RPC services:** [Services reference](./services-reference.md) —
-  all 19 services and their methods.
+  all built-in services and their methods.
 - **Console UI:** [Console](./console.md).

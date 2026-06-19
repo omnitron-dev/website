@@ -4,50 +4,53 @@ title: DevTools
 description: Inspect the container at runtime — dependency graph, performance, state snapshots.
 ---
 
-# DevTools
+# Container Introspection
 
-The Nexus DevTools let you introspect a running container: which
-providers are registered, what depends on what, how long
-resolutions take, what the in-memory graph looks like.
+> **History.** An experimental `DevToolsServer` / `DevToolsPlugin`
+> debugger (with its own wire protocol) once lived in
+> `src/nexus/devtools.ts`. It had zero consumers and was **removed**
+> (NX-5); `NEXUS_FEATURES.DEVTOOLS` is `false`. There is no
+> `@omnitron-dev/titan/nexus/devtools` subpath. What survived — and
+> what this page documents — is the dependency-graph export plus the
+> lifecycle-observer system, both of which ship from the main
+> `@omnitron-dev/titan/nexus` barrel.
 
-DevTools are **experimental** (`@experimental` JSDoc marker in the
-source) and exported wholesale from
-`@omnitron-dev/titan/nexus/devtools` via
-`@omnitron-dev/titan/nexus`'s `export *`. The exact public class
-names live in `src/nexus/devtools.ts`; the patterns shown here are
-the canonical use cases.
+You can still introspect a running container: which providers are
+registered, what depends on what, how long resolutions take, what the
+in-memory graph looks like.
 
-```typescript
-import {
-  // From the devtools wildcard re-export. Check the source for
-  // the precise class / function names in your version.
-} from '@omnitron-dev/titan/nexus';
-```
+## Two things you can inspect
 
-## Three things DevTools tell you
+1. **The dependency graph** — `Container.exportGraph()` returns the
+   provider/dependency graph, renderable as DOT, Mermaid, or JSON.
+2. **Lifecycle events** — the observer system surfaces resolution
+   timings, memory, and an audit trail.
 
-1. **The dependency graph** — what depends on what, who has cycles,
-   who is reachable from where.
-2. **Performance** — resolution timings per token; total time
-   spent constructing each provider.
-3. **State** — current scopes, in-flight resolutions, observer
-   events.
+## The dependency graph — `Container.exportGraph()`
 
-## The `DependencyGraph` shape
-
-DevTools' graph output uses a simple, stable shape:
+The container exposes `exportGraph(options?)` directly. It walks the
+container's registrations and returns a stable `DependencyGraph`
+(defined in `src/nexus/dependency-graph.ts`):
 
 ```typescript
+import { exportToMermaid, exportToDot, exportToJson } from '@omnitron-dev/titan/nexus';
+
+const graph = container.exportGraph();        // { includeParent?: boolean }
+
 interface DependencyGraph {
   nodes: Array<{ id: string; label?: string; type?: string }>;
   edges: Array<{ from: string; to: string; type?: 'dependency' | 'parent' }>;
   roots?: string[];
   leaves?: string[];
 }
+
+console.log(exportToMermaid(graph));          // also: exportToDot, exportToJson
 ```
 
-You can render this with any graph library (Mermaid, Graphviz,
-D3, etc.) — it isn't tied to a specific renderer.
+The same export backs `omnitron inspect <app> --graph`. The three
+formatters (`exportToDot` / `exportToMermaid` / `exportToJson`) are
+exported from the nexus barrel, so you can render the graph with
+Graphviz, Mermaid, or pipe the JSON anywhere.
 
 ## Observers
 
@@ -76,48 +79,38 @@ const manager = new LifecycleManager();
 manager.addObserver(new AuditObserver());
 manager.addObserver(new PerformanceObserver());
 
-manager.on(LifecycleEvent.ResolutionStart, (data: LifecycleEventData) => {
+manager.on(LifecycleEvent.BeforeResolve, (data: LifecycleEventData) => {
   // …
 });
 ```
 
-## DevTools messages
-
-DevTools internally use a typed message protocol:
-
-```typescript
-interface DevToolsMessage {
-  type:        MessageType;
-  timestamp:   number;
-  containerId: string;
-  data:        any;
-}
-```
-
-Useful for piping container events to an external panel (e.g. the
-Omnitron web console).
+The resolution events are `BeforeResolve` (`'resolve:before'`),
+`AfterResolve` (`'resolve:after'`), and `ResolveFailed`
+(`'resolve:failed'`) — see the full `LifecycleEvent` map in
+`src/nexus/lifecycle.ts` for container, instance, module, cache,
+scope, and middleware events.
 
 ## Production guidance
 
-Enable DevTools only when:
+Enable observers only when:
 
 - Diagnosing a specific issue (slow boot, suspected leak,
   mystery resolution).
 - Running in a controlled environment with extra headroom.
 - For a bounded period, then disable.
 
-The overhead is small (a few microseconds per resolution,
-~10 KB per provider for tracked metadata) but non-zero. Long-running
-production processes with full DevTools enabled will slowly
-accumulate memory.
+Observers add per-resolution work and retain event data, so the
+overhead is non-zero. Long-running production processes with verbose
+observers attached will slowly accumulate memory — attach them for a
+bounded window, then remove them.
 
 ## Anti-patterns
 
-- **Leaving DevTools on in production by default.** Diagnostic
-  tooling, not a runtime requirement.
-- **Using DevTools data to drive runtime decisions.** The data is
-  for *humans diagnosing*, not for code reading. If your
-  application needs to know about its own DI graph at runtime, you
-  have probably reinvented configuration in a worse form.
+- **Leaving verbose observers on in production by default.**
+  Diagnostic tooling, not a runtime requirement.
+- **Using introspection data to drive runtime decisions.** The graph
+  and observer data are for *humans diagnosing*, not for code reading.
+  If your application needs to know about its own DI graph at runtime,
+  you have probably reinvented configuration in a worse form.
 
 → Back to [DI Overview](./overview.md).

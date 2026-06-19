@@ -98,9 +98,12 @@ You can validate just a slice of the config without loading the
 whole schema:
 
 ```typescript
-const cacheConfig = this.config.getSchema(CacheConfigSchema, 'cache');
-//      ^? z.infer<typeof CacheConfigSchema>
+const cacheConfig = this.config.getTyped<CacheConfig>(CacheConfigSchema, 'cache');
+//      ^? CacheConfig (z.infer<typeof CacheConfigSchema>)
 ```
+
+`getTyped<T>(schema, path?)` parses the value at `path` (or the whole
+config when `path` is omitted) and throws if it doesn't match.
 
 Useful in dynamic modules whose options are a subtree of the global
 config.

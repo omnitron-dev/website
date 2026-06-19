@@ -20,7 +20,8 @@ const child = this.logger.child({ requestId: 'r_42', userId: 'u_91' });
 child.info('processing');
 // → {"level":"info","requestId":"r_42","userId":"u_91","msg":"processing", …}
 
-child.error('oops', { reason: 'db timeout' });
+// Object-first when you have per-call fields:
+child.error({ reason: 'db timeout' }, 'oops');
 // → {"level":"error","requestId":"r_42","userId":"u_91","reason":"db timeout","msg":"oops", …}
 ```
 
@@ -62,7 +63,7 @@ Use it via `@Context()`:
 ```typescript
 @Public()
 async findById(id: string, @Context() ctx: NetronContext) {
-  ctx.logger.debug('looking up user', { id });
+  ctx.logger.debug({ id }, 'looking up user');
   return this.repo.findById(id);
 }
 ```
@@ -84,8 +85,8 @@ async findById(id: string, @Context() ctx: NetronContext) {
   return this.repo.findById(id);
 }
 
-private async warmCache(id: string, logger: LoggerService) {
-  logger.debug('warming cache', { id });
+private async warmCache(id: string, logger: ILogger) {
+  logger.debug({ id }, 'warming cache');
   // …
 }
 ```
@@ -102,7 +103,7 @@ A common mistake:
 // Wrong — uses the unbound parent.
 @Public()
 async findById(id: string) {
-  this.logger.info('looking up', { id });   // no requestId, no traceId
+  this.logger.info({ id }, 'looking up');   // no requestId, no traceId
 }
 ```
 
@@ -122,7 +123,7 @@ A common pattern in tight loops:
 const itemLogger = ctx.logger.child({ batch: 'b_42' });
 
 for (const item of items) {
-  itemLogger.debug('processing item', { id: item.id });
+  itemLogger.debug({ id: item.id }, 'processing item');
 }
 ```
 

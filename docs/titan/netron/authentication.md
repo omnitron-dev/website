@@ -44,10 +44,10 @@ flowchart LR
   Req[Incoming RPC call]
   Req --> Authn[AuthenticationManager<br/>validate JWT / token]
   Authn -->|valid| Ctx[AuthContext<br/>userId, roles, scopes]
-  Authn -->|invalid| F1[AuthError 401]
+  Authn -->|invalid| F1[TitanError<br/>UNAUTHORIZED / 401]
   Ctx --> Authz[AuthorizationManager<br/>evaluate policies]
   Authz -->|allowed| Method[Method body]
-  Authz -->|denied| F2[PermissionError 403]
+  Authz -->|denied| F2[TitanError<br/>FORBIDDEN / 403]
 ```
 
 These are wired by the `titan-auth` ecosystem module (or by your own
@@ -59,15 +59,17 @@ Every authenticated call carries an auth context with:
 
 ```typescript
 {
-  userId:      string;
-  roles:       string[];
-  permissions: string[];
-  scopes:      string[];
-  // …integration-specific extras
+  userId:       string;
+  roles:        string[];
+  permissions:  string[];
+  scopes?:      string[];                // optional
+  token?:       { /* … */ };             // optional, integration extras
+  metadata?:    Record<string, any>;     // optional
 }
 ```
 
-This is what `AuthConfig` policies match against.
+This is what `AuthConfig` policies match against. (`userId`, `roles`,
+and `permissions` are required; `scopes` is optional.)
 
 ## `@Auth(config)` — configuring a method
 
@@ -132,11 +134,12 @@ const policies = [
   BuiltInPolicies.requireAnyRole(['admin', 'support']),
   BuiltInPolicies.requireAllRoles(['user', 'verified']),
   BuiltInPolicies.requirePermission('users:read'),
-  // …additional helpers in the source
+  // …~18 helpers in the source: requireAnyPermission, requireScope,
+  // requireResourceOwner, requireIP, requireRateLimit, …
 ];
 
 // Register them with the engine:
-policyEngine.register(policies);
+policyEngine.registerPolicies(policies);   // array form; single: registerPolicy(p)
 ```
 
 Reference by name in `AuthConfig`:
@@ -161,8 +164,8 @@ const IsResourceOwner: PolicyDefinition = {
   name:        'resource:owner',
   description: 'Caller must own the resource referenced by the first argument',
   evaluate: async (context) => {
-    const resourceId = context.args?.[0];
-    const resource   = await context.deps.resolve('OrdersRepo').findById(resourceId);
+    const resourceId = context.method?.args?.[0];      // method args live here
+    const resource   = await ordersRepo.findById(resourceId);  // close over your deps
     const allowed    = resource?.userId === context.auth?.userId;
     return {
       allowed,
@@ -171,7 +174,7 @@ const IsResourceOwner: PolicyDefinition = {
   },
 };
 
-policyEngine.register([IsResourceOwner]);
+policyEngine.registerPolicies([IsResourceOwner]);
 
 // Then in your service:
 @Public()
@@ -179,8 +182,12 @@ policyEngine.register([IsResourceOwner]);
 async getOrder(orderId: string) { /* … */ }
 ```
 
-The exact `PolicyContext` and helper APIs live in
-`netron/auth/policy-engine.ts` and `netron/auth/types.ts`.
+The context passed to `evaluate` is an `ExecutionContext`
+(`{ auth?, service?, method?: { name, args }, resource?, environment?, request? }`).
+Note there is **no** `context.args` (use `context.method?.args`) and
+**no** DI hook on the context — close over the dependencies your
+policy needs. The exact shapes live in `netron/auth/policy-engine.ts`
+and `netron/auth/types.ts`.
 
 ## Class-level vs method-level
 
@@ -208,15 +215,21 @@ combination semantics for fine-grained cases.
 
 ## Failure semantics
 
-| Failure                            | TitanError type                              | Status |
-| ---------------------------------- | -------------------------------------------- | ------ |
-| No credentials                     | `AuthError`                                  | 401    |
-| Invalid token                      | `AuthError`                                  | 401    |
-| Authenticated but policy denied    | `PermissionError`                            | 403    |
+The Netron enforcement path throws a plain `TitanError` carrying an
+error **code** (not the `AuthError`/`PermissionError` subclasses):
 
-Both classes extend `HttpError` extends `TitanError`. The client
-can `instanceof AuthError` vs `instanceof PermissionError` to
-discriminate.
+| Failure                            | Thrown                                       | Code / Status                |
+| ---------------------------------- | -------------------------------------------- | ---------------------------- |
+| No credentials                     | `TitanError`                                 | `UNAUTHORIZED` / 401         |
+| Invalid token                      | `TitanError`                                 | `UNAUTHORIZED` / 401         |
+| Authenticated but policy denied    | `TitanError`                                 | `FORBIDDEN` / 403            |
+
+Discriminate on the **code**, not the class — e.g.
+`err.code === ErrorCode.UNAUTHORIZED` vs `ErrorCode.FORBIDDEN` (or the
+401/403 HTTP status). The `AuthError` / `PermissionError` classes do
+exist in the errors module (both extend `HttpError` extends
+`TitanError`), but the auth layer does not instantiate them, so
+`instanceof AuthError` will not match a thrown auth error.
 
 ## Anti-patterns
 

@@ -27,11 +27,14 @@ class TitanError extends Error {
   readonly category:    ErrorCategory;
   readonly httpStatus:  number;
   readonly details:     Record<string, any>;
-  readonly context?:    ErrorContext;
+  readonly context:     ErrorContext;
+  readonly timestamp:   number;
+  readonly requestId?:     string;
   readonly correlationId?: string;
+  readonly spanId?:     string;
   readonly traceId?:    string;
-  readonly retryStrategy?: RetryStrategy;
-  // …plus serialise / toJSON helpers
+  // …plus isRetryable() / getRetryStrategy() / withContext() /
+  //    withDetails() / toJSON() helpers
 }
 ```
 
@@ -112,15 +115,15 @@ The `Errors` namespace has methods for every common case:
 | `Errors.notFound(resource, id?)` | 404 | `NOT_FOUND`          |
 | `Errors.conflict(msg, …)`    | 409    | `CONFLICT`            |
 | `Errors.alreadyExists(resource, id?)` | 409 | `CONFLICT`       |
-| `Errors.validation(msg, fields?)` | 422 | `VALIDATION_ERROR`  |
-| `Errors.rateLimit(...)`      | 429    | `RATE_LIMITED`        |
+| `Errors.validation(fields, opts?)` | 422 | `VALIDATION_ERROR`  |
+| `Errors.tooManyRequests(retryAfter?)` | 429 | `TOO_MANY_REQUESTS` |
 | `Errors.internal(msg, ...)`  | 500    | `INTERNAL_ERROR`      |
 | `Errors.unavailable(...)`    | 503    | `SERVICE_UNAVAILABLE` |
 
 Other namespaces:
 
 - **`NetronErrors`** — transport-specific (`serviceNotFound`,
-  `methodNotFound`, `transportError`, `timeout`, …).
+  `methodNotFound`, `connectionFailed`, `rpcTimeout`, …).
 - **`HttpErrors`** — when you want a `HttpError` subclass
   specifically.
 - **`AuthErrors`** — for `AuthError` / `PermissionError` /

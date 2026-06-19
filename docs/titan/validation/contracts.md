@@ -6,147 +6,146 @@ description: Method contracts — bind input + output schemas as a single declar
 
 # Contracts
 
-A `@Contract` is a method-level declaration that bundles input
-validation, output validation, and contract metadata (description,
-examples, version) into one decorator.
+A `Contract` bundles per-method input/output schemas (plus optional
+metadata) for a whole service. `@Contract` applies it to the service
+**class**, mapping each method name to its `{ input, output, … }`.
 
-It is the recommended form for `@Public` methods — it puts the wire
-contract next to the method body where readers expect it.
+> ⚠️ **NEEDS REWRITE.** This page previously described `@Contract` as
+> a *method* decorator wrapping a single method's input/output, and a
+> contract as `contract({ name, version, input, output })`. Both are
+> wrong: `contract(definition, metadata?)` takes a **map of method
+> name → `MethodContract`**, and `@Contract(c)` is a **class**
+> decorator (`src/decorators/validation.ts`). The corrected shape is
+> below; the per-method narrative further down still needs reworking.
 
 ## Basic shape
 
 ```typescript
 import { contract } from '@omnitron-dev/titan/validation';
+import { Contract } from '@omnitron-dev/titan/decorators';
 
-const FindByIdContract = contract({
-  name:        'users.findById',
-  version:     '1.0.0',
-  description: 'Look up a user by ID. Returns null if not found.',
-  input:       z.object({ id: z.string().uuid() }),
-  output:      z.union([UserSchema, z.null()]),
-});
+// A contract is a map of method-name → MethodContract, plus metadata.
+const UsersContract = contract(
+  {
+    findById: {
+      input:  z.object({ id: z.string().uuid() }),
+      output: z.union([UserSchema, z.null()]),
+    },
+  },
+  { name: 'users', version: '1.0.0', description: 'User service' },
+);
 
 @Service('users@1.0.0')
+@Contract(UsersContract)          // class-level, not per-method
 class UsersService {
   @Public()
-  @Contract(FindByIdContract)
-  async findById(input: z.infer<typeof FindByIdContract.input>) {
+  async findById(input: { id: string }) {
     return this.repo.findById(input.id);
   }
 }
 ```
 
-Three things happen:
+Each `MethodContract` may declare `input`, `output`,
+`errors` (a `Record<httpStatus, ZodSchema>`), `stream`, `options`,
+and an `http` extension (`{ status?, contentType?, streaming?,
+openapi? }`). What happens when the contract is applied:
 
-1. **Input validation.** `input` is parsed against
-   `FindByIdContract.input`. Failures throw `ValidationError`.
+1. **Input validation.** The first argument is parsed against the
+   method's `input`. Failures throw `ValidationError`.
 2. **Output validation.** The return value is parsed against
-   `FindByIdContract.output`. Failures throw `ContractError` (server
-   bug — your method returned the wrong shape).
-3. **Metadata exposure.** The contract is registered with the
-   service descriptor so clients (and the Omnitron console) can
-   introspect it.
+   `output`. Failures throw `ContractError`.
+3. **Metadata exposure.** The contract is stored in service metadata
+   so clients (and the Omnitron console) can introspect it.
 
 ## Why contracts, not just schemas
 
-A bare `@Validate(Schema)` validates input. A `@Contract` adds:
+A method-level `@Validate({ input })` validates one method's input. A
+class-level `@Contract` adds:
 
 - **Output validation in development.** Catches "I returned
   `undefined` when I promised a `User`" bugs at the boundary.
 - **Wire-format introspection.** The Omnitron console can render
   the contract for any registered service.
-- **Versioning.** A contract carries its own version; you can ship
-  v1 and v2 side by side and route to either.
-- **Examples for documentation.** Contracts can carry sample
-  inputs/outputs that surface in DevTools and generated API docs.
+- **Versioning.** A contract carries metadata including `version`,
+  alongside the service version.
+- **Per-status error schemas.** A `MethodContract`'s `errors` map
+  binds a Zod schema to each HTTP status the method can return.
 
 ## Versioning
 
-A contract version is independent of the service version. You can
-bump a single method's contract without bumping the whole service:
+A contract's `version` lives in its metadata, independent of the
+service version:
 
 ```typescript
-const FindByIdV2 = contract({
-  name:    'users.findById',
-  version: '2.0.0',                  // method bumped, service still 1.0.0
-  input:   z.object({ id: z.string().uuid(), include: z.array(z.string()).optional() }),
-  output:  UserSchemaV2,
-});
+const UsersContractV2 = contract(
+  {
+    findById: {
+      input:  z.object({ id: z.string().uuid(), include: z.array(z.string()).optional() }),
+      output: UserSchemaV2,
+    },
+  },
+  { name: 'users', version: '2.0.0' },   // contract metadata
+);
 ```
 
-The Netron client requests a specific version; mismatches surface as
-typed errors.
+## Predefined contract templates
 
-## Examples in contracts
+The `Contracts` namespace ships ready-made shapes:
 
 ```typescript
-const FindByIdContract = contract({
-  name:    'users.findById',
-  version: '1.0.0',
-  input:   z.object({ id: z.string().uuid() }),
-  output:  UserSchema,
-  examples: [
-    {
-      description: 'happy path',
-      input:       { id: '550e8400-e29b-41d4-a716-446655440000' },
-      output:      { id: '550e8400-…', email: 'ada@example.com', name: 'Ada' },
-    },
-    {
-      description: 'not found',
-      input:       { id: '00000000-0000-0000-0000-000000000000' },
-      output:      null,
-    },
-  ],
-});
+import { Contracts } from '@omnitron-dev/titan/validation';
+
+const UserContract = Contracts.crud(UserSchema);              // create/read/update/delete/list
+const FeedContract = Contracts.streaming(PostSchema);          // subscribe (stream)/unsubscribe
+const CalcContract = Contracts.rpc(InputSchema, OutputSchema); // single execute() method
 ```
 
-Examples surface in:
+There is also a fluent `contractBuilder()` (`.method(name, mc).build()`).
 
-- The Omnitron console's method invoker (pre-fills the form).
-- Generated API docs.
-- The DevTools service descriptor inspector.
+## Per-status error schemas
 
-They are also useful as readable test fixtures.
+A `MethodContract` can declare the error payload for each status:
+
+```typescript
+const UsersContract = contract({
+  create: {
+    input:  CreateUserSchema,
+    output: UserSchema,
+    errors: {
+      409: z.object({ code: z.literal('ALREADY_EXISTS'), message: z.string() }),
+    },
+  },
+});
+```
 
 ## When to use `@Validate` vs `@Contract`
 
-| Use `@Validate(Schema)` when …                   | Use `@Contract(c)` when …                     |
+| Use `@Validate({ input })` (method) when …       | Use `@Contract(c)` (class) when …             |
 | ------------------------------------------------- | --------------------------------------------- |
-| The method is internal (no `@Public`)             | The method is public                          |
-| You only need to validate one parameter           | You want input + output + metadata in one place |
-| The output is implicit from the TypeScript type   | You want runtime output validation in dev     |
-| The contract surface is small and unstable        | The contract is stable and may be versioned   |
+| You want to annotate one method in place          | You want input + output for many methods       |
+| The method is internal (no `@Public`)             | The methods are public                         |
+| The output is implicit from the TypeScript type   | You want runtime output validation             |
+| The contract surface is small                     | The contract is stable and worth versioning    |
 
-For a stable public API, prefer contracts. For internal helpers,
-`@Validate` is enough.
+`@Validate` is the per-method method decorator; `@Contract` is the
+service-wide class decorator.
 
-## Output validation in production
+## Output validation
 
-Output validation is on by default. In high-throughput production
-services, the cost is small but non-zero (~1µs per object). To
-disable in production while keeping it on in dev:
-
-```typescript
-const FindByIdContract = contract({
-  // …
-  output:           UserSchema,
-  validateOutputIn: ['development', 'test'],     // skip in production
-});
-```
-
-Use sparingly. Output validation catches bugs that would otherwise
-ship as wire-format-incompatible responses.
+When a `MethodContract` declares `output`, the return value is
+validated (in dev and prod alike). The cost is small but non-zero
+(~1µs per object). There is no built-in per-environment toggle field
+on the contract; gate it yourself (e.g. omit `output` outside dev, or
+via `options`) if profiling shows it matters. Output validation
+catches bugs that would otherwise ship as wire-incompatible responses.
 
 ## Anti-patterns
 
 - **Schema inline at every method.** Define schemas once (in a
   `schemas.ts` file) and import. Inline schemas lead to drift
   between server and client.
-- **Validating outputs of every method.** Use contracts for
+- **Validating outputs of every method.** Reserve output schemas for
   `@Public` methods. Internal methods are typed by TypeScript;
   runtime validation there is overhead with no benefit.
-- **Forgetting `version`.** A contract without a version is the
-  default `1.0.0` — fine for v1, painful when you need to ship v2
-  and discover everything has been at v1 forever.
 
 → Next: [Error Handling](./error-handling.md).

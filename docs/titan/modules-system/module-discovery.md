@@ -59,13 +59,16 @@ Inspect via the `module:registered` event or programmatically through
 
 ## Detecting cycles
 
-The discovery walk detects cycles between modules. A cycle throws a
-`CircularDependencyError` at boot with the full cycle path:
+The discovery walk detects cycles between modules. A cycle throws at
+boot with the full cycle path:
 
 ```
-CircularDependencyError: cycle in module imports
-  AuthModule → SessionModule → UsersModule → AuthModule
+Circular module dependency detected: AuthModule -> SessionModule -> UsersModule -> AuthModule
 ```
+
+(Module-import cycles surface as a `TitanError`. Provider-level
+dependency cycles within the DI container are a separate
+`CircularDependencyError` from Nexus.)
 
 The fix is structural — extract the shared piece into a third module,
 or invert one of the dependencies (often via a callback or interface).
@@ -99,15 +102,20 @@ preferred patterns are:
   @Module({
     providers: [
       {
-        provide:     BillingService,
-        useClass:    BillingService,
-        when:        (ctx) => ctx.config.get('billing.enabled'),
-        useFallback: NoopBillingService,
+        provide:   BillingService,
+        useClass:  BillingService,
+        condition: (ctx) => ctx.container.resolve(ConfigService).get('billing.enabled'),
+        fallback:  { useClass: NoopBillingService },
       },
     ],
   })
   export class BillingModule {}
   ```
+
+  The conditional fields are `condition` (a predicate over the
+  `ResolutionContext`) and `fallback` (a provider used when the
+  condition is false). The `createConditionalProvider` helper from
+  `@omnitron-dev/titan/nexus` produces the same shape.
 
 These are decided at `Application.create` time. Truly dynamic
 load/unload at runtime is a multi-app concern; use the Omnitron

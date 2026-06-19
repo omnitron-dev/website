@@ -29,12 +29,12 @@ import {
 
 const code = ErrorCode.SERVICE_UNAVAILABLE;
 
-getErrorCategory(code);   // ErrorCategory.ServerError (or similar)
+getErrorCategory(code);   // ErrorCategory.SERVER
 isClientError(code);      // false  — 5xx
 isServerError(code);      // true
 isRetryableError(code);   // true   — 503 is retryable
 getErrorName(code);       // 'SERVICE_UNAVAILABLE'
-getDefaultMessage(code);  // 'Service is currently unavailable'
+getDefaultMessage(code);  // 'The service is temporarily unavailable'
 ```
 
 These helpers operate on the code alone — no need for the full error
@@ -46,9 +46,13 @@ code.
 ```typescript
 import { ErrorCategory } from '@omnitron-dev/titan/errors';
 
-ErrorCategory.ClientError    // 4xx-equivalent
-ErrorCategory.ServerError    // 5xx-equivalent
-// …additional categories as needed
+ErrorCategory.CLIENT       // 4xx
+ErrorCategory.SERVER       // 5xx
+ErrorCategory.AUTH         // 401, 403, 407
+ErrorCategory.VALIDATION   // 422
+ErrorCategory.RATE_LIMIT   // 429
+ErrorCategory.SUCCESS      // 2xx
+ErrorCategory.CUSTOM       // 600+
 ```
 
 The mapping from `ErrorCode` to `ErrorCategory` is the

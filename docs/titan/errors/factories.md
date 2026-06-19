@@ -23,12 +23,20 @@ import { Errors } from '@omnitron-dev/titan/errors';
 | `Errors.notFound(resource, id?)`                 | 404    | `NOT_FOUND`           |
 | `Errors.conflict(message, details?)`             | 409    | `CONFLICT`            |
 | `Errors.alreadyExists(resource, identifier?)`    | 409    | `CONFLICT`            |
-| `Errors.validation(message, fields?)`            | 422    | `VALIDATION_ERROR`    |
-| `Errors.rateLimit(message?, details?)`           | 429    | `RATE_LIMITED`        |
-| `Errors.internal(message?, details?)`            | 500    | `INTERNAL_ERROR`      |
-| `Errors.unavailable(message?, details?)`         | 503    | `SERVICE_UNAVAILABLE` |
+| `Errors.validation(fields, options?)`            | 422    | `VALIDATION_ERROR`    |
+| `Errors.tooManyRequests(retryAfter?)`            | 429    | `TOO_MANY_REQUESTS`   |
+| `Errors.timeout(operation, timeoutMs)`           | 408    | `REQUEST_TIMEOUT`     |
+| `Errors.internal(message?, cause?)`              | 500    | `INTERNAL_ERROR`      |
+| `Errors.notImplemented(feature)`                 | 501    | `NOT_IMPLEMENTED`     |
+| `Errors.unavailable(service, reason?)`           | 503    | `SERVICE_UNAVAILABLE` |
 | `Errors.invalidCredentials(message?)`            | 401    | `UNAUTHORIZED`        |
+| `Errors.permissionDenied(permission)`            | 403    | `FORBIDDEN`           |
 | `Errors.create(code, message, details?)`         | varies | any                   |
+
+`Errors.validation(fields, options?)` takes an array of
+`{ field, message, code? }` (delegating to
+`ValidationError.fromFieldErrors`) — not a message string.
+`Errors.tooManyRequests` returns a `RateLimitError` subclass.
 
 The catalogue is exhaustive — check the source for the latest
 methods. Use `Errors.create(code, message, details)` for codes that
@@ -44,14 +52,23 @@ Wraps transport-layer failures. Used internally by Netron; you
 usually catch these on the client rather than throwing them on the
 server.
 
-| Factory                                          | What it represents                  |
-| ------------------------------------------------ | ----------------------------------- |
-| `NetronErrors.serviceNotFound(name, version?)`   | No such service                     |
-| `NetronErrors.methodNotFound(service, method)`   | No such method on the service       |
-| `NetronErrors.transportError(transport, cause)`  | Transport-layer failure             |
-| `NetronErrors.timeout(operation, ms)`            | Call exceeded deadline              |
-| `NetronErrors.protocolError(reason)`             | Malformed packet                    |
-| `NetronErrors.serviceUnavailable(name, reason)`  | Service is registered but not ready |
+| Factory                                                       | What it represents                          |
+| ------------------------------------------------------------- | ------------------------------------------- |
+| `NetronErrors.serviceNotFound(serviceId)`                     | No such service                             |
+| `NetronErrors.methodNotFound(serviceId, method)`              | No such method on the service               |
+| `NetronErrors.connectionFailed(transport, address, cause?)`   | Could not establish the connection          |
+| `NetronErrors.connectionTimeout(transport, address)`          | Connection attempt timed out                |
+| `NetronErrors.connectionClosed(transport, reason?)`           | Connection closed (clean shutdown)          |
+| `NetronErrors.transportLost(transport, peerId, packetId?, reason?)` | Connection vanished mid-RPC (result unknown) |
+| `NetronErrors.rpcTimeout(serviceId, method, timeoutMs)`       | RPC call exceeded its deadline              |
+| `NetronErrors.invalidRequest(reason, details?)`               | Malformed RPC request                       |
+| `NetronErrors.peerNotFound(peerId)` / `peerDisconnected(...)` | Peer-level failures                         |
+| `NetronErrors.streamClosed(streamId, reason?)` / `streamBackpressure(...)` | Stream-level failures          |
+| `NetronErrors.serializeEncode(value, cause?)` / `serializeDecode(...)` | (De)serialization failures        |
+
+Each returns the matching `NetronError` subclass
+(`ServiceNotFoundError`, `TransportError`, `TransportLostError`,
+`RpcError`, `PeerError`, `StreamError`, `SerializationError`).
 
 ## `HttpErrors` — when you need an `HttpError` subclass
 

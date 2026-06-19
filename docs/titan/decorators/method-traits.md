@@ -48,7 +48,7 @@ Decorators evaluate **outside-in** at declaration; they execute
 @Public()                                              //  ← outer, processes last
 @Auth({ roles: ['admin'] })                            //
 @RateLimit({ limit: 10, window: 60_000 })              //
-@Validate(InputSchema)                                 //  ← inner, processes first
+@Validate({ input: InputSchema })                      //  ← inner, processes first
 async dangerousOp(input: Input) { /* … */ }
 ```
 
@@ -66,7 +66,7 @@ budget.
   cache:     { ttl: 30_000 },
   rateLimit: { limit: 100, window: 60_000 },
 })
-@Validate(IdSchema)
+@Validate({ input: IdSchema })
 async findById(id: string) { /* … */ }
 ```
 
@@ -80,7 +80,7 @@ async findById(id: string) { /* … */ }
   auth:      { scopes: ['orders:write'] },
   rateLimit: { limit: 10, window: 60_000 },
 })
-@Validate(CreateOrderSchema)
+@Validate({ input: CreateOrderSchema })
 async create(input: z.infer<typeof CreateOrderSchema>) { /* … */ }
 ```
 
@@ -91,7 +91,7 @@ async create(input: z.infer<typeof CreateOrderSchema>) { /* … */ }
 
 ```typescript
 @Public({ auth: { roles: ['admin'] } })
-@Validate(InputSchema)
+@Validate({ input: InputSchema })
 async resetDatabase(input: Input) { /* … */ }
 ```
 
@@ -136,7 +136,7 @@ async warm() {
 private async loadDictionary() { /* … */ }
 ```
 
-## Custom traits via `createDecorator`
+## Custom traits via `createMethodInterceptor`
 
 If you need a trait the built-ins don't cover, write your own:
 

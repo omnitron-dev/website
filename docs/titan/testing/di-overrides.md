@@ -10,7 +10,22 @@ The container's central role makes testing easy: replace any
 provider with a test double, and every consumer gets the double
 without code changes.
 
-## The override API
+> ⚠️ NEEDS REWRITE — this page (and the Integration / Testing
+> pages) use an `Application.create(Module, { overrides: [...] })`
+> option that does **not** exist. `CreateOptions` in
+> `packages/titan/src/application/application.ts` accepts `modules`,
+> `imports`, and `providers` (an array of `[token, providerDef]`
+> tuples) — there is no `overrides` key (it type-checks only because
+> `IApplicationOptions` has an index signature, but the bootstrap
+> ignores it). To override a provider, register it last via the
+> `providers` tuple array, swap in a fake module, or use the
+> `@omnitron-dev/testing/titan` helpers (`createTestModule` /
+> `TestModule` with a `mocks:` array, `MockProvider`,
+> `createMockProvider`). The corrected `providers`-tuple form is
+> shown below; the module-swap and spy patterns further down are
+> accurate as written.
+
+## The provider-override API
 
 ```typescript
 const container = new Container();
@@ -25,22 +40,26 @@ container.register(USERS_SERVICE, {
 });
 ```
 
-For a Titan-style override (replacing within an `Application`):
+For a Titan-style override (replacing within an `Application`), pass
+the `providers` tuple array — `[token, providerDefinition]`. These
+are registered after the module's own providers, so they win:
 
 ```typescript
 import { Application } from '@omnitron-dev/titan';
 
-const app = await Application.create(AppModule, {
-  overrides: [
-    { provide: Database, useClass: FakeDatabase },
-    { provide: REDIS,    useValue: fakeRedis     },
+const app = await Application.create({
+  modules:   [AppModule],
+  providers: [
+    [Database, { useClass: FakeDatabase }],
+    [REDIS,    { useValue: fakeRedis     }],
   ],
 });
 ```
 
-The `overrides` option applies after module discovery but before
-provider resolution — your override wins over what the modules
-declare.
+Each tuple's provider definition uses the standard Nexus shape
+(`useClass` / `useValue` / `useFactory`). Because `create()`
+registers them into the container after the modules are wired, the
+last registration for a token wins over what the modules declare.
 
 ## Fake vs mock vs stub
 

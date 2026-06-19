@@ -46,19 +46,22 @@ custom agents).
 
 ## What the agent sees
 
-Five tool groups, each conditional on what's available:
+Two surfaces, registered conditionally on what's available:
 
 | Tool group | Requires | When unavailable |
 | ---------- | -------- | ---------------- |
 | `kb.*` | KB indexed (`omnitron kb index`) | "Run `omnitron kb index` first" |
 | `apps.*` | Daemon running | "Run `omnitron up` to start the daemon" |
 | `infra.*` | Daemon running | (same) |
-| `monitoring.*` | Daemon running | (same) |
-| `stack.*` / `secret.*` / `backup.*` / `deploy.*` / `cluster.*` / `fleet.*` / `project.*` / `webapp.*` / `pipeline.*` | Daemon running | (same) |
+| `monitoring.*` (`health.*` / `metrics.*` / `logs.*`) | Daemon running | (same) |
+| `stack.*` / `secret.*` / `backup.*` / `deploy.*` / `cluster.*` / `fleet.*` / `k8s.*` / `project.*` / `webapp.*` / `pipeline.*` | Daemon running | (same) |
 
-Partial availability is fine: if the daemon is down but the KB
-is indexed, the agent can still answer "how does X work" but
-can't `start app`.
+"When unavailable" is logged to **stderr** — the tools are
+simply not registered (absent from `tools/list`), not stubbed
+with a fallback response. So partial availability is fine: if
+the daemon is down but the KB is indexed, the agent only sees
+the `kb.*` tools and can still answer "how does X work" — it
+just can't `start app`.
 
 ## KB tools
 
@@ -73,6 +76,8 @@ can't `start app`.
 | `kb.get_gotchas` | Known pitfalls and critical warnings (essential before modifying unfamiliar code) |
 | `kb.search_symbols` | Search for classes / interfaces / types by name or kind |
 | `kb.dependencies` | Dependency graph for a module — depends-on + dependents |
+| `kb.index` | Trigger an (incremental or full) reindex from the agent |
+| `kb.status` | Index health, entry counts, last-indexed timestamp |
 
 Agents typically lead with `kb.repo_map` (orient), then
 `kb.query` (find), then `kb.get_api` (verify signature) before
@@ -99,6 +104,14 @@ making changes.
 | `infra.down` | Stop containers (optional `--volumes` for data wipe) |
 | `infra.status` | Container inventory |
 | `infra.logs` | Per-service container logs |
+| `infra.psql` | Run SQL against a managed Postgres container |
+| `infra.redis` | Run a command against a managed Redis container |
+| `infra.migrate` | Run database migrations |
+
+> `infra.psql` / `infra.redis` are exactly the wide-blast-radius
+> "execute SQL / run command" tools the [anti-patterns](#anti-patterns)
+> section warns about — they exist for operator convenience; scope
+> the agent's token accordingly.
 
 ## Management tools — monitoring
 
@@ -119,18 +132,19 @@ making changes.
 | `backup.create` / `backup.list` / `backup.restore` | Database backup |
 | `deploy.app` / `deploy.build` / `deploy.rollback` | Deployment |
 | `cluster.status` / `fleet.status` / `fleet.health` | Cluster + fleet |
+| `k8s.pods` / `k8s.scale` | Kubernetes pods + scaling |
 | `webapp.status` / `webapp.build` | Console UI |
 | `pipeline.list` / `pipeline.run` / `pipeline.status` | CI/CD |
 
-That's ~40 management tools alongside ~9 KB tools — enough for an
-agent to drive the platform end-to-end.
+That's ~44 management tools (apps + infra + monitoring +
+control-plane) alongside 11 KB tools — enough for an agent to
+drive the platform end-to-end.
 
 ## KB index lifecycle
 
 ```bash
 omnitron kb index              # incremental reindex (default)
 omnitron kb index --full       # full reindex (ignore manifest cache)
-omnitron kb index --watch      # watch + reindex on file changes
 omnitron kb status             # index health, entry counts, last-indexed timestamp
 omnitron kb query "<question>" # one-shot query (test the index)
 ```
@@ -152,8 +166,10 @@ Both indexes update during `omnitron kb index`.
 
 ## Indexing strategy for a monorepo
 
-For a monorepo, run `omnitron kb index --watch` during dev so the
-KB stays fresh. For CI / production reads:
+Reindexing is incremental by default (manifest-cached), so a
+plain `omnitron kb index` after a batch of edits is cheap — wire
+it into a pre-commit hook or run it manually when you've changed
+public surfaces. For CI / production reads:
 
 ```bash
 omnitron kb index --full       # fresh, in case manifests drifted
@@ -174,9 +190,9 @@ group exports a factory:
 
 ```typescript
 // apps/omnitron/src/mcp/tool-groups/my-tools.ts
-import type { ToolDef } from '../types.js';
+import type { IMcpToolDef } from '../types.js';
 
-export function createMyTools(daemon: DaemonClient): ToolDef[] {
+export function createMyTools(daemonClient: any): IMcpToolDef[] {
   return [{
     name: 'mything.do',
     description: 'Do the thing. Use when X.',
@@ -187,19 +203,28 @@ export function createMyTools(daemon: DaemonClient): ToolDef[] {
       },
       required: ['target'],
     },
+    // Return a raw value — the bridge wraps it into the
+    // MCP { content: [{ type: 'text', text }] } envelope for you.
     handler: async ({ target }) => {
-      const result = await daemon.someService.someMethod({ target });
-      return { content: [{ type: 'text', text: JSON.stringify(result) }] };
+      return daemonClient.someService.someMethod({ target });
     },
   }];
 }
 ```
 
-Register in `kb mcp` command:
+Register in the `kb mcp` command (`apps/omnitron/src/commands/kb.ts`):
 
 ```typescript
 bridge.registerTools(createMyTools(daemonClient));
 ```
+
+The tool definition interface is `IMcpToolDef` (in
+`apps/omnitron/src/mcp/types.ts`); the existing group factories
+(`createKbTools`, `createAppsTools`, …) all take the relevant
+client/service as a loosely-typed `any`. Handlers return a raw
+object or string — `McpBridge` `JSON.stringify`s it and wraps it
+in the `{ content: [...] }` envelope; don't build that envelope
+yourself or you'll double-encode.
 
 The `description` field is **what the agent reads to decide
 whether to call the tool**. Make it specific.
@@ -223,37 +248,24 @@ whether to call the tool**. Make it specific.
 
 ## Auth model
 
-The MCP server **inherits the local Unix-socket trust**. If the
-agent process can talk to `~/.omnitron/daemon.sock`, it runs as
-admin (same model as the CLI). Different process running as a
-different OS user → different daemon → different scope.
+The MCP server **inherits the local Unix-socket trust**. The
+`kb mcp` command takes no connection flags — it always builds a
+local daemon client (`createDaemonClient()`) that talks to
+`~/.omnitron/daemon.sock`. If the agent process can reach that
+socket, it runs as admin (same model as the CLI). A different
+process running as a different OS user → different daemon →
+different scope.
 
-For agents that run on remote machines or in containers, expose
-the daemon over TCP / HTTP with JWT auth and run the agent as
-an operator role:
+> **There is no remote/TCP MCP transport today.** `kb mcp` has no
+> `--daemon-url` or `--token` option; the server cannot point at a
+> remote daemon. To drive a remote host, run the MCP server **on
+> that host** (over an SSH session or inside its container) so it
+> reaches the local socket there, and scope the agent's OS-level
+> access accordingly.
 
-```bash
-# On the remote daemon host:
-omnitron up --webapp                                   # exposes :9800 with JWT
-
-# Agent host config:
-{
-  "mcpServers": {
-    "omnitron-prod": {
-      "command": "omnitron",
-      "args": [
-        "kb", "mcp",
-        "--daemon-url", "https://prod-daemon.internal:9800",
-        "--token", "$OMNITRON_TOKEN"
-      ]
-    }
-  }
-}
-```
-
-The token has whatever roles you minted it with. Match agent
-power to its expected scope — give a code-review agent `viewer`,
-not `admin`.
+Match agent power to its expected scope. Because local-socket
+access is effectively admin, the strongest control is *where*
+you run the MCP server and *which* host's daemon it can reach.
 
 ## Common agent workflows
 
@@ -299,8 +311,11 @@ restarting on every prompt adds noticeable latency.
 
 ## Anti-patterns
 
-- **Letting an agent run as `admin`** by default. Default to
-  `operator`; require human override for admin actions.
+- **Running the MCP server next to a production daemon socket**
+  without thinking. Local-socket access is admin — keep the
+  server on dev/staging hosts, or gate destructive tools behind
+  operator confirmation, since there is no per-token role scoping
+  for the MCP surface today.
 - **Skipping `kb index`** in CI before MCP-based code review.
   Stale KB makes agents confidently wrong.
 - **Tools that perform multiple actions atomically.** The agent
@@ -316,5 +331,5 @@ restarting on every prompt adds noticeable latency.
 
 - [CLI / Knowledge base](./cli.md#knowledge-base-mcp)
 - [Configuration](./configuration.md) — daemon config
-- [Daemon / Auth flow](./daemon.md#auth-flow) — JWT for remote agents
+- [Daemon / Auth flow](./daemon.md#auth-flow) — local Unix-socket trust model
 - [Best practices](./best-practices.md)

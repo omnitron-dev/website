@@ -34,6 +34,7 @@ until it has been parsed against a schema.
 
 ```typescript
 import { z } from '@omnitron-dev/titan/validation';
+import { Validate } from '@omnitron-dev/titan/decorators';
 
 const CreateUserSchema = z.object({
   email: z.string().email(),
@@ -43,14 +44,21 @@ const CreateUserSchema = z.object({
 
 @Service('users@1.0.0')
 class UsersService {
+  // @Validate is a METHOD decorator taking a MethodContract
+  // ({ input, output?, options? }) — not a parameter decorator.
   @Public()
-  async create(@Validate(CreateUserSchema) input: z.infer<typeof CreateUserSchema>) {
-    // input is parsed and trusted here.
+  @Validate({ input: CreateUserSchema })
+  async create(input: z.infer<typeof CreateUserSchema>) {
+    // The first argument is parsed and trusted here.
     // The TypeScript type matches the schema exactly.
     return this.repo.create(input);
   }
 }
 ```
+
+`@Validate` validates the method's **first argument** against
+`input`. Shorthands `@ValidateInput(schema, options?)` and
+`@ValidateOutput(schema, options?)` exist for the common cases.
 
 The body of `create` runs only if the input passes validation. If
 not, the caller receives a typed `ValidationError` with the schema's
@@ -76,7 +84,8 @@ Netron call dispatch:
 
 1. Transport receives bytes.
 2. msgpack decodes into the call's argument object.
-3. `@Validate(Schema)` runs the schema against each marked argument.
+3. `@Validate({ input })` (or a class-level `@Contract`) runs the
+   schema against the method's first argument.
 4. On success: the parsed (and possibly transformed) value replaces
    the raw input. The method body runs with the trusted value.
 5. On failure: a `ValidationError` is sent back to the client. The
@@ -117,16 +126,21 @@ method body sees.
 
 ## Validation result options
 
-By default, `@Validate(Schema)` runs the schema in **parse** mode —
-unknown properties are rejected. Pass options for other behaviour:
+Behaviour is controlled by the contract's `options`
+(`ValidationOptions`). The `mode` field decides how unknown keys are
+treated:
 
 ```typescript
-@Validate(Schema, { stripUnknown: true })   // unknown keys silently dropped
-@Validate(Schema, { passthrough: true })    // unknown keys preserved
+@Validate({ input: Schema, options: { mode: 'strip' } })        // unknown keys dropped
+@Validate({ input: Schema, options: { mode: 'passthrough' } })  // unknown keys preserved
+@Validate({ input: Schema, options: { mode: 'strict' } })       // unknown keys rejected
 ```
 
-For development and debugging, `stripUnknown` is sometimes useful;
-for production APIs, the default (reject unknown) is safer.
+Other `ValidationOptions` include `abortEarly`, `coerce`,
+`errorFormat` (`'simple' | 'detailed'`), `errorMap`, and
+`cacheValidators`. The exact default depends on the schema (a plain
+`z.object` strips unknown keys unless `.strict()`/`.passthrough()` is
+applied); for production APIs, be explicit.
 
 ## Read on
 

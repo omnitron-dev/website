@@ -35,11 +35,13 @@ container.register(LOGGER, {
   useClass: ConsoleLogger,
   scope:    Scope.Singleton,
   inject:   [],                // optional; auto-detected from metadata
-  lazy:     false,             // construct on first resolve, not eagerly
-  async:    false,             // declare an async provider
   multi:    false,             // single token
 });
 ```
+
+A `ClassProvider` also accepts `condition` (a context predicate) and
+`fallback` (a provider to use when the condition fails). `async` and
+`timeout`/`retry` belong to `FactoryProvider`, not `ClassProvider`.
 
 In Titan, this is what `@Module({ providers: [ConsoleLogger] })`
 becomes. The bare-class form is shorthand:
@@ -60,11 +62,12 @@ container.register(API_KEY, { useValue: 'sk_live_…' });
 container.register(CONFIG,  { useValue: { tier: 'redis-lru', max: 10_000 } });
 ```
 
-Or via helper:
+Or via helper — note the helpers take the token and return a
+`[token, provider]` tuple ready to spread into `register`:
 
 ```typescript
-const provider = createValueProvider('sk_live_…');
-container.register(API_KEY, provider);
+const [token, provider] = createValueProvider(API_KEY, 'sk_live_…');
+container.register(token, provider);
 ```
 
 Use when: the value is data, an external object, or a constant.
@@ -151,18 +154,22 @@ See [Multi-injection](./multi-injection.md) for the full pattern.
 ```typescript
 import { createConditionalProvider } from '@omnitron-dev/titan/nexus';
 
-const provider = createConditionalProvider({
-  when:        (ctx) => ctx.config.get('billing.provider') === 'stripe',
-  useClass:    StripeBillingService,
-  useFallback: NoopBillingService,
-  scope:       Scope.Singleton,
-});
+// createConditionalProvider(token, provider, condition, fallback?)
+// returns a [token, provider] tuple with `condition`/`fallback` attached.
+const [token, provider] = createConditionalProvider(
+  BILLING_SERVICE,
+  { useClass: StripeBillingService, scope: Scope.Singleton },
+  (ctx) => ctx.metadata?.billingProvider === 'stripe',
+  { useClass: NoopBillingService },
+);
 
-container.register(BILLING_SERVICE, provider);
+container.register(token, provider);
 ```
 
-The predicate runs at resolution time; the result is cached per
-scope.
+The `condition` predicate runs at resolution time against the
+`ResolutionContext`; if it returns false the `fallback` provider is
+used. (`condition` and `fallback` are first-class fields on every
+provider shape — see `types.ts`.)
 
 ## Provider options summary
 
@@ -171,8 +178,9 @@ scope.
 | `scope`      | `Scope.Singleton`    | Lifetime — see [Scopes](./scopes.md)                        |
 | `inject`     | `[]`                 | Tokens for `useFactory` arguments or constructor params     |
 | `multi`      | `false`              | Multi-injection — multiple providers per token              |
-| `lazy`       | `false`              | Defer construction until first resolve                      |
-| `async`      | `false`              | Provider produces a Promise                                 |
+| `async`      | `false`              | `FactoryProvider` only — provider produces a Promise        |
+| `condition`  | —                    | Context predicate; falls back to `fallback` when false      |
+| `fallback`   | —                    | Provider used when `condition` returns false                |
 
 ## Provider predicates
 

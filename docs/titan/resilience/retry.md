@@ -43,29 +43,29 @@ import { isOperationalError } from '@omnitron-dev/titan/utils';
 await retry(
   () => fetch(url),
   {
-    maxRetries:   3,
-    initialDelay: 100,
-    maxDelay:     5_000,
-    multiplier:   2,
-    jitter:       true,
-    backoff:      BackoffStrategy.Exponential,
-    shouldRetry:  (error) => isOperationalError(error),
-    onRetry:      (error, attempt) => log.warn('retry', { attempt }),
+    maxRetries:       3,
+    initialDelay:     100,
+    maxDelay:         5_000,
+    backoffMultiplier: 2,
+    jitterFactor:     0.1,
+    backoffStrategy:  BackoffStrategy.Exponential,
+    shouldRetry:      (error) => isOperationalError(error),
+    onRetry:          (error, attempt, delay) => log.warn('retry', { attempt, delay }),
   },
 );
 ```
 
 Real shape of `RetryOptions` lives in `utils/resilience.ts`. Common
-knobs:
+knobs (note the exact field names):
 
-- `maxRetries` — maximum retry attempts (in addition to the first try).
-- `initialDelay` / `maxDelay` — bounds.
-- `multiplier` — for exponential backoff.
-- `jitter` — `true` to randomise around the computed delay.
-- `backoff` — `BackoffStrategy.Fixed | .Linear | .Exponential |
-  .Fibonacci`.
-- `shouldRetry` — classifier predicate; default retries everything.
-- `onRetry` — callback per attempt.
+- `maxRetries` — maximum retry attempts (in addition to the first try). Default `3`.
+- `initialDelay` / `maxDelay` — bounds (ms). Defaults `100` / `30_000`.
+- `backoffMultiplier` — multiplier for exponential backoff. Default `2`.
+- `jitterFactor` — `0..1` random variance applied to the delay. Default `0.1`.
+- `backoffStrategy` — `BackoffStrategy.Fixed | .Linear | .Exponential |
+  .ExponentialWithJitter`. Default `.Exponential`.
+- `shouldRetry(error, attempt)` — classifier predicate; default retries everything.
+- `onRetry(error, attempt, delay)` — callback per attempt.
 
 ## The `computeBackoff` helper
 
@@ -81,11 +81,11 @@ while (true) {
   } catch (e) {
     if (++attempt >= 3) throw e;
     const delayMs = computeBackoff({
-      attempt,
-      baseMs:     100,
-      maxMs:      5_000,
-      multiplier: 2,
-      jitter:     0.25,
+      attempt,            // 0-indexed
+      baseMs: 100,
+      maxMs:  5_000,
+      factor: 2,          // exponential growth factor (not `multiplier`)
+      jitter: 0.25,       // 0..1 fraction, additive by default
     });
     await sleep(delayMs);
   }
@@ -131,7 +131,7 @@ A retry without a circuit breaker can hammer a failing backend:
 ```typescript
 import { CircuitBreaker, retry, isOperationalError } from '@omnitron-dev/titan/utils';
 
-const breaker = new CircuitBreaker({ failureThreshold: 5, timeout: 60_000 });
+const breaker = new CircuitBreaker({ failureThreshold: 5, resetTimeout: 60_000 });
 
 await breaker.execute(() =>
   retry(() => callBackend(), { maxRetries: 3, shouldRetry: isOperationalError }),
@@ -149,6 +149,7 @@ backend, so no exponential pile-up.
 - **No backoff.** Immediate retry is a thundering herd. Use one of
   the named strategies.
 - **No jitter.** Synchronised retries from many clients create
-  bursts. Enable `jitter: true`.
+  bursts. Set a non-zero `jitterFactor` (e.g. `0.3`), or use
+  `BackoffStrategy.ExponentialWithJitter`.
 
 → Next: [Circuit Breaker](./circuit-breaker.md).

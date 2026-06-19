@@ -131,7 +131,7 @@ and produces the per-app env injection.
 | ----------- | ------ |
 | `"database": true` | Auto-create one database for this app in the shared Postgres; inject `DATABASE_URL` |
 | `"database": { "dedicated": true }` | Provision a dedicated Postgres container |
-| `"database": { "dialect": "mysql" }` | Use MySQL instead (presets exist) |
+| `"database": { "dialect": "mysql" }` | Dialect hint (the preset architecture supports alternatives; only `postgres` ships built-in today) |
 | `"redis": true` | Auto-assign a Redis DB index; inject `REDIS_URL` |
 | `"redis": { "dedicated": true }` | Dedicated Redis container |
 | `"s3": true` | Default bucket on the shared MinIO |
@@ -323,30 +323,37 @@ containers are restarted; orphaned ones are removed.
 
 ```typescript
 interface IDockerServiceConfig {
-  image:        string;
-  command?:     string | string[];
-  env?:         Record<string, string>;
-  volumes?:     IVolumeMount[];
-  network?:     IDockerNetworkConfig;
-  user?:        string;
-  privileged?:  boolean;
-  capabilities?: { add?: string[]; drop?: string[] };
-  resources?:   ResourceLimits;
-  healthCheck?: ContainerHealthCheck;
-  labels?:      Record<string, string>;
-  variants?:    Record<string, Partial<IDockerServiceConfig>>;   // for networkMode
-  // ... more options for fine-tuning
+  image?:        string;                              // required unless `build` given
+  build?:        { context: string; dockerfile?: string; args?: Record<string,string>; tag?: string };
+  portMappings?: Record<string, number>;              // host-port overrides, keyed by port name
+  bindHost?:     string;                              // default '127.0.0.1'
+  environment?:  Record<string, string>;              // env for the SERVICE container
+  volumes?:      Record<string, string | IVolumeMount>; // name → mount path | full spec
+  command?:      string[];
+  entrypoint?:   string[];
+  user?:         string;
+  healthCheck?:  ContainerHealthCheck;
+  resources?:    ResourceLimits;
+  restart?:      string;                              // default 'unless-stopped'
+  shmSize?:      string;
+  network?:      string | IDockerNetworkConfig;
+  extraHosts?:   string[];                            // e.g. 'host.docker.internal:host-gateway'
+  labels?:       Record<string, string>;
+  variants?:     Record<string, Partial<IDockerServiceConfig>>;   // for networkMode
 }
 ```
+
+Note `volumes` is a **map** (`name → path | spec`), not an array,
+and container env is `environment` (not `env`). There is no
+`privileged` / `capabilities` field.
 
 ### `IVolumeMount`
 
 ```typescript
 interface IVolumeMount {
-  source:     string;     // host path or named volume
-  target:     string;     // path inside the container
-  type?:      'bind' | 'volume';
-  readOnly?:  boolean;
+  source:    string;     // host path (bind mount) or named volume
+  target:    string;     // path inside the container
+  readonly?: boolean;
 }
 ```
 
@@ -355,8 +362,9 @@ restarts. Bind mounts read from host paths verbatim.
 
 ## Bare-metal provider
 
-For `prod` stacks (or wherever you don't want Docker), declare a
-bare-metal connection:
+For `prod` stacks (or wherever you don't want Docker), declare
+bare-metal provisioning hints. These tell Omnitron how to
+install / locate / validate the service on the target host:
 
 ```typescript
 {
@@ -364,8 +372,9 @@ bare-metal connection:
   ports: { tcp: 5432 },
   env: { DATABASE_URL: 'postgres://${secret:db_user}:${secret:db_pass}@${host}:${port:tcp}/main' },
   bareMetal: {
-    discovery: 'static',
-    servers: [{ host: '10.0.1.10', port: 5432 }],
+    systemdUnit:     'postgresql',
+    dataDir:         '/var/lib/postgresql/data',
+    validateCommand: 'pg_isready',
   },
   secrets: {
     db_user: { secret: 'db_user' },
@@ -374,21 +383,29 @@ bare-metal connection:
 }
 ```
 
-The provider connects to the declared server(s), verifies health,
-and resolves the same env-template machinery.
+For an external host you don't manage, prefer a stack
+`serviceOverride` with `external: { host, ports }` (see below) —
+that disables provisioning and just wires up the connection.
 
 ### `IBareMetalServiceConfig`
 
 ```typescript
 interface IBareMetalServiceConfig {
-  discovery: 'static' | 'consul' | 'k8s';
-  servers?:  Array<{ host: string; port?: number; weight?: number }>;
-  // ... discovery-specific options
+  installCommand?:  string;   // package install command
+  systemdUnit?:     string;   // systemd service name
+  configFile?:      string;   // config path on the target machine
+  configTemplate?:  string;   // template (uses ${...} syntax)
+  dataDir?:         string;   // data dir; omnitron ensures it exists
+  user?:            string;   // user to run the service as
+  bindAddress?:     string;   // bind address for remote/cluster stacks
+  validateCommand?: string;   // check whether the service is installed
+  variants?:        Record<string, Partial<IBareMetalServiceConfig>>; // per networkMode
 }
 ```
 
-`static` is the simplest — explicit address list. `consul` and
-`k8s` discover live service endpoints.
+There is no service-discovery layer here (no `consul` / `k8s`
+provider) — bare-metal config describes install + on-disk layout.
+Live external endpoints are wired via `serviceOverrides.external`.
 
 ## Container state
 
@@ -474,20 +491,30 @@ secret store (`omnitron secret set X ...`). Secrets are resolved
 
 ## Health checks per service
 
-```json
-{
-  "healthCheck": {
-    "tcp":      { "port": 5432 },
-    "http":     { "path": "/healthz", "port": 8080, "status": 200 },
-    "command":  { "exec": ["pg_isready", "-U", "postgres"], "interval": "5s" },
-    "retries":  10,
-    "timeout":  "10s"
-  }
+A health check is a single discriminated `{ type, target }` pair,
+not a set of nested probe blocks:
+
+```typescript
+interface IServiceHealthCheck {
+  type:    'http' | 'tcp' | 'command' | 'jsonrpc';
+  target:  string;        // http: URL path · tcp: port name · command: shell cmd · jsonrpc: method
+  interval?:    string;   // default '30s'
+  timeout?:     string;   // default '10s'
+  retries?:     number;   // default 5
+  startPeriod?: string;   // grace before first check; default '30s'
+  jsonrpc?: { port: string; method: string; path?: string; auth?: {...} };
 }
 ```
 
-Three probe types — TCP, HTTP, exec. The infrastructure gate uses
-these to decide when to release the start gate for dependent apps.
+```json
+{ "healthCheck": { "type": "command", "target": "pg_isready -U postgres", "interval": "5s", "retries": 10 } }
+{ "healthCheck": { "type": "tcp",  "target": "tcp" } }
+{ "healthCheck": { "type": "http", "target": "/healthz", "timeout": "10s" } }
+```
+
+Four probe types — `http`, `tcp`, `command`, and `jsonrpc` (the
+last for blockchain daemons). The infrastructure gate uses these
+to decide when to release the start gate for dependent apps.
 
 ## API gateway integration
 
@@ -515,7 +542,7 @@ always points at the current location.
 | Command | Effect |
 | ------- | ------ |
 | `omnitron infra up` | Provision all infrastructure |
-| `omnitron infra down [--volumes]` | Stop everything; `--volumes` deletes data |
+| `omnitron infra down [--volumes]` | Stop + remove containers. (`--volumes` is accepted but volume deletion is not yet implemented — it prints a hint to run `docker volume prune` manually.) |
 | `omnitron infra status` (`ps`) | Container inventory |
 | `omnitron infra logs [service] [-f] [-n N]` | Tail container logs |
 | `omnitron infra psql [database]` | Open psql against the managed Postgres |

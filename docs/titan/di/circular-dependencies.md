@@ -18,11 +18,15 @@ import { CircularDependencyError, forwardRef } from '@omnitron-dev/titan/nexus';
 ## What you see
 
 ```
-CircularDependencyError: cycle in container graph
-  UsersService → SessionService → AuthService → UsersService
+CircularDependencyError: Circular dependency detected: UsersService
+  The dependency chain forms a cycle:
+  UsersService -> SessionService -> AuthService -> UsersService
 ```
 
-The error names every node in the cycle, in order.
+The message (built by Nexus's actionable-error formatter) names every
+node in the cycle, in order, and lists fixes — extract a shared
+service, use lazy injection, switch to property injection, or
+`forwardRef()`.
 
 ## Why cycles are bad
 
@@ -90,7 +94,8 @@ class B {
 the construction-time cycle:
 
 ```typescript
-import { forwardRef, Inject } from '@omnitron-dev/titan/nexus';
+import { forwardRef } from '@omnitron-dev/titan/nexus';
+import { Inject } from '@omnitron-dev/titan';
 
 class UsersService {
   constructor(

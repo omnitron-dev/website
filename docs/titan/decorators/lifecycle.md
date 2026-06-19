@@ -50,8 +50,10 @@ class UsersService {
 }
 ```
 
-Multiple `@PreDestroy` methods run in reverse declaration order
-(LIFO).
+Multiple `@PreDestroy` methods on one class run in declaration order.
+(It is the disposal order *across instances/modules* that is reversed —
+dependents are torn down before their dependencies — not the multiple
+`@PreDestroy` methods within a single class.)
 
 ## When to prefer the interface form
 
@@ -110,9 +112,10 @@ For `onStart` / `onStop` work, implement the interface.
 
 ## Anti-patterns
 
-- **Mixing decorators and interfaces on the same class.** The
-  framework runs both, but readers will be confused. Pick one
-  style per class.
+- **Mixing decorators and interfaces on the same class.** For the
+  init phase the two are *not* additive: if a class has any
+  `@PostConstruct` method, the container runs those and **skips**
+  `onInit()`. Don't rely on both firing — pick one style per class.
 - **Lifecycle decorators on private methods.** They work — but the
   intent is unclear. Lifecycle work is part of the class's public
   contract, even if the method is private.

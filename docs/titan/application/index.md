@@ -27,10 +27,10 @@ import {
 | Symbol                  | Purpose                                                  |
 | ----------------------- | -------------------------------------------------------- |
 | `Application`           | The orchestrator class                                   |
-| `Application.create()`  | Static factory; returns a configured (not started) app   |
-| `createApp`             | Alias of `Application.create`                            |
-| `createAndStartApp()`   | Single-call bootstrap (create + start)                   |
-| `startApp`              | Alias related to `Application.create` + `.start()`       |
+| `Application.create()`  | Static **async** factory; registers modules + core modules, returns a configured (not started) app |
+| `createApp`             | Sync `new Application(options)` — wraps the constructor only; does **not** register modules or core modules (those run lazily on `start()`) |
+| `createAndStartApp()`   | Single-call bootstrap: `createApp` + `app.use(...)` per module + `app.start()` |
+| `startApp`              | Sync `createApp` + `await app.start()`                  |
 | `IApplication`          | Public interface                                         |
 | `IApplicationOptions`   | Constructor options                                      |
 | `ApplicationToken`      | DI token to inject the application into a provider       |

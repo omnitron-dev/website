@@ -45,14 +45,25 @@ Application.create(AppModule, options?)
 Application.create({ modules: [AppModule], ...otherOptions })
 ```
 
-Aliases:
+Related helpers:
 
 ```typescript
 import { createApp, createAndStartApp } from '@omnitron-dev/titan';
 
-createApp           // same as Application.create
+createApp           // sync new Application(options) — constructor only;
+                    // core/extra modules register lazily on start()
 createAndStartApp   // create + start in one call (see Step 2)
 ```
+
+> **`createApp` is not `Application.create`.** The `createApp` exported
+> from the package root is a thin sync wrapper over the constructor
+> (`new Application(options)`). It does **not** register a main module,
+> core modules, or run auto-discovery — those happen inside the async
+> `Application.create` factory (or lazily during `start()`). Use
+> `Application.create({ modules: [...] })` when you want the full wiring
+> up front. (There is a separate `createApp` in the
+> `@omnitron-dev/titan/application` Simple API that *is* bound to
+> `Application.create` — but the root-barrel export is the sync one.)
 
 What happens inside `create`:
 
@@ -98,8 +109,21 @@ What happens, in order:
 After `start` resolves, every provider has had its `onInit` and
 `onStart` called. The application is **live**.
 
-A failure in any phase aborts the start, fires `onStop`/`onDestroy`
-for providers that already ran, and rejects with a typed error.
+> **Implementation note.** The phases above are the *contract* the
+> framework guarantees, not a literal 1:1 of the call order inside
+> `_doStart`. In practice the Nexus container fires most provider
+> `onInit` / `@PostConstruct` hooks during the eager singleton
+> initialisation that runs inside `Application.create` (and a final
+> `container.initialize()` sweep at the tail of `start`), while module
+> `onStart` hooks run during `start`. What you can rely on: a provider's
+> `onInit` completes before its own `onStart`, and both respect
+> dependency order. Don't depend on the absolute wall-clock interleaving
+> of unrelated providers' phases.
+
+A failure in any phase aborts the start, rolls back modules that
+reached `onStart` (in reverse order) via their `onStop`, disposes the
+container, transitions to `Failed`, and rejects with the original
+error.
 
 ## Step 3 — running
 

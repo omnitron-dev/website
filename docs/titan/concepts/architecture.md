@@ -79,28 +79,33 @@ stopping → stopped`) and fires hooks in **dependency order** at each
 transition. Owns timeouts, parallelism rules, and the hard-exit
 guarantee.
 
-States:
+States. The public `app.state` reports the **`ApplicationState`** enum —
+six values, the coarse axis the kernel transitions through:
 
-| State          | Meaning                                                  |
-| -------------- | -------------------------------------------------------- |
-| `created`      | Container built, no hooks fired yet                      |
-| `initializing` | `onInit` hooks running                                   |
-| `initialized`  | All `onInit` complete; ready to start                    |
-| `starting`     | `onStart` hooks running                                  |
-| `running`      | `onStart` complete; service surfaces are live            |
-| `stopping`     | `onStop` hooks running (reverse dependency order)        |
-| `stopped`      | `onStop` complete                                        |
-| `shuttingDown` | `onShutdown` hooks running; phased timeouts active       |
-| `error`        | A hook failed; the application is in a poisoned state    |
+| `ApplicationState` | Meaning                                                  |
+| ------------------ | -------------------------------------------------------- |
+| `created`          | Container built, no hooks fired yet                      |
+| `starting`         | Start sequence running (`onStart` hooks + module starts) |
+| `started`          | Start complete; service surfaces are live                |
+| `stopping`         | Stop sequence running (reverse dependency order)         |
+| `stopped`          | Stop complete                                            |
+| `failed`           | A phase threw; the application is in a poisoned state    |
+
+A separate, finer-grained **`LifecycleState`** enum (`created`,
+`initializing`, `initialized`, `starting`, `running`, `stopping`,
+`stopped`, `shuttingDown`, `error`) is surfaced through
+`getProcessMetrics().state` for diagnostics. Don't confuse the two:
+`app.state` is `ApplicationState`.
 
 → Reference: [Lifecycle](../application/lifecycle.md), [Shutdown](../application/shutdown.md)
 
 ### Event Bus
 
 Broadcasts framework events (`module:registered`, `config:changed`,
-`lifecycle:phase`, `health:changed`, etc.) to subscribers registered via
-`app.on(event, handler)`. Strictly typed event names; payload type
-inferred from the event.
+`lifecycle:phase`, `shutdown:complete`, etc.) to subscribers registered
+via `app.on(event, handler)`. Event names come from the
+`ApplicationEvent` enum; see [Application Events](../application/events.md)
+for the full list and the payload each one carries.
 
 → Reference: [Application Events](../application/events.md)
 
@@ -142,10 +147,11 @@ load balancers, and the Omnitron orchestrator.
 
 ### Shutdown Coordinator
 
-Phased graceful shutdown. Tasks declare a phase (`PreShutdown |
-Cleanup | Flush | Final`), a priority, a timeout, and a critical flag.
-The coordinator runs each phase to completion (or timeout), then
-proceeds to the next. Hard exit after the last phase.
+Phased graceful shutdown. Tasks declare a priority, a timeout, and a
+critical flag; the priority is bucketed into one of three phases
+(`pre-stop → stop-runtime → dispose`). The coordinator runs each phase
+to completion (or timeout), then proceeds to the next. Hard exit after
+the last phase.
 
 → Reference: [Shutdown](../application/shutdown.md)
 
