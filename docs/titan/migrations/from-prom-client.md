@@ -23,11 +23,11 @@ This page is the surgical recipe for moving from one to the other.
 | `new Registry()`                          | `MetricsService` (DI-provided singleton)       |
 | `new Counter({ name, help, labelNames })` | `metrics.recordTyped('counter', name, labels, 1)` |
 | `new Gauge(...)`                          | `metrics.recordTyped('gauge', name, labels, v)` |
-| `new Histogram({ buckets })`              | `metrics.recordTyped('histogram', name, labels, v)` + `@Metrics` decorator |
+| `new Histogram({ buckets })`              | `metrics.recordTyped('histogram', name, labels, v)`           |
 | `register.metrics()`                      | `metrics.getPrometheusText()`                  |
 | `collectDefaultMetrics()`                 | `collection: { process: true, system: true }` |
 | Custom registry per app                   | `appName` option (tags every sample)           |
-| (no built-in storage)                     | `storage: 'memory' \| 'sqlite' \| 'postgres'` |
+| (no built-in storage)                     | `storage: { type: 'memory' \| 'sqlite' \| 'postgres' }` |
 | (manual cleanup)                          | `retention: { maxAge: '7d' }` (automatic)      |
 | (manual exposition route)                 | `MetricsRpcService` over Netron (or roll your own) |
 
@@ -72,23 +72,34 @@ app.get('/metrics', async (_req, res) => {
 });
 ```
 
-The Titan equivalent leans on the `@Metrics` decorator:
+The Titan equivalent uses the `@Metrics` decorator for automatic
+RPC instrumentation, and `recordTyped` for your own counters /
+histograms:
 
 ```typescript
 // titan-metrics
-import { Module, Service, Public, Inject } from '@omnitron-dev/titan';
+import { Module, Service, Inject } from '@omnitron-dev/titan';
+import { Public } from '@omnitron-dev/titan/decorators';
 import { TitanMetricsModule, MetricsService, METRICS_SERVICE_TOKEN, Metrics }
   from '@omnitron-dev/titan-metrics';
 
 @Service('orders@1.0.0')
 class OrdersService {
+  constructor(
+    @Inject(METRICS_SERVICE_TOKEN) private readonly metrics: MetricsService,
+  ) {}
+
+  // @Metrics() auto-records rpc_requests_total,
+  // rpc_request_duration_seconds and rpc_errors_total for this method.
+  // The optional string only overrides the `method` label.
   @Public()
-  @Metrics({
-    counter:   { name: 'orders.processed.total' },
-    histogram: { name: 'orders.process.ms', buckets: [5, 25, 100, 500, 2500] },
-  })
+  @Metrics()
   async create(input: CreateOrder) {
-    return this.repo.create(input);
+    const order = await this.repo.create(input);
+    // Custom metrics use recordTyped — there is no counter/histogram
+    // option on @Metrics.
+    this.metrics.recordTyped('counter', 'orders_processed_total', { status: 'ok' }, 1);
+    return order;
   }
 }
 
@@ -104,6 +115,13 @@ class OrdersService {
 })
 class AppModule {}
 ```
+
+:::note
+`@Metrics()` only records once the instance is linked to the
+`MetricsService` via `attachMetricsService(instance, service)` —
+`forRoot()` does not do this for you. The imperative `recordTyped`
+path (using the injected service) works with no extra wiring.
+:::
 
 If you need the raw Prometheus text:
 
@@ -133,7 +151,8 @@ TitanMetricsModule.forRoot({
 ```
 
 `collection.process: true` replaces `collectDefaultMetrics()` —
-RSS, heap, event loop, CPU.
+RSS, heap, CPU, uptime. (Event-loop lag is not built in; register
+a gauge yourself if you need it.)
 
 ### 3. Migrate one metric at a time
 
@@ -150,7 +169,7 @@ const userCreated = new Counter({
 userCreated.inc({ source: 'web' });
 
 // After
-metrics.recordTyped('counter', 'users.created.total', { source: 'web' }, 1);
+metrics.recordTyped('counter', 'users_created_total', { source: 'web' }, 1);
 ```
 
 `recordTyped` is the canonical API — it keeps the Prometheus
@@ -170,8 +189,9 @@ app.get('/metrics', async (_req, res) => {
 });
 
 // After (via Netron RPC — what the Omnitron console reads)
-// MetricsRpcService auto-registers when the module is loaded;
-// no extra wiring needed.
+// MetricsRpcService (Netron service name 'OmnitronMetrics') is NOT
+// auto-registered by the module — expose it yourself, constructing it
+// with the injected MetricsService.
 ```
 
 ### 5. Drop `prom-client`
@@ -184,18 +204,22 @@ pnpm remove prom-client
 
 ## Naming conventions
 
-`prom-client` uses `snake_case`; `titan-metrics` accepts both.
-The Prometheus exposition normalises to `snake_case` (dots become
-underscores), so:
+`prom-client` uses `snake_case`. **`titan-metrics` does not
+normalise metric names** — `getPrometheusText()` emits the name
+exactly as you registered it. Prometheus metric names may only
+contain `[a-zA-Z0-9_:]`, so a dotted name like `users.created.total`
+would be emitted verbatim and produce **invalid** exposition.
 
-| Source name              | Prometheus exposition       |
+Use `snake_case` at the call site:
+
+| What you record          | Prometheus exposition       |
 | ------------------------ | --------------------------- |
-| `users.created.total`    | `users_created_total`       |
-| `http.request.duration`  | `http_request_duration`     |
+| `users_created_total`    | `users_created_total`       |
+| `http_request_duration`  | `http_request_duration`     |
 | `orders_processed_total` | `orders_processed_total`    |
 
-Pick one convention per codebase; `dot.notation` reads more
-naturally in TypeScript.
+The built-in collectors already follow this (`rpc_requests_total`,
+`heap_used_bytes`, …); match it so your custom metrics scrape cleanly.
 
 ## Labels
 
@@ -211,9 +235,11 @@ sites.
 
 ## Histograms
 
-Both use bucket arrays of the form `[1, 5, 25, 100, 500]`. The
-defaults differ — `titan-metrics` does not assume a one-size-fits-
-all set, so always pass `buckets` for histograms you care about.
+`prom-client` lets you set buckets per-histogram. `titan-metrics`
+applies one **registry-wide** bucket set instead: `recordTyped('histogram',
+…)` records against the registry's configured buckets (a default set
+unless the registry is constructed with a custom `buckets` array) —
+there is no per-call bucket argument.
 
 Five-to-ten buckets is usually right. Each bucket is a separate
 time-series, so over-bucketing has real cost.
@@ -224,20 +250,19 @@ time-series, so over-bucketing has real cost.
 | ------------------------------ | ------------------------------------------ |
 | `collectDefaultMetrics()`      | `collection: { process: true }`            |
 | `collectDefaultMetrics({ register })` | (registry is module-managed; nothing to pass) |
-| GC / event-loop / RSS / FDs    | All included; sample at `collection.interval` (default 5s) |
+| heap / RSS / CPU / uptime      | Included via `collection.process`; sample at `collection.interval` (default 5s). Event-loop lag / GC / FDs are not built in. |
 
 ## Persistence — the bit `prom-client` doesn't do
 
-`titan-metrics` writes samples to a storage backend on a
-`flushInterval` (default 5s). This unlocks queries from inside your
-app:
+`titan-metrics` flushes samples to the storage backend on a fixed
+5s cadence. This unlocks queries from inside your app:
 
 ```typescript
 const series = await metrics.querySeries({
-  name:  'orders.process.ms',
-  from:  Date.now() - 3_600_000,
-  to:    Date.now(),
-  step:  60_000,
+  names:    ['orders_process_ms'],   // array; filter by metric name(s)
+  from:     Date.now() - 3_600_000,
+  to:       Date.now(),
+  interval: '1m',                    // bucket size as a duration string
 });
 ```
 
@@ -245,8 +270,8 @@ Use cases:
 
 - **Operator console** without Prometheus.
 - **Auto-degradation logic** that reads its own metrics.
-- **Cross-pod aggregation** by pointing `storage: 'postgres'` at
-  a shared connection.
+- **Cross-pod aggregation** by pointing `storage: { type: 'postgres' }`
+  at a shared connection.
 
 If you don't need these, the `'memory'` backend is essentially
 free — the ring buffer caps RAM use, the exposition path is
@@ -261,8 +286,10 @@ persistence on later.
 - **`recordTyped` instead of typed builders.** Less verbose,
   fewer pre-declared objects, but you lose the compile-time
   guarantee that the label set matches the declaration.
-- **`@Metrics` decorator** for the common method-instrumentation
-  pattern — you'll reach for it more than the imperative API.
+- **`@Metrics()` decorator** auto-instruments a Netron method with
+  the fixed `rpc_requests_total` / `rpc_request_duration_seconds` /
+  `rpc_errors_total` set. It takes only an optional method-label
+  string — for custom metrics you still use `recordTyped`.
 
 ## See also
 

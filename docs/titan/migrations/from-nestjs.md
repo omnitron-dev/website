@@ -67,7 +67,7 @@ class UsersService {
   async findById(id: string) { return this.repo.find(id); }
 
   @Public()
-  @Validate(CreateUserSchema)
+  @Validate({ input: CreateUserSchema })
   async create(input: CreateUser) { return this.repo.create(input); }
 }
 ```
@@ -89,8 +89,10 @@ contract semantics.
 | `OnModuleDestroy`            | `OnDestroy`             | Final cleanup phase                     |
 
 Map your existing hooks accordingly. The `signal` argument on
-`OnApplicationShutdown` becomes the `reason` on Titan's shutdown
-events — query `app.getShutdownReason()` if you need it.
+`OnApplicationShutdown` becomes a `ShutdownReason` — but the
+`OnStop` interface method takes no argument. If you need the
+reason, register a shutdown handler via `app.onStop((reason,
+details) => …)`, which receives it.
 
 → [Application / Lifecycle](../application/lifecycle.md)
 
@@ -119,7 +121,7 @@ const CreateUserSchema = z.object({
 });
 
 @Public()
-@Validate(CreateUserSchema)
+@Validate({ input: CreateUserSchema })
 async create(input: z.infer<typeof CreateUserSchema>) { /* … */ }
 ```
 
@@ -192,11 +194,14 @@ Titan:
 async findById(id: string) { /* … */ }
 ```
 
-Or use Netron RPC middleware globally:
+Or register RPC middleware globally. Middleware is a plain
+`(ctx, next)` function registered on the HTTP server's
+`MiddlewarePipeline` (there is no `netron.use()`); the HTTP server
+already wires auth — app bootstrap adds the rest:
 
 ```typescript
-netron.use(AuthMiddleware);
-netron.use(RateLimitMiddleware);
+pipeline.use(authMiddlewareFn);
+pipeline.use(rateLimitMiddlewareFn);
 ```
 
 → [Netron / Middleware](../netron/middleware.md) and
@@ -205,7 +210,10 @@ netron.use(RateLimitMiddleware);
 ## Module helpers
 
 NestJS has helpers like `Test.createTestingModule()` for tests.
-Titan exposes the same shape via `Application.create({ overrides: [...] })`:
+Titan overrides a provider by registering it **last** — pass the
+`providers` tuple array to `Application.create`; entries are wired
+after the modules' own providers, so the last registration for a
+token wins:
 
 ```typescript
 // NestJS
@@ -213,10 +221,10 @@ const module = await Test.createTestingModule({
   providers: [UsersService],
 }).overrideProvider(Database).useClass(FakeDatabase).compile();
 
-// Titan
+// Titan — providers are [token, providerDefinition] tuples
 const app = await Application.create({
   modules:    [UsersModule],
-  overrides:  [{ provide: Database, useClass: FakeDatabase }],
+  providers:  [[Database, { useClass: FakeDatabase }]],
   disableGracefulShutdown: true,
 });
 ```
@@ -253,8 +261,9 @@ const app = await Application.create({
   is heavily class-decorated DTOs, the rewrite is real work.
 - **No `@Get('/path')` semantics.** RPC-first means thinking in
   service methods, not URL routes.
-- **`OnApplicationShutdown(signal)` → `OnStop` + reason from
-  `app.getShutdownReason()`** — slightly different API.
+- **`OnApplicationShutdown(signal)` → `OnStop` (no argument);
+  the `ShutdownReason` is delivered to handlers registered via
+  `app.onStop((reason, details) => …)`** — slightly different API.
 
 ## See also
 

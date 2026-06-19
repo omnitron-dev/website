@@ -88,11 +88,9 @@ const TraceContextProcessor: ILogProcessor = {
     // ── Logging with redaction + trace correlation ─────────────────────
     LoggerModule.forRoot({
       level: process.env.NODE_ENV === 'production' ? 'info' : 'debug',
-      transports: [new ConsoleTransport({ pretty: process.env.NODE_ENV !== 'production' })],
+      transports: [new ConsoleTransport()],
       processors: [
-        new RedactionProcessor({
-          paths: ['password', 'token', 'headers.authorization'],
-        }),
+        new RedactionProcessor(['password', 'token', 'headers.authorization']),
         TraceContextProcessor,
       ],
     }),
@@ -142,10 +140,11 @@ import { TelemetryRelayService } from '@omnitron-dev/titan-telemetry-relay';
 import { Application } from '@omnitron-dev/titan';
 
 const relay = new TelemetryRelayService({
-  role:         'producer',
-  nodeId:       process.env.HOSTNAME ?? 'unknown',
-  bufferConfig: { maxSize: 10_000, flushInterval: 5_000, compressionEnabled: true },
-  walConfig:    { enabled: true, directory: './.wal', maxFileSize: 10 * 1024 * 1024, retentionDays: 7 },
+  role:   'producer',
+  nodeId: process.env.HOSTNAME ?? 'unknown',
+  buffer: { maxBufferSize: 10_000, flushIntervalMs: 5_000, maxBatchSize: 500 },
+  // `wal: false` disables it; otherwise pass a config (retention is by segment count).
+  wal:    { directory: './.wal', maxSizeBytes: 10 * 1024 * 1024, maxSegments: 7 },
 });
 
 relay.setTransport(buildNetronTransportToAggregator());
@@ -172,13 +171,16 @@ const relay = new TelemetryRelayService({
 });
 
 relay.setAggregator({
-  async write(entries) {
+  // The aggregator interface is { ingest(nodeId, entries), query(filter) }.
+  // Entry types are 'log' | 'metric' | 'event' | 'health' | 'alert'.
+  async ingest(nodeId, entries) {
     // Ship to your backend(s): OTLP, Loki, Tempo, Prometheus remote-write, etc.
     await Promise.all([
       shipLogs(entries.filter(e => e.type === 'log')),
       shipMetrics(entries.filter(e => e.type === 'metric')),
-      shipTraces(entries.filter(e => e.type === 'trace')),
+      shipEvents(entries.filter(e => e.type === 'event')),
     ]);
+    return entries.length;        // count acknowledged
   },
   async query(filter) { /* … */ return []; },
 });
@@ -193,47 +195,40 @@ await app.start();
 ## Trace propagation in your code
 
 ```typescript
-import { startSpan, currentTrace } from '@omnitron-dev/titan';
+import { startSpan, withTrace } from '@omnitron-dev/titan';
 
 @Public()
 async findById(id: string) {
-  const { traceContext, end } = startSpan('repo.find', { resource: 'users' });
-  try {
-    return await this.repo.find(id);
-  } finally {
-    end('ok');
-  }
+  // startSpan(parent?) returns a new child TraceContext; run work inside
+  // withTrace so currentTrace() — and the log processor — see this span.
+  const span = startSpan();
+  return withTrace(span, () => this.repo.find(id));
 }
 ```
 
 Netron propagates the `traceparent` across RPC calls automatically;
-log lines inside the span automatically carry `traceId` / `spanId`
+log lines inside `withTrace` automatically carry `traceId` / `spanId`
 through the `TraceContextProcessor` above.
 
 ## A typical instrumented service
 
 ```typescript
-import { Service, Public } from '@omnitron-dev/titan';
-import { startSpan } from '@omnitron-dev/titan';
+import { Service, startSpan, withTrace } from '@omnitron-dev/titan';
+import { Public } from '@omnitron-dev/titan/netron';
 import { Metrics } from '@omnitron-dev/titan-metrics';
 
 @Service('users@1.0.0')
 class UsersService {
   constructor(
-    private readonly logger: LoggerService,
+    private readonly logger: ILogger,
     private readonly metrics: MetricsService,
   ) {}
 
   @Public()
-  @Metrics({ counter: { name: 'users.findById.total' }, histogram: { name: 'users.findById.ms' } })
+  @Metrics('users.findById')                                    // name only; tracks total + duration + errors
   async findById(id: string) {
     this.logger.info('findById', { id });                       // gets traceId/spanId via processor
-    const { end } = startSpan('repo.find');
-    try {
-      return await this.repo.find(id);
-    } finally {
-      end('ok');
-    }
+    return withTrace(startSpan(), () => this.repo.find(id));
   }
 }
 ```
@@ -246,7 +241,7 @@ class UsersService {
 | Auto-RPC metrics              | `collection.rpc: true` auto-counts Netron calls — no per-method `@Metrics` needed                    |
 | Health → readiness            | `/readyz` returns `200` only when every indicator is `healthy` or `degraded` — not `unhealthy`       |
 | Relay producer vs aggregator  | Producer pods buffer + ship via transport; aggregator receives + writes to sink. Either or both.    |
-| WAL crash safety              | `walConfig.enabled: true` writes buffer to disk on overflow; replayed on next start                  |
+| WAL crash safety              | Provide a `wal` config object (omit or `wal: false` to disable); buffer overflow spills to disk and replays on next start |
 | Metrics retention             | `retention.maxAge` is the in-storage window; ship metrics to long-term backend before that elapses   |
 
 ## Production checklist
@@ -258,7 +253,7 @@ class UsersService {
 - [ ] **Metrics**: scraped by Prometheus (`/metrics`) OR shipped via relay (pick one)
 - [ ] **Traces**: trace context propagated across worker thread boundaries via `withTrace`
 - [ ] **Health**: `enableRpcService: true` so the orchestrator can poll via Netron
-- [ ] **Relay**: `walConfig.enabled: true` in production
+- [ ] **Relay**: a `wal` config provided (not `wal: false`) in production
 - [ ] **Relay**: producer / aggregator topology mirrors your deployment shape
 - [ ] **Relay**: aggregator's `write()` is idempotent (handles retries from buffer re-enqueue)
 - [ ] **K8s**: `terminationGracePeriodSeconds` ≥ relay's flush interval + buffer drain time

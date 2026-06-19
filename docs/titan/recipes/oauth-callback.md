@@ -96,7 +96,8 @@ export class AppModule {}
 ## Implementation
 
 ```typescript
-import { Service, Public, Inject } from '@omnitron-dev/titan';
+import { Service, Inject } from '@omnitron-dev/titan';
+import { Public } from '@omnitron-dev/titan/netron';
 import { Errors } from '@omnitron-dev/titan/errors';
 import {
   JWT_SERVICE_TOKEN, SIGNED_URL_SERVICE_TOKEN,
@@ -176,12 +177,17 @@ class AuthFlowService {
     // For external IDPs, use TitanAuthModule with jwksUrl for this verify.
     // Project-specific: store refresh_token securely (encrypted-at-rest).
 
-    // Bootstrap the local session via signed URL
+    // Bootstrap the local session via signed URL.
+    // ISignedTokenPayload is { resourceId, resourcePath, operation, transform? };
+    // stash bootstrap claims under `transform`.
     const bootstrapToken = await this.signer.createSignedToken(
       {
-        resource: 'session/bootstrap',
-        // any minimal claims you need to bootstrap
-        accessTokenHash: createHash('sha256').update(tokens.access_token).digest('hex'),
+        resourceId:   'session',
+        resourcePath: 'bootstrap',
+        operation:    'read',
+        transform: {
+          accessTokenHash: createHash('sha256').update(tokens.access_token).digest('hex'),
+        },
       },
       120,    // 2 min expiry — single-use
     );

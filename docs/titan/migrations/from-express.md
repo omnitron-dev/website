@@ -23,10 +23,10 @@ trade is worth it.
 | Express                              | Titan                                                |
 | ------------------------------------ | ---------------------------------------------------- |
 | `express()` app                      | `Application.create({ modules: [...] })`             |
-| `app.use(mw)` middleware             | Netron RPC middleware via `netron.use(...)`          |
+| `app.use(mw)` middleware             | Netron RPC middleware via the HTTP `MiddlewarePipeline` |
 | `app.get('/path', handler)`          | `@Service` method with `@Public()`                   |
 | `req.body` / `req.query` / `req.params` | Plain method arguments                            |
-| `req.headers`                        | RPC context (auth, tracing) from `Netron.useContext` |
+| `req.headers`                        | RPC `ExecutionContext` (auth, tracing)               |
 | `process.env`                        | `ConfigModule.forRoot({ schema, sources })`          |
 | `console.log` / `winston` / `pino`   | Built-in `LoggerService` (pino under the hood)       |
 | `helmet` / `cors` / `compression`    | Transport-level options or per-method middleware     |
@@ -74,10 +74,10 @@ app.listen(3000);
 
 ```typescript
 // Titan — equivalent
-import { Application, Module, Service, Public, Injectable, Inject }
+import { Application, Module, Service, Injectable, Inject }
   from '@omnitron-dev/titan';
-import { Validate } from '@omnitron-dev/titan/validation';
-import { z } from 'zod';
+import { Public, Validate } from '@omnitron-dev/titan/decorators';
+import { z } from '@omnitron-dev/titan/validation';
 
 const CreateUserSchema = z.object({ email: z.string().email() });
 type  CreateUser       = z.infer<typeof CreateUserSchema>;
@@ -90,7 +90,7 @@ class UsersService {
   constructor(private readonly repo: UserRepo) {}
 
   @Public()
-  @Validate(CreateUserSchema)
+  @Validate({ input: CreateUserSchema })
   async create(input: CreateUser) {
     return this.repo.create(input);
   }
@@ -129,17 +129,21 @@ app.use((req, res, next) => {
 
 ```typescript
 // Titan — use titan-auth
+import { TitanAuthModule } from '@omnitron-dev/titan-auth';
+import { Public, Auth } from '@omnitron-dev/titan/decorators';
+
 @Module({
   imports: [TitanAuthModule.forRoot({ jwtSecret: env.JWT_SECRET })],
 })
 class AppModule {}
 
-// In your service:
+// In your service — @Auth declares the requirement; the verified
+// AuthContext is carried on the RPC ExecutionContext, not a parameter.
 @Service('users@1.0.0')
 class UsersService {
   @Public()
   @Auth({ roles: ['user'] })
-  async me(@Context() ctx: AuthContext) { return ctx.user; }
+  async me() { /* … */ }
 }
 ```
 
@@ -149,13 +153,17 @@ These belong to the HTTP **transport**, not the service. Configure
 on the Netron HTTP transport directly:
 
 ```typescript
-import { HttpTransport } from '@omnitron-dev/titan/netron/transport-http';
+import { HttpTransport } from '@omnitron-dev/titan/netron/transport/http';
 
-netron.use('http', new HttpTransport({
-  port: 3000,
-  cors: { origin: 'https://example.com' },
-  // compression, helmet-style headers, etc.
-}));
+netron.registerTransport('http', () => new HttpTransport());
+netron.registerTransportServer('http', {
+  name: 'api-http',
+  options: {
+    port: 3000,
+    cors: { origin: 'https://example.com' },
+    // compression, helmet-style headers, etc.
+  },
+});
 ```
 
 ### Logging requests
@@ -166,11 +174,20 @@ Express:
 app.use(morgan('combined'));
 ```
 
-Titan: enable the built-in logger and request middleware:
+Titan: enable the built-in logger, then register a request-logging
+middleware function on the HTTP server's `MiddlewarePipeline`:
 
 ```typescript
 LoggerModule.forRoot({ level: 'info' });
-netron.use(RequestLoggingMiddleware);
+
+// A middleware is a plain (ctx, next) function, registered on the
+// pipeline — there is no netron.use().
+const requestLogging: MiddlewareFunction = async (ctx, next) => {
+  const t0 = performance.now();
+  await next();
+  logger.info({ method: ctx.methodName, ms: performance.now() - t0 });
+};
+pipeline.use(requestLogging);
 ```
 
 → See [Netron / Middleware](../netron/middleware.md) for the

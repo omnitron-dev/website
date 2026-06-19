@@ -36,7 +36,7 @@ and act on the typed error.
 try {
   return await this.upstream.fetch();
 } catch (e) {
-  this.logger.error('upstream failed', { e });
+  this.logger.error({ err: e }, 'upstream failed');
   return null;
 }
 ```
@@ -59,7 +59,7 @@ try {
   return await this.upstream.fetch();
 } catch (e) {
   if (isOperationalError(e)) {
-    this.logger.warn('upstream unavailable, using cache', { e });
+    this.logger.warn({ err: e }, 'upstream unavailable, using cache');
     return await this.cache.get();
   }
   throw e;
@@ -75,11 +75,11 @@ different `ErrorCode` values. Callers branch on the code, not on
 parsing the message.
 
 ```typescript
-import { Errors, ErrorCode, DomainError, defineDomainCodes } from '@omnitron-dev/titan/errors';
+import { Errors, DomainError, defineDomainCodes } from '@omnitron-dev/titan/errors';
 
 const BillingCodes = defineDomainCodes('BILLING', {
-  INSUFFICIENT_FUNDS: { httpStatus: 409, message: 'Insufficient funds' },
-  ACCOUNT_FROZEN:     { httpStatus: 403, message: 'Account frozen'    },
+  INSUFFICIENT_FUNDS: { status: 409, message: 'Insufficient funds' },
+  ACCOUNT_FROZEN:     { status: 403, message: 'Account frozen'    },
 });
 
 @Public()
@@ -92,17 +92,19 @@ async transfer(from: string, to: string, amount: number) {
 
   if (fromAcct.balance < amount) {
     throw new DomainError({
-      code:    BillingCodes.INSUFFICIENT_FUNDS,
-      message: 'Insufficient funds',
-      details: { available: fromAcct.balance, required: amount },
+      domainCode: BillingCodes.INSUFFICIENT_FUNDS,
+      httpStatus: 409,
+      message:    'Insufficient funds',
+      details:    { available: fromAcct.balance, required: amount },
     });
   }
 
   if (fromAcct.frozen) {
     throw new DomainError({
-      code:    BillingCodes.ACCOUNT_FROZEN,
-      message: 'Account frozen',
-      details: { accountId: from },
+      domainCode: BillingCodes.ACCOUNT_FROZEN,
+      httpStatus: 403,
+      message:    'Account frozen',
+      details:    { accountId: from },
     });
   }
 
@@ -110,8 +112,9 @@ async transfer(from: string, to: string, amount: number) {
 }
 ```
 
-The client checks `e.code` (or uses `isDomainCode(e, BillingCodes)`)
-to discriminate.
+The client checks the error code (or uses
+`isDomainCode(e, BillingCodes, 'INSUFFICIENT_FUNDS')`) to
+discriminate.
 
 ## Patterns
 
@@ -129,7 +132,7 @@ async findById(id: string) {
     return await this.db.users.findOne({ id });
   } catch (e) {
     if (e instanceof MongoNetworkError) {
-      throw Errors.unavailable('database unreachable', { cause: String(e) });
+      throw Errors.unavailable('database', String(e));
     }
     throw e;          // unknown — let the framework wrap as INTERNAL_ERROR
   }
@@ -138,14 +141,15 @@ async findById(id: string) {
 
 ### Use the cause field
 
-Modern JavaScript errors support `cause`. Use it to chain failures
-without losing the original:
+Modern JavaScript errors support `cause`. `Errors.internal` takes the
+original error as its second argument, so you can chain failures
+without losing the underlying cause:
 
 ```typescript
 try {
   await this.upstream.fetch();
 } catch (e) {
-  throw Errors.unavailable('upstream down', { cause: String(e) });
+  throw Errors.internal('upstream down', e as Error);
 }
 ```
 
@@ -153,7 +157,7 @@ try {
 
 ```typescript
 // Schema validation — input is malformed (422).
-@Validate(InputSchema)               // throws via the framework
+@Validate({ input: InputSchema })    // throws via the framework
 
 // Business validation — input is well-formed but invalid in context (409).
 if (input.endDate < input.startDate) {
@@ -209,11 +213,11 @@ class ErrorLoggingInterceptor {
     try {
       return await next();
     } catch (e) {
-      this.logger.error('rpc.error', {
+      this.logger.error({
         service: ctx.service,
         method:  ctx.method,
-        error:   e,
-      });
+        err:     e,
+      }, 'rpc.error');
       throw e;
     }
   }

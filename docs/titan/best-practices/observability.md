@@ -22,12 +22,12 @@ For every event you might need to investigate one day. Structured,
 contextual, level-appropriate.
 
 ```typescript
-this.logger.info('order created', {
+this.logger.info({
   orderId:  order.id,
-  userId:   ctx.auth.userId,
+  userId:   order.userId,
   amount:   order.total,
   currency: order.currency,
-});
+}, 'order created');
 ```
 
 Don't:
@@ -44,9 +44,9 @@ For every quantity you want to chart, alert on, or query in
 aggregate.
 
 ```typescript
-metrics.histogram('order.processing.ms', { tier: order.tier }).observe(durationMs);
-metrics.counter('order.created.total', { source: 'web' }).inc();
-metrics.gauge('cache.size').set(this.cache.size);
+metrics.histogram('order.processing.ms', { tier: order.tier }, durationMs);
+metrics.counter('order.created.total', { source: 'web' }, 1);
+metrics.gauge('cache.size', {}, this.cache.size);
 ```
 
 Three metric types:
@@ -67,12 +67,14 @@ For finding which call to which service caused the slowness or the
 failure. One trace per request, spans for sub-operations.
 
 ```typescript
-const span = startSpan('upstream.fetch', { attributes: { url: this.url } });
-try {
-  return await this.fetch();
-} finally {
-  span.end();
-}
+import { startSpan, withTrace } from '@omnitron-dev/titan/tracing';
+
+// startSpan(parent?) returns a child TraceContext; withTrace installs
+// it for the duration of the work. The propagation layer carries the
+// context — span timing/attributes/export belong to a telemetry layer
+// (the relay module or an OTel sink) on top.
+const span = startSpan();
+return await withTrace(span, () => this.fetch());
 ```
 
 Don't span every function call. Span:
@@ -89,24 +91,27 @@ A canonical service exposes:
 
 | Signal                                         | Type      | Why                                |
 | ---------------------------------------------- | --------- | ---------------------------------- |
-| `rpc.call.total{service,method,outcome}`       | Counter   | Throughput, error rate             |
-| `rpc.duration_ms{service,method,outcome}`      | Histogram | Latency distribution               |
+| `rpc_requests_total{method,status}`            | Counter   | Throughput, error rate             |
+| `rpc_request_duration_seconds{method}`         | Histogram | Latency distribution               |
 | `db.query.duration_ms{table}`                  | Histogram | Database tail latency              |
 | `outbound.duration_ms{provider}`               | Histogram | Third-party performance            |
 | `cache.hit_rate{cache}`                        | Gauge     | Cache effectiveness                |
 | `app.active_connections{transport}`            | Gauge     | Resource utilisation               |
 | `lifecycle.boot_ms`                            | Histogram | Boot SLA                           |
 
-Most of these are auto-emitted by `titan-metrics` and the relevant
-modules. Custom metrics are for domain-specific quantities.
+The `rpc_requests_total` / `rpc_request_duration_seconds` pair is
+auto-emitted by `titan-metrics` (note: durations are in **seconds**,
+following Prometheus convention). The rest are illustrative names for
+signals you wire up per service. Custom metrics are for
+domain-specific quantities.
 
 ## Alerting policy
 
 Alerts on:
 
-- **Error rate** — `rpc.call.total{outcome=error}` divided by
-  `rpc.call.total` exceeds threshold.
-- **Latency** — `rpc.duration_ms` p99 > SLO.
+- **Error rate** — `rpc_requests_total{status=error}` divided by
+  `rpc_requests_total` exceeds threshold.
+- **Latency** — `rpc_request_duration_seconds` p99 > SLO.
 - **Resource exhaustion** — connection pool full, queue depth high.
 - **Health** — readiness flipping `unhealthy`.
 
