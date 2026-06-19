@@ -160,12 +160,11 @@ const client = new HttpClient({
 });
 ```
 
-:::warning `createClient` / `NetronClient` has no middleware option
-The high-level `createClient()` / `NetronClient` API exposes **no**
+**`createClient()` / `NetronClient` has no middleware option.** The
+high-level `createClient()` / `NetronClient` API exposes **no**
 middleware option. To register middleware, construct an
 `HttpClient` or `WebSocketClient` directly and use `.use(...)` (or
 the `middleware` pipeline option above).
-:::
 
 ## Built-in middleware
 
@@ -333,9 +332,11 @@ collector.getSlowestCalls(10);
 | `onSlowRequest` | console.warn | Called when `duration > slowThreshold` |
 | `skipServices` / `skipMethods` | `[]` | Skip lists |
 
-Also exported: `MetricsCollector` / `PerformanceMetrics` types,
-`InMemoryMetricsCollector`, and `createPerformanceObserver(cb)`
-for observing the emitted `performance.measure` entries.
+Also exported: `MetricsCollector` / `PerformanceMetrics` types and
+`InMemoryMetricsCollector` (package root). For observing the emitted
+`performance.measure` entries there is also `createPerformanceObserver(cb)`,
+which is exported only from the `/middleware` subpath
+(`@omnitron-dev/netron-browser/middleware`), not the package root.
 
 ### `createErrorTransformMiddleware`
 
