@@ -13,6 +13,30 @@ content via `<Outlet />`.
 Three pre-built layouts cover most app shapes. Each is also
 extensible via slots.
 
+:::warning Doc drift — verify against source
+
+This page's component names and prop tables predate the current
+implementation and are partly inaccurate (flagged inline below). The
+real surface (`packages/prism/src/layouts`) is:
+
+- **`DashboardLayout`** — exists, but its props are `navData`
+  (`LayoutNavData`, i.e. `LayoutNavSection[]`), `headerSlots`, `logo`,
+  `footer`, `sidenavFooter`, `initialConfig`, `persistKey`, `layoutQuery`,
+  `slotProps`. There is **no** `brand` / `navItems` / `topRight` /
+  `topLeft` / `sidebarWidth` / `defaultCollapsed` / `persistCollapse` /
+  `showBreadcrumbs` / `userRoles` prop, and the nav item type is
+  `LayoutNavItem` (with `id`, `allowedRoles`, `allowedPermissions`,
+  `deepMatch`, `selectionPrefix`, …), not the `NavItem` shown below.
+- **Auth layouts** are `AuthCenteredLayout`, `AuthSplitLayout`,
+  `AuthSimpleLayout` — there is **no** single `<AuthLayout>` component
+  (only an `AuthLayoutProps` / `AuthLayoutVariant` type).
+- There is **no** `<CoreLayout>`. The core building blocks are
+  `LayoutSection`, `MainSection`, `HeaderSection`, `LayoutProvider`.
+
+Treat the `<AuthLayout>` / `<CoreLayout>` sections and the prop tables
+below as illustrative pending a rewrite.
+:::
+
 ## `<DashboardLayout>`
 
 Admin / operator console shell: collapsible sidebar + topbar +
@@ -254,13 +278,23 @@ only when your shell genuinely doesn't fit any of them.
 Layouts are just route-element wrappers — react-router 7
 handles the rest.
 
-## Subpath imports
+## Imports
+
+The layout package does not expose per-layout subpaths — import
+everything from `@omnitron-dev/prism/layouts`:
 
 ```tsx
-import { DashboardLayout } from '@omnitron-dev/prism/layouts/dashboard';
-import { AuthLayout }      from '@omnitron-dev/prism/layouts/auth';
-import { CoreLayout }      from '@omnitron-dev/prism/layouts/core';
+import {
+  DashboardLayout,
+  AuthCenteredLayout,
+  AuthSplitLayout,
+  AuthSimpleLayout,
+} from '@omnitron-dev/prism/layouts';
 ```
+
+> The package `exports` map only declares `./layouts` (no
+> `./layouts/dashboard` / `./layouts/auth` / `./layouts/core`
+> subpaths), so deep imports will not resolve.
 
 ## See also
 

@@ -78,19 +78,19 @@ orchestrator. It carries:
 
 ```typescript
 class AppHandle {
-  readonly name:    string;
-  readonly mode:    'classic' | 'bootstrap';
-  readonly app:     IAppDefinition;
+  readonly entry:      IEcosystemAppEntry;
+  readonly mode:       'classic' | 'bootstrap';
+  get name():          string;        // entry.name
   // Classic mode only — raw ChildProcess
-  childProcess?:    ChildProcess;
-  // Bootstrap mode — PM supervisor + per-process workers
-  supervisor?:      ProcessManager;
+  childProcess:        ChildProcess | null;
+  // Bootstrap mode — PM ProcessSupervisor + per-process workers
+  supervisor:          ProcessSupervisor | null;
   // Timer for classic-mode crash restart backoff (cleared on explicit stop)
-  restartTimer?:    NodeJS.Timeout;
+  crashRestartTimer:   ReturnType<typeof setTimeout> | null;
   // Restart accounting
-  restarts:         number;
-  // Persisted to state.json
-  state:            'starting' | 'running' | 'stopped' | 'crashed';
+  restarts:            number;
+  // Persisted to the daemon state store
+  status: 'stopped' | 'starting' | 'online' | 'stopping' | 'errored' | 'crashed';
 }
 ```
 
@@ -156,18 +156,25 @@ directly.
 
 ## TS compiler — `ts-compiler.ts`
 
-JIT TypeScript compilation for dev mode. Compiles
-`src/bootstrap.ts` and all its statically reachable imports to
-ESM JavaScript on first-launch, then caches the compiled
-artefacts. Driven by the project's `tsconfig.json`.
+JIT TypeScript compilation, used so the **daemon process** (which
+runs from compiled JS and can't `import` `.ts`) can read fresh
+`src/bootstrap.ts` topology in dev mode. Compiles a single
+bootstrap file and its relative imports to ESM via **esbuild**
+(<10 ms/file); all non-relative imports (npm / workspace
+packages) are marked external rather than bundled — only the
+static `defineSystem()` shape is needed.
+
+> This module is `@deprecated` — superseded by `BuildService`,
+> which pre-bundles every entry point. It is retained for the
+> bootstrap-loader fallback and classic-launcher compatibility.
 
 | Behaviour                          | When                                          |
 | ---------------------------------- | --------------------------------------------- |
-| Fresh full compile                 | Cold start; cache miss                        |
-| Incremental compile                | After file watcher reports a changed file      |
-| Diagnostic reporting               | Type errors shown in CLI, do not auto-block start |
-| Source map emission                | Always in dev — preserves stack traces        |
-| Cache directory                    | `node_modules/.cache/omnitron/`               |
+| Fresh compile                      | Cold start; cache miss (by source mtime)      |
+| Cached output reused               | Source `mtime` unchanged since last compile   |
+| Compile errors                     | Thrown — surfaced to the caller               |
+| Source maps                        | Not emitted (`sourcemap: false`)              |
+| Output location                    | Next to the source as `<name>.omnitron-compiled.mjs` (gitignored), unlinked after import in the daemon path — no global cache dir |
 
 ## Dependency resolver — `dependency-resolver.ts`
 
@@ -200,34 +207,39 @@ args})` arrives, the router:
 3. Proxies the call through that process's Netron transport.
 4. Returns the result.
 
-For pool-mode (`instances > 1`), the router load-balances across
-instances using a round-robin policy with health-aware skipping.
+For pool-mode (`instances > 1`), the router dispatches through
+the PM pool's `execute()`, which load-balances across instances
+using a power-of-two-choices (P2C) policy.
 
 ## File watcher — `file-watcher.ts`
 
-In dev mode (or when an app's `watch.enabled: true`), the
-orchestrator runs a per-app `FileWatcher`. On file change:
+In dev mode (or when an app's `watch` is enabled), the
+orchestrator runs a per-app `FileWatcher` built on Node's native
+`fs.watch({ recursive: true })` (not chokidar). On file change:
 
 ```mermaid
 flowchart LR
-  FS[chokidar event]
-  FS --> Debounce[debounce 100 ms]
-  Debounce --> Classify{File type}
-  Classify -- bootstrap-relevant --> Recompile[ts-compiler<br/>incremental]
-  Recompile --> Restart[restart app]
-  Classify -- non-bootstrap --> Reload[per-process reload]
+  FS[fs.watch event]
+  FS --> Debounce[debounce ~300 ms]
+  Debounce --> Restart[orchestrator.restartApp]
 ```
 
 Heuristics:
 
-- Bootstrap path changes → full app restart.
-- Module file changes → reload only the processes that import the
-  changed module (graph-aware).
-- Non-source files (e.g., `*.md`, `*.test.ts`) → ignored unless
-  in `watch.paths`.
+- **Bootstrap-mode apps skip `fs.watch` entirely.** Their import
+  graph is watched precisely by `BuildService` (esbuild
+  `context.watch`), which knows exactly which files contribute to
+  the bundle — running `fs.watch` on the same tree on top of that
+  produced duplicate, staggered restart triggers (a primary cause
+  of dev-mode restart storms).
+- **Classic / non-bootstrap apps** get the `fs.watch` watcher,
+  which on a change debounces then calls `restartApp`.
+- A missing watch directory is logged at **error** (hot reload is
+  silently broken otherwise), not warn.
 
-The watcher debounces bursts (editor saves often produce multiple
-events) to a single reload per 100 ms window.
+The default debounce is **300 ms**, overridable per app via the
+`watch` config; editor saves often produce multiple events, so
+the watcher collapses a burst to a single restart per window.
 
 ## Classic launcher — `classic-launcher.ts`
 
@@ -239,18 +251,25 @@ handshake. Manages:
 - Crash detection via exit-code observation.
 - Per-app crash-restart backoff timer.
 
-## Module-worker spawner — `module-worker-process.ts`
+## Module-worker entrypoint — `module-worker-process.ts`
 
-Forks `module-worker-process.js` once per `IProcessEntry`. Each
-fork:
+The generic `@Process`-compatible class the PM worker-runtime
+instantiates for each module-based topology entry (one per
+`IProcessEntry`). The orchestrator wires these through a PM
+`ProcessSupervisor` rather than forking this file directly. Each
+worker:
 
-1. Receives its `processName` via IPC.
-2. Re-imports the bootstrap to find the matching `IProcessEntry`.
+1. Receives its `bootstrapPath` + `processName` via
+   `init(bootstrapPath, processName)`.
+2. Loads the bootstrap definition to find the matching
+   `IProcessEntry`.
 3. Imports the process's `module` file.
-4. Discovers `@Service` providers in the module's metadata.
-5. Calls `Application.create(module)`.
+4. Discovers the `@Service`-decorated provider in the module's
+   metadata.
+5. Creates a Titan `Application` with the entry's module.
 6. Runs lifecycle (`onInit` → `onStart`).
-7. Reports ready on IPC.
+7. Exposes the service's methods over Netron RPC and reports
+   ready.
 
 A key invariant: the child imports the **single module file**
 declared in `IProcessEntry.module` — not the entire bootstrap —
@@ -282,15 +301,18 @@ leave a leak of orphaned child PIDs.
 
 ## Build service — `build-service.ts`
 
-Produces deployment artefacts for `omnitron deploy build <app>`:
+Pre-bundles each process entry point (via esbuild) into the
+app's `.omnitron-build/` directory so the daemon imports a single
+compiled `bootstrap.js` instead of recompiling source per launch.
+This is the runtime bundling path; it also drives the esbuild
+import-graph watcher used for bootstrap-mode hot reload.
 
-1. Run `pnpm build` in the app directory (or whatever's configured).
-2. Resolve the app's workspace dependencies.
-3. Bundle the app + deps into a tarball.
-4. Output to `~/.omnitron/build/<app>-<version>.tar.gz`.
-
-The build service is invoked from the `deploy` RPC service when
-preparing a remote ship.
+> The deployment **tarball** for `omnitron deploy build <app>` is
+> a separate path: it goes through `ArtifactBuilder`
+> (`src/project/artifact-builder.ts`), which runs the app's
+> `pnpm build`, resolves workspace deps, and writes
+> `<projectRoot>/.omnitron/artifacts/<app>-<version>.tar.gz`. The
+> CLI reports the artifact path, version, size, and checksum.
 
 ## Reload semantics
 
@@ -348,7 +370,7 @@ loading `titan-health` / `titan-metrics` modules.
 - **Single huge bootstrap with many `@Module`s in classic mode.**
   Loads everything in one process. Prefer module-worker mode with
   one process per concern.
-- **Mutating `state.json` to remove a crashed app.** Use
+- **Poking the daemon state DB to remove a crashed app.** Use
   `omnitron stop` first; the orchestrator owns lifecycle.
 - **File watcher in production.** Wastes CPU and risks
   accidentally hot-reloading prod on a config push. Production

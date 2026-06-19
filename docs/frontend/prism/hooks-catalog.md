@@ -21,49 +21,60 @@ import { useArray, useAsync, useKeyboardShortcut } from '@omnitron-dev/prism/hoo
 Reactive array operations without manual setState:
 
 ```tsx
-const { items, push, remove, replace, clear } = useArray<Todo>([]);
+const { value, push, removeAt, updateAt, clear } = useArray<Todo>([]);
 
 <Button onClick={() => push({ id: '1', text: 'Buy milk' })}>Add</Button>
-<Button onClick={() => remove(0)}>Remove first</Button>
-<Button onClick={() => replace(0, { id: '1', text: 'Buy oat milk' })}>Update</Button>
+<Button onClick={() => removeAt(0)}>Remove first</Button>
+<Button onClick={() => updateAt(0, { id: '1', text: 'Buy oat milk' })}>Update</Button>
 <Button onClick={clear}>Clear</Button>
 ```
 
-Returns:
+The current array is `value` (not `items`). Returns:
 
-| Method | Effect |
+| Member | Effect |
 | ------ | ------ |
+| `value` | Current array |
+| `setValue(items)` | Replace entire array |
 | `push(item)` | Append |
-| `unshift(item)` | Prepend |
-| `pop()` | Remove last |
-| `shift()` | Remove first |
-| `remove(index)` | Remove at index |
-| `removeBy(pred)` | Remove first matching predicate |
-| `replace(index, item)` | Replace at index |
-| `replaceBy(pred, item)` | Replace first matching |
+| `pushMany(items)` | Append many |
+| `remove(itemOrPredicate)` | Remove first matching value or predicate |
+| `removeAt(index)` | Remove at index |
+| `removeWhere(pred)` | Remove all matching predicate |
+| `updateAt(index, item)` | Replace at index |
+| `updateAtPartial(index, partial)` | Merge partial at index |
+| `updateWhere(pred, update)` | Update all matching predicate |
+| `insertAt(index, item)` | Insert at index |
 | `move(from, to)` | Reorder |
+| `swap(a, b)` | Swap two indices |
 | `clear()` | Reset to `[]` |
-| `set(items)` | Replace entire array |
+| `reset()` | Reset to initial value |
+| `reverse()` / `sort(cmp?)` | Reorder in place |
+
+Plus non-mutating helpers (`filter`, `find`, `findIndex`, `includes`) and
+computed reads (`length`, `isEmpty`, `first`, `last`).
 
 ### `useAsync<T>`
 
 Lifecycle-safe async state — handles unmount-during-fetch.
 
 ```tsx
-const { value, error, status, run, reset } = useAsync(
+const { data, loading, error, execute, reset } = useAsync(
   async (id: string) => fetchUser(id),
   { immediate: false },
 );
 
-useEffect(() => { run(userId); }, [userId]);
+useEffect(() => { execute(userId); }, [userId]);
 
-if (status === 'pending') return <Spinner />;
-if (status === 'error')   return <ErrorCard error={error} />;
-return <UserCard user={value!} />;
+if (loading)        return <Spinner />;
+if (error)          return <ErrorCard error={error} />;
+return <UserCard user={data!} />;
 ```
 
-Statuses: `'idle' | 'pending' | 'success' | 'error'`. Unmount
-before resolve → state never updates (no leak warnings).
+Returns `{ data, loading, error, execute, reset, setData, setError }`.
+Options: `{ initialData, immediate, onSuccess, onError }`. Unmount
+before resolve → state never updates (no leak warnings). For a
+fire-and-forget variant without data tracking, see `useAsyncFn`
+(`{ execute, loading, error }`).
 
 ### `useUpdateEffect`
 
@@ -78,53 +89,69 @@ useUpdateEffect(() => {
 
 ### `useSessionStorage<T>` / `useCookies`
 
-Reactive storage mirrors:
+Reactive storage mirrors. Both return an object (not a `[value, setValue]`
+tuple):
 
 ```tsx
-const [draft, setDraft] = useSessionStorage<Draft | null>('post-draft', null);
+const { state: draft, setState: setDraft, remove } =
+  useSessionStorage<Draft | null>('post-draft', null);
 
-const cookies = useCookies(['session', 'theme']);
-cookies.set('theme', 'dark', { maxAge: 365 * 86400, path: '/' });
+// Single key; supports object values with partial/field updates.
+const { state, setState, setField } = useCookies('theme', 'dark', {
+  maxAge: 365 * 86400,
+  path: '/',
+});
 ```
 
-`useSessionStorage` survives only the tab session; persists
-through reloads. Pairs with `useLocalStorage` (in
-`@omnitron-dev/prism/state` for typed stores).
+`useSessionStorage` returns `{ state, setState, remove, hasValue }` and
+survives reloads within the tab session. `useCookies(key, initialState,
+options)` returns `{ state, setState, setField, resetState }` — it manages
+a single cookie key, not a list. Pairs with `useLocalStorage` (re-exported
+from `@omnitron-dev/prism/hooks`).
 
-### `useConfigFromQuery<T>`
+### `useConfigFromQuery`
 
-Reads URL query params into a typed config object:
+Syncs **theme configuration** (preset / mode / primary / direction /
+density / contrast) with URL query params — for shareable demo/preview
+links. It is not a generic schema-driven query-state hook.
 
 ```tsx
-const config = useConfigFromQuery({
-  schema: z.object({
-    tab:    z.enum(['overview', 'logs', 'metrics']).default('overview'),
-    range:  z.enum(['1h', '24h', '7d']).default('24h'),
-    grep:   z.string().optional(),
-  }),
+const {
+  configFromUrl,   // parsed UrlConfigValues from the current URL
+  updateUrl,       // (partial) => void — writes via history.replaceState
+  clearUrl,        // () => void — strips all recognised params
+  generateUrl,     // (partial, baseUrl?) => string — build a share link
+  hasUrlConfig,    // boolean
+} = useConfigFromQuery({
+  onConfigChange: (cfg) => {
+    if (cfg.preset) setPreset(cfg.preset);
+    if (cfg.mode)   setMode(cfg.mode);
+  },
 });
 
-config.tab;     // 'overview' | 'logs' | 'metrics'
-config.range;   // '1h' | '24h' | '7d'
-config.setConfig({ tab: 'logs' });  // updates URL
+const shareUrl = generateUrl({ preset: 'luxury', mode: 'dark' });
 ```
 
-Roundtrip URL ↔ state without manual `URLSearchParams`
-parsing.
+Recognised params: `preset`, `mode`, `primary` (hex), `dir`, `density`,
+`contrast` (rename via the `paramNames` option). For arbitrary typed
+query-state, parse `URLSearchParams` yourself or use a router loader.
 
 ## Timers & lifecycle
 
 ### `useCountdownDate` / `useCountdownSeconds`
 
 ```tsx
-const { days, hours, minutes, seconds, isExpired } = useCountdownDate(deadline);
+// Returns formatted, zero-padded strings (no isExpired flag).
+const { days, hours, minutes, seconds } = useCountdownDate(deadline);
 
-const { remaining, isExpired } = useCountdownSeconds(60);
+// Returns control object; call start() to begin (does not auto-start).
+const { value, start, reset, isCounting, setValue } = useCountdownSeconds(60);
 ```
 
-`useCountdownDate(date)` counts down to a specific timestamp;
-`useCountdownSeconds(n)` counts down N seconds from mount. Both
-tick every second.
+`useCountdownDate(date, placeholder?)` counts down to a specific
+timestamp, ticking every second and returning two-digit strings.
+`useCountdownSeconds(n)` is a manually-started countdown (ideal for OTP
+resend timers) — it stays at `n` until you call `start()`.
 
 ### `useThrottle<T>`
 
@@ -139,103 +166,123 @@ most one per window.
 
 ### `useOnlineStatus`
 
-Reactive `navigator.onLine`:
+Reactive `navigator.onLine`. Returns an object, not a bare boolean:
 
 ```tsx
-const online = useOnlineStatus();
-if (!online) return <OfflineBanner />;
+const { isOnline, isOffline, lastChanged } = useOnlineStatus();
+if (isOffline) return <OfflineBanner />;
 ```
 
-Listens to `online` + `offline` events.
+Listens to `online` + `offline` events (SSR-safe via
+`useSyncExternalStore`).
 
 ## Layout & sizing
 
 ### `useClientRect`
 
-Element rect with `ResizeObserver`:
+Bounding rect + scroll dimensions. The hook provides the ref:
 
 ```tsx
-const ref = useRef<HTMLDivElement>(null);
-const rect = useClientRect(ref);
+const { elementRef, width, height, top, left } = useClientRect<HTMLDivElement>();
 
-<div ref={ref}>Width: {rect?.width}px</div>
+<div ref={elementRef}>Width: {width}px</div>
 ```
 
-Updates on resize / layout shift.
+Values default to `0` (never null) and update on resize / scroll.
 
 ### `useWindowSize`
 
 ```tsx
-const { width, height } = useWindowSize();
+const { width, height, isMobile, isTablet, isDesktop } = useWindowSize();
 ```
 
-Debounced internally (16 ms) to avoid render thrash.
+Debounced internally (100 ms by default) to avoid render thrash, and
+exposes MUI-aligned breakpoint booleans.
 
 ### `useScrollPosition` / `useScrollOffsetTop`
 
 ```tsx
-const { scrollY, scrollX } = useScrollPosition();
-const isScrolledPast = useScrollOffsetTop(200);   // boolean
+const { x, y, directionY, isScrolled, isAtBottom } = useScrollPosition();
+const { offsetTop } = useScrollOffsetTop(200);   // offsetTop is the boolean
 
-<TopBar elevation={isScrolledPast ? 4 : 0} />
+<TopBar elevation={offsetTop ? 4 : 0} />
 ```
+
+`useScrollPosition` returns scroll `x` / `y` (not `scrollX` / `scrollY`)
+plus direction + edge flags. `useScrollOffsetTop(defaultValue)` returns
+`{ offsetTop, elementRef }` — attach `elementRef` to track an element's
+offset instead of a fixed pixel value.
 
 ### `useBackToTop`
 
-Returns `true` once deep-scrolled (default > 1.5× viewport
-height):
+Returns visibility state + a scroll-to-top handler. The threshold is a
+positional arg — a `'NN%'` string (scroll progress) or a pixel number
+(distance from bottom); default `'90%'`:
 
 ```tsx
-const show = useBackToTop({ threshold: 800 });
-{show && <ScrollToTop />}
+const { isVisible, onBackToTop } = useBackToTop('90%');
+{isVisible && <Fab onClick={onBackToTop} />}
 ```
 
 ### `useImageDimensions`
 
 ```tsx
-const { width, height } = useImageDimensions(src);
-// natural dimensions; useful for aspect-ratio containers
+const { dimensions, loading, error } = useImageDimensions(src);
+// dimensions: { width, height, aspectRatio } | null
 ```
 
 ## Visibility & focus
 
 ### `useIntersectionObserver`
 
+The hook returns the `ref` callback to attach (it does not take a ref arg):
+
 ```tsx
-const ref = useRef(null);
-const { isIntersecting } = useIntersectionObserver(ref, {
+const { ref, isIntersecting } = useIntersectionObserver({
   threshold: 0.5,
   rootMargin: '100px',
+  triggerOnce: true,
 });
 
-{isIntersecting && <Image src={src} />}
+<div ref={ref}>{isIntersecting && <Image src={src} />}</div>
 ```
 
-Foundation for lazy-loading patterns.
+Returns `{ ref, entry, isIntersecting, disconnect }`. Foundation for
+lazy-loading patterns.
 
 ### `useInfiniteScroll`
 
+Takes a page-fetch function (not a `hasMore`/`onLoadMore` config) and
+owns the paging state itself:
+
 ```tsx
-const { sentinelRef, isFetching } = useInfiniteScroll({
-  hasMore:    pages.hasNextPage,
-  onLoadMore: pages.fetchNextPage,
-  threshold:  '200px',
-});
+const { items, isFetchingMore, hasNextPage, fetchNextPage, sentinelRef } =
+  useInfiniteScroll<Row>(
+    async ({ cursor, pageSize }) => {
+      const res = await api.list({ cursor, limit: pageSize });
+      return { items: res.rows, pageInfo: { hasNextPage: res.hasMore, endCursor: res.next } };
+    },
+    { pageSize: 20 },
+  );
 
 <>
   {items.map(i => <Row key={i.id} {...i} />)}
-  <div ref={sentinelRef}>{isFetching && <Spinner />}</div>
+  <div ref={sentinelRef}>{isFetchingMore && <Spinner />}</div>
 </>
 ```
 
-Wraps `useIntersectionObserver` + a load-more callback. Use
-sparingly — pagination is friendlier than infinite scroll for
-most apps.
+The fetch fn returns `{ items, pageInfo: { hasNextPage, endCursor } }`;
+the hook flattens pages into `items` and auto-loads when `sentinelRef`
+intersects. Use sparingly — pagination is friendlier than infinite
+scroll for most apps.
 
 ### `useFocusTrap`
 
+The hook returns `{ ref, focusFirst, focusLast }` — destructure `ref`.
+The activation option is `enabled` (not `active`):
+
 ```tsx
-const ref = useFocusTrap<HTMLDivElement>({ active: open });
+const { ref } = useFocusTrap<HTMLDivElement>({ enabled: open });
 
 <div ref={ref}>
   <Input autoFocus />
@@ -244,56 +291,67 @@ const ref = useFocusTrap<HTMLDivElement>({ active: open });
 </div>
 ```
 
-Traps Tab navigation inside the container. The modal /
-drawer / dialog components use this internally.
+Traps Tab navigation inside the container (options: `enabled`,
+`autoFocus`, `restoreFocus`, `focusableSelector`). The modal / drawer /
+dialog components use this internally.
 
 ### `useKeyboardShortcut`
 
+The shortcut is a descriptor object `{ key, ctrl?, shift?, alt?, meta? }`
+(one per call), not a `'cmd+k'` string or an array:
+
 ```tsx
-useKeyboardShortcut(['cmd+k', 'ctrl+k'], () => commandPalette.open(), {
+useKeyboardShortcut({ key: 'k', ctrl: true }, () => commandPalette.open(), {
   preventDefault: true,
-  enabled: !inputFocused,
+  ignoreInputs: true,
 });
 
-useKeyboardShortcut('?', () => helpDrawer.open());
-
-useKeyboardShortcut(['shift+/'], () => helpDrawer.open());
+useKeyboardShortcut({ key: '?', shift: true }, () => helpDrawer.open());
 ```
 
-Disables itself when an input is focused unless `enabled: true`.
+`ctrl: true` matches Ctrl or Cmd. Set `ignoreInputs: true` to suppress
+the shortcut while focus is in an input / textarea / contenteditable
+(off by default); `enabled` toggles the listener entirely.
 
 ## Interaction
 
 ### `useDoubleClick`
 
 Distinguish single from double click (built-in delay so single
-clicks fire only after the double-click window):
+clicks fire only after the double-click window). Options are `click`,
+`doubleClick`, `timeout`; the hook returns a single click handler:
 
 ```tsx
-const handlers = useDoubleClick({
-  onSingleClick: () => select(item),
-  onDoubleClick: () => navigate(`/items/${item.id}`),
-  delay: 250,
+const handleClick = useDoubleClick({
+  click:       () => select(item),
+  doubleClick: () => navigate(`/items/${item.id}`),
+  timeout:     250,
 });
 
-<div {...handlers} />
+<div onClick={handleClick} />
 ```
 
 ### `useLazyQuery`
 
-Trigger a query on demand rather than on mount:
+Trigger a query on demand rather than on mount. Pass a query function;
+call `query(variables)` to run it:
 
 ```tsx
-const { run, value, status } = useLazyQuery(() =>
-  searchService.search.useQuery([{ q: query }]),
+const { query, data, isLoading, isSuccess } = useLazyQuery(
+  (q: string) => searchApi(q),
+  { cacheTime: 60_000 },
 );
 
 <>
-  <Input value={query} onChange={(e) => setQuery(e.target.value)} />
-  <Button onClick={run}>Search</Button>
-  {status === 'success' && <Results items={value!.items} />}
+  <Input value={q} onChange={(e) => setQ(e.target.value)} />
+  <Button onClick={() => query(q)}>Search</Button>
+  {isSuccess && <Results items={data!.items} />}
 </>
 ```
+
+Returns `{ data, error, isLoading, isSuccess, isError, isCalled,
+isFetching, isRefetching, query, refetch, reset, setData }` with optional
+`cacheTime` / `staleTime` / `retry`.
 
 ### `useMutation` (Prism's)
 
@@ -323,27 +381,40 @@ The Prism version is for non-RPC operations.
 
 ### `usePopoverHover`
 
-Hover-managed popover open state with intent delay:
+Hover-managed popover open state. Returns the trigger ref + open/close
+handlers + anchor element (no `triggerProps` / `popoverProps` bundles):
 
 ```tsx
-const popover = usePopoverHover({ enterDelay: 200, leaveDelay: 200 });
+const { open, anchorEl, onOpen, onClose, elementRef } =
+  usePopoverHover<HTMLDivElement>();
 
-<Box {...popover.triggerProps}>
+<Box ref={elementRef} onMouseEnter={onOpen} onMouseLeave={onClose}>
   <Avatar />
 </Box>
-<Popover {...popover.popoverProps}>
+<Popover open={open} anchorEl={anchorEl} onClose={onClose}>
   <UserCard />
 </Popover>
 ```
 
 ### `usePasswordVisibility`
 
-```tsx
-const { type, visible, toggle, IconButton } = usePasswordVisibility();
+Returns `{ visible, toggle, show, hide, type }` (state + helpers, not a
+prebuilt button). Wire `type` and `toggle` into your own adornment:
 
-<Field
+```tsx
+const { type, visible, toggle } = usePasswordVisibility();
+
+<TextField
   type={type}
-  endAdornment={<IconButton onClick={toggle} aria-label="Toggle password visibility" />}
+  slotProps={{
+    input: {
+      endAdornment: (
+        <IconButton onClick={toggle} aria-label="Toggle password visibility">
+          {visible ? <VisibilityOff /> : <Visibility />}
+        </IconButton>
+      ),
+    },
+  }}
 />
 ```
 
@@ -368,40 +439,42 @@ and you SSR.
 These are exposed but typically consumed via the matching
 component:
 
-| Hook | Component |
+| Hook | Component / area |
 | ---- | --------- |
-| `useMenu` | `<Menu>` |
+| `useMenu` | `<Menu>` (from `@omnitron-dev/prism/components/menu`) |
 | `useSnackbar` | `<Snackbar>` |
-| `useConfirmDialog` | `<ConfirmDialog>` |
 | `useLightbox` | `<Lightbox>` |
-| `useCommandPalette` | `<CommandPalette>` |
 | `useChart` | `<Chart>` |
-| `usePrismContext` | `<PrismProvider>` |
-| `useColorMode` | theme/dark-mode |
-| `useSettingsStore` | `<Settings>` |
-| `useLayoutContext` | layouts |
+| `usePrismContext` | `<PrismProvider>` (from `/core`) |
+| `useSettingsStore` | settings / theme mode / density (from `/state`) |
+| `useLayoutContext` | layouts (from `/layouts`) |
+
+Dark mode is driven through `useSettingsStore` (`mode`, `setMode`,
+`toggleMode`) — there is no `useColorMode` hook. `<ConfirmDialog>` and
+`<CommandPalette>` are component-only (no companion `use*` hook).
 
 ## Composition patterns
 
 Hooks compose freely:
 
 ```tsx
-function ProductGrid() {
-  const filters = useConfigFromQuery({ schema: FilterSchema });
-  const products = useAsync(() => api.list(filters));
-  const sentinelRef = useInfiniteScroll({
-    hasMore: products.value?.hasMore ?? false,
-    onLoadMore: () => products.run({ ...filters, after: products.value?.nextCursor }),
-  });
+function ProductGrid({ filters }: { filters: ProductFilters }) {
+  const { items, isFetchingMore, fetchNextPage, sentinelRef } =
+    useInfiniteScroll<Product>(
+      async ({ cursor, pageSize }) => {
+        const res = await api.list({ ...filters, cursor, limit: pageSize });
+        return { items: res.items, pageInfo: { hasNextPage: res.hasMore, endCursor: res.nextCursor } };
+      },
+      { pageSize: 24 },
+    );
 
   return (
     <Stack>
-      <FilterToolbar value={filters} onChange={filters.setConfig} />
       <Grid>
-        {products.value?.items.map(p => <ProductCard key={p.id} {...p} />)}
+        {items.map(p => <ProductCard key={p.id} {...p} />)}
       </Grid>
-      <div ref={sentinelRef.sentinelRef}>
-        {sentinelRef.isFetching && <Spinner />}
+      <div ref={sentinelRef}>
+        {isFetchingMore && <Spinner />}
       </div>
     </Stack>
   );

@@ -36,14 +36,14 @@ import {
 @Module({
   imports: [
     LoggerModule.forRoot({
-      level:      'info',
+      level:       'info',
+      prettyPrint: process.env.NODE_ENV !== 'production',   // pretty console in dev
       transports: [
-        new ConsoleTransport({ pretty: process.env.NODE_ENV !== 'production' }),
+        new ConsoleTransport(),                             // ctor takes an optional ILogger, not options
       ],
       processors: [
-        new RedactionProcessor({
-          paths: ['password', 'token', 'headers.authorization', 'creditCard.*'],
-        }),
+        // RedactionProcessor takes a positional string[] of dotted paths
+        new RedactionProcessor(['password', 'token', 'headers.authorization']),
       ],
     }),
   ],
@@ -53,54 +53,78 @@ class AppModule {}
 
 ## The `ILogger` interface
 
+Pino-style, **object-first** signatures (the bound object comes first,
+then an optional message). Six levels, plus level introspection and a
+timing helper:
+
 ```typescript
 interface ILogger {
-  // Levels — only four
-  debug(msg: string | object, meta?: Record<string, any>): void;
-  info(msg: string | object,  meta?: Record<string, any>): void;
-  warn(msg: string | object,  meta?: Record<string, any>): void;
-  error(msg: string | object | Error, meta?: Record<string, any>): void;
+  // Six levels — object-first (obj, msg?, ...args) or (msg, ...args)
+  trace(obj: object, msg?: string, ...args: any[]): void;
+  trace(msg: string, ...args: any[]): void;
+  debug(obj: object, msg?: string, ...args: any[]): void;
+  debug(msg: string, ...args: any[]): void;
+  info(obj: object,  msg?: string, ...args: any[]): void;
+  info(msg: string,  ...args: any[]): void;
+  warn(obj: object,  msg?: string, ...args: any[]): void;
+  warn(msg: string,  ...args: any[]): void;
+  error(obj: object, msg?: string, ...args: any[]): void;
+  error(msg: string, ...args: any[]): void;
+  fatal(obj: object, msg?: string, ...args: any[]): void;
+  fatal(msg: string, ...args: any[]): void;
 
   // Child logger with bound context — inherits transports + processors,
-  // adds the supplied fields to every log line through it
-  child(meta: Record<string, any>): ILogger;
+  // adds the supplied bindings to every log line through it
+  child(bindings: object): ILogger;
 
-  // Escape hatch — underlying pino instance for advanced options
-  pino?: any;
+  // Timing helper — returns a stop() that logs the elapsed duration
+  time(label?: string): () => void;
+
+  // Level introspection / control
+  isLevelEnabled(level: LogLevel): boolean;
+  setLevel(level: LogLevel): void;
+  getLevel(): LogLevel;
 }
 ```
 
-> **Four levels only.** Map "trace"-style content to `debug` and
-> pair `error` with explicit shutdown for "fatal" cases. The
-> framework deliberately avoids `trace` / `fatal` distinct levels
-> to keep handler logic simple.
+> **Object-first calls.** Because signatures are Pino-style, pass
+> structured context as the first argument and the message second:
+> `logger.error({ err, userId }, 'repo failed')`. The single-arg
+> string form `logger.info('done')` also works.
 
 ## Usage in a service
 
+Inject the **`ILogger`** via `LOGGER_TOKEN` (the convenient alias the
+module derives from the root logger) — or use the `@Logger()` property
+decorator (below). The DI-injected `LoggerService` is the *module*
+(`ILoggerModule`: `create` / `child` / `setLevel` / …), not an
+`ILogger`; reach a logger via `loggerService.logger` or
+`loggerService.create(name)`.
+
 ```typescript
-import { Service, Public } from '@omnitron-dev/titan';
-import { LoggerService } from '@omnitron-dev/titan/module/logger';
+import { Service, Public, Inject } from '@omnitron-dev/titan';
+import { LOGGER_TOKEN, type ILogger } from '@omnitron-dev/titan/module/logger';
 
 @Service({ name: 'users' })
 class UsersService {
-  constructor(private readonly logger: LoggerService) {}
+  constructor(@Inject(LOGGER_TOKEN) private readonly logger: ILogger) {}
 
   @Public()
   async findById(id: string) {
-    this.logger.info('findById', { id });
+    this.logger.info({ id }, 'findById');         // object first, message second
     try {
       return await this.repo.findById(id);
     } catch (e) {
-      this.logger.error('repo failed', { id, error: e });
+      this.logger.error({ id, err: e }, 'repo failed');
       throw e;
     }
   }
 }
 ```
 
-The injected `LoggerService` is **automatically bound** to the
-service's class name, so every log line carries
-`{ service: 'UsersService', ... }`.
+For a per-service tag, bind it with a child logger
+(`this.logger.child({ service: 'UsersService' })`) — there is no
+automatic class-name binding.
 
 ## Per-request child loggers
 
@@ -115,7 +139,7 @@ async findById(id: string, @Context() ctx: NetronContext) {
     requestId: ctx.requestId,
   });
 
-  log.info('findById', { id });
+  log.info({ id }, 'findById');
   return this.repo.findById(id);
 }
 ```
@@ -138,7 +162,7 @@ class UsersService {
 
   @Public()
   async findById(id: string) {
-    this.logger.info('findById', { id });
+    this.logger.info({ id }, 'findById');
   }
 }
 ```
@@ -151,9 +175,14 @@ class UsersService {
 async findById(id: string) { /* … */ }
 
 @Public()
-@Log({ level: 'info', args: true, result: false })
+@Log({ level: 'info', includeArgs: true, includeResult: false })
 async create(input: CreateInput) { /* … */ }
 ```
+
+Options: `level` (`'trace'|'debug'|'info'|'warn'|'error'`),
+`includeArgs`, `includeResult`, `message`. The method's instance must
+expose a logger (a `logger` / `_logger` / `log` property) or the
+decorator silently no-ops.
 
 ### `@Monitor()` — performance instrumentation
 
@@ -167,9 +196,9 @@ async heavyComputation(input: Input) { /* … */ }
 
 | Symbol                | Purpose                                                |
 | --------------------- | ------------------------------------------------------ |
-| `LoggerService`       | DI-injected wrapper around an `ILogger`               |
-| `ConsoleTransport`    | Built-in transport — stdout / stderr                  |
-| `RedactionProcessor`  | Built-in processor — redact secret paths              |
+| `LoggerService`       | DI-injected logger manager (`ILoggerModule`): `create` / `child` / `setLevel` / `logger` getter |
+| `ConsoleTransport`    | Built-in `ITransport` (forwards records to an `ILogger`; mainly for tests) |
+| `RedactionProcessor`  | Built-in `ILogProcessor` — redacts the given dotted paths (positional `string[]`) |
 | `createNullLogger()`  | Returns an `ILogger` that discards everything (tests) |
 | `isLogger(value)`     | Type guard                                            |
 
@@ -181,6 +210,8 @@ A transport receives log records and writes them somewhere:
 import type { ITransport } from '@omnitron-dev/titan/module/logger';
 
 class OtlpTransport implements ITransport {
+  readonly name = 'otlp';                 // ITransport requires a `name`
+
   constructor(private readonly endpoint: string) {}
 
   async write(record: any): Promise<void> {
@@ -193,7 +224,7 @@ class OtlpTransport implements ITransport {
 
 LoggerModule.forRoot({
   transports: [
-    new ConsoleTransport({ pretty: false }),
+    new ConsoleTransport(),
     new OtlpTransport('https://otel.internal/v1/logs'),
   ],
 })
@@ -232,7 +263,7 @@ LoggerModule.forRoot({ processors: [TraceContextProcessor] });
 ```mermaid
 flowchart LR
   Code[Service.logger.info]
-  Code --> Bind[LoggerService<br/>class-name bound]
+  Code --> Bind[LoggerService<br/>root + child bindings]
   Bind --> Pino[pino instance]
   Pino --> Proc[Processors<br/>redact / enrich / sample]
   Proc --> Trans1[Transport: console]
@@ -250,18 +281,25 @@ flowchart LR
 | `LOGGER_TRANSPORTS_TOKEN`   | Registered transports                |
 | `LOGGER_PROCESSORS_TOKEN`   | Registered processors                |
 
-## Hot-reloading the level
+## Setting the level from config / at runtime
 
-The logger subscribes to `config:changed` for `logging.level` (when
-ConfigModule is loaded). Edit `config/local.yaml` while the dev
-server is running:
+When ConfigModule is loaded, the logger reads its initial settings from
+the `logger.*` namespace **once at construction** — `logger.level`,
+`logger.prettyPrint`, `logger.redact`, `logger.base`, and so on:
 
 ```yaml
-logging:
+logger:
   level: debug
 ```
 
-… and the next log line uses the new level — no restart.
+There is **no live `config:changed` subscription** — editing the file
+at runtime does not re-level an already-constructed logger. To change
+the level on a running process, call `setLevel()` imperatively on the
+`LoggerService` (or any `ILogger`):
+
+```typescript
+loggerService.setLevel('debug');   // or: logger.setLevel('debug')
+```
 
 ## Anti-patterns
 

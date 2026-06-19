@@ -42,9 +42,9 @@ sequenceDiagram
     PM-->>Init: error — already running
     Init->>Init: exit 1
   end
-  Init->>SS: load ~/.omnitron/state.json
-  alt corrupt JSON
-    SS->>SS: log warning; start empty
+  Init->>SS: load persisted state (SQLite)
+  alt unreadable / empty
+    SS->>SS: start empty
   end
   Init->>N: bind Unix socket + [TCP / HTTP]
   Init->>SVC: register all services
@@ -82,42 +82,50 @@ check that fired.
 
 ## State store — `state-store.ts`
 
-Persists daemon intent to `~/.omnitron/state.json`. Atomic
-write semantics: write to a temp file, `fsync`, rename over the
-old file. The previous file is kept as `state.json.bak` after a
-successful write — the daemon falls back to the backup if the
-primary becomes unreadable.
+Persists daemon intent to a **SQLite-backed** key/value row
+(`DaemonStateStore`, `state_kv` key `orchestrator:persisted-state`)
+co-located with the daemon's other state surfaces (PID lock,
+project registry, node registry, backup index). SQLite WAL-mode
+transactions remove the torn-write risk that the legacy
+`fsync` + atomic-rename JSON recipe guarded against. Writes are
+serialised through an internal promise chain so back-to-back
+`save()` calls never interleave; callers use a synchronous API
+and the actual write is awaited in the background.
 
-Two modes:
+Each persisted app entry records `name`, `pid`, `status`,
+`mode` (`classic` | `bootstrap`), `startedAt`, `restarts`, and
+`port`:
 
 | Mode        | When                                                    | Layout                                                 |
 | ----------- | ------------------------------------------------------- | ------------------------------------------------------ |
 | `classic`   | App was launched via classic launcher (single fork)     | One PID + status per app                               |
-| `bootstrap` | App was launched via module-worker spawner (per-process) | Per-process PID + status, parent app aggregates       |
+| `bootstrap` | App was launched via the PM supervisor (per-process)     | Per-process PID + status, parent app aggregates       |
+
+**Legacy migration.** On the first boot of the SQLite-backed
+code, if an old `~/.omnitron/state.json` exists it is read once,
+migrated into the SQLite row, and unlinked. After that the JSON
+file never reappears.
 
 State is persisted on every status transition (start, stop,
-crash, restart) plus a baseline flush every 30 s. A crash of the
-daemon itself leaves the file in a consistent state — on next
-boot, the daemon rehydrates and relaunches whatever was running.
+crash, restart). A crash of the daemon itself leaves the row in a
+consistent state — on next boot, the daemon rehydrates and
+relaunches whatever was running.
 
 ## Daemon scheduler — `daemon-scheduler.ts`
 
-A small in-process scheduler tied to the daemon's lifecycle.
-Runs periodic background tasks; all timers `.unref()`-ed so they
-don't pin the event loop alive.
+A small set of periodic jobs registered against `titan-scheduler`
+and tied to the daemon's lifecycle. `registerDaemonJobs()` wires:
 
-| Task                                  | Default cadence | Source                              |
-| ------------------------------------- | --------------- | ----------------------------------- |
-| Health probe sweep                    | per app config (default 15 s) | titan-health integration |
-| Metrics aggregation tick              | 5 s             | from `monitoring.metrics.interval`  |
-| State persistence flush               | on transition + 30 s | state-store                    |
-| Per-app crash backoff timers          | exponential     | per `IRestartPolicy`               |
-| Cluster heartbeat (if `cluster.enabled`) | 2 s          | daemon config                       |
-| Node health-monitor sweep             | 60 s            | `DEFAULT_DAEMON_CONFIG.healthMonitor` |
+| Job                  | Cadence                                      | Notes                                        |
+| -------------------- | -------------------------------------------- | -------------------------------------------- |
+| `metrics-collection` | `monitoring.metrics.interval` (default 5 s)  | Polls app state, records via `titan-metrics` |
+| `log-rotation`       | 60 s                                         | `LogManager.checkRotation`                   |
+| `session-cleanup`    | 5 min                                        | Master only (requires the auth service / PG) |
+| `alert-evaluation`   | `monitoring.healthCheck.interval` (default 15 s) | Master only (requires PG)                |
+| `fleet-heartbeat`    | `monitoring.healthCheck.interval` (default 15 s) | Master only (requires PG)                |
 
-The cluster heartbeat and node-health sweep only run when
-explicitly enabled — they do not consume resources on a standalone
-single-node setup.
+The master-only jobs are skipped on a standalone single-node
+setup where the auth / alert / fleet services aren't wired.
 
 ## Daemon configuration
 
@@ -162,8 +170,8 @@ Every method is gated by role:
 | Role         | Members                              | Methods                                                                 |
 | ------------ | ------------------------------------ | ----------------------------------------------------------------------- |
 | `viewer`     | `viewer`, `operator`, `admin`        | `list`, `getApp`, `status`, `getMetrics`, `getHealth`, `getLogs`, `inspect`, `getEnv`, `getDependencyGraph`, `getWatchStatus` |
-| `operator`   | `operator`, `admin`                  | `startApp`, `startAll`, `stopApp`, `stopAll`, `restartApp`, `restartAll`, `reloadApp`, `scale`, `exec`, `enableWatch`, `disableWatch` |
-| `admin`      | `admin` only                         | `shutdown`, `reloadConfig`, `setMetricsEnabled` |
+| `operator`   | `operator`, `admin`                  | `startApp`, `startAll`, `stopApp`, `stopAll`, `restartApp`, `restartAll`, `reloadApp`, `scale`, `enableWatch`, `disableWatch` |
+| `admin`      | `admin` only                         | `shutdown`, `reloadConfig`, `setMetricsEnabled`, `exec` |
 | anonymous    | anyone with socket access            | `ping` (allowAnonymous) |
 
 ### Methods, by intent
@@ -217,14 +225,15 @@ Every method is gated by role:
 | --------------------------------------------------------------- | -------------------------------- |
 | `ping()`                                                        | `{ uptime, version, pid }`       |
 
-#### RPC plumbing (`operator`)
+#### RPC plumbing (`admin`)
 
 | Method                                                          | Returns                          |
 | --------------------------------------------------------------- | -------------------------------- |
 | `exec({ name, service, method, args })`                         | `unknown` (whatever the called method returns) |
 
 `exec` is what `omnitron exec api users findById u_42` routes
-through.
+through. It is **admin-gated** — invoking arbitrary methods on a
+managed app is a privileged operation.
 
 ## Auth flow
 
@@ -297,7 +306,7 @@ persisted so an operator can inspect and intervene.
 | Child process exits 0                     | Treat as graceful; don't restart unless `autoRestart: always`     |
 | Child process exits non-zero              | Apply restart policy; backoff; persist                            |
 | Child process hangs (no heartbeat)        | Health probe fails; restart after grace period                    |
-| Daemon itself crashes                     | systemd / launchd respawns; state.json rehydrates                 |
+| Daemon itself crashes                     | systemd / launchd respawns; persisted SQLite state rehydrates     |
 | Lock-file PID is alive but daemon hung    | `omnitron kill` force-removes the lock                            |
 | Two `omnitron up` race                    | Second loses the PID lock; exits with error                       |
 | Storage failure persisting state          | Logs at error; in-memory state continues; next flush retries      |
@@ -313,13 +322,15 @@ persisted so an operator can inspect and intervene.
 | Force shutdown                        | `omnitron down` (graceful) or `omnitron kill` (forceful) |
 | Reload daemon config without restart  | `omnitron --json status` then admin call (or restart) |
 | See the lock holder                   | `cat ~/.omnitron/daemon.pid`                     |
-| Reset state from cold                 | `omnitron down` → `rm ~/.omnitron/state.json` → `omnitron up` |
+| Reset persisted process state cold    | `omnitron down` → delete `~/.omnitron/data/daemon-state.db` → `omnitron up` (note: this DB also holds the project / node / backup registries) |
 | Reset secret store from cold          | `omnitron down` → `rm ~/.omnitron/secrets.enc` → `omnitron up` |
 
 ## Anti-patterns
 
-- **Editing `state.json` by hand.** The state shape may evolve;
-  hand-edits often break on next restart. Prefer using the CLI to
+- **Editing the daemon state DB by hand.** Persisted state lives
+  in a SQLite DB (`~/.omnitron/data/daemon-state.db`), not a
+  hand-editable JSON file. The schema may evolve; poke it directly
+  and you risk a broken next restart. Prefer using the CLI to
   drive state changes.
 - **Running two daemons against the same `~/.omnitron/`.** They
   fight over the lock. Multiple daemons need different home

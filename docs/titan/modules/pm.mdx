@@ -105,17 +105,21 @@ class MediaService {
 }
 ```
 
+`spawn()` accepts either a process **class** or a **module path string**
+(for fork/process isolation where the worker runs in a separate module).
+
 | Method                                                                  | Returns                                       |
 | ----------------------------------------------------------------------- | --------------------------------------------- |
-| `spawn<T>(processClass, options?)`                                      | `Promise<ServiceProxy<T>>`                    |
-| `createPool<T>(processClass, options?)`                                 | `ProcessPool<T>`                              |
-| `createSupervisor<T>(processClass, options?)`                           | `ProcessSupervisor`                           |
-| `getProcessInfo(id)`                                                    | `IProcessInfo \| undefined`                   |
-| `getAllProcesses()`                                                     | `IProcessInfo[]`                              |
-| `stopProcess(id, timeout?)`                                             | `Promise<void>`                               |
-| `stopAll(timeout?)`                                                     | `Promise<void>`                               |
-| `getMetrics(processId?)`                                                | `IProcessMetrics \| Map<string, IProcessMetrics>` |
-| `health()`                                                              | `Promise<IHealthStatus>`                      |
+| `spawn<T>(processClassOrPath, options?)`                                | `Promise<ServiceProxy<T>>`                    |
+| `pool<T>(processClassOrPath, options?)`                                 | `Promise<IProcessPool<T>>`                    |
+| `createSupervisor(classOrConfig, options?)`                             | `ProcessSupervisor`                           |
+| `discover<T>(serviceName)`                                              | `Promise<ServiceProxy<T> \| null>`            |
+| `getProcess(id)`                                                        | `IProcessInfo \| undefined`                   |
+| `listProcesses()`                                                       | `IProcessInfo[]`                              |
+| `kill(id, signal?)`                                                     | `Promise<boolean>`                            |
+| `shutdown({ timeout?, force? })`                                        | `Promise<void>`                               |
+| `getMetrics(processId)`                                                 | `Promise<IProcessMetrics \| null>`            |
+| `getHealth(processId)`                                                  | `Promise<IHealthStatus \| null>`              |
 
 The `ServiceProxy` returned by `spawn()` exposes every `@Public`
 method of the process class as a typed remote call — transport
@@ -124,12 +128,14 @@ details are hidden.
 ### Worker pools
 
 ```typescript
-const pool = this.pm.createPool(ImageWorker, { min: 2, max: 8 });
-const result = await pool.invoke('resize', [input, width]);
+const pool = await this.pm.pool(ImageWorker, { min: 2, max: 8 });
+const result = await pool.execute('resize', input, width);
 ```
 
 The pool routes the call to a free worker, queues if all workers
-are busy, and respects the pool's load-balancing policy.
+are busy, and respects the pool's load-balancing policy. The proxy
+returned by `pool()` also lets you call `@Public` methods directly
+(`pool.resize(input, width)`).
 
 ### Supervisors
 
@@ -168,20 +174,20 @@ resilience, and saga semantics declaratively.
 
 ### Method-level — observability
 
-| Decorator         | Purpose                                                          |
-| ----------------- | ---------------------------------------------------------------- |
-| `@Trace()`        | Distributed tracing span                                         |
-| `@Metric()`       | Auto-instrument metric                                           |
-| `@Validate()`     | Validate input                                                   |
-| `@Cache()`        | Cache the result                                                 |
+| Decorator                | Purpose                                                          |
+| ------------------------ | ---------------------------------------------------------------- |
+| `@Trace()`               | Distributed tracing span                                         |
+| `@Metric(name?)`         | Auto-instrument metric (flags the method for metrics collection) |
+| `@Validate(options)`     | Validate input (`{ schema?, validator? }`)                       |
+| `@Cache(options?)`       | Cache the result (`{ ttl?, key?, condition? }`)                  |
 
 ### Method-level — resilience
 
-| Decorator             | Purpose                                                      |
-| --------------------- | ------------------------------------------------------------ |
-| `@CircuitBreaker()`   | Circuit-break the method                                     |
-| `@RateLimit()`        | Rate-limit the method                                        |
-| `@Idempotent()`       | Mark as idempotent (safe to retry, deduplicate by key)       |
+| Decorator                | Purpose                                                      |
+| ------------------------ | ------------------------------------------------------------ |
+| `@CircuitBreaker(opts)`  | Circuit-break the method (`{ threshold?, timeout?, fallback? }`) |
+| `@RateLimit(opts)`       | Rate-limit the method (`{ rps?, burst?, strategy?, key? }`)  |
+| `@Idempotent(opts)`      | Deduplicate by key (`{ key, ttl? }` — `key` names the arg field, `ttl` a duration string like `'1h'`) |
 
 ### Combined example — a worker class
 
@@ -195,9 +201,9 @@ import {
 class ImageWorker {
   @Public()
   @Trace()
-  @Metric({ counter: 'images.resized', histogram: 'images.resize.ms' })
-  @CircuitBreaker({ failureThreshold: 5, timeout: 30_000 })
-  @Idempotent({ keyFn: (input, w) => `${hash(input)}:${w}` })
+  @Metric('images.resized')
+  @CircuitBreaker({ threshold: 5, timeout: 30_000 })
+  @Idempotent({ key: 'requestId', ttl: '1h' })
   async resize(input: Buffer, width: number): Promise<Buffer> {
     return sharp(input).resize(width).toBuffer();
   }
@@ -252,8 +258,9 @@ supervisor to restart per policy.
 ## Lifecycle
 
 `ProcessManager` is registered as a singleton service. On
-application shutdown, `stopAll()` runs to gracefully terminate
-every spawned process (respects `gracefulShutdownTimeout`).
+application shutdown, `shutdown({ timeout?, force? })` runs to
+gracefully terminate every spawned process and pool (respects
+`gracefulShutdownTimeout`).
 
 ## Isolation modes
 

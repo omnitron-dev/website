@@ -33,7 +33,7 @@ All entries verified against source via grep for `^export
 | Subscribe to a typed event                    | `@OnEvent('user.created')` *(titan-events)*              |
 | Auto-emit an event from a method              | `@EmitEvent('user.created')` *(titan-events)*            |
 | Wrap a method in a distributed lock           | `@WithDistributedLock(key, ttl)` *(titan-lock)*          |
-| Instrument a method with counter + histogram  | `@Metrics({ counter, histogram })` *(titan-metrics)*     |
+| Instrument a method with RPC counters + latency | `@Metrics(metricName?)` *(titan-metrics)*               |
 | Define a worker process class                 | `@Process()` *(titan-pm)*                                |
 | Define a supervised hierarchy                 | `@Supervisor()` + `@Child()` *(titan-pm)*                |
 | Bind a class to a config subtree              | `@Configuration('cache')` *(config built-in)*            |
@@ -76,6 +76,20 @@ noted.
 > further marks the same method as auth-bypass. They compose:
 > `@Public() @RequireAuth()` for an exposed-but-protected method
 > is the common pattern.
+
+Core also ships three lightweight **composable annotations** meant
+to sit alongside `@Public()` — they write metadata that transports /
+modules read, rather than implementing the behaviour themselves:
+
+| Decorator        | Targets | Effect                                              |
+| ---------------- | ------- | --------------------------------------------------- |
+| `@Auth(opts?)`   | method  | Marks the method as requiring authentication        |
+| `@RateLimit(opts?)` | method | Attaches rate-limit metadata to the method         |
+| `@Cache(opts?)`  | method  | Attaches cache metadata to the method               |
+
+> These share names with the satellite-package decorators
+> (`titan-ratelimit.@RateLimit`, `titan-pm.@Cache`, etc.). The core
+> ones are bare metadata annotations; see the collision table below.
 
 ### Lifecycle
 
@@ -236,7 +250,7 @@ The decorator releases the lock in `finally` — even on throw.
 
 | Decorator                                                       | Targets | Effect                                                  |
 | --------------------------------------------------------------- | ------- | ------------------------------------------------------- |
-| `@Metrics({ counter?, histogram?, ... })`                       | method  | Auto-instrument the method with the listed metrics      |
+| `@Metrics(metricName?)`                                         | method  | Auto-track `rpc_requests_total`, `rpc_request_duration_seconds`, `rpc_errors_total` around the call (optional name prefix) |
 
 ### `titan-notifications`
 
@@ -266,8 +280,9 @@ The decorator releases the lock in `finally` — even on throw.
 | `@Compensate(stageName)`                 | method          | Compensating action if a stage fails                         |
 | `@Actor(opts?)`                          | class           | Actor-style stateful entity                                  |
 | `@CircuitBreaker(opts)`                  | method          | Circuit-breaker around external calls                        |
-| `@SelfHeal(action)`                      | method          | Auto-remediation action on failure                           |
 | `@Idempotent({ key, ttl? })`             | method          | Idempotency key-based deduplication                          |
+| `@HealthCheck(opts?)`                    | method          | Marks a method as the process's health check                 |
+| `@OnShutdown(opts?)`                     | method          | Runs the method during graceful worker shutdown              |
 
 > `titan-pm` re-exports several decorator names (`@Public`,
 > `@RateLimit`, `@Cache`, `@Validate`) for its **worker runtime**.
@@ -275,6 +290,10 @@ The decorator releases the lock in `finally` — even on throw.
 > Netron surface. Don't confuse them with the same-named
 > decorators in `@omnitron-dev/titan` / `titan-ratelimit` /
 > `titan-cache`.
+
+> A `@SelfHeal(action)` decorator is defined in the package but is
+> **not** re-exported from the `@omnitron-dev/titan-pm` barrel — it
+> isn't importable from the package root.
 
 ### `titan-ratelimit`
 
@@ -289,9 +308,11 @@ The decorator releases the lock in `finally` — even on throw.
 
 <ModuleBadge origin="official" pkg="@omnitron-dev/titan-redis" />
 
-`titan-redis` exports no decorators — inject the `Redis` client
-via `REDIS_TOKEN` or `getRedisClientToken(name)`. See
-[`titan-redis`](./redis.mdx).
+`titan-redis` ships only injection decorators — `@InjectRedis()`
+for the default client and `@InjectRedisManager()` for the manager
+(plus `@RedisCache` / `@RedisLock` / `@RedisRateLimit` helpers). For
+token-based injection use `REDIS_MANAGER` or
+`getRedisClientToken(name)`. See [`titan-redis`](./redis.mdx).
 
 ### `titan-scheduler`
 
@@ -325,8 +346,8 @@ path resolves the ambiguity. Quick table:
 | `@Public`        | `@omnitron-dev/titan` (expose) + `titan-auth` (auth bypass) + `titan-pm` (worker IPC) | Pick by purpose; compose if needed     |
 | `@Validate`      | `@omnitron-dev/titan` + `titan-pm`                                          | Core for Netron methods; pm for workers        |
 | `@Timeout`       | `@omnitron-dev/titan` (abort) + `titan-scheduler` (one-shot)                | Read the verb — abort vs defer                 |
-| `@RateLimit`     | `titan-ratelimit` + `titan-pm`                                              | Use ratelimit for service methods              |
-| `@Cache`         | `titan-pm` (worker)                                                          | Compare with `@Cacheable` from titan-cache     |
+| `@RateLimit`     | `@omnitron-dev/titan` (composable) + `titan-ratelimit` + `titan-pm`         | Use titan-ratelimit for service methods        |
+| `@Cache`         | `@omnitron-dev/titan` (composable) + `titan-pm` (worker)                    | Compare with `@Cacheable` from titan-cache     |
 
 When in doubt, the import path is authoritative.
 
@@ -340,7 +361,7 @@ order normally arranges:
 @RequireAuth()             // auth check
 @RateLimit({ ... })        // rate limit
 @Validate({ input })       // input validation
-@Metrics({ counter, hist })// instrumentation
+@Metrics()                 // instrumentation
 @WithDistributedLock(key)  // lock
 async create(input) {/*…*/}
 ```

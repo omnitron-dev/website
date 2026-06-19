@@ -267,16 +267,30 @@ attempt rather than being dropped. This applies to all backends
 import { Metrics } from '@omnitron-dev/titan-metrics';
 
 @Public()
-@Metrics({
-  counter:   { name: 'orders.processed.total' },
-  histogram: { name: 'orders.process.ms', buckets: [1, 5, 25, 100, 500] },
-})
+@Metrics()                      // metric label defaults to `ClassName.process`
 async process(order: Order) { /* … */ }
+
+@Public()
+@Metrics('orders.process')      // optional explicit method label
+async processNamed(order: Order) { /* … */ }
 ```
 
-The decorator auto-instruments the method: increments the counter on
-each call, records duration into the histogram, optionally
-distinguishes success/error outcomes via labels.
+The decorator takes a single optional `metricName` string — the value
+used as the `method` label (defaults to `ClassName.methodName`). It
+auto-instruments the wrapped method, recording three registry metrics
+on every call:
+
+| Registry metric                  | Type      | Labels             |
+| -------------------------------- | --------- | ------------------ |
+| `rpc_requests_total`             | counter   | `method`, `status` |
+| `rpc_request_duration_seconds`   | histogram | `method`           |
+| `rpc_errors_total`               | counter   | `method`, `error`  |
+
+> **Wiring required.** The decorator reads its `MetricsService` from a
+> `WeakMap` keyed by the instance — call `attachMetricsService(instance,
+> service)` during DI wiring, or the decorator silently records nothing.
+> It writes to the registry only (Prometheus exposition); these metrics
+> are not pushed to the storage buffer.
 
 ## Prometheus exposition
 

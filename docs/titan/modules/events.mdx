@@ -194,33 +194,39 @@ async warmCaches() { /* … */ }
 
 ```typescript
 @EmitEvent({
-  event:         'user.created',
-  after:         true,
-  includeArgs:   false,
-  includeResult: true,
-  mapResult:     (user) => ({ id: user.id, email: user.email }),
+  event:     'user.created',
+  mapResult: (user) => ({ id: user.id, email: user.email }),
+  mapError:  (err)  => ({ reason: err.message }),
 })
 async create(input: CreateInput) { /* … */ }
 ```
 
-Method's return value is auto-emitted via the configured mapper.
+The interceptor runs **after** the method: on success it emits
+`<event>.success` (payload = `mapResult(result)` if provided, else the
+raw result); on throw it emits `<event>.error` (payload =
+`mapError(error)` if provided, else the error) and re-throws. Options
+are `event`, `mapResult?`, `mapError?` only.
 
 ### `@ScheduleEvent(options)`
 
 ```typescript
-@ScheduleEvent({ delay: 24 * 60 * 60 * 1000 })   // 24h delay
+@ScheduleEvent({ event: 'user.welcome-followup', delay: 24 * 60 * 60 * 1000 })   // 24h delay
 async welcomeFollowup() { /* … */ }
 
-@ScheduleEvent({ cron: '0 9 * * *' })
+@ScheduleEvent({ event: 'reports.daily', cron: '0 9 * * *' })
 async dailyReport() { /* … */ }
 ```
+
+Options: `event` (required), plus one of `delay` (ms), `cron`, or
+`at` (a `Date`).
 
 ### `@BatchEvents(options)`
 
 Coalesce many emits into one delivery — useful when a tight loop
-would otherwise fire thousands of identical events.
+would otherwise fire thousands of identical events. Options: `event`,
+`maxSize`, and `maxWait` (ms) are all required.
 
-### `@OnModuleEvent(event)` — listen to framework module events
+### `@OnModuleEvent({ event, filter? })` — listen to framework module events
 
 ### `@EventEmitter(namespace?)` — class-level emitter binding
 

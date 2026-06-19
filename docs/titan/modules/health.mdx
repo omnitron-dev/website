@@ -43,7 +43,7 @@ import { TitanHealthModule } from '@omnitron-dev/titan-health';
       enableRedisIndicator:     true,
       redisClient:              redis,          // any object with .ping()
       memoryThresholds:         { heapDegradedThreshold: 0.8, heapUnhealthyThreshold: 0.95 },
-      eventLoopThresholds:      { degradedThreshold: 50, unhealthyThreshold: 200 },
+      eventLoopThresholds:      { lagDegradedThreshold: 50, lagUnhealthyThreshold: 200 },
       timeout:                  5_000,
       enableCaching:            true,
       cacheTtl:                 1_000,
@@ -76,7 +76,7 @@ Async configuration via `forRootAsync({ useFactory, inject?, imports?, isGlobal?
 | `isGlobal`                   | `boolean`                                                                             | `false`       |
 | `indicators`                 | `Array<new (...args) => IHealthIndicator>` — custom indicator classes                 | —             |
 | `memoryThresholds`           | `{ heapDegradedThreshold, heapUnhealthyThreshold }` (0..1 ratio)                      | —             |
-| `eventLoopThresholds`        | `{ degradedThreshold, unhealthyThreshold }` (ms)                                      | —             |
+| `eventLoopThresholds`        | `{ lagDegradedThreshold, lagUnhealthyThreshold }` (ms)                                | —             |
 | `diskThresholds`             | `DiskThresholds`                                                                      | —             |
 | `databaseOptions`            | `DatabaseIndicatorOptions`                                                            | —             |
 | `redisOptions`               | `RedisIndicatorOptions`                                                               | —             |
@@ -205,7 +205,7 @@ When `enableRpcService: true` (default), a Netron service is
 auto-registered:
 
 ```typescript
-const healthSvc = await client.queryInterface<HealthRpcService>('health@1.0.0');
+const healthSvc = await client.queryInterface<HealthRpcService>('Health@1.0.0');
 
 await healthSvc.check();   // HealthResponse
 await healthSvc.live();    // LivenessResponse

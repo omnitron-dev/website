@@ -100,13 +100,15 @@ orchestrator `EventsService` adds `onStart` / `onStop`.
 
 | Hook         | What it does                                                |
 | ------------ | ----------------------------------------------------------- |
-| `onInit`     | Registers configured indicators                             |
+| `onInit`     | —                                                           |
 | `onStart`    | —                                                           |
 | `onStop`     | —                                                           |
 | `onDestroy`  | —                                                           |
 
-Checks are *pull-driven* — Kubernetes probes invoke `check()` on
-demand. No background loop runs.
+`titan-health` is **lifecycle-passive**: the module registers its
+indicators eagerly at config time (inside `forRoot` / `forFeature`),
+not in a lifecycle hook. Checks are *pull-driven* — Kubernetes probes
+invoke `check()` on demand. No background loop runs.
 
 ### `titan-lock`
 
@@ -170,13 +172,15 @@ Uses an explicit `destroy()` method called during module shutdown.
 
 ### `titan-redis`
 
-| Hook         | What it does                                                |
-| ------------ | ----------------------------------------------------------- |
-| `onModuleInit` | Establishes the connection(s) configured via `forRoot` / `forFeature` |
-| `onStop`     | Disconnects all named clients gracefully                    |
+| Hook            | What it does                                                |
+| --------------- | ----------------------------------------------------------- |
+| `onModuleInit`  | Establishes the connection(s) configured via `forRoot` / `forFeature` |
+| `onModuleDestroy` | Disconnects all named clients gracefully (`closeAllClients()`) |
 
-`onModuleInit` is the legacy name in `titan-redis` — functionally
-equivalent to `onInit` in newer modules.
+`titan-redis` uses the `onModuleInit` / `onModuleDestroy` hook names
+(on `RedisManager`) — functionally equivalent to `onInit` / `onDestroy`
+in newer modules. There is no `onStop` hook; cleanup runs in
+`onModuleDestroy`.
 
 ### `titan-scheduler`
 
@@ -289,7 +293,6 @@ sequenceDiagram
   App->>DB: onStop (drain pool)
   App->>Config: onStop (stop watchers)
   App->>Metr: stop() (drain buffer)
-  App->>Redis: onStop (disconnect)
   App->>Logger: onStop (FLUSH transports)
 
   Note over App: ─── onDestroy phase ───
@@ -298,6 +301,7 @@ sequenceDiagram
   App->>Notif: onDestroy
   App->>Disc: onDestroy
   App->>RL: destroy()
+  App->>Redis: onModuleDestroy (disconnect)
   App->>Logger: onDestroy
   App->>Config: onDestroy
 ```

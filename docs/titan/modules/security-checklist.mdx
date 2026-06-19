@@ -160,12 +160,15 @@ or a 50-pod fleet.
 
 - [ ] **TTL always set.** A crashed holder shouldn't pin the lock
   forever. Set TTL to the longest credible work time + margin.
-- [ ] **Ownership UUID enforced.** Use `tryAcquire(key, { owner })`
-  — the included Lua scripts verify ownership on release. Never
-  release with `DEL key` directly.
-- [ ] **Refresh extends, doesn't reset.** Use `refresh()` to push
-  the TTL out periodically while still holding; don't release-and-
-  reacquire which is racy.
+- [ ] **Ownership UUID enforced.** `acquireLock(key, ttlMs)` returns
+  a generated `lockId` (UUID); pass it back to `releaseLock(key,
+  lockId)` / `extendLock(key, lockId, ttlMs)`. The included Lua
+  scripts verify the `lockId` on release. Never release with
+  `DEL key` directly. Prefer `withLock(key, fn)` so release is
+  automatic.
+- [ ] **Extend, don't reset.** Use `extendLock(key, lockId, ttlMs)`
+  to push the TTL out periodically while still holding; don't
+  release-and-reacquire, which is racy.
 - [ ] **Lock granularity.** A single global lock per resource is
   cleaner than a hierarchy; deep lock chains invite deadlocks.
 
@@ -202,8 +205,8 @@ or a 50-pod fleet.
 - [ ] **Preferences honoured before send.** `IPreferenceStore`
   must check unsubscribes / DND windows before delivery, not
   after.
-- [ ] **DLQ access controlled.** `listDLQ()` reveals undelivered
-  payloads — operator-only.
+- [ ] **DLQ access controlled.** `subscribeToDLQ()` /
+  `requeueFromDLQ()` expose undelivered payloads — operator-only.
 
 ### `titan-pm`
 

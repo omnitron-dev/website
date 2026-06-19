@@ -82,11 +82,11 @@ not matter, the container resolves the dependency graph:
     LoggerModule.forRoot({ level: 'info' }),
 
     // Official
-    TitanRedisModule.forRoot({ url: env.REDIS_URL }),
+    TitanRedisModule.forRoot({ config: { url: env.REDIS_URL } }),
     TitanAuthModule.forRoot({ jwtSecret: env.JWT_SECRET }),
     TitanCacheModule.forRoot({ multiTier: true, l2: { client: redisClient, ttl: 60 } }),
-    TitanDatabaseModule.forRoot({ dialect: 'postgres', connection: env.DATABASE_URL }),
-    SchedulerModule.forRoot({ persistence: { provider: 'redis' } }),
+    TitanDatabaseModule.forRoot({ connection: { dialect: 'postgres', connection: env.DATABASE_URL } }),
+    SchedulerModule.forRoot({ persistence: { provider: redisPersistenceProvider } }),
     TitanMetricsModule.forRoot({ storage: { type: 'memory' } }),
   ],
   providers: [/* your services */],

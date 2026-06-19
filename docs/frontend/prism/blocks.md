@@ -7,273 +7,282 @@ description: Full-page composites — drop one in, fill the slots, ship a screen
 # Blocks
 
 Blocks sit one level above [layouts](./layouts.md) and components.
-They're complete user-flow surfaces — sign-in screen, dashboard
-overview, data-grid page — that you drop into a route, wire to
-your data callbacks, and ship.
+They're higher-level composites — auth forms + guards, a
+collapsible dashboard panel, a full data-grid — that you drop
+into a route, wire to your data callbacks, and ship.
 
-Three blocks ship out of the box. Each is also available as its
-own subpath import.
+Three blocks ship out of the box (`AuthBlock`, `DashboardBlock`,
+`DataGridBlock`). Each is also available as its own subpath
+import.
 
-## `<AuthBlock>` — full sign-in screen
+## `AuthBlock` — auth forms + route guards {#authblock}
+
+`AuthBlock` is a **namespace** of ready-made auth forms —
+`AuthBlock.Login`, `AuthBlock.Register`, `AuthBlock.ForgotPassword`,
+`AuthBlock.ResetPassword`, `AuthBlock.VerifyCode` (the same
+components are also exported individually as `LoginForm`,
+`RegisterForm`, etc.). There is no single `<AuthBlock mode="…">`
+component — render the form you need and wire its `onSubmit`:
 
 ```tsx
 import { AuthBlock } from '@omnitron-dev/prism/blocks';
 
 function SignInPage() {
   return (
-    <AuthBlock
-      mode="sign-in"
-      onSignIn={async ({ email, password, totpCode }) => {
-        await authService.signIn({ email, password, totpCode });
+    <AuthBlock.Login
+      onSubmit={async ({ email, password, rememberMe }) => {
+        await authService.signIn({ email, password });
         navigate('/');
       }}
-      oauth={[
-        { provider: 'google',  label: 'Continue with Google',  onClick: oauthGoogle },
-        { provider: 'github',  label: 'Continue with GitHub',  onClick: oauthGithub },
+      showRememberMe
+      showForgotPassword
+      onForgotPassword={() => navigate('/recover')}
+      showSocialLogin
+      socialProviders={[
+        { id: 'google', name: 'Google', icon: <GoogleIcon />, onClick: oauthGoogle },
+        { id: 'github', name: 'GitHub', icon: <GithubIcon />, onClick: oauthGithub },
       ]}
-      links={{
-        signUp:        { label: 'Create account',  href: '/sign-up' },
-        forgotPassword:{ label: 'Forgot password', href: '/recover' },
-      }}
-      logo={<Logo size={48} />}
-      tagline="Welcome back"
     />
   );
 }
 ```
 
-### Modes
+### The forms
 
-| Mode | Purpose |
-| ---- | ------- |
-| `'sign-in'` | Email + password + 2FA |
-| `'sign-up'` | Registration |
-| `'verify'` | Email/phone verification code entry |
-| `'forgot-password'` | Initiate password reset |
-| `'reset-password'` | Set new password (from email link) |
-| `'2fa-setup'` | TOTP secret QR + initial code |
+| Member (namespace) | Standalone export | Submit payload |
+| ------------------ | ----------------- | -------------- |
+| `AuthBlock.Login` | `LoginForm` | `{ email, password, rememberMe? }` |
+| `AuthBlock.Register` | `RegisterForm` | `RegisterFormData` |
+| `AuthBlock.ForgotPassword` | `ForgotPasswordForm` | `{ email }` |
+| `AuthBlock.ResetPassword` | `ResetPasswordForm` | `ResetPasswordFormData` |
+| `AuthBlock.VerifyCode` | `VerifyCodeForm` | `{ code }` |
 
-### Props
+### Common form props
 
 | Prop | Type | Notes |
 | ---- | ---- | ----- |
-| `mode` | one of modes above | |
-| `onSignIn` / `onSignUp` / `onVerify` / etc. | `(data) => Promise<void>` | Handler for the active mode |
-| `oauth` | `Array<{provider, label, onClick}>` | Buttons above the form |
-| `links` | per-mode navigation links | |
-| `logo` | `ReactNode` | Top of the card |
-| `tagline` | `string` | Subtitle |
-| `background` | `'gradient' \| 'image' \| ReactNode` | Right-pane illustration |
-| `formError` | `string \| ReactNode` | Inline error above the form |
+| `onSubmit` | `(data) => Promise<void> \| void` | Submit handler for the form |
+| `loading` | `boolean` | Disables + shows progress while submitting |
+| `disabled` | `boolean` | Disable the form |
+| `schema` | `z.ZodSchema` | Override the built-in Zod validation |
+| `labels` | per-field label overrides | i18n / copy customisation |
+| `slotProps` | `{ wrapper, submitButton, textField }` | MUI slot overrides |
 
-The block uses `<Field>` + `SchemaProvider` internally — you
-get email validation, password-strength meter, TOTP-code mask
-free.
+The forms use react-hook-form + Zod internally — you get email
+validation and field-level errors for free.
 
-### 2FA flow
+### Route guards
+
+The block also exports composable route guards (each takes a
+`useAuth` hook so you can plug in your own auth store):
 
 ```tsx
-const [pendingMfa, setPendingMfa] = useState(false);
+import { AuthGuard, GuestGuard, RoleBasedGuard }
+  from '@omnitron-dev/prism/blocks';
 
-<AuthBlock
-  mode={pendingMfa ? 'verify' : 'sign-in'}
-  onSignIn={async (data) => {
-    const result = await authService.signIn(data);
-    if (result.requires2fa) {
-      setPendingMfa(true);
-    } else {
-      navigate('/');
-    }
-  }}
-  onVerify={async ({ code }) => {
-    await authService.verifyTotp({ code });
-    navigate('/');
-  }}
-/>
+<AuthGuard useAuth={useAuth} onUnauthenticated={() => navigate('/sign-in')}>
+  <Dashboard />
+</AuthGuard>
+
+<RoleBasedGuard
+  useAuth={useAuth}
+  roles={['admin', 'moderator']}
+  roleMatchStrategy="any"
+  accessDeniedComponent={<Forbidden />}
+>
+  <AdminPanel />
+</RoleBasedGuard>
 ```
 
-## `<DashboardBlock>` — overview page
+`hasRole` / `hasPermission` / `createConditionalRender` helpers
+are exported for inline checks.
+
+## `<DashboardBlock>` — collapsible content panel
+
+`<DashboardBlock>` is a flexible **panel/card** primitive — a
+titled, optionally-collapsible container with header, content,
+and footer slots, plus built-in loading and error states. It is
+the building block you compose dashboards *from* (it does not
+itself render stat tiles or charts — drop those in as children):
 
 ```tsx
 import { DashboardBlock } from '@omnitron-dev/prism/blocks';
 
-function DashboardPage() {
+function RequestsPanel({ loading, series }) {
   return (
     <DashboardBlock
-      title="Platform overview"
-      tiles={[
-        { label: 'Apps online',    value: 12, delta: +2, icon: 'box',  color: 'primary' },
-        { label: 'Active users',   value: '4.2k', delta: +12.5, icon: 'users', color: 'success' },
-        { label: 'Storage used',   value: '230GB', delta: +5.1, icon: 'hard-drive', color: 'warning' },
-        { label: 'Error rate',     value: '0.12%', delta: -0.04, icon: 'alert', color: 'error' },
-      ]}
-      charts={[
-        { title: 'Requests / min', chart: <Chart series={requestsSeries} type="area" /> },
-        { title: 'Latency p95',     chart: <Chart series={latencySeries}  type="line" /> },
-      ]}
-      recentActivity={
-        <ActivityFeed items={activity} />
-      }
-    />
+      title="Requests / min"
+      subtitle="last 24h"
+      icon={<ActivityIcon />}
+      actions={<IconButton><RefreshIcon /></IconButton>}
+      loading={loading}
+      collapsible
+    >
+      <Chart series={series} type="area" />
+    </DashboardBlock>
   );
 }
 ```
 
-| Prop | Purpose |
-| ---- | ------- |
-| `title` | Page heading |
-| `tiles` | Array of `<Stat>` cards |
-| `charts` | Chart panels — typically 2-4 |
-| `recentActivity` | Right-rail feed |
-| `actions` | Top-right action buttons |
-| `loading` | Boolean — shows skeleton tiles & charts |
+| Prop | Type | Purpose |
+| ---- | ---- | ------- |
+| `title` / `subtitle` | `string` | Header text |
+| `icon` | `ReactNode` | Leading header icon |
+| `actions` | `ReactNode` | Top-right header slot |
+| `children` | `ReactNode` | Panel body |
+| `footer` | `ReactNode` | Footer slot |
+| `variant` / `size` | `DashboardBlockVariant` / `…Size` | Visual style |
+| `loading` | `boolean` | Shows the loading skeleton |
+| `error` | `boolean` | Shows the error state (`errorConfig`) |
+| `collapsible` / `collapsed` / `onCollapseChange` | — | Collapse behaviour |
 
-The layout is responsive — tiles wrap, charts collapse to stack
-on small screens.
+`DashboardBlockHeader`, `DashboardBlockContent`, and
+`DashboardBlockFooter` are exported for fully custom composition,
+and `useDashboardBlock` drives collapse/loading state.
 
 ## `<DataGridBlock>` — filterable / sortable / paginated table
 
-The most-used block. Composes `<FilterToolbar>` + `<Table>` +
-`<Pagination>` + per-row actions into one prop API:
+The most-used block. It wraps **MUI X DataGrid** and adds a
+toolbar, row actions, selection, and empty/error states behind
+one prop API. Columns are MUI `GridColDef`s and rows are passed
+directly via the `rows` prop:
 
 ```tsx
 import { DataGridBlock } from '@omnitron-dev/prism/blocks';
 
-function UsersPage() {
-  const users = useService<UserService>('users');
-
+function UsersPage({ users, loading }) {
   return (
     <DataGridBlock
-      title="Users"
+      rows={users}
+      getRowId={(row) => row.id}
+      loading={loading}
       columns={[
-        { field: 'email',  header: 'Email', sortable: true },
-        { field: 'role',   header: 'Role',  filterable: { type: 'select', options: ['admin','user','viewer'] } },
-        { field: 'status', header: 'Status', render: (row) => <StatusChip status={row.status} /> },
-        { field: 'createdAt', header: 'Created', render: (row) => <DateCell value={row.createdAt} /> },
+        { field: 'email',  headerName: 'Email', flex: 1, sortable: true },
+        { field: 'role',   headerName: 'Role' },
+        { field: 'status', headerName: 'Status',
+          renderCell: (p) => <StatusChip status={p.value} /> },
+        { field: 'createdAt', headerName: 'Created',
+          renderCell: (p) => <DateCell value={p.value} /> },
       ]}
-      query={({ page, pageSize, sort, filter }) =>
-        users.list.useQuery([{ page, pageSize, sort, filter }])
-      }
-      rowKey="id"
-      onRowClick={(row) => navigate(`/users/${row.id}`)}
+      onRowClick={(params) => navigate(`/users/${params.id}`)}
       rowActions={[
-        { id: 'edit',    label: 'Edit',    icon: 'edit', onClick: (row) => navigate(`/users/${row.id}/edit`) },
-        { id: 'remove',  label: 'Remove',  icon: 'trash', danger: true, onClick: handleRemove },
+        { key: 'edit',   label: 'Edit',   icon: <EditIcon />,  onClick: (row) => navigate(`/users/${row.id}/edit`) },
+        { key: 'remove', label: 'Remove', icon: <TrashIcon />, color: 'error', onClick: handleRemove },
       ]}
-      bulkActions={[
-        { id: 'export',  label: 'Export selected', onClick: handleExport },
-      ]}
+      selection={{ enabled: true, checkboxSelection: true }}
+      onSelectionChange={(model) => setSelected(model)}
       toolbar={{
-        search:  { placeholder: 'Search by email', field: 'email' },
-        filters: ['role', 'status'],
-        export:  { formats: ['csv', 'json'] },
+        quickFilter:      { enabled: true, placeholder: 'Search by email' },
+        export:           { csv: true },
+        columnVisibility: { enabled: true },
+        densitySelector:  true,
       }}
       pagination={{ defaultPageSize: 25, pageSizeOptions: [25, 50, 100] }}
-      emptyState={
-        <EmptyContent
-          title="No users yet"
-          description="Invite your first user."
-          action={<Button onClick={onInvite}>Invite</Button>}
-        />
-      }
+      empty={{
+        title:       'No users yet',
+        description: 'Invite your first user.',
+        action:      { label: 'Invite', onClick: onInvite },
+      }}
     />
   );
 }
 ```
 
-### Column definitions
+### Columns
 
-```typescript
-interface ColumnDef<TRow> {
-  field:        keyof TRow | string;
-  header:       string | ReactNode;
-  width?:       number | string;
-  align?:       'left' | 'center' | 'right';
-  sortable?:    boolean;
-  filterable?:  boolean | FilterConfig;
-  render?:      (row: TRow) => ReactNode;
-  exportValue?: (row: TRow) => string;     // for CSV/JSON export
-  hidden?:      boolean;                    // user can re-show via column toggler
-}
-```
-
-### Server-side vs client-side
-
-```typescript
-// Server-side (recommended — scales): query callback receives state
-query={({ page, pageSize, sort, filter, search }) =>
-  myService.list.useQuery([{ page, pageSize, sort, filter, search }])
-}
-
-// Client-side: provide all data upfront
-data={allItems}
-```
-
-Server-side is the default; `<DataGridBlock>` debounces filter
-+ search inputs before calling `query`.
+Columns are standard MUI X `GridColDef`s — `field`, `headerName`,
+`flex` / `width`, `sortable`, `renderCell`, `valueGetter`, etc.
+(Not a bespoke `ColumnDef`.) Column visibility is controlled via
+`columnVisibilityModel` / `onColumnVisibilityChange`, or the
+toolbar's `columnVisibility` toggler.
 
 ### Row actions
 
+`rowActions` render in a per-row menu — each is keyed and gets
+the row + event:
+
 ```tsx
 rowActions={[
-  { id: 'edit',   label: 'Edit',  icon: 'edit',  onClick: (row) => { ... } },
-  { id: 'view',   label: 'View',  icon: 'eye',   onClick: (row) => { ... } },
-  { id: 'remove', label: 'Remove', icon: 'trash', danger: true,
-    onClick: (row) => { ... },
-    confirm: { title: 'Remove user?', confirmLabel: 'Remove' },
+  { key: 'edit',   label: 'Edit',   icon: <EditIcon />,  onClick: (row, e) => { /* … */ } },
+  { key: 'view',   label: 'View',   icon: <EyeIcon />,   onClick: (row, e) => { /* … */ } },
+  { key: 'remove', label: 'Remove', icon: <TrashIcon />, color: 'error',
+    disabled: (row) => row.locked,
+    divider: true,
+    onClick: (row, e) => { /* … */ },
   },
 ]}
 ```
 
-The `confirm` field wires `<ConfirmDialog>` automatically — no
-manual state.
+Actions support `disabled` / `hidden` (boolean or `(row) =>
+boolean`), `color`, and a `divider`. (There is no built-in
+`confirm` field — open your own `<ConfirmDialog>` from `onClick`.)
 
-### Bulk actions
+### Selection & bulk operations
 
 ```tsx
-bulkActions={[
-  { id: 'export', label: 'Export selected', icon: 'download', onClick: (rows) => handleExport(rows) },
-  { id: 'delete', label: 'Delete selected', icon: 'trash', danger: true,
-    onClick: (rows) => handleDelete(rows),
-    confirm: { title: 'Delete N selected?', confirmLabel: 'Delete' },
-  },
-]}
+<DataGridBlock
+  selection={{ enabled: true, mode: 'multiple', checkboxSelection: true }}
+  onSelectionChange={(model) => setSelected(model)}
+  // …
+/>
 ```
 
-Selection appears as checkboxes; bulk-action bar shows when ≥1
-row is selected.
+`onSelectionChange` reports the MUI `GridRowSelectionModel`; drive
+your own bulk-action bar from that selection.
 
 ### Toolbar config
 
 ```typescript
-interface ToolbarConfig {
-  search?:  { placeholder, field, debounceMs? };
-  filters?: string[];                              // column ids that should appear as filter chips
-  export?:  { formats: ('csv' | 'json' | 'xlsx')[] };
-  refresh?: boolean;                               // refresh button
-  columnVisibility?: boolean;                      // column toggler
-  savedViews?: { provider: SavedViewsProvider };   // save & restore filter sets
+interface DataGridToolbarConfig {
+  show?:             boolean;
+  quickFilter?:      { enabled?, placeholder?, debounceMs? };
+  export?:           { csv?, excel?, print?, fileName? };
+  columnVisibility?: { enabled?, defaultModel? };
+  densitySelector?:  boolean;
+  actions?:          ReactNode;          // custom toolbar actions
+  startContent?:     ReactNode;          // left-aligned custom content
+  endContent?:       ReactNode;          // right-aligned custom content
 }
 ```
 
-### Saved views
+### Server-side data — `useDataGridBlock`
+
+For server-driven paging/sorting/filtering, use the
+`useDataGridBlock` hook: pass a `fetcher` and spread its return
+onto the block (server pagination mode):
 
 ```tsx
-import { useSavedViews } from '@omnitron-dev/prism/hooks';
+import { DataGridBlock, useDataGridBlock } from '@omnitron-dev/prism/blocks';
 
-const provider = useSavedViews({
-  scope:   'users',
-  storage: 'localStorage',          // or pass a server-side provider
-});
+function UsersPage() {
+  const grid = useDataGridBlock({
+    fetcher: async ({ page, pageSize, sortModel, filterModel, quickFilterValue }) => {
+      const res = await usersService.list({ page, pageSize, sortModel, filterModel, q: quickFilterValue });
+      return { rows: res.items, total: res.total };   // DataGridFetchResult
+    },
+    initialPageSize: 25,
+  });
 
-<DataGridBlock
-  // ...
-  toolbar={{ savedViews: { provider } }}
-/>
+  return (
+    <DataGridBlock
+      columns={columns}
+      rows={grid.rows}
+      loading={grid.loading}
+      pagination={{ mode: 'server', rowCount: grid.total }}
+      paginationModel={grid.paginationModel}
+      onPaginationChange={grid.onPaginationChange}
+      sortModel={grid.sortModel}
+      onSortChange={grid.onSortChange}
+      filterModel={grid.filterModel}
+      onFilterChange={grid.onFilterChange}
+    />
+  );
+}
 ```
 
-Users can save the current filter + sort + column-visibility
-combo as a named view and restore it later.
+The hook also returns `refresh()` and `reset()`. For client-side
+data, just pass the full `rows` array and use the default
+(`'client'`) pagination mode.
 
 ## When to use a block vs compose your own
 
@@ -284,11 +293,10 @@ combo as a named view and restore it later.
 | Speed of iteration matters more than control | Pixel-precision matters more than speed |
 | You're building admin / operator surfaces | You're building a marketing / brochure page |
 
-Both blocks are designed so dropping out is cheap — they're
-compositions of public components + hooks. If you outgrow
-`<DataGridBlock>`, replace it with `<FilterToolbar>` +
-`<Table>` + `<Pagination>` without changing the rest of your
-page.
+The blocks are compositions of public components + hooks, so
+dropping out is cheap. If you outgrow `<DataGridBlock>`, drop to
+MUI X `<DataGrid>` directly (or `<FilterToolbar>` + the Prism
+`<Table>`) without changing the rest of your page.
 
 ## Subpath imports
 
