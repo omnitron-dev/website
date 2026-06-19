@@ -63,10 +63,16 @@ external RPC surface of an app for security/audit purposes.
 
 ### `titan-database`
 
-`titan-database` does **not** define dedicated DI tokens. The
-`TitanDatabaseModule` registers `DatabaseManager` and
-`DatabaseHealthIndicator` as classes — inject them by class
-reference:
+| Token                                   | Type                          |
+| --------------------------------------- | ----------------------------- |
+| `DATABASE_MANAGER`                      | `DatabaseManager`             |
+| `DATABASE_MODULE_OPTIONS`               | `DatabaseModuleOptions`       |
+| `DATABASE_CONNECTION`                   | `Kysely` (default connection) |
+| `DATABASE_HEALTH_INDICATOR`             | `DatabaseHealthIndicator`     |
+
+The tokens are `Symbol.for('titan:…')` symbols, but `DatabaseManager`
+and `DatabaseHealthIndicator` are also registered against their class
+references, so you can inject either way:
 
 ```typescript
 constructor(private readonly db: DatabaseManager) {}
@@ -83,7 +89,12 @@ tokens are generated from the repository class name. See the
 | `DISCOVERY_SERVICE_TOKEN`              | `IDiscoveryService`           |
 | `DISCOVERY_OPTIONS_TOKEN`              | `DiscoveryOptions`            |
 | `NETRON_DISCOVERY_INTEGRATION_TOKEN`   | `NetronDiscoveryIntegration`  |
-| `REDIS_TOKEN` (re-exported)            | `Redis`                       |
+| `REDIS_TOKEN` (module-local)           | `Redis`                       |
+
+> `titan-discovery` exports its **own** `REDIS_TOKEN`
+> (`createToken('TitanDiscovery:Redis')`) — it is not the same
+> symbol as `titan-redis`'s `REDIS_MANAGER`. Supply a client
+> against this token, or let the module create one from its options.
 
 ### `titan-events`
 
@@ -94,10 +105,13 @@ tokens are generated from the repository class name. See the
 | `EVENT_EMITTER_TOKEN`                  | `EnhancedEventEmitter`        |
 | `EVENT_BUS_SERVICE_TOKEN`              | `EventBusService`             |
 | `EVENT_HISTORY_SERVICE_TOKEN`          | `EventHistoryService`         |
-| `EVENT_METADATA_SERVICE_TOKEN`         | `EventMetadataService`        |
 | `EVENT_SCHEDULER_SERVICE_TOKEN`        | `EventSchedulerService`       |
-| `EVENT_DISCOVERY_SERVICE_TOKEN`        | `EventDiscoveryService`       |
 | `EVENT_VALIDATION_SERVICE_TOKEN`       | `EventValidationService`      |
+
+> `EVENT_METADATA_SERVICE_TOKEN` and `EVENT_DISCOVERY_SERVICE_TOKEN`
+> exist internally but are **not** re-exported from the package
+> barrel — their backing services are module-private. The seven
+> tokens above are the public DI surface.
 
 ### `titan-health`
 
@@ -173,18 +187,21 @@ convention — symbols are bare:
 
 | Symbol                                    | Type                          |
 | ----------------------------------------- | ----------------------------- |
-| `REDIS_TOKEN`                             | `Redis`                       |
-| `getRedisClientToken(namespace?)` factory | `Redis` (named instance)      |
-| `getRedisOptionsToken(namespace?)` factory| `RedisModuleOptions`          |
+| `REDIS_MANAGER`                           | `RedisManager`                |
+| `REDIS_MODULE_OPTIONS`                    | `RedisModuleOptions`          |
+| `getRedisClientToken(namespace?)` factory | `IRedisClient` (named instance) |
 
-Multi-client setups use the factory form:
+The default client is injected with the `@InjectRedis()` decorator;
+`getRedisClientToken(namespace)` is the per-namespace token used for
+multi-client setups. (There is no `REDIS_TOKEN` symbol — the
+manager token is `REDIS_MANAGER`.)
 
 ```typescript
-import { Redis } from 'ioredis';
-import { getRedisClientToken } from '@omnitron-dev/titan-redis';
+import { getRedisClientToken, type IRedisClient }
+  from '@omnitron-dev/titan-redis';
 
-@Inject(getRedisClientToken('cache'))   cacheRedis: Redis;
-@Inject(getRedisClientToken('queue'))   queueRedis: Redis;
+@Inject(getRedisClientToken('cache'))   cacheRedis: IRedisClient;
+@Inject(getRedisClientToken('queue'))   queueRedis: IRedisClient;
 ```
 
 ### `titan-scheduler`
@@ -232,13 +249,13 @@ class UsersService {
 ## RPC services — what's reachable from the wire
 
 Most modules expose their API only via DI inside the same process.
-Two modules also register a Netron `@Service` so the Omnitron CLI /
+Two modules ship a Netron `@Service` class so the Omnitron CLI /
 web console (or any remote peer) can call them.
 
 | Module                                  | RPC service name      | When                                                |
 | --------------------------------------- | --------------------- | --------------------------------------------------- |
-| [`titan-health`](./health.mdx)          | `Health@1.0.0`        | When `enableRpcService: true` (default)             |
-| [`titan-metrics`](./metrics.mdx)        | `OmnitronMetrics`     | Auto-registered when the module loads               |
+| [`titan-health`](./health.mdx)          | `Health@1.0.0`        | `HealthRpcService` is **provided by the module** when `enableRpcService: true` (default) |
+| [`titan-metrics`](./metrics.mdx)        | `OmnitronMetrics`     | `MetricsRpcService` is **exported, not auto-provided** — register it yourself (the Omnitron daemon does) |
 
 Everything else (`titan-auth`, `titan-cache`, `titan-database`,
 `titan-discovery`, `titan-events`, `titan-lock`, `titan-notifications`,
@@ -263,10 +280,11 @@ TitanHealthModule.forRoot({
 })
 ```
 
-`OmnitronMetrics` does not have a feature flag for unregistering —
-if you don't want it on the wire, control exposure at the transport
-layer (don't expose the Netron port externally, or front it with
-auth-only middleware).
+`OmnitronMetrics` is reachable only if you registered
+`MetricsRpcService` yourself — it has no module feature flag.
+If you don't want it on the wire, simply don't register it (or
+control exposure at the transport layer: don't expose the Netron
+port externally, or front it with auth-only middleware).
 
 ## Health RPC surface — `Health@1.0.0`
 

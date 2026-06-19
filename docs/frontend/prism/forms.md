@@ -6,25 +6,47 @@ description: Schema-aware forms with react-hook-form + zod + Prism Field.
 
 # Forms
 
-Prism's form layer wraps **react-hook-form** + **zod** with a
-schema-context provider. Fields auto-infer their type,
-constraints, and error display from the active schema — no
-per-field configuration.
+Prism's form layer is **react-hook-form** + **zod**, plus a `Field`
+namespace of RHF-bound input components and an optional i18n provider for
+localized validation messages.
 
-## The three pieces
+:::warning Doc drift — verify against source
 
-1. **A zod schema** — the source of truth for shape + validation.
-2. **`<SchemaProvider>`** — makes the schema available to fields
-   via context.
-3. **`<Field>`** — a context-aware input that reads the schema
-   and renders the right control with the right constraints.
+The earlier "schema-context drives field inference" model below was
+inaccurate. The real surface (`packages/prism/src/forms` +
+`packages/prism/src/components/field`) is:
+
+- **`Field` is a namespace** of typed components — `Field.Text`,
+  `Field.Select`, `Field.Checkbox`, `Field.Switch`, `Field.Number`,
+  `Field.Radio`, `Field.Autocomplete`, `Field.MultiSelect`,
+  `Field.Rating`, `Field.Slider`, `Field.DatePicker`, `Field.Code`,
+  `Field.Upload`, `Field.Phone`, `Field.Editor`, … — each wired to RHF
+  via `name`. There is **no** single schema-aware `<Field name type>`
+  that auto-infers control/constraints from zod.
+- **`SchemaProvider`** does **not** take a `schema` prop. It supplies an
+  i18n `t` / `locale` / `messages` context for validation messages; pair
+  it with `useSchema()` to build zod schemas with localized errors. It
+  does not feed field rendering.
+- Validation is enforced the standard way — `zodResolver(schema)` on
+  `useForm`. Fields read errors from RHF, not from a schema context.
+
+The react-hook-form patterns further down (validation modes, `Controller`,
+`useFieldArray`, `FormAlert`, submit state) are accurate.
+:::
+
+## The pieces
+
+1. **A zod schema** — the source of truth for shape + validation, wired
+   in via `zodResolver`.
+2. **react-hook-form** — `useForm` + `FormProvider` own the form state.
+3. **`Field.*` components** — RHF-bound inputs from the `Field`
+   namespace, addressed by `name`.
 
 ```tsx
-import { SchemaProvider } from '@omnitron-dev/prism/forms';
-import { Field }          from '@omnitron-dev/prism/components/field';
-import { useForm }        from 'react-hook-form';
-import { zodResolver }    from '@hookform/resolvers/zod';
-import { z }              from 'zod';
+import { Field }       from '@omnitron-dev/prism/components/field';
+import { FormProvider, useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z }           from 'zod';
 
 const SignInSchema = z.object({
   email:    z.string().email(),
@@ -44,76 +66,66 @@ function SignInForm() {
 
   return (
     <FormProvider {...form}>
-      <SchemaProvider schema={SignInSchema}>
-        <form onSubmit={form.handleSubmit(onSubmit)}>
-          {form.formState.errors.root && (
-            <FormAlert error={form.formState.errors.root} />
-          )}
-          <Field name="email"    label="Email"    type="email" />
-          <Field name="password" label="Password" type="password" />
-          <Field name="remember" label="Remember me" type="checkbox" />
-          <Button type="submit" disabled={form.formState.isSubmitting}>
-            Sign in
-          </Button>
-        </form>
-      </SchemaProvider>
+      <form onSubmit={form.handleSubmit(onSubmit)}>
+        {form.formState.errors.root && (
+          <FormAlert error={form.formState.errors.root} />
+        )}
+        <Field.Text     name="email"    label="Email"    type="email" />
+        <Field.Text     name="password" label="Password" type="password" />
+        <Field.Checkbox name="remember" label="Remember me" />
+        <Button type="submit" disabled={form.formState.isSubmitting}>
+          Sign in
+        </Button>
+      </form>
     </FormProvider>
   );
 }
 ```
 
-## What the schema drives
+## Localized validation messages (optional)
 
-`<Field>` reads the schema entry for its `name` and infers:
-
-| Schema clause | Field behaviour |
-| ------------- | --------------- |
-| `z.string()` | Plain text input |
-| `z.string().email()` | `type="email"`, browser-level validation |
-| `z.string().url()` | `type="url"` |
-| `z.string().min(N)` / `.max(N)` | `minlength` / `maxlength` |
-| `z.string().regex(/.../)` | `pattern` attribute |
-| `z.number()` | `type="number"` |
-| `z.number().int()` | Step 1 |
-| `z.number().min(N)` / `.max(N)` | `min` / `max` |
-| `z.boolean()` | Checkbox |
-| `z.enum([...])` | Select with options |
-| `.optional()` | `required={false}` |
-| `.describe(text)` | `helperText` |
-
-You can override any of these per `<Field>`:
+Wrap the form in `<SchemaProvider>` and build schemas via `useSchema()`
+to get i18n error messages. The provider takes a `t` function, `locale`,
+and `messages` — **not** a `schema`:
 
 ```tsx
-<Field name="email" label="Email" type="email" autoComplete="username" />
-<Field name="role"  label="Role"  select>
-  <MenuItem value="admin">Admin</MenuItem>
-  <MenuItem value="user">User</MenuItem>
-</Field>
+import { SchemaProvider, useSchema } from '@omnitron-dev/prism/forms';
+
+<SchemaProvider t={t} locale="en">
+  <SignInForm />
+</SchemaProvider>;
+
+// inside, build the schema with translated messages:
+const s = useSchema();
+const Schema = z.object({ email: s.email(), password: s.password() });
 ```
 
 ## Field types
 
+Each control is a member of the `Field` namespace:
+
 ```tsx
-<Field name="title"     label="Title" />                                  {/* text */}
-<Field name="bio"       label="Bio" multiline rows={4} />                  {/* textarea */}
-<Field name="email"     label="Email" type="email" />
-<Field name="password"  label="Password" type="password" />
-<Field name="age"       label="Age" type="number" />
-<Field name="website"   label="Website" type="url" />
-<Field name="phone"     label="Phone" type="tel" />
-<Field name="when"      label="When" type="datetime-local" />
-<Field name="dob"       label="Date of birth" type="date" />
-<Field name="active"    label="Active" type="checkbox" />
-<Field name="role"      label="Role" select>
-  <MenuItem value="admin">Admin</MenuItem>
-  <MenuItem value="user">User</MenuItem>
-</Field>
-<Field name="tags"      label="Tags" multiple select>
-  {availableTags.map(t => <MenuItem key={t} value={t}>{t}</MenuItem>)}
-</Field>
+<Field.Text   name="title"    label="Title" />
+<Field.Text   name="bio"      label="Bio" multiline rows={4} />
+<Field.Text   name="email"    label="Email" type="email" />
+<Field.Text   name="password" label="Password" type="password" />
+<Field.Number name="age"      label="Age" min={0} max={150} />
+<Field.Phone  name="phone"    label="Phone" defaultCountry="US" />
+<Field.DatePicker name="dob"  label="Date of birth" />
+<Field.Checkbox   name="active" label="Active" />
+<Field.Switch     name="newsletter" label="Subscribe" />
+<Field.Select name="role" label="Role" options={[
+  { value: 'admin', label: 'Admin' },
+  { value: 'user',  label: 'User' },
+]} />
+<Field.MultiSelect name="tags" label="Tags" options={tagOptions} />
+<Field.Code   name="otp" label="One-time code" />
+<Field.Upload name="avatar" />
 ```
 
-For domain-specific inputs, use the dedicated components:
+(Selects take an `options` array; they don't take `<MenuItem>` children.)
+
+For other domain-specific inputs, use the dedicated components:
 
 ```tsx
 import { DateRangePicker } from '@omnitron-dev/prism/components/date-range-picker';
@@ -241,13 +253,13 @@ const { formState: { isSubmitting, isValid, isDirty } } = form;
 const role = form.watch('role');
 
 <>
-  <Field name="role" label="Role" select>
-    <MenuItem value="admin">Admin</MenuItem>
-    <MenuItem value="user">User</MenuItem>
-  </Field>
+  <Field.Select name="role" label="Role" options={[
+    { value: 'admin', label: 'Admin' },
+    { value: 'user',  label: 'User' },
+  ]} />
 
   {role === 'admin' && (
-    <Field name="adminScope" label="Admin scope" />
+    <Field.Text name="adminScope" label="Admin scope" />
   )}
 </>
 ```
@@ -275,8 +287,8 @@ const { fields, append, remove } = useFieldArray({
 <>
   {fields.map((field, index) => (
     <div key={field.id}>
-      <Field name={`items.${index}.label`} label="Label" />
-      <Field name={`items.${index}.value`} label="Value" />
+      <Field.Text name={`items.${index}.label`} label="Label" />
+      <Field.Text name={`items.${index}.value`} label="Value" />
       <IconButton onClick={() => remove(index)}>
         <DeleteIcon />
       </IconButton>
@@ -354,14 +366,22 @@ import { usePasswordVisibility } from '@omnitron-dev/prism/hooks';
 
 const password = form.watch('password');
 const strength = getPasswordStrength(password);
-const { type, toggle, IconButton: VisibilityToggle } = usePasswordVisibility();
+const { type, visible, toggle } = usePasswordVisibility();
 
-<Field
+<Field.Text
   name="password"
   label="Password"
   type={type}
-  endAdornment={<VisibilityToggle onClick={toggle} />}
   helperText={<PasswordStrengthBar score={strength} />}
+  slotProps={{
+    input: {
+      endAdornment: (
+        <IconButton onClick={toggle} aria-label="Toggle password visibility">
+          {visible ? <VisibilityOff /> : <Visibility />}
+        </IconButton>
+      ),
+    },
+  }}
 />
 ```
 
@@ -428,7 +448,7 @@ attributes.
   `<Field>` API
 - [Hooks catalog](./hooks-catalog.md) — `usePasswordVisibility`,
   `useFocusTrap`, etc.
-- [Blocks / AuthBlock](./blocks.md#authblock--full-sign-in-screen) —
+- [Blocks / AuthBlock](./blocks.md#authblock) —
   prebuilt sign-in flow
 - [zod docs](https://zod.dev/) — schema authoring
 - [react-hook-form](https://react-hook-form.com/) — form

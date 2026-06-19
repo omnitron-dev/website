@@ -127,8 +127,10 @@ async withLock<T>(
     retryDelay?:         number;     // ms (default: module defaultRetryDelay)
     exponentialBackoff?: boolean;    // default: true — delay × (attempt + 1)
     skipOnLockFailure?:  boolean;    // default: false — return undefined instead of throwing
+    autoRenew?:          boolean;    // default: true — extend the lock while fn runs so it can't expire mid-execution
+    renewIntervalMs?:    number;     // default: floor(ttl / 3)
   },
-): Promise<T | undefined>
+): Promise<T>
 ```
 
 ```typescript
@@ -143,6 +145,12 @@ if (result === undefined) {
   this.logger.info('skipped — another instance is running cleanup');
 }
 ```
+
+By default (`autoRenew: true`) `withLock` runs a watchdog that
+extends the lock every `ttl / 3` while `fn` is running, so a function
+that outlives its TTL cannot let the lock expire and be re-acquired
+by another node mid-execution. If a renewal ever finds the lock no
+longer owned, it logs an error and stops renewing.
 
 ## `@WithDistributedLock` decorator
 
@@ -224,12 +232,14 @@ and another acquirer takes over.
 
 ## Failure tracking
 
-Each operation (`acquireLock`, `releaseLock`, `extendLock`,
-`isLocked`) has its own `FailureTracker` keyed by lock name. The
-tracker categorises a stream of failures (first / continuing /
-persistent / suppress / recovery) and only logs at the matching
-level. Outcome: a single noisy lock under contention does not flood
-your logs with thousands of identical warnings.
+Each operation has its own `FailureTracker` (one for `acquireLock`,
+one for `releaseLock`, one for `extendLock`, and one shared by the
+status reads `isLocked` / `getLockTtl`), keyed per lock name
+(`acquire:<key>`, `release:<key>`, …). The tracker categorises a
+stream of failures (first / continuing / persistent / suppress /
+recovery) and only logs at the matching level. Outcome: a single
+noisy lock under contention does not flood your logs with thousands
+of identical warnings.
 
 ## Tokens
 

@@ -25,7 +25,7 @@ import { Alert, FormAlert } from '@omnitron-dev/prism/components/alert';
   90% of the bucket quota is in use.
 </Alert>
 
-<FormAlert error={form.formState.errors.email}>
+<FormAlert title="Invalid email">
   Please enter a valid email address.
 </FormAlert>
 ```
@@ -33,21 +33,24 @@ import { Alert, FormAlert } from '@omnitron-dev/prism/components/alert';
 | Prop | Type | Default | Notes |
 | ---- | ---- | ------- | ----- |
 | `severity` | `'info' \| 'success' \| 'warning' \| 'error'` | `'info'` | Drives icon + colour |
-| `title` | `string` | — | Bold leading line |
+| `title` | `ReactNode` | — | Bold leading line |
 | `onClose` | `() => void` | — | Renders dismiss button |
 | `variant` | `'standard' \| 'filled' \| 'outlined'` | `'standard'` | Visual weight |
-| `icon` | `ReactNode` | (derived) | Override the default icon |
+| `icon` | `ReactNode \| false` | (derived) | Override (or `false` to hide) |
+| `closable` | `boolean` | `false` | Show the dismiss button |
 
 **`<FormAlert>`** is the canonical surface for **inline** form
 errors — toast/snackbar is reserved for transient background
-events. Pair with `react-hook-form`:
+events. It defaults to `severity="error"`; pass the message as
+**children** (there is no `error` prop). Pair with
+`react-hook-form`:
 
 ```tsx
 const { formState, register } = useForm();
 
 <form>
   {formState.errors.root && (
-    <FormAlert error={formState.errors.root} />
+    <FormAlert>{formState.errors.root.message}</FormAlert>
   )}
   <input {...register('email')} />
 </form>
@@ -76,43 +79,48 @@ function CopyButton({ text }: { text: string }) {
 
 | Prop | Type | Default |
 | ---- | ---- | ------- |
-| `message` | `string \| ReactNode` | — |
+| `message` | `string` | — |
 | `severity` | `'info' \| 'success' \| 'warning' \| 'error'` | `'info'` |
-| `duration` | `number` (ms) | `4_000` |
+| `duration` | `number` (ms) | — |
 | `action` | `ReactNode` | — |
-| `anchorOrigin` | `{ vertical, horizontal }` | `{ vertical: 'bottom', horizontal: 'right' }` |
+| `position` | `{ vertical, horizontal }` (MUI `SnackbarOrigin`) | — |
+| `key` | `string \| number` | — |
 
-Multiple snackbars stack; max-stack is configured at the
-provider level (default 3).
+`useSnackbar()` also exposes `success` / `error` / `warning` /
+`info` / `close` shortcuts. Max-stack is configured at the
+provider level (`maxSnackbars`).
 
 ### `<ConfirmDialog>`
 
+`<ConfirmDialog>` is a controlled component — thread `open` /
+`onClose` / `onConfirm` (there is no `useConfirmDialog` hook):
+
 ```tsx
-import { ConfirmDialog, useConfirmDialog }
-  from '@omnitron-dev/prism/components/confirm-dialog';
+import { ConfirmDialog } from '@omnitron-dev/prism/components/confirm-dialog';
 
 function DeleteButton({ onDelete }: { onDelete: () => void }) {
-  const confirm = useConfirmDialog();
+  const [open, setOpen] = useState(false);
 
   return (
-    <Button color="error" onClick={async () => {
-      const ok = await confirm({
-        title:        'Delete project?',
-        description:  'This cannot be undone.',
-        confirmLabel: 'Delete',
-        cancelLabel:  'Keep',
-        severity:     'error',
-      });
-      if (ok) onDelete();
-    }}>
-      Delete
-    </Button>
+    <>
+      <Button color="error" onClick={() => setOpen(true)}>Delete</Button>
+      <ConfirmDialog
+        open={open}
+        onClose={() => setOpen(false)}
+        onConfirm={onDelete}
+        title="Delete project?"
+        content="This cannot be undone."
+        confirmLabel="Delete"
+        cancelLabel="Keep"
+        confirmColor="error"
+      />
+    </>
   );
 }
 ```
 
-The hook returns a promise — `true` on confirm, `false` on
-cancel or backdrop. No manual open-state to thread through.
+`onConfirm` may be async — pass `loading` to show a spinner
+while it resolves. A `<DeleteDialog>` preset is also exported.
 
 ### `<Tooltip>`
 
@@ -131,7 +139,7 @@ single child element (not a fragment).
 
 ### `<LoadingScreen>`
 
-Full-viewport spinner — typical use is the Suspense fallback:
+Full-viewport loading bar — typical use is the Suspense fallback:
 
 ```tsx
 import { LoadingScreen } from '@omnitron-dev/prism/components/loading-screen';
@@ -141,24 +149,25 @@ import { LoadingScreen } from '@omnitron-dev/prism/components/loading-screen';
 </Suspense>
 ```
 
-| Prop | Type | Default |
-| ---- | ---- | ------- |
-| `message` | `string` | — |
-| `variant` | `'spinner' \| 'skeleton'` | `'spinner'` |
-| `fullScreen` | `boolean` | `true` |
+Pass `portal` to render through a portal, or override the
+progress indicator via `slots.progress` / `slotProps.progress`.
+`SplashScreen` (branded full-screen) and `Spinner` (inline) are
+also exported.
 
 ### `<Skeleton>`
 
 Animated placeholder while data loads.
 
 ```tsx
-import { Skeleton } from '@omnitron-dev/prism/components/skeleton';
+import { Skeleton, CardSkeleton, TableSkeleton }
+  from '@omnitron-dev/prism/components/skeleton';
 
-{isLoading ? <Skeleton height={200} /> : <Chart data={data} />}
+{isLoading ? <Skeleton variant="rectangular" height={200} /> : <Chart data={data} />}
 ```
 
-Per-component default sizes — `<Avatar variant="circular">` →
-circular skeleton, `<Card>` → card-shaped, etc.
+`<Skeleton>` wraps MUI's Skeleton (`variant`: `text` /
+`circular` / `rectangular`). For composite placeholders use the
+dedicated `<CardSkeleton>` and `<TableSkeleton>` exports.
 
 ### `<EmptyContent>`
 
@@ -172,25 +181,32 @@ import { EmptyContent } from '@omnitron-dev/prism/components/empty-content';
     title="No projects yet"
     description="Create your first project to get started."
     action={<Button onClick={onCreate}>Create project</Button>}
-    illustration="empty-folder"
+    icon={<FolderIcon />}
   />
 ) : (
   <ItemList items={items} />
 )}
 ```
 
-Built-in illustrations: `empty-folder`, `empty-search`,
-`empty-cart`, `empty-mail`, `error-404`, `error-500`. Pass a
-custom `ReactNode` for any other case.
+`illustration` and `icon` both take a `ReactNode` (there are no
+built-in named illustrations). `icon` is rendered inside a
+circular coloured wrapper; `illustration` is rendered as-is.
+`SearchEmptyContent` and `LoadingEmptyContent` are preset
+variants.
 
 ### `<ErrorBoundary>`
+
+`fallback` receives a single `FallbackProps` object
+(`{ error, errorInfo, parsedStack, resetErrorBoundary }`):
 
 ```tsx
 import { ErrorBoundary } from '@omnitron-dev/prism/components/error-boundary';
 
 <ErrorBoundary
-  fallback={(error, reset) => <ErrorScreen error={error} onReset={reset} />}
-  onError={(error, info) => reportToSentry(error, info)}
+  fallback={({ error, resetErrorBoundary }) =>
+    <ErrorScreen error={error} onReset={resetErrorBoundary} />}
+  onError={(error, errorInfo) => reportToSentry(error, errorInfo)}
+  resetKeys={[location.pathname]}
 >
   <Outlet />
 </ErrorBoundary>
@@ -198,63 +214,74 @@ import { ErrorBoundary } from '@omnitron-dev/prism/components/error-boundary';
 
 Catches synchronous render errors. Doesn't catch async / event-
 handler errors — those go through global window error handlers.
+Omit `fallback` to use the built-in error screen (with dev-mode
+stack details).
 
-### `<Progress>`
+### `<LinearProgress>` / `<CircularProgress>` / `<ProgressBar>` / `<CountdownRing>`
 
 ```tsx
-<Progress value={75} max={100} label="75%" />
-<Progress variant="indeterminate" />
-<Progress variant="circular" value={50} />
+import { LinearProgress, CircularProgress, ProgressBar, CountdownRing }
+  from '@omnitron-dev/prism/components/progress';
+
+<ProgressBar value={75} />                {/* labelled linear bar */}
+<LinearProgress />                         {/* indeterminate */}
+<CircularProgress value={50} />            {/* determinate ring */}
+<CountdownRing duration={30} />            {/* timed ring */}
 ```
 
 Linear and circular variants; determinate and indeterminate
-modes.
+modes. (There is no single `<Progress>` export — pick the
+specific component.)
 
 ## Data display
 
 ### `<Card>`
 
 ```tsx
-import { Card } from '@omnitron-dev/prism/components/card';
+import { Card, StatCard } from '@omnitron-dev/prism/components/card';
 
-<Card title="Active users" subtitle="last 30 days">
-  <Stat value={1234} delta={+12.5} />
+<Card title="Active users" subheader="last 30 days">
+  <Typography variant="h3">1,234</Typography>
 </Card>
 
 <Card
+  variant="outlined"
   title="Project Alpha"
-  cover={<Image src={cover} aspectRatio="16/9" />}
+  headerAction={<IconButton><MoreIcon /></IconButton>}
   actions={<Button>Open</Button>}
-  onClick={() => navigate('/projects/alpha')}
-  interactive
 >
-  <Text variant="body2">Last updated 2 hours ago</Text>
+  <Typography variant="body2">Last updated 2 hours ago</Typography>
 </Card>
+
+{/* Pre-composed stat tile: */}
+<StatCard title="Revenue" total={48200} />
 ```
 
-| Prop | Type | Default |
-| ---- | ---- | ------- |
-| `title` | `string \| ReactNode` | — |
-| `subtitle` | `string` | — |
-| `cover` | `ReactNode` | — | Top media area |
+| Prop | Type | Default | Notes |
+| ---- | ---- | ------- | ----- |
+| `variant` | `'elevation' \| 'outlined' \| 'soft'` | `'elevation'` | Visual weight |
+| `title` | `ReactNode` | — | Card header title |
+| `subheader` | `ReactNode` | — | Card header subtitle |
+| `headerAction` | `ReactNode` | — | Top-right header slot |
 | `actions` | `ReactNode` | — | Footer actions row |
-| `interactive` | `boolean` | `false` | Hover state + cursor |
-| `onClick` | `() => void` | — | Card-wide click handler |
-| `elevation` | `0 \| 1 \| 2 \| 3 \| 4 \| 6 \| 8` | `1` | Shadow depth |
+| `disablePadding` | `boolean` | `false` | Drop content padding |
 
-Cards are typically arranged in `<Grid container spacing={2}>` —
-`<Card>` itself doesn't handle layout.
+Card extends MUI's `Card`, so MUI props (`onClick`, `elevation`,
+`sx`, …) pass through. `CardSection` and `StatCard` are also
+exported. Cards are typically arranged in a `<Grid>` — `<Card>`
+itself doesn't handle layout.
 
 ### `<Avatar>`
 
 ```tsx
-import { Avatar } from '@omnitron-dev/prism/components/avatar';
+import { Avatar, CustomAvatarGroup } from '@omnitron-dev/prism/components/avatar';
 
 <Avatar src={user.avatarUrl} name={user.name} size="md" />
-<Avatar name="Alice" presence="online" />
-<Avatar.Group max={3}>
-  {team.map(u => <Avatar key={u.id} src={u.avatarUrl} name={u.name} />)}
-</Avatar.Group>
+<Avatar name="Alice" online />
+<CustomAvatarGroup
+  max={3}
+  avatars={team.map(u => ({ name: u.name, src: u.avatarUrl }))}
+/>
 ```
 
 | Prop | Type | Default | Notes |
@@ -262,8 +289,10 @@ import { Avatar } from '@omnitron-dev/prism/components/avatar';
 | `src` | `string` | — | Image URL; falls back to initials |
 | `name` | `string` | — | Used for initials + alt text |
 | `size` | `'xs' \| 'sm' \| 'md' \| 'lg' \| 'xl'` | `'md'` | |
-| `presence` | `'online' \| 'busy' \| 'away' \| 'offline'` | — | Status indicator dot |
-| `shape` | `'circle' \| 'square' \| 'rounded'` | `'circle'` | |
+| `online` / `offline` | `boolean` | — | Status indicator dot |
+| `badge` | `ReactNode` | — | Corner badge (e.g. count) |
+| `badgeColor` | `'primary' \| 'secondary' \| 'success' \| 'warning' \| 'error' \| 'info'` | — | |
+| `shape` | `'circular' \| 'rounded' \| 'square'` | `'circular'` | |
 
 The fallback is **deterministic** — same name always produces
 the same colour + initials, so users are visually identifiable
@@ -271,24 +300,32 @@ even without photos.
 
 ### `<Badge>`
 
-```tsx
-import { Badge } from '@omnitron-dev/prism/components/badge';
+`<Badge>` wraps MUI Badge (use `badgeContent` / `variant="dot"`).
+For a count overlay, the `<CountBadge>` helper (with `count` /
+`max`) is more ergonomic; `<StatusDot>` renders a standalone
+status dot:
 
-<Badge count={5}>
+```tsx
+import { Badge, CountBadge, StatusDot }
+  from '@omnitron-dev/prism/components/badge';
+
+<Badge badgeContent={5}>
   <NotificationsIcon />
 </Badge>
 
-<Badge dot color="error">
+<Badge variant="dot" color="error">
   <Avatar src={src} />
 </Badge>
 
-<Badge count={150} max={99}>
+<CountBadge count={150} max={99}>
   <ShoppingCartIcon />
-</Badge>
+</CountBadge>
+
+<StatusDot status="online" pulse />
 ```
 
-`max` caps the display value with `+` suffix (`99+`); `dot`
-shows a colour dot without a number.
+`max` caps the display value with a `+` suffix (`99+`);
+`variant="dot"` shows a colour dot without a number.
 
 ### `<Table>`
 
@@ -297,29 +334,27 @@ The low-level table. For most app tables, prefer
 `<AdminDataTable>` (re-exported from `components/admin-filters`)
 which add filtering, sorting, pagination, row actions.
 
-```tsx
-import { Table, TableHead, TableBody, TableRow, TableCell }
-  from '@omnitron-dev/prism/components/table';
+`<Table>` is config-driven — pass `columns` + `data` (it is not
+a MUI-style composition of `<TableRow>` / `<TableCell>`):
 
-<Table>
-  <TableHead>
-    <TableRow>
-      <TableCell>Name</TableCell>
-      <TableCell>Email</TableCell>
-      <TableCell align="right">Karma</TableCell>
-    </TableRow>
-  </TableHead>
-  <TableBody>
-    {users.map(u => (
-      <TableRow key={u.id}>
-        <TableCell>{u.name}</TableCell>
-        <TableCell>{u.email}</TableCell>
-        <TableCell align="right">{u.karma}</TableCell>
-      </TableRow>
-    ))}
-  </TableBody>
-</Table>
+```tsx
+import { Table } from '@omnitron-dev/prism/components/table';
+
+<Table
+  rowKey="id"
+  data={users}
+  columns={[
+    { id: 'name',  label: 'Name' },
+    { id: 'email', label: 'Email' },
+    { id: 'karma', label: 'Karma', align: 'right',
+      render: (u) => u.karma },
+  ]}
+/>
 ```
+
+Columns are `{ id, label, align?, sortable?, render?, format? }`.
+The component also supports `selectable`, `sortable`, `paginated`,
+and `loading` props (see `TableProps`).
 
 ### `<Chart>`
 
@@ -345,53 +380,61 @@ function CpuChart({ series }: { series: TimeSeries[] }) {
 rather than passing raw ApexCharts options — keeps theming
 consistent.
 
-Supported types: `area`, `line`, `bar`, `column`, `pie`, `donut`,
-`radar`, `scatter`, `heatmap`, `treemap`, `boxPlot`,
-`candlestick`, `radialBar`.
+Supported `type` values: `line`, `area`, `bar`, `pie`, `donut`,
+`radialBar`, `scatter`, `bubble`, `heatmap`, `candlestick`,
+`boxPlot`, `radar`, `polarArea`, `rangeBar`, `rangeArea`,
+`treemap`. (There is no `column` type — use `bar`.)
 
 ### `<Carousel>`
+
+Slides are passed as **children** (not a `slides` array prop):
 
 ```tsx
 import { Carousel } from '@omnitron-dev/prism/components/carousel';
 
-<Carousel
-  slides={images.map(src => <img src={src} />)}
-  autoplay={{ delay: 5000 }}
-  showDots
-  showArrows
-/>
+<Carousel autoplay autoplayInterval={5000} dots arrows>
+  {images.map((src) => <img key={src} src={src} />)}
+</Carousel>
 ```
 
 | Prop | Type | Default |
 | ---- | ---- | ------- |
-| `slides` | `ReactNode[]` | — |
-| `autoplay` | `{ delay, pauseOnHover? } \| false` | `false` |
-| `loop` | `boolean` | `true` |
-| `showDots` | `boolean` | `true` |
-| `showArrows` | `boolean` | `true` |
-| `slidesPerView` | `number \| 'auto'` | `1` |
-| `spaceBetween` | `number` | `0` |
+| `children` | `ReactNode` (slides) | — |
+| `autoplay` | `boolean` | `false` |
+| `autoplayInterval` | `number` (ms) | — |
+| `pauseOnHover` | `boolean` | — |
+| `loop` | `boolean` | — |
+| `dots` | `boolean` | — |
+| `arrows` | `boolean` | — |
+| `slidesToShow` | `number` | `1` |
+| `spacing` | `number` (px) | — |
+| `responsive` | `CarouselBreakpoint[]` | — |
 
 ### `<Lightbox>`
+
+Drive open/index state with `useLightbox`, then spread
+`getLightboxProps()` onto `<Lightbox>` (which takes a `slides`
+array). There is no `controller` prop:
 
 ```tsx
 import { Lightbox, useLightbox } from '@omnitron-dev/prism/components/lightbox';
 
 function Gallery({ images }: { images: string[] }) {
-  const lightbox = useLightbox();
+  const lightbox = useLightbox({ totalSlides: images.length });
+  const slides = images.map((src) => ({ src }));
   return (
     <>
       {images.map((src, i) => (
-        <img src={src} onClick={() => lightbox.open(images, i)} />
+        <img key={src} src={src} onClick={() => lightbox.onOpen(i)} />
       ))}
-      <Lightbox controller={lightbox} />
+      <Lightbox slides={slides} {...lightbox.getLightboxProps()} />
     </>
   );
 }
 ```
 
-Keyboard navigation (arrows, Esc), pinch-zoom on touch, optional
-caption + EXIF panel.
+Keyboard navigation (arrows, Esc), zoom controls, thumbnails,
+counter, optional download/share buttons.
 
 ### `<Image>`
 
@@ -400,16 +443,18 @@ import { Image } from '@omnitron-dev/prism/components/image';
 
 <Image
   src={user.avatarUrl}
-  fallback="/default-avatar.png"
-  aspectRatio="1/1"
-  loading="lazy"
-  blurDataURL={user.blurHash}
+  alt={user.name}
+  ratio="1/1"
+  fallbackSrc="/default-avatar.png"
+  placeholder
 />
 ```
 
-Adds: aspect-ratio container (no layout shift), fallback on
-error, lazy-load via `IntersectionObserver`, optional blurhash
-placeholder.
+Adds: aspect-ratio container via `ratio` (no layout shift),
+fallback on error (`fallbackSrc` URL or a `fallback` ReactNode),
+lazy-load by default (disable with `disableLazy`), and an
+optional loading `placeholder`. (`ratio` is the prop name — not
+`aspectRatio`.)
 
 ### `<TagCloud>`
 
@@ -417,18 +462,19 @@ placeholder.
 import { TagCloud } from '@omnitron-dev/prism/components/tag-cloud';
 
 <TagCloud
-  items={[
-    { value: 'react', count: 142 },
-    { value: 'typescript', count: 98 },
-    { value: 'rpc', count: 31 },
+  tags={[
+    { id: '1', name: 'react',      slug: 'react',      postCount: 142 },
+    { id: '2', name: 'typescript', slug: 'typescript', postCount: 98 },
+    { id: '3', name: 'rpc',        slug: 'rpc',        postCount: 31 },
   ]}
-  maxFontSize={32}
-  minFontSize={12}
-  onClick={(tag) => navigate(`/search?q=${tag}`)}
+  variant="cloud"
+  onTagClick={(tag) => navigate(`/search?q=${tag.slug}`)}
 />
 ```
 
-Sizes tags proportional to count using a log scale; clickable.
+Each tag is `{ id, name, slug, postCount, … }`; the cloud sizes
+tags proportional to `postCount`. `variant="list"` renders a
+ranked list instead. `onTagClick` receives the full tag object.
 
 ## Navigation
 
@@ -438,82 +484,105 @@ Sizes tags proportional to count using a log scale; clickable.
 import { Breadcrumbs } from '@omnitron-dev/prism/components/breadcrumbs';
 
 <Breadcrumbs
-  items={[
-    { label: 'Home',    href: '/' },
-    { label: 'Projects', href: '/projects' },
-    { label: 'Alpha' },               // current page — no href
+  heading="Alpha"
+  links={[
+    { name: 'Home',     href: '/' },
+    { name: 'Projects', href: '/projects' },
+    { name: 'Alpha' },               // current page — no href
   ]}
-  separator="›"
 />
 ```
 
-| Prop | Type | Default |
-| ---- | ---- | ------- |
-| `items` | `Array<{label, href?, icon?}>` | — |
-| `separator` | `ReactNode` | `'/'` |
-| `maxItems` | `number` | `8` |
-| `itemsBeforeCollapse` | `number` | `1` |
-| `itemsAfterCollapse` | `number` | `2` |
+| Prop | Type | Default | Notes |
+| ---- | ---- | ------- | ----- |
+| `links` | `BreadcrumbLinkProps[]` (`{ name, href?, icon? }`) | — | The crumb trail |
+| `heading` | `string` | — | Page heading above the crumbs |
+| `activeLast` | `boolean` | `false` | Keep the last crumb clickable |
+| `backHref` | `string` | — | Shows a back arrow before the heading |
+| `action` | `ReactNode` | — | Right-side action slot |
+| `linkComponent` | `ElementType` | — | Router `Link` for client-side nav |
 
-Auto-collapses to `Home / ... / Alpha` past `maxItems` — the
-collapsed range expands on click.
+Pass `linkComponent` (e.g. react-router's `Link`) to keep
+breadcrumb links client-side.
 
 ### `<Menu>`
 
 Dropdown menu. Pairs with `<IconButton>` or any trigger:
 
+`<Menu>` is config-driven — pass `items` (a `MenuItemDef[]`), and
+drive open/anchor state with the `useMenu` hook. There are no
+`<MenuItem>` / `<MenuDivider>` child components:
+
 ```tsx
-import { Menu, MenuItem, MenuDivider, useMenu }
-  from '@omnitron-dev/prism/components/menu';
+import { Menu, useMenu } from '@omnitron-dev/prism/components/menu';
 
 function UserMenu() {
   const menu = useMenu();
   return (
     <>
-      <IconButton {...menu.triggerProps}><MoreIcon /></IconButton>
-      <Menu controller={menu}>
-        <MenuItem icon={<ProfileIcon />} onClick={() => navigate('/me')}>
-          Profile
-        </MenuItem>
-        <MenuItem icon={<SettingsIcon />} onClick={() => navigate('/settings')}>
-          Settings
-        </MenuItem>
-        <MenuDivider />
-        <MenuItem icon={<LogoutIcon />} danger onClick={signOut}>
-          Sign out
-        </MenuItem>
-      </Menu>
+      <IconButton onClick={menu.handleOpen}><MoreIcon /></IconButton>
+      <Menu
+        {...menu.menuProps}
+        items={[
+          { key: 'profile',  label: 'Profile',  icon: <ProfileIcon />,  onClick: () => navigate('/me') },
+          { key: 'settings', label: 'Settings', icon: <SettingsIcon />, onClick: () => navigate('/settings') },
+          { type: 'divider', key: 'd1' },
+          { key: 'signout',  label: 'Sign out', icon: <LogoutIcon />,   danger: true, onClick: signOut },
+        ]}
+      />
     </>
   );
 }
 ```
 
+Item shape: `{ key, label, icon?, onClick?, danger?, shortcut?, type? }`.
+A `<ContextMenu>` variant is also exported for right-click menus.
+
 ### `<MegaMenu>`
 
-Multi-column dropdown for sites with deep navigation:
+Multi-column dropdown for sites with deep navigation. It is
+config-driven — pass a `data` array (there is no `<MegaMenuColumn>`
+child component). Use `MegaMenu` (auto), or the explicit
+`MegaMenuHorizontal` / `MegaMenuVertical` / `MegaMenuMobile`
+variants:
 
 ```tsx
-<MegaMenu trigger={<NavLink>Products</NavLink>}>
-  <MegaMenuColumn title="Backend">
-    <NavCard title="Titan"     href="/titan"     icon="cpu" />
-    <NavCard title="Modules"   href="/modules"   icon="box" />
-  </MegaMenuColumn>
-  <MegaMenuColumn title="Frontend">
-    <NavCard title="Prism"           href="/prism"            icon="palette" />
-    <NavCard title="netron-react"    href="/netron-react"     icon="zap" />
-  </MegaMenuColumn>
-</MegaMenu>
+import { MegaMenu } from '@omnitron-dev/prism/components/mega-menu';
+
+<MegaMenu
+  data={[
+    {
+      title: 'Products',
+      path:  '/products',
+      children: [
+        { subheader: 'Backend',  items: [
+          { title: 'Titan',   path: '/titan' },
+          { title: 'Modules', path: '/modules' },
+        ]},
+        { subheader: 'Frontend', items: [
+          { title: 'Prism',        path: '/prism' },
+          { title: 'netron-react', path: '/netron-react' },
+        ]},
+      ],
+    },
+  ]}
+/>
 ```
 
 ### `<NavCard>` / `<NavCardGrid>`
 
-Compact cards for navigation hubs:
+Compact cards for navigation hubs. `<NavCard>` navigates via
+`to` + `linkComponent` (not `href`); `icon` is a `ReactNode`.
+`<NavCardGrid>` auto-wraps based on `minTileWidth` (not a fixed
+`columns` count):
 
 ```tsx
-<NavCardGrid columns={3} spacing={2}>
-  <NavCard title="Apps"     href="/apps"     icon="box"  description="Manage applications" />
-  <NavCard title="Infra"    href="/infra"    icon="grid" description="Containers + services" />
-  <NavCard title="Settings" href="/settings" icon="cog"  description="Per-user preferences" />
+import { Link as RouterLink } from 'react-router-dom';
+
+<NavCardGrid minTileWidth={260} gap={3}>
+  <NavCard title="Apps"     to="/apps"     linkComponent={RouterLink} icon={<BoxIcon />}  description="Manage applications" />
+  <NavCard title="Infra"    to="/infra"    linkComponent={RouterLink} icon={<GridIcon />} description="Containers + services" />
+  <NavCard title="Settings" to="/settings" linkComponent={RouterLink} icon={<CogIcon />}  description="Per-user preferences" />
 </NavCardGrid>
 ```
 
@@ -522,113 +591,159 @@ Compact cards for navigation hubs:
 Sidebar navigation builder. The `<DashboardLayout>` uses this
 internally; you can use it standalone:
 
+Driven by a `data` prop — an array of sections, each with an
+optional `subheader` and an `items` array (active state is
+derived from the router automatically):
+
 ```tsx
 <NavSection
-  items={[
-    { title: 'Dashboard', path: '/',         icon: 'home' },
+  data={[
     {
-      title: 'Settings',
-      path:  '/settings',
-      icon:  'cog',
-      children: [
-        { title: 'Profile',  path: '/settings/profile' },
-        { title: 'Security', path: '/settings/security' },
+      subheader: 'Main',
+      items: [
+        { title: 'Dashboard', path: '/', icon: 'home' },
+        {
+          title: 'Settings',
+          path:  '/settings',
+          icon:  'cog',
+          children: [
+            { title: 'Profile',  path: '/settings/profile' },
+            { title: 'Security', path: '/settings/security' },
+          ],
+        },
       ],
     },
   ]}
-  currentPath={location.pathname}
 />
 ```
 
+`NavSectionVertical` / `NavSectionHorizontal` / `NavSectionMini`
+are the explicit layout variants.
+
 ### `<NavigationProgress>`
 
-Top-of-page loading bar — shows during route transitions:
+Top-of-page loading bar — shows during route transitions. Feed
+it the current `pathname` (and optionally `search`) from the
+router; it completes when those change:
 
 ```tsx
 import { NavigationProgress } from '@omnitron-dev/prism/components/navigation-progress';
+import { useLocation } from 'react-router-dom';
 
-<NavigationProgress color="primary" height={3} />
+const { pathname, search } = useLocation();
+
+<NavigationProgress pathname={pathname} search={search} />
 ```
 
-Hooks into the router (react-router 7) to start on navigation
-and finish on settled.
+`delay` (default 100ms) avoids flashing on fast transitions.
 
 ### `<Stepper>`
 
+`<Stepper>` is config-driven — pass a `steps` array (there is no
+separate `<Step>` component):
+
 ```tsx
-import { Stepper, Step } from '@omnitron-dev/prism/components/stepper';
+import { Stepper } from '@omnitron-dev/prism/components/stepper';
 
 const [activeStep, setActiveStep] = useState(0);
 
-<Stepper activeStep={activeStep}>
-  <Step label="Account"  description="Email + password" />
-  <Step label="Profile"  description="Name + avatar" />
-  <Step label="Plan"     description="Choose a tier" />
-  <Step label="Confirm"  description="Review & finish" optional />
-</Stepper>
+<Stepper
+  activeStep={activeStep}
+  steps={[
+    { label: 'Account', description: 'Email + password' },
+    { label: 'Profile', description: 'Name + avatar' },
+    { label: 'Plan',    description: 'Choose a tier' },
+    { label: 'Confirm', description: 'Review & finish', optional: true },
+  ]}
+/>
 ```
 
 Horizontal by default; pass `orientation="vertical"` for a side
-stepper.
+stepper. `StepperActions` + `useStepper` cover next/back/reset
+wiring.
 
 ### `<Tabs>` / `<TabPanel>`
 
+There is no separate `<Tab>` component. Either pass a `tabs`
+array of `{ value, label, content }`, or compose `<TabPanel>`
+children — `<Tabs>` builds the tab strip from each panel's
+`value` / `label` and renders the active one. `onChange`
+receives the new value directly.
+
 ```tsx
-import { Tabs, Tab, TabPanel } from '@omnitron-dev/prism/components/tabs';
+import { Tabs, TabPanel } from '@omnitron-dev/prism/components/tabs';
 
-const [value, setValue] = useState('overview');
+// Config-driven:
+<Tabs
+  defaultValue="overview"
+  onChange={(value) => console.log(value)}
+  tabs={[
+    { value: 'overview', label: 'Overview', content: <Overview /> },
+    { value: 'logs',     label: 'Logs',     content: <Logs /> },
+    { value: 'metrics',  label: 'Metrics',  content: <Metrics /> },
+  ]}
+/>
 
-<>
-  <Tabs value={value} onChange={(_, v) => setValue(v)}>
-    <Tab value="overview"  label="Overview" />
-    <Tab value="logs"      label="Logs" />
-    <Tab value="metrics"   label="Metrics" badge={4} />
-  </Tabs>
-
-  <TabPanel value={value} index="overview"><Overview /></TabPanel>
-  <TabPanel value={value} index="logs"><Logs /></TabPanel>
-  <TabPanel value={value} index="metrics"><Metrics /></TabPanel>
-</>
+// Or with <TabPanel> children:
+<Tabs defaultValue="overview">
+  <TabPanel value="overview" label="Overview"><Overview /></TabPanel>
+  <TabPanel value="logs"     label="Logs"><Logs /></TabPanel>
+  <TabPanel value="metrics"  label="Metrics"><Metrics /></TabPanel>
+</Tabs>
 ```
 
-`badge` prop renders a numeric badge on a tab — useful for
-"unread" / "errors" counts.
+The `useTabs` hook manages active-value state for you when you
+need it outside the component.
 
 ### `<ScrollSpy>` / `<ScrollSpyProvider>`
 
+Wrap content in `<ScrollSpyProvider>`, mark each tracked region
+with `<ScrollSpySection id="…">`, and read the in-view section
+from the `useScrollSpy()` hook (`activeId`) to drive your own
+nav. There is no all-in-one `<ScrollSpy items={…}>` nav widget:
+
 ```tsx
-import { ScrollSpyProvider, ScrollSpy }
+import { ScrollSpyProvider, ScrollSpySection, useScrollSpy }
   from '@omnitron-dev/prism/components/scroll-spy';
+
+function Toc() {
+  const { activeId } = useScrollSpy();
+  return (
+    <aside>
+      {['intro', 'setup', 'api'].map((id) => (
+        <a key={id} href={`#${id}`} aria-current={activeId === id}>{id}</a>
+      ))}
+    </aside>
+  );
+}
 
 <ScrollSpyProvider>
   <article>
-    <section id="intro">...</section>
-    <section id="setup">...</section>
-    <section id="api">...</section>
+    <ScrollSpySection id="intro">…</ScrollSpySection>
+    <ScrollSpySection id="setup">…</ScrollSpySection>
+    <ScrollSpySection id="api">…</ScrollSpySection>
   </article>
-  <aside>
-    <ScrollSpy
-      items={[
-        { id: 'intro', label: 'Introduction' },
-        { id: 'setup', label: 'Setup' },
-        { id: 'api',   label: 'API' },
-      ]}
-    />
-  </aside>
+  <Toc />
 </ScrollSpyProvider>
 ```
 
-Tracks which section is in view; highlights the matching nav
-item. Used by docs pages.
+Tracks which section is in view via `activeId`. Used by docs
+pages.
 
 ### `<ScrollToTop>`
 
+Scrolls the window back to the top whenever the route changes —
+pass the current `pathname` from the router:
+
 ```tsx
-<ScrollToTop threshold={400} />
+import { ScrollToTop } from '@omnitron-dev/prism/components/scroll-to-top';
+import { useLocation } from 'react-router-dom';
+
+<ScrollToTop pathname={useLocation().pathname} />
 ```
 
-Shows a floating "scroll to top" button past `threshold` px of
-scroll. Self-contained.
+(This resets scroll on navigation — it is not a floating
+"scroll to top" button. For that, see the `useBackToTop` hook.)
 
 ### `<Scrollbar>`
 
@@ -645,46 +760,62 @@ scroll — just themes the bar.
 
 ## Input & form
 
-### `<Field>`
+### `Field` (namespace: `Field.Text`, `Field.Select`, …) {#field}
 
-The canonical form field. Reads the active schema from
-`<SchemaProvider>` (see [Forms](./forms.md)):
+`Field` is a **namespace** of react-hook-form-integrated inputs —
+you use `<Field.Text>`, `<Field.Select>`, `<Field.Number>`, etc.,
+not a single polymorphic `<Field>` element. Each field reads from
+the surrounding react-hook-form `FormProvider` by `name`:
 
 ```tsx
 import { Field } from '@omnitron-dev/prism/components/field';
+import { useForm, FormProvider } from 'react-hook-form';
 
-<Field name="email"    label="Email"    type="email" />
-<Field name="password" label="Password" type="password" />
-<Field name="bio"      label="Bio"      multiline rows={4} />
-<Field name="role"     label="Role" select>
-  <MenuItem value="viewer">Viewer</MenuItem>
-  <MenuItem value="admin">Admin</MenuItem>
-</Field>
+const methods = useForm();
+
+<FormProvider {...methods}>
+  <Field.Text   name="email"    label="Email"    type="email" />
+  <Field.Text   name="password" label="Password" type="password" />
+  <Field.Text   name="bio"      label="Bio"      multiline rows={4} />
+  <Field.Select name="role"     label="Role" options={[
+    { value: 'viewer', label: 'Viewer' },
+    { value: 'admin',  label: 'Admin' },
+  ]} />
+</FormProvider>
 ```
 
-| Prop | Type | Default | Notes |
-| ---- | ---- | ------- | ----- |
-| `name` | `string` | — | Maps to react-hook-form field |
-| `label` | `string` | — | Shown above the input |
-| `type` | `'text' \| 'email' \| 'password' \| 'number' \| 'tel' \| 'url' \| 'search'` | `'text'` | |
-| `multiline` | `boolean` | `false` | Renders `<TextField multiline>` |
-| `rows` | `number` | `4` | Min rows when multiline |
-| `select` | `boolean` | `false` | Render as `<Select>` |
-| `helperText` | `string` | — | Below input |
-| `required` | `boolean` | (from schema) | Marks the field |
-| `autoComplete` | `string` | — | HTML autocomplete hint |
-| `placeholder` | `string` | — | |
+Available members include `Field.Text`, `Field.Select`,
+`Field.Checkbox`, `Field.Switch`, `Field.Number`, `Field.Radio`,
+`Field.Autocomplete`, `Field.MultiSelect`, `Field.Rating`,
+`Field.Slider`, `Field.DatePicker`, `Field.TimePicker`,
+`Field.DateTimePicker`, `Field.Code`, `Field.Upload`,
+`Field.Phone`, `Field.CountrySelect`, `Field.Editor`, and more.
 
-The schema drives required / min / max / type — the prop
-overrides take precedence per field.
+Each text field extends MUI's `TextField` props plus:
+
+| Prop | Type | Notes |
+| ---- | ---- | ----- |
+| `name` | `string` | Maps to the react-hook-form field (required) |
+| `rules` | `RegisterOptions` | Per-field react-hook-form validation rules |
+| `label` / `multiline` / `rows` / `type` / `placeholder` / `helperText` | — | Inherited from MUI `TextField` |
+
+When you wrap the form in [`<SchemaProvider>`](./forms.md), Zod
+schema messages flow into the fields (i18n-aware); `rules`
+overrides per field.
 
 ### `<Label>`
 
-Standalone label, useful outside `<Field>`:
+A small status/category chip (not an HTML form `<label>`). Use
+`color` + `variant` for status pills; `StatusLabel` and
+`BooleanLabel` are presets:
 
 ```tsx
-<Label required htmlFor="custom-input">Display name</Label>
-<input id="custom-input" />
+import { Label, StatusLabel, BooleanLabel }
+  from '@omnitron-dev/prism/components/label';
+
+<Label color="success" variant="soft">Active</Label>
+<Label color="warning" startIcon={<ClockIcon />}>Pending</Label>
+<BooleanLabel value={isEnabled} />
 ```
 
 ### `<SearchInput>`
@@ -696,146 +827,179 @@ import { SearchInput } from '@omnitron-dev/prism/components/search-input';
 
 <SearchInput
   value={query}
-  onDebouncedChange={(v) => setQuery(v)}
-  debounceMs={300}
+  onChange={(v) => setQuery(v)}
+  debounce={300}
   placeholder="Search projects…"
 />
 ```
 
-`onDebouncedChange` fires `debounceMs` after the user stops
-typing — saves you wiring `useDebouncedValue` per call site.
+When `debounce > 0`, `onChange` fires that many ms after the
+user stops typing (it receives the raw string) — saves you
+wiring `useDebouncedValue` per call site. A clear button is
+built in.
 
 ### `<DateRangePicker>`
 
-```tsx
-import { DateRangePicker } from '@omnitron-dev/prism/components/date-range-picker';
-
-<DateRangePicker
-  value={{ start: from, end: to }}
-  onChange={({ start, end }) => setRange({ from: start, to: end })}
-  presets={[
-    { label: 'Last 7 days',  value: 'last-7d' },
-    { label: 'Last 30 days', value: 'last-30d' },
-    { label: 'This month',   value: 'this-month' },
-  ]}
-  maxDate={new Date()}
-/>
-```
-
-Built-in presets for the common ranges; localised; keyboard-
-navigable.
-
-### `<DurationPicker>`
-
-For "how long" inputs (TTLs, timeouts):
+`<DateRangePicker>` is a dialog driven by the
+`useDateRangePicker` hook — spread the hook's return onto it
+(dates are Day.js values):
 
 ```tsx
-<DurationPicker
-  value={{ value: 30, unit: 'minutes' }}
-  onChange={(v) => setDuration(v)}
-  units={['seconds', 'minutes', 'hours', 'days']}
-  min={0}
-/>
-```
+import { DateRangePicker, useDateRangePicker }
+  from '@omnitron-dev/prism/components/date-range-picker';
 
-Returns `{ value, unit }`; helper `toMs(v)` for conversion.
-
-### `<CountrySelect>`
-
-ISO 3166 country dropdown with flags + search.
-
-```tsx
-<CountrySelect value={country} onChange={setCountry} />
-```
-
-Returns the ISO alpha-2 code.
-
-### `<Editor>` + `<TiptapRenderer>`
-
-Tiptap-based rich-text editor and read-only renderer:
-
-```tsx
-import { Editor } from '@omnitron-dev/prism/components/editor';
-import { TiptapRenderer } from '@omnitron-dev/prism/components/tiptap-renderer';
-
-// Edit mode:
-<Editor
-  value={content}
-  onChange={setContent}
-  toolbar={['bold', 'italic', 'link', 'heading', 'list', 'code', 'image']}
-  uploadImage={async (file) => (await uploadService.put(file)).url}
-/>
-
-// Read mode (e.g., displaying a saved post):
-<TiptapRenderer content={post.content} />
-```
-
-Storage format is Tiptap's JSON document — portable across
-edit/view, indexable for full-text search, safer than raw HTML.
-
-### `<ContentRenderer>`
-
-Renders a payload of mixed content (Tiptap JSON, markdown, plain
-text, OEmbed cards) with consistent typography:
-
-```tsx
-<ContentRenderer content={post.body} format="auto" />
-```
-
-Auto-detects the format from the content shape; explicit format
-override available.
-
-### `<CommandPalette>`
-
-`Cmd+K` style command palette:
-
-```tsx
-import { CommandPalette, useCommandPalette }
-  from '@omnitron-dev/prism/components/command-palette';
-
-function App() {
-  const palette = useCommandPalette({
-    shortcuts: ['cmd+k', 'ctrl+k'],
-    actions: [
-      { id: 'new-project', label: 'New project', icon: 'plus', onSelect: () => navigate('/projects/new') },
-      { id: 'sign-out',    label: 'Sign out',    icon: 'logout', danger: true, onSelect: signOut },
-    ],
-  });
+function Filter() {
+  const range = useDateRangePicker();
   return (
     <>
-      <Outlet />
-      <CommandPalette controller={palette} />
+      <Button onClick={range.onOpen}>{range.label || 'Pick dates'}</Button>
+      <DateRangePicker {...range} variant="calendar" />
     </>
   );
 }
 ```
 
-Fuzzy-matches actions by label + tag; arrow keys + Enter; Esc
-closes.
+`variant` is `'input'` (default) or `'calendar'`; pass
+`translations` to localise the dialog. A `<DateRangeInput>` (the
+two-field inline form) is also exported.
 
-### `<AdminFilters>` / `<FilterToolbar>`
+### `<DurationPicker>`
 
-Filter toolbar above admin tables — multi-select, search, date
-range, status chips, save-as-view:
+For "how long" inputs (TTLs, timeouts). The value is a duration
+**in seconds** (`null` = permanent/indefinite):
+
+```tsx
+<DurationPicker
+  value={seconds}
+  onChange={(seconds) => setDuration(seconds)}
+/>
+```
+
+`onChange` receives a `number | null` (seconds). Pass `labels`
+to localise the unit strings.
+
+### `<CountrySelect>`
+
+ISO 3166 country dropdown with flags + search. It is
+**asset-free** — the consumer supplies the `options` list (and
+optionally a `getFlagSrc` resolver); Prism bundles no country
+data:
+
+```tsx
+<CountrySelect
+  value={country}                    // lowercase iso2, or null
+  onChange={setCountry}              // receives lowercase iso2 | null
+  options={countries}               // ReadonlyArray<CountryOption>
+  getFlagSrc={(iso2) => `/flags/${iso2}.svg`}
+/>
+```
+
+Value / change are the lowercase ISO 3166-1 alpha-2 code.
+
+### `<Editor>` + `<TipTapRenderer>`
+
+TipTap-based rich-text editor and read-only renderer. The
+`toolbar` prop takes a **preset** (`'full' | 'standard' |
+'compact' | 'minimal' | 'chat' | 'inline'`) or an explicit
+`{ items: [...] }` config — not a bare array:
+
+```tsx
+import { Editor } from '@omnitron-dev/prism/components/editor';
+import { TipTapRenderer } from '@omnitron-dev/prism/components/tiptap-renderer';
+
+// Edit mode (onChange receives a string — JSON by default, or HTML
+// when format="html"):
+<Editor
+  value={content}
+  onChange={setContent}
+  format="json"
+  toolbar={{ items: ['bold', 'italic', 'link', 'heading', 'bulletList', 'code'] }}
+/>
+
+// Read mode (e.g., displaying a saved post):
+<TipTapRenderer content={post.content} />
+```
+
+Storage format is TipTap's JSON document — portable across
+edit/view, indexable for full-text search, safer than raw HTML.
+(The renderer export is `TipTapRenderer` — note the capital T.)
+
+### `<ContentRenderer>`
+
+Renders mixed content (TipTap JSON, markdown string, or HTML
+string) with consistent typography — it auto-detects the format
+from the content shape:
+
+```tsx
+<ContentRenderer content={post.body} />
+```
+
+Props: `content`, `compact`, `className`, `sx`,
+`markdownComponents`, and `routerLinkComponent` (pass a
+router-aware `Link` to keep internal links client-side).
+
+### `<CommandPalette>`
+
+`Cmd+K` style command palette. It self-manages open state via
+`triggerKey` (default `'k'` + the platform meta key) — just pass
+`actions`:
+
+```tsx
+import { CommandPalette }
+  from '@omnitron-dev/prism/components/command-palette';
+
+function App() {
+  return (
+    <>
+      <Outlet />
+      <CommandPalette
+        actions={[
+          { id: 'new-project', title: 'New project', icon: <PlusIcon />,   onSelect: () => navigate('/projects/new') },
+          { id: 'sign-out',    title: 'Sign out',    icon: <LogoutIcon />, onSelect: signOut },
+        ]}
+      />
+    </>
+  );
+}
+```
+
+Each action is `{ id, title, subtitle?, group?, keywords?, icon?,
+shortcut?, onSelect }`. Fuzzy-matches by title + keywords; arrow
+keys + Enter; Esc closes. Pass `open` / `onOpenChange` for
+controlled mode.
+
+### `<FilterToolbar>`
+
+Filter toolbar above admin tables — `search`, `select`,
+`multi-select`, `date-range`, `boolean`, `number-range` filter
+types. State is centralised: declare `filters` (a
+`FilterConfig[]`), hold a single `values` object, and update via
+one `onChange`:
 
 ```tsx
 import { FilterToolbar } from '@omnitron-dev/prism/components/admin-filters';
 
+const [values, setValues] = useState({});
+
 <FilterToolbar
   filters={[
-    { id: 'status', type: 'multi-select', label: 'Status',
-      options: ['active', 'archived'], value: status, onChange: setStatus },
-    { id: 'tier', type: 'multi-select', label: 'Tier',
-      options: ['free', 'pro', 'enterprise'], value: tier, onChange: setTier },
-    { id: 'q', type: 'search', label: 'Search', value: q, onChange: setQ },
+    { key: 'status', type: 'multi-select', label: 'Status',
+      options: [{ value: 'active', label: 'Active' }, { value: 'archived', label: 'Archived' }] },
+    { key: 'tier', type: 'multi-select', label: 'Tier',
+      options: [{ value: 'free', label: 'Free' }, { value: 'pro', label: 'Pro' }] },
+    { key: 'q', type: 'search', label: 'Search' },
   ]}
-  onReset={() => { setStatus([]); setTier([]); setQ(''); }}
-  onSaveView={(name) => savedViews.add(name, currentFilters)}
+  values={values}
+  onChange={setValues}
+  onReset={() => setValues({})}
+  total={results.length}
 />
 ```
 
-Filter chips appear inline; clicking removes the filter. Pairs
-naturally with `<DataGridBlock>`.
+Each filter is `{ key, type, label, options?, … }`. The module
+also exports `AdminDataTable`, `StatusChip`, and `AmountCell` for
+admin table surfaces. (There is no `<AdminFilters>` export and no
+built-in save-as-view.)
 
 ## Layout & utility
 
@@ -852,7 +1016,7 @@ const [open, setOpen] = useState(false);
   open={open}
   onClose={() => setOpen(false)}
   anchor="right"
-  size="md"             // 'sm' (320px) | 'md' (480px) | 'lg' (640px) | 'full'
+  width={480}           // px or any CSS width (for left/right anchors)
   title="Edit user"
   footer={<><Button onClick={() => setOpen(false)}>Cancel</Button>
             <Button variant="contained" onClick={save}>Save</Button></>}
@@ -861,40 +1025,41 @@ const [open, setOpen] = useState(false);
 </Drawer>
 ```
 
-Variants:
+Use `width` for left/right anchors and `height` for top/bottom
+(there is no preset `size` prop). Variants via the `variant` prop:
 - `temporary` (default) — overlays, closes on backdrop click
 - `persistent` — pushes content
-- `permanent` — always visible (used in `<DashboardLayout>`)
+- `permanent` — always visible
 
 ### `<PageContent>`
 
-Page-wrapper with header + breadcrumbs + actions:
+A vertical-stack content wrapper (consistent section `gap`,
+optional `fill`). It does **not** render a title/breadcrumb
+header — compose `<Breadcrumbs>` + a heading above it, or use a
+layout. For breadcrumbs use the standalone `<Breadcrumbs>`
+component (above):
 
 ```tsx
-<PageContent
-  title="Projects"
-  breadcrumbs={[
-    { label: 'Home', href: '/' },
-    { label: 'Projects' },
-  ]}
-  actions={
-    <Button variant="contained" startIcon={<PlusIcon />}>
-      New project
-    </Button>
-  }
->
+<PageContent gap={3}>
+  <Breadcrumbs items={[{ label: 'Home', href: '/' }, { label: 'Projects' }]} />
   <ProjectsList />
 </PageContent>
 ```
 
 ### `<DocLayout>`
 
-For documentation pages — sidebar + main + table-of-contents:
+For documentation pages — collapsible sidebar + main +
+on-this-page nav. The right-rail "table of contents" is
+`<DocSectionNav>` (passed via the `sectionNav` prop); there is no
+`<TableOfContents>` component:
 
 ```tsx
+import { DocLayout, DocSidebar, DocSectionNav }
+  from '@omnitron-dev/prism/components/doc-layout';
+
 <DocLayout
   sidebar={<DocSidebar items={navItems} />}
-  toc={<TableOfContents headings={headings} />}
+  sectionNav={<DocSectionNav headings={headings} />}
 >
   <article>{content}</article>
 </DocLayout>
@@ -902,66 +1067,102 @@ For documentation pages — sidebar + main + table-of-contents:
 
 ### `<Accordion>`
 
+`<Accordion>` is config-driven — pass an `items` array (there is
+no `<Accordion.Item>` child). Single-open by default; pass
+`multiple` to allow several panels open:
+
 ```tsx
 import { Accordion } from '@omnitron-dev/prism/components/accordion';
 
-<Accordion>
-  <Accordion.Item value="overview" title="Overview">
-    What it does.
-  </Accordion.Item>
-  <Accordion.Item value="installation" title="Installation">
-    How to install.
-  </Accordion.Item>
-</Accordion>
+<Accordion
+  multiple
+  items={[
+    { id: 'overview',     title: 'Overview',     content: 'What it does.' },
+    { id: 'installation', title: 'Installation', content: 'How to install.' },
+  ]}
+/>
 ```
 
-Multiple/single mode (`type="multiple" | "single"`).
+Item shape: `{ id, title, subtitle?, content, icon?, disabled? }`.
+A `<SimpleAccordion>` convenience wrapper is also exported.
 
-### `<Animate>`
+### `<AnimateBorder>` / `<MotionLazy>`
 
-Wraps content with an entrance animation:
+The `animate` module exports `AnimateBorder` — a `Box` with an
+animated gradient border — and `MotionLazy`, a provider that
+lazy-loads framer-motion features (there is no generic
+`<Animate type="fade-up">` entrance wrapper):
 
 ```tsx
-<Animate type="fade-up" delay={100} duration={400}>
-  <Card>…</Card>
-</Animate>
-```
+import { AnimateBorder, MotionLazy }
+  from '@omnitron-dev/prism/components/animate';
 
-Types: `fade`, `fade-up`, `fade-down`, `slide-left`, `slide-right`,
-`scale`, `bounce-in`.
+// Animated gradient border around any content:
+<AnimateBorder duration={8}>
+  <Card>…</Card>
+</AnimateBorder>
+
+// Lazy-load framer-motion once near the app root:
+<MotionLazy>
+  <App />
+</MotionLazy>
+```
 
 ### `<SvgColor>`
 
-Inlines an SVG and applies theme colour via CSS mask:
+Inlines an SVG and applies a colour via CSS mask (uses
+`currentColor` by default — pass any CSS colour, e.g. a theme
+token via `sx`):
 
 ```tsx
-<SvgColor src="/icons/star.svg" color="primary" size={20} />
+<SvgColor src="/icons/star.svg" sx={{ color: 'primary.main' }} size={20} />
 ```
 
 Lets you tint icons without exporting per-colour copies.
 
-### `<Settings>`
+### Settings drawer — `<SettingsProvider>` / `<SettingsDrawer>`
 
-In-app settings drawer — theme mode, layout, colour preset:
+In-app settings drawer (theme mode, layout, colour preset).
+Wrap the app in `<SettingsProvider>`, mount `<SettingsDrawer>`
+once, and open it via the `useSettingsDrawer` hook — there is no
+single `<Settings>` component with `open`/`onClose` props:
 
 ```tsx
-<Settings open={open} onClose={() => setOpen(false)} />
+import { SettingsProvider, SettingsDrawer, useSettingsDrawer }
+  from '@omnitron-dev/prism/components/settings';
+
+function Header() {
+  const drawer = useSettingsDrawer();
+  return <IconButton onClick={drawer.onOpen}><SettingsIcon /></IconButton>;
+}
+
+<SettingsProvider>
+  <App />
+  <SettingsDrawer />
+</SettingsProvider>
 ```
 
-Reads/writes from the Prism settings store
-(`useSettingsStore`) — persisted to localStorage.
+State is backed by the Prism settings store (`useSettingsStore`
+from `@omnitron-dev/prism/state`) — persisted to localStorage.
 
-### `<Changelog>`
+### Changelog — `<ChangelogTimeline>` / `<ChangelogEntry>`
 
-Renders a feed of changes:
+Renders a feed of changes (there is no single `<Changelog>`
+component — compose a `<ChangelogTimeline>` of
+`<ChangelogEntry>` children):
 
 ```tsx
-<Changelog
-  entries={[
-    { date: '2026-05-16', version: '1.4.0', title: 'New dashboard', body: 'Added project overview.' },
-    { date: '2026-05-10', version: '1.3.1', title: 'Fix logs', body: 'Resolved tail buffering.' },
-  ]}
-/>
+import { ChangelogTimeline, ChangelogEntry }
+  from '@omnitron-dev/prism/components/changelog';
+
+<ChangelogTimeline>
+  <ChangelogEntry version="1.4.0" date="2026-05-16">
+    New dashboard — added project overview.
+  </ChangelogEntry>
+  <ChangelogEntry version="1.3.1" date="2026-05-10">
+    Fixed logs — resolved tail buffering.
+  </ChangelogEntry>
+</ChangelogTimeline>
 ```
 
 ## Accessibility — across the catalog
@@ -1002,11 +1203,10 @@ function ScrollIntoViewExample() {
 }
 ```
 
-Components that expose an imperative handle (e.g. `<CaptchaInput>`
-with `getData()` / `refresh()`) attach the handle type via a
-`ref?: Ref<HandleType>` field on their props interface — identical
-call-site ergonomics, no `useImperativeHandle` ceremony on the
-consumer side.
+Components that expose an imperative handle attach the handle
+type via a `ref?: Ref<HandleType>` field on their props interface
+— identical call-site ergonomics, no `useImperativeHandle`
+ceremony on the consumer side.
 
 ## MUI v9 slot props
 

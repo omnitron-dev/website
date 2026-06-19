@@ -137,14 +137,18 @@ export class UsersRepository extends TransactionAwareRepository<Database, 'users
 
 | Method                                          | Purpose                                       |
 | ----------------------------------------------- | --------------------------------------------- |
-| `find(id)`                                      | Fetch by primary key                          |
-| `findMany(options)`                             | Paginated list                                |
-| `findByCondition(where)`                        | Dynamic `WHERE` with operators                |
-| `create(data)`                                  | Insert                                        |
-| `update(id, data)`                              | Update                                        |
-| `delete(id)`                                    | Hard delete (or soft if `@SoftDelete` set)    |
-| `paginate(offset, limit)`                       | Offset pagination                             |
-| `paginateCursor(options)`                       | Cursor-based pagination                       |
+| `findById(id)`                                  | Fetch by primary key (`null` if missing)      |
+| `findByIds(ids[])`                              | Fetch many by primary key                     |
+| `create(data)` / `createMany(data[])`          | Insert one / many (returns inserted rows)     |
+| `update(id, data)`                              | Update by id (returns row or `null`)          |
+| `delete(id)`                                    | Hard delete by id (returns `boolean`)         |
+| `softDelete(id)` / `restore(id)`               | Soft-delete / restore (requires `@SoftDelete`)|
+| `list(options?)`                                | Offset-paginated list → `OffsetPaginatedResult` |
+| `findWhere(where, options?)`                    | Dynamic `WHERE` (via `@kysera/repository` operators) |
+| `findOneWhere(where)` / `countWhere(where)`     | Single match / count by `WHERE`               |
+| `updateWhere(where, data)` / `deleteWhere(where)` | Bulk update / delete by `WHERE` (returns count) |
+| `exists(id)` / `count()`                        | Existence check / row count                   |
+| `upsert(data, options)` / `upsertMany(data[], options)` | Insert-or-update                      |
 
 ### Protected accessors
 
@@ -159,7 +163,7 @@ export class UsersRepository extends TransactionAwareRepository<Database, 'users
 ## `DatabaseManager`
 
 ```typescript
-import { DATABASE_MANAGER, type IDatabaseManager } from '@omnitron-dev/titan-database';
+import { DATABASE_MANAGER, type IDatabaseManager, runInTransaction } from '@omnitron-dev/titan-database';
 
 @Service({ name: 'reports' })
 class ReportsService {
@@ -167,8 +171,9 @@ class ReportsService {
 
   @Public()
   async summary() {
-    return this.db.runInTransaction(async () => {
-      const users = await this.db.getConnection().selectFrom('users').selectAll().execute();
+    const conn = await this.db.getConnection();   // getConnection() is async → Kysely<unknown>
+    return runInTransaction(conn, async () => {
+      const users = await conn.selectFrom('users').selectAll().execute();
       // …
     });
   }
@@ -177,11 +182,15 @@ class ReportsService {
 
 | Method                                          | Purpose                                              |
 | ----------------------------------------------- | ---------------------------------------------------- |
-| `getConnection(name?)`                          | Get named or default `Kysely<unknown>` instance      |
-| `getExecutor<DB>(name?)`                        | Plugin-aware executor (used by repositories)         |
-| `runInTransaction<T>(fn, options?)`             | Run within a transaction; nested calls reuse it      |
-| `closeAll()`                                    | Async cleanup of every connection (called on shutdown) |
-| `getPoolMetrics(name?)`                         | Connection pool stats                                |
+| `getConnection(name?)`                          | `async` — named or default plugin-aware `Kysely<unknown>` |
+| `getExecutor(name?, plugins?)`                  | `async` — plugin-aware Kysera executor               |
+| `getPool(name?)` / `getPoolMetrics(name?)`      | Raw driver pool / pool stats                         |
+| `isConnected(name?)` / `getConnectionNames()`   | Connection state / registered names                  |
+| `close(name?)` / `closeAll()`                   | Async cleanup of one / every connection (on shutdown) |
+
+Transactions are run through the standalone `runInTransaction(conn, fn, options?)`
+helper (below), **not** a method on the manager — pass it a connection from
+`getConnection()`.
 
 ## Transaction context
 
@@ -224,7 +233,7 @@ import { Repository, SoftDelete, Timestamps, Audit, Migration }
 
 | Decorator                              | Effect                                                     |
 | -------------------------------------- | ---------------------------------------------------------- |
-| `@Repository(table \| config)`         | Mark a class as a repository; can pass `{ table, connection?, softDelete?, timestamps?, audit?, rls? }` |
+| `@Repository(table \| config)`         | Mark a class as a repository; config: `{ table, connection?, softDelete?, timestamps?, audit?, schema?, validate?, plugins? }` (RLS is configured separately via `@Policy`) |
 | `@SoftDelete({ column?, includeDeleted?, tables? })` | Soft-delete behaviour — column defaults to `'deletedAt'` |
 | `@Timestamps({ createdAt?, updatedAt? })` | Auto-managed timestamp columns                          |
 | `@Audit({ table?, captureOldValues?, captureNewValues? })` | Row-level audit logging                  |

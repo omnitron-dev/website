@@ -60,8 +60,8 @@ The simplest form. Options are known at boot time.
       config: { host: 'localhost', port: 6379, db: 0 },
     }),
     TitanCacheModule.forRoot({
-      defaultTTL: 60,
-      maxItems:   10_000,
+      defaultTtl: 60,
+      maxSize:    10_000,
     }),
   ],
 })
@@ -167,8 +167,8 @@ global `TitanDatabaseModule.forRoot(...)`.
 @Module({
   imports: [
     TitanCacheModule.forFeature([
-      { name: 'users',  defaultTTL: 300 },
-      { name: 'tokens', defaultTTL: 60  },
+      { name: 'users',  defaultTtl: 300 },
+      { name: 'tokens', defaultTtl: 60  },
     ]),
   ],
 })
@@ -302,8 +302,8 @@ used to instantiate the module's services.
   array silently passes the wrong service to the wrong parameter.
   Prefer named destructuring + tuple typing:
   ```typescript
-  useFactory: (config: ConfigService, redis: Redis) => ({...}),
-  inject: [CONFIG_SERVICE_TOKEN, REDIS_TOKEN],
+  useFactory: (config: ConfigService, redis: RedisManager) => ({...}),
+  inject: [CONFIG_SERVICE_TOKEN, REDIS_MANAGER],
   ```
 - **`forFeature` before `forRoot`** — the global module has to be
   bound first or `forFeature` won't find what to attach to.
@@ -319,10 +319,11 @@ used to instantiate the module's services.
   which is rarely what you want. If you need different options for
   different scopes, use `forFeature` (where supported) or
   consciously override via test fixtures.
-- **`forRootAsync` factory throwing.** A throw aborts boot with
-  the original error wrapped in a `ModuleResolutionError`. Don't
-  log-and-swallow; let it crash so the operator sees the
-  configuration mistake.
+- **`forRootAsync` factory throwing.** A throw aborts boot — the
+  error propagates out of the container's async resolution (the
+  Nexus DI layer raises `ResolutionError` / `AsyncResolutionError`
+  for resolution failures). Don't log-and-swallow; let it crash so
+  the operator sees the configuration mistake.
 
 ## Migration tip — sync to async
 

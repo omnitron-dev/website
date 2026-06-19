@@ -78,7 +78,7 @@ flowchart TB
 Solid arrows are **hard dependencies** — you can't run the
 dependent module without the foundation. Dotted arrows are
 **soft / optional** — feature flagged at config time
-(`storage: 'redis'`, `multiTier: true`, `enableDatabaseIndicator: true`).
+(`storageType: 'redis'`, `multiTier: true`, `enableDatabaseIndicator: true`).
 
 ## Install footprint
 
@@ -93,7 +93,7 @@ The numbers below count peer modules a typical adoption pulls in
 | `titan-cache`                | Standalone (`+ titan-redis` if `multiTier: true`)         |
 | `titan-lock`                 | `+ titan-redis`                                           |
 | `titan-discovery`            | `+ titan-redis`                                           |
-| `titan-ratelimit`            | Standalone (`+ titan-redis` if `storage: 'redis'`)        |
+| `titan-ratelimit`            | Standalone (`+ titan-redis` if `storageType: 'redis'`)    |
 | `titan-notifications`        | `+ titan-redis` (`+ titan-database` for preference store) |
 | `titan-scheduler`            | Standalone (`+ titan-redis` for distributed persistence)  |
 | `titan-auth`                 | Standalone (`+ titan-cache` for token cache)              |
@@ -176,7 +176,7 @@ flushes when connectivity returns.
 | Sync in-process pub/sub             | [`titan-events`](./events.mdx)                | Fire-and-forget, intra-process, typed channels             |
 | Reliable cross-pod queue            | [`titan-notifications`](./notifications.mdx)  | Built on rotif; survives crashes, has DLQ + retry          |
 | Periodic work (cron / interval)     | [`titan-scheduler`](./scheduler.mdx)          | Per-job persistence + missed-fire handling                 |
-| Memoize a function call             | [`titan-cache`](./cache.mdx)                  | `@Cached(...)` decorator; multi-tier (L1+L2)               |
+| Memoize a function call             | [`titan-cache`](./cache.mdx)                  | `@Cacheable(...)` decorator; multi-tier (L1+L2)            |
 | Talk to Redis directly              | [`titan-redis`](./redis.mdx)                  | Just a typed client; no service abstraction                |
 | Throttle calls                      | [`titan-ratelimit`](./ratelimit.mdx)          | Token-bucket / sliding-window / fixed-window               |
 | Coordinate across instances         | [`titan-lock`](./lock.mdx)                    | Redis-backed mutex with UUID ownership                     |
@@ -196,7 +196,7 @@ flushes when connectivity returns.
 | ---------------------------- | ------------------------------------------------ | ----------------------------------------------------- |
 | `titan-events`               | `titan-notifications`                            | In-process / no persistence / lowest latency          |
 | `titan-notifications`        | `titan-events` + `titan-scheduler`               | Cross-process, retry, DLQ, channel templating         |
-| `titan-cache`                | bare `titan-redis`                               | Caching semantics (`@Cached`, TTL, multi-tier)        |
+| `titan-cache`                | bare `titan-redis`                               | Caching semantics (`@Cacheable`, TTL, multi-tier)     |
 | `titan-scheduler`            | `setInterval` / `node-cron`                      | Persistence, missed-fire, observability               |
 | `titan-lock`                 | bare `SETNX` on Redis                            | Safe ownership (UUID) + Lua-script atomicity          |
 | `titan-discovery`            | env-var URL config                               | Dynamic topology, autoscaling, rolling deploys        |
@@ -249,7 +249,8 @@ class AppModule {}
 
 Configure per-module by passing a different `db:` index in the
 options, or by registering multiple named Redis clients via
-`TitanRedisModule.forRootMultiple([...])`.
+`TitanRedisModule.forFeature(['cache', 'queue', …])` (or the
+`clients: [...]` option on `forRoot`).
 
 ## Lifecycle order — first to last
 

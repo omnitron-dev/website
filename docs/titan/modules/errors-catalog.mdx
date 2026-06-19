@@ -91,8 +91,12 @@ extra fields aid programmatic handling.
 | `InvalidTokenError`            | `Error`           | JWT verification fails (bad signature, malformed)        |
 | `TokenExpiredError`            | `InvalidTokenError` | Token's `exp` is in the past                            |
 | `UnauthorizedError`            | `Error`           | Middleware ran but no credentials presented              |
-| `SessionRevokedAuthError`      | `Error`           | Shared-session preset detected revocation                |
-| `InvalidTokenClaimError`       | `Error`           | Token decoded but claims don't match the expected shape  |
+| `SessionRevokedAuthError`†     | `Error`           | Shared-session preset detected revocation                |
+| `InvalidTokenClaimError`†      | `Error`           | Token decoded but claims don't match the expected shape  |
+
+† `SessionRevokedAuthError` and `InvalidTokenClaimError` are exported
+from the `@omnitron-dev/titan-auth/preset/shared-session` subpath, not
+the package root. The other three are root exports.
 
 ```typescript
 import { InvalidTokenError, TokenExpiredError, UnauthorizedError }
@@ -127,13 +131,16 @@ investigate before retry.
 | ------------------------------ | ----------------------------------------------------------------- |
 | `PoolBackpressureError`        | Pool queue is full; caller must back off                          |
 
-```typescript
-import { PoolBackpressureError } from '@omnitron-dev/titan-pm';
+> `PoolBackpressureError` is **not re-exported** from the
+> `@omnitron-dev/titan-pm` barrel, so you can't `instanceof` it from
+> the package root — narrow on `error.name === 'PoolBackpressureError'`
+> instead.
 
+```typescript
 try {
   await pool.exec('compress', payload);
 } catch (e) {
-  if (e instanceof PoolBackpressureError) {
+  if (e instanceof Error && e.name === 'PoolBackpressureError') {
     await sleep(100);
     return retry();
   }
@@ -149,15 +156,18 @@ try {
 | ------------------------------ | ----------------------------------------------------------------- |
 | `RateLimitExceededError`       | `enforce(key)` rejected — caller exceeded limit                   |
 
-Carries:
+Carries an `IRateLimitResult` on its `.result` property (the fields
+are nested under `error.result`, not on the error directly):
 
-| Field         | Type    | Meaning                                          |
-| ------------- | ------- | ------------------------------------------------ |
-| `retryAfter`  | `number`(ms) | Suggested back-off before next attempt      |
-| `remaining`   | `number`     | Remaining capacity at error time             |
-| `resetAt`     | `number`     | Epoch ms when the window resets              |
+| `error.result` field | Type    | Meaning                                     |
+| -------------------- | ------- | ------------------------------------------- |
+| `retryAfter`         | `number` (seconds) | Suggested back-off before next attempt |
+| `remaining`          | `number`     | Remaining capacity at error time         |
+| `limit`              | `number`     | Maximum requests allowed in the window   |
+| `resetAt`            | `number`     | Unix ms when the window resets           |
 
-Surface this to clients as a 429 with a `Retry-After` header.
+Surface this to clients as a 429 with a `Retry-After` header
+(`error.result.retryAfter`).
 
 ## Common patterns per error kind
 
@@ -304,10 +314,11 @@ A field guide for your retry middleware:
 | `INTERNAL_ERROR`              |     ⚠      | with budget         |
 | `NOT_IMPLEMENTED`             |     ✗      | —                   |
 
-`titan-resilience` ships pre-built [retry](../resilience/retry.md)
-and [circuit-breaker](../resilience/circuit-breaker.md) primitives
-that already encode this matrix — wire one of those rather than
-hand-rolling.
+`@omnitron-dev/titan/utils` ships pre-built
+[retry](../resilience/retry.md) and
+[circuit-breaker](../resilience/circuit-breaker.md) primitives
+(`retry()`, `CircuitBreaker`, `withTimeout()`) that already encode
+this matrix — wire one of those rather than hand-rolling.
 
 ## Anti-patterns
 

@@ -74,7 +74,7 @@ Pick the level that matches your need:
 | `@omnitron-dev/prism` | Everything; convenient but largest |
 | `@omnitron-dev/prism/theme` | `createTheme()`, palette, typography, shadows, presets |
 | `@omnitron-dev/prism/core` | `<PrismProvider>`, `<ProviderStack>`, context primitives |
-| `@omnitron-dev/prism/layouts` | `<DashboardLayout>`, `<AuthLayout>`, `<CoreLayout>` |
+| `@omnitron-dev/prism/layouts` | `<DashboardLayout>`, `<AuthCenteredLayout>` / `<AuthSplitLayout>` / `<AuthSimpleLayout>`, `<LayoutProvider>` |
 | `@omnitron-dev/prism/blocks` | `<AuthBlock>`, `<DashboardBlock>`, `<DataGridBlock>` |
 | `@omnitron-dev/prism/blocks/*` | Individual block subpaths |
 | `@omnitron-dev/prism/components` | All 50+ components |
@@ -128,34 +128,53 @@ multiple providers cleanly:
 </ProviderStack>
 ```
 
-## State management — `createStore`
+## State management — `createPrismStore` / `createPersistedStore`
 
-Prism ships a Zustand-based factory for app-level state with
-version-aware migration:
+Prism ships Zustand-based store factories (Immer + DevTools +
+optional localStorage persistence baked in). Use
+`createPrismStore` for general state and `createPersistedStore`
+for persisted state with version-aware migration:
 
 ```tsx
-import { createStore } from '@omnitron-dev/prism/state';
+import { createPrismStore } from '@omnitron-dev/prism/state';
 
 interface UIState {
   sidebarOpen: boolean;
   toggleSidebar: () => void;
 }
 
-export const useUIStore = createStore<UIState>((set) => ({
+// Immer middleware is enabled — mutate `state` directly in `set`.
+export const useUIStore = createPrismStore<UIState>((set) => ({
   sidebarOpen:   true,
-  toggleSidebar: () => set((s) => ({ sidebarOpen: !s.sidebarOpen })),
+  toggleSidebar: () => set((s) => { s.sidebarOpen = !s.sidebarOpen; }),
 }), {
   name:    'ui-store',
-  persist: { storage: 'localStorage', whitelist: ['sidebarOpen'] },
-  version: 2,
-  migrate: (persisted, version) => {
-    // version-aware migration
-  },
+  persist: { partialize: (s) => ({ sidebarOpen: s.sidebarOpen }) },
 });
 ```
 
+For persisted preferences with migrations, pass a `version`
+plus a `migrate` callback through the persist options:
+
+```tsx
+import { createPersistedStore } from '@omnitron-dev/prism/state';
+
+export const useSettings = createPersistedStore<SettingsState>(
+  (set) => ({ /* … */ }),
+  'settings',                       // store name (positional)
+  {
+    version: 2,
+    migrate: (persisted, version) => {
+      // version-aware migration
+      return persisted as SettingsState;
+    },
+  },
+);
+```
+
 When you bump `version`, persisted state from older versions
-runs through `migrate` before being adopted.
+runs through `migrate` before being adopted. (See also the
+versioned-settings helpers in `@omnitron-dev/prism/state`.)
 
 ## Accessibility
 
@@ -243,8 +262,9 @@ component metadata.
   per-field boilerplate.
 - **Surface form errors with `<FormAlert>` inline**; reserve
   toasts (`<Snackbar>`) for transient background events.
-- **`createStore` over raw Zustand** for any state that
-  persists — `settings-version` handles migrations.
+- **`createPrismStore` / `createPersistedStore` over raw
+  Zustand** for any state that persists — the versioned-settings
+  helpers handle migrations.
 
 ## See also
 

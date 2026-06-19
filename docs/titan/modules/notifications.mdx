@@ -212,13 +212,21 @@ import { OnNotification } from '@omnitron-dev/titan-notifications';
 
 @Injectable()
 class AuditListener {
-  @OnNotification({ pattern: 'sent', priority: 10 })
+  @OnNotification('notifications.notification.sent')
   async onSent(notification: any) { /* … */ }
 
-  @OnNotification({ pattern: 'failed' })
+  @OnNotification('notifications.notification.failed', { maxRetries: 5, exactlyOnce: true })
   async onFailed(notification: any) { /* … */ }
 }
 ```
+
+`OnNotification(pattern, options?)` takes the pattern as the **first
+positional argument**. `options` extends `TransportSubscribeOptions`
+(`groupName`, `consumerName`, `maxRetries`, `retryDelay`,
+`retryStrategy`, `autoAck`, `prefetchCount`, …) plus an `exactlyOnce`
+flag. Patterns are the transport topic names — the lifecycle topics are
+exported as `NOTIFICATIONS_EVENTS` (e.g.
+`NOTIFICATIONS_EVENTS.NOTIFICATION_SENT === 'notifications.notification.sent'`).
 
 Subscribe to delivery lifecycle events for observability, audit,
 metrics.

@@ -84,12 +84,14 @@ SchedulerModule.forRootAsync({
   useFactory: (config: ConfigService) => ({
     enabled:       config.get('scheduler.enabled'),
     persistence:   { enabled: true, provider: new RedisPersistenceProvider(redis) },
-    distributed:   { enabled: true, lockProvider: 'redis', lockTTL: 60_000 },
     maxConcurrent: config.get('scheduler.concurrency'),
   }),
   inject: [ConfigService],
 })
 ```
+
+For distributed (multi-node) scheduling, also supply a `lockProvider` —
+see [Distributed coordination](#distributed-coordination) below.
 
 ## `ISchedulerModuleOptions`
 
@@ -108,6 +110,8 @@ SchedulerModule.forRootAsync({
 | `shutdownTimeout`   | `number` (ms) — grace window                                                  | `30_000`      |
 | `healthCheck`       | `{ enabled, path? }`                                                          | —             |
 | `listeners`         | `IJobListener[]` — global listeners                                           | —             |
+| `lockProvider`      | `ISchedulerLockProvider` — required when `distributed.enabled` (SC-1)         | —             |
+| `executor` / `persistenceProvider` / `metricsProvider` | `InjectionToken` — override the built-in providers      | —             |
 
 ## Decorators
 
@@ -184,6 +188,11 @@ CronExpression.EVERY_DAY_AT_1AM      // '0 1 * * *'
 
 ## `SchedulerService`
 
+Most jobs are registered declaratively with the decorators above. To
+register a job **dynamically** at runtime, inject the service and use
+`addCronJob` / `addInterval` / `addTimeout` — each takes a `name`, the
+pattern, a handler, and optional job options:
+
 ```typescript
 import { SchedulerService, SCHEDULER_SERVICE_TOKEN } from '@omnitron-dev/titan-scheduler';
 
@@ -192,34 +201,41 @@ class JobsService {
   constructor(@Inject(SCHEDULER_SERVICE_TOKEN) private readonly scheduler: SchedulerService) {}
 
   @Public()
-  async scheduleOnce(at: Date, payload: unknown) {
-    await this.scheduler.schedule({
-      id:       crypto.randomUUID(),
-      type:     SchedulerJobType.TIMEOUT,
-      runAt:    at,
-      handler:  async () => { /* … */ },
-      metadata: { payload },
-    });
+  async runAfter(ms: number, payload: unknown) {
+    this.scheduler.addTimeout(
+      `once:${crypto.randomUUID()}`,
+      ms,
+      async () => { /* … fires once after `ms` … */ },
+      { metadata: { payload } },
+    );
   }
 }
 ```
 
-| Method                                    | Purpose                                          |
-| ----------------------------------------- | ------------------------------------------------ |
-| `schedule(jobDefinition)`                 | Register and schedule a job                      |
-| `cancel(jobId)`                           | Cancel a running job                             |
-| `list(filters?)`                          | List jobs with filters                           |
-| `getMetrics()`                            | Scheduler metrics                                |
-| `getJob(jobId)`                           | Look up a single job                             |
-| `pause(jobId)` / `resume(jobId)`          | Pause / resume                                   |
-| `retryJob(jobId)`                         | Re-run a failed job                              |
+| Method                                                       | Purpose                                          |
+| ------------------------------------------------------------ | ------------------------------------------------ |
+| `addCronJob(name, expression, handler, options?)`            | Register + schedule a cron job dynamically       |
+| `addInterval(name, ms, handler, options?)`                   | Register + schedule an interval job              |
+| `addTimeout(name, ms, handler, options?)`                    | Register + schedule a one-shot timeout job       |
+| `triggerJob(name)`                                           | Run a job immediately (bypasses distributed lock)|
+| `stopJob(name)` / `startJob(name)`                           | Stop (pause) / re-schedule a job by name         |
+| `deleteJob(name)`                                            | Stop + remove a job (and its persisted record)   |
+| `getJob(name)`                                               | Look up a single job by name                     |
+| `getAllJobs()`                                               | All registered jobs                              |
+| `findJobs(filter)`                                           | Filter jobs (`IJobFilterOptions`)                |
+| `getMetrics()`                                               | Scheduler metrics (`ISchedulerMetrics \| null`)  |
+| `isRunning()`                                                | Whether the scheduler has started                |
+
+> Jobs are keyed by **name**, not an opaque id. Lifecycle (`onInit` /
+> `onStart` / `onStop`) is driven by the framework — you rarely call
+> these methods yourself for decorator-defined jobs.
 
 ## Persistence providers
 
 | Provider class                  | Persistence                                  |
 | ------------------------------- | -------------------------------------------- |
-| `InMemoryPersistenceProvider`   | Default — keeps last ~100 executions per job in memory |
-| `RedisPersistenceProvider`      | Cross-pod coordination; survives restart     |
+| `InMemoryPersistenceProvider`   | Default — keeps last 100 executions per job in memory |
+| `RedisPersistenceProvider`      | Redis-backed job + execution storage; survives restart |
 | `DatabasePersistenceProvider`   | SQL-backed; durable, transactional history   |
 
 Implement `IPersistenceProvider`:
@@ -240,18 +256,44 @@ interface IPersistenceProvider {
 
 For multi-pod deployments, two paths:
 
-### A) Module-level distributed config
+### A) Module-level distributed config (SC-1)
+
+When `distributed.enabled` is `true`, before each scheduled fire the
+scheduler acquires a per-fire-window lock so a given fire runs on
+**exactly one** node; the other nodes skip it. This requires a
+**lock provider** — an object implementing `ISchedulerLockProvider`
+(`acquireLock(key, ttlMs)` / `releaseLock(key, lockId)`). Pass it as
+the `lockProvider` module option (or register it at
+`SCHEDULER_LOCK_TOKEN`). titan-lock's `DistributedLockService` is
+structurally compatible and can be used directly.
+
+> **Fail-fast.** If `distributed.enabled` is true but no lock provider
+> is wired, the scheduler throws on start rather than silently running
+> every job on every node.
 
 ```typescript
-SchedulerModule.forRoot({
-  distributed: {
-    enabled:      true,
-    lockProvider: 'redis',
-    lockTTL:      60_000,
-    nodeId:       process.env.HOSTNAME,
-  },
+import { LOCK_SERVICE_TOKEN } from '@omnitron-dev/titan-lock';
+
+SchedulerModule.forRootAsync({
+  imports: [TitanLockModule.forRoot({ /* … */ })],
+  useFactory: (locks) => ({
+    distributed: {
+      enabled: true,
+      lockTTL: 60_000,
+      nodeId:  process.env.HOSTNAME,
+    },
+    lockProvider: locks,    // ISchedulerLockProvider (DistributedLockService is compatible)
+  }),
+  inject: [LOCK_SERVICE_TOKEN],
 })
 ```
+
+The `distributed.lockProvider?: 'redis' | 'database'` field is only an
+advisory label describing the kind of backing store; the actual
+coordination is done by the `lockProvider` instance you supply. The
+scheduler holds each per-fire lock for its full `lockTTL` and does not
+release it early (so a clock-skewed-late node can't re-run the same
+fire).
 
 ### B) Per-job `@WithDistributedLock`
 
@@ -263,8 +305,10 @@ import { WithDistributedLock } from '@omnitron-dev/titan-lock';
 async hourlyReport() { /* exactly one pod runs this per hour */ }
 ```
 
-Per-job locking gives you finer control; module-level coordination
-is one config flip.
+Per-job locking gives you finer control (only the decorated jobs are
+coordinated, and it releases the lock as soon as the method returns);
+module-level coordination (A) covers **every** job at once and holds
+each fire's lock for the full `lockTTL`.
 
 ## Listeners
 
@@ -286,9 +330,12 @@ without coupling each job's body to telemetry concerns.
 ## Status / priority enums
 
 ```typescript
-enum JobStatus {
-  PENDING, RUNNING, COMPLETED, FAILED, CANCELLED, PAUSED, RETRYING,
-}
+// JobStatus is a const-object string union:
+//   'pending' | 'running' | 'completed' | 'failed' | 'cancelled' | 'paused' | 'retrying'
+const JobStatus = {
+  PENDING: 'pending', RUNNING: 'running', COMPLETED: 'completed',
+  FAILED: 'failed', CANCELLED: 'cancelled', PAUSED: 'paused', RETRYING: 'retrying',
+} as const;
 
 enum JobPriority {
   CRITICAL = 0,
@@ -312,17 +359,17 @@ enum JobPriority {
 
 ```mermaid
 stateDiagram-v2
-  [*] --> PENDING: schedule()
+  [*] --> PENDING: register / addCronJob()
   PENDING --> RUNNING: trigger fires
   RUNNING --> COMPLETED: success
   RUNNING --> FAILED: error & no retries left
   RUNNING --> RETRYING: error & retries remain
   RETRYING --> RUNNING: backoff elapsed
-  RUNNING --> CANCELLED: cancel()
-  PENDING --> PAUSED: pause()
-  PAUSED --> PENDING: resume()
+  RUNNING --> CANCELLED: cancel
+  PENDING --> PAUSED: stopJob()
+  PAUSED --> PENDING: startJob()
   COMPLETED --> PENDING: next cron tick
-  FAILED --> PENDING: retryJob()
+  FAILED --> PENDING: startJob()
 ```
 
 ## Tokens
@@ -332,9 +379,12 @@ stateDiagram-v2
 | `SCHEDULER_SERVICE_TOKEN`             |
 | `SCHEDULER_CONFIG_TOKEN`              |
 | `SCHEDULER_REGISTRY_TOKEN`            |
+| `SCHEDULER_EXECUTOR_TOKEN`            |
 | `SCHEDULER_PERSISTENCE_TOKEN`         |
 | `SCHEDULER_METRICS_TOKEN`             |
+| `SCHEDULER_DISCOVERY_TOKEN`           |
 | `SCHEDULER_LISTENERS_TOKEN`           |
+| `SCHEDULER_LOCK_TOKEN`                |
 
 ## Anti-patterns
 

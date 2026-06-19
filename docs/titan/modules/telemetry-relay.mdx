@@ -352,8 +352,8 @@ oldest segment is dropped first.
 {
   nodeId:               string;
   role:                 'producer' | 'aggregator' | 'both';
-  buffer:               { size, isStarted, ... };
-  wal:                  { currentSegment, currentSize, totalWritten, ... } | null;
+  buffer:               { size, totalPushed, totalDropped, totalFlushed };
+  wal:                  { segments, totalSize, totalWritten, currentSegment } | null;
   totalEmitted:         number;
   totalSent:            number;
   totalFailed:          number;

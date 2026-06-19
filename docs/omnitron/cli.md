@@ -45,7 +45,8 @@ Verified against `src/cli/omnitron.ts` and `src/commands/*`.
 | **Backup** | `backup create`, `backup list`, `backup restore` |
 | **Kubernetes** | `k8s pods`, `k8s deploy scale` |
 | **Nodes** | `node list`, `node add`, `node update`, `node remove`, `node check`, `node ssh-keys` |
-| **Webapp** | `webapp build`, `webapp start`, `webapp open` |
+| **Webapp** | `webapp build`, `webapp start`, `webapp stop`, `webapp status`, `webapp open` |
+| **Tor** | `tor` |
 | **Knowledge base** | `kb mcp`, `kb index`, `kb status`, `kb query` |
 
 ## Daemon lifecycle
@@ -93,7 +94,7 @@ operate on them by name.
 | `omnitron project add <name> <path>` | Register a seed project |
 | `omnitron project list` (alias `proj list`) | List registered projects |
 | `omnitron project remove <name>` | Unregister (does not delete files) |
-| `omnitron project scan` | Auto-discover projects in known paths |
+| `omnitron project scan` | Scan app bootstraps and report their infrastructure requirements |
 
 Aliases: `omnitron proj` works the same as `omnitron project`.
 
@@ -105,8 +106,8 @@ infrastructure to a subset of the project's apps.
 
 | Command | Effect |
 | ------- | ------ |
-| `omnitron stack list` (alias `stacks list`) | All stacks across all projects |
-| `omnitron stack create <project> <stack>` | Create a new stack |
+| `omnitron stack list [-p project]` (alias `stacks list`) | All stacks across all projects (filter with `-p, --project`) |
+| `omnitron stack create <project> <stack> [-t type] [-a apps]` | Create a new stack (`-t, --type local\|remote\|cluster`, default `local`; `-a, --apps` comma-separated names or `all`, default `all`) |
 | `omnitron stack delete <project> <stack>` | Drop a stack |
 | `omnitron stack status <project> <stack>` | Per-app status within the stack |
 | `omnitron stack start <project> <stack>` | Start everything in the stack |
@@ -279,6 +280,13 @@ Rollback an app to its previous deployed version.
 | ------ | ------ |
 | `-t, --target <server>` | Target server alias or tag |
 
+## Tor
+
+### `omnitron tor`
+
+Show the Tor hidden-service onion addresses for the running
+stack. Top-level command; no flags.
+
 ## Infrastructure
 
 Manage infrastructure containers (Postgres / Redis / MinIO /
@@ -352,7 +360,9 @@ targets that may or may not run a daemon.
 | Command | Effect |
 | ------- | ------ |
 | `omnitron webapp build` | Build the React + Vite bundle |
-| `omnitron webapp start [-f]` | Start nginx container serving static + gateway |
+| `omnitron webapp start [-f]` | Start nginx container serving static + gateway (`-f, --force` recreates a running container) |
+| `omnitron webapp stop` | Stop the webapp nginx container |
+| `omnitron webapp status` | Show webapp status |
 | `omnitron webapp open` | Open the webapp in the system browser |
 
 ## Knowledge base (MCP)

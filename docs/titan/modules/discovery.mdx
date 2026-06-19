@@ -52,7 +52,11 @@ import { TitanRedisModule } from '@omnitron-dev/titan-redis';
 class AppModule {}
 ```
 
-## `DiscoveryOptions`
+## `DiscoveryModuleOptions`
+
+`forRoot()` accepts `DiscoveryModuleOptions`, which extends `DiscoveryOptions`
+(the heartbeat / pub-sub fields) with the three module-wiring fields
+(`redisUrl`, `redisOptions`, `enableNetronIntegration`).
 
 | Option                       | Type                                  | Default                            |
 | ---------------------------- | ------------------------------------- | ---------------------------------- |

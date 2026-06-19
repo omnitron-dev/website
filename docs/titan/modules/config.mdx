@@ -86,7 +86,7 @@ type ConfigSource =
   | { type: 'env';    prefix?, separator?, transform? }
   | { type: 'argv';   prefix? }
   | { type: 'object'; data }                                  // ← `data`, not `value`
-  | { type: 'remote'; url, headers?, timeout?, retry? };
+  | { type: 'remote'; url, headers?, timeout?, retry? };   // `retry` is a number (attempt count)
 ```
 
 Files auto-detect format by extension (`json`, `yaml`, `toml`,
@@ -100,7 +100,7 @@ the full per-source reference.
 
 | Class                       | Purpose                                                |
 | --------------------------- | ------------------------------------------------------ |
-| `ConfigService`             | Main API — `get`, `set`, `has`, `delete`, `onChange`, `reload`, `validate`, … |
+| `ConfigService`             | Main API — `get`, `set`, `has`, `getAll`, `getTyped`, `onChange`, `reload`, `validate`, … |
 | `ConfigLoaderService`       | Loads from sources at startup                          |
 | `ConfigValidatorService`    | Runs the schema(s)                                     |
 | `ConfigWatcherService`      | Hot-reload watcher (when `watchForChanges: true`)      |
@@ -141,8 +141,7 @@ class UsersService {
 ```typescript
 import {
   Config, InjectConfig, ConfigSchema, Configuration,
-  ConfigValidate, ConfigWatch, ConfigDefaults,
-  ConfigProvider, ConfigTransform,
+  ConfigWatch, ConfigDefaults, ConfigProvider,
 } from '@omnitron-dev/titan/module/config';
 ```
 
@@ -152,11 +151,9 @@ import {
 | `@InjectConfig()`          | Inject the full `ConfigService`                         |
 | `@ConfigSchema(schema)`    | Class-level Zod schema for this class's config subtree  |
 | `@Configuration(prefix?)`  | Bind a class as a typed view of a config subtree        |
-| `@ConfigValidate(schema)`  | Method-level validation of one config subtree           |
 | `@ConfigWatch(path)`       | Method runs when the watched path changes               |
 | `@ConfigDefaults({...})`   | Provide class-level defaults                            |
 | `@ConfigProvider(name)`    | Custom config provider class                            |
-| `@ConfigTransform(fn)`     | Property-level value transformer                        |
 
 ```typescript
 @Service('users@1.0.0')
@@ -284,17 +281,23 @@ sources: [
     url:     'https://config-server.internal/api/configs/my-api',
     headers: { authorization: `Bearer ${process.env.CONFIG_TOKEN}` },
     timeout: 5_000,
-    retry:   { attempts: 3, delay: 1_000 },
   },
   { type: 'env', prefix: 'APP_' },
 ],
 ```
 
-The loader:
-- Tries `attempts` times on transport failure.
-- Waits `delay` ms between attempts (exponential backoff if your
-  loader is so configured).
+The loader retries automatically on transient failures:
+- Up to **3 attempts** total per remote source.
+- Exponential backoff with ±30% jitter (200 ms base, capped at 2 s).
+- Only **retryable** failures are retried (5xx, 408/429, network
+  errnos, request-timeout `AbortError`); a 4xx or a 2xx-with-bad-body
+  fast-fails without retrying.
 - After exhaustion, throws — boot aborts.
+
+> The retry policy (attempt count and backoff) is **fixed in the
+> loader**, not configurable per-source. `IRemoteConfigSource` carries
+> an optional `retry?: number` field, but the current loader does not
+> read it.
 
 For consumers that may be partitioned from the config server,
 combine a remote source with a file fallback:
