@@ -69,8 +69,8 @@ method.
 
 ## Service descriptors
 
-When you register a `@Service` class, Netron extracts a *descriptor* —
-a typed metadata record:
+When you register a `@Service` class, Netron extracts *service
+metadata* — a record built from `reflect-metadata` design types:
 
 ```typescript
 {
@@ -78,30 +78,33 @@ a typed metadata record:
   version: '1.0.0',
   methods: {
     findById: {
-      name:       'findById',
-      paramSchemas: [/* … */],
-      returnSchema: /* … */,
-      contract:   /* if @Contract was applied */,
-      // …
+      type:      'Promise',                 // design:returntype name
+      arguments: [{ index: 0, type: 'String' }],
     },
     create: { /* … */ },
   },
+  properties: { /* @Public properties, if any */ },
 }
 ```
 
-The descriptor is what `queryInterface<T>()` resolves against. Clients
-download the descriptor (or have it as part of a shared package); the
-methods they call are typed against it.
+(Reflection records the runtime *type names*, not full schemas — e.g.
+`Promise`, `String`, `Object`. Generic type arguments are erased.)
 
-Inspect a registered descriptor:
+This metadata is what `queryInterface<T>()` resolves against. The
+generic `<T>` is your TypeScript interface, supplied client-side;
+the wire carries the metadata above.
+
+The descriptor metadata is stamped on the class by the `@Service`
+decorator (via `reflect-metadata`) and read back when the service is
+exposed. The local peer is reachable through the running `Netron`
+instance:
 
 ```typescript
-const peer = app.getLocalPeer();
-const descriptor = peer.getServiceDescriptor('users@1.0.0');
-console.log(descriptor.methods);
+const peer = app.netron?.getLocalPeer();   // app.netron may be undefined before start()
+const names = peer?.getServiceNames();      // qualified names of exposed services
 ```
 
-The Omnitron console exposes the same descriptors via the operator
+The Omnitron console exposes the same metadata via the operator
 service.
 
 ## Peers
@@ -114,11 +117,12 @@ Netron's runtime model has two peer types:
   marshal as RPC packets.
 
 The application's `LocalPeer` is accessible via
-`app.getLocalPeer()`. You rarely interact with it directly — the
-framework wires services on its behalf.
+`app.netron?.getLocalPeer()`. You rarely interact with it directly —
+the framework wires services on its behalf.
 
-`RemotePeer` is the client-side view. `NetronClient` constructs one
-under the hood; you get the proxy via `queryInterface`.
+`RemotePeer` is the client-side view. `netron.connect(address)`
+returns one; you get the typed proxy via its
+`queryInterface<T>('name@version')`.
 
 ## Local vs remote calls — the same code
 
@@ -133,7 +137,7 @@ class OrdersService {
   @Public()
   async create(userId: string, items: Item[]) {
     const user = await this.users.findById(userId);   // direct method call
-    if (!user) throw Errors.notFound('user', { id: userId });
+    if (!user) throw Errors.notFound('user', userId);
     // …
   }
 }
@@ -156,26 +160,31 @@ the wire contract less coherent and complicates versioning.
 
 ## Service-level decorators
 
-In addition to method-level decorators, you can apply some traits at
-the **class** level — they then cover every `@Public` method on the
-class:
+In addition to method-level decorators, you can apply `@Auth` at the
+**class** level — it then covers every `@Public` method on the class:
 
 ```typescript
+import { Service, Public, Auth } from '@omnitron-dev/titan/decorators';
+
 @Service('orders@1.0.0')
-@Auth({ scope: 'orders:*' })                          // class-level auth
-@RateLimit({ capacity: 100, refillPerSec: 10 })       // class-level rate limit
+@Auth({ scopes: ['orders:read'] })                    // class-level auth
 class OrdersService {
   @Public() async list() { /* … */ }
   @Public() async get(id: string) { /* … */ }
   @Public()
-  @Auth({ scope: 'orders:write' })                    // override for this method
+  @Auth({ scopes: ['orders:write'] })                 // override for this method
   async create(input: CreateInput) { /* … */ }
 }
 ```
 
-Method-level decorators **override or extend** class-level ones, not
-remove them. To opt out, the method must explicitly declare `@NoAuth()`
-or equivalent.
+Method-level `@Auth` **overrides** the class-level config for that
+method (use the `inherit` / `override` flags on `AuthConfig` for
+finer control). To allow anonymous access on one method, declare
+`@Auth({ allowAnonymous: true })`.
+
+> `@Auth` is the only decorator that combines this way at the class
+> level. `@RateLimit`, `@Cache`, and `@Public`'s other options are
+> method-level only.
 
 ## Anti-patterns
 
@@ -190,8 +199,9 @@ or equivalent.
 - **Mixing service identities in one class.** "UsersService" and
   "AdminService" should be two classes, even if they share helpers.
   The wire contract is per-class.
-- **Skipping the version.** `@Service('users')` — defaults to
-  `1.0.0`, which is fine for v1 but invisible at the call site.
-  Always write the explicit version.
+- **Skipping the version.** `@Service('users')` leaves the version
+  **empty** (the qualified name is just `users`, not `users@1.0.0`).
+  That's a valid identity, but clients then resolve `'users'` with no
+  version pin. Always write the explicit version.
 
 → Next: [Transports](./transports.md).

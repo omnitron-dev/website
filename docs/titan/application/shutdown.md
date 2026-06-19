@@ -50,12 +50,21 @@ Reasons (from `ShutdownReason` enum): `Manual`, `SIGTERM`, `SIGINT`,
 
 ## `app.stop()` options
 
+`IShutdownOptions` is `{ timeout?, force?, graceful?, signal? }`:
+
 ```typescript
 await app.stop({
-  reason:  ShutdownReason.Maintenance,
-  timeout: 10_000,           // override gracefulShutdownTimeout for this call
+  timeout:  10_000,   // override gracefulShutdownTimeout for this call
+  force:    false,    // true → swallow hook/task/module errors, push to Stopped
+  graceful: true,     // false → a module-stop error aborts (unless force)
 });
 ```
+
+A direct `app.stop()` always reports `ShutdownReason.Manual` to
+shutdown-task handlers and the `ShutdownComplete` event. The reason
+variants (`SIGTERM`, `Maintenance`, …) come from the signal/programmatic
+path that calls the internal `shutdown(reason)` entry, not from a
+`reason` field on `stop()`.
 
 ## Custom shutdown tasks
 
@@ -80,8 +89,8 @@ app.unregisterShutdownTask('audit.flush');
 ```
 
 `ShutdownPriority` is a numeric enum (lower = runs first):
-`First (0)`, `VeryHigh (10)`, `High (25)`, `AboveNormal (40)`,
-`Normal (50)`, `BelowNormal (60)`, `Low (75)`, `VeryLow (90)`,
+`First (0)`, `VeryHigh (10)`, `High (20)`, `AboveNormal (30)`,
+`Normal (50)`, `BelowNormal (70)`, `Low (80)`, `VeryLow (90)`,
 `Last (100)`.
 
 ## The hard-exit guarantee
@@ -124,18 +133,20 @@ event bus:
 
 | Event                                | Payload                                       |
 | ------------------------------------ | --------------------------------------------- |
-| `ApplicationEvent.ShutdownStart`     | `{ reason }`                                  |
-| `ApplicationEvent.ShutdownTaskComplete` | `{ taskId, name, durationMs }`             |
-| `ApplicationEvent.ShutdownTaskError` | `{ taskId, name, error }`                     |
-| `ApplicationEvent.ShutdownComplete`  | `{ totalDurationMs, hardExit? }`              |
-| `ApplicationEvent.ShutdownError`     | `{ error }`                                   |
+| `ApplicationEvent.ShutdownStart`     | `{ reason, details }`                         |
+| `ApplicationEvent.ShutdownTaskComplete` | `{ task }`                                 |
+| `ApplicationEvent.ShutdownTaskError` | `{ task, error }`                             |
+| `ApplicationEvent.ShutdownComplete`  | `{ reason, success }`                         |
+| `ApplicationEvent.ShutdownError`     | `{ reason, error }`                           |
 
-Subscribe in production to record shutdown SLAs:
+Per-phase timing flows through `ApplicationEvent.LifecyclePhaseEvent`
+(a `LifecyclePhaseEvent` with `phase`, `kind`, and timing fields), which
+is where duration histograms belong. Subscribe in production to record
+shutdown outcomes:
 
 ```typescript
-app.on(ApplicationEvent.ShutdownComplete, ({ totalDurationMs, hardExit }) => {
-  metrics.histogram('app.shutdown.ms').observe(totalDurationMs);
-  if (hardExit) metrics.counter('app.shutdown.hard_exit').inc();
+app.on(ApplicationEvent.ShutdownComplete, ({ reason, success }) => {
+  metrics.counter('app.shutdown', { reason, success: String(success) }).inc();
 });
 ```
 

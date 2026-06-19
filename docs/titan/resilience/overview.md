@@ -18,7 +18,7 @@ the call boundary.
 | `CircuitBreaker` class | Stop calling a backend after failures          | [Circuit Breaker](./circuit-breaker.md) |
 | `withTimeout()` | Abandon a call that takes too long                    | [Timeout](./timeout.md)           |
 | `FailureTracker` | Sliding-window error counting                        | source: `utils/failure-tracker.ts` |
-| `ResilientHandle` | Bundled retry + breaker + timeout for one dep       | source: `utils/resilience.ts`     |
+| `ResilientHandle` | Self-healing cached handle to a flaky external resource (auto-recreate on fatal error) | source: `utils/resilience.ts` |
 
 There is also a `@Retry` decorator in
 `@omnitron-dev/titan/decorators` for simple fixed-delay retry on a
@@ -58,8 +58,12 @@ flowchart LR
 - Circuit breaker next — if open, fail fast (no retries).
 - Retry — re-attempt on transient failures.
 
-For this exact composition, use `ResilientHandle` from
-`utils/resilience.ts` — see the source for the current API surface.
+Compose the primitives directly (as in the example below). Note
+that `ResilientHandle` is **not** a retry+breaker+timeout bundle —
+it is a self-healing cache for a single external resource (a Redis
+client, the esbuild sidecar, a gRPC channel) that recreates the
+instance via a `factory` when a call throws a fatal error. See
+`utils/resilience.ts` for its API.
 
 ## The minimal example
 
@@ -70,16 +74,18 @@ import { retry, withTimeout, CircuitBreaker } from '@omnitron-dev/titan/utils';
 class PaymentsService {
   private readonly stripeBreaker = new CircuitBreaker({
     failureThreshold: 5,
-    timeout:          60_000,
+    resetTimeout:     60_000,   // ms in Open before a probe
   });
 
   @Public()
   async charge(req: ChargeRequest) {
+    // withTimeout takes a Promise (not a thunk) and a number of ms
+    // (or { timeout, errorMessage }).
     return withTimeout(
-      () => this.stripeBreaker.execute(() =>
+      this.stripeBreaker.execute(() =>
         retry(() => this.stripe.charge(req), { maxRetries: 3 })
       ),
-      { timeoutMs: 5_000 },
+      5_000,
     );
   }
 }

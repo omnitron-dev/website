@@ -767,7 +767,8 @@ dev: {
 },
 ```
 
-at the app level — applied with `omnitron dev`. Plus
+at the app level — picked up by `omnitron up` (which file-watches
+dev stacks by default; pass `--no-watch` to disable). Plus
 `watch: { directory: './apps/X' }` per app at the ecosystem
 level for HMR.
 

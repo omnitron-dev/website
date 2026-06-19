@@ -60,14 +60,19 @@ flowchart LR
     Mw[DI middleware pipeline]
     Ld[Lazy / Async / Conditional]
   end
-  subgraph Experimental
-    Dt[DevTools graph]
-    Ms[Service Mesh]
-    Tr[Tracing hooks]
+  subgraph Diagnostics
+    Dt[Dependency-graph export]
+    Lc2[Lifecycle observers]
   end
   Core --> Advanced
-  Advanced --> Experimental
+  Advanced --> Diagnostics
 ```
+
+> The experimental Service Mesh, Distributed Tracing, and DevTools
+> debugger modules were removed (`NEXUS_FEATURES.SERVICE_MESH`,
+> `DISTRIBUTED_TRACING`, and `DEVTOOLS` are all `false`). The
+> dependency-graph export and lifecycle observers survive as stable
+> diagnostics — see [DevTools](./devtools.md).
 
 - **Multi-tokens** — a single token can hold multiple providers
   (`createMultiToken<T[]>('Validators')`).
@@ -172,7 +177,7 @@ The Nexus error hierarchy (`NexusError` → specialised subclasses):
 
 | Topic                                         | When to read                                              |
 | --------------------------------------------- | --------------------------------------------------------- |
-| [Providers](./providers.md)                   | The five provider types and when to use each              |
+| [Providers](./providers.md)                   | The provider types and when to use each                   |
 | [Scopes](./scopes.md)                         | Transient / Singleton / Scoped / Request                  |
 | [Tokens](./tokens.md)                         | Class, symbol, multi-, lazy, async, optional tokens       |
 | [Multi-injection](./multi-injection.md)       | Plugin patterns, middleware chains                        |

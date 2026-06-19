@@ -6,9 +6,19 @@ description: One client, many servers — pools, failover, method-level routing.
 
 # Multi-Backend
 
+:::warning Config shape corrected against source
+An earlier version of this page documented a config surface
+(`strategy`, `stickyKey`, `routing`, nested `health`/`failover`,
+per-backend `pool`) that **does not exist** in the implementation. The
+examples below are rewritten against
+`packages/titan/src/netron/multi-backend/types.ts`. Confirm there for
+the version you target.
+:::
+
 A `MultiBackendClient` is a Netron client that fans out to multiple
 servers. It exposes the same interface as a single-backend client;
-the backend selection is internal.
+the backend selection is internal. The server-side implementation is
+exported from `@omnitron-dev/titan/netron/multi-backend`.
 
 ```mermaid
 flowchart LR
@@ -38,81 +48,90 @@ Use when you have:
 
 ## The minimal example
 
+Every backend needs a unique `id` and a `url`:
+
 ```typescript
-import { MultiBackendClient } from '@omnitron-dev/netron-browser';
+import { MultiBackendClient } from '@omnitron-dev/titan/netron/multi-backend';
 
 const client = new MultiBackendClient({
   backends: [
-    { url: 'http://api-1.internal' },
-    { url: 'http://api-2.internal' },
-    { url: 'http://api-3.internal' },
+    { id: 'api-1', url: 'http://api-1.internal' },
+    { id: 'api-2', url: 'http://api-2.internal' },
+    { id: 'api-3', url: 'http://api-3.internal' },
   ],
-  strategy: 'round-robin',
+  // strategy is set per-route (see below), not at the top level.
 });
 
 const users = await client.queryInterface<UsersService>('users@1.0.0');
-const user  = await users.findById('u_42');     // call goes to one of the three
+const user  = await users.findById('u_42');     // routed to one of the three
 ```
 
-The client picks a backend per call (round-robin, here) and routes
-the call to it. If the call fails on a transient error, the client
-retries on a different backend.
+If the call fails and `failover` is on (the default), the client
+retries on another backend (up to `maxFailoverAttempts`, default 2).
 
 ## Strategies
 
-| Strategy        | Behaviour                                                   |
-| --------------- | ----------------------------------------------------------- |
-| `round-robin`   | Cycle through backends evenly                               |
-| `least-busy`    | Send to the backend with the fewest in-flight calls         |
-| `sticky`        | Hash the request to a backend (same key → same backend)     |
-| `primary`       | First backend serves all traffic; failover to others         |
-| `weighted`      | Weighted round-robin per backend's `weight` field           |
+The load-balancing strategy is a `LoadBalancingStrategy`, set on a
+route (`router.routes[].strategy`) or as `router.defaultStrategy`
+(default `round-robin`):
 
-```typescript
-strategy: 'sticky',
-stickyKey: (service, method, args) => args[0],   // hash by first arg
-```
+| Strategy             | Behaviour                                              |
+| -------------------- | ------------------------------------------------------ |
+| `round-robin`        | Cycle through backends evenly (default)                |
+| `random`             | Pick a backend at random                               |
+| `least-connections`  | Send to the backend with the fewest active connections |
+| `weighted`           | Intended to weight by `BackendConfig.weight` — **currently falls back to random** (weights not yet wired) |
 
-## Method-level routing rules
+There is no `sticky`, `least-busy`, or `primary` strategy, and no
+`stickyKey` hook. "Primary/fallback" semantics are expressed through a
+route's `backends` vs `fallback` lists, not a strategy name.
 
-Some methods should always go to the primary (writes), even when
-reads are spread across replicas:
+## Service-level routing rules
+
+Routing matches on the **service name** (with `*` wildcards) — not on
+method. Configure it under `router.routes`:
 
 ```typescript
 new MultiBackendClient({
   backends: [
-    { url: '…primary',  role: 'primary' },
-    { url: '…replica1', role: 'replica' },
-    { url: '…replica2', role: 'replica' },
+    { id: 'primary',  url: '…primary'  },
+    { id: 'replica1', url: '…replica1' },
+    { id: 'replica2', url: '…replica2' },
   ],
-  routing: [
-    { match: { method: /^create|update|delete/ },  role: 'primary' },
-    { match: { method: /^find|list|get/ },         role: 'replica' },
-  ],
-});
-```
-
-The first matching rule wins. Calls without a matching rule use the
-default strategy.
-
-## Health monitoring
-
-The client polls each backend's health endpoint:
-
-```typescript
-new MultiBackendClient({
-  backends: [...],
-  health: {
-    intervalMs:        5_000,         // check every 5s
-    unhealthyAfter:    3,             // 3 consecutive failures = unhealthy
-    healthyAfter:      2,             // 2 consecutive successes = healthy again
-    timeoutMs:         2_000,         // single check timeout
+  router: {
+    routes: [
+      { service: 'orders@*', backends: ['primary'], fallback: ['replica1', 'replica2'] },
+      { service: 'reports@*', backends: ['replica1', 'replica2'], strategy: 'round-robin' },
+    ],
+    defaultBackends: ['primary'],
+    defaultStrategy: 'round-robin',
   },
 });
 ```
 
-Unhealthy backends are removed from the rotation. They keep being
-polled; when they recover, they re-enter.
+A route targets backend **ids**. `fallback` ids are tried when the
+primary `backends` are unavailable. To split reads vs writes by
+method, expose them as separate services (e.g. `orders` and
+`orders-read`) and route per service.
+
+## Health monitoring
+
+Health-check options are **flat** top-level fields (not a nested
+`health` object):
+
+```typescript
+new MultiBackendClient({
+  backends: [...],
+  healthChecks:        true,          // default true
+  healthCheckInterval: 30_000,        // default 30s
+  unhealthyThreshold:  3,             // consecutive failures → unhealthy (default 3)
+  healthyThreshold:    2,             // consecutive successes → healthy (default 2)
+});
+```
+
+(There is no per-check `timeoutMs` field.) Unhealthy backends are
+removed from the rotation; they keep being polled and re-enter when
+they recover.
 
 The Omnitron orchestrator's `MultiBackendClient` consumes
 `titan-discovery` data instead of a static list — backends register
@@ -120,53 +139,49 @@ themselves; the client picks them up automatically.
 
 ## Failover
 
-When a call fails on a backend, the client decides:
-
-- **Retry on another backend?** Yes if the error is classified as
-  transient (`ServiceUnavailable`, `TimeoutError`, network error).
-  No otherwise.
-- **Mark this backend unhealthy?** Yes if the failure looks
-  infrastructure-level (connection refused, TLS error, 503).
-  No for application-level errors (404, 422).
-
-Configurable:
+`failover` is a **boolean** (default `true`), not an options object,
+and `maxFailoverAttempts` (default 2) caps the retries:
 
 ```typescript
-failover: {
-  retriableErrors: (e) => isOperationalError(e),
-  maxRetries:      2,                 // try up to 3 backends total
+new MultiBackendClient({
+  backends: [...],
+  failover:            true,
+  maxFailoverAttempts: 2,             // up to 2 extra backends tried
+});
+```
+
+The current implementation retries on **any** thrown error (there is
+no `retriableErrors` classifier hook). A single call can opt out via a
+per-request `hints.noFailover`.
+
+For failure *isolation*, configure the **circuit breaker** (this is
+the real mechanism for shedding a bad backend):
+
+```typescript
+circuitBreaker: {
+  enabled:      true,
+  threshold:    5,                    // errors before opening (default 5)
+  window:       60_000,               // error-tracking window (default 60s)
+  resetTimeout: 30_000,               // wait before half-open (default 30s)
 }
 ```
 
-## Connection pooling
+## Connection model
 
-For each backend, a connection pool is maintained:
-
-```typescript
-backends: [
-  {
-    url: '…',
-    pool: {
-      min:           1,
-      max:           10,
-      idleTimeoutMs: 30_000,
-    },
-  },
-],
-```
-
-Connection reuse is essential for performance. The default pool size
-(10 per backend) is appropriate for most services.
+There is no sized connection pool. Each backend is fronted by a single
+`BackendClient` holding one HTTP client (or one WebSocket connection).
+Per-backend `pool: { min, max, idleTimeoutMs }` is not a real option.
 
 ## Observability
 
-The client emits per-call metrics including the chosen backend:
+Track per-call latency and the chosen backend (the exact metric shape
+is up to your metrics layer — illustrative):
 
 ```typescript
 metrics.histogram('rpc.duration_ms', {
   service: 'users@1.0.0',
   method:  'findById',
-  backend: 'api-2.internal',
+  backend: 'api-2',
 }).observe(duration);
 ```
 
@@ -175,7 +190,8 @@ overlooked failover events.
 
 ## When not to use MultiBackend
 
-- **One backend.** Use a regular `NetronClient` — simpler.
+- **One backend.** Connect a single peer
+  (`netron.connect(url)` → `queryInterface`) — simpler.
 - **Cross-region routing.** A client in one region routing across
   regions adds round-trip latency that a regional load balancer
   hides better. Put the multi-backend logic at the LB.
@@ -185,15 +201,17 @@ overlooked failover events.
 
 ## Anti-patterns
 
-- **Sticky routing on a small key space.** Sticky-by-tenant-ID
-  with one large tenant routes all traffic for that tenant to one
-  backend. Use sticky only when the key space is large enough to
-  spread.
-- **Aggressive `unhealthyAfter`.** Marking a backend unhealthy
-  after one failure is fragile to noise. Three is a good default;
-  five for very flaky networks.
-- **Failover on every error.** Application errors should not
-  trigger failover — they are not the backend's fault. Use
-  classifier-based filters.
+- **Routing a whole hot service to one backend.** A route that pins a
+  high-traffic service to a single backend id forfeits spreading. Give
+  busy services multiple backends with `round-robin` /
+  `least-connections`.
+- **Aggressive `unhealthyThreshold`.** Marking a backend unhealthy
+  after one failure is fragile to noise. Three (the default) is a good
+  baseline; raise it for very flaky networks.
+- **Relying on failover to mask app errors.** Failover currently
+  retries on any error, so a deterministic application error will be
+  retried against every backend and still fail. Prefer the circuit
+  breaker for infrastructure faults, and don't lean on failover to
+  paper over 4xx-class errors.
 
 → Next: [Serialization](./serialization.md).

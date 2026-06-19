@@ -15,15 +15,21 @@ a worker thread.
 ```typescript
 import { withTimeout } from '@omnitron-dev/titan/utils';
 
-const result = await withTimeout(
-  () => fetch(url),
-  { timeoutMs: 5_000 },
+// withTimeout takes a Promise (already-invoked), and either a number
+// of milliseconds or a { timeout, errorMessage } object.
+const result = await withTimeout(fetch(url), 5_000);
+
+// With a custom message:
+const result2 = await withTimeout(
+  fetch(url),
+  { timeout: 5_000, errorMessage: 'upstream fetch timed out' },
 );
 ```
 
-The exact shape of `TimeoutOptions` lives in
-`utils/resilience.ts`. After the timeout, the framework rejects with
-a typed error (use `isTimeoutError(e)` to check).
+`TimeoutOptions` is `{ timeout: number; errorMessage?: string }`
+(see `utils/resilience.ts`). On timeout, `withTimeout` rejects with
+an `Error` whose `name` is `'TimeoutError'` (use `isTimeoutError(e)`
+to check).
 
 The underlying operation is **not** automatically cancelled — see
 "Cancellation" below.

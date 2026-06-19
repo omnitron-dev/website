@@ -67,6 +67,11 @@ The array contains every provider registered against `VALIDATORS`,
 in the order they were registered. New validators in new modules
 slot in without changing the consumer.
 
+> Titan also ships a dedicated `@InjectAll(token)` decorator
+> (`@omnitron-dev/titan`) that explicitly resolves *all* providers
+> bound to a token into an array — use it when you want the intent to
+> be unambiguous at the injection site.
+
 ## Why this matters
 
 The alternative — a registry the consumer maintains — couples consumer

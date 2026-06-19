@@ -13,7 +13,9 @@ run without the real backend.
 
 The rule of thumb stays the same: unit tests instantiate the class
 with mock dependencies; integration tests boot a real `Application`
-with the heavy infrastructure overridden via `overrides:`.
+with the heavy infrastructure overridden via the `providers:` tuple
+array on `Application.create` (see
+[DI Overrides](./di-overrides.md) — there is no `overrides:` option).
 
 ## Built-in modules
 
@@ -33,8 +35,8 @@ const mockConfig = {
     };
     return (map[path] ?? defaultValue) as T;
   },
-  has:     () => true,
-  watch:   () => () => {},
+  has:      () => true,
+  onChange: () => () => {},   // returns an unsubscribe fn
 } as unknown as ConfigService;
 ```
 

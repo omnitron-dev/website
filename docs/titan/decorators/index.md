@@ -228,17 +228,27 @@ Validate input (and optionally output) against Zod schemas.
 
 ```typescript
 import { z } from '@omnitron-dev/titan/validation';
-import { Validate, Contract } from '@omnitron-dev/titan/decorators';
+import { Validate, ValidateInput, Contract } from '@omnitron-dev/titan/decorators';
 
 @Public()
-async create(@Validate(CreateUserSchema) input: z.infer<typeof CreateUserSchema>) {
+@Validate({ input: CreateUserSchema })
+async create(input: z.infer<typeof CreateUserSchema>) {
   // input is parsed and trusted here.
 }
+
+// Input-only shorthand — equivalent to @Validate({ input: schema })
+@Public()
+@ValidateInput(CreateUserSchema)
+async createAlt(input: z.infer<typeof CreateUserSchema>) { /* … */ }
 
 @Public()
 @Contract(FindByIdContract)
 async findById(input: { id: string }) { /* input + output validated */ }
 ```
+
+`@Validate` is a **method** decorator. It takes a `MethodContract`
+options object (`{ input?, output?, errors?, stream?, options? }`)
+of Zod schemas — not a bare schema, and not a parameter decorator.
 
 Other validation decorators: `ValidateInput`, `ValidateOutput`,
 `NoValidation`, `Contracts` (class-level), `contract` (builder).
@@ -357,7 +367,7 @@ execution at call time is **inside-out**:
 @Public()                                              //  ← outer
 @Auth({ roles: ['admin'] })                            //
 @RateLimit({ limit: 10, window: 60_000 })              //
-@Validate(InputSchema)                                 //  ← inner, runs first
+@Validate({ input: InputSchema })                      //  ← inner, runs first
 async dangerousOp(input: Input) { /* … */ }
 ```
 

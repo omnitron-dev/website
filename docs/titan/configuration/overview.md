@@ -14,7 +14,7 @@ This is the entry point. Detail in:
 
 - [Sources](./sources.md) — files, env, argv, objects, remote.
 - [Validation](./validation.md) — schema-checked config at boot.
-- [Hot Reload](./hot-reload.md) — `ConfigWatcherService` and events.
+- [Hot Reload](./hot-reload.md) — `ConfigWatcherService` and the `onChange` callback.
 
 ## The mental model
 
@@ -120,7 +120,7 @@ hardcoded `localhost:5432` in code locks you to one deployment.
 - [Sources](./sources.md) — every source type and what it accepts.
 - [Validation](./validation.md) — schema patterns and error
   handling.
-- [Hot Reload](./hot-reload.md) — `ConfigWatcherService`, the
-  `config:changed` event.
+- [Hot Reload](./hot-reload.md) — `ConfigWatcherService` and the
+  `ConfigService.onChange()` callback.
 
 → Next: [Sources](./sources.md).

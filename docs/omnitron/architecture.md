@@ -37,7 +37,7 @@ flowchart TB
       Sched[Daemon scheduler]
     end
 
-    subgraph BuiltIn["Built-in RPC services &#40;19&#41;"]
+    subgraph BuiltIn["Built-in RPC services &#40;21 on a master daemon&#41;"]
       Deploy[deploy]
       Fleet[fleet]
       Secrets[secrets]
@@ -47,6 +47,7 @@ flowchart TB
       Infra[infrastructure]
       K8s[kubernetes]
       Logs[log-collector]
+      Metrics[metrics]
       Trace[trace-collector]
       Telemetry[telemetry]
       Health[health-check]
@@ -130,7 +131,7 @@ socket for ergonomics.
 
 | Carries                       | Used by                                  |
 | ----------------------------- | ---------------------------------------- |
-| All 19 RPC services           | `omnitron` CLI                           |
+| All built-in RPC services     | `omnitron` CLI                           |
 | The `OmnitronDaemon` service  | Webapp dev (when running locally)        |
 | MCP server requests           | Agent processes spawned by the CLI       |
 
@@ -146,12 +147,17 @@ JWT is **required** on this plane. RBAC roles
 
 ### 3. HTTP / WS plane — `http://0.0.0.0:9800`
 
-Opt-in. Serves:
-- The webapp's static bundle (production build).
-- The Netron HTTP bridge (`netron-browser` uses this).
-- A REST gateway if `httpRest: true` is configured.
+Opt-in. The daemon's HTTP plane is the **Netron HTTP + WebSocket
+bridge** that browser clients use. With the default `httpPort`
+of `9800`, the daemon binds the HTTP bridge on `httpPort + 1`
+(`:9801`) and the WebSocket transport on `httpPort + 2`
+(`:9802`); the public `:9800` is fronted by the `omnitron-nginx`
+container, which serves the static bundle and reverse-proxies
+`/netron/*` and `/ws` to those daemon ports.
 
-JWT also required here, except for static asset routes.
+JWT is required for RPC, except for static asset routes (served
+by nginx) and the unauthenticated `signIn` / `validateToken` /
+`refreshSession` methods.
 
 ## Daemon lifecycle
 
@@ -282,31 +288,41 @@ Two launch modes:
 
 ## Built-in RPC services
 
-The daemon registers 19 Netron services at boot. They share
+A master daemon registers 21 Netron services at boot (22 when
+`cluster.enabled`). A slave daemon registers a reduced core set —
+the PostgreSQL-backed services (`OmnitronAuth`, `OmnitronAlerts`,
+`OmnitronTelemetry`, `OmnitronFleet`, `OmnitronDiscovery`,
+`OmnitronPipelines`, `OmnitronTraces`, `OmnitronDeploy`,
+`OmnitronNodes`) are master-only. All services share
 authentication / authorization with the `OmnitronDaemon` service.
+
+The first column is the **Netron service name** (the identifier
+clients resolve, e.g. `daemon.OmnitronAuth.signIn(...)`).
 
 | Service               | Purpose                                                    |
 | --------------------- | ---------------------------------------------------------- |
 | `OmnitronDaemon`      | App lifecycle — start / stop / restart / status / inspect  |
-| `auth`                | JWT issue / verify / RBAC                                  |
-| `secrets`             | Encrypted secret CRUD                                      |
-| `infrastructure`      | Docker container management (Postgres / Redis / etc.)      |
-| `deploy`              | Deployment workflows                                       |
-| `fleet`               | Cross-node fleet operations                                |
-| `pipeline`            | CI/CD pipeline runs                                        |
-| `backup`              | Database backup / restore                                  |
-| `project`             | Seed project registry                                      |
-| `kubernetes`          | k8s integration (apply / scale / observe)                  |
-| `node-manager`        | Infrastructure node inventory                              |
-| `log-collector`       | Per-app log streaming + filtering                          |
-| `trace-collector`     | Distributed trace ingestion                                |
-| `telemetry`           | Telemetry-relay (`titan-telemetry-relay`) aggregator       |
-| `health-check`        | Active health-check runs                                   |
-| `discovery`           | Service discovery state                                    |
-| `event-broadcaster`   | Cross-process event bus                                    |
-| `alert`               | Alert rules + delivery                                     |
-| `sync`                | Cross-daemon state synchronisation                         |
-| `system-info`         | Host CPU / RAM / disk inventory                            |
+| `OmnitronAuth`        | JWT issue / verify / RBAC                                  |
+| `OmnitronSecrets`     | Encrypted secret CRUD                                      |
+| `OmnitronInfra`       | Docker container management (Postgres / Redis / etc.)      |
+| `OmnitronDeploy`      | Deployment workflows                                       |
+| `OmnitronFleet`       | Cross-node fleet operations                                |
+| `OmnitronPipelines`   | CI/CD pipeline runs                                        |
+| `OmnitronBackups`     | Database backup / restore                                  |
+| `OmnitronProject`     | Project + stack registry                                   |
+| `OmnitronKubernetes`  | k8s integration (apply / scale / observe)                  |
+| `OmnitronNodes`       | Infrastructure node inventory (node-manager)               |
+| `OmnitronLogs`        | Per-app log streaming + filtering                          |
+| `OmnitronMetrics`     | Metrics aggregation (from `titan-metrics`)                 |
+| `OmnitronTraces`      | Distributed trace ingestion                                |
+| `OmnitronTelemetry`   | Telemetry-relay (`titan-telemetry-relay`) aggregator       |
+| `OmnitronHealth`      | Active health-check runs                                   |
+| `OmnitronDiscovery`   | Service discovery state                                    |
+| `OmnitronEvents`      | Cross-process event bus (WebSocket subscriptions)          |
+| `OmnitronAlerts`      | Alert rules + delivery                                     |
+| `OmnitronSync`        | Cross-daemon state synchronisation                         |
+| `OmnitronSystemInfo`  | Host CPU / RAM / disk inventory                            |
+| `OmnitronCluster`     | Leader election (only when `cluster.enabled`)              |
 
 → Full reference: [Services reference](./services-reference.md).
 
@@ -369,15 +385,21 @@ group — see [CLI Cluster section](./cli.md#cluster-leader-election).
 
 ## Webapp host
 
-The daemon optionally serves the React console:
+The React console is served by a dedicated `omnitron-nginx`
+container — **not** by the daemon process itself. The daemon's
+HTTP plane carries only the Netron RPC bridge; nginx serves the
+static bundle and proxies RPC to the daemon:
 
-| Mode             | Source                                          | When          |
-| ---------------- | ----------------------------------------------- | ------------- |
-| **Production**   | Pre-built bundle from `apps/omnitron/webapp/dist/` | After `pnpm build` |
-| **Dev**          | Spawns Vite dev server with HMR                | `omnitron webapp dev` |
+| Mode             | Served by                                          | Command               |
+| ---------------- | -------------------------------------------------- | --------------------- |
+| **Production**   | `omnitron-nginx` container fronting `apps/omnitron/webapp/dist/` | `omnitron webapp build` then `omnitron webapp start` |
+| **Dev**          | Vite dev server with HMR                            | `pnpm dev` in `apps/omnitron/webapp/` |
 
-Both modes proxy Netron RPC over HTTP through the daemon's HTTP
-plane.
+nginx (`:9800`) proxies `/netron/*` to the daemon's HTTP listener
+(`httpPort + 1`, default `:9801`) and `/ws` to the daemon's Netron
+WebSocket transport (`httpPort + 2`, default `:9802`). In dev mode
+Vite talks to the same daemon HTTP/WS ports directly. See
+[Console](./console.md) for the full port map.
 
 ## Auth model — three roles
 

@@ -6,92 +6,75 @@ description: Transform, filter, enrich records before they hit a transport.
 
 # Log Processors
 
-A processor receives a log record before it goes to any transport.
-It can transform the record, drop it, or pass it through. Processors
-chain.
+A processor implements `ILogProcessor` — a single `process(log)`
+method that can transform a log object, or return `null` to drop it.
 
-## Built-in processors
+```typescript
+interface ILogProcessor {
+  process(log: any): any | null;
+}
+```
 
-### `RedactionProcessor`
+> ⚠️ **NEEDS REWRITE.** Processors registered via
+> `LoggerModule.forRoot({ processors })` are currently **stored but
+> not applied** to log output — the root logger is Pino, and the
+> processor list is not run in its write path. The reliable redaction
+> mechanism today is Pino's native `redact` option (see below). The
+> `ILogProcessor` interface and the `RedactionProcessor` class exist,
+> but treat the "processor pipeline" framing as aspirational until the
+> wiring lands. The signatures below are corrected to the real API.
 
-Replaces sensitive field values with `***`:
+## Redaction (the mechanism that works today)
+
+Use the module's `redact` option, which is forwarded to Pino:
 
 ```typescript
 LoggerModule.forRoot({
-  processors: [
-    new RedactionProcessor({
-      paths: [
-        'password',
-        'token',
-        'apiKey',
-        'headers.authorization',
-        'creditCard.*',
-      ],
-    }),
-  ],
+  redact: ['password', 'token', 'apiKey', 'headers.authorization', '*.creditCard'],
 })
 ```
 
-Path syntax: dotted; `*` is a wildcard for one segment. The
-processor walks every log record's fields and replaces matched
-paths with `'***'` (configurable).
+Pino redaction supports its own path syntax (including `*` wildcards)
+and replaces matched values with `[Redacted]` by default. **Set the
+redaction list per-app** — Titan does not redact by default because
+what counts as sensitive is project-specific.
 
-This is mandatory for any log infrastructure that ships beyond the
-host. **Default redaction list should be set per-app** — Titan does
-not redact by default because what counts as sensitive is
-project-specific.
+### `RedactionProcessor` (interface-level)
 
-### `EnrichmentProcessor`
-
-Add fields to every record:
+The built-in `RedactionProcessor` takes a **positional** `string[]`
+of dotted paths (not an options object) and replaces matched leaf
+values with the literal string `'[REDACTED]'`. Paths are literal
+dotted segments — there is no `*` wildcard support in this class:
 
 ```typescript
-new EnrichmentProcessor({
-  staticFields: {
-    region:  'eu-west-1',
-    podName: process.env.HOSTNAME,
-  },
-})
+import { RedactionProcessor } from '@omnitron-dev/titan/module/logger';
+
+new RedactionProcessor(['password', 'token', 'headers.authorization']);
 ```
 
-For dynamic enrichment (per-request fields), use a child logger
-instead — see [Child Loggers](./child-loggers.md).
+Note the caveat above: until the processor pipeline is wired into the
+write path, prefer the `redact` module option for actual redaction.
 
 ### Custom processors
 
 ```typescript
-import { type ILogProcessor, type LogRecord } from '@omnitron-dev/titan/module/logger';
+import { type ILogProcessor } from '@omnitron-dev/titan/module/logger';
 
-class TraceLevelProcessor implements ILogProcessor {
-  process(record: LogRecord): LogRecord | null {
-    if (record.level === LogLevel.Trace && record.service !== 'debug-target') {
+class DropTraceProcessor implements ILogProcessor {
+  process(log: any): any | null {
+    if (log.level === 'trace' && log.service !== 'debug-target') {
       return null;        // drop
     }
-    return record;
+    return log;
   }
 }
 ```
 
-Return `null` to drop. Return the record (modified or not) to pass
-through.
+Return `null` to drop. Return the log (modified or not) to pass
+through. There is no `LogRecord` type — `process` receives a plain
+object.
 
-## Order
-
-Processors run in declaration order. The first dropped record skips
-all subsequent processors and all transports.
-
-Conventional order:
-
-```typescript
-processors: [
-  new RedactionProcessor(...),     // redact first — even dropped logs are not stored
-  new EnrichmentProcessor(...),    // add static metadata
-  new RateLimitProcessor(...),     // drop if too noisy
-  new SamplingProcessor(...),      // drop a fraction (volume control)
-]
-```
-
-## When to processor vs at the call site
+## When to use a processor vs the call site
 
 A processor is the right tool for **uniform** transformations:
 

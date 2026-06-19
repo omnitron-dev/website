@@ -135,23 +135,24 @@ Five methods, all related to election + state:
 
 | Method | Auth | Effect |
 | ------ | ---- | ------ |
-| `getState()` | anonymous | Current election state — `{nodeId, state, term, leaderId, votedFor, peers, uptime}` |
+| `getClusterState()` | anonymous | Current election state — `{nodeId, state, term, leaderId, votedFor, peers, uptime}` |
 | `requestVote({candidateId, term})` | anonymous | Inter-daemon vote request |
 | `leaderHeartbeat({leaderId, term, configHash?})` | anonymous | Leader-to-follower heartbeat |
 | `stepDown()` | operator | Force the local leader to step down → triggers new election |
-| `getConfigHash()` | operator | Hash of the current config (used to detect drift) |
+| `isLeader()` | operator | `{leader, nodeId, term}` — quick leadership check |
 
-Anonymous methods are for daemon-to-daemon comm; operator
-methods are for human / CLI use.
+All five carry `@Public({ auth: { allowAnonymous: true } })` except
+the operator-facing methods. Anonymous methods are for
+daemon-to-daemon comm; operator methods are for human / CLI use.
 
 ### CLI
 
 ```bash
-omnitron cluster status        # → getState()
+omnitron cluster status        # → getClusterState()
 omnitron cluster step-down     # → stepDown()
 ```
 
-Sample `getState()` output:
+Sample `getClusterState()` output:
 
 ```json
 {
@@ -253,6 +254,8 @@ health history). They overlap but serve different purposes.
 - **History**: `getCheckHistory`, `getUptimeBar`,
   `getNodeHealthSummaries`.
 - **SSH**: `listSshKeys`.
+- **Check config**: `getCheckConfig`, `setCheckConfig`
+  (ping/SSH/omnitron timeouts).
 
 ### Uptime bars
 
@@ -260,12 +263,16 @@ health history). They overlap but serve different purposes.
 historical health bucketed into time segments. The webapp uses
 this for the green/yellow/red availability bars.
 
-| Param | Default |
-| ----- | ------- |
-| `intervalMs` | `86 400 000` (24 h per bucket) |
-| `bucketCount` | computed from `retentionDays` (default `90`) |
+| Param | Default (RPC method) |
+| ----- | -------------------- |
+| `bucketCount` | `60` |
+| `intervalMs` | `300_000` (5 min per bucket) |
 
-Each bucket is `healthy | degraded | offline | unknown`.
+Each bucket reports ping / omnitron uptime as a `0.0–1.0`
+percentage. (The daemon's health-monitor worker keeps a longer
+retention window — `retentionDays: 90`, `uptimeIntervalMs:
+86_400_000` — but those govern check storage, not this method's
+default windowing.)
 
 ## State sync — `OmnitronSync` service
 

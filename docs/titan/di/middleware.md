@@ -78,26 +78,31 @@ flowchart LR
 | `TransactionMiddleware`    | Wrap resolution in a transaction (DB-aware contexts)      |
 | `CircuitBreakerMiddleware` | Open a circuit after consecutive resolution failures      |
 
-The built-ins are factory functions or pre-built middleware objects
-exported from `nexus/middleware`. Consult the source for the
-constructor signature of each (they accept knob-based options).
+These come in two flavours. `LoggingMiddleware`, `CachingMiddleware`,
+`RetryMiddleware`, `ValidationMiddleware`, and `TransactionMiddleware`
+are **pre-built middleware objects** (`export const … = createMiddleware(…)`)
+— add them directly. `CircuitBreakerMiddleware` and
+`RateLimitMiddleware` are **classes** you instantiate with `new`
+(e.g. `new RateLimitMiddleware(100, 60000)`).
 
 ## Applying middleware
+
+Middleware is added one at a time via `container.addMiddleware()`,
+which returns the container for chaining:
 
 ```typescript
 const container = createContainer();
 
-container.useMiddleware([
-  LoggingMiddleware({ level: 'debug' }),
-  RetryMiddleware({ /* options */ }),
-  CachingMiddleware({ /* options */ }),
-]);
+container.addMiddleware(LoggingMiddleware);
+container.addMiddleware(CachingMiddleware);
+container.addMiddleware(new CircuitBreakerMiddleware({ threshold: 5 }));
+container.addMiddleware(new RateLimitMiddleware(100, 60000)); // 100/min
 ```
 
-The order in the array is the **outer-to-inner execution order**:
-`Logging` runs first, then `Retry`, then `Caching`, then the
-provider. The `priority` field on each middleware can override the
-array order.
+Execution order is governed by each middleware's `priority` field
+(higher priority runs first); the container sorts on insertion. There
+is no array-position ordering — set `priority` explicitly when order
+matters.
 
 ## Custom middleware via `createMiddleware`
 
@@ -120,14 +125,15 @@ const InstrumentationMiddleware = createMiddleware({
   },
 });
 
-container.useMiddleware([InstrumentationMiddleware]);
+container.addMiddleware(InstrumentationMiddleware);
 ```
 
 ## Composing middleware
 
-`composeMiddleware(middlewares)` produces a single middleware that
-chains the inputs. Useful for grouping related middleware as a
-single unit.
+`composeMiddleware(...middlewares)` takes middleware as rest arguments
+and produces a single middleware that chains them. Useful for grouping
+related middleware as a single unit, then adding the composite with one
+`addMiddleware()` call.
 
 `MiddlewarePipeline` is the class that drives execution; the
 container creates one internally, but you can construct one
@@ -145,7 +151,8 @@ const ExpensiveMiddleware: Middleware = {
 };
 ```
 
-`condition: false` means skip — `next()` runs directly.
+When `condition(ctx)` returns false the middleware is skipped for that
+resolution and `next()` runs directly.
 
 ## Per-token middleware
 

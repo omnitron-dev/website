@@ -69,8 +69,12 @@ container.register(LOGGER, { useClass: ConsoleLogger });
 const logger = container.resolve(LOGGER);  // ILogger
 ```
 
-The first argument is a debug name; not used for matching. Two
-`createToken('Logger')` calls produce two **distinct** tokens.
+The name is both a debug label **and** the registry key: `createToken`
+caches by name in a process-global registry, so two
+`createToken('Logger')` calls (with no metadata) return the **same**
+token instance. Tokens are still matched by `symbol` identity at
+runtime — the registry just guarantees that identity is shared for a
+given name.
 
 Use for: interfaces, configuration bundles, third-party types.
 
@@ -102,14 +106,16 @@ class UsersService {
 
 `isOptionalToken(token)` distinguishes these at runtime.
 
-### Lazy token — `createLazyToken<T>(name, factory)`
+### Lazy token — `createLazyToken<T>(name, metadata?)`
 
 ```typescript
-const AUTH = createLazyToken<AuthService>('Auth', () => AUTH_TOKEN_BACKING);
+const AUTH = createLazyToken<AuthService>('Auth');
 ```
 
-Resolved lazily on first use. Useful for breaking circular import
-graphs. See [Circular Dependencies](./circular-dependencies.md).
+Tags the token as lazy (`isLazy: true`); pair it with
+`container.resolveLazy(AUTH)` to defer construction until first use.
+Useful for breaking circular import graphs. See
+[Circular Dependencies](./circular-dependencies.md).
 
 ### Async token — `createAsyncToken<T>(name)`
 
@@ -124,7 +130,7 @@ container.register(REMOTE, {
 const remote = await container.resolveAsync(REMOTE);
 ```
 
-### Config token — `createConfigToken<T>(name, defaults?)`
+### Config token — `createConfigToken<T>(name, { validate?, defaults? })`
 
 A typed token specifically for configuration bundles. The
 `@omnitron-dev/titan/module/config` module uses these internally.
@@ -173,13 +179,15 @@ because TypeScript cannot emit them.
 
 ## Token uniqueness
 
-Tokens are matched by reference equality. Two `createToken('Logger')`
-calls produce distinct tokens, even though they share the name. This
-is by design — it prevents accidental collision between modules that
-both define a `'Logger'` token.
+Tokens are matched by `symbol` identity at runtime, and `createToken`
+backs that identity with a process-global, name-keyed registry: two
+`createToken('Logger')` calls (with no metadata) return the **same**
+token. Passing metadata bypasses the cache and yields a fresh,
+non-cached token.
 
-If you want a single shared token, declare it once in a shared module
-and import it everywhere.
+For clarity, still declare a shared token once in a shared module and
+import it everywhere rather than relying on the by-name registry to
+reconcile independently-created tokens.
 
 ## Token naming conventions
 
@@ -201,8 +209,9 @@ Ecosystem modules (`titan-cache`, `titan-redis`, etc.) use the
   injects `LOGGER` should not have to import the implementation
   just to get the token. Place tokens in a separate file (or a
   `*.tokens.ts` barrel) that the implementation also imports.
-- **Re-creating tokens at consumption sites.** `createToken`
-  returns a fresh token every call — re-creating means the
-  resolution fails. Always import the same token instance.
+- **Re-creating tokens at consumption sites.** While `createToken`
+  reconciles bare names through its global registry, re-deriving a
+  token at each call site is brittle (a typo, or any metadata
+  argument, breaks identity). Always import the same token instance.
 
 → Next: [Multi-injection](./multi-injection.md).

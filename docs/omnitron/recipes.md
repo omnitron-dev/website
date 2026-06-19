@@ -126,8 +126,13 @@ for raw data you can't afford to lose.
   fails or the stream grows unboundedly. Monitor stream length
   (`XLEN`) and set a `MAXLEN ~` trim cap on the producer.
 - **Consumer-group ID conflicts on rolling restart.** Use stable
-  consumer IDs (e.g., `${process.env.OMNITRON_INSTANCE_ID}`) so
-  rebalancing is clean.
+  consumer IDs so rebalancing is clean. Omnitron injects
+  `OMNITRON_APP_NAME` (plus `OMNITRON_PROJECT` / `OMNITRON_STACK`
+  in stack mode) into every managed process — derive the consumer
+  id from those rather than a random per-boot value. (There is no
+  per-instance `OMNITRON_INSTANCE_ID`; pool instances aren't
+  individually addressable via env, which is another reason to
+  keep stream consumers single-instance here.)
 
 ## 2. CPU-bound worker pool with P2C balancing
 
@@ -236,6 +241,11 @@ class MarketService {
   }
 }
 ```
+
+`@Cron` is imported from `@omnitron-dev/titan-scheduler` (a
+separate package from the core `@omnitron-dev/titan` decorators).
+The 6-field form shown here includes a leading seconds field;
+the standard 5-field form works too.
 
 Pattern: **always-on processes hold the schedule; pools execute
 the work.** Keeps the http event loop responsive (it just
@@ -466,11 +476,14 @@ isolation.
 ### Pattern
 
 ```typescript
-// 1. Define the policy
-defineRLSSchema({
+import { defineRLSSchema, filter } from '@kysera/rls';   // re-exported by @omnitron-dev/titan-database
+
+// 1. Define the policy — policies are factory functions (filter / allow / validate),
+//    and a filter returns a column-value object, not a raw sql`` fragment:
+const schema = defineRLSSchema({
   users: {
-    rls: [
-      { name: 'tenant_isolation', filter: ({ tenantId }) => sql`tenant_id = ${tenantId}` },
+    policies: [
+      filter('read', ctx => ({ tenant_id: ctx.auth.tenantId })),
     ],
   },
 });
@@ -481,13 +494,15 @@ auth: {
   invocationWrapper: createRlsInvocationWrapper(),   // sets tenantId in AsyncLocalStorage
 },
 
-// 3. Repositories pick it up automatically:
+// 3. Repositories pick it up automatically. Inject the Kysely connection
+//    directly with @InjectConnection() (DatabaseManager has no `.connection`
+//    getter — it exposes `await db.getConnection()`):
 @Injectable()
 class UserRepository {
-  constructor(@InjectDatabaseManager() private db: DatabaseManager) {}
+  constructor(@InjectConnection() private db: Kysely<Database>) {}
 
   async findAll() {
-    return this.db.connection.selectFrom('users').selectAll().execute();
+    return this.db.selectFrom('users').selectAll().execute();
     // Kysera RLS plugin auto-adds `WHERE tenant_id = $current_tenant`
   }
 }
@@ -503,7 +518,7 @@ comes via http, websocket, or service-to-service.
 @Public({ auth: { roles: ['admin'] } })
 @BypassRLS()                                // explicit per-method opt-out
 async listAllUsersAcrossTenants() {
-  return this.db.connection.selectFrom('users').selectAll().execute();
+  return this.db.selectFrom('users').selectAll().execute();
 }
 ```
 
@@ -517,7 +532,7 @@ graceful degradation.
 
 ```mermaid
 flowchart LR
-  Op[Operator: omnitron --json exec OmnitronSecrets set platform:maintenance 1]
+  Op[Operator: redis-cli SET platform:maintenance 1]
   Op --> R[(Redis)]
   R --> LB[Gateway Lua check]
   LB -- read flag --> R

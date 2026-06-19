@@ -39,6 +39,11 @@ type ConfigSource =
 Reads a file on startup. Format is auto-detected from extension if
 `format` is not specified.
 
+> The `format` type accepts `'toml' | 'ini'`, but the current
+> `ConfigLoaderService` only parses `json`, `yaml`, `env`, and
+> `properties` — passing `toml`/`ini` throws at load time. Use one
+> of the supported formats until loader support lands.
+
 ### Environment variables
 
 ```typescript

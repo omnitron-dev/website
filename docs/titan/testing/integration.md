@@ -10,6 +10,14 @@ An integration test boots a real Titan `Application` with selectively
 faked infrastructure. It catches wiring, lifecycle, and module-
 composition bugs that pure unit tests cannot.
 
+> ⚠️ NEEDS REWRITE — the `overrides: [...]` option used in the
+> examples below is not a real `Application.create` option (see
+> [DI Overrides](./di-overrides.md) for the full explanation). Use
+> the `providers: [[token, def]]` tuple array — or the
+> `@omnitron-dev/testing/titan` helpers — to inject fakes. The
+> first example is corrected; the `bootTestApp` helper and other
+> snippets that still show `overrides:` need the same swap.
+
 ## The pattern
 
 ```typescript
@@ -20,10 +28,11 @@ describe('UsersModule (integration)', () => {
   let users: UsersService;
 
   beforeAll(async () => {
-    app = await Application.create(AppModule, {
-      overrides: [
-        { provide: Database, useClass: FakeDatabase },
-        { provide: REDIS,    useValue: fakeRedis     },
+    app = await Application.create({
+      modules:   [AppModule],
+      providers: [
+        [Database, { useClass: FakeDatabase }],
+        [REDIS,    { useValue: fakeRedis     }],
       ],
       disableGracefulShutdown: true,
     });
@@ -112,11 +121,16 @@ Common test setup deserves a helper:
 
 ```typescript
 // test/setup.ts
-export async function bootTestApp(overrides: any[] = []) {
-  const app = await Application.create(AppModule, {
-    overrides: [
-      { provide: Database, useClass: FakeDatabase },
-      ...overrides,
+import type { InjectionToken, Provider } from '@omnitron-dev/titan/nexus';
+
+export async function bootTestApp(
+  extraProviders: Array<[InjectionToken<unknown>, Provider<unknown>]> = [],
+) {
+  const app = await Application.create({
+    modules:   [AppModule],
+    providers: [
+      [Database, { useClass: FakeDatabase }],
+      ...extraProviders,
     ],
     disableGracefulShutdown: true,
   });

@@ -6,9 +6,23 @@ description: AsyncIterable methods, server-push, backpressure.
 
 # Streaming
 
-Netron supports server-streaming methods — methods that return
-`AsyncIterable<T>` instead of `Promise<T>`. The client iterates the
-stream as values arrive.
+Netron supports server-streaming methods. On the server you can write
+an `async *` generator (or return a `NetronReadableStream`); for a
+remote caller Netron auto-wraps the generator into a
+`NetronWritableStream` and sends a stream reference over the wire. The
+underlying primitives are **Node Web Streams**
+(`NetronReadableStream extends Readable`,
+`NetronWritableStream extends Writable`), not native async iterables —
+so the *received* stream is consumed with stream events
+(`.on('data')` / `.on('end')`), though a `Readable` is also
+`for await`-iterable.
+
+:::note
+The "define with `async *`" pattern below is real and works. The
+consumption examples in this page show `for await` for brevity, but
+the demonstrated/tested API consumes the received stream via Node
+stream events. See `netron/streams/` for the concrete classes.
+:::
 
 ```mermaid
 sequenceDiagram
@@ -23,9 +37,9 @@ sequenceDiagram
     T-->>C: chunk
     C->>C: process
   end
-  alt client break
-    C->>T: close iterator
-    T->>S: cancel (return signal)
+  alt client stops reading
+    C->>C: destroy received stream (no upstream signal)
+    Note over S: server unwinds only when its<br/>next write to the socket fails
     S->>S: finally { release resources }
   else server done
     S-->>T: close
@@ -33,9 +47,12 @@ sequenceDiagram
   end
 ```
 
-Streaming requires WebSocket, TCP, or Unix transport. HTTP cannot
-stream Netron values (HTTP/1.1 chunked is a stream of bytes, not of
-typed objects).
+Streaming requires WebSocket, TCP, or Unix transport. The HTTP
+transport does not open a streaming channel — instead it **collects an
+`async *` generator into an array** (capped by `maxAsyncGeneratorItems`,
+default 10000; over that it throws `PAYLOAD_TOO_LARGE`). So over HTTP
+you get a bounded batch, not a live stream; use WS/TCP/Unix for true
+streaming.
 
 ## Defining a streaming method
 
@@ -70,9 +87,17 @@ the loop throws.
 
 ## Backpressure
 
-The transport applies backpressure automatically. If the client is
-slow to consume, the server's generator pauses on `yield` until the
-transport drains. There is no buffer to overflow.
+Backpressure is real. The producer is wrapped in a `NetronWritableStream`,
+which uses the standard `write()` → `await once('drain')` loop; because
+`sendPacket` awaits the socket-send callback for stream packets too
+(fixed in T#43), the producer feels genuine socket congestion and the
+`async *` generator effectively pauses at `yield`.
+
+There *are* bounded buffers, though: the readable side keeps a
+reorder buffer (`MAX_BUFFER_SIZE`, 10 000 chunks) and **destroys the
+stream** with a backpressure error if it overflows, and there are
+per-peer stream-count caps. So overflow is a handled failure mode, not
+an impossibility.
 
 This means a slow client can slow down a fast producer. If you need
 producer-side draining (for example, the producer is a queue that
@@ -93,16 +118,18 @@ async *watchAll(): AsyncIterable<Order> {
 
 ## Cancellation
 
-The client can cancel the stream by `break`-ing out of the loop or
-calling `.return()` on the iterator:
+:::warning Consumer-initiated cancellation does not signal the server
+The server→consumer direction sends a close packet when the producer
+ends or is destroyed. But the **consumer** destroying its received
+stream does *not* currently send a close signal upstream — so a clean
+client `break` does **not** reliably trigger the server generator's
+`finally`. The server keeps pulling its source until it errors writing
+to the now-dead socket. Don't rely on prompt server-side teardown from
+a client `break`.
+:::
 
-```typescript
-for await (const order of orders.watchAll()) {
-  if (order.id === target) break;     // server's generator receives a return signal
-}
-```
-
-The server's generator runs its `finally` block:
+You should still release resources in a `finally`, since the generator
+*does* unwind when the write side fails (or the connection drops):
 
 ```typescript
 @Public()
@@ -113,13 +140,14 @@ async *watchAll(): AsyncIterable<Order> {
       yield event.order;
     }
   } finally {
-    await sub.unsubscribe();          // always runs on cancellation
+    await sub.unsubscribe();          // runs when the generator unwinds
   }
 }
 ```
 
-Always release stream resources in `finally`. Otherwise a cancelled
-stream leaks subscriptions.
+For deterministic cancellation, give the client an explicit
+"unsubscribe"/"stop" method on the service rather than relying on
+iterator teardown.
 
 ## Reconnection
 
@@ -161,12 +189,16 @@ while (true) {
 
 ## Bidirectional streaming
 
-Bidirectional streaming (client and server both stream) is **not** in
-the current Netron model. A method takes argument values and returns
-either a single value or a server-side stream.
+There is no single-method *duplex* sugar — a method doesn't return one
+two-way channel. But the primitives for full duplex exist: a
+`NetronWritableStream` streams **client→server**, and a stream
+(readable or writable) can be **passed as a method argument** —
+Netron serialises it as a stream reference and rebuilds a live stream
+on the far side.
 
-For protocols that need full duplex (collaborative editing,
-multi-party games), use multiple unidirectional streams.
+So for full-duplex protocols (collaborative editing, multi-party
+games) you compose unidirectional streams: return a server→client
+stream and/or pass a client→server stream as an argument.
 
 ## Performance
 

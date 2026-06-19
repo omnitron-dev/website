@@ -6,6 +6,19 @@ description: Resolve different providers based on runtime context — current us
 
 # Contextual Injection
 
+> ⚠️ **NEEDS REWRITE.** Several code samples on this page describe APIs
+> that do not match `src/nexus/context.ts`. The verified facts: a
+> `ResolutionStrategy` is `{ name, applies(token, ctx), select(providers, ctx) }`;
+> `createContextAwareProvider(p)` takes a `{ provide(ctx), canProvide?(ctx) }`
+> object (it is an identity helper, *not* a `{ strategy, providers, scope }`
+> map); `@InjectContext(key)` injects a single context **value** by
+> `ContextKey` (it is not a zero-arg decorator that injects the
+> `ContextManager`); and `get`/`set`/`has`/… live on the
+> `ContextProvider` returned by `contextManager.getCurrentContext()`,
+> not on `ContextManager` itself. The conceptual framing below is
+> sound; the concrete snippets need to be re-derived from source before
+> relying on them.
+
 Contextual injection lets a single token resolve to **different
 providers** depending on runtime context. Same dependency, different
 implementation, chosen per call or per scope.
@@ -92,19 +105,21 @@ const USER_ROLE = createContextKey<string>('user.role');
 
 ## Setting context per request
 
-The `ContextManager` interface (a `ContextProvider`) exposes
-`get`/`set`/`has`/`delete`/`clear`/`keys`/`toObject`/`createChild`:
+`ContextManager` owns the strategy registry and the active context.
+The key/value accessors — `get`/`set`/`has`/`delete`/`clear`/`keys`/
+`toObject`/`createChild` — live on the **`ContextProvider`** it returns
+from `getCurrentContext()`:
 
 ```typescript
 import { ContextManager } from '@omnitron-dev/titan/nexus';
 
 @Injectable()
 class TenantMiddleware {
-  constructor(private readonly context: ContextManager) {}
+  constructor(private readonly contextManager: ContextManager) {}
 
   async handle(ctx: any, next: () => Promise<any>) {
     const tenantId = ctx.headers.get('x-tenant-id');
-    this.context.set(TENANT_ID, tenantId);
+    this.contextManager.getCurrentContext().set(TENANT_ID, tenantId);
     return next();
   }
 }
@@ -115,26 +130,29 @@ get the right instance for the tenant.
 
 ## Building a context-aware provider
 
+`createContextAwareProvider` is an identity helper over the
+`ContextAwareProvider` interface — `{ provide(context), canProvide?(context) }`.
+The `provide` callback receives the active `ResolutionContext` and
+returns the value (or a Promise of it):
+
 ```typescript
-import { createContextAwareProvider, TenantStrategy, createToken, Scope } from '@omnitron-dev/titan/nexus';
+import { createContextAwareProvider, ContextKeys } from '@omnitron-dev/titan/nexus';
 
-const STORAGE = createToken<IStorage>('Storage');
-
-const storageProvider = createContextAwareProvider({
-  strategy:  TenantStrategy,
-  providers: {
-    enterprise: { useClass: S3Storage    },
-    default:    { useClass: LocalStorage },
+const storageProvider = createContextAwareProvider<IStorage>({
+  provide(context) {
+    const tenant = context.metadata?.['tenant'];
+    return tenant?.tier === 'enterprise' ? new S3Storage() : new LocalStorage();
   },
-  scope:     Scope.Request,
 });
-
-container.register(STORAGE, storageProvider);
 ```
 
-When a consumer resolves `STORAGE`, the strategy reads the current
-context (via `ContextManager`), picks the matching provider entry,
-and constructs it.
+The branching logic lives inside `provide`; read whatever you need
+from `context.metadata` (which `ContextManager.createResolutionContext`
+populates from the current `ContextProvider`). The built-in
+`ResolutionStrategy` classes (`TenantStrategy`, etc.) are a *separate*
+mechanism used by `ContextManager.selectProvider()` to pick among
+several registered providers — they are not passed into
+`createContextAwareProvider`.
 
 ## Composition with scopes
 
@@ -153,18 +171,19 @@ defeating the purpose.
 
 ## `@InjectContext` decorator
 
-Inject the `ContextManager` directly:
+`@InjectContext(key)` injects a single context **value** by its
+`ContextKey` — not the `ContextManager`:
 
 ```typescript
-import { InjectContext } from '@omnitron-dev/titan/nexus';
+import { InjectContext, ContextKeys } from '@omnitron-dev/titan/nexus';
 
 @Service({ name: 'users' })
 class UsersService {
-  constructor(@InjectContext() private readonly context: ContextManager) {}
+  constructor(@InjectContext(ContextKeys.Tenant) private readonly tenant: { id: string }) {}
 
   @Public()
   async whoAmI() {
-    return this.context.get(TENANT_ID);
+    return this.tenant?.id;
   }
 }
 ```
@@ -176,18 +195,25 @@ swapping.
 
 ## Custom strategies
 
-Implement `ResolutionStrategy`:
+Implement `ResolutionStrategy` — `{ name, applies(token, ctx), select(providers, ctx) }`
+— and register it with `contextManager.registerStrategy(...)`:
 
 ```typescript
 import type { ResolutionStrategy } from '@omnitron-dev/titan/nexus';
 
 const PaymentTierStrategy: ResolutionStrategy = {
-  selectProvider(ctx, providers) {
-    const tier = ctx.get(USER_TIER);     // 'free' | 'premium' | …
-    return providers[tier] ?? providers['default'];
+  name: 'payment-tier',
+  applies: (_token, ctx) => ctx.metadata?.['user']?.tier !== undefined,
+  select: (providers, ctx) => {
+    const tier = ctx.metadata?.['user']?.tier;     // 'free' | 'premium' | …
+    return providers.find((p) => p.tier === tier) ?? providers[0];
   },
 };
 ```
+
+`select` receives the candidate provider **array** and the
+`ResolutionContext`, and returns the chosen provider. `applies` gates
+whether the strategy runs at all for a given token/context.
 
 ## Anti-patterns
 

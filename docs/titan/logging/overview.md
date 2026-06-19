@@ -33,24 +33,39 @@ import {
 
 ```typescript
 interface ILogger {
-  // Levels — only four
-  debug(msg: string | object, meta?: Record<string, any>): void;
-  info(msg: string | object,  meta?: Record<string, any>): void;
-  warn(msg: string | object,  meta?: Record<string, any>): void;
-  error(msg: string | object | Error, meta?: Record<string, any>): void;
+  // Six levels (Pino-compatible). Each is overloaded: object-first
+  // (Pino v9 style) or message-first.
+  trace(obj: object, msg?: string, ...args: any[]): void;
+  trace(msg: string, ...args: any[]): void;
+  debug(obj: object, msg?: string, ...args: any[]): void;
+  debug(msg: string, ...args: any[]): void;
+  info(obj: object, msg?: string, ...args: any[]): void;
+  info(msg: string, ...args: any[]): void;
+  warn(obj: object, msg?: string, ...args: any[]): void;
+  warn(msg: string, ...args: any[]): void;
+  error(obj: object, msg?: string, ...args: any[]): void;
+  error(msg: string, ...args: any[]): void;
+  fatal(obj: object, msg?: string, ...args: any[]): void;
+  fatal(msg: string, ...args: any[]): void;
 
   // Child logger with bound context
-  child(meta: Record<string, any>): ILogger;
+  child(bindings: object): ILogger;
 
-  // Underlying pino instance (escape hatch)
-  pino?: any;
+  // Timing + level control
+  time(label?: string): () => void;       // returns a stop() that logs elapsed ms
+  isLevelEnabled(level: LogLevel): boolean;
+  setLevel(level: LogLevel): void;
+  getLevel(): LogLevel;
 }
 ```
 
-> **Four levels only.** Unlike some loggers that ship `trace` and
-> `fatal`, `ILogger` exposes `debug`, `info`, `warn`, `error`. Map
-> "trace" needs to `debug`; map "fatal" needs to `error` plus an
-> explicit shutdown.
+> **Six levels.** `ILogger` exposes the full Pino set —
+> `trace`, `debug`, `info`, `warn`, `error`, `fatal`. `LogLevel` is
+> `'fatal' | 'error' | 'warn' | 'info' | 'debug' | 'trace' | 'silent'`.
+
+> **Object-first signatures.** Following Pino v9, pass the structured
+> data **first**, then the message: `logger.info({ userId }, 'login')`.
+> A bare-string call also works: `logger.info('login')`.
 
 ## The minimal usage
 
@@ -63,7 +78,7 @@ class UsersService {
 
   @Public()
   async findById(id: string) {
-    this.logger.info('findById', { id });
+    this.logger.info({ id }, 'findById');   // object first, message second
     return this.repo.findById(id);
   }
 }
@@ -101,19 +116,19 @@ an options bag that includes `level` on pino).
 
 ## Pretty mode (dev)
 
-The console transport accepts a `pretty` flag for development:
+Pretty printing is a module option (`prettyPrint`), resolved at
+`forRoot` time — not a per-transport flag:
 
 ```typescript
 LoggerModule.forRoot({
-  transports: [
-    new ConsoleTransport({ pretty: process.env.NODE_ENV !== 'production' }),
-  ],
+  prettyPrint: process.env.NODE_ENV !== 'production',
 })
 ```
 
-`pretty: false` (production default) writes JSON one-per-line —
-what log shippers expect. `pretty: true` renders human-friendly
-lines (colours, indentation).
+`prettyPrint: false` (production default) writes JSON one-per-line —
+what log shippers expect. `prettyPrint: true` renders human-friendly
+lines. The module also reads `logger.prettyPrint` from `ConfigService`
+when present.
 
 ## Decorators
 

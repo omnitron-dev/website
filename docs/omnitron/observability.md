@@ -21,10 +21,10 @@ Verified against `apps/omnitron/src/{observability,monitoring,services}/`.
 
 | Signal | Owner | Storage | Exposure |
 | ------ | ----- | ------- | -------- |
-| **Logs** | `log-collector` service + `LogManager` | `~/.omnitron/logs/{app}.log` + rotated archives | RPC: `OmnitronLogs.queryLogs` / `streamLogs` |
+| **Logs** | `log-collector` service + `LogManager` | `~/.omnitron/logs/{app}/app.log` (+ `error.log`) + rotated archives | RPC: `OmnitronLogs.queryLogs` / `streamLogs` |
 | **Metrics** | `MetricsBridge` + `OmnitronTelemetry` | titan-metrics storage (memory / SQLite / Postgres) | RPC: `OmnitronTelemetry.pushBatch` (ingest), `OmnitronMetrics` (read) |
-| **Traces** | `OmnitronTraces` | trace-store (in-memory ring + optional persistence) | RPC: `ingestSpan`, `queryTraces`, `getServiceMap` |
-| **Health** | `OmnitronHealth` + `OmnitronNodes` health monitor | rolling window in state-store | RPC: `checkApp`, `getCheckHistory`, `getUptimeBar` |
+| **Traces** | `OmnitronTraces` (`TraceCollectorService`) | Postgres (`OmnitronDatabase`), write-buffered | RPC: `ingestSpan`, `ingestBatch`, `getTrace`, `queryTraces`, `getServiceMap` |
+| **Health** | `OmnitronHealth` (app/infra probes) + `OmnitronNodes` health monitor (fleet) | rolling window in state-store / node history | RPC: `OmnitronHealth.checkApp` / `checkAll`; `OmnitronNodes.getCheckHistory` / `getUptimeBar` |
 
 ## Logs
 
@@ -35,13 +35,13 @@ sequenceDiagram
   participant App as Child app process
   participant Pipe as stdio pipe
   participant LM as LogManager
-  participant File as ~/.omnitron/logs/{app}.log
-  participant Ring as In-memory ring (last N entries)
+  participant File as ~/.omnitron/logs/{app}/app.log
+  participant Ring as Orchestrator in-memory ring (last N entries)
   participant CLI as omnitron logs
 
   App->>Pipe: pino JSON line
   Pipe->>LM: ingest entry
-  LM->>File: append
+  LM->>File: append (errors also to error.log)
   LM->>Ring: append (capped)
   LM->>LM: rotate if file > maxSize
   alt maxFiles exceeded
@@ -59,12 +59,20 @@ sequenceDiagram
 The orchestrator wires every spawned child's stdout/stderr
 through a `LogManager`. Responsibilities:
 
-- Append every pino JSON line to `~/.omnitron/logs/{app}.log`.
-- Maintain an in-memory ring of the last N entries per app (used
-  by `omnitron logs` for fast tail without disk I/O).
+- Append every pino JSON line to a per-app file. The layout is
+  directory-per-app, not a flat file: a standalone app writes
+  `~/.omnitron/logs/{app}/app.log`; the daemon itself writes
+  `~/.omnitron/logs/omnitron.log`; project-mode apps write under
+  `~/.omnitron/projects/{project}/{stack}/logs/{app}/app.log`.
+- Dual-write errors and fatals to a sibling `error.log` so a
+  noisy info stream doesn't bury them.
 - Rotate when file size exceeds the configured threshold.
 - Drop the oldest archive when count exceeds `maxFiles`.
 - Optionally gzip rotated archives (async, doesn't block writers).
+
+The fast-tail in-memory ring of the last N entries lives in the
+`OrchestratorService` (the `LogManager` delegates `getLogs()` to
+it), so `omnitron logs` can tail without disk I/O.
 
 Defaults from `ecosystem.logging`:
 
@@ -81,12 +89,13 @@ Per-app overrides live in `IAppDefinition.observability.logging`.
 
 | Method | Effect |
 | ------ | ------ |
-| `queryLogs({app?, level?, grep?, lines?, ...})` | Filter & return entries |
-| `streamLogs({app?, follow})` | Live subscription |
+| `queryLogs({app?, level?, search?, labels?, traceId?, from?, to?, limit?, offset?})` | Filter & return entries (note: full-text filter is `search`, not `grep`; page with `limit`/`offset`) |
+| `streamLogs({app?, level?, search?, tail?, since?})` | Return the last `tail` entries (default 100) in chronological order — poll for near-real-time tailing |
 | `getLogStats()` | Per-app file size + rotation count |
 
-Both `queryLogs` and `streamLogs` consult the in-memory ring
-first, then fall back to file tail for older entries.
+`streamLogs` is a poll-friendly "recent entries" call rather than
+a push subscription; pass `since` to fetch only entries after a
+timestamp.
 
 ### CLI
 
@@ -201,6 +210,29 @@ See [titan-metrics docs](../titan/modules/metrics.mdx) for the
 full read API — `getSnapshot`, `querySeries`,
 `getPrometheusText`, `evictApp`.
 
+### Prometheus scrape endpoint — `MetricsServer`
+
+`apps/omnitron/src/observability/metrics-server.ts` runs a tiny
+standalone HTTP server *alongside* the RPC surface, so an
+existing Prometheus can scrape the daemon directly:
+
+- `GET /metrics` → text/plain Prometheus exposition
+  (`metrics.getPrometheusText()`, after refreshing per-app gauges).
+- `GET /healthz` (and `/health`) → `ok` for liveness probes.
+- Anything else → 404; non-GET → 405.
+
+Port defaults to `httpPort + 3` (≈ `9803`); it binds to
+**`127.0.0.1` by default** so the aggregate counters aren't
+exposed network-wide. To scrape remotely, bind `0.0.0.0` **and**
+set a bearer token (`authToken`) — `/metrics` then requires
+`Authorization: Bearer <token>` (constant-time compared);
+`/healthz` stays public. Binding non-loopback without a token
+logs a loud warning.
+
+So the "no separate Prometheus to deploy" baseline still holds —
+but if you *do* run Prometheus, this is the endpoint to point it
+at, rather than the RPC read path.
+
 ### Aggregated metrics — `AggregatedMetricsDto`
 
 `OmnitronDaemon.getMetrics({name?})` returns:
@@ -233,8 +265,10 @@ omnitron metrics api                # one app
 omnitron --json metrics             # NDJSON
 ```
 
-For time-series queries, use the webapp or call
-`OmnitronMetrics.querySeries` directly via `omnitron exec`.
+For time-series queries (`OmnitronMetrics.querySeries`), use the
+webapp — `OmnitronMetrics` is a daemon-hosted service, so it
+isn't reachable through `omnitron exec` (which targets services
+running inside a managed app).
 
 ## Traces
 
@@ -246,15 +280,16 @@ sequenceDiagram
   participant OTel as titan-tracing
   participant Trans as netron-telemetry-transport
   participant TC as OmnitronTraces service
-  participant Store as trace store
+  participant Store as Postgres (OmnitronDatabase)
   participant UI as Webapp / CLI
 
   App->>OTel: start span / end span
   OTel->>Trans: export OTLP-shaped span
   Trans->>TC: ingestSpan(span) | ingestBatch({spans})
-  TC->>Store: write
-  Store->>Store: index by traceId
+  TC->>TC: buffer span (flush at 500 or every 5s)
+  TC->>Store: flush batch (INSERT)
   UI->>TC: getTrace({traceId}) | queryTraces(filter) | getServiceMap()
+  TC->>Store: SQL query
   Store-->>UI: trace(s) / service map
 ```
 
@@ -265,8 +300,14 @@ sequenceDiagram
 | `ingestSpan(span)` | Push one span |
 | `ingestBatch({spans})` | Push many |
 | `getTrace({traceId})` | One trace (all its spans) |
-| `queryTraces(filter)` | Filter by service / op / duration / status / time |
+| `queryTraces(filter)` | Filter by service / op / duration / tags / time |
 | `getServiceMap()` | Derived `service_a → service_b` call graph |
+
+Storage is **Postgres-backed**, not an in-memory ring:
+`TraceCollectorService` write-buffers spans (flushing to
+`OmnitronDatabase` whenever the buffer hits 500 spans or every
+5 s), and `getTrace` / `queryTraces` / `getServiceMap` run SQL
+queries against that table.
 
 ### `TraceFilter`
 
@@ -276,64 +317,70 @@ interface TraceFilter {
   operation?:  string;
   minDuration?: number;        // ms
   maxDuration?: number;
-  status?:     'ok' | 'error';
-  from?:       number;         // epoch ms
-  to?:         number;
+  from?:       string;         // ISO timestamp
+  to?:         string;
+  tags?:       Record<string, string>;
   limit?:      number;
-  offset?:     number;
 }
 ```
 
 ### CLI
 
-No dedicated `omnitron traces` command — use the webapp's
-`/traces` page or call directly:
-
-```bash
-omnitron exec OmnitronTraces getTrace '{"traceId":"abc123"}'
-```
+No dedicated `omnitron traces` command. `OmnitronTraces` is a
+daemon-hosted RPC service, and `omnitron exec` only reaches
+services *inside a managed app* (it routes by app name) — so the
+trace API is consumed by the webapp's `/traces` page rather than
+from the CLI.
 
 ## Health
 
-Two levels: **app health** (HTTP/TCP/exec probes against running
-apps) and **node health** (cross-machine availability).
+Two levels: **app/infra health** (on-demand probes via
+`OmnitronHealth`) and **node health** (cross-machine
+availability). On top of those sit two **titan-health
+indicators** that roll up live state for the daemon's own
+`/health` summary.
 
-### App health flow
+### `OmnitronHealth` — active probing
+
+`HealthCheckService` (`apps/omnitron/src/services/health-check.service.ts`,
+exposed as `OmnitronHealth`) does the actual probing on demand,
+using `@xec-sh/ops` `HealthChecker` with built-in TCP/HTTP
+fallbacks:
+
+- **HTTP** — GET the app's health endpoint, expect a 2xx.
+- **TCP** — connect attempt to a port (used for infra services).
+- Process liveness is folded in from the orchestrator.
 
 ```mermaid
 sequenceDiagram
-  participant Sched as Daemon scheduler
-  participant App as App process
-  participant Indicator as AppHealthIndicator
-  participant HC as OmnitronHealth service
+  participant Caller as CLI / webapp
+  participant HC as OmnitronHealth (HealthCheckService)
+  participant App as App process / container
 
-  loop every healthCheck.interval (15s)
-    Sched->>Indicator: probe (HTTP / TCP / exec)
-    Indicator->>App: connect / call
-    App-->>Indicator: 200 OK / pong / exit 0
-    Indicator->>Sched: { status: 'healthy', latency }
-    Sched->>Sched: update AggregatedHealthDto
-  end
-  HC->>Sched: read current
+  Caller->>HC: checkApp / checkApps / checkInfrastructure / checkAll
+  HC->>App: HTTP GET health endpoint / TCP connect
+  App-->>HC: 2xx / socket accepted
+  HC-->>Caller: HealthReport { overall, checks[] }
 ```
 
 ### `AppHealthIndicator`
 
-`apps/omnitron/src/monitoring/app-health.indicator.ts` runs the
-probe types declared per-app:
-
-- **TCP** — connect attempt to a port.
-- **HTTP** — GET `/healthz` (or custom path), expect 200.
-- **Exec** — run a command; non-zero exit = unhealthy.
-
-The same indicator is shared across the daemon scheduler and the
-`OmnitronHealth.checkApp` RPC method.
+`apps/omnitron/src/monitoring/app-health.indicator.ts` is a
+titan-health indicator (name `'apps'`) — **not** a network
+prober. It reads `orchestrator.list()` and grades by *process
+status*: `healthy` when all managed apps are online, `degraded`
+when some are crashed/errored, `unhealthy` when a `critical` app
+is down. It feeds the daemon's aggregated `/health` summary, not
+the per-app HTTP/TCP probe path above.
 
 ### `DockerHealthIndicator`
 
-`apps/omnitron/src/monitoring/docker-health.indicator.ts` does
-the same for managed infrastructure containers — uses Docker's
-healthcheck output where available, falls back to TCP probe.
+`apps/omnitron/src/monitoring/docker-health.indicator.ts` is the
+infra counterpart (name `'docker'`). It reads
+`InfrastructureService.getState()` and aggregates each managed
+container's reported `status` / `health` — it does not itself
+run Docker healthchecks or fall back to a TCP probe; it reports
+the infra service's cached state.
 
 ### `OmnitronHealth` RPC
 
@@ -377,14 +424,20 @@ omnitron node check [id]           # node connectivity probe
 ```text
 ~/.omnitron/
 ├── logs/                      # log-manager rotated files
-│   ├── daemon.log
-│   ├── api.log
-│   ├── api.log.1.gz
+│   ├── omnitron.log           # the daemon's own log
+│   ├── omnitron.error.log
+│   ├── api/                   # one directory per standalone app
+│   │   ├── app.log
+│   │   ├── error.log
+│   │   ├── app.log.1.gz
+│   │   └── ...
 │   └── ...
+├── projects/{project}/{stack}/logs/{app}/   # project-mode apps
 ├── state.json                 # app status + health summary
 └── secrets.enc
 
-(plus per-storage-backend persistence — Postgres / SQLite per metrics+traces config)
+(traces persist to Postgres / OmnitronDatabase; metrics persist
+per-storage-backend — memory / SQLite / Postgres per config)
 ```
 
 ## Retention
@@ -394,8 +447,8 @@ omnitron node check [id]           # node connectivity probe
 | Logs | `logging.maxFiles` × `logging.maxSize` (default ~ 500 MB per app) |
 | Metrics (in-memory) | `monitoring.metrics.retention` (default 3 600 s) |
 | Metrics (persistent) | `titan-metrics.retention.maxAge` (default `7d`) |
-| Traces (in-memory ring) | default 10 000 spans, oldest dropped |
-| Traces (persistent) | configured per backend |
+| Traces (write buffer) | flushed to Postgres at 500 spans or every 5 s |
+| Traces (persistent) | Postgres (`OmnitronDatabase`) — trim/retain at the DB layer |
 | Health history | `healthMonitor.retentionDays` (default 90 days) |
 | Alert events | from `OmnitronAlerts` per-rule retention |
 
