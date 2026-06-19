@@ -40,9 +40,9 @@ This page describes the target authorisation model. Omnitron today ships only th
 ```
 
 Four layers. They share **one** identity (the JWT-resolved
-`AuthContext`), **one** permission grammar (`shared/permission-engine.ts`),
-**one** counter (`perm-v:{userId}`), and **one** audit
-sink (`audit_logs`).
+`AuthContext`), **one** permission matcher (`permissionMatches` /
+`hasPermission` in `netron/auth/utils.ts`), **one** counter
+(`perm-v:{userId}`), and **one** audit sink (`audit_logs`).
 
 ## Layer 1 — Roles
 
@@ -56,11 +56,12 @@ roles.
 
 ## Layer 2 — Permissions
 
-Strings in the canonical registry, matched by the engine, baked
-into the JWT at mint time. Wildcards expand to sets of keys;
-hierarchical prefixes grant child keys. The engine's matcher
-is the **single source of truth** for "does this granted set
-authorise this required permission?" — used unchanged on both
+Strings in the canonical registry, matched by `permissionMatches`,
+baked into the JWT at mint time. The `.*` wildcard expands to the
+set of keys under its prefix (a bare prefix without the star is
+*not* a hierarchical grant — it matches only the exact key). The
+matcher is the **single source of truth** for "does this granted
+set authorise this required permission?" — used unchanged on both
 the platform and org scopes, on the server `@Auth` decorator,
 on the @kysera/rls policy ctx, and on the frontend
 `<PermissionGuard>` / `usePermission()`.

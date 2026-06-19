@@ -19,36 +19,45 @@ Verified against `packages/cuid/src/`.
 ## API
 
 ```typescript
-import { cuid } from '@omnitron-dev/cuid';
+import { cuid, isCuid, createOptimizedCuid } from '@omnitron-dev/cuid';
 
-const id = cuid();      // e.g. 'clh3k7v0a0000q9zoo3y3a8oz'
+const id = cuid();             // e.g. 'k3j7v0a8z4m1qp9x'
+isCuid(id);                    // true
+
+// Custom-length / pre-seeded factory:
+const makeId = createOptimizedCuid({ length: 24 });
+const longId = makeId();
 ```
 
-That's the whole surface. One function, one return type.
+- `cuid()` — generate an ID (default 16 chars).
+- `isCuid(id)` — cheap validity check (first char `a-z`, rest `[a-z0-9]`, length 2–32).
+- `createOptimizedCuid({ length?, fingerprint?, initialCount? })` — returns a closure
+  generating IDs of a custom length / fingerprint / counter seed.
 
 ## Properties
 
 | Property | Value |
 | -------- | ----- |
-| Length | 25 characters |
+| Length | 16 characters (default; configurable via `createOptimizedCuid`) |
 | Alphabet | `[a-z0-9]` (URL-safe, case-insensitive) |
-| Time-prefixed | Yes — IDs sort approximately by creation time |
-| Collision-resistant | 10^15+ per host per millisecond before practical collision |
-| Predictable | No — middle bytes are random |
+| Time-seeded | Yes — `Date.now()` + a per-process counter feed the hash, but the output is a SHA3-512 digest, **not** a literal time prefix |
+| Collision-resistant | Hash of time + per-call salt + monotonic counter + per-process fingerprint |
+| Predictable | No — salted hash output |
 | Speed | ~3M IDs/sec on modern CPUs |
 
 ## Format
 
 ```text
-c          lh3k7v0a    000a    q9zoo3y3a8oz
-↑          ↑           ↑       ↑
-prefix     timestamp   counter random
-(version)  (base36)            (per-process entropy)
+k    3j7v0a8z4m1qp9x
+↑    ↑
+↑    SHA3-512 digest of (time + salt + counter + fingerprint), base36, sliced
+random first letter (a–z)
 ```
 
-The leading `c` identifies the format (cuid v1); timestamp +
-counter give monotonic sort within a host; the random tail
-guarantees collision-resistance across hosts.
+The first character is a random `a–z` letter; the remainder is a base36
+SHA3-512 digest of the timestamp, a per-call salt, a monotonic counter, and a
+per-process fingerprint. There is **no** literal time/counter substring you can
+parse back out — sortability is approximate, not lexical.
 
 ## When to use cuid
 
@@ -56,23 +65,20 @@ guarantees collision-resistance across hosts.
   server, no coordination round-trip.
 - **Public-facing IDs** — short enough for URLs, opaque enough
   not to leak ordering or scale info.
-- **Time-orderable lists** — sortable by ID gives
-  approximately-chronological order without an extra timestamp
-  column.
+- **Opaque, coordination-free identifiers** — generate anywhere
+  without a central allocator and without leaking row counts or
+  insertion order.
 
 ## When NOT to use cuid
 
 - **Cryptographic randomness** — cuid is collision-resistant but
   not cryptographically random. For session tokens / API keys
   use `crypto.randomBytes`.
-- **Sequential keys for analytics** — sort order is per-process
-  + per-millisecond. Multi-host inserts can re-order.
+- **Lexically time-sortable keys** — the output is a salted hash,
+  not a sortable time prefix. Sorting by cuid does **not** give
+  chronological order. Use a snowflake/ULID scheme if you need that.
 - **Numeric IDs** — cuid is a string. If you need integer
   primary keys, use a snowflake-style scheme.
-- **Sub-millisecond uniqueness** — within one process, one
-  millisecond, you get the counter. Below ~10^7 IDs/sec/process,
-  no collisions. Above — extremely unlikely but theoretically
-  possible.
 
 ## Examples
 

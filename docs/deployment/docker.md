@@ -25,13 +25,12 @@ services:
       DATABASE_URL: postgres://platform:${DB_PASS}@postgres:5432/platform
       REDIS_URL:    redis://redis:6379
       JWT_SECRET:   ${JWT_SECRET}
-      OMNITRON_HOME: /var/lib/omnitron
+      HOME:         /var/lib/omnitron   # daemon state → $HOME/.omnitron
     volumes:
       - omnitron-data:/var/lib/omnitron
-      - app-logs:/var/lib/omnitron/logs
     ports:
-      - '3001:3001'      # api HTTP
-      - '9800:9800'      # webapp
+      - '3001:3001'      # api HTTP (per-app Netron transport)
+      - '9801:9801'      # daemon Netron HTTP RPC
     depends_on:
       postgres: { condition: service_healthy }
       redis:    { condition: service_healthy }
@@ -80,11 +79,23 @@ volumes:
   pg-data:
   redis-data:
   omnitron-data:
-  app-logs:
 ```
 
 `omnitron up --foreground` keeps the daemon attached to the
 container's foreground so Docker's restart policy works.
+
+> **The Console UI (port 9800) is served by a separate
+> `omnitron-nginx` container that the daemon provisions over the
+> Docker API**, not by the daemon process itself. The daemon's own
+> ports are: `9700` (TCP fleet RPC), `9801` (Netron HTTP RPC),
+> `9802` (Netron WebSocket), `9803` (`/metrics` + `/healthz`).
+> Nginx proxies `9800 → 9801/9802` via `host.docker.internal`. If
+> you run the daemon inside this container and want it to manage
+> sibling infra/console containers, mount the Docker socket
+> (`/var/run/docker.sock`) and reach the daemon on the host. Many
+> single-container deployments instead run the daemon with
+> `--no-infra` and front it with their own nginx (the `nginx`
+> service below).
 
 ## The Dockerfile
 
@@ -123,8 +134,9 @@ RUN addgroup -S omni && adduser -S omni -G omni && \
     mkdir -p /var/lib/omnitron && chown -R omni:omni /var/lib/omnitron
 USER omni
 
-ENV NODE_ENV=production
-EXPOSE 3001 9800
+# Daemon state lives under $HOME/.omnitron — point HOME at the volume.
+ENV NODE_ENV=production HOME=/var/lib/omnitron
+EXPOSE 3001 9801 9802 9803
 
 ENTRYPOINT ['/sbin/tini', '--']
 CMD ['pnpm', 'omnitron', 'up', '--foreground']
@@ -159,8 +171,7 @@ Three persistent volumes:
 | ------ | ----- | ------- |
 | `pg-data` | `/var/lib/postgresql/data` | Postgres data |
 | `redis-data` | `/data` | Redis snapshots |
-| `omnitron-data` | `/var/lib/omnitron` | Daemon state, secrets, logs |
-| `app-logs` | `/var/lib/omnitron/logs` | Per-app log files |
+| `omnitron-data` | `/var/lib/omnitron` | Daemon state (`$HOME/.omnitron`): SQLite state at `data/daemon-state.db`, secrets, logs |
 
 **Back up `pg-data` regularly** — that's the only volume whose
 loss is catastrophic. The rest can be reconstructed.

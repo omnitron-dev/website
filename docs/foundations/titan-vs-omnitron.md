@@ -24,7 +24,7 @@ flowchart TB
     DI[Nexus DI container]
     Net[Netron RPC<br/>HTTP / WS / TCP / Unix]
     Lif[Lifecycle hooks]
-    Mods[16+ modules: auth, cache, db, ...]
+    Mods[14 modules: auth, cache, db, ...]
   end
 
   subgraph Omnitron["Omnitron — supervisor + control plane (opt-in)"]
@@ -278,7 +278,7 @@ your container orchestrator. Titan keeps running.
 | Section | Layer |
 | ------- | ----- |
 | [Titan overview](../titan/overview.md) | Titan core |
-| [Titan modules](../titan/modules) | The 16+ official modules — all usable without Omnitron |
+| [Titan modules](../titan/modules) | The 14 official modules — all usable without Omnitron |
 | [Frontend / Netron](../frontend/netron) | Browser-side; works whether the backend is Titan-alone or Omnitron-supervised |
 | [Omnitron overview](../omnitron/overview.md) | Omnitron-specific |
 | [Omnitron CLI](../omnitron/cli.md) | The 75+ commands — only relevant if you use Omnitron |

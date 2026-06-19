@@ -63,7 +63,7 @@ flowchart TB
 
 Plus the per-module testing reference:
 [Titan / Testing / Modules](../titan/testing/modules.md) —
-specific mock recipes for each of the 16+ modules.
+specific mock recipes for each of the 14 modules.
 
 ## Quick reference — one test per level
 
@@ -171,7 +171,7 @@ sparingly.
 
 ## Per-module mocking
 
-For each of the 16+ Titan modules, the cheapest path to a mock
+For each of the 14 Titan modules, the cheapest path to a mock
 is in [Titan / Testing / Modules](../titan/testing/modules.md).
 Some quick links:
 

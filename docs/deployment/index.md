@@ -52,25 +52,35 @@ no shipped node_modules.
 | Variable | Purpose |
 | -------- | ------- |
 | `NODE_ENV` | `'production'` |
-| `OMNITRON_HOME` | Override `~/.omnitron/` location |
+| `HOME` | Daemon state lives under `$HOME/.omnitron/` |
 | `DATABASE_URL` | Postgres connection string |
 | `REDIS_URL` | Redis connection string |
 | `JWT_SECRET` | Signing key — long random; from secret manager |
-| `OMNITRON_TOKEN` | Operator token for remote daemon ops (optional) |
-| `<APP>_*` | Per-app overrides (matches `envPrefix` in `bootstrap.ts`) |
+| `OMNITRON_SOCKET` | Override the daemon Unix socket path (optional) |
+| `OMNITRON_NO_INFRA` | `1` to skip Docker infra provisioning on boot |
+| `<APP>_*` | Per-app overrides (matches the app's `config.envPrefix`) |
 
-Anything in `omnitron.config.ts` can be derived from env at
-boot via `ConfigService` — favour env over config files for
-per-environment values.
+The daemon resolves its home directory from `$HOME`
+(`$HOME/.omnitron/`) — there is no `OMNITRON_HOME` override. Set
+`HOME` for the daemon's user to relocate state.
+
+Per-environment values flow in through each app's
+`config.sources` / `config.envPrefix` (Titan's config module) —
+favour env over config files for per-environment values.
 
 ### Logs and metrics
 
 - **Logs** stream to stdout (pino JSON) — ingest with your log
   aggregator's stdin-tail or sidecar.
-- **Metrics** scrape via the Omnitron daemon's `/metrics`
-  endpoint or push to a backend via `titan-telemetry-relay`.
-- **Health probes** — point your platform's liveness/readiness
-  at `/healthz` / `/readyz` served by `titan-health`.
+- **Metrics** scrape the daemon's Prometheus endpoint at
+  `/metrics` on its dedicated metrics port (`httpPort + 3`,
+  default `9803`, bound to loopback unless you opt in via host +
+  bearer token), or push to a backend via `titan-telemetry-relay`.
+- **Health probes** — the daemon's metrics port also serves
+  `/healthz` (always public, returns `200 ok`). Per-app health is
+  exposed over Netron RPC by `titan-health` (the `live()` /
+  `ready()` methods) — `omnitron health` surfaces it. There are no
+  `/healthz` / `/readyz` HTTP routes on the app transport ports.
 
 ### Secrets
 
@@ -102,15 +112,18 @@ deploys are safe; only one will run, others wait.
 ### Backups
 
 ```bash
-# Manual:
+# Manual (defaults to the 'omnitron' database; pass a name for others):
 omnitron backup create
+omnitron backup create main
 
-# Scheduled (in omnitron.config.ts or via CLI):
-omnitron backup schedule create main --cron '0 2 * * *'
+# List / restore:
+omnitron backup list
+omnitron backup restore <id>
 ```
 
-Backups land in `~/.omnitron/backups/` by default; configure
-S3 destination in the daemon config for off-host storage.
+For scheduled backups, drive `omnitron backup create` from cron
+(see the [bare-metal guide](./bare-metal.md#backups)) — there is
+no built-in backup scheduler command.
 
 ### Zero-downtime deploys
 
@@ -124,8 +137,9 @@ In **module-worker mode**, the worker pool maintains capacity
 throughout the reload. In **classic mode**, a new bootstrap is
 forked side-by-side; the old one drains.
 
-For blue/green or canary, the [deploy](./../omnitron/cli.md#deployment) command supports
-`--strategy blue-green` and `--strategy canary`.
+For blue/green or canary, [`omnitron deploy app <app>`](./../omnitron/cli.md#deployment)
+takes `--strategy <rolling|all-at-once|blue-green|canary>`
+(default `all-at-once`).
 
 ### Multi-region
 
@@ -164,22 +178,20 @@ See [Auth & RBAC](./../omnitron/auth-rbac.md) and the per-module
 ### Rollback
 
 ```bash
-# Roll back the last deploy:
-omnitron rollback api
-
-# Or to a specific version:
-omnitron rollback api --version v1.4.2
+# Roll back an app on a target server (alias or tag):
+omnitron rollback api --target web-1
 ```
 
-Configure retention of previous deploy artefacts in
-`omnitron.config.ts`:
+`omnitron rollback <app> --target <server>` requires a target —
+it operates against a registered remote daemon. Build artefacts
+are versioned tarballs under `<projectRoot>/.omnitron/artifacts/`
+(`<app>-<version>.tar.gz`); prune old ones with the
+`ArtifactBuilder` retention helper (keeps the latest N per app).
 
-```typescript
-deployment: {
-  retain: 5,           // keep last 5 versions for rollback
-  versionTag: 'git-sha',  // 'git-sha' | 'semver' | 'timestamp'
-}
-```
+> ⚠️ **NEEDS REWRITE** — there is no `deployment: { retain,
+> versionTag }` block in `omnitron.config.ts`, and `rollback`
+> has no `--version` flag. Artefact retention is handled by the
+> builder, not declarative config.
 
 ## Read the per-target guides
 

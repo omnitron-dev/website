@@ -59,7 +59,9 @@ pnpm install --frozen-lockfile --prod
 ```
 
 For mature shops, replace with a real deploy pipeline
-(`omnitron deploy build` + scp + atomic symlink swap).
+(`omnitron deploy build <app>` — which writes a versioned tarball
+to `<projectRoot>/.omnitron/artifacts/<app>-<version>.tar.gz` —
+plus scp + atomic symlink swap).
 
 ## systemd unit
 
@@ -122,7 +124,9 @@ NODE_ENV=production
 DATABASE_URL=postgres://platform:strongpass@localhost:5432/platform
 REDIS_URL=redis://localhost:6379
 JWT_SECRET=<generated>
-OMNITRON_HOME=/home/omnitron/.omnitron
+# Daemon state lives at $HOME/.omnitron — with User=omnitron that resolves to
+# /home/omnitron/.omnitron. There is no OMNITRON_HOME override; set HOME to relocate.
+HOME=/home/omnitron
 ```
 
 Set restrictive perms:
@@ -144,8 +148,9 @@ sudo journalctl -u omnitron -f
 ```
 
 The Omnitron daemon writes its own log to
-`~/.omnitron/logs/daemon.log`; journald captures stdout/stderr
-as a backup.
+`~/.omnitron/logs/omnitron.log` (errors also to
+`~/.omnitron/logs/omnitron.error.log`); journald captures
+stdout/stderr as a backup.
 
 ## Database setup
 
@@ -165,6 +170,14 @@ auth method per source.
 
 ## Reverse proxy (nginx)
 
+The `webapp_backend` below assumes the Omnitron Console is
+running on `:9800`. That port is served by the `omnitron-nginx`
+container that `omnitron webapp start` provisions (it proxies to
+the daemon's Netron HTTP on `:9801` / WS on `:9802`), so the
+Console still needs Docker on the host. If you don't want Docker
+on a bare-metal box, drop the `webapp_backend`/`app.example.com`
+server block and operate via the CLI + the daemon RPC on `:9801`.
+
 ```nginx
 # /etc/nginx/sites-available/platform
 upstream api_backend {
@@ -173,7 +186,7 @@ upstream api_backend {
 }
 
 upstream webapp_backend {
-    server 127.0.0.1:9800;
+    server 127.0.0.1:9800;   # omnitron-nginx (Console) — needs `omnitron webapp start`
     keepalive 16;
 }
 
@@ -270,14 +283,19 @@ Daily Postgres backup via cron:
 30 2 * * *  postgres  pg_dump platform | gzip > /var/backups/platform-$(date +\%Y\%m\%d).sql.gz
 ```
 
-Plus Omnitron's built-in:
+Or drive Omnitron's built-in `pg_dump`-based backup from cron
+(it writes compressed dumps to `~/.omnitron/backups/`):
 
 ```bash
-omnitron backup schedule create main --cron '0 3 * * *'
+# /etc/cron.d/omnitron-app-backups — 'main' is the app database name
+0 3 * * *  omnitron  cd /home/omnitron/platform && /usr/bin/pnpm omnitron backup create main
 ```
 
-The Omnitron daemon's state under `~/.omnitron/` is regenerable
-— back up if you want history (uptime bars, secrets store).
+There is no `omnitron backup schedule` command — schedule it via
+cron as above. The daemon's state under `~/.omnitron/` (including
+the SQLite store at `~/.omnitron/data/daemon-state.db`) is
+regenerable — back it up if you want history (uptime bars,
+secrets store).
 
 ## Multi-server fleet
 
@@ -294,21 +312,31 @@ omnitron fleet status
 Each `omnitron up` daemon listens on TCP 9700 (configurable) for
 fleet RPC; the master coordinates.
 
-For cluster mode (leader election), enable in
-`/etc/omnitron/env`:
+For cluster mode (leader election), configure the daemon's
+`cluster` block — not env vars. `omnitron cluster status`
+itself prompts with the config shape:
 
-```bash
-OMNITRON_CLUSTER_ENABLED=true
-OMNITRON_CLUSTER_DISCOVERY=redis
-OMNITRON_CLUSTER_PEERS=192.168.1.10:9700,192.168.1.11:9700,192.168.1.12:9700
+```typescript
+// daemon cluster config
+cluster: {
+  enabled: true,
+  discovery: 'redis',   // 'redis' | 'static'
+  peers: ['192.168.1.10:9700', '192.168.1.11:9700', '192.168.1.12:9700'],
+}
 ```
+
+Inspect/manage it with `omnitron cluster status` and
+`omnitron cluster step-down`. (There are no
+`OMNITRON_CLUSTER_*` environment variables.)
 
 See [Cluster + Fleet](./../omnitron/cluster.md).
 
 ## Monitoring
 
 - **Application metrics** — Prometheus scrapes the daemon's
-  `:9800/metrics`.
+  dedicated metrics port `:9803/metrics` (loopback by default;
+  bind `0.0.0.0` + bearer token to scrape off-host). `:9803`
+  also serves `/healthz`.
 - **Host metrics** — node_exporter on each host.
 - **Logs** — Promtail / Filebeat tails journald + Omnitron's
   log directory.

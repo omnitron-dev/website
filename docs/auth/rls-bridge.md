@@ -95,17 +95,25 @@ shared Redis namespace; only `main` reads.
 ## RLS policies
 
 A policy is a per-table allow/deny/filter that runs inside the
-plugin BEFORE every SELECT / INSERT / UPDATE / DELETE.
+plugin BEFORE every SELECT / INSERT / UPDATE / DELETE. The
+`defineRLSSchema`, `allow`, `deny`, `filter` builders are the
+real `@kysera/rls` API, re-exported from
+`@omnitron-dev/titan/module/database/rls`. The condition function
+receives a `PolicyEvaluationContext`: `ctx.auth` for identity and
+`ctx.row` (read/update/delete) or `ctx.data` (create) for the
+record under evaluation:
 
 ```ts
 // rls-schema.ts
+import { defineRLSSchema, allow } from '@omnitron-dev/titan/module/database/rls';
+
 export const platformRLSSchema = defineRLSSchema<Database>({
   users: {
     policies: [
       allow('read', () => true, { name: 'publicProfiles' }),
-      allow('update', (ctx) => ctx.auth.userId === row(ctx)?.['id'], { name: 'ownUpdate' }),
+      allow('update', (ctx) => ctx.auth.userId === ctx.row?.id, { name: 'ownUpdate' }),
       allow('update', (ctx) => {
-        const targetRole = (row(ctx)?.['platformRole'] as string) ?? 'user';
+        const targetRole = (ctx.row?.platformRole as string) ?? 'user';
         return canModerateUserWithRole(ctx.auth.roles, targetRole);
       }, { name: 'tieredAdminUpdate' }),
     ],
@@ -116,8 +124,10 @@ export const platformRLSSchema = defineRLSSchema<Database>({
 });
 ```
 
-`ctx.auth` carries `userId`, `roles`, `permissions` — the
-same shape the application-side gates check.
+`ctx.auth` (an `RLSAuthContext`) carries `userId`, `roles`,
+`permissions`, `tenantId`, `attributes`, and `isSystem` — the
+bridge populates it from the application's `AuthContext` so the
+DB layer sees the same identity the call-side gates check.
 
 ## STRICT vs PERMISSIVE plugin tiers
 

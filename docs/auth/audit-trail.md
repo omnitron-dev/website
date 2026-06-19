@@ -101,16 +101,19 @@ double-protected by the STRICT RLS policy on `audit_logs`:
 audit_logs: {
   policies: [
     allow('read', (ctx) => hasPermission(ctx.auth.permissions ?? [], 'admin.audit.view'), { name: 'adminAuditRead' }),
-    deny(['create', 'update', 'delete'], () => false, { name: 'systemOnlyWrite' }),
+    deny(['create', 'update', 'delete'], undefined, { name: 'systemOnlyWrite' }),
   ],
   skipFor: ['system'],
   defaultDeny: true,
 }
 ```
 
-`create` is denied for every role except `'system'` so audit
-entries can only be written through the authorised
-service-layer path — never via a raw client-issued INSERT.
+`@kysera/rls` `deny(op, condition)` blocks when the condition is
+true; called with no condition it **always** denies. Combined
+with `skipFor: ['system']`, write operations are refused for
+every role except `'system'`, so audit entries can only be
+written through the authorised service-layer path — never via a
+raw client-issued INSERT.
 
 ## Redaction
 
