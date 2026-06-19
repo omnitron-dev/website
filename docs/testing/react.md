@@ -1,7 +1,7 @@
 ---
 sidebar_position: 5
 title: React testing
-description: Testing React components that call Netron — MockProvider patterns.
+description: Testing React components that call Netron — TestNetronProvider patterns.
 ---
 
 # React testing
@@ -10,70 +10,72 @@ Components built on `netron-react` need RPC mocks; Prism
 components need a `<PrismProvider>`. This page covers both with
 patterns that scale.
 
-## The two MockProviders
+## TestNetronProvider + multi-backend
 
-| Mock | When |
-| ---- | ---- |
-| **`MockProvider`** (from `@omnitron-dev/netron-react/test`) | Single-backend tests |
-| **`MockMultiBackendProvider`** (same package) | Multi-backend tests |
+| Provider | When |
+| -------- | ---- |
+| **`TestNetronProvider`** (from `@omnitron-dev/netron-react/test`) | Single-backend tests |
+| **`MultiBackendProvider`** (from `@omnitron-dev/netron-react`, fed a mock client) | Multi-backend tests |
 
-Both produce a `NetronClient` substitute that intercepts RPC calls
-and returns canned data.
+`TestNetronProvider` builds a `NetronReactClient` substitute
+(via `createTestClient`) that intercepts RPC calls and returns
+the canned data from its `mocks`.
 
 ## Single-backend mock
 
 ```tsx
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect } from 'vitest';
 import { render, screen } from '@testing-library/react';
-import { MockProvider, mockService } from '@omnitron-dev/netron-react/test';
+import { TestNetronProvider } from '@omnitron-dev/netron-react/test';
 import { UserCard } from './UserCard.js';
 
 describe('UserCard', () => {
   it('renders user email', async () => {
-    const users = mockService<UserService>('users', {
-      getUser: vi.fn().mockResolvedValue({ id: '1', email: 'a@b.c' }),
-    });
-
     render(
-      <MockProvider services={[users]}>
+      <TestNetronProvider
+        testConfig={{
+          mocks: [
+            { service: 'users', method: 'getUser', response: { id: '1', email: 'a@b.c' } },
+          ],
+        }}
+      >
         <UserCard userId="1" />
-      </MockProvider>
+      </TestNetronProvider>
     );
 
     await screen.findByText('a@b.c');
-    expect(users.getUser).toHaveBeenCalledWith('1');
   });
 });
 ```
 
 Two pieces:
 
-- **`mockService(name, impl)`** — builds a typed service mock.
-  `impl` provides any subset of the interface; uncalled methods
-  are `vi.fn()` returning `undefined`.
-- **`<MockProvider services={[...]}>`** — wraps your component
-  with a fake `NetronProvider`.
+- **`testConfig.mocks`** — an array of `MockResponse` entries
+  (`{ service, method, response?, error?, delay? }`). The test
+  client's `invoke` matches on `service.method` and returns the
+  canned `response` (or throws `error`).
+- **`<TestNetronProvider testConfig={{ mocks }}>`** — wraps your
+  component with a `NetronProvider` backed by the test client.
+
+To branch on call arguments, build a service object with
+**`createMockService<T>(implementations)`** (async methods, any
+subset of the interface) and inject it as the client's service.
 
 ## Multi-backend mock
 
 ```tsx
-import { MockMultiBackendProvider } from '@omnitron-dev/netron-react/test';
+import { MultiBackendProvider } from '@omnitron-dev/netron-react';
 
 render(
-  <MockMultiBackendProvider
-    backends={{
-      auth:  { services: [authMock] },
-      media: { services: [mediaMock] },
-    }}
-    routes={{ 'users.*': 'auth', 'objects.*': 'media' }}
-  >
+  <MultiBackendProvider client={mockMultiBackendClient} autoConnect={false}>
     <Dashboard />
-  </MockMultiBackendProvider>
+  </MultiBackendProvider>
 );
 ```
 
-Mirrors production `<MultiBackendProvider>` exactly — same
-routing semantics.
+Uses the production `<MultiBackendProvider>` directly — supply a
+mock multi-backend client that satisfies the same routing
+contract.
 
 ## With Prism components
 
@@ -86,22 +88,27 @@ import { createTheme }   from '@omnitron-dev/prism/theme';
 
 const theme = createTheme({ mode: 'light' });
 
-function TestProviders({ children, services }: {
+import { TestNetronProvider, type TestClientConfig }
+  from '@omnitron-dev/netron-react/test';
+import type { NetronReactClient } from '@omnitron-dev/netron-react';
+
+function TestProviders({ children, testConfig, client }: {
   children: React.ReactNode;
-  services: any[];
+  testConfig?: TestClientConfig;
+  client?: NetronReactClient;
 }) {
   return (
     <PrismProvider theme={theme}>
-      <MockProvider services={services}>
+      <TestNetronProvider client={client} testConfig={testConfig}>
         {children}
-      </MockProvider>
+      </TestNetronProvider>
     </PrismProvider>
   );
 }
 
 // In a test:
 render(
-  <TestProviders services={[usersMock]}>
+  <TestProviders testConfig={{ mocks: [{ service: 'users', method: 'list', response: users }] }}>
     <UsersPage />
   </TestProviders>
 );
@@ -114,14 +121,14 @@ this wrapper is mandatory.
 
 ```tsx
 it('shows skeleton while loading', async () => {
-  const users = mockService<UserService>('users', {
-    getUser: vi.fn(() => new Promise((r) => setTimeout(() => r(user), 100))),
-  });
-
   render(
-    <MockProvider services={[users]}>
+    <TestNetronProvider
+      testConfig={{
+        mocks: [{ service: 'users', method: 'getUser', response: user, delay: 100 }],
+      }}
+    >
       <UserCard userId="1" />
-    </MockProvider>
+    </TestNetronProvider>
   );
 
   expect(screen.getByTestId('skeleton')).toBeInTheDocument();
@@ -130,16 +137,18 @@ it('shows skeleton while loading', async () => {
 });
 
 it('shows error on NOT_FOUND', async () => {
-  const users = mockService<UserService>('users', {
-    getUser: vi.fn().mockRejectedValue(
-      new TitanError({ code: ErrorCode.NOT_FOUND, message: 'not found' })
-    ),
-  });
-
   render(
-    <MockProvider services={[users]}>
+    <TestNetronProvider
+      testConfig={{
+        mocks: [{
+          service: 'users',
+          method:  'getUser',
+          error:   new TitanError({ code: ErrorCode.NOT_FOUND, message: 'not found' }),
+        }],
+      }}
+    >
       <UserCard userId="missing" />
-    </MockProvider>
+    </TestNetronProvider>
   );
 
   await screen.findByText(/not found/i);
@@ -149,14 +158,18 @@ it('shows error on NOT_FOUND', async () => {
 ## Mutation assertions
 
 ```tsx
+import { createTestClient, createMockService } from '@omnitron-dev/netron-react/test';
+
 it('calls invite on submit', async () => {
-  const user = userEvent.setup();
-  const users = mockService<UserService>('users', {
-    invite: vi.fn().mockResolvedValue({ id: 'new', email: 'x@y.z' }),
-  });
+  const user   = userEvent.setup();
+  const invite = vi.fn(async () => ({ id: 'new', email: 'x@y.z' }));
+  const usersMock = createMockService<UserService>({ invite });
+
+  const client = createTestClient();
+  client.service = (() => usersMock) as never;   // inject the mock service
 
   render(
-    <TestProviders services={[users]}>
+    <TestProviders client={client}>
       <InviteForm />
     </TestProviders>
   );
@@ -165,26 +178,36 @@ it('calls invite on submit', async () => {
   await user.click(screen.getByRole('button', { name: 'Invite' }));
 
   await waitFor(() => {
-    expect(users.invite).toHaveBeenCalledWith({ email: 'x@y.z' });
+    expect(invite).toHaveBeenCalledWith({ email: 'x@y.z' });
   });
 });
 ```
 
+`useMutation` exposes `isLoading` while in flight (not
+`isPending`), plus `isSuccess` / `isError` / `data`.
+
 ## Subscriptions
 
+For streaming RPCs consumed by `useSubscription`, build a
+service whose method returns an async iterable with
+`createMockService`, then inject it as the client's service:
+
 ```tsx
-import { mockAsyncIterable } from '@omnitron-dev/netron-react/test';
+import { createTestClient, createMockService } from '@omnitron-dev/netron-react/test';
 
 it('updates on stream events', async () => {
-  const orders = mockService<OrderService>('orders', {
-    watchAll: vi.fn(() => mockAsyncIterable([
-      { type: 'created', orderId: '1' },
-      { type: 'updated', orderId: '1', status: 'paid' },
-    ])),
+  const orders = createMockService<OrderService>({
+    watchAll: async function* () {
+      yield { type: 'created', orderId: '1' };
+      yield { type: 'updated', orderId: '1', status: 'paid' };
+    },
   });
 
+  const client = createTestClient();
+  client.service = (() => orders) as never;
+
   render(
-    <TestProviders services={[orders]}>
+    <TestProviders client={client}>
       <OrderStream />
     </TestProviders>
   );
@@ -194,21 +217,27 @@ it('updates on stream events', async () => {
 });
 ```
 
-`mockAsyncIterable(items)` yields each item with a microtask
-delay between — components see them in order.
+The generator yields each item in order — components using
+`useSubscription` see them as they arrive.
 
 ## Suspense + error boundary
 
+Suspense is the `suspense: true` option on `useQuery` (there is
+no separate `useSuspenseQuery` hook) — it throws the in-flight
+fetch to the nearest `<Suspense>` and escalates errors to the
+nearest error boundary:
+
 ```tsx
 it('catches render error via boundary', async () => {
-  const users = mockService<UserService>('users', {
-    getUser: vi.fn().mockRejectedValue(new Error('boom')),
-  });
-
   render(
-    <TestProviders services={[users]}>
+    <TestProviders
+      testConfig={{
+        mocks: [{ service: 'users', method: 'getUser', error: new Error('boom') }],
+      }}
+    >
       <ErrorBoundary fallback={() => <div>caught</div>}>
         <Suspense fallback={<div>loading</div>}>
+          {/* SuspenseUserCard calls useQuery([...], { suspense: true }) */}
           <SuspenseUserCard userId="1" />
         </Suspense>
       </ErrorBoundary>
@@ -226,10 +255,11 @@ path that production needs.
 
 ```tsx
 import { createTestClient } from '@omnitron-dev/netron-react/test';
+import { NetronProvider } from '@omnitron-dev/netron-react';
 
 const client = createTestClient({
-  services: [usersMock],
-  cache:    { defaultStaleTime: 0, defaultGcTime: 0 },   // disable cache
+  mocks:  [{ service: 'users', method: 'getUser', response: user }],
+  config: { cache: { staleTime: 0, cacheTime: 0 } },   // disable cache
 });
 
 render(
@@ -286,7 +316,7 @@ import { MemoryRouter } from 'react-router-dom';
 
 render(
   <MemoryRouter initialEntries={['/users/u_42']}>
-    <TestProviders services={[usersMock]}>
+    <TestProviders testConfig={{ mocks: [{ service: 'users', method: 'getUser', response: user }] }}>
       <Routes>
         <Route path="/users/:id" element={<UserPage />} />
       </Routes>
@@ -338,12 +368,12 @@ The webapp's E2E suite lives at `apps/omnitron/webapp/e2e/`.
 
 ## Anti-patterns
 
-- **Mocking `useService` directly.** Use `MockProvider` — it
-  preserves the full hook contract (loading, error, refetch,
+- **Mocking `useService` directly.** Use `TestNetronProvider` —
+  it preserves the full hook contract (loading, error, refetch,
   etc.).
 - **`act()` warnings ignored.** They mean React's batching
   surprised you; fix the test.
-- **Real `fetch` in unit tests.** Use MockProvider.
+- **Real `fetch` in unit tests.** Use `TestNetronProvider`.
 - **Shared mock state across tests.** `mockClear()` in `beforeEach`
   or recreate.
 
@@ -352,5 +382,5 @@ The webapp's E2E suite lives at `apps/omnitron/webapp/e2e/`.
 - [Testing overview](./index.md)
 - [Testing package](./testing-package.md)
 - [Integration patterns](./integration.md)
-- [Netron React testing](../frontend/netron/testing.md) — `MockProvider` API
+- [Netron React testing](../frontend/netron/testing.md) — `TestNetronProvider` API
 - [Prism overview](../frontend/prism/index.md) — `<PrismProvider>` wiring

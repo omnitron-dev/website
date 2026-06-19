@@ -26,7 +26,7 @@ Used automatically by every `useQuery` / `useService(...).x.useQuery`:
 ```tsx
 const { data, isLoading, isStale } = users.getUser.useQuery([userId], {
   staleTime:    30_000,
-  gcTime:       5 * 60_000,
+  cacheTime:    5 * 60_000,
   refetchOnWindowFocus:  true,
   refetchOnReconnect:    true,
   refetchInterval:       60_000,
@@ -36,7 +36,7 @@ const { data, isLoading, isStale } = users.getUser.useQuery([userId], {
 | Option | Default | Meaning |
 | ------ | ------- | ------- |
 | `staleTime` | `0` | Data is fresh for N ms; while fresh, no refetch on subscribe |
-| `gcTime` | `5 * 60_000` | Drop from cache N ms after last subscriber unmounts |
+| `cacheTime` | `5 * 60_000` | Drop from cache N ms after last subscriber unmounts |
 | `refetchOnMount` | `true` | Refetch when a component mounts subscribing to this key |
 | `refetchOnWindowFocus` | `false` | Refetch when tab regains focus |
 | `refetchOnReconnect` | `true` | Refetch when WS / network reconnects |
@@ -73,16 +73,16 @@ function CacheManager() {
 
   return (
     <>
-      <Button onClick={() => cache.invalidateQueries(['users'])}>
+      <Button onClick={() => client.invalidateQueries({ queryKey: ['users'] })}>
         Refresh all users queries
       </Button>
-      <Button onClick={() => cache.removeQueries(['users', 'getUser', 'u_42'])}>
+      <Button onClick={() => client.removeQueries({ queryKey: ['users', 'getUser', 'u_42'] })}>
         Drop one specific
       </Button>
-      <Button onClick={() => cache.setQueryData(['users', 'getUser', 'u_42'], updatedUser)}>
+      <Button onClick={() => cache.set(['users', 'getUser', 'u_42'], updatedUser)}>
         Patch cached value
       </Button>
-      <Button onClick={() => cache.clear()}>
+      <Button onClick={() => client.clear()}>
         Nuke everything
       </Button>
     </>
@@ -90,24 +90,39 @@ function CacheManager() {
 }
 ```
 
-| Method | Effect |
-| ------ | ------ |
-| `getQueryData(key)` | Read cached data without subscribing |
-| `setQueryData(key, data)` | Write to cache directly |
-| `setQueryData(key, (old) => new)` | Functional update |
-| `invalidateQueries(filter)` | Mark stale → subscribers refetch |
-| `removeQueries(filter)` | Drop from cache |
-| `cancelQueries(filter)` | Abort in-flight queries matching filter |
-| `prefetchQuery(args)` | Warm cache without rendering |
-| `clear()` | Drop everything |
+The TanStack-style filter methods live on the **client**; the
+low-level read/write methods live on the **QueryCache**
+(`client.getQueryCache()`):
+
+| Method | Lives on | Effect |
+| ------ | -------- | ------ |
+| `getQueryCache().get(key)` | cache | Read cached data without subscribing |
+| `getQueryCache().set(key, data)` | cache | Write to cache directly |
+| `invalidateQueries(filters)` | client | Mark stale → subscribers refetch |
+| `removeQueries(filters)` | client | Drop from cache |
+| `cancelQueries(filters)` | client | Abort in-flight queries matching filter |
+| `prefetchQuery(key, fetcher)` | client | Warm cache without rendering |
+| `clear()` | client | Drop everything |
+
+To patch a cached value functionally, read-then-set:
+
+```tsx
+const prev = cache.get(['users', 'getUser', 'u_42']);
+cache.set(['users', 'getUser', 'u_42'], { ...prev, ...patch });
+```
 
 ### Filter patterns
 
+The client's filter methods take a `QueryFilters` object —
+`{ queryKey?, exact?, status?, stale?, fetching?, predicate? }`.
+`queryKey` is a prefix match by default; add `exact: true` for
+an exact match.
+
 ```tsx
-cache.invalidateQueries(['users']);                  // every users.* query
-cache.invalidateQueries(['users', 'getUser']);       // every getUser
-cache.invalidateQueries(['users', 'getUser', 'u_42']); // one specific
-cache.invalidateQueries({ predicate: (q) => q.queryKey[0] === 'users' && q.state.dataUpdatedAt < Date.now() - 60_000 });
+client.invalidateQueries({ queryKey: ['users'] });                  // every users.* query
+client.invalidateQueries({ queryKey: ['users', 'getUser'] });       // every getUser
+client.invalidateQueries({ queryKey: ['users', 'getUser', 'u_42'], exact: true }); // one specific
+client.invalidateQueries({ predicate: (q) => q.queryKey[0] === 'users' && q.state.dataUpdatedAt < Date.now() - 60_000 });
 ```
 
 The functional `predicate` form lets you invalidate by age,
@@ -118,7 +133,7 @@ state, or any custom condition.
 ```tsx
 users.getUser.useQuery([userId], {
   staleTime: 30_000,
-  gcTime:    5 * 60_000,
+  cacheTime: 5 * 60_000,
 });
 ```
 
@@ -144,16 +159,16 @@ runs.
 const updateProfile = users.updateProfile.useMutation({
   onMutate: async (newProfile) => {
     // 1. Cancel any in-flight queries that would clobber the optimistic update
-    await cache.cancelQueries(['users', 'getUser', userId]);
+    client.cancelQueries({ queryKey: ['users', 'getUser', userId] });
 
     // 2. Snapshot the previous value
-    const previous = cache.getQueryData(['users', 'getUser', userId]);
+    const previous = cache.get(['users', 'getUser', userId]);
 
     // 3. Optimistically update
-    cache.setQueryData(['users', 'getUser', userId], (old) => ({
-      ...old,
+    cache.set(['users', 'getUser', userId], {
+      ...previous,
       ...newProfile,
-    }));
+    });
 
     // 4. Return context for rollback
     return { previous };
@@ -161,12 +176,12 @@ const updateProfile = users.updateProfile.useMutation({
   onError: (err, _newProfile, context) => {
     // Rollback to snapshot
     if (context?.previous) {
-      cache.setQueryData(['users', 'getUser', userId], context.previous);
+      cache.set(['users', 'getUser', userId], context.previous);
     }
   },
   onSettled: () => {
     // Always re-fetch authoritative state
-    cache.invalidateQueries(['users', 'getUser', userId]);
+    client.invalidateQueries({ queryKey: ['users', 'getUser', userId] });
   },
 });
 ```
@@ -219,19 +234,19 @@ one drops the entry.
 ## Prefetching
 
 ```tsx
-import { useNetronClient } from '@omnitron-dev/netron-react';
+import { useNetronClient, useService } from '@omnitron-dev/netron-react';
 
 function ProjectLink({ id }: { id: string }) {
-  const client = useNetronClient();
+  const client   = useNetronClient();
+  const projects = useService<ProjectService>('projects');
   return (
     <Link
       to={`/projects/${id}`}
       onMouseEnter={() => {
-        client.getQueryCache().prefetchQuery({
-          service: 'projects',
-          method:  'getProject',
-          args:    [id],
-        });
+        client.prefetchQuery(
+          ['projects', 'getProject', id],
+          () => projects.getProject.call(id),
+        );
       }}
     >
       {name}
@@ -247,7 +262,7 @@ destination renders instantly.
 
 ```typescript
 const stats = cache.getStats();
-// { size, hits, misses, evictions, hitRatio }
+// { size, maxEntries, observerCount, fetchingCount }
 ```
 
 Surface in devtools or a metrics dashboard.
@@ -282,7 +297,7 @@ Query, the mental model carries over. The differences:
 
 - **`staleTime: 0` everywhere.** Defeats caching; every mount
   refetches.
-- **`gcTime: Infinity`.** Cache grows unboundedly; first call
+- **`cacheTime: Infinity`.** Cache grows unboundedly; first call
   after page reload is cold anyway.
 - **Manual cache writes from multiple components.** Use
   invalidation; manual writes drift.
@@ -296,4 +311,4 @@ Query, the mental model carries over. The differences:
 
 - [Middleware](./middleware.md) — `CacheMiddleware` configuration
 - [netron-react](./react.md) — `useQuery` / `useMutation`
-- [Multi-backend](./multi-backend.md) — per-backend cache
+- [Multi-backend](./multi-backend.md) — shared cache across backends

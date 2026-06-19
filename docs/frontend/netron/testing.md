@@ -1,116 +1,153 @@
 ---
 sidebar_position: 10
 title: Testing
-description: MockProvider, integration patterns, deterministic fixtures.
+description: TestNetronProvider, integration patterns, deterministic fixtures.
 ---
 
 # Testing
 
-netron-react ships testing utilities that let you drive
-components without a real backend.
+netron-react ships testing utilities (under
+`@omnitron-dev/netron-react/test`) that let you drive components
+without a real backend.
 
-## `MockProvider`
+## `TestNetronProvider`
 
 ```tsx
-import { MockProvider, mockService } from '@omnitron-dev/netron-react/test';
-
-const usersMock = mockService<UserService>('users', {
-  getUser: vi.fn().mockResolvedValue({ id: '1', email: 'a@b.c' }),
-  list:    vi.fn().mockResolvedValue([{ id: '1', email: 'a@b.c' }]),
-});
+import { TestNetronProvider } from '@omnitron-dev/netron-react/test';
 
 render(
-  <MockProvider services={[usersMock]}>
+  <TestNetronProvider
+    testConfig={{
+      mocks: [
+        { service: 'users', method: 'getUser', response: { id: '1', email: 'a@b.c' } },
+        { service: 'users', method: 'list',    response: [{ id: '1', email: 'a@b.c' }] },
+      ],
+    }}
+  >
     <UserCard userId="1" />
-  </MockProvider>
+  </TestNetronProvider>
 );
 
 await screen.findByText('a@b.c');
-expect(usersMock.getUser).toHaveBeenCalledWith('1');
 ```
 
-No real transport — the mock fakes the entire RPC layer. Hooks
-behave identically (`useQuery`, `useMutation`, `useService`).
+No real transport — `TestNetronProvider` builds a test client
+(via `createTestClient`) whose `invoke` is intercepted by the
+`mocks` array. Hooks behave identically (`useQuery`,
+`useMutation`, `useService`).
+
+Each mock entry is a `MockResponse`: `{ service, method, response?,
+error?, delay? }`. Provide `error` to make the matching call
+reject, and `delay` to simulate latency.
 
 ## Custom mock responses
 
+Each entry in `mocks` returns a **static** `response` for one
+`service.method`. To branch on arguments, override the client's
+`invoke` — it's a plain method. `createMockService` builds an
+object of async method implementations you can dispatch to:
+
 ```tsx
-const usersMock = mockService<UserService>('users', {
-  getUser: vi.fn((id: string) => {
+import { createTestClient, createMockService, TestNetronProvider }
+  from '@omnitron-dev/netron-react/test';
+
+const usersMock = createMockService<UserService>({
+  getUser: async (id: string) => {
     if (id === 'missing') {
       throw new TitanError({ code: ErrorCode.NOT_FOUND, message: 'not found' });
     }
-    return Promise.resolve({ id, email: `${id}@example.com` });
-  }),
+    return { id, email: `${id}@example.com` };
+  },
 });
-```
 
-The mock returns / throws exactly what the matching real method
-would.
-
-## Mock subscriptions
-
-```tsx
-const ordersMock = mockService<OrderService>('orders', {
-  watchAll: vi.fn(() => mockAsyncIterable([
-    { type: 'created', orderId: '1' },
-    { type: 'updated', orderId: '1', status: 'paid' },
-  ])),
-});
-```
-
-`mockAsyncIterable` yields the array contents on demand;
-components using `useSubscription` see them in order.
-
-## Multi-backend tests
-
-```tsx
-import { MockMultiBackendProvider } from '@omnitron-dev/netron-react/test';
+const client = createTestClient();
+// Dispatch every call to the mock service object:
+client.invoke = (async (_service, method, args) =>
+  (usersMock as Record<string, (...a: unknown[]) => Promise<unknown>>)[method](...args)
+) as typeof client.invoke;
 
 render(
-  <MockMultiBackendProvider
-    backends={{
-      auth: { services: [authMock] },
-      media: { services: [mediaMock] },
-    }}
-    routes={{ 'users.*': 'auth', 'objects.*': 'media' }}
-  >
-    <Dashboard />
-  </MockMultiBackendProvider>
+  <TestNetronProvider client={client}>
+    <UserCard userId="missing" />
+  </TestNetronProvider>
 );
 ```
 
-Mirrors the production `MultiBackendProvider` API — switch
-import + you have isolated tests.
+`createMockService(implementations)` returns a plain object of
+async methods. It is **not** auto-wired into the provider —
+dispatch to it via `invoke` as above (or pass `vi.fn()`
+implementations so you can assert calls).
+
+## Mock latency
+
+```tsx
+render(
+  <TestNetronProvider
+    testConfig={{
+      mocks: [
+        { service: 'orders', method: 'getOrder', response: order, delay: 100 },
+      ],
+    }}
+  >
+    <OrderCard orderId="1" />
+  </TestNetronProvider>
+);
+```
+
+A per-mock `delay` (or `testConfig.defaultDelay`) lets you assert
+intermediate loading states before the response settles.
+
+## Multi-backend tests
+
+For multi-backend apps, build a `MultiBackendProvider` around a
+mock multi-backend client in your test setup — the test utils
+focus on the single-client path; the multi-backend hooks
+(`useBackendService`, …) read from whatever
+`<MultiBackendProvider>` you supply.
+
+```tsx
+import { MultiBackendProvider } from '@omnitron-dev/netron-react';
+
+render(
+  <MultiBackendProvider client={mockMultiBackendClient} autoConnect={false}>
+    <Dashboard />
+  </MultiBackendProvider>
+);
+```
+
+See [Multi-backend](./multi-backend.md) for the production
+`MultiBackendProvider` API the mock client must satisfy.
 
 ## Cache control in tests
 
 ```tsx
-import { createTestClient } from '@omnitron-dev/netron-react/test';
+import { createTestClient, TestNetronProvider }
+  from '@omnitron-dev/netron-react/test';
 
 const client = createTestClient({
-  services: [usersMock],
-  cache:    { defaultStaleTime: 0, defaultGcTime: 0 },   // disable cache for predictability
+  mocks:  [{ service: 'users', method: 'getUser', response: user }],
+  config: { cache: { staleTime: 0, cacheTime: 0 } },   // disable cache for predictability
 });
 
-render(<NetronProvider client={client}><App /></NetronProvider>);
+render(<TestNetronProvider client={client}><App /></TestNetronProvider>);
 ```
 
-Tests with `staleTime: 0` re-fetch on every mount — useful for
-asserting "fetched N times" without caching surprises.
+`createTestClient(config?)` builds the client; pass cache tuning
+through `config`. With `staleTime: 0`, every mount re-fetches —
+useful for asserting "fetched N times" without caching surprises.
 
 ## Loading + error states
 
 ```tsx
 it('shows skeleton while loading', async () => {
-  const usersMock = mockService<UserService>('users', {
-    getUser: vi.fn(() => new Promise((r) => setTimeout(() => r(user), 100))),
-  });
-
   render(
-    <MockProvider services={[usersMock]}>
+    <TestNetronProvider
+      testConfig={{
+        mocks: [{ service: 'users', method: 'getUser', response: user, delay: 100 }],
+      }}
+    >
       <UserCard userId="1" />
-    </MockProvider>
+    </TestNetronProvider>
   );
 
   expect(screen.getByTestId('skeleton')).toBeInTheDocument();
@@ -119,14 +156,18 @@ it('shows skeleton while loading', async () => {
 });
 
 it('shows error on failure', async () => {
-  const usersMock = mockService<UserService>('users', {
-    getUser: vi.fn().mockRejectedValue(new TitanError({ code: ErrorCode.NOT_FOUND })),
-  });
-
   render(
-    <MockProvider services={[usersMock]}>
+    <TestNetronProvider
+      testConfig={{
+        mocks: [{
+          service: 'users',
+          method:  'getUser',
+          error:   new TitanError({ code: ErrorCode.NOT_FOUND }),
+        }],
+      }}
+    >
       <UserCard userId="1" />
-    </MockProvider>
+    </TestNetronProvider>
   );
 
   await screen.findByText(/not found/i);
@@ -135,44 +176,56 @@ it('shows error on failure', async () => {
 
 ## Mutation assertions
 
+Spy on the client's `invoke` to assert a mutation fired with the
+right arguments — the proxy calls `invoke(service, method, args)`:
+
 ```tsx
 it('calls invite on submit', async () => {
-  const user = userEvent.setup();
-  const usersMock = mockService<UserService>('users', {
-    invite: vi.fn().mockResolvedValue({ id: 'new', email: 'x@y.z' }),
+  const user   = userEvent.setup();
+  const client = createTestClient({
+    mocks: [{ service: 'users', method: 'invite', response: { id: 'new', email: 'x@y.z' } }],
   });
+  const invokeSpy = vi.spyOn(client, 'invoke');
 
   render(
-    <MockProvider services={[usersMock]}>
+    <TestNetronProvider client={client}>
       <InviteForm />
-    </MockProvider>
+    </TestNetronProvider>
   );
 
   await user.type(screen.getByLabelText('Email'), 'x@y.z');
   await user.click(screen.getByRole('button', { name: 'Invite' }));
 
   await waitFor(() => {
-    expect(usersMock.invite).toHaveBeenCalledWith({ email: 'x@y.z' });
+    expect(invokeSpy).toHaveBeenCalledWith('users', 'invite', ['x@y.z'], expect.anything());
   });
 });
 ```
 
+`useMutation` exposes `isLoading` while the mutation is in flight
+(plus `isSuccess` / `isError` / `data`).
+
 ## Suspense + error boundary tests
+
+Suspense is the `suspense: true` option on `useQuery` — it makes
+the hook throw the in-flight fetch to the nearest `<Suspense>`,
+and escalates errors to the nearest error boundary:
 
 ```tsx
 it('falls back to error boundary on render error', () => {
-  const usersMock = mockService<UserService>('users', {
-    getUser: vi.fn().mockRejectedValue(new Error('boom')),
-  });
-
   render(
-    <MockProvider services={[usersMock]}>
+    <TestNetronProvider
+      testConfig={{
+        mocks: [{ service: 'users', method: 'getUser', error: new Error('boom') }],
+      }}
+    >
       <ErrorBoundary fallback={() => <div>caught</div>}>
         <Suspense fallback={<div>loading</div>}>
+          {/* SuspenseUserCard calls useQuery([...], { suspense: true }) */}
           <SuspenseUserCard userId="1" />
         </Suspense>
       </ErrorBoundary>
-    </MockProvider>
+    </TestNetronProvider>
   );
 
   return waitFor(() => expect(screen.getByText('caught')).toBeInTheDocument());
@@ -220,6 +273,9 @@ For time-sensitive behaviour (`refetchInterval`, retries,
 debounce):
 
 ```tsx
+import { createTestClient, advanceTimersAndFlush }
+  from '@omnitron-dev/netron-react/test';
+
 vi.useFakeTimers();
 
 const client = createTestClient({ /* ... */ });
@@ -227,12 +283,15 @@ render(<NetronProvider client={client}><Polling /></NetronProvider>);
 
 await screen.findByText('initial');
 
-vi.advanceTimersByTime(30_000);    // trigger refetch interval
+await advanceTimersAndFlush(30_000);    // trigger refetch interval + flush microtasks
 
 await screen.findByText('refreshed');
 
 vi.useRealTimers();
 ```
+
+`advanceTimersAndFlush(ms)` advances vitest fake timers and
+flushes pending microtasks; `nextTick()` awaits a single tick.
 
 ## Best practices
 
@@ -251,10 +310,10 @@ vi.useRealTimers();
 ## Anti-patterns
 
 - **Mocking `fetch` directly.** Bypasses the client logic;
-  use `MockProvider`.
+  use `TestNetronProvider`.
 - **Stale mocks shared across tests.** State leaks; mysterious
   failures.
-- **Testing implementation details.** "Calls `setQueryData`"
+- **Testing implementation details.** "Calls `cache.set`"
   is fragile; "shows the updated value" is robust.
 - **Real backend in unit tests.** Slow, flaky, hard to seed —
   reserve for integration suite.
@@ -262,5 +321,5 @@ vi.useRealTimers();
 ## See also
 
 - [netron-react](./react.md) — hooks under test
-- [Multi-backend](./multi-backend.md) — `MockMultiBackendProvider`
+- [Multi-backend](./multi-backend.md) — `MultiBackendProvider`
 - [Caching](./caching.md) — `staleTime` tuning for tests

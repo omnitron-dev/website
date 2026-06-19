@@ -62,7 +62,7 @@ Topic-focused references:
 - [Auth manager](./auth.md) — token rotation, cross-tab sync, inactivity timeout
 - [Multi-backend](./multi-backend.md) — `MultiBackendProvider`, routing, per-backend hooks
 - [Error handling](./errors.md) — typed errors, retry classification, circuit breaker
-- [Testing](./testing.md) — MockProvider, integration patterns
+- [Testing](./testing.md) — TestNetronProvider, integration patterns
 - [SSR](./ssr.md) — dehydration / hydration
 
 ## Quick start — single backend

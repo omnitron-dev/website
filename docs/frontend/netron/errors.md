@@ -162,7 +162,7 @@ Custom retry predicate:
 
 ```typescript
 client.use(RetryMiddleware({
-  maxAttempts: 3,
+  attempts: 3,
   shouldRetry: (error, attempt, ctx) => {
     // Never retry mutating calls automatically:
     if (ctx.method.match(/^(create|update|delete)/)) return false;
@@ -185,7 +185,7 @@ client.use(CircuitBreakerMiddleware({
   perService:   true,        // separate breaker per service
 }));
 
-client.use(RetryMiddleware({ maxAttempts: 3 }));
+client.use(RetryMiddleware({ attempts: 3 }));
 ```
 
 Order matters — the breaker runs **first** in the error stage.

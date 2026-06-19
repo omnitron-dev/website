@@ -17,26 +17,28 @@ export async function loader(req) {
   const client = new NetronReactClient({
     url:       process.env.API_URL,
     transport: 'http',
+    ssr:       { enabled: true },
   });
   await client.connect();
 
   // Prefetch everything the page needs:
-  const cache = client.getQueryCache();
-  await cache.prefetchQuery({ service: 'users',    method: 'list',    args: [{ filter: 'active' }] });
-  await cache.prefetchQuery({ service: 'projects', method: 'getMine', args: [] });
+  const users    = client.service<UserService>('users');
+  const projects = client.service<ProjectService>('projects');
+  await client.prefetchQuery(['users', 'list', { filter: 'active' }], () => users.list.call({ filter: 'active' }));
+  await client.prefetchQuery(['projects', 'getMine'], () => projects.getMine.call());
 
-  const dehydratedState = cache.dehydrate();
+  const dehydratedState = client.dehydrate();
 
   return { dehydratedState };
 }
 
 // client-side root:
 function App({ dehydratedState }: { dehydratedState: DehydratedState }) {
-  const [client] = useState(() => new NetronReactClient({
-    url:            '/api',
-    transport:      'auto',
-    hydratedState:  dehydratedState,    // populate cache from server
-  }));
+  const [client] = useState(() => {
+    const c = new NetronReactClient({ url: '/api', transport: 'auto' });
+    c.hydrate(dehydratedState);    // populate cache from server
+    return c;
+  });
 
   return (
     <NetronProvider client={client}>
@@ -47,8 +49,8 @@ function App({ dehydratedState }: { dehydratedState: DehydratedState }) {
 ```
 
 The server's `dehydrate()` returns a plain-object snapshot of
-the cache. The client's `hydratedState` option populates the
-fresh client's cache from that snapshot.
+the cache (synchronously — no `await`). The client's `hydrate()`
+method populates the fresh client's cache from that snapshot.
 
 ## Hydration semantics
 
@@ -101,7 +103,8 @@ const stream = await renderToReadableStream(<App />, {
 ```
 
 For streaming, prefer `<Suspense>` boundaries around data-bound
-sections; `useSuspenseQuery` integrates cleanly.
+sections; pass `{ suspense: true }` to `useQuery` and it
+integrates cleanly.
 
 ## Per-user dehydration
 
@@ -117,7 +120,7 @@ async function loader(req) {
   // ... prefetch ...
 
   return {
-    dehydratedState: client.getQueryCache().dehydrate(),
+    dehydratedState: client.dehydrate(),
   };
 }
 ```
@@ -128,19 +131,19 @@ across users — leak risk.
 
 ## Excluding queries from dehydration
 
-```typescript
-const dehydratedState = cache.dehydrate({
-  shouldDehydrateQuery: (query) => {
-    // Skip mutations and sensitive queries:
-    if (query.queryKey[0] === 'admin') return false;
-    if (query.queryKey[0] === 'tokens') return false;
-    return query.state.status === 'success';
-  },
-});
-```
+`dehydrate()` takes no arguments — it automatically dehydrates
+only **successful** queries. Errored / in-flight queries are
+skipped so the client retries fresh, and mutation state is
+request-local. To keep sensitive entries out of the snapshot,
+remove them from the cache before dehydrating:
 
-By default, only successful queries dehydrate. Errored / in-flight
-queries are skipped so the client retries fresh.
+```typescript
+// Drop sensitive queries before serialising:
+client.removeQueries({ queryKey: ['admin'] });
+client.removeQueries({ queryKey: ['tokens'] });
+
+const dehydratedState = client.dehydrate();
+```
 
 ## Bundle size considerations
 
@@ -180,7 +183,7 @@ edge runtimes:
 - **Streaming WebSocket on the server.** WS doesn't work
   pre-hydration; the cache rehydrates, but live subscriptions
   start on the client.
-- **`hydratedState` without a matching server prefetch.** The
+- **`client.hydrate()` without a matching server prefetch.** The
   cache is empty; you've added complexity for nothing.
 
 ## See also

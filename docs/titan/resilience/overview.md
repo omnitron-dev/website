@@ -77,7 +77,7 @@ class PaymentsService {
   async charge(req: ChargeRequest) {
     return withTimeout(
       () => this.stripeBreaker.execute(() =>
-        retry(() => this.stripe.charge(req), { maxAttempts: 3 })
+        retry(() => this.stripe.charge(req), { maxRetries: 3 })
       ),
       { timeoutMs: 5_000 },
     );

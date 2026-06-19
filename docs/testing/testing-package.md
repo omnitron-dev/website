@@ -327,5 +327,5 @@ Same source, three runtimes, identical assertions.
 - [Testing overview](./index.md) — the pyramid + when to use what
 - [Integration patterns](./integration.md) — `Application.create` recipes
 - [Cross-runtime testing](./cross-runtime.md) — Node + Bun + Deno
-- [React component testing](./react.md) — `MockProvider` patterns
+- [React component testing](./react.md) — `TestNetronProvider` patterns
 - [common — promise helpers](../utilities/common.md#promise-helpers) — building blocks `testing` builds on

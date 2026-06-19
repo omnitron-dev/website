@@ -124,7 +124,7 @@ const theme = createTheme({ mode: 'dark', palette: { primary: { main: '#7c4dff' 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
     <NetronProvider client={client}>
-      <AuthProvider>
+      <AuthProvider onLogin={(credentials) => client.invoke('auth', 'signIn', [credentials])}>
         <PrismProvider theme={theme}>
           <BrowserRouter>
             <App />
@@ -143,9 +143,7 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
 ```tsx
 import { useState } from 'react';
 import { useAuth }  from '@omnitron-dev/netron-react/auth';
-import { useService } from '@omnitron-dev/netron-react';
 import { useNavigate } from 'react-router-dom';
-import type { AuthService } from '@my-platform/api-contracts';
 
 export function SignInPage() {
   const [email,    setEmail]    = useState('');
@@ -153,25 +151,34 @@ export function SignInPage() {
   const [error,    setError]    = useState<string>();
   const navigate = useNavigate();
 
-  const auth    = useService<AuthService>('auth');
-  const authMgr = useAuth();
+  const [pending, setPending] = useState(false);
+  const { login } = useAuth();
 
-  const signIn = auth.signIn.useMutation({
-    onSuccess: async (result) => {
-      await authMgr.setTokens({ accessToken: result.token, user: result.user });
+  // `login` runs the AuthProvider's `onLogin` handler (the auth.signIn RPC) and,
+  // on success, stores the session via the client internally — no manual token
+  // handling needed.
+  const onSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError(undefined);
+    setPending(true);
+    try {
+      await login({ email, password });
       navigate('/');
-    },
-    onError: (e) => setError(e instanceof Error ? e.message : String(e)),
-  });
+    } catch (err) {
+      setError(err instanceof Error ? err.message : String(err));
+    } finally {
+      setPending(false);
+    }
+  };
 
   return (
-    <form onSubmit={(e) => { e.preventDefault(); signIn.mutate({ email, password }); }}>
+    <form onSubmit={onSubmit}>
       <h1>Sign in</h1>
       {error && <p style={{ color: 'red' }}>{error}</p>}
       <input type="email"    placeholder="Email"    value={email}    onChange={(e) => setEmail(e.target.value)} />
       <input type="password" placeholder="Password" value={password} onChange={(e) => setPassword(e.target.value)} />
-      <button type="submit" disabled={signIn.isPending}>
-        {signIn.isPending ? 'Signing in…' : 'Sign in'}
+      <button type="submit" disabled={pending}>
+        {pending ? 'Signing in…' : 'Sign in'}
       </button>
     </form>
   );

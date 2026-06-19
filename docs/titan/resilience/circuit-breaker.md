@@ -122,7 +122,7 @@ import { CircuitBreaker, retry, isOperationalError } from '@omnitron-dev/titan/u
 const breaker = new CircuitBreaker({ failureThreshold: 5, timeout: 60_000 });
 
 await breaker.execute(() =>
-  retry(() => callBackend(), { maxAttempts: 3, shouldRetry: isOperationalError }),
+  retry(() => callBackend(), { maxRetries: 3, shouldRetry: isOperationalError }),
 );
 ```
 
