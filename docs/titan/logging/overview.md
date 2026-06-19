@@ -114,21 +114,38 @@ LoggerModule.forRoot({
 Per-context level overrides through child loggers (`child` accepts
 an options bag that includes `level` on pino).
 
-## Output format (always JSON)
+## Output format (JSON, or pretty in dev)
 
-The logger always writes **structured JSON**, one record per line —
-what log shippers (Loki, ELK, Datadog) expect. There is no built-in
-pretty renderer: the `prettyPrint` option (and the
-`logger.prettyPrint` ConfigService key) is accepted but **not
-currently wired** to anything, so it has no effect on output.
+By default the logger writes **structured JSON**, one record per line —
+what log shippers (Loki, ELK, Datadog) expect. Keep this in production.
 
-For human-friendly output in local dev, pipe the process through
-[`pino-pretty`](https://github.com/pinojs/pino-pretty) — the logger is
-built on pino, so its JSON is `pino-pretty`-compatible:
+For human-friendly local output, set `prettyPrint` (or the `pretty`
+alias, or the `logger.prettyPrint` ConfigService key). The logger then
+uses [`pino-pretty`](https://github.com/pinojs/pino-pretty) — a declared
+dependency — as its stdout destination, producing colorised,
+human-readable lines. pino-pretty writes to fd 1 directly:
 
-```bash
-node dist/main.js | npx pino-pretty
+```typescript
+LoggerModule.forRoot({
+  prettyPrint: true,   // colorised human-readable output for dev
+})
 ```
+
+```yaml
+# or via ConfigService
+logger:
+  prettyPrint: true
+```
+
+`LoggerService` chooses pretty output when `prettyPrint === true`, when
+the `pretty` alias is true, or when the environment is `development` and
+neither flag is explicitly `false`; otherwise it stays on structured
+JSON (`packages/titan/src/modules/logger/logger.service.ts:232-239`).
+Leave it off (JSON) for production so log shippers can parse each line.
+
+You can still pipe JSON output through `pino-pretty` externally if you
+prefer (`node dist/main.js | npx pino-pretty`), since the logger's JSON
+is `pino-pretty`-compatible.
 
 ## Decorators
 
