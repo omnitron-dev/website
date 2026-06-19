@@ -298,19 +298,24 @@ const { run, value, status } = useLazyQuery(() =>
 ### `useMutation` (Prism's)
 
 ```tsx
-const save = useMutation({
-  mutationFn:   (data) => api.save(data),
-  onMutate:     () => toast.info('Saving…'),
-  onSuccess:    () => toast.success('Saved'),
-  onError:      (e) => toast.error(`Save failed: ${e.message}`),
-  optimistic:   (data) => setLocal(data),
-  rollback:     () => setLocal(previous),
-});
+// useMutation(mutationFn, options) — mutationFn is the first positional arg.
+const save = useMutation(
+  (data) => api.save(data),
+  {
+    onMutate:  (data) => { setLocal(data); toast.info('Saving…'); },      // optimistic update
+    onSuccess: () => toast.success('Saved'),
+    onError:   (e) => { setLocal(previous); toast.error(`Save failed: ${e.message}`); }, // rollback
+  },
+);
 
-<Button onClick={() => save.run(values)} disabled={save.isPending}>
+<Button onClick={() => save.mutate(values)} disabled={save.isLoading}>
   Save
 </Button>
 ```
+
+Prism's `useMutation` returns `{ mutate, isLoading, isSuccess, isError,
+isIdle, data, error, reset }` — do optimistic updates in `onMutate` and roll
+back in `onError` (there are no separate `optimistic`/`rollback` options).
 
 For RPC mutations, prefer `useMutation` from
 `@omnitron-dev/netron-react` — it integrates with the cache.

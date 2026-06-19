@@ -43,7 +43,7 @@ import { isOperationalError } from '@omnitron-dev/titan/utils';
 await retry(
   () => fetch(url),
   {
-    maxAttempts:  3,
+    maxRetries:   3,
     initialDelay: 100,
     maxDelay:     5_000,
     multiplier:   2,
@@ -58,7 +58,7 @@ await retry(
 Real shape of `RetryOptions` lives in `utils/resilience.ts`. Common
 knobs:
 
-- `maxAttempts` — total attempts.
+- `maxRetries` — maximum retry attempts (in addition to the first try).
 - `initialDelay` / `maxDelay` — bounds.
 - `multiplier` — for exponential backoff.
 - `jitter` — `true` to randomise around the computed delay.
@@ -134,7 +134,7 @@ import { CircuitBreaker, retry, isOperationalError } from '@omnitron-dev/titan/u
 const breaker = new CircuitBreaker({ failureThreshold: 5, timeout: 60_000 });
 
 await breaker.execute(() =>
-  retry(() => callBackend(), { maxAttempts: 3, shouldRetry: isOperationalError }),
+  retry(() => callBackend(), { maxRetries: 3, shouldRetry: isOperationalError }),
 );
 ```
 
@@ -143,7 +143,7 @@ backend, so no exponential pile-up.
 
 ## Anti-patterns
 
-- **Unlimited retries.** Always bound with `maxAttempts`.
+- **Unlimited retries.** Always bound with `maxRetries`.
 - **Retry on every error.** Use a `shouldRetry` predicate
   (`isOperationalError` is the safe default).
 - **No backoff.** Immediate retry is a thundering herd. Use one of

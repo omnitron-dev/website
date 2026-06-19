@@ -238,7 +238,7 @@ Provides:
 - `<NetronProvider>` / `<MultiBackendProvider>`
 - `<AuthProvider>` + `<AuthGuard>` + `<GuestGuard>` + `useAuth`
 - `<NetronDevtools>` (React DevTools-style panel)
-- `MockProvider` for testing
+- `TestNetronProvider` for testing
 
 → Full reference: [netron-react](../frontend/netron/react.md).
 

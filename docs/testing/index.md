@@ -41,7 +41,7 @@ flowchart TB
 | [`vitest`](https://vitest.dev/) | The runner. Native ESM, TypeScript, fast. |
 | [`@omnitron-dev/testing`](./testing-package.md) | Cross-runtime helpers + async primitives + Titan-specific test glue |
 | [`@playwright/test`](https://playwright.dev/) | E2E browser automation. Used by the webapp. |
-| [`@omnitron-dev/netron-react/test`](../frontend/netron/testing.md) | `MockProvider` for React components that call Netron |
+| [`@omnitron-dev/netron-react/test`](../frontend/netron/testing.md) | `TestNetronProvider` for React components that call Netron |
 | Test-fixture databases | Postgres via `@kysera/migrations-rollback` for transaction-isolated tests |
 
 ## What lives where
@@ -59,7 +59,7 @@ flowchart TB
 | [Testing package reference](./testing-package.md) | `@omnitron-dev/testing` API — async helpers, runtime adapters, mock primitives |
 | [Integration patterns](./integration.md) | `Application.create({ overrides })`, in-memory DB, fake clocks, transaction rollback |
 | [Cross-runtime testing](./cross-runtime.md) | Same test source running on Node + Bun + Deno |
-| [React component testing](./react.md) | `MockProvider`, `mockService`, Suspense, error boundaries |
+| [React component testing](./react.md) | `TestNetronProvider`, `createMockService`, Suspense, error boundaries |
 
 Plus the per-module testing reference:
 [Titan / Testing / Modules](../titan/testing/modules.md) —
@@ -223,4 +223,4 @@ Each module ships a "Smallest mock" snippet on its page.
 - [Testing package reference](./testing-package.md) — `@omnitron-dev/testing` API
 - [Titan / Testing](../titan/testing/overview.md) — framework-level guide
 - [Titan / Testing / Modules](../titan/testing/modules.md) — per-module mock recipes
-- [Netron React testing](../frontend/netron/testing.md) — `MockProvider`
+- [Netron React testing](../frontend/netron/testing.md) — `TestNetronProvider`

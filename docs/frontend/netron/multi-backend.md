@@ -210,23 +210,23 @@ fan-out architecture.
 When `onUnhealthy: 'fallback'` and a failover backend is
 configured, calls to the unhealthy backend get re-routed.
 
-## Per-backend cache
+## Shared cache
 
-Each backend has its own QueryCache instance. Cache keys are
-backend-scoped — same `[users, getUser, 'u_42']` key in the
-`auth` and `media` backends are different entries.
+The provider's query engine owns a single QueryCache shared
+across every backend. Cache keys distinguish entries — encode
+the backend into the key (e.g. `['auth', 'users', 'getUser', 'u_42']`)
+when the same service name lives on more than one backend.
 
-Cross-backend invalidation:
+Cross-backend invalidation — the bridged client invalidates over
+the shared cache:
 
 ```tsx
-import { useMultiBackendContext } from '@omnitron-dev/netron-react';
+import { useNetronClient } from '@omnitron-dev/netron-react';
 
 function CacheManager() {
-  const { backends } = useMultiBackendContext();
+  const client = useNetronClient();
   return (
-    <Button onClick={() => {
-      Object.values(backends).forEach(b => b.getQueryCache().invalidateQueries(['users']));
-    }}>
+    <Button onClick={() => client.invalidateQueries({ queryKey: ['users'] })}>
       Refresh users everywhere
     </Button>
   );
@@ -348,5 +348,5 @@ hooks into the Prism context.
 
 - [netron-react](./react.md) — single-backend equivalents
 - [Auth manager](./auth.md) — shared auth across backends
-- [Caching](./caching.md) — per-backend cache
+- [Caching](./caching.md) — shared cache across backends
 - [Transports](./transports.md) — transport per backend

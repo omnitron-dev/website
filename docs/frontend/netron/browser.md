@@ -238,7 +238,7 @@ stage.
 
 ```typescript
 client.use(AuthMiddleware({ getToken: () => localStorage.getItem('token') }));
-client.use(RetryMiddleware({ maxAttempts: 3, on: ['network', '5xx'] }));
+client.use(RetryMiddleware({ attempts: 3, on: ['network', '5xx'] }));
 client.use(CacheMiddleware({ ttl: 60_000, maxSize: 500 }));
 ```
 
@@ -271,7 +271,7 @@ adding it globally:
 ```typescript
 const user = await client
   .cache({ ttl: 60_000 })
-  .retry({ maxAttempts: 5 })
+  .retry({ attempts: 5 })
   .timeout(3_000)
   .service<UserService>('users')
   .findById('u_42');
@@ -313,7 +313,7 @@ evictions, hit ratio.
 
 ```typescript
 client.use(RetryMiddleware({
-  maxAttempts: 3,
+  attempts:    3,
   on:          ['network', '5xx', 'timeout'],
   backoff:     { type: 'exponential', base: 500, max: 8_000, jitter: true },
 }));

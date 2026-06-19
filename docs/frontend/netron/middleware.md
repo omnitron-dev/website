@@ -59,7 +59,7 @@ interface MiddlewareContext {
 
 ```typescript
 client.use(AuthMiddleware({ getToken: () => localStorage.getItem('token') }));
-client.use(RetryMiddleware({ maxAttempts: 3 }));
+client.use(RetryMiddleware({ attempts: 3 }));
 client.use(CacheMiddleware({ ttl: 60_000 }));
 ```
 
@@ -109,7 +109,7 @@ needed.
 
 ```typescript
 client.use(RetryMiddleware({
-  maxAttempts: 3,
+  attempts:    3,
   on:          ['network', '5xx', 'timeout', 'ECONNRESET'],
   backoff: {
     type:   'exponential',
@@ -317,7 +317,7 @@ globally:
 ```typescript
 const user = await client
   .cache({ ttl: 5 * 60_000, tags: ['users'] })
-  .retry({ maxAttempts: 5, on: ['network', 'timeout'] })
+  .retry({ attempts: 5, on: ['network', 'timeout'] })
   .timeout(3_000)
   .skipMiddleware(['logging'])
   .service<UserService>('users')

@@ -147,24 +147,30 @@ Catches a class of bugs unit tests miss.
 `apps/web/src/UsersPage.test.tsx`:
 
 ```tsx
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect } from 'vitest';
 import { render, screen } from '@testing-library/react';
-import { MockProvider, mockService } from '@omnitron-dev/netron-react/test';
+import { TestNetronProvider } from '@omnitron-dev/netron-react/test';
 import { UsersPage } from './UsersPage.js';
 
 describe('<UsersPage>', () => {
   it('renders user list', async () => {
-    const users = mockService<any>('users', {
-      list: vi.fn().mockResolvedValue([
-        { id: '1', name: 'Alice', email: 'a@b.c', roles: ['user'] },
-        { id: '2', name: 'Bob',   email: 'b@c.d', roles: ['admin'] },
-      ]),
-    });
-
     render(
-      <MockProvider services={[users]}>
+      <TestNetronProvider
+        testConfig={{
+          mocks: [
+            {
+              service:  'users',
+              method:   'list',
+              response: [
+                { id: '1', name: 'Alice', email: 'a@b.c', roles: ['user'] },
+                { id: '2', name: 'Bob',   email: 'b@c.d', roles: ['admin'] },
+              ],
+            },
+          ],
+        }}
+      >
         <UsersPage />
-      </MockProvider>
+      </TestNetronProvider>
     );
 
     await screen.findByText('Alice — a@b.c — [user]');

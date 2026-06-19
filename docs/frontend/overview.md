@@ -97,22 +97,23 @@ import { RouterProvider }                      from 'react-router-dom';
 const client = new NetronReactClient({
   url:       import.meta.env.VITE_API_URL,
   transport: 'auto',
-  auth: {
-    signInMethod:    'OmnitronAuth.signIn',
-    refreshMethod:   'OmnitronAuth.refreshSession',
-    storage:         'localStorage',
-    inactivityTimeout: 30 * 60_000,
-  },
 });
 
 const theme = createTheme({ mode: 'dark', palette: { primary: { main: '#7c4dff' } } });
 
+// `AuthProvider` takes a `config` (refreshEndpoint?, logoutEndpoint?,
+// storage?: 'local' | 'session' | 'memory', autoRefresh?, refreshThreshold?)
+// and an `onLogin` handler that performs the actual sign-in and returns
+// an AuthResult.
 function App() {
   return (
     <ProviderStack
       providers={[
         [NetronProvider, { client }],
-        [AuthProvider,   {}],
+        [AuthProvider,   {
+          config:  { storage: 'local', autoRefresh: true, refreshEndpoint: '/auth/refresh' },
+          onLogin: (credentials) => signIn(client, credentials),
+        }],
         [PrismProvider,  { theme }],
         [RouterProvider, { router }],
       ]}
@@ -124,7 +125,10 @@ function App() {
 ```
 
 Four providers, one app. Anything Titan-side becomes
-discoverable through `useService`.
+discoverable through `useService`. The auth API is `login` / `logout`
+(from `useAuth()`) with `<AuthGuard>` / `<GuestGuard>` /
+`<RoleGuard>` / `<PermissionGuard>` route guards — see
+[netron-react / Auth](./netron/auth.md) for the full surface.
 
 ## Multi-backend out of the box
 
