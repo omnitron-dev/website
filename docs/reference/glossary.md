@@ -20,8 +20,9 @@ the Netron transports, and lifecycle hooks.
 gates an RPC call by role. `@Auth({roles: ['admin']})`.
 → [Auth decorators](../titan/modules/auth.mdx#decorators)
 
-**`AuthManager`** — Browser-side auth state manager: stores
-tokens, auto-refreshes, syncs across tabs.
+**`AuthenticationClient`** — Browser-side auth state manager
+(from `@omnitron-dev/netron-browser/auth`): stores tokens,
+auto-refreshes, syncs across tabs.
 → [netron-browser auth](../frontend/netron/auth.md)
 
 **Autoscaler** — `titan-pm`'s built-in worker-pool scaler.
@@ -58,7 +59,7 @@ Args are deep-equal compared.
 
 **Circuit breaker** — Trips after N consecutive failures;
 fails-fast for the cooldown period. Half-opens with one probe.
-→ [Middleware / CircuitBreaker](../frontend/netron/middleware.md#circuitbreakermiddleware)
+→ [Browser client / Fluent HTTP interface](../frontend/netron/browser.md#fluent-http-interface--caching-retry-circuit-breaking)
 
 **Classic mode** — Per-app launch mode where one fork runs the
 full bootstrap end-to-end. Compare with **module-worker mode**.

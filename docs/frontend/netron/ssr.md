@@ -153,8 +153,9 @@ edge runtimes:
 
 - HTTP transport only (no WebSocket on edge).
 - `transport: 'http'` explicitly to avoid the WebSocket bundle.
-- Skip `AuthManager` (no localStorage on edge); use cookie-
-  based auth.
+- Skip persistent `AuthenticationClient` storage (no localStorage
+  on edge); use cookie-based auth (`CookieClientTokenTransport` +
+  `NoopTokenStorage`).
 
 ## Caveats
 

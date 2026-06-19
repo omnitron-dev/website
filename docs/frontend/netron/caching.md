@@ -6,18 +6,25 @@ description: LRU cache, stale-while-revalidate, tag invalidation.
 
 # Caching
 
-netron-browser ships an LRU cache + CacheMiddleware; netron-react
-layers a query cache on top with React-aware subscriptions.
+netron-browser caches HTTP responses through its **fluent HTTP
+interface** (`HttpCacheManager`); netron-react layers a query
+cache on top with React-aware subscriptions.
 
 ## Two cache layers
 
 | Layer | When to use |
 | ----- | ----------- |
-| **netron-browser LRU** | Vanilla JS / web workers / non-React clients |
+| **netron-browser fluent cache** (`HttpCacheManager`) | Vanilla JS / web workers / non-React HTTP clients |
 | **netron-react QueryCache** | React apps — used by `useQuery` |
 
 Both share the same TTL / stale-while-revalidate / tag
 invalidation semantics. Pick one — don't double-cache.
+
+> The fluent cache is opt-in per call (`.cache(...)`) on a
+> service obtained via `peer.queryFluentInterface(...)`. The
+> basic `createClient()` / `HttpClient` path does **not** cache —
+> its `http.caching` / `http.cacheTTL` options are currently
+> inert.
 
 ## netron-react QueryCache
 
@@ -195,30 +202,33 @@ Pattern:
 
 ## Tag-based invalidation
 
-For non-React (netron-browser LRU):
+For non-React HTTP clients, attach an `HttpCacheManager` to the
+peer and tag calls through the fluent `.cache({ tags })`:
 
 ```typescript
-import { LRUCache, CacheMiddleware } from '@omnitron-dev/netron-browser';
+import { HttpCacheManager } from '@omnitron-dev/netron-browser';
 
-const cache = new LRUCache({
-  maxSize:              1_000,
-  defaultTTL:           60_000,
-  staleWhileRevalidate: 10_000,
-});
+const cache = new HttpCacheManager({ maxEntries: 1_000 });
+peer.setCacheManager(cache);
 
-client.use(CacheMiddleware({ cache }));
+const users = await peer.queryFluentInterface<UserService>('users@1.0.0');
 
-// Tag queries with arbitrary labels:
-await client
-  .cache({ tags: ['user:u_42', 'tier:pro'] })
-  .service<UserService>('users')
-  .getUser('u_42');
+// Tag a cached call with arbitrary labels:
+await users
+  .cache({
+    maxAge:               60_000,
+    staleWhileRevalidate: 10_000,
+    tags:                 ['user:u_42', 'tier:pro'],
+  })
+  .api.getUser('u_42');
 
-// Later, when user u_42 changes:
-cache.invalidateByTag('user:u_42');
+// Later, when user u_42 changes — invalidate by tag.
+// (The array form of invalidate() matches tags; a bare string
+// matches cache keys, so pass tags as an array.)
+cache.invalidate(['user:u_42']);
 
 // Or all pro-tier cached data:
-cache.invalidateByTag('tier:pro');
+cache.invalidate(['tier:pro']);
 ```
 
 Tags are arbitrary strings — typical patterns:
@@ -229,7 +239,8 @@ Tags are arbitrary strings — typical patterns:
 - `feature:<flag>` — invalidate when a flag flips
 
 A single cache entry can carry multiple tags; invalidating any
-one drops the entry.
+one drops the entry. `cache.invalidate()` also accepts a key
+`RegExp` or a `'prefix*'` string for pattern-based invalidation.
 
 ## Prefetching
 
@@ -260,9 +271,12 @@ destination renders instantly.
 
 ## Cache stats
 
+The fluent `HttpCacheManager` exposes hit/miss statistics:
+
 ```typescript
 const stats = cache.getStats();
-// { size, maxEntries, observerCount, fetchingCount }
+// CacheStats:
+//   { entries, hits, misses, hitRate, sizeBytes, activeRevalidations }
 ```
 
 Surface in devtools or a metrics dashboard.
@@ -309,6 +323,6 @@ Query, the mental model carries over. The differences:
 
 ## See also
 
-- [Middleware](./middleware.md) — `CacheMiddleware` configuration
+- [Browser client](./browser.md#fluent-http-interface--caching-retry-circuit-breaking) — fluent `HttpCacheManager` / `.cache()`
 - [netron-react](./react.md) — `useQuery` / `useMutation`
 - [Multi-backend](./multi-backend.md) — shared cache across backends

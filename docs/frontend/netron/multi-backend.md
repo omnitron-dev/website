@@ -173,7 +173,7 @@ Each backend can carry its own auth:
 ```tsx
 <MultiBackendProvider
   backends={{
-    auth:   { url: 'https://auth.example.com',   transport: 'auto', auth: { /* uses primary AuthManager */ } },
+    auth:   { url: 'https://auth.example.com',   transport: 'auto', auth: { /* uses primary AuthenticationClient */ } },
     public: { url: 'https://public.example.com', transport: 'http', auth: false },
   }}
   routes={{
@@ -186,7 +186,7 @@ Each backend can carry its own auth:
 `auth: false` disables auth for that backend (e.g., a public CMS
 endpoint).
 
-For most setups, **one shared AuthManager** across all
+For most setups, **one shared `AuthenticationClient`** across all
 backends is right — the same JWT verifies everywhere in a
 fan-out architecture.
 
@@ -325,7 +325,7 @@ hooks into the Prism context.
 - **Match backend boundaries to logical concerns.** Don't split
   arbitrarily; split when scaling / ownership / lifecycle
   genuinely differs.
-- **Shared `AuthManager`** across backends in fan-out
+- **Shared `AuthenticationClient`** across backends in fan-out
   architectures.
 - **`RequireBackendConnection`** for routes that need a specific
   backend up — fail-fast UX beats mystery loading state.
@@ -336,8 +336,8 @@ hooks into the Prism context.
 
 - **Per-route `MultiBackendProvider`.** Loses connection
   sharing and cache; re-connects on every route change.
-- **Per-backend AuthManager** in a fan-out architecture.
-  Multiple managers, mismatched tokens, sign-out doesn't
+- **Per-backend `AuthenticationClient`** in a fan-out architecture.
+  Multiple instances, mismatched tokens, sign-out doesn't
   propagate.
 - **Glob `'**'`** as the only pattern. Defeats routing; use
   `defaultBackend` instead.

@@ -121,7 +121,7 @@ You get **everything**:
 | Notifications (email / push / SMS / webhooks) | `titan-notifications` |
 | Service discovery | `titan-discovery` |
 | In-process event bus | `titan-events` |
-| Cross-tab browser auth | `netron-browser` + `AuthManager` |
+| Cross-tab browser auth | `netron-browser` + `AuthenticationClient` |
 | React hooks for RPC | `netron-react` |
 | UI design system | `prism` |
 

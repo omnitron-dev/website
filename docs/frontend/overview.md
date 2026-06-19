@@ -183,7 +183,7 @@ const users = useBackendService<UserService>('auth', 'users');
 | Sign-in flow + route guards | `@omnitron-dev/netron-react/auth` + `<AuthGuard>` |
 | Multi-backend setup | `MultiBackendProvider` from `@omnitron-dev/netron-react` |
 | Raw RPC client (no React) | `createClient` from `@omnitron-dev/netron-browser` |
-| Cross-tab auth sync | `AuthManager` from `@omnitron-dev/netron-browser/auth` |
+| Cross-tab auth sync | `AuthenticationClient` from `@omnitron-dev/netron-browser/auth` |
 | Cache, retry, circuit breaker | `@omnitron-dev/netron-browser/middleware` |
 
 ## Bundle strategy
