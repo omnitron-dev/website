@@ -165,16 +165,22 @@ export class UsersRepository extends TransactionAwareRepository<Database, 'users
 ```typescript
 import { DATABASE_MANAGER, type IDatabaseManager, runInTransaction } from '@omnitron-dev/titan-database';
 
+interface AppDB {
+  users: { id: number; email: string };
+}
+
 @Service({ name: 'reports' })
 class ReportsService {
   constructor(@Inject(DATABASE_MANAGER) private readonly db: IDatabaseManager) {}
 
   @Public()
   async summary() {
-    const conn = await this.db.getConnection();   // getConnection() is async → Kysely<unknown>
+    // getConnection() is async, and takes your schema as its type argument.
+    // Without one it is Kysely<unknown>, which accepts no table name.
+    const conn = await this.db.getConnection<AppDB>();
     return runInTransaction(conn, async () => {
       const users = await conn.selectFrom('users').selectAll().execute();
-      // …
+      return users;
     });
   }
 }
