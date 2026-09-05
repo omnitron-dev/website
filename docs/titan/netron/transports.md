@@ -154,26 +154,65 @@ A few client-side differences:
 
 ## The transport registry
 
-Transports are pluggable. The framework auto-registers the four
-built-ins; you can add your own by implementing the transport
-interface and registering with `TransportRegistry`.
+Transports are pluggable. **Every `Netron` instance owns its own
+registry** (`new TransportRegistry()` in the constructor), which
+auto-registers `tcp`, `ws`/`websocket` and `unix`. Add your own by
+implementing the transport interface and registering it **on the
+instance**:
 
 ```typescript
-import { registerTransport, type ITransport } from '@omnitron-dev/titan/netron/transport';
+import { Netron } from '@omnitron-dev/titan/netron';
+// ITransport ships from the http entry point — that is currently its only
+// public path, though the interface itself is transport-agnostic.
+import type {
+  ITransport, ITransportConnection, ITransportServer,
+  TransportOptions, TransportAddress,
+} from '@omnitron-dev/titan/netron/transport/http';
 
 class QuicTransport implements ITransport {
-  // …
+  readonly name = 'quic';
+  readonly capabilities = {
+    streaming: true, bidirectional: true, binary: true,
+    reconnection: true, multiplexing: true, server: true,
+  };
+
+  async connect(address: string, options?: TransportOptions): Promise<ITransportConnection> {
+    throw new Error('not implemented');
+  }
+  async createServer(options?: TransportOptions): Promise<ITransportServer> {
+    throw new Error('not implemented');
+  }
+  isValidAddress(address: string) { return address.startsWith('quic://'); }
+  parseAddress(address: string): TransportAddress {
+    return { protocol: 'quic', host: 'localhost', port: 4433 };
+  }
 }
 
-// register() takes a *factory*, not the class itself.
-registerTransport('quic', () => new QuicTransport());
+// registerTransport takes a *factory*, not the class itself.
+netron.registerTransport('quic', () => new QuicTransport());
+netron.registerTransportServer('quic', { name: 'quic', options: { port: 4433 } });
 ```
 
-`registerTransport(name, factory)` is the convenience export over the
-global `TransportRegistry`; the registry's `register` rejects a
-non-function argument. Most apps never touch it — it exists for
-adapter packages (WebTransport, QUIC, message queues exposed as
-Netron transports).
+`registerTransportServer` throws `NotFound` unless the name was
+registered first, so the two calls are ordered.
+
+:::warning There is also a module-global registry. Nothing reads it.
+
+`transport-registry.ts` exports a free `registerTransport(name, factory)`
+that writes to a module-level singleton. No `Netron` instance ever
+consults that singleton — each builds its own registry — so a transport
+registered through the free function is invisible to your application:
+
+```
+registerTransport('quic', () => new QuicTransport());  // global registry: OK
+netron.registerTransportServer('quic', { … });         // NotFound: Transport with id quic not found
+```
+
+The free function is also unreachable from any published entry point:
+the package exports `./netron/transport/http`, `/websocket`, `/tcp`
+and `/unix`, but not `./netron/transport` itself. Use the instance
+method — it is what every call site in this monorepo uses.
+:::
 
 ## Cross-runtime transport availability
 
@@ -184,10 +223,16 @@ Netron transports).
 | Deno    | ✓    | ✓         | ✓   | ✓    |
 | Browser | ✓    | ✓         | —   | —    |
 
-On import, the registry auto-registers `ws`/`tcp`/`unix` under Node
-(just `ws` in a browser context). **HTTP is never auto-registered** —
-register it explicitly with `registerTransport('http', () => new HttpTransport())`
-before starting an HTTP server. The browser RPC client lives in the
+A fresh `Netron` already has `tcp`, `ws`/`websocket` and `unix`.
+**HTTP is never auto-registered** — register it on the instance before
+starting an HTTP server:
+
+```typescript
+import { HttpTransport } from '@omnitron-dev/titan/netron/transport/http';
+
+netron.registerTransport('http', () => new HttpTransport());
+netron.registerTransportServer('http', { name: 'http', options: { port: 8081 } });
+``` The browser RPC client lives in the
 separate `@omnitron-dev/netron-browser` package.
 
 ## Anti-patterns
