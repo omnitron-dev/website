@@ -202,8 +202,10 @@ convention — symbols are bare:
 
 The default client is injected with the `@InjectRedis()` decorator;
 `getRedisClientToken(namespace)` is the per-namespace token used for
-multi-client setups. (There is no `REDIS_TOKEN` symbol — the
-manager token is `REDIS_MANAGER`.)
+multi-client setups. (`titan-redis` exports no `REDIS_TOKEN` — its manager token is
+`REDIS_MANAGER`. Note that `titan-discovery` *does* export a
+`REDIS_TOKEN` of its own, for the client it injects; the two are
+unrelated, so check which package an import comes from.)
 
 ```typescript
 import { getRedisClientToken, type IRedisClient }
