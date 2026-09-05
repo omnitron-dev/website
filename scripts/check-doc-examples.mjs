@@ -82,7 +82,17 @@ for (const f of files) {
     if (/^\s*\/\/\s*…|\.\.\./m.test(code) && code.split('\n').length < 6) continue;
     const line = text.slice(0, m.index).split('\n').length;
     if (!parses(code)) { skipped++; continue; }
-    const name = `${path.basename(f).replace(/\.mdx?$/, '')}__${i++}.ts`;
+    // Name from the FULL relative path, not the basename. With basenames,
+    // titan/application/index.md and testing/index.md both produced
+    // "index__0.ts": the second write clobbered the first (so one snippet was
+    // never checked while the count still claimed it was), and findings were
+    // attributed by `cases.find(name)` to whichever page came first. Eleven
+    // basenames collide in this docs tree.
+    const name = `${path.relative(process.cwd(), f).replace(/\.mdx?$/, '').replace(/[^A-Za-z0-9]+/g, '_')}__${i++}.ts`;
+    if (cases.some((c) => c.name === name)) {
+      console.error(`NAME COLLISION: ${name} — two snippets would share one file. Aborting.`);
+      process.exit(2);
+    }
     cases.push({ file: f, line, name, code });
     fs.writeFileSync(path.join(OUT, name), code);
   }
@@ -181,7 +191,9 @@ const FRAGMENT = new Set([
   '2307', // Cannot find module — a made-up app path like '../src/app.module.js'
   '2503', // Cannot find namespace
   '2552', // Cannot find name, did you mean
-  '2580', // Cannot find name 'process'/'require'
+  '2580', // Cannot find name 'process'
+  '2868', // Cannot find name 'Bun' — same class as the two above, for the
+          // runtime-specific snippets on the cross-runtime pages./'require'
   '2688', // Cannot find type definition file
   '7016', // implicitly has an 'any' type (untyped import)
   '1208', // isolatedModules
@@ -193,9 +205,16 @@ const FRAGMENT = new Set([
   // Snippets legitimately use Node globals; the harness has no @types/node.
   '2591', // Cannot find name 'Buffer'
   '2580', // Cannot find name 'process'
+  '2868', // Cannot find name 'Bun' — same class as the two above, for the
+          // runtime-specific snippets on the cross-runtime pages.
   // A fragment's locals are frequently `unknown` because the prose, not the
   // code, said what they were.
   '2571', // Object is of type 'unknown'
+  // Test snippets use the runner's globals, which this harness does not load.
+  // TS2593 is raised ONLY for those names (it is the diagnostic that suggests
+  // @types/jest or @types/mocha), so ignoring it costs no coverage of the API
+  // surface — and leaving it in buried real findings under describe/it/beforeEach.
+  '2593', // Cannot find name 'describe' / 'it' / 'beforeEach' — test runner globals
 ]);
 
 const byCase = new Map();
