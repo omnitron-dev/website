@@ -58,9 +58,19 @@ What is *not* visible from the method body — but is real:
   the method body runs.
 - A trace context is attached to the current async scope; calls from
   this method to other services propagate it.
-- If this method throws a typed `NetronError`, the client receives the
-  same class. If it throws an `Error`, the client receives
-  `InternalError` and the original is logged with the stack.
+- Whatever this method throws reaches the client **as its own class**.
+  A `TitanError` arrives as a `TitanError` with its `code`, `message`
+  and details; a plain `Error` arrives as an `Error`, and a `TypeError`
+  as a `TypeError` — the serializer registers std errors alongside
+  `TitanError`, so class identity survives the wire. There is no
+  `NetronError` class and no `InternalError` wrapper.
+
+  This matters for what you put in a message: **the message crosses
+  verbatim**, so `throw new Error(\`bad password for ${user}\`)` sends
+  that string to the caller. Stack traces are the part that is stripped
+  by default (see [Serialization](../netron/serialization.md)); the
+  message is not. Throw a `TitanError` with a deliberate message for
+  anything a client should see, and log the detail separately.
 
 You write the method as if these were not there. The framework wires
 them in.

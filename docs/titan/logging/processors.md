@@ -19,14 +19,15 @@ all child loggers. Each processor either **transforms** the record
 
 `LoggerService` installs the pipeline as Pino's `logMethod` hook when it
 builds the root logger
-(`packages/titan/src/modules/logger/logger.service.ts:219-227`). Because
+(the `logMethod` hook in `LoggerService.initialize`,
+`packages/titan/src/modules/logger/logger.service.ts`). Because
 the hook lives on the root logger, **every child logger inherits it** —
 processors apply everywhere, not just on the root.
 
 For each log call the service builds the record the processors see,
 runs each processor in order, and then either drops the log or forwards
 the (possibly transformed) fields back to Pino
-(`logger.service.ts:464-517`). The record shape is:
+(`LoggerService.runProcessors`). The record shape is:
 
 ```typescript
 {
@@ -41,18 +42,18 @@ the (possibly transformed) fields back to Pino
 
 After the pipeline, `level`/`time`/`msg` are stripped before the call
 because they are **pino-managed** — pino re-emits its own values
-(`logger.service.ts:494-501`). A top-level `Error` is preserved as the
+(in `runProcessors`). A top-level `Error` is preserved as the
 original object so Pino's native error serialiser still applies
-(`logger.service.ts:502-511`).
+(also in `runProcessors`).
 
 **Fast path.** With no processors registered the hook is a single
-length check and a passthrough (`logger.service.ts:221-224`), so the
+length check and a passthrough (the `processors.length === 0` early return in the hook), so the
 common case keeps Pino's native overhead — zero added cost.
 
 **Dynamic registration.** The processor list is read **by reference on
 every log**, so `LoggerService.addProcessor()` after init takes effect
-on the next log line (`logger.service.ts:449-451`, list consumed at
-`:487-492`). You can also register at startup via
+on the next log line (`LoggerService.addProcessor`, with the list consumed inside
+`runProcessors`). You can also register at startup via
 `LoggerModule.forRoot({ processors })`.
 
 ```typescript
@@ -87,9 +88,9 @@ interface ILogProcessor {
 
 A processor is a single `process(log)` method that returns a
 transformed log object, or `null`/`undefined` to drop the record
-(`logger.types.ts:67-69`). Processors run in registration order; the
+(the `ILogProcessor` interface in `logger.types.ts`). Processors run in registration order; the
 first one to return `null`/`undefined` short-circuits the rest and
-emits nothing (`logger.service.ts:487-492`).
+emits nothing (`runProcessors`).
 
 ## Redaction
 
@@ -107,7 +108,7 @@ Redaction has two working paths — pick by need:
 ### `redact` (Pino native)
 
 Set the `redact` module option. `LoggerService` forwards it straight to
-Pino when it builds the root logger (`logger.service.ts:195-204`):
+Pino when it builds the root logger (`redact` in `LoggerService.initialize`):
 
 ```typescript
 LoggerModule.forRoot({
@@ -143,7 +144,7 @@ constructor takes a **positional** `string[]` of dotted paths (not an
 options object), and `process()` walks each path and replaces the
 matched leaf with the literal string `'[REDACTED]'`. Paths are literal
 dotted segments only — **no `*` wildcard support** in this class
-(source: `logger.module.ts:213-239`):
+(source: `RedactionProcessor` in `logger.module.ts`):
 
 ```typescript
 import { RedactionProcessor } from '@omnitron-dev/titan/module/logger';

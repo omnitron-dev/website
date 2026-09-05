@@ -47,8 +47,14 @@ All entries verified against source via grep for `^export
 
 <ModuleBadge origin="built-in" pkg="@omnitron-dev/titan" />
 
-Imported from the package root (`@omnitron-dev/titan`) unless
-noted.
+Imported from `@omnitron-dev/titan/decorators`, which exports all of
+them. The package **root** re-exports exactly nine — `Service`,
+`Injectable`, `Inject`, `Optional`, `Singleton`, `Transient`,
+`Module`, `PostConstruct`, `PreDestroy` — and nothing else, so
+`@Public`, `@Validate`, `@Timeout`, `@RateLimit`, `@Cache` and the
+rest below are **not** importable from `@omnitron-dev/titan`. Real
+code follows this: every one of the 52 `@Public` imports in the DAOS
+backends reads `from '@omnitron-dev/titan/decorators'`.
 
 ### DI
 
@@ -118,7 +124,7 @@ freely with other decorators.
 | `@Deprecated({ message, version })`        | Warn callers; metadata for tooling                           |
 
 > The core `@Timeout` clashes with `titan-scheduler.@Timeout` —
-> distinguish by import path (`@omnitron-dev/titan` vs
+> distinguish by import path (`@omnitron-dev/titan/decorators` vs
 > `@omnitron-dev/titan-scheduler`).
 
 ## Built-in module decorators
@@ -169,8 +175,8 @@ See [`logger`](./logger.mdx).
 
 > **Two `@Public()` decorators exist.** The core one exposes the
 > method on Netron. The titan-auth one opts it out of authentication.
-> Import path determines which: `@omnitron-dev/titan` (expose) vs
-> `@omnitron-dev/titan-auth` (auth bypass).
+> Import path determines which: `@omnitron-dev/titan/decorators`
+> (expose) vs `@omnitron-dev/titan-auth` (auth bypass).
 
 ### `titan-cache`
 
@@ -343,11 +349,11 @@ path resolves the ambiguity. Quick table:
 
 | Name             | Available in                                                                | Default expectation                            |
 | ---------------- | --------------------------------------------------------------------------- | ---------------------------------------------- |
-| `@Public`        | `@omnitron-dev/titan` (expose) + `titan-auth` (auth bypass) + `titan-pm` (worker IPC) | Pick by purpose; compose if needed     |
-| `@Validate`      | `@omnitron-dev/titan` + `titan-pm`                                          | Core for Netron methods; pm for workers        |
-| `@Timeout`       | `@omnitron-dev/titan` (abort) + `titan-scheduler` (one-shot)                | Read the verb — abort vs defer                 |
-| `@RateLimit`     | `@omnitron-dev/titan` (composable) + `titan-ratelimit` + `titan-pm`         | Use titan-ratelimit for service methods        |
-| `@Cache`         | `@omnitron-dev/titan` (composable) + `titan-pm` (worker)                    | Compare with `@Cacheable` from titan-cache     |
+| `@Public`        | `@omnitron-dev/titan/decorators` (expose) + `titan-auth` (auth bypass) + `titan-pm` (worker IPC) | Pick by purpose; compose if needed     |
+| `@Validate`      | `@omnitron-dev/titan/decorators` + `titan-pm`                                          | Core for Netron methods; pm for workers        |
+| `@Timeout`       | `@omnitron-dev/titan/decorators` (abort) + `titan-scheduler` (one-shot)                | Read the verb — abort vs defer                 |
+| `@RateLimit`     | `@omnitron-dev/titan/decorators` (composable) + `titan-ratelimit` + `titan-pm`         | Use titan-ratelimit for service methods        |
+| `@Cache`         | `@omnitron-dev/titan/decorators` (composable) + `titan-pm` (worker)                    | Compare with `@Cacheable` from titan-cache     |
 
 When in doubt, the import path is authoritative.
 

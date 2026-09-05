@@ -60,16 +60,16 @@ ConfigModule.forRoot({
 Omit it (or set it `false`) to disable watching. On `onInit`,
 `ConfigService` only attaches the watcher when both `watchForChanges`
 is truthy and a watcher service is present; the watcher's change
-handler is what calls `reload()` (`config.service.ts:103-107`,
-`309-316`). Only `file` sources are watched — `ConfigWatcherService`
+handler is what calls `reload()` (the watcher wiring in `ConfigService.initialize`, and
+`ConfigService.handleConfigChange`). Only `file` sources are watched — `ConfigWatcherService`
 filters the source list to `type === 'file'` and ignores the rest
-(`config-watcher.service.ts:22-23`).
+(`ConfigWatcherService.watch`).
 
 ## Subscribing to changes
 
 Register a listener with `ConfigService.onChange()`. It adds the
 listener to an internal `Set` and returns an unsubscribe function that
-removes it (`config.service.ts:231-234`) — call it in `onDestroy` to
+removes it (`ConfigService.onChange`) — call it in `onDestroy` to
 avoid leaks. There is **no** `config:changed` event on the application
 bus; the callback is the only subscription path.
 
@@ -117,10 +117,10 @@ interface IConfigChangeEvent {
 A file change triggers a full `reload()`, which fires **one** event
 with `path: ''`, `source: 'reload'`, and `oldValue` / `newValue`
 holding the entire previous / new config object — it does **not**
-diff and emit per leaf key (`config.service.ts:266-272`). A
+diff and emit per leaf key (in `ConfigService.reload`). A
 programmatic `config.set(path, value)` is the other emit path: it
 fires a targeted event for that `path` with `source: 'runtime'`,
-carrying the old and new value at that path (`config.service.ts:179-186`).
+carrying the old and new value at that path (`ConfigService.set`).
 
 So inside an `onChange` handler, branch on `event.source` (or on
 `event.path === ''`) and re-read the specific keys you care about from
@@ -133,10 +133,10 @@ reload.
 schema is present (`validateOnStartup` in `ConfigService`). In that case a reload
 that fails validation is **rejected** — `reload()` restores the
 previous config and throws, so the running app keeps its
-last-known-good values (`config.service.ts:251-260`). The reload is
+last-known-good values (the validation branch of `ConfigService.reload`). The reload is
 triggered from the watcher's change handler (`handleConfigChange`),
 which `await`s `reload()` inside a `try/catch` and logs the failure
-rather than propagating it (`config.service.ts:309-316`).
+rather than propagating it (`ConfigService.handleConfigChange`).
 
 This means a typo in a config file does not crash the running app.
 You see the error in the logs, fix the file, and the next change
@@ -157,12 +157,12 @@ whole-config `onChange` event fires after the swap.
 
 The watcher resolves each file source's path and opens a Node
 `fs.watch` on it, de-duplicating already-watched paths
-(`config-watcher.service.ts:21-55`). It reacts to `fs.watch` events
+(`ConfigWatcherService.watch`). It reacts to `fs.watch` events
 whose `eventType` is `'change'`, calling back into `ConfigService` to
 reload. There are no polling-interval or debounce options — the change
 event triggers a reload directly, so a rapid burst of writes can drive
 several reloads. `unwatch()` closes every `FSWatcher` and clears the
-tracked set (`config-watcher.service.ts:60-66`); `ConfigService`
+tracked set (`ConfigWatcherService.unwatch`); `ConfigService`
 calls it on both `onStop` and `onDestroy`. On filesystems where
 `fs.watch` is unreliable (some NFS mounts), prefer a restart-on-change
 deployment or a `remote` source instead.

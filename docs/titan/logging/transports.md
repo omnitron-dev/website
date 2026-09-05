@@ -40,8 +40,9 @@ builds the root Pino logger in one of these shapes:
   so a slow or fully-synchronous consumer can't stall Pino's hot path
   or its sibling streams.
 
-Source: `packages/titan/src/modules/logger/logger.service.ts:243-299`
-(stream selection) and `:24-45` (the `wrapAsyncStream` forwarder).
+Source: the stream-selection branch in `LoggerService.initialize`
+(`packages/titan/src/modules/logger/logger.service.ts`) and the
+`wrapAsyncStream` forwarder in the same file.
 
 ### Fanning out to extra streams with `destinations`
 
@@ -63,7 +64,7 @@ LoggerModule.forRoot({
 The stdout stream is always included as the first stream; your entries
 are added alongside it. Use `pino.destination()` or
 `fs.createWriteStream()` for file targets. The option is typed on
-`ILoggerModuleOptions.destinations` (`logger.types.ts:47-52`).
+`ILoggerModuleOptions.destinations` (`ILoggerModuleOptions.destinations` in `logger.types.ts`).
 
 ### Async stdout and shutdown
 
@@ -71,7 +72,7 @@ When stdout is the async destination, buffered lines can be lost if the
 process is hard-killed. To recover what it can on a clean exit,
 `LoggerService` installs a process-wide flush hook on `beforeExit`,
 `SIGTERM`, and `SIGINT` that calls `flushSync()` on every registered
-async destination (`logger.service.ts:341-357`). `SIGKILL` still loses
+async destination (`LoggerService.installFlushOnExit`). `SIGKILL` still loses
 unflushed data — there is no user-space recovery for that.
 
 The flush hook is installed **once per process** and tracks every
@@ -91,12 +92,12 @@ interface ITransport {
 
 Only `name` and `write` are required; `flush` is optional. There is no
 `dispose()` method, no `filter` hook, and no `bufferSize`/`flushEveryMs`
-options. (Definition: `logger.types.ts:58-62`.)
+options. (Definition: the `ITransport` interface in `logger.types.ts`.)
 
 ### How `write()` is driven
 
 A registered transport's `write()` **is called for every log line**,
-with these guarantees (`logger.service.ts:529-565`):
+with these guarantees (`LoggerService.createTransportFanout`):
 
 - **It receives the fully-serialised record, parsed back to an object.**
   The fan-out stream sits in Pino's `multistream`, so it gets exactly
@@ -108,11 +109,11 @@ with these guarantees (`logger.service.ts:529-565`):
   and only for logs that passed the level filter.
 - **Off the hot path.** Delivery is deferred a macrotask
   (`setImmediate`), so a slow or synchronous `transport.write` can
-  never block Pino's hot path (`logger.service.ts:540-559`).
+  never block Pino's hot path (the `setImmediate` in `createTransportFanout`).
 - **Error-isolated.** Each transport runs in its own try/catch, and
   rejected promises are swallowed — a throwing or rejecting transport
   can never break logging or affect sibling transports
-  (`logger.service.ts:547-558`).
+  (the per-transport try/catch in `createTransportFanout`).
 
 ```typescript
 import type { ITransport } from '@omnitron-dev/titan/module/logger';
@@ -145,14 +146,14 @@ LoggerModule.forRoot({
 ### `flush()`
 
 `LoggerService.flush()` awaits `flush()` across every registered
-transport that defines one (`logger.service.ts:587-589`). Call it on
+transport that defines one (`LoggerService.flush`). Call it on
 shutdown to drain anything a transport has buffered.
 
 ### Caveat: configure transports at `forRoot`
 
 The fan-out stream that drives transports is created **at init**, and
 only when at least one transport was registered at that point — it is
-the multistream branch that wires it in (`logger.service.ts:275-279`).
+the multistream branch that wires it in (the multistream branch of `LoggerService.initialize`).
 Consequences:
 
 - **Configure transports at `forRoot`** (or via the constructor) for
@@ -174,7 +175,7 @@ The one bundled example transport. Its constructor takes an
 **optional** `ILogger` (positional — there is no options object, and no
 `pretty`/`stderr`/`filter` option), and `write(log)` forwards to
 `logger?.info({ log }, 'Console transport log')`. With no logger it is a
-no-op. (Source: `logger.module.ts:197-208`.)
+no-op. (Source: `ConsoleTransport` in `logger.module.ts`.)
 
 ```typescript
 import { ConsoleTransport } from '@omnitron-dev/titan/module/logger';

@@ -107,7 +107,7 @@ flowchart LR
   S4[argv: --app-*] --> Merge
   Merge --> Validate{schema?}
   Validate -- valid --> Frozen[(frozen config)]
-  Validate -- invalid --> Throw[/throw ConfigValidationError/]
+  Validate -- invalid --> Throw[/throw TitanError BAD_REQUEST/]
 ```
 
 Sources merge in the order listed (deep merge — later wins per

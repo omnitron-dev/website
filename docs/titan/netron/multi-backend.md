@@ -159,17 +159,17 @@ per-backend failures and transitions closed → open → half-open
 ```typescript
 circuitBreaker: {
   enabled:      true,
-  threshold:    5,                    // failures before opening (default 5)
+  threshold:    5,                    // failures inside the window (default 5)
+  window:       60_000,               // error-tracking window (default 60s)
   resetTimeout: 30_000,               // wait before half-open (default 30s)
 }
 ```
 
-`window` is accepted by the type and read by nothing. The failure count
-is cumulative: `recordFailure()` increments it and only a success
-resets it, so failures hours apart count the same as failures
-milliseconds apart, and a backend that fails once a day eventually
-trips a threshold of 5. Do not rely on it to scope failures to a
-period.
+Only failures inside `window` count towards `threshold`; older ones age
+out. A success while half-open closes the circuit and clears the
+history. So the breaker measures a failure *rate* — three failures a
+minute apart with a 60s window never coincide, and the circuit stays
+closed.
 
 ## Connection model
 
