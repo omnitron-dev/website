@@ -11,7 +11,7 @@ servers. It exposes the same interface as a single-backend client; the
 backend selection is internal. It is exported from
 `@omnitron-dev/titan/netron/multi-backend`, and its option shape is the
 `MultiBackendClientOptions` interface in
-`packages/titan/src/netron/multi-backend/types.ts:256`.
+`packages/titan/src/netron/multi-backend/types.ts`.
 
 ```mermaid
 flowchart LR
@@ -64,23 +64,23 @@ retries on another backend (up to `maxFailoverAttempts`, default 2).
 
 ## Strategies
 
-The load-balancing strategy is a `LoadBalancingStrategy` (`types.ts:25`),
+The load-balancing strategy is a `LoadBalancingStrategy` (`LoadBalancingStrategy` in `types.ts`),
 set on a route (`router.routes[].strategy`) or as
 `router.defaultStrategy` (default `round-robin`). The router dispatches
-on it in `service-router.ts:236`:
+on it in `ServiceRouter.selectBackend`:
 
 | Strategy             | Behaviour                                              |
 | -------------------- | ------------------------------------------------------ |
 | `round-robin`        | Cycle through backends evenly (default)                |
 | `random`             | Pick a backend at random                               |
 | `least-connections`  | Send to the backend with the fewest active connections |
-| `weighted`           | Intended to weight by `BackendConfig.weight`, but **currently falls back to random** — `selectWeighted` delegates to `selectRandom` (`service-router.ts:286`) because `weight` is not carried on the per-backend status it selects from |
+| `weighted`           | Intended to weight by `BackendConfig.weight`, but **currently falls back to random** — `selectWeighted` delegates to `selectRandom` (`selectWeighted`) because `weight` is not carried on the per-backend status it selects from |
 
 Those four are the only values the type and the dispatch allow. There
 is no `sticky`, `least-busy`, or `primary` strategy, and no
 `stickyKey`/`sessionAffinity` hook. "Primary/fallback" semantics are
 expressed through a route's `backends` vs `fallback` lists
-(`service-router.ts:110`), not a strategy name.
+(the route's `backends`/`fallback` handling in `ServiceRouter`), not a strategy name.
 
 ## Service-level routing rules
 
@@ -112,7 +112,7 @@ method, expose them as separate services (e.g. `orders` and
 
 ## Health monitoring
 
-Health-check options are **flat** top-level fields (`types.ts:288`),
+Health-check options are **flat** top-level fields (`MultiBackendClientOptions` in `types.ts`),
 not a nested `health` object:
 
 ```typescript
@@ -127,7 +127,7 @@ new MultiBackendClient({
 
 There is no per-check `timeoutMs` field. The router filters out any
 backend whose `health` is `'unhealthy'` before selecting
-(`service-router.ts:112`), so unhealthy backends drop out of the
+(in `ServiceRouter`, before selection), so unhealthy backends drop out of the
 rotation; the pool keeps polling them and they re-enter once the
 `healthyThreshold` of consecutive successes is met.
 
@@ -144,34 +144,40 @@ new MultiBackendClient({
 });
 ```
 
-The failover loop (`multi-backend-client.ts:271`) retries on **any**
+The failover loop (the catch in `MultiBackendClient`'s failover loop) retries on **any**
 thrown error — there is no `retriableErrors` classifier hook, so the
 catch block does not inspect the error before retrying. It will,
 however, skip a candidate whose circuit breaker is open
-(`multi-backend-client.ts:287`). A single call can opt out of failover
-entirely via a per-request `hints.noFailover` (`types.ts:407`).
+(`isCircuitClosed`). A single call can opt out of failover
+entirely via a per-request `hints.noFailover` (`hints.noFailover`).
 
-For failure *isolation*, configure the **circuit breaker** (`types.ts:323`)
+For failure *isolation*, configure the **circuit breaker** (`circuitBreaker` in `types.ts`)
 — this is the real mechanism for shedding a bad backend. It tracks
 per-backend failures and transitions closed → open → half-open
-(`multi-backend-client.ts:359`):
+(`recordFailure` / `isCircuitClosed`):
 
 ```typescript
 circuitBreaker: {
   enabled:      true,
   threshold:    5,                    // failures before opening (default 5)
-  window:       60_000,               // error-tracking window (default 60s)
   resetTimeout: 30_000,               // wait before half-open (default 30s)
 }
 ```
 
+`window` is accepted by the type and read by nothing. The failure count
+is cumulative: `recordFailure()` increments it and only a success
+resets it, so failures hours apart count the same as failures
+milliseconds apart, and a backend that fails once a day eventually
+trips a threshold of 5. Do not rely on it to scope failures to a
+period.
+
 ## Connection model
 
 There is no sized connection pool. The `BackendPool` holds one
-`BackendClient` per backend id (`backend-pool.ts:39`), and each
+`BackendClient` per backend id (`BackendPool`), and each
 `BackendClient` holds at most one transport — a single
 `HttpTransportClient` *or* a single `WebSocketConnection`
-(`backend-client.ts:53`), chosen by the backend's `transport` field.
+(`BackendClient`), chosen by the backend's `transport` field.
 Per-backend `pool: { min, max, idleTimeoutMs }` is not a real option.
 
 ## Observability

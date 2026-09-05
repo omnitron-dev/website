@@ -131,7 +131,8 @@ decorator (below). The DI-injected `LoggerService` is the *module*
 `loggerService.create(name)`.
 
 ```typescript
-import { Service, Public, Inject } from '@omnitron-dev/titan';
+import { Service, Inject } from '@omnitron-dev/titan';
+import { Public } from '@omnitron-dev/titan/decorators';
 import { LOGGER_TOKEN, type ILogger } from '@omnitron-dev/titan/module/logger';
 
 @Service({ name: 'users' })
@@ -310,7 +311,7 @@ hot-path isolation, or a `flush()` lifecycle. There is **no
 
 Redaction has two working paths. For **plain path redaction**, prefer
 **pino's native `redact` option** — `LoggerService` forwards it straight
-to pino when it builds the root logger (`logger.service.ts:199`). It
+to pino when it builds the root logger (`redact: config.redact || []` in `LoggerService.initialize`). It
 runs inside pino's serialisation, on the hot path, for every line
 including child loggers; it is pino-optimised and supports pino path
 syntax (`*` wildcards, bracket notation) and the object form for a
@@ -323,7 +324,7 @@ LoggerModule.forRoot({
 ```
 
 The list can also come from `ConfigService` under `logger.redact`
-(read at startup, `logger.service.ts:368`). Titan redacts nothing by
+(read at startup in `getConfiguration`). Titan redacts nothing by
 default (`redact: config.redact || []`) — set the list per app.
 
 For **arbitrary transform/drop logic** (conditional redaction,

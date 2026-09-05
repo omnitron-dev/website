@@ -98,14 +98,14 @@ A policy is a per-table allow/deny/filter that runs inside the
 plugin BEFORE every SELECT / INSERT / UPDATE / DELETE. The
 `defineRLSSchema`, `allow`, `deny`, `filter` builders are the
 real `@kysera/rls` API, re-exported from
-`@omnitron-dev/titan/module/database/rls`. The condition function
+`@omnitron-dev/titan-database/rls`. The condition function
 receives a `PolicyEvaluationContext`: `ctx.auth` for identity and
 `ctx.row` (read/update/delete) or `ctx.data` (create) for the
 record under evaluation:
 
 ```ts
 // rls-schema.ts
-import { defineRLSSchema, allow } from '@omnitron-dev/titan/module/database/rls';
+import { defineRLSSchema, allow } from '@omnitron-dev/titan-database/rls';
 
 export const platformRLSSchema = defineRLSSchema<Database>({
   users: {

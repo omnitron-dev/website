@@ -230,17 +230,34 @@ timeout = 10000
 ## Benchmarks across runtimes
 
 ```typescript
-import { bench } from '@omnitron-dev/testing/performance';
+import { PerfTimer } from '@omnitron-dev/testing/performance';
 import { RUNTIME } from '@omnitron-dev/testing';
 
-bench(`parse on ${RUNTIME}`, {
-  variant1: () => parseV1(input),
-  variant2: () => parseV2(input),
-}, { runs: 10_000 });
+const timer = new PerfTimer();
+
+for (let i = 0; i < 10_000; i++) {
+  timer.mark('v1:start');
+  parseV1(input);
+  timer.mark('v1:end');
+  timer.measure('v1', 'v1:start', 'v1:end');
+
+  timer.mark('v2:start');
+  parseV2(input);
+  timer.mark('v2:end');
+  timer.measure('v2', 'v2:start', 'v2:end');
+}
+
+console.log(RUNTIME, {
+  v1: timer.getPercentile('v1', 50),
+  v2: timer.getPercentile('v2', 50),
+});
 ```
 
-Run all three; compare. Bun usually wins raw JS work; Node wins
-ecosystem maturity; Deno wins startup time.
+Compare a percentile rather than a single run or a mean: one scheduling
+delay moves a mean and does not move a median, and on a loaded machine
+that is the difference between measuring the code and measuring the
+host. Run all three runtimes and compare — Bun usually wins raw JS
+work; Node wins ecosystem maturity; Deno wins startup time.
 
 ## Where the platform itself uses this
 

@@ -26,7 +26,8 @@ indicator registration and HTTP probes come from the
 the application. Inject it where you need to read aggregate health:
 
 ```typescript
-import { Inject, Service, Public } from '@omnitron-dev/titan';
+import { Inject, Service } from '@omnitron-dev/titan';
+import { Public } from '@omnitron-dev/titan/decorators';
 import { HEALTH_SERVICE_TOKEN, type HealthService }
   from '@omnitron-dev/titan-health';
 

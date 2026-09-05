@@ -130,7 +130,7 @@ reload.
 ## Validation on reload
 
 `reload()` only re-validates when `validateOnStartup` is set and a
-schema is present (`config.service.ts:251`). In that case a reload
+schema is present (`validateOnStartup` in `ConfigService`). In that case a reload
 that fails validation is **rejected** — `reload()` restores the
 previous config and throws, so the running app keeps its
 last-known-good values (`config.service.ts:251-260`). The reload is

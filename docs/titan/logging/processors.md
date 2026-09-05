@@ -127,9 +127,9 @@ This is Pino's own redaction, so:
 
 You can also supply the list through `ConfigService` under the
 `logger.redact` key, which `LoggerService` reads at startup
-(`logger.service.ts:368`). **Set the list per app** — Titan redacts
-nothing by default (`redact: config.redact || []`,
-`logger.service.ts:199`), because what counts as sensitive is
+(in `LoggerService.getConfiguration`). **Set the list per app** — Titan redacts
+nothing by default (`redact: config.redact || []` in
+`LoggerService.initialize`), because what counts as sensitive is
 project-specific.
 
 > **Redaction is defence-in-depth, not a primary control.** It catches

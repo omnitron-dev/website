@@ -38,7 +38,7 @@ stateDiagram-v2
 ```
 
 ```typescript
-import type { OnInit, OnStart, OnStop, OnDestroy } from '@omnitron-dev/titan';
+import type { OnInit, OnStart, OnStop, OnDestroy } from '@omnitron-dev/titan/application';
 ```
 
 Implement only the ones you need. A provider with no hooks is fine —
@@ -61,8 +61,9 @@ it is constructed and used; no lifecycle code runs for it.
 ## Hook signatures
 
 ```typescript
-import { Service, Public, type OnInit, type OnStart, type OnStop, type OnDestroy }
-  from '@omnitron-dev/titan';
+import { Service } from '@omnitron-dev/titan';
+import { Public } from '@omnitron-dev/titan/decorators';
+import type { OnInit, OnStart, OnStop, OnDestroy } from '@omnitron-dev/titan/application';
 
 @Service({ name: 'Users', version: '1.0.0' })
 export class UsersService

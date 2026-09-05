@@ -11,15 +11,15 @@ Netron supports server-streaming methods. On the server you write an
 a method returns an async generator and the caller is remote, the
 service stub wraps the generator in a `NetronWritableStream` and pipes
 it (`stream.pipeFrom(generator)`), returning a `StreamReference` over
-the wire (`netron/service-stub.ts:151`). The receiving peer rebuilds
-the other half as a `NetronReadableStream` (`netron/remote-peer.ts:982`).
+the wire (the `isAsyncGenerator` branch of `ServiceStub.call`). The receiving peer rebuilds
+the other half as a `NetronReadableStream` (`TYPE_STREAM` in `RemotePeer.handlePacket`).
 
 The stream primitives are built on the **`readable-stream` package**
 (the userland Node.js streams implementation), not the WHATWG Web
 Streams API and not native async iterables: `NetronReadableStream
 extends Readable` and `NetronWritableStream extends Writable`, both in
-`objectMode` (`netron/streams/readable-stream.ts:48`,
-`netron/streams/writable-stream.ts:49`). Because the received stream is
+`objectMode` (`netron/streams/readable-stream.ts`,
+`netron/streams/writable-stream.ts`). Because the received stream is
 a `Readable`, you can consume it either with stream events
 (`.on('data')` / `.on('end')`) or with `for await` — a `Readable` is
 async-iterable. The examples below use `for await` for brevity.
@@ -50,11 +50,11 @@ sequenceDiagram
 Streaming requires WebSocket, TCP, or Unix transport. The HTTP
 transport does not open a streaming channel — instead it **collects an
 `async *` generator into an array** before sending the response
-(`netron/transport/http/server.ts:2566` `collectAsyncGeneratorValues`).
+(`collectAsyncGeneratorValues` in `netron/transport/http/server.ts`).
 Collection is bounded by `maxAsyncGeneratorItems` (a server option,
-default `10000` — `server.ts:148`). When the generator exceeds that
+default `10000`, the constant `DEFAULT_MAX_ASYNC_GENERATOR_ITEMS`). When the generator exceeds that
 limit the server throws a `TitanError` with code `PAYLOAD_TOO_LARGE`
-(`server.ts:2591`); other (non-`TitanError`) iteration failures return
+(from that same method); other (non-`TitanError`) iteration failures return
 the partial results collected so far rather than failing the whole
 request. So over HTTP you get a bounded batch, not a live stream — use
 WS/TCP/Unix for true streaming, or paginate.
@@ -129,16 +129,16 @@ matters.
 The **producer → consumer** direction is wired. When the server's
 `NetronWritableStream` finishes (`end()`) it sends an end-of-stream
 final chunk; when it is `destroy()`ed it sends an explicit
-`TYPE_STREAM_CLOSE` packet (`netron/streams/writable-stream.ts:254`),
+`TYPE_STREAM_CLOSE` packet (`NetronWritableStream.finalizing`),
 and the consumer's readable reacts by force-closing
-(`netron/remote-peer.ts:998` → `stream.forceClose(reason)`). The two
+(`TYPE_STREAM_CLOSE` in `RemotePeer.handlePacket` → `stream.forceClose(reason)`). The two
 are mutually exclusive — a graceful end uses the EOS chunk, a destroy
 uses the close packet (the `finalizing` guard in `writable-stream.ts`
 prevents emitting both).
 
 The **consumer → producer** direction is *not* wired. The received
 stream is a `NetronReadableStream`, and its `destroy()`
-(`netron/streams/readable-stream.ts:280`) only tears down locally — it
+(`NetronReadableStream.destroy`) only tears down locally — it
 sends **no** packet back to the producer. There is no code path where a
 broken/destroyed readable notifies the writable upstream. So a clean
 client `break` out of the `for await` loop does **not** signal the
