@@ -86,6 +86,21 @@ above; reusable in non-Omnitron projects.
 | `@omnitron-dev/kb` | Knowledge-base framework (backs `omnitron kb mcp`) |
 | `@omnitron-dev/testing` | Cross-runtime testing utilities (Node + Bun + Deno) |
 
+### Shared internals
+
+Two more packages exist and are published, but you install
+neither: `titan` and `netron-browser` both depend on them, and
+that is the point — each is a single definition that used to be a
+pair of copies drifting apart on either side of the wire.
+
+| Package | Purpose |
+| ------- | ------- |
+| `@omnitron-dev/netron-protocol` | The on-the-wire contract: UID generation, wire constants. Dependency-free |
+| `@omnitron-dev/netron-http-core` | Environment-neutral HTTP primitives — cache manager, retry manager, query builder, request batcher |
+
+Their versions move with the packages that consume them; pin
+those, not these.
+
 ## License
 
 MIT across every package.

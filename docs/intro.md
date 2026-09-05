@@ -164,7 +164,7 @@ That's the entire wire format. The rest is opt-in.
 | Component | Requirement |
 | --------- | ----------- |
 | **Node.js** | 22+ (engines require `>=22`; CI runs 22 and 24) |
-| **TypeScript** | 5.x; strict mode recommended |
+| **TypeScript** | 7.x (5.x works for consumers); strict mode recommended |
 | **Bun / Deno** | App-level support (test matrix covers Node + Bun + Deno); Omnitron daemon expects Node |
 | **OS** | macOS, Linux. Windows: CLI + apps OK; Omnitron daemon assumes Unix sockets |
 | **React** | 18 or 19 |
