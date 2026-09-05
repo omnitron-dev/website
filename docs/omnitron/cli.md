@@ -63,7 +63,7 @@ ancestor.
 | `-p, --project <name>`       | Initial project name (default: auto-detect from CWD)  |
 | `-f, --foreground`           | Block the terminal — useful for `tail -F` style use   |
 | `--no-infra`                 | Skip Docker infrastructure provisioning               |
-| `--no-watch`                 | Disable file watching for dev stacks                  |
+| `--no-watch`                 | Disable file watching daemon-wide                     |
 | `--master`                   | First-run: configure as master in a cluster          |
 | `--slave [host:port]`        | First-run: configure as slave; optional master address |
 | `--webapp` / `--no-webapp`   | Toggle automatic console UI start                     |

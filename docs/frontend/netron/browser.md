@@ -410,13 +410,13 @@ ErrorCode.SERVICE_UNAVAILABLE`.
 ## Authentication
 
 The real class is **`AuthenticationClient`** (from
-`@omnitron-dev/netron-browser/auth`) — there is no `AuthManager`.
+`@omnitron-dev/netron-browser`) — there is no `AuthManager`.
 Construct one, attach it to the transport client, then drive it
 with `setAuth()` / `clearAuth()` / `logout()`:
 
 ```typescript
 import { HttpClient } from '@omnitron-dev/netron-browser';
-import { AuthenticationClient, LocalTokenStorage } from '@omnitron-dev/netron-browser/auth';
+import { AuthenticationClient, LocalTokenStorage } from '@omnitron-dev/netron-browser';
 
 const auth = new AuthenticationClient({
   storage:           new LocalTokenStorage('platform:token'),  // or Session/Memory/Noop
@@ -536,7 +536,7 @@ for the full code reference.
 | ------- | -------- |
 | `@omnitron-dev/netron-browser` | Everything; convenient root |
 | `@omnitron-dev/netron-browser/client` | `NetronClient`, `HttpClient`, `WebSocketClient`, `BackendPool` |
-| `@omnitron-dev/netron-browser/auth` | `AuthenticationClient`, token storage + token-transport helpers |
+| `@omnitron-dev/netron-browser` | `AuthenticationClient`, token storage + token-transport helpers |
 | `@omnitron-dev/netron-browser/middleware` | All built-in middleware |
 | `@omnitron-dev/netron-browser/core` | Types, defaults, factory helpers |
 | `@omnitron-dev/netron-browser/core-tasks` | Built-in service tasks (`$system.describe`, etc.) |

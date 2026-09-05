@@ -309,8 +309,10 @@ The RPC client uses a relative `baseUrl`, so the Vite dev server
 proxies the daemon for it (see `vite.config.ts`): `/netron/*` →
 `http://localhost:9801` (daemon HTTP) and `/ws` → the daemon's
 Netron WebSocket transport. The daemon must already be running
-(`omnitron up`). Auth credentials come from your `omnitron auth`
-setup.
+(`omnitron up`). Sign in with the same account you use against the
+production build — the `001_initial_schema` migration seeds a single
+`admin` user with password `admin` on first daemon start, and the
+console's Change-password screen is the only way to change it.
 
 ### Production build
 

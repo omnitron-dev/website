@@ -12,7 +12,7 @@ ABAC, RLS bridge) start at [Authentication & Authorisation](../../auth/index.md)
 This page is the browser-side **token-lifecycle** reference.
 :::
 
-`AuthenticationClient` (from `@omnitron-dev/netron-browser/auth`)
+`AuthenticationClient` (from `@omnitron-dev/netron-browser`)
 owns browser-side authentication state: where the token lives,
 when to refresh, how to propagate sign-in/out across tabs, and
 when to time out an idle session.
@@ -33,7 +33,7 @@ client attaches the token to every request and the built-in
 
 ```typescript
 import { HttpClient } from '@omnitron-dev/netron-browser';
-import { AuthenticationClient, LocalTokenStorage } from '@omnitron-dev/netron-browser/auth';
+import { AuthenticationClient, LocalTokenStorage } from '@omnitron-dev/netron-browser';
 import { createAuthErrorMiddleware } from '@omnitron-dev/netron-browser/middleware';
 
 const auth = new AuthenticationClient({
@@ -84,7 +84,7 @@ await auth.logout();   // POSTs logoutConfig.endpoint if set, then clearAuth()
 ## Storage backends
 
 `storage` takes a `TokenStorage` **instance** (not a string).
-Four implementations ship from `@omnitron-dev/netron-browser/auth`:
+Four implementations ship from `@omnitron-dev/netron-browser`:
 
 | Class | Survives | Use case |
 | ----- | -------- | -------- |
@@ -95,7 +95,7 @@ Four implementations ship from `@omnitron-dev/netron-browser/auth`:
 
 ```typescript
 import { LocalTokenStorage, MemoryTokenStorage, NoopTokenStorage }
-  from '@omnitron-dev/netron-browser/auth';
+  from '@omnitron-dev/netron-browser';
 
 new AuthenticationClient({ storage: new LocalTokenStorage('myapp:token') });
 ```
@@ -117,8 +117,8 @@ How the token reaches the server is a pluggable
 | `HybridClientTokenTransport` | both — cookie credentials + bearer header | Migration / dual-mode |
 
 ```typescript
-import { AuthenticationClient, NoopTokenStorage } from '@omnitron-dev/netron-browser/auth';
-import { CookieClientTokenTransport } from '@omnitron-dev/netron-browser/auth';
+import { AuthenticationClient, NoopTokenStorage } from '@omnitron-dev/netron-browser';
+import { CookieClientTokenTransport } from '@omnitron-dev/netron-browser';
 
 // HttpOnly-cookie auth: no client-side token, browser sends the cookie.
 const auth = new AuthenticationClient({
