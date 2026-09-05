@@ -36,7 +36,7 @@ is handled through *registered types* (below).
 
 A registered ("extension") type is a single-byte code paired with an
 `encode`/`decode` callback. Codes are a single byte, `0..127`, and the
-registration map (`packages/msgpack/src/index.ts:11`) partitions the
+registration map (`registerCommonTypesFor` in `packages/msgpack/src/index.ts`) partitions the
 range like this:
 
 - **`119..126`** — standard library / runtime types (the common-type
@@ -47,7 +47,7 @@ range like this:
 - **`1..99`** — free for your own custom types.
 
 The common types registered by
-`registerCommonTypesFor` (`packages/msgpack/src/index.ts:7`):
+`registerCommonTypesFor` (`packages/msgpack/src/index.ts`):
 
 | Type    | Code  | Wire form                                                       |
 | ------- | ----- | --------------------------------------------------------------- |
@@ -73,13 +73,13 @@ The Titan wire layer
 
 `TitanError` (code `110`) is what makes typed errors travel across the
 wire intact. It is registered **before** the common types
-(`serializer.ts:113`) precisely so its handler is checked ahead of the
+(`packages/titan/src/netron/packet/serializer.ts`) precisely so its handler is checked ahead of the
 generic `Error` handler (`126`) — `TitanError` extends `Error`, so the
 more specific codec must win. On decode it reconstructs the matching
 error with its `code`, `message`, tracing fields, `cause` chain, and
 any subclass-specific fields (`serviceId`, `requiredPermission`,
 `retryAfter`, …). Stack traces are **omitted on the wire by default**
-(`serializer.ts:150`, security policy T#38) to avoid leaking
+(`includeStackTraces` in `packages/titan/src/netron/packet/serializer.ts`, security policy T#38) to avoid leaking
 server-internal paths; dev tooling can opt in via
 `setSerializerErrorOptions({ includeStackTraces: true })`.
 
@@ -93,7 +93,7 @@ The signature is **positional**:
 serializer.register(typeCode, constructor, encode, decode)
 ```
 
-(`packages/msgpack/src/serializer.ts:41`). `typeCode` must be in
+(`Serializer.register`, `packages/msgpack/src/serializer.ts`). `typeCode` must be in
 `0..127` or `register` throws a `RangeError`; pick one in the
 **`1..99`** user band, since `100..126` are reserved (see the tables
 above). The `encode` callback is `(value, buf) => void` and the
@@ -143,20 +143,20 @@ or the codes differ, the receiver cannot reconstruct the value.
 ## Payload limits
 
 The default packet ceiling is **16 MiB**
-(`DEFAULT_MAX_PACKET_SIZE`, `packet/index.ts:204`), overridable per
-transport via the `maxPacketSize` option (`transport/types.ts:107`). It
+(`DEFAULT_MAX_PACKET_SIZE` in `netron/packet/index.ts`), overridable per
+transport via the `maxPacketSize` option (`maxPacketSize` in `netron/transport/types.ts`). It
 is checked inside `decodePacket` **before** the msgpack decoder runs
-(`packet/index.ts:209`), so an oversized frame can't force a matching
+(`decodePacket` in the same file), so an oversized frame can't force a matching
 scratch allocation and OOM the host. Over the limit, decoding throws a
 `TitanError` with code `PAYLOAD_TOO_LARGE` (HTTP 413). TCP additionally
 rejects on the *declared* length before reading the body
-(`tcp-transport.ts:148`).
+(`TcpTransport`).
 
 Each transport also has its own body/frame cap layered on top: the
 HTTP transport caps request bodies (default **10 MB**; the public
 option is `maxRequestSize` as a human string like `'10mb'` —
-`transport/types.ts:152`), and WebSocket has its own numeric
-`maxPayload` (`websocket/types.ts:25`). There is no `maxPayloadBytes`
+`transport/types.ts`), and WebSocket has its own numeric
+`maxPayload` (`websocket/types.ts`). There is no `maxPayloadBytes`
 option.
 
 For larger transfers (file uploads, bulk data), use:

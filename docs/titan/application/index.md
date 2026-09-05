@@ -38,7 +38,8 @@ import {
 ## The minimal app
 
 ```typescript
-import { Application, Module, Injectable, Service, Public } from '@omnitron-dev/titan';
+import { Application, Module, Injectable, Service } from '@omnitron-dev/titan';
+import { Public } from '@omnitron-dev/titan/decorators';
 
 @Injectable()
 @Service({ name: 'Calculator' })
@@ -132,7 +133,8 @@ The application registers itself in the container under
 API:
 
 ```typescript
-import { ApplicationToken, type IApplication, Inject, Service, Public } from '@omnitron-dev/titan';
+import { ApplicationToken, type IApplication, Inject, Service } from '@omnitron-dev/titan';
+import { Public } from '@omnitron-dev/titan/decorators';
 
 @Service({ name: 'AdminService' })
 export class AdminService {

@@ -65,35 +65,71 @@ expect(fetchMock.mock.lastCall()).toEqual(['/api/foo']);
 `MockFunction<T>` preserves `T`'s type so `mock.calls[0]` is the
 inferred parameter tuple, not `any[]`.
 
-## Async helpers — `async/`
+## Async helpers — `@omnitron-dev/testing/async`
 
-### `eventually(predicate, opts?)`
+Also re-exported from the package root.
 
-Poll until a condition is true (or timeout):
+### `waitFor(condition, options?)` / `waitForCondition(condition, timeout?, interval?)`
+
+Poll until a predicate is true, or throw at the deadline:
 
 ```typescript
-import { eventually } from '@omnitron-dev/testing';
+import { waitFor } from '@omnitron-dev/testing';
 
-await eventually(() => queue.size === 0, {
-  timeout:  5_000,
+await waitFor(() => queue.size === 0, {
+  timeout: 5_000,
   interval: 50,
-  message:  'queue did not drain',
+  message: 'queue did not drain',
 });
 ```
 
-Default timeout 5 s, default poll interval 50 ms. Throws with
-the `message` if the deadline passes.
+Defaults: 5 s timeout, 50 ms interval, message `'Condition not met'`.
+`waitForCondition(fn, timeout, interval)` is the same check with
+positional arguments.
 
-### `waitForEvent(emitter, event, opts?)`
+### `waitForEvents(target, events, timeout?)`
+
+Wait for several events on an emitter at once, resolving with their
+payloads in the order requested:
 
 ```typescript
-import { waitForEvent } from '@omnitron-dev/testing';
+import { waitForEvents } from '@omnitron-dev/testing';
 
-const [user] = await waitForEvent(bus, 'user.created', { timeout: 2_000 });
-expect(user.email).toBe('a@b.c');
+const [created, indexed] = await waitForEvents(bus, ['user.created', 'user.indexed'], 2_000);
+expect(created.email).toBe('a@b.c');
 ```
 
-Resolves with the event args when fired; rejects on timeout.
+### `createEventSpy(target, event)` and `EventCollector`
+
+`createEventSpy` records every payload for one event and hands back
+`{ events, clear }`. `EventCollector` does the same for several events
+and adds assertions:
+
+```typescript
+import { EventCollector, createEventSpy } from '@omnitron-dev/testing';
+
+const spy = createEventSpy(bus, 'user.created');
+await service.invite({ email: 'a@b.c' });
+expect(spy.events).toHaveLength(1);
+
+const collector = new EventCollector(bus);
+collector.collect('user.created').collect('user.deleted');
+// …
+collector.assertEmitted('user.created', 1);
+collector.assertNotEmitted('user.deleted');
+collector.stop();
+```
+
+### `EventListenerTracker`
+
+Registers listeners and removes all of them in one call — the usual
+cause of a leaking test suite is a listener nobody detached:
+
+```typescript
+const tracker = new EventListenerTracker();
+tracker.on(emitter, 'data', handler);
+afterEach(() => tracker.cleanup());
+```
 
 ### `flushPromises()`
 
@@ -102,154 +138,193 @@ import { flushPromises } from '@omnitron-dev/testing';
 
 doSomethingThatScheduledMicrotasks();
 await flushPromises();             // microtask queue drained
-expect(someState).toBe(...);
+expect(someState).toBe(/* … */);
 ```
 
-Useful between synchronous-trigger and async-effect when you
-need everything queued to run.
-
-### `withTimeout(promise, ms)`
+### `withTimeout(promise, ms)` / `retry(fn, options?)` / `delay(ms)` / `nextTick()`
 
 ```typescript
-const result = await withTimeout(longRunning(), 3_000);
-// → throws TimeoutError if longRunning takes >3s
+const result = await withTimeout(longRunning(), 3_000);  // throws TimeoutError
+const value = await retry(() => flakyCall(), { attempts: 3 });
 ```
 
-## Error helpers — `errors.ts`
+### `createMockTimer()` / `MockTimerController`
+
+Drive time forward deterministically instead of sleeping.
+
+## Errors — `errors.ts`
+
+The package exports its own error types, thrown by the helpers above:
 
 ```typescript
-import { expectThrows, expectThrowsAsync } from '@omnitron-dev/testing';
+import { TestingError, TimeoutError, NotFoundError, RetryError } from '@omnitron-dev/testing';
 
-expectThrows(() => parse(bad), ValidationError, /invalid email/);
-await expectThrowsAsync(() => service.do(), {
-  type:    TitanError,
-  code:    'NOT_FOUND',
-  message: /user not found/,
-});
+await expect(withTimeout(hangs(), 100)).rejects.toBeInstanceOf(TimeoutError);
 ```
 
-More expressive than `try/catch + expect.fail` boilerplate.
-
-## Titan-specific glue — `titan/`
-
-### `createTestApp(options)`
+For asserting that a call rejects, use `assertRejects` from
+`@omnitron-dev/testing/helpers`:
 
 ```typescript
-import { createTestApp } from '@omnitron-dev/testing/titan';
+import { assertRejects } from '@omnitron-dev/testing/helpers';
+
+await assertRejects(service.load('missing'), /not found/);
+await assertRejects(service.load('missing'), NotFoundError);
+```
+
+It accepts a string, a RegExp, or an error constructor.
+
+## Generic helpers — `@omnitron-dev/testing/helpers`
+
+```typescript
+import { createTempDir, cleanupTempDir, suppressConsole, withFixture } from '@omnitron-dev/testing/helpers';
+
+const dir = await createTempDir();
+afterEach(() => cleanupTempDir(dir));
+
+const restore = suppressConsole();   // silence console.* for one test
+restore();
+
+await withFixture(myFixture, async (instance) => { /* … */ });
+```
+
+## Titan-specific glue — `@omnitron-dev/testing/titan`
+
+### `createTestModule(options)` / `testModule()`
+
+Builds a container with your modules, providers and mocks, and can
+create an `Application` from it:
+
+```typescript
+import { createTestModule } from '@omnitron-dev/testing/titan';
 import { AppModule } from '../src/app.module.js';
 
 describe('users service', () => {
-  let app: TestApp;
+  let mod: TestModule;
 
-  beforeEach(async () => {
-    app = await createTestApp({
-      modules:   [AppModule],
-      overrides: [{ provide: MAILER_TOKEN, useClass: FakeMailer }],
-      database:  'memory',            // or 'rollback' or { url: '...' }
-      logger:    'null',              // or 'console' or your own
+  beforeEach(() => {
+    mod = createTestModule({
+      modules: [AppModule],
+      providers: [[MAILER_TOKEN, { useClass: FakeMailer }]],
+      mocks: [{ token: CLOCK_TOKEN, mock: fixedClock, spy: true }],
+      config: { name: 'test-app' },
     });
   });
 
   afterEach(async () => {
-    await app.dispose();              // cleans DB, stops the Application
+    await mod.cleanup();
   });
 
   it('invites a user', async () => {
-    const users = await app.resolve(UsersService);
+    const users = mod.getContainer().resolve(UsersService);
     await users.invite({ email: 'a@b.c' });
-    // ...
   });
 });
 ```
 
-`createTestApp` wraps `Application.create` with sensible test
-defaults:
+`resetMocks()`, `clearMocks()` and `restore()` manage mock state between
+tests; `createApplication()` returns a started `Application` when the
+test needs the full lifecycle.
 
-- `disableGracefulShutdown: true`
-- in-memory DB by default
-- null logger by default
-- transaction-rollback wrapper if `database: 'rollback'`
-
-### `transactionRollback`
+`testModule()` is the same thing with a fluent builder:
 
 ```typescript
-import { transactionRollback } from '@omnitron-dev/testing/titan';
-
-it('writes a user',
-  transactionRollback(async (db) => {
-    await db.insertInto('users').values({...}).execute();
-    const u = await db.selectFrom('users').selectAll().executeTakeFirst();
-    expect(u.email).toBe('a@b.c');
-    // Rolled back automatically; next test sees clean DB.
-  }),
-);
+const mod = testModule()
+  .withModule(AppModule)
+  .withConfig({ name: 'test-app' })
+  .withAutoMock()
+  .build();
 ```
 
-Wraps the test body in `BEGIN ... ROLLBACK`. Faster than
-truncate + reseed.
+### `TestApplication`
 
-## Docker helpers — `docker/`
-
-For integration tests that need real Postgres / Redis without
-manual setup:
+A thinner wrapper when you want the Application itself:
 
 ```typescript
-import { startPostgres, startRedis, stopAll } from '@omnitron-dev/testing/docker';
+import { TestApplication } from '@omnitron-dev/testing/titan';
+
+const app = new TestApplication({ name: 'test-app' });
+await app.bootstrap(AppModule);
+
+const users = app.get(UsersService);
+await app.close();
+```
+
+### Fixtures
+
+`TestSchemas`, `TestConfigs`, `TestRedisConfigs`, `TestModules`,
+`TestData` and `TestTiming` are ready-made fixtures for the common
+shapes — see `packages/testing/src/titan/test-fixtures.ts`.
+
+## Docker helpers — `@omnitron-dev/testing/docker`
+
+For integration tests that need a real Postgres or Redis. The API is
+three manager classes with static factory methods, each returning a
+`DockerContainer` you clean up yourself:
+
+```typescript
+import { RedisTestManager, DatabaseTestManager } from '@omnitron-dev/testing/docker';
+
+let redis: DockerContainer;
+let postgres: DockerContainer;
 
 beforeAll(async () => {
-  await startPostgres({ port: 5433, database: 'test' });
-  await startRedis({   port: 6380 });
-});
+  redis = await RedisTestManager.createRedisContainer({ port: 'auto' });
+  postgres = await DatabaseTestManager.createPostgresContainer({ port: 'auto' });
+}, 60_000);
 
 afterAll(async () => {
-  await stopAll();
+  await redis.cleanup();
+  await postgres.cleanup();
 });
 ```
 
-Uses Docker behind the scenes; reuses long-lived containers
-across test runs in dev. Skips on CI environments that already
-provide services.
+`port: 'auto'` asks the OS for a free port, which is what lets several
+suites run in parallel; read the assigned port from
+`container.ports.get(6379)`.
 
-## Performance helpers — `performance/`
+`RedisTestManager` also builds multi-node topologies —
+`createRedisCluster()` and `createRedisSentinel()` — and
+`DockerTestManager` is the lower-level driver the other two use.
+
+## Performance helpers — `@omnitron-dev/testing/performance`
 
 ```typescript
-import { measure, expectFasterThan, bench } from '@omnitron-dev/testing/performance';
+import { PerfTimer, MemoryLeakDetector } from '@omnitron-dev/testing/performance';
 
-it('parser is fast', async () => {
-  const result = await measure(() => parse(LARGE_INPUT));
-  expect(result.durationMs).toBeLessThan(50);
-});
+const timer = new PerfTimer();
+timer.mark('start');
+await parse(LARGE_INPUT);
+timer.mark('end');
 
-it('beats baseline', async () => {
-  await expectFasterThan(() => myImpl(),  () => referenceImpl(), { runs: 100 });
-});
-
-// Standalone bench:
-bench('parser variants', {
-  v1: () => parseV1(input),
-  v2: () => parseV2(input),
-  v3: () => parseV3(input),
-}, { runs: 1_000 });
+expect(timer.measure('parse', 'start', 'end')).toBeLessThan(50);
+// Repeated runs: timer.getAverage('parse'), timer.getPercentile('parse', 95)
 ```
 
-Inline microbenchmarks alongside tests — not a replacement for
-a real benchmark suite, but useful for regression catches.
+A percentile over repeated runs is the useful shape here: a single
+wall-clock measurement compared against a flat millisecond bound
+measures the machine as much as the code.
 
-## Env helpers — `env.ts`
+## Env helpers — `@omnitron-dev/testing/env`
+
+The shared endpoints for the test stack. Ports deliberately differ from
+the defaults so a test run cannot reach a developer's own Redis or
+Postgres:
 
 ```typescript
-import { withEnv, mockProcessEnv } from '@omnitron-dev/testing';
+import {
+  TEST_REDIS_URL,      // redis://localhost:16379
+  TEST_POSTGRES_URL,   // postgresql://test:test@localhost:15432/test
+  testRedisUrl,
+  testPostgresUrl,
+} from '@omnitron-dev/testing/env';
 
-withEnv({ NODE_ENV: 'test', DATABASE_URL: 'postgres://test' }, async () => {
-  // process.env temporarily mutated; restored on return
-});
-
-const restore = mockProcessEnv({ JWT_SECRET: 'test' });
-// ... test ...
-restore();
+const url = testRedisUrl(5);            // …:16379/5
+const dbUrl = testPostgresUrl('other'); // …:15432/other
 ```
 
-Avoids leaking env changes across tests.
+Every value is overridable through the matching environment variable
+(`TEST_REDIS_HOST`, `TEST_REDIS_PORT`, `TEST_POSTGRES_*`).
 
 ## Vitest configuration baseline
 

@@ -12,7 +12,7 @@ uniformly — auth checks, rate limiting, tracing, logging, metrics.
 
 Middleware is **an HTTP-transport feature**. The pipeline lives in
 `netron/transport/http/middleware/`, and the real surface is the
-`MiddlewarePipeline` class (`pipeline.ts:22`) — there is no
+`MiddlewarePipeline` class (`MiddlewarePipeline` in `netron/transport/http/middleware/pipeline.ts`) — there is no
 `INetronMiddleware` interface and no `netron.use()` method. The
 persistent transports (WebSocket / TCP / Unix) do **not** instantiate
 this pipeline; they enforce auth and access control inline at dispatch
@@ -21,7 +21,7 @@ and `IAuthorizationManager` checks in `service-stub.ts` /
 `remote-peer.ts`). So the patterns on this page apply when you serve
 over HTTP. (The transport-agnostic *context* type used below,
 `NetronMiddlewareContext`, is defined once in
-`middleware/types.ts:20` and reused by the HTTP-specific extension.)
+`NetronMiddlewareContext` in `netron/transport/http/middleware/types.ts` and reused by the HTTP-specific extension.)
 
 > Do not confuse with **DI middleware**, which wraps container
 > resolution. See [DI Middleware](../di/middleware.md) for the
@@ -140,7 +140,7 @@ headers).
 
 Method decorators (`@Auth`, `@RateLimit`, `@Cache`) are **not**
 middleware classes — they stamp `reflect-metadata` onto the method
-(`decorators/core.ts:788`, `:805`, `:822`, storing `METHOD_AUTH` /
+(the `Auth` decorator in `decorators/core.ts`, `:805`, `:822`, storing `METHOD_AUTH` /
 `METHOD_RATE_LIMIT` / `METHOD_CACHE`). The auth middleware (and, on
 WS/TCP, the inline dispatch path) reads that metadata and enforces it:
 
@@ -175,10 +175,10 @@ pipeline.use(authMiddleware, {
 ```
 
 The built-in auth middleware (`createAuthMiddleware` /
-`NetronAuthMiddleware`, `middleware/auth.ts:164`) also accepts
-`skipServices` / `skipMethods` options (`auth.ts:37`), and any
+`NetronAuthMiddleware`) also accepts
+`skipServices` / `skipMethods` options (`AuthMiddlewareOptions`), and any
 middleware can set `ctx.skipRemaining` to short-circuit the rest of its
-stage (honoured by the pipeline at `pipeline.ts:325`).
+stage (honoured by the pipeline at `ctx.skipRemaining` in `MiddlewarePipeline`).
 
 ## Modifying the request
 

@@ -117,7 +117,7 @@ The right balance for most suites.
 
 Common test setup deserves a helper. The `providers` option is typed
 as `Array<[InjectionToken<unknown>, Provider<unknown>]>`
-(`CreateOptions`, `packages/titan/src/application/application.ts:117`),
+(`CreateOptions`, `IModuleOptions.imports` in `packages/titan/src/application/application.ts`),
 so a per-suite booter just spreads in any extra tuples:
 
 ```typescript

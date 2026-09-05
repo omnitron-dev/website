@@ -22,7 +22,7 @@ original is in place.
 
 A provider definition is the standard Nexus shape (one of `useClass`,
 `useValue`, `useFactory`, `useToken`, or a bare constructor — see
-`Provider` in `packages/titan/src/nexus/types.ts:300`):
+`Provider` in `Provider` in `packages/titan/src/nexus/types.ts`):
 
 ```typescript
 import { Container } from '@omnitron-dev/titan/nexus';
@@ -66,14 +66,14 @@ const app = await Application.create({
 ```
 
 The shape of `providers` is defined by `CreateOptions` in
-`packages/titan/src/application/application.ts:117`:
+`IModuleOptions.imports` in `packages/titan/src/application/application.ts`:
 
 ```typescript
 providers?: Array<[InjectionToken<unknown>, Provider<unknown>]>;
 ```
 
 `create()` registers these into the container **after** the modules
-are wired (`application.ts:276`–288 — modules at lines 269–274,
+are wired (`Application.create`–288 — modules at lines 269–274,
 `providers` immediately after), so each tuple's definition wins over
 whatever the module declared for the same token. There is no
 `overrides` option — `providers` is the override mechanism.
@@ -89,7 +89,7 @@ providers: [
 ```
 
 After all modules and providers are registered, `create()` calls
-`container.eagerlyInitialize()` (`application.ts:293`), so singleton
+`container.eagerlyInitialize()` (`Application.create`), so singleton
 providers — including your fakes — are constructed before `create()`
 resolves.
 
@@ -173,7 +173,7 @@ and interaction recording without standing up the full lifecycle.
 ### `createTestModule` / `TestModule`
 
 `createTestModule(options)` returns a `TestModule`
-(`packages/testing/src/titan/test-module.ts:165`). Its options
+(`createTestModule` in `packages/testing/src/titan/test-module.ts`). Its options
 (`TestModuleOptions`, same file lines 11–21):
 
 ```typescript
@@ -207,7 +207,7 @@ harness
 const users = harness.get(USERS_SERVICE);  // resolves from the test container
 ```
 
-Method reference (`test-module.ts:78`–159):
+Method reference (`TestModuleBuilder.mock`–159):
 
 | Method | Effect |
 | ------ | ------ |

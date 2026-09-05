@@ -385,7 +385,8 @@ Rough WAL math: `outage_seconds × producer_rate × avg_entry_bytes
 DI lifecycle hooks. Wire it manually if you want DI integration:
 
 ```typescript
-import { Injectable, OnStart, OnStop } from '@omnitron-dev/titan';
+import { Injectable } from '@omnitron-dev/titan';
+import type { OnStart, OnStop } from '@omnitron-dev/titan/application';
 import { TelemetryRelayService } from '@omnitron-dev/titan-telemetry-relay';
 
 @Injectable()

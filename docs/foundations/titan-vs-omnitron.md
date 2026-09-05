@@ -61,7 +61,8 @@ overhead — just a Node process.
 
 ```typescript
 // my-app/src/main.ts — that's the whole entrypoint
-import { Application, Module, Service, Public } from '@omnitron-dev/titan';
+import { Application, Module, Service } from '@omnitron-dev/titan';
+import { Public } from '@omnitron-dev/titan/decorators';
 import { TitanDatabaseModule } from '@omnitron-dev/titan-database';
 import { TitanAuthModule }     from '@omnitron-dev/titan-auth';
 

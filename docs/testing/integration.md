@@ -15,31 +15,30 @@ highest signal-to-noise.
 
 ```typescript
 import { describe, beforeEach, afterEach, it, expect } from 'vitest';
-import { createTestApp, type TestApp } from '@omnitron-dev/testing/titan';
+import { createTestModule, type TestModule } from '@omnitron-dev/testing/titan';
 import { AppModule } from '../src/app.module.js';
 
 describe('user invite flow', () => {
-  let app: TestApp;
+  let mod: TestModule;
 
-  beforeEach(async () => {
-    app = await createTestApp({
-      modules:   [AppModule],
-      database:  'rollback',                          // real Postgres, isolated
-      logger:    'null',
-      overrides: [
-        { provide: MAILER_TOKEN,         useClass: FakeMailer },
-        { provide: PAYMENT_PROVIDER,     useClass: FakeProvider },
+  beforeEach(() => {
+    mod = createTestModule({
+      modules: [AppModule],
+      providers: [
+        [MAILER_TOKEN, { useClass: FakeMailer }],
+        [PAYMENT_PROVIDER, { useClass: FakeProvider }],
       ],
     });
   });
 
   afterEach(async () => {
-    await app.dispose();
+    await mod.cleanup();
   });
 
   it('happy path', async () => {
-    const users  = await app.resolve(UsersService);
-    const mailer = await app.resolve(MAILER_TOKEN) as FakeMailer;
+    const container = mod.getContainer();
+    const users = container.resolve(UsersService);
+    const mailer = container.resolve(MAILER_TOKEN) as FakeMailer;
 
     await users.invite({ email: 'a@b.c' });
 
@@ -50,13 +49,21 @@ describe('user invite flow', () => {
 
 Pieces:
 
-- **`createTestApp`** boots a real `Application` with test-friendly
-  defaults (no graceful shutdown, no signal handlers).
-- **`database: 'rollback'`** wraps every test in `BEGIN ... ROLLBACK`
-  — fast + isolated.
-- **`overrides`** swaps external-boundary services for fakes.
-- **`app.resolve(...)`** pulls anything from the DI container,
-  including the fakes (to inspect what was called).
+- **`createTestModule`** assembles a container from your modules,
+  provider overrides and mocks. Call `createApplication()` on it when a
+  test needs the full `Application` lifecycle rather than just the
+  container.
+- **`providers`** takes `[token, definition]` pairs and replaces
+  external-boundary services with fakes. `mocks` takes
+  `{ token, mock, spy? }` entries when you want a mock object rather
+  than a class.
+- **`getContainer().resolve(...)`** pulls anything out, including the
+  fakes, so a test can inspect what was called.
+- **`cleanup()`** disposes the container and anything it started.
+
+Transaction isolation is not part of this API — arrange it in your own
+`beforeEach`/`afterEach` around the connection your module resolves, or
+give each worker its own database (see below).
 
 ## Fake patterns
 
@@ -181,68 +188,79 @@ Use when:
   exercised.
 - Speed > realism.
 
-### Real Postgres with rollback
+### Real Postgres
+
+Use a real Postgres when RLS, triggers, advisory locks or jsonb
+queries matter, or when the schema is Postgres-specific. The shared
+test stack is reachable through the env helpers:
 
 ```typescript
-app = await createTestApp({
-  database: 'rollback',
-  modules:  [AppModule],
+import { TEST_POSTGRES_URL } from '@omnitron-dev/testing/env';
+
+mod = createTestModule({
+  modules: [AppModule],
+  providers: [[DATABASE_URL_TOKEN, { useValue: TEST_POSTGRES_URL }]],
 });
 ```
 
-Use when:
-- RLS / triggers / advisory locks / jsonb queries matter.
-- The schema is Postgres-specific.
-
 ### Docker-managed test DB
 
+When a suite needs its own instance rather than the shared stack:
+
 ```typescript
-import { startPostgres, stopAll } from '@omnitron-dev/testing/docker';
+import { DatabaseTestManager, type DockerContainer } from '@omnitron-dev/testing/docker';
+
+let postgres: DockerContainer;
 
 beforeAll(async () => {
-  await startPostgres({ port: 5433, database: 'integration_test' });
-});
+  postgres = await DatabaseTestManager.createPostgresContainer({ port: 'auto' });
+}, 60_000);
+
 afterAll(async () => {
-  await stopAll();
+  await postgres.cleanup();
 });
 
-beforeEach(async () => {
-  app = await createTestApp({
-    database: { url: 'postgres://localhost:5433/integration_test', rollback: true },
-    modules:  [AppModule],
+beforeEach(() => {
+  const port = postgres.ports.get(5432);
+  mod = createTestModule({
+    modules: [AppModule],
+    providers: [[DATABASE_URL_TOKEN, { useValue: `postgres://test:test@localhost:${port}/test` }]],
   });
 });
 ```
 
-For tests that need a fresh Postgres instance — `startPostgres`
-boots a Docker container if one isn't running.
+`port: 'auto'` asks the OS for a free port and is what allows several
+suites to run in parallel — a fixed port makes them collide, and the
+failure names a port the test never chose.
 
 ## Netron integration tests
 
 ```typescript
-import { createTestApp } from '@omnitron-dev/testing/titan';
-import { NetronClient }  from '@omnitron-dev/netron-browser';
+import { createTestModule } from '@omnitron-dev/testing/titan';
+import { NetronClient } from '@omnitron-dev/netron-browser';
+import type { Application } from '@omnitron-dev/titan';
 
 describe('end-to-end users service', () => {
-  let app:    TestApp;
+  let mod: TestModule;
+  let app: Application;
   let client: NetronClient;
 
   beforeEach(async () => {
-    app = await createTestApp({
-      modules:  [AppModule],
-      netron:   { http: { port: 0 } },           // 0 = pick free port
-      database: 'rollback',
-    });
+    mod = createTestModule({ modules: [AppModule] });
+    app = await mod.createApplication();
     await app.start();
 
-    const port = app.netron.getPort('http');
+    // Register the transport server with `port: 0` and read back the port
+    // the OS assigned — the server reports the port it bound, not the one
+    // it was asked for.
+    const port = app.netron.transportServers.get('http')!.port!;
     client = new NetronClient({ url: `http://localhost:${port}` });
     await client.connect();
   });
 
   afterEach(async () => {
     await client.disconnect();
-    await app.dispose();
+    await mod.cleanup();
   });
 
   it('returns a user over the wire', async () => {
@@ -260,13 +278,14 @@ huge class of bugs that mocked-RPC tests miss.
 ## Event-driven assertions
 
 ```typescript
-import { waitForEvent } from '@omnitron-dev/testing';
+import { waitForEvents } from '@omnitron-dev/testing';
 
 it('fires user.created after invite', async () => {
-  const bus    = await app.resolve(EVENT_BUS_TOKEN);
-  const users  = await app.resolve(UsersService);
+  const container = mod.getContainer();
+  const bus = container.resolve(EVENT_BUS_TOKEN);
+  const users = container.resolve(UsersService);
 
-  const eventPromise = waitForEvent(bus, 'user.created', { timeout: 2_000 });
+  const eventPromise = waitForEvents(bus, ['user.created'], 2_000);
   await users.invite({ email: 'a@b.c' });
 
   const [user] = await eventPromise;
@@ -274,8 +293,10 @@ it('fires user.created after invite', async () => {
 });
 ```
 
-`waitForEvent` returns a promise that resolves with the event
-args. Set up the wait **before** triggering the action — race-free.
+`waitForEvents` resolves with one payload per event name, in the order
+requested. Set up the wait **before** triggering the action — race-free.
+`createEventSpy(bus, 'user.created')` is the alternative when you want
+to inspect everything that was emitted rather than wait for the first.
 
 ## Custom routes
 
