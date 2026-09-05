@@ -59,9 +59,12 @@ or a 50-pod fleet.
   all in-flight tokens expire.
 - [ ] **Token cache TTL ≤ token lifetime.** Cached verifications
   bypass JWKS fetch; never cache longer than the token's `exp`.
-- [ ] **Clock skew bounded.** Use the smallest workable
-  `clockTolerance` (default 5 s is usually right). Wider windows
-  enable replay-after-expiry.
+- [ ] **Clock skew bounded.** `clockTolerance` (seconds, or a jose
+  string like `'5s'`) defaults to **0** — no skew is allowed at all, so
+  a token from a server whose clock runs slightly ahead fails its
+  `nbf`/`iat` check and one expiring this instant fails `exp`. Set it
+  only as wide as the fleet's clock discipline requires: the window is
+  also how long an expired token stays usable.
 - [ ] **`audience` and `issuer` enforced.** Both options must be
   populated; otherwise any well-signed token from any service
   authenticates.

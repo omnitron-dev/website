@@ -472,7 +472,7 @@ Override via CLI flags on `omnitron up` or environment variables.
 interface IDaemonConfig {
   socketPath:  string;     // ~/.omnitron/daemon.sock
   port:        number;     // TCP, default 9700
-  host:        string;     // default 0.0.0.0
+  host:        string;     // bind address; default 127.0.0.1
   httpPort:    number;     // default 9800
   pidFile:     string;     // ~/.omnitron/daemon.pid
   stateFile:   string;     // ~/.omnitron/state.json
