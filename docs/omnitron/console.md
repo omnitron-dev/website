@@ -302,14 +302,19 @@ already pushes.
 
 ```bash
 cd apps/omnitron/webapp
-pnpm dev                    # Vite dev server with HMR (port 9802)
+pnpm dev                    # Vite dev server with HMR (port 9810)
 ```
 
 The RPC client uses a relative `baseUrl`, so the Vite dev server
 proxies the daemon for it (see `vite.config.ts`): `/netron/*` →
 `http://localhost:9801` (daemon HTTP) and `/ws` → the daemon's
-Netron WebSocket transport. The daemon must already be running
-(`omnitron up`). Sign in with the same account you use against the
+Netron WebSocket transport on `:9802`. The daemon must already be
+running (`omnitron up`).
+
+The dev server deliberately sits at `9810`, outside `9800`–`9803`.
+It used to ask for `9802` — the daemon's WebSocket port — so it
+could not start while the daemon it exists to talk to was running,
+and its own `/ws` proxy pointed back at itself. Sign in with the same account you use against the
 production build — the `001_initial_schema` migration seeds a single
 `admin` user with password `admin` on first daemon start, and the
 console's Change-password screen is the only way to change it.
