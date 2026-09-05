@@ -112,20 +112,17 @@ import React           from 'react';
 import ReactDOM        from 'react-dom/client';
 import { BrowserRouter } from 'react-router-dom';
 import { PrismProvider } from '@omnitron-dev/prism/core';
-import { createTheme }   from '@omnitron-dev/prism/theme';
 import { NetronProvider } from '@omnitron-dev/netron-react';
 import { AuthProvider }   from '@omnitron-dev/netron-react/auth';
 
 import { client } from './client.js';
 import App        from './App.js';
 
-const theme = createTheme({ mode: 'dark', palette: { primary: { main: '#7c4dff' } } });
-
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
     <NetronProvider client={client}>
       <AuthProvider onLogin={(credentials) => client.invoke('auth', 'signIn', [credentials])}>
-        <PrismProvider theme={theme}>
+        <PrismProvider defaultSettings={{ mode: 'dark', primaryColor: '#7c4dff' }}>
           <BrowserRouter>
             <App />
           </BrowserRouter>

@@ -285,7 +285,7 @@ The activation option is `enabled` (not `active`):
 const { ref } = useFocusTrap<HTMLDivElement>({ enabled: open });
 
 <div ref={ref}>
-  <Input autoFocus />
+  <TextField autoFocus />
   <Button>Save</Button>
   <Button>Cancel</Button>
 </div>
@@ -343,7 +343,7 @@ const { query, data, isLoading, isSuccess } = useLazyQuery(
 );
 
 <>
-  <Input value={q} onChange={(e) => setQ(e.target.value)} />
+  <SearchInput value={q} onChange={setQ} debounce={300} />
   <Button onClick={() => query(q)}>Search</Button>
   {isSuccess && <Results items={data!.items} />}
 </>

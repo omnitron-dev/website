@@ -91,15 +91,12 @@ every caller in the same `tsc` pass.
 import { NetronReactClient, NetronProvider }   from '@omnitron-dev/netron-react';
 import { AuthProvider }                        from '@omnitron-dev/netron-react/auth';
 import { PrismProvider, ProviderStack }        from '@omnitron-dev/prism/core';
-import { createPrismTheme }                    from '@omnitron-dev/prism/theme';
 import { RouterProvider }                      from 'react-router-dom';
 
 const client = new NetronReactClient({
   url:       import.meta.env.VITE_API_URL,
   transport: 'auto',
 });
-
-const theme = createPrismTheme({ mode: 'dark', primaryColor: '#7c4dff' });
 
 // `AuthProvider` takes a `config` (refreshEndpoint?, logoutEndpoint?,
 // storage?: 'local' | 'session' | 'memory', autoRefresh?, refreshThreshold?)
@@ -114,7 +111,7 @@ function App() {
           config:  { storage: 'local', autoRefresh: true, refreshEndpoint: '/auth/refresh' },
           onLogin: (credentials) => signIn(client, credentials),
         }],
-        [PrismProvider,  { theme }],
+        [PrismProvider,  { defaultSettings: { mode: 'dark', primaryColor: '#7c4dff' } }],
         [RouterProvider, { router }],
       ]}
     >

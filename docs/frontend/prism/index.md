@@ -95,22 +95,38 @@ your bundler needs.
 
 ```tsx
 import { PrismProvider } from '@omnitron-dev/prism/core';
-import { createPrismTheme } from '@omnitron-dev/prism/theme';
-
-const theme = createPrismTheme({ mode: 'dark', primaryColor: '#7c4dff' });
 
 function App() {
   return (
-    <PrismProvider theme={theme}>
+    <PrismProvider
+      defaultSettings={{ mode: 'dark', preset: 'midnight', primaryColor: '#7c4dff' }}
+    >
       <Outlet />
     </PrismProvider>
   );
 }
 ```
 
-`<PrismProvider>` sets up MUI's `ThemeProvider`, `CssBaseline`,
-the snackbar host, the icon registry, react-query (if a query
-client is passed), and the i18n context.
+`<PrismProvider>` builds the theme itself — you do not call
+`createPrismTheme()` and hand it over, and there is no `theme`
+prop to hand it to. It reads the settings store (persisted, so a
+user's own choices survive a reload), falls back to
+`defaultSettings` for anything unset, resolves `mode: 'system'`
+against the OS preference, and calls `createPrismTheme()` with
+the result. Both production consumers — the DAOS portal and the
+Omnitron console — pass exactly `{ mode, preset, direction }`.
+
+`defaultSettings` accepts `mode`, `preset`, `direction`,
+`primaryColor`, `contrast`, `fontSize`, `fontFamily` and
+`navLayout`. For MUI-level escapes use `themeOverrides`, which is
+merged into the generated theme; `config` carries non-theme
+configuration. `createPrismTheme()` is exported for building a
+theme outside the provider (a standalone MUI tree, a snapshot
+test), not for feeding one back in.
+
+Beyond the theme, the provider sets up MUI's `ThemeProvider`,
+`CssBaseline`, the snackbar host, the icon registry, and the
+localization context (`dateAdapterLocale`, `dateLocaleText`).
 
 For more sophisticated apps, use `<ProviderStack>` to layer
 multiple providers cleanly:
@@ -120,7 +136,7 @@ multiple providers cleanly:
   providers={[
     [QueryClientProvider, { client: queryClient }],
     [AuthProvider,         { client: authClient }],
-    [PrismProvider,        { theme }],
+    [PrismProvider,        { defaultSettings: { mode: 'dark', preset: 'midnight' } }],
     [RouterProvider,       { router }],
   ]}
 >
