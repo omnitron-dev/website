@@ -100,45 +100,69 @@ making changes.
 
 | Tool | Effect |
 | ---- | ------ |
-| `infra.up` | Provision and start all infra services |
-| `infra.down` | Stop containers (optional `--volumes` for data wipe) |
-| `infra.status` | Container inventory |
-| `infra.logs` | Per-service container logs |
-| `infra.psql` | Run SQL against a managed Postgres container |
-| `infra.redis` | Run a command against a managed Redis container |
-| `infra.migrate` | Run database migrations |
+| `infra.status` | Full infrastructure state: containers, images, ports, health |
+| `infra.containers` | Managed container inventory |
+| `infra.connection` | Resolved host / port / credentials for a logical service |
+| `infra.start` / `infra.stop` | Start or stop one managed container |
+| `infra.logs` | Tail one container's logs |
+| `infra.log_stats` | Log ingestion counters (stored, dropped, buffered) |
 
-> `infra.psql` / `infra.redis` are exactly the wide-blast-radius
-> "execute SQL / run command" tools the [anti-patterns](#anti-patterns)
-> section warns about — they exist for operator convenience; scope
-> the agent's token accordingly.
+> There is no `infra.psql` or `infra.redis`. Both were listed here
+> and both called RPCs that do not exist; there is no service that
+> executes an arbitrary SQL statement or Redis command, and adding
+> one reachable by whoever the agent talks to is a decision for an
+> operator rather than a gap to fill. Use `omnitron infra psql` on
+> the host, where the blast radius is the person typing it.
+>
+> Provisioning (`infra.up` / `infra.down`) is likewise CLI-only:
+> it starts and stops containers for a whole stack, which is not
+> something to hand an agent by default.
 
 ## Management tools — monitoring
 
 | Tool | Effect |
 | ---- | ------ |
-| `health.check` | Composite health report |
+| `health.check` | One app, or the whole platform when `app` is omitted |
 | `metrics.get` | Aggregate metric snapshot |
 | `metrics.app` | Per-app metrics |
-| `logs.query` | Cross-app log query with filters |
+| `logs.query` | Stored logs. Full-text filter is `search`; page with `limit` / `offset` |
+| `logs.tail` | The most recent entries, oldest-first — poll for near-real-time |
+| `logs.stats` | Per-app log volume and rotation counts |
 
 ## Management tools — control plane
 
 | Tool | Effect |
 | ---- | ------ |
-| `stack.list` / `stack.create` / `stack.status` / `stack.start` / `stack.stop` | Stack lifecycle |
-| `project.list` / `project.scan` | Project registry |
+| `stack.list` / `stack.status` / `stack.start` / `stack.stop` | Stack lifecycle |
+| `project.list` / `project.scan` / `project.apps` | Project registry |
 | `secret.list` / `secret.get` / `secret.set` | Secret management |
-| `backup.create` / `backup.list` / `backup.restore` | Database backup |
-| `deploy.app` / `deploy.build` / `deploy.rollback` | Deployment |
-| `cluster.status` / `fleet.status` / `fleet.health` | Cluster + fleet |
+| `backup.create` / `backup.list` / `backup.restore` / `backup.schedules` | Database backup |
+| `deploy.app` / `deploy.rollback` / `deploy.history` | Deployment |
+| `fleet.status` / `fleet.summary` | Fleet nodes and counts |
 | `k8s.pods` / `k8s.scale` | Kubernetes pods + scaling |
-| `webapp.status` / `webapp.build` | Console UI |
 | `pipeline.list` / `pipeline.run` / `pipeline.status` | CI/CD |
 
-That's ~44 management tools (apps + infra + monitoring +
-control-plane) alongside 11 KB tools — enough for an agent to
-drive the platform end-to-end.
+Not offered, and deliberately: `stack.create` (stack creation is
+`omnitron stack create`, and getting it wrong strands
+infrastructure), `deploy.build`, `cluster.status`,
+`fleet.health`, and the two `webapp.*` tools — the console is
+managed by a CLI command that runs Docker locally, with no
+service behind it.
+
+That is 54 tools in total — 43 management plus 11 KB. Re-check
+against the source rather than trusting the number:
+
+```bash
+# 54 total
+grep -roh "name: '[a-z_.]*'" apps/omnitron/src/mcp/tool-groups/ | sort -u | wc -l
+# 11 of them KB
+grep -roh "name: '[a-z_.]*'" apps/omnitron/src/mcp/tool-groups/kb.tools.ts | sort -u | wc -l
+```
+
+Two thirds of the tools listed on this page used to call methods
+`DaemonClient` does not have — the handler parameter was typed
+`any`, so it compiled, and each failed at call time with a
+`TypeError`. The list above is what the daemon answers today.
 
 ## KB index lifecycle
 
