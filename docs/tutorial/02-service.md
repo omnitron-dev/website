@@ -13,10 +13,15 @@ By the end: a `UsersService` with `findById` / `create` /
 
 ```bash
 cd apps/api
-pnpm add @omnitron-dev/titan-database @omnitron-dev/titan-redis
-pnpm add @omnitron-dev/titan/module/config @omnitron-dev/titan/module/logger
-pnpm add zod
+pnpm add @omnitron-dev/titan-database @omnitron-dev/titan-redis zod
 ```
+
+`ConfigModule` and `LoggerModule` need no install — they ship
+inside `@omnitron-dev/titan`, which you already have, and are
+imported from its `./module/config` and `./module/logger`
+subpaths. A subpath is not a package: `pnpm add
+@omnitron-dev/titan/module/config` asks the registry for a
+package by that name and fails.
 
 Spin up Postgres locally:
 
