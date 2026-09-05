@@ -78,8 +78,11 @@ class TenantContextMiddleware {
     if (token) {
       // IJWTPayload uses snake_case `tenant_id`; `tier` is a custom claim.
       const claims = await this.jwt.verify(token);
-      this.context.set(TENANT_ID, claims.tenant_id as string);
-      this.context.set(USER_TIER, claims.tier as string);
+      // `set` lives on the ContextProvider, not on the manager: the manager
+      // selects and scopes providers, the provider holds the values.
+      const ctx = this.context.getCurrentContext();
+      ctx.set(TENANT_ID, claims.tenant_id as string);
+      ctx.set(USER_TIER, claims.tier as string);
     }
     return next();
   }

@@ -115,7 +115,7 @@ const TraceContextProcessor: ILogProcessor = {
       enableMemoryIndicator:    true,
       enableEventLoopIndicator: true,
       memoryThresholds:         { heapDegradedThreshold: 0.8, heapUnhealthyThreshold: 0.95 },
-      eventLoopThresholds:      { degradedThreshold: 50, unhealthyThreshold: 200 },
+      eventLoopThresholds:      { lagDegradedThreshold: 50, lagUnhealthyThreshold: 200 },
       timeout:                  3_000,
       enableCaching:            true,
       cacheTtl:                 1_000,

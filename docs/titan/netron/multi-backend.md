@@ -55,7 +55,10 @@ const client = new MultiBackendClient({
   // strategy is set per-route (see below), not at the top level.
 });
 
-const users = await client.queryInterface<UsersService>('users@1.0.0');
+// `service(name)`, not `queryInterface` — that is the server-side Netron API.
+// It returns a proxy whose every method call goes through `invoke()` and the
+// router; there is no round trip to fetch a definition first.
+const users = client.service<UsersService>('users@1.0.0');
 const user  = await users.findById('u_42');     // routed to one of the three
 ```
 

@@ -92,8 +92,18 @@ const DEDUP_TTL_S    = 7 * 24 * 60 * 60;     // 7 days
 
 @Service({ name: 'webhooks' })
 class WebhooksService {
-  // ILoggerModule exposes create(); the child ILogger is what has .info/.warn/.error.
-  private readonly logger = this.loggerModule.create('webhooks');
+  // ILoggerModule exposes create(); the child ILogger is what has
+  // .info/.warn/.error.
+  //
+  // A GETTER, not a field initializer. `private readonly logger =
+  // this.loggerModule.create(…)` looks equivalent and crashes: field
+  // initializers run BEFORE constructor parameter properties are assigned, so
+  // `this.loggerModule` is still undefined and construction throws
+  // "Cannot read properties of undefined". A getter defers the read to first
+  // use, by which time the constructor has run.
+  private get logger() {
+    return this.loggerModule.create('webhooks');
+  }
 
   constructor(
     @InjectRedis() private readonly redis: IRedisClient,

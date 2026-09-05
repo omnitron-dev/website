@@ -181,7 +181,10 @@ const REALTIME_SIGNALER_TOKEN = createToken<INotificationRealtimeSignaler>('Real
       persister:        NOTIFICATION_PERSISTER_TOKEN,
       realtimeSignaler: REALTIME_SIGNALER_TOKEN,
       workerOptions: {
-        concurrency: 8,
+        // There is no `concurrency`. The worker runs one XREADGROUP loop and
+        // takes a BATCH per read; `readCount` is the knob that sizes it.
+        readCount: 100,
+        blockTimeoutMs: 5_000,
       },
     }),
   ],

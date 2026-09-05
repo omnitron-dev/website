@@ -254,8 +254,12 @@ class MediaService {
 
   @Public()
   async resize(input: { jobId: string; data: Buffer; width: number }) {
-    const pool = await this.pm.pool(ImageWorker, { min: 2, max: 8 });
-    return pool.execute('resize', input);            // .execute(method, ...args)
+    // `size`, not `min`/`max` — the pool is a fixed size (or `'auto'`,
+    // which sizes it to the CPU count). Use `pool.scale(n)` to change it.
+    const pool = await this.pm.pool(ImageWorker, { size: 8 });
+    // The pool IS a service proxy: call the worker's own methods on it.
+    // There is no `.execute(method, …args)`.
+    return pool.resize(input);
   }
 }
 ```
