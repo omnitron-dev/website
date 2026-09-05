@@ -82,23 +82,26 @@ import { LoggerModule } from '@omnitron-dev/titan/module/logger';
 // DI container primitives (advanced):
 import { Container, createToken } from '@omnitron-dev/titan/nexus';
 
-// Validation:
-import { z, Validate, Contract } from '@omnitron-dev/titan/validation';
+// Validation (`@Validate` is a decorator — see below):
+import { z, Contract } from '@omnitron-dev/titan/validation';
 
 // Typed errors:
 import { Errors, ErrorCode, TitanError } from '@omnitron-dev/titan/errors';
 
-// Decorators:
-import { Memoize, Retry, Timeout } from '@omnitron-dev/titan/decorators';
+// Decorators. The root re-exports only the nine DI ones; every
+// other decorator — @Public, @Validate, @Auth, @Cache,
+// @RateLimit, @Memoize, @Retry — is available ONLY from here:
+import { Public, Validate, Memoize, Retry, Timeout }
+  from '@omnitron-dev/titan/decorators';
 ```
 
 Full subpath list (from `titan/package.json` exports):
 
 | Subpath | Contains |
 | ------- | -------- |
-| `@omnitron-dev/titan` | Application, Module, decorators, all primitives — convenient root import |
-| `@omnitron-dev/titan/application` | `Application.create` + lifecycle |
-| `@omnitron-dev/titan/lifecycle` | `OnInit` / `OnStart` / `OnStop` / `OnDestroy` interfaces |
+| `@omnitron-dev/titan` | `Application`, `startApp` / `createApp` / `createModule` / `defineModule` / `createToken`, and exactly nine decorators re-exported from `/decorators`: `Service`, `Injectable`, `Inject`, `Optional`, `Singleton`, `Transient`, `Module`, `PostConstruct`, `PreDestroy`. **Not** a root import for everything — `@Public`, `@Validate`, `@Auth`, `@Cache`, `@RateLimit`, `@Memoize` and the rest are only in `/decorators` |
+| `@omnitron-dev/titan/application` | `Application.create`, and the `OnInit` / `OnStart` / `OnStop` / `OnDestroy` interfaces |
+| `@omnitron-dev/titan/lifecycle` | The lifecycle *machinery*: `LifecycleController`, `LifecycleTimeoutError`, `bucketOf`, `LifecyclePhase`. The interfaces you implement are in `/application` |
 | `@omnitron-dev/titan/decorators` | All core decorators (`@Service`, `@Public`, `@Validate`, `@Memoize`, etc.) |
 | `@omnitron-dev/titan/netron` | **Server Netron API** — peers, services, descriptors |
 | `@omnitron-dev/titan/netron/service-descriptor` | Service metadata types |
@@ -110,7 +113,7 @@ Full subpath list (from `titan/package.json` exports):
 | `@omnitron-dev/titan/netron/auth` | `AuthenticationManager`, JWT verify, RLS context mapping |
 | `@omnitron-dev/titan/netron/multi-backend` | Multi-backend server-side routing |
 | `@omnitron-dev/titan/nexus` | DI container primitives |
-| `@omnitron-dev/titan/validation` | zod re-export + `@Validate`, `@Contract` |
+| `@omnitron-dev/titan/validation` | zod re-export (`z`), `Contract` / `contract` / `ContractBuilder`, `ValidationEngine`, `ValidationMiddleware`. `@Validate` is in `/decorators` |
 | `@omnitron-dev/titan/module/config` | `ConfigModule` (built-in) |
 | `@omnitron-dev/titan/module/logger` | `LoggerModule` (built-in) |
 | `@omnitron-dev/titan/module/rls` | RLS decorators |

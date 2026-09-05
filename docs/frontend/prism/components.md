@@ -162,7 +162,7 @@ Animated placeholder while data loads.
 import { Skeleton, CardSkeleton, TableSkeleton }
   from '@omnitron-dev/prism/components/skeleton';
 
-{isLoading ? <Skeleton variant="rectangular" height={200} /> : <Chart data={data} />}
+{isLoading ? <Skeleton variant="rectangular" height={200} /> : <Chart type="line" series={series} />}
 ```
 
 `<Skeleton>` wraps MUI's Skeleton (`variant`: `text` /
@@ -226,12 +226,19 @@ import { LinearProgress, CircularProgress, ProgressBar, CountdownRing }
 <ProgressBar value={75} />                {/* labelled linear bar */}
 <LinearProgress />                         {/* indeterminate */}
 <CircularProgress value={50} />            {/* determinate ring */}
-<CountdownRing duration={30} />            {/* timed ring */}
+<CountdownRing deadline={expiresAt} totalMs={30_000} />  {/* timed ring */}
 ```
 
 Linear and circular variants; determinate and indeterminate
 modes. (There is no single `<Progress>` export — pick the
 specific component.)
+
+`CountdownRing` counts down to a **deadline** (`Date` or ISO
+string), not for a duration: it survives a remount and a
+backgrounded tab, both of which a duration timer gets wrong.
+`totalMs` is only the denominator for the filled fraction — omit
+it and the ring starts full. It switches to `warningColor` below
+`warningThresholdMs` and to `expiredColor` past the deadline.
 
 ## Data display
 
@@ -254,8 +261,17 @@ import { Card, StatCard } from '@omnitron-dev/prism/components/card';
 </Card>
 
 {/* Pre-composed stat tile: */}
-<StatCard title="Revenue" total={48200} />
+<StatCard label="Revenue" value="$48,200" change={12.5} />
 ```
+
+`StatCard` takes `label` and `value` (both required), plus
+`change` (a percentage, rendered with direction), `icon`,
+`color`, `subtitle` and `loading`. It extends
+`Omit<CardProps, 'children'>`, so `title` is a valid prop —
+inherited from `Card` — but it is the *card header*, not the
+stat. A tile given `title` and `total` renders a header with an
+empty stat below it, which is why the wrong pair does not look
+broken at a glance.
 
 | Prop | Type | Default | Notes |
 | ---- | ---- | ------- | ----- |

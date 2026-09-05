@@ -84,9 +84,6 @@ host. Wrap once at the test boundary:
 
 ```tsx
 import { PrismProvider } from '@omnitron-dev/prism/core';
-import { createTheme }   from '@omnitron-dev/prism/theme';
-
-const theme = createTheme({ mode: 'light' });
 
 import { TestNetronProvider, type TestClientConfig }
   from '@omnitron-dev/netron-react/test';
@@ -98,7 +95,7 @@ function TestProviders({ children, testConfig, client }: {
   client?: NetronReactClient;
 }) {
   return (
-    <PrismProvider theme={theme}>
+    <PrismProvider defaultSettings={{ mode: 'light' }}>
       <TestNetronProvider client={client} testConfig={testConfig}>
         {children}
       </TestNetronProvider>

@@ -801,15 +801,18 @@ import { NetronDevtools } from '@omnitron-dev/netron-react/devtools';
 provider + mock helpers (no real WebSocket / fetch):
 
 ```tsx
-import { TestNetronProvider, createMockService, createWrapper }
-  from '@omnitron-dev/netron-react/test';
-
-const users = createMockService<UserService>('users', {
-  getUser: async (id) => ({ id, email: 'a@b.c' }),
-});
+import { TestNetronProvider } from '@omnitron-dev/netron-react/test';
 
 render(
-  <TestNetronProvider services={[users]}>
+  <TestNetronProvider
+    testConfig={{
+      mocks: [
+        { service: 'users', method: 'getUser', response: { id: '1', email: 'a@b.c' } },
+        { service: 'users', method: 'deleteUser', error: new Error('forbidden') },
+      ],
+      defaultDelay: 0,
+    }}
+  >
     <UserCard userId="1" />
   </TestNetronProvider>
 );
@@ -817,11 +820,28 @@ render(
 await screen.findByText('a@b.c');
 ```
 
-Also exported: `createTestClient`, `createWrapper` (a
-`renderHook` wrapper), the query helpers `waitForQuery` /
-`createQueryKey`, the assertion helpers `expectLoading` /
-`expectSuccess` / `expectError`, and timer utilities
-`advanceTimersAndFlush` / `nextTick`.
+`TestNetronProvider` takes `testConfig` (from which it builds a
+client) or a `client` you built yourself with
+`createTestClient` — there is no `services` prop. Mocks are
+matched on the `service.method` pair and answer with a **static**
+`response` or a thrown `error`; `delay` is per-mock,
+`defaultDelay` the fallback. There is no per-call function form,
+so a mock whose answer must depend on the arguments belongs in a
+hand-built client rather than here.
+
+`createMockService<T>(implementations)` is a separate tool and
+takes **one** argument — the object of method implementations,
+which may be dynamic. It returns a plain stub object to inject
+where a service instance is expected; it does not register
+anything with the provider.
+
+For hooks, `createWrapper(client?, testConfig?)` returns a
+`renderHook` wrapper around the same provider.
+
+Also exported: `createTestClient`, the query helpers
+`waitForQuery` / `createQueryKey`, the assertion helpers
+`expectLoading` / `expectSuccess` / `expectError`, and timer
+utilities `advanceTimersAndFlush` / `nextTick`.
 
 ## Subpaths
 

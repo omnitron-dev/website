@@ -223,10 +223,21 @@ one probe runs; success closes the breaker. There is no
 
 ### Inline form errors (mutations)
 
+`FormAlert` takes the message as **children** — there is no
+`error` prop. The distinction matters more than it looks: the
+component renders with empty children rather than unmounting (so
+a conditional slot causes no layout shift), and it announces
+itself with `role="alert"`, `aria-live="assertive"` and
+`aria-atomic="true"`. Passing the error object to a prop that
+does not exist therefore produces an alert that a screen reader
+announces as empty — silence where the failure should be.
+
 ```tsx
 <form>
   {form.formState.errors.root && (
-    <FormAlert error={form.formState.errors.root} />
+    <FormAlert title="Couldn't sign in">
+      {form.formState.errors.root.message}
+    </FormAlert>
   )}
   <Field name="email" />
   <Field name="password" />
