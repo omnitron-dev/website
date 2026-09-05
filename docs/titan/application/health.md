@@ -71,6 +71,10 @@ import type { IHealthIndicator } from '@omnitron-dev/titan-health';
 
 @Injectable()
 export class StripeHealth implements IHealthIndicator {
+  // Required. `registerIndicator` throws BadRequest without it —
+  // it is also the key the indicator is reported under.
+  readonly name = 'stripe';
+
   constructor(private readonly stripe: Stripe) {}
 
   async check() {
@@ -87,8 +91,23 @@ export class StripeHealth implements IHealthIndicator {
 }
 ```
 
-Then register through the module configuration that `titan-health`
-exposes.
+Then register it. There are two paths, and they are not equivalent:
+
+```typescript
+// 1. Module options — the module does `new IndicatorClass()` itself.
+HealthModule.forRoot({ indicators: [ClockSkewHealth] });
+
+// 2. Through DI, for an indicator that HAS dependencies.
+@Inject(HEALTH_SERVICE_TOKEN) private readonly health: IHealthService;
+// …then, once your own dependencies are resolved:
+this.health.registerIndicator(this.stripeHealth);
+```
+
+The `indicators` array constructs with **no arguments**
+(`new IndicatorClass()`), so `StripeHealth` registered that way would
+get `stripe === undefined` and fail at its first check rather than at
+registration. Use it for indicators that need nothing; resolve the
+others from DI and hand over the instance.
 
 ## Liveness vs readiness
 
