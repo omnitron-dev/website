@@ -69,6 +69,20 @@ Pick the level that matches your need:
 
 ## Subpath exports
 
+There is no per-component subpath. `./components/*` and `./blocks/*`
+globs used to appear in the package's `exports`, which made every
+component directory resolvable to TypeScript while only three of them
+shipped JavaScript — so `@omnitron-dev/prism/components/alert`
+typechecked and then failed in the browser, and these pages recommended
+that form in 55 places. The globs are gone: such an import is now a
+compile error, which is where it belongs.
+
+`<Editor>` and `<EmojiPicker>` keep their own subpaths because they are
+deliberately code-split — the emoji dataset alone is ~80 kB gzipped and
+should not sit on the critical path. Everything else comes from the root
+or from `./components`; the bundler tree-shakes either.
+
+
 | Subpath | What it exports |
 | ------- | --------------- |
 | `@omnitron-dev/prism` | Everything; convenient but largest |
@@ -76,16 +90,15 @@ Pick the level that matches your need:
 | `@omnitron-dev/prism/core` | `<PrismProvider>`, `<ProviderStack>`, context primitives |
 | `@omnitron-dev/prism/layouts` | `<DashboardLayout>`, `<AuthCenteredLayout>` / `<AuthSplitLayout>` / `<AuthSimpleLayout>`, `<LayoutProvider>` |
 | `@omnitron-dev/prism/blocks` | `<AuthBlock>`, `<DashboardBlock>`, `<DataGridBlock>` |
-| `@omnitron-dev/prism/blocks/*` | Individual block subpaths |
 | `@omnitron-dev/prism/components` | All 50+ components |
-| `@omnitron-dev/prism/components/*` | Individual component subpaths |
+| `@omnitron-dev/prism/components/editor` | `<Editor>` alone, as its own chunk |
+| `@omnitron-dev/prism/components/emoji-picker` | `<EmojiPicker>` alone — the dataset is ~80 kB gz |
 | `@omnitron-dev/prism/forms` | Schema-aware form helpers |
 | `@omnitron-dev/prism/hooks` | 25+ React hooks |
 | `@omnitron-dev/prism/state` | Zustand-based store factory |
 | `@omnitron-dev/prism/accessibility` | A11y primitives + ARIA helpers |
 | `@omnitron-dev/prism/netron` | Pre-wired Netron auth/UI bindings |
 | `@omnitron-dev/prism/http` | HTTP fetcher helpers |
-| `@omnitron-dev/prism/utils` | Pure utility functions |
 | `@omnitron-dev/prism/cli` | CLI helpers (used by `prism` bin) |
 
 Tree-shaking works on every subpath — import the smallest scope
