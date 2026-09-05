@@ -26,23 +26,22 @@ pnpm add -D vitest @testing-library/react @testing-library/user-event jsdom
 
 ```typescript
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
-import { createTestApp } from '@omnitron-dev/testing/titan';
-import { AppModule }     from '../app.module.js';
-import { UserRepo }      from './user.repo.js';
+import { TestApplication } from '@omnitron-dev/testing/titan';
+import { AppModule }       from '../app.module.js';
+import { UserRepo }        from './user.repo.js';
 
 describe('UserRepo', () => {
-  let app: any;
+  let app: TestApplication;
   let repo: UserRepo;
 
   beforeEach(async () => {
-    app = await createTestApp({
-      modules:  [AppModule],
-      database: 'rollback',
-    });
-    repo = await app.resolve(UserRepo);
+    // `create` bootstraps the module graph with logging off and graceful
+    // shutdown disabled — test defaults you would otherwise set by hand.
+    app = await TestApplication.create(AppModule);
+    repo = app.get(UserRepo);
   });
 
-  afterEach(() => app.dispose());
+  afterEach(() => app.close());
 
   it('creates and finds', async () => {
     const u = await repo.create({ email: 'a@b.c', name: 'Alice' });
@@ -59,8 +58,11 @@ describe('UserRepo', () => {
 });
 ```
 
-`database: 'rollback'` wraps each test in `BEGIN ... ROLLBACK` —
-fast, isolated, no cleanup boilerplate.
+`TestApplication` has no transaction mode of its own: isolation
+is the repository's business. `@omnitron-dev/titan-database`
+gives you `withTransaction`, so wrap the body and let it roll
+back, or point the test at a schema you drop afterwards —
+`app.addCleanup(fn)` runs teardown in `close()`.
 
 ## Service test with mocks
 
@@ -98,30 +100,31 @@ Pure DI test — no real DB, no real Application.
 
 ```typescript
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
-import { createTestApp } from '@omnitron-dev/testing/titan';
-import { createClient }  from '@omnitron-dev/netron-browser';
-import { AppModule }     from '../src/app.module.js';
+import { TestApplication } from '@omnitron-dev/testing/titan';
+import { createClient }    from '@omnitron-dev/netron-browser';
+import { AppModule }       from '../src/app.module.js';
 
 describe('users service end-to-end', () => {
-  let app:    any;
-  let client: any;
+  let app:    TestApplication;
+  let client: ReturnType<typeof createClient>;
 
   beforeAll(async () => {
-    app = await createTestApp({
-      modules:  [AppModule],
-      netron:   { http: { port: 0 } },           // 0 → pick free port
-      database: 'rollback',
+    // Transport options belong to the application config, the same shape
+    // production uses — there is no test-only netron block.
+    app = await TestApplication.create(AppModule, {
+      netron: { transports: { http: { port: 0 } } },   // 0 → pick free port
     });
-    await app.start();
 
-    const port = app.netron.getPort('http');
+    const netron = app.getApplication().netron;
+    // `port` reports what the OS actually bound, so `port: 0` works.
+    const { port } = netron.transportServers.get('http') as { port: number };
     client = createClient({ url: `http://localhost:${port}` });
     await client.connect();
   });
 
   afterAll(async () => {
     await client.disconnect();
-    await app.dispose();
+    await app.close();
   });
 
   it('CRUD round-trip', async () => {
