@@ -32,6 +32,35 @@ if (!fs.existsSync(srcRoot)) {
 }
 
 /**
+ * Not every service the daemon exposes lives in apps/omnitron.
+ * `OmnitronMetrics` is declared in `packages/titan-metrics` and registered by
+ * its module, so a checker reading only the app's own tree misses it — and
+ * this one did, while reporting "ok — 21 services": the right count with the
+ * wrong set. It had gained `OmnitronCluster`, which is registered only when
+ * clustering is enabled, and lost `OmnitronMetrics`. Two errors of opposite
+ * sign summing to a clean total is exactly what a count cannot detect.
+ *
+ * Caught by reading `availableServices` out of a running daemon's log, which
+ * is the only ground truth here. Short of that, scan everywhere a
+ * *.rpc-service.ts can live.
+ */
+const scanRoots = [srcRoot, path.join(repo, 'packages')].filter((d) => fs.existsSync(d));
+
+/**
+ * A service file is `<something>.rpc-service.ts` — or just `rpc-service.ts`.
+ *
+ * `titan-metrics` uses the bare name, and matching on `.rpc-service.ts` alone
+ * skips it: the string is shorter than the suffix. Widening the SEARCH ROOTS
+ * to `packages/` therefore did not find `OmnitronMetrics`, though the comment
+ * added alongside that change said it had. Two fixes were needed and one was
+ * written down as done — the same defect the page itself documents, in the
+ * checker built to catch it.
+ */
+function isRpcServiceFile(name) {
+  return name === 'rpc-service.ts' || name.endsWith('.rpc-service.ts');
+}
+
+/**
  * `@Service({ name: X })` where X is a constant, not a literal —
  * `DAEMON_SERVICE_ID` is declared in config/defaults.ts. Reading only string
  * literals made the daemon's own service look unregistered, i.e. the checker
@@ -42,15 +71,16 @@ function constants() {
   const walk = (dir) => {
     for (const e of fs.readdirSync(dir, { withFileTypes: true })) {
       const p = path.join(dir, e.name);
-      if (e.isDirectory()) walk(p);
-      else if (e.name.endsWith('.ts')) {
+      if (e.isDirectory()) {
+        if (e.name !== 'node_modules' && e.name !== 'dist' && e.name !== 'test') walk(p);
+      } else if (e.name.endsWith('.ts')) {
         for (const m of fs.readFileSync(p, 'utf8').matchAll(/export const (\w+)(?::\s*string)?\s*=\s*['"]([^'"]+)['"]/g)) {
           out.set(m[1], m[2]);
         }
       }
     }
   };
-  walk(srcRoot);
+  for (const root of scanRoots) walk(root);
   return out;
 }
 
@@ -61,8 +91,9 @@ function realServices() {
   const walk = (dir) => {
     for (const e of fs.readdirSync(dir, { withFileTypes: true })) {
       const p = path.join(dir, e.name);
-      if (e.isDirectory()) walk(p);
-      else if (e.name.endsWith('.rpc-service.ts')) {
+      if (e.isDirectory()) {
+        if (e.name !== 'node_modules' && e.name !== 'dist' && e.name !== 'test') walk(p);
+      } else if (isRpcServiceFile(e.name)) {
         const src = fs.readFileSync(p, 'utf8');
         const decl = src.match(/@Service\(\s*\{\s*name:\s*(?:['"]([^'"]+)['"]|(\w+))/);
         const id = decl?.[1] ?? (decl?.[2] ? consts.get(decl[2]) : undefined);
@@ -73,7 +104,7 @@ function realServices() {
       }
     }
   };
-  walk(srcRoot);
+  for (const root of scanRoots) walk(root);
   return out;
 }
 
@@ -84,7 +115,13 @@ function documentedServices() {
     'utf8'
   );
   const rows = new Map();
-  for (const m of md.matchAll(/\|\s*`[^`]*\.rpc-service\.ts`\s*\|\s*`(Omnitron\w+)`\s*\|\s*(\d+)\s*\|/g)) {
+  // The id pattern has to admit more than `Omnitron<Word>`: `Health@1.0.0`
+  // carries Netron's versioned form, and while the pattern excluded it the
+  // checker skipped the row silently and went on reporting the service as
+  // MISSING — a page that documented it correctly could not have satisfied
+  // this script. A pattern that cannot match a real value fails closed and
+  // looks like a finding about the page.
+  for (const m of md.matchAll(/\|\s*`[^`]*rpc-service\.ts`\s*\|\s*`([\w@.-]+)`\s*\|\s*(\d+)\s*\|/g)) {
     rows.set(m[1], Number(m[2]));
   }
   return rows;
