@@ -28,14 +28,29 @@ export const AppConfigSchema = z.object({
   cache: z.object({
     tier:  z.enum(['memory', 'redis']).default('memory'),
     ttlMs: z.number().int().positive().default(60_000),
-  }).default({}),
+  }).prefault({}),
   features: z.object({
     enableBilling: z.boolean().default(false),
-  }).default({}),
+  }).prefault({}),
 });
 
 export type AppConfig = z.infer<typeof AppConfigSchema>;
 ```
+
+:::warning `.default({})` on a nested object drops the inner defaults
+
+In zod 4 `.default(v)` is an **output** default: when the key is
+absent, `v` is returned as-is, without being parsed. So
+`z.object({ tier: …default('memory') }).default({})` yields `{}` — the
+inner defaults never run, and `config.cache.tier` is `undefined` while
+the schema reads as though it cannot be. TypeScript rejects it (the
+default must satisfy the output type), which is worth not casting away.
+
+`.prefault({})` is the **input** default: the value is parsed, so the
+inner defaults apply and you get `{ tier: 'memory', ttlMs: 60000 }`.
+Writing the object out in full — `.default({ tier: 'memory', ttlMs:
+60_000 })` — works too, at the cost of stating every default twice.
+:::
 
 Wire it in. **`validateOnStartup` is required** — it has no default, so
 a schema on its own is parsed by nothing and an invalid config loads in

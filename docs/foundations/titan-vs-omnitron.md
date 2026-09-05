@@ -74,7 +74,9 @@ class UsersService {
 
 @Module({
   imports: [
-    TitanDatabaseModule.forRoot({ dialect: 'postgres', connection: env.DATABASE_URL }),
+    TitanDatabaseModule.forRoot({
+      connection: { dialect: 'postgres', connection: env.DATABASE_URL },
+    }),
     TitanAuthModule.forRoot({ jwtSecret: env.JWT_SECRET }),
   ],
   providers: [UsersService],
