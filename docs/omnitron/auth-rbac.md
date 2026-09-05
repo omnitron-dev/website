@@ -293,32 +293,24 @@ auth: {
 },
 ```
 
-Now every database query — from any `@Service` method reached
-**over HTTP** — runs inside an AsyncLocalStorage scope that
-exposes `user_id`, `is_system`, `tenant_id` to RLS policies.
-Repositories pick this up automatically via the kysera RLS plugin.
+Now every database query — from any `@Service` method, over any
+transport — runs inside an AsyncLocalStorage scope that exposes
+`user_id`, `is_system`, `tenant_id` to RLS policies. Repositories
+pick this up automatically via the kysera RLS plugin.
 
-:::caution HTTP only — the WebSocket transport ignores this option
-`invocationWrapper` is read by
-`netron/transport/http/server.ts` and by nothing under
-`transport/websocket/`. A call arriving over WebSocket (or TCP,
-or the Unix socket) is dispatched by `remote-peer.ts` straight to
-`stub.call(method, args)`: authorisation still runs —
-`enforceMethodAccess` precedes it — but no AsyncLocalStorage
-frame is established.
+:::note One wrapper, two places that apply it
+`transport/http/server.ts` applies it per request. Every socket
+transport — WebSocket, TCP, Unix — dispatches through
+`remote-peer.ts`, which applies it per invocation on the `CALL`
+branch and builds a metadata map of the same shape, so a wrapper
+written against HTTP works unchanged.
 
-So a service method invoked over WebSocket runs with **no RLS
-context**. kysera fails closed there: `SELECT` gets an impossible
-predicate and `UPDATE` / `DELETE` touch no rows, with a warning
-in the log. Nothing leaks — queries simply return nothing, which
-is the kind of failure that gets reported as "the realtime page
-is empty" rather than as an auth bug.
-
-Both call sites in Omnitron pass the option to the WebSocket
-transport anyway, so it begins working the day the transport
-honours it; `apps/omnitron/test/unit/websocket-wrapper-gap.test.ts`
-fails when that day comes. Until then, keep anything that depends
-on RLS on the HTTP transport.
+Until recently only the HTTP half existed, and a call arriving
+over WebSocket ran with **no RLS context**. That failed closed
+rather than open — kysera gives `SELECT` an impossible predicate
+and lets `UPDATE` / `DELETE` touch no rows — so it surfaced as a
+realtime page that was simply empty, which is why it lasted: the
+wrong answer looked like no data rather than an error.
 :::
 
 ## Role hierarchy patterns for end-user RBAC
