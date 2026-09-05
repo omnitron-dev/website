@@ -98,7 +98,8 @@ export const client = new NetronReactClient({
   url:       import.meta.env.VITE_API_URL ?? 'http://localhost:3001',
   transport: 'http',
   auth: {
-    storage: 'localStorage',
+    // 'local' | 'session' | 'memory' — not the Web Storage API's names.
+    storage: 'local',
   },
 });
 ```

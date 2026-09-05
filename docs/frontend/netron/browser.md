@@ -463,46 +463,46 @@ identity, one for media, one for analytics — wrap each in a
 `BackendClient` and pool them:
 
 ```typescript
-import { BackendPool, BackendClient } from '@omnitron-dev/netron-browser';
+import { createMultiBackendClient } from '@omnitron-dev/netron-browser';
 
-const pool = new BackendPool({
+// Backends sit behind one origin, separated by path — a gateway with
+// /auth, /media, /analytics under it. One auth client and one middleware
+// chain then cover all of them.
+const client = createMultiBackendClient({
+  baseUrl: 'https://api.example.com',
   backends: {
-    auth:      new BackendClient({ url: 'https://auth.example.com' }),
-    media:     new BackendClient({ url: 'https://media.example.com' }),
-    analytics: new BackendClient({ url: 'https://analytics.example.com' }),
+    auth:      { path: '/auth' },
+    media:     { path: '/media' },
+    analytics: { path: '/analytics' },
   },
-  routes: {
-    'users.*':       'auth',
-    'objects.*':     'media',
-    'reports.*':     'analytics',
-  },
-});
-
-await pool.connectAll();
-
-const users = pool.service<UserService>('users');
-await users.findById('u_42');        // automatically routed to 'auth' backend
-```
-
-Pattern matching is glob-style. Calls not matching any rule
-throw `BackendNotConfiguredError`.
-
-### Health-aware routing
-
-```typescript
-const pool = new BackendPool({
-  backends:    /* ... */,
-  routes:      /* ... */,
-  healthCheck: {
-    interval:  30_000,
-    timeout:   2_000,
-    onUnhealthy: 'fail',       // 'fail' | 'fallback' | 'queue'
+  defaultBackend: 'auth',
+  routing: {
+    // String patterns match by prefix, not as globs.
+    patterns: [
+      { pattern: 'objects', backend: 'media' },
+      { pattern: 'reports', backend: 'analytics' },
+    ],
   },
 });
+
+const users = client.service<UserService>('users');
+await users.findById('u_42');        // unrouted → defaultBackend, 'auth'
 ```
 
-Unhealthy backends fail fast or fall back to a designated backup
-(when configured).
+A string pattern matches by prefix, not as a glob; a `RegExp`
+covers anything more. A call matching no rule goes to
+`defaultBackend` rather than throwing.
+
+### Health checks
+
+`enableHealthChecks` (off by default) and `healthCheckInterval`
+(30s) make the pool poll its backends. Nothing re-routes away
+from an unhealthy one — there is no failover map and no
+`onUnhealthy` policy; a call to a backend that is down fails like
+any other call.
+
+→ [Multi-backend](./multi-backend.md) for routing, per-backend
+auth, and the React provider.
 
 ## Errors
 
@@ -511,7 +511,7 @@ the client — wire format preserves the constructor name and
 `code`:
 
 ```typescript
-import { TitanError, ErrorCode } from '@omnitron-dev/netron-browser';
+import { TitanError, ErrorCode } from '@omnitron-dev/netron-browser/errors';
 
 try {
   await users.findById('missing');

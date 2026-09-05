@@ -77,11 +77,13 @@ import { UserRepo, type User } from './user.repo.js';
 describe('UsersService', () => {
   it('throws NOT_FOUND on miss', async () => {
     const container = new Container();
-    container.register({
-      provide:  UserRepo,
+    // `register(token, provider)` — the token is the first argument, not a
+    // `provide` key inside the provider. Nexus has no NestJS-style
+    // `{ provide, useValue }` single-argument form.
+    container.register(UserRepo, {
       useValue: { findById: vi.fn().mockResolvedValue(null) } as any,
     });
-    container.register({ provide: UsersService, useClass: UsersService });
+    container.register(UsersService, { useClass: UsersService });
 
     const service = await container.resolveAsync(UsersService);
 

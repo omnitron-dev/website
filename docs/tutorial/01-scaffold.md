@@ -121,7 +121,8 @@ cd apps/api
 `apps/api/src/main.ts`:
 
 ```typescript
-import { Application, Module, Injectable, Service, Public } from '@omnitron-dev/titan';
+import { Application, Module, Injectable, Service } from '@omnitron-dev/titan';
+import { Public } from '@omnitron-dev/titan/decorators';
 
 // 1. A trivial service.
 @Service('greetings@1.0.0')

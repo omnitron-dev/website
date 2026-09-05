@@ -13,8 +13,15 @@ server-side.
 
 ## TitanError
 
+`TitanError` and `ErrorCode` come from the `/errors` subpath, not
+the package root. The root exports the transport-level errors
+(`NetronError`, `ConnectionError`, `TimeoutError`, …) — the ones
+raised by the client itself — while `/errors` carries what the
+server sent, including `ErrorCode`, the `Errors` factory and
+`toTitanError`.
+
 ```typescript
-import { TitanError, ErrorCode } from '@omnitron-dev/netron-browser';
+import { TitanError, ErrorCode } from '@omnitron-dev/netron-browser/errors';
 
 try {
   await users.findById('missing');
@@ -60,10 +67,9 @@ Netron error classes (`NetronError`, `ProtocolError`,
 > `"Circuit breaker is open"`) — check the code, not a class.
 
 ```typescript
-import {
-  NetworkError, TimeoutError, ConnectionError,
-  TitanError, ErrorCode,
-} from '@omnitron-dev/netron-browser';
+import { NetworkError, TimeoutError, ConnectionError }
+  from '@omnitron-dev/netron-browser';
+import { TitanError, ErrorCode } from '@omnitron-dev/netron-browser/errors';
 
 try {
   await users.findById(id);

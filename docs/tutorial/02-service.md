@@ -119,8 +119,9 @@ export class UserRepo {
 `apps/api/src/users/users.service.ts`:
 
 ```typescript
-import { Service, Public, Errors } from '@omnitron-dev/titan';
-import { Validate } from '@omnitron-dev/titan/validation';
+import { Service } from '@omnitron-dev/titan';
+import { Public, Validate } from '@omnitron-dev/titan/decorators';
+import { Errors } from '@omnitron-dev/titan/errors';
 import { z } from 'zod';
 import { UserRepo, type User } from './user.repo.js';
 
@@ -171,8 +172,13 @@ import { UsersService } from './users/users.service.js';
       sources: [{ type: 'env', prefix: 'API_' }],
     }),
     TitanDatabaseModule.forRoot({
-      dialect:    'postgres',
-      connection: process.env.DATABASE_URL ?? 'postgres://postgres:dev@localhost:5432/platform',
+      // `connection` is the whole connection, not just its URL — dialect and
+      // DSN travel together, which is what lets `connections: { … }` name
+      // several of them.
+      connection: {
+        dialect: 'postgres',
+        connection: process.env['DATABASE_URL'] ?? 'postgres://postgres:dev@localhost:5432/platform',
+      },
     }),
   ],
   providers: [UserRepo, UsersService],
