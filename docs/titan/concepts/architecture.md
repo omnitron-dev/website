@@ -207,9 +207,14 @@ depending on what it needs.
 | Tracing                             | `@omnitron-dev/titan/tracing`             |
 | Resilience helpers                  | `@omnitron-dev/titan/utils`               |
 
-These subpaths are stable. Importing from `@omnitron-dev/titan` (no
-subpath) re-exports the most common surfaces; subpath imports keep
-your bundle tighter.
+These subpaths are stable. The root (no subpath) re-exports a
+deliberately small surface — the DI decorators, `Application`,
+`startApp`/`createApp`, the tokens — and **not** the rest. `@Public`,
+`@Validate`, `@Timeout`, `@RateLimit` and `@Cache` are among the
+eighteen decorators available only from `@omnitron-dev/titan/decorators`;
+`OnStart`/`OnStop` come from `@omnitron-dev/titan/application`. Reach
+for the subpath first: it is where the symbol actually lives, and it
+keeps the bundle tighter.
 
 ## Boundaries between subsystems
 

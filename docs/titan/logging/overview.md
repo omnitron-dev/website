@@ -140,7 +140,8 @@ logger:
 `LoggerService` chooses pretty output when `prettyPrint === true`, when
 the `pretty` alias is true, or when the environment is `development` and
 neither flag is explicitly `false`; otherwise it stays on structured
-JSON (`packages/titan/src/modules/logger/logger.service.ts:232-239`).
+JSON (the `prettyPrint` branch of `LoggerService.initialize`,
+`packages/titan/src/modules/logger/logger.service.ts`).
 Leave it off (JSON) for production so log shippers can parse each line.
 
 You can still pipe JSON output through `pino-pretty` externally if you

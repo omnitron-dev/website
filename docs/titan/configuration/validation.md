@@ -37,11 +37,14 @@ export const AppConfigSchema = z.object({
 export type AppConfig = z.infer<typeof AppConfigSchema>;
 ```
 
-Wire it in:
+Wire it in. **`validateOnStartup` is required** — it has no default, so
+a schema on its own is parsed by nothing and an invalid config loads in
+silence:
 
 ```typescript
 ConfigModule.forRoot({
   schema: AppConfigSchema,
+  validateOnStartup: true,
   sources: [...],
 })
 ```
@@ -52,21 +55,39 @@ ConfigModule.forRoot({
 2. The candidate is parsed against the schema.
 3. On success: the typed result is frozen and exposed via
    `ConfigService`.
-4. On failure: `Application.create` rejects with a
-   `ConfigValidationError` listing every invalid field.
+4. On failure: `ConfigService.initialize()` throws
+   `Errors.badRequest('Configuration validation failed', { errors })`,
+   which surfaces as a `TitanError` with code `BAD_REQUEST`. There is
+   no `ConfigValidationError` class.
 
-The error message is detailed:
+Every invalid field is carried in `details.errors`, one entry per Zod
+issue:
+
+```typescript
+try {
+  await app.start();
+} catch (err) {
+  if (err instanceof TitanError && err.code === ErrorCode.BAD_REQUEST) {
+    // [{ path, message, expected, received }, …]
+    console.error(err.details.errors);
+  }
+}
+```
 
 ```
-ConfigValidationError: 3 invalid configuration fields
-
-  port:           expected number, got "3000" (string)
-  database.url:   missing required field
-  cache.tier:     invalid enum value; expected 'memory' | 'redis'; got 'redos'
+[
+  { path: 'port',          message: 'Expected number, received string', expected: 'number', received: 'string' },
+  { path: 'database.url',  message: 'Required',                          expected: 'string', received: 'undefined' },
+  { path: 'cache.tier',    message: "Invalid enum value. Expected 'memory' | 'redis', received 'redos'" }
+]
 ```
 
-Use this to fail fast in CI: a config that doesn't validate locally
-won't validate in production either.
+`path` is the Zod issue path joined with `.`, so a nested field reads
+`database.url`. Use this to fail fast in CI: a config that doesn't
+validate locally won't validate in production either.
+
+This runs only when both `validateOnStartup` and `schema` are set, as
+above.
 
 ## Defaults
 

@@ -81,16 +81,16 @@ Two facts about this flow are worth pinning down up front:
    `ContextManager`.** `ContextManager.getCurrentContext()` returns the
    active `ContextProvider`, and `get`/`set`/`has`/`delete`/`clear`/
    `keys`/`toObject`/`createChild` are all methods on *that* object
-   (`context.ts:53-93`).
+   (the `ContextProvider` interface in `nexus/context.ts`).
 2. **Strategy selection is an explicit call.** A strategy never runs
    "automatically" on a bare `container.resolve(token)`. The code that
    has several candidate providers for a token calls
    `ContextManager.selectProvider(token, providers, resolutionContext)`,
    which walks the registered strategies and returns one provider
-   (`context.ts:377-398`). The `ResolutionContext.metadata` it reads is
+   (`ContextManager.selectProvider`). The `ResolutionContext.metadata` it reads is
    built by `createResolutionContext`, which flattens the current
    `ContextProvider` into a plain object via `toObject()`
-   (`context.ts:403-418`).
+   (`createResolutionContext`).
 
 The four building blocks:
 
@@ -156,7 +156,7 @@ see each other's values — wrap the request handler in
 `runWithContext`. The active `ContextProvider` is stored in an
 `AsyncLocalStorage` frame, so every `getCurrentContext()` call inside
 the callback (including across `await`s) sees the same provider
-(`context.ts:339-365`):
+(`ContextManager.runWithContext`):
 
 ```typescript
 const requestContext = contextManager.createScopedContext();
@@ -171,7 +171,7 @@ await contextManager.runWithContext(requestContext, async () => {
 > The Nexus `Container` holds its own `ContextManager` and a root
 > `ContextProvider`. `container.getContext()` returns that provider and
 > `container.withContext(fn)` runs `fn` inside the container's context
-> frame (`container.ts:2153-2162`) — convenient when you are wiring
+> frame (`Container.getContext` / `Container.withContext`) — convenient when you are wiring
 > context outside an HTTP layer.
 
 ## End-to-end: context-driven provider selection
@@ -220,7 +220,7 @@ const chosen = await manager.runWithContext(requestContext, async () => {
 chosen.value; // 'prod-service' — EnvironmentStrategy matched 'production'
 ```
 
-Walking the selection (`context.ts:377-398`):
+Walking `ContextManager.selectProvider`:
 
 - `selectProvider` short-circuits when there are 0 or 1 candidates.
 - Otherwise it iterates strategies **in registration order**
@@ -241,7 +241,7 @@ Because `environment` is registered first, it takes precedence over
 
 `createContextAwareProvider` is an identity helper over the
 `ContextAwareProvider` interface — `{ provide(context), canProvide?(context) }`
-(`context.ts:437-454`). It returns its argument unchanged; its only job
+(`createContextAwareProvider` in `nexus/context.ts`). It returns its argument unchanged; its only job
 is to give you the typed shape. The `provide` callback receives the
 active `ResolutionContext` and returns the value (or a Promise of it);
 the optional `canProvide` lets a provider opt out of a context:
@@ -318,7 +318,7 @@ class UsersService {
 
 Under the hood the decorator only records metadata: it writes the key
 into a `context:inject` map keyed by parameter index, via
-`Reflect.defineMetadata('context:inject', …)` (`context.ts:424-432`).
+`Reflect.defineMetadata('context:inject', …)` (the `InjectContext` decorator).
 The integrating runtime reads that metadata and supplies
 `getCurrentContext().get(key)` for the marked parameter. (Plain
 `container.resolve()` does not interpret `context:inject` on its own —
@@ -357,7 +357,7 @@ name to add alongside the defaults, or `unregisterStrategy('environment')`
 to drop a built-in. Newly registered strategies are appended, so they
 are consulted *after* the four defaults — order matters because the
 first strategy that both `applies` and returns a provider wins
-(`context.ts:316-398`).
+(strategy registration and `selectProvider`).
 
 ## Anti-patterns
 

@@ -98,7 +98,7 @@ backend, no `if` statements leaking into business logic.
 `createContextAwareProvider` is an identity helper over the
 `ContextAwareProvider` interface — a single object with a
 `provide(context)` method and an optional `canProvide(context)` guard
-(`packages/titan/src/nexus/context.ts:437-454`). There is **no**
+(`createContextAwareProvider` in `packages/titan/src/nexus/context.ts`). There is **no**
 `strategies` array and **no** `factory` key; the branching lives inside
 `provide`, and the tenant is read from the resolution context's
 `metadata`:

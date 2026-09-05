@@ -240,7 +240,8 @@ Two complementary ways to fan records out beyond stdout.
 JSON line as a chunk, plugged straight into Pino's `multistream`.
 stdout is always the first stream, and each user stream is async-wrapped
 so a slow consumer can't stall the hot path
-(`logger.service.ts:243-299`, `:24-45`):
+(the stream-selection branch of `LoggerService.initialize`, plus
+`wrapAsyncStream`):
 
 ```typescript
 import { Writable } from 'node:stream';
@@ -266,7 +267,7 @@ processor pipeline and only for logs that passed the level filter.
 Delivery is deferred a macrotask (off Pino's hot path) and each
 transport is isolated in try/catch, so a slow or throwing transport
 can't block or break logging. `flush()` is awaited by
-`LoggerService.flush()` (`logger.service.ts:529-565`, `:587-589`):
+`LoggerService.flush()` (`LoggerService.createTransportFanout` and `LoggerService.flush`):
 
 ```typescript
 import type { ITransport } from '@omnitron-dev/titan/module/logger';
@@ -292,7 +293,7 @@ LoggerModule.forRoot({
 
 > **Configure transports at `forRoot`.** The fan-out stream that drives
 > `ITransport.write()` is created at init, and only when at least one
-> transport is registered then (`logger.service.ts:275-279`). So
+> transport is registered then (the multistream branch of `LoggerService.initialize`). So
 > `addTransport()` after init delivers records **only if** the logger
 > started with ≥1 transport; with zero transports at init there is no
 > fan-out stream, so a later `addTransport()`'s `write()` won't receive
@@ -349,7 +350,7 @@ For the other shaping needs:
   the idiomatic way to attach per-scope fields.
 - **Transform or drop per line** → a `processors` entry. Each runs on
   every log call and returns the modified record, or `null`/`undefined`
-  to drop it (`logger.service.ts:464-517`).
+  to drop it (`LoggerService.runProcessors`).
 - **Filtering by level** → set the level (`forRoot({ level })` or
   `setLevel`); pino drops below-threshold records before serialising
   (cheaper than a dropping processor for a pure level cut).
@@ -393,7 +394,7 @@ happens inside pino's serialisation (`redact`) and/or as a processor.
 When ConfigModule is loaded, the logger reads its initial settings from
 the `logger.*` namespace **once at construction** — `logger.level`,
 `logger.prettyPrint`, `logger.redact`, `logger.base`, and so on
-(`logger.service.ts:364-381`):
+(`LoggerService.getConfiguration`):
 
 ```yaml
 logger:
