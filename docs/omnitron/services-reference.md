@@ -12,32 +12,50 @@ the `OmnitronDaemon` service itself. All share the same auth model
 same socket / TCP / HTTP planes.
 
 This page is the canonical inventory: service name, registered
-Netron service id, purpose, and key methods. Verified against
-`src/services/*.rpc-service.ts`.
+Netron service id, purpose, and key methods.
+
+Re-check this page against the source with
+`node scripts/check-services-reference.mjs <path-to-omni>` — it
+reads `@Service`/`@Public` out of `src/**/*.rpc-service.ts` and
+diffs them against the index table below.
+
+That script exists because this paragraph used to read "verified
+against `src/services/*.rpc-service.ts`" while six counts
+undercounted — every one of them a method added after the page was
+written — and `OmnitronCluster` was missing altogether. A claim of
+verification is the one sentence on a page that nothing can check,
+so it is the one that drifts furthest; the remedy is a command a
+reader can run, not a stronger assurance.
 
 ## Quick index
 
 | File | Service id (Netron) | Methods | Role gate (typical) |
 | ---- | ------------------- | ------- | ------------------- |
-| `alert.rpc-service.ts` | `OmnitronAlerts` | 7 | viewer (read) + operator (mutate) |
+| `alert.rpc-service.ts` | `OmnitronAlerts` | 8 | viewer (read) + operator (mutate) |
 | `auth.rpc-service.ts` | `OmnitronAuth` | 7 | mixed (5 allowAnonymous; 2 authenticated) |
-| `backup.rpc-service.ts` | `OmnitronBackups` | 6 | viewer (read) + admin (mutate) |
-| `deploy.rpc-service.ts` | `OmnitronDeploy` | 3 | viewer (history) + operator (deploy/rollback) |
+| `backup.rpc-service.ts` | `OmnitronBackups` | 10 | viewer (read) + admin (mutate) |
+| `deploy.rpc-service.ts` | `OmnitronDeploy` | 4 | viewer (history) + operator (deploy/rollback) |
 | `discovery.rpc-service.ts` | `OmnitronDiscovery` | 3 | viewer |
 | `event-broadcaster.rpc-service.ts` | `OmnitronEvents` | 4 | viewer (sub/stats) + admin (pushEvent) |
 | `fleet.rpc-service.ts` | `OmnitronFleet` | 8 | viewer (read) + operator (mutate); heartbeat anonymous |
 | `health-check.rpc-service.ts` | `OmnitronHealth` | 4 | viewer |
-| `infrastructure.rpc-service.ts` | `OmnitronInfra` | 3 | viewer |
+| `infrastructure.rpc-service.ts` | `OmnitronInfra` | 7 | viewer (read) + operator (start/stop/remove) |
 | `kubernetes.rpc-service.ts` | `OmnitronKubernetes` | 9 | admin |
-| `log-collector.rpc-service.ts` | `OmnitronLogs` | 3 | viewer |
+| `log-collector.rpc-service.ts` | `OmnitronLogs` | 4 | viewer |
 | `node-manager.rpc-service.ts` | `OmnitronNodes` | 14 | viewer (read) + operator (mutate) |
 | `pipeline.rpc-service.ts` | `OmnitronPipelines` | 8 | viewer (read) + operator (mutate) |
 | `project.rpc-service.ts` | `OmnitronProject` | 14 | viewer (read) + operator (start/stop) + admin (CRUD) |
 | `secrets.rpc-service.ts` | `OmnitronSecrets` | 4 | admin |
-| `sync.rpc-service.ts` | `OmnitronSync` | 3 | service-to-service (getSyncStatus is viewer) |
+| `sync.rpc-service.ts` | `OmnitronSync` | 4 | service-to-service (getSyncStatus is viewer) |
 | `system-info.rpc-service.ts` | `OmnitronSystemInfo` | 1 | viewer |
 | `telemetry.rpc-service.ts` | `OmnitronTelemetry` | 2 | pushBatch anonymous; getRelayStats viewer |
 | `trace-collector.rpc-service.ts` | `OmnitronTraces` | 5 | viewer |
+
+And, only when `daemon.cluster.enabled` is set on a master:
+
+| File | Service id (Netron) | Methods | Role gate |
+| ---- | ------------------- | ------- | --------- |
+| `cluster/cluster.rpc-service.ts` | `OmnitronCluster` | 5 | viewer (state) + **unauthenticated** (`requestVote`, `leaderHeartbeat`) |
 
 Plus the core supervisor:
 
@@ -84,6 +102,7 @@ exceeds value, app crashed N times, etc.).
 | `deleteRule({id})` | Remove a rule |
 | `getEvents({ruleId?, status?, limit?})` | Fired-alert events |
 | `acknowledgeAlert({alertId, acknowledgedBy})` | Mark as acknowledged |
+| `getActiveAlerts()` | Currently firing, unresolved alerts |
 | `getSummary()` | Aggregate counts (open / acknowledged / resolved) |
 
 ### `OmnitronAuth` — `auth.rpc-service.ts`
@@ -112,16 +131,20 @@ Database backup, restore, scheduling.
 
 | Method | Effect |
 | ------ | ------ |
-| `createBackup({database, compress?})` | One-shot backup |
+| `createBackup({database, compress?})` | One-shot backup of one database |
+| `createAllBackups(...)` | Back up every registered database |
+| `createFullBackup(...)` | Full backup including non-database state |
 | `listBackups({database?})` | List available backups |
 | `restoreBackup({backupId})` | Restore from a backup |
 | `deleteBackup({backupId})` | Drop a backup file |
 | `setSchedule({database, cron})` | Configure recurring backups |
 | `getSchedule({database})` | Read current schedule |
+| `listSchedules()` | Every configured schedule |
+| `removeSchedule({database})` | Drop a schedule |
 
 Driven by `omnitron backup` commands. Reads (`listBackups`,
-`getSchedule`) gate on `viewer`; all mutations (`createBackup`,
-`restoreBackup`, `deleteBackup`, `setSchedule`) require `admin`.
+`getSchedule`, `listSchedules`) gate on `viewer`; every mutation
+requires `admin`.
 
 ### `OmnitronDeploy` — `deploy.rpc-service.ts`
 
@@ -132,6 +155,7 @@ App deployment workflows.
 | `deployApp({app, version, strategy?, deployedBy?})` | Run a deploy with the chosen strategy |
 | `rollback({app, deployedBy?})` | Roll back to previous version |
 | `getHistory({app?, limit?})` | Deployment history |
+| `listDeployableApps()` | Apps this daemon can deploy |
 
 Strategies: `rolling | all-at-once | blue-green | canary`.
 
@@ -202,8 +226,13 @@ Read-only inventory of provisioned infrastructure.
 | `getState()` | Full infrastructure state (containers, env, networks) |
 | `listContainers()` | All managed containers |
 | `getConnectionInfo({service})` | Resolved host / port / creds for a logical service |
+| `getContainerLogs({container, tail?})` | Tail one container's logs |
+| `startContainer({container})` | Start a managed container |
+| `stopContainer({container})` | Stop a managed container |
+| `removeContainer({container})` | Remove a managed container |
 
-Mutating ops live in the daemon directly (Docker compose runs).
+Reads gate on `viewer`; `startContainer`, `stopContainer` and
+`removeContainer` on `operator`.
 
 ### `OmnitronKubernetes` — `kubernetes.rpc-service.ts`
 
@@ -229,11 +258,15 @@ Log query + streaming.
 
 | Method | Effect |
 | ------ | ------ |
-| `queryLogs({app?, level?, grep?, lines?, ...})` | Filter logs |
+| `queryLogs({app?, level?, search?, labels?, traceId?, from?, to?, limit?, offset?})` | Filter logs |
 | `getLogStats()` | Per-app log size + rotation stats |
-| `streamLogs({app?, follow})` | Streaming subscription |
+| `getIngestionStats()` | Ingested / dropped totals and buffer depth |
+| `streamLogs({app?, level?, search?, tail?, since?})` | Last `tail` entries, oldest-first (default 100) |
 
-`omnitron logs` calls `queryLogs` or `streamLogs`.
+`omnitron logs` calls `queryLogs` or `streamLogs`. Note the
+full-text filter is `search`, not `grep`, and `streamLogs` is a
+poll — it returns a page ending at now, it does not hold a
+subscription open.
 
 ### `OmnitronNodes` — `node-manager.rpc-service.ts`
 
@@ -303,12 +336,22 @@ cluster mode).
 | ------ | ------ |
 | `receiveBatch(batch)` | Accept a sync batch from another daemon |
 | `drainBuffer({limit?})` | Pull pending sync data |
+| `ackDrained({ids})` | Acknowledge what the caller has durably taken |
 | `getSyncStatus()` | Current sync state |
 
-`receiveBatch` / `drainBuffer` gate on `['admin', 'operator',
-'service_role']` (daemon-to-daemon over TCP); `getSyncStatus` is
-`viewer` (webapp monitoring). Not typically called directly by
-operators.
+`receiveBatch`, `drainBuffer` and `ackDrained` gate on `['admin',
+'operator', 'service_role']` (daemon-to-daemon over TCP);
+`getSyncStatus` is `viewer` (webapp monitoring). Not typically
+called directly by operators.
+
+:::caution The slave side has no production caller
+`SyncService.setMasterConnection()` — the injection point that
+gives a slave daemon its channel to the master — is called only
+from tests. Nothing in `src/` wires it, so on a real slave the
+sync service buffers to its local WAL and never delivers. The
+server half documented above is reachable and correct; the client
+half is not connected.
+:::
 
 ### `OmnitronSystemInfo` — `system-info.rpc-service.ts`
 
@@ -334,6 +377,28 @@ aggregates.
 `pushBatch` is `allowAnonymous` (follower daemons call it over TCP
 before holding a token); `getRelayStats` gates on `viewer` (webapp
 monitoring).
+
+### `OmnitronCluster` — `cluster/cluster.rpc-service.ts`
+
+Leader election (Raft-shaped) across master daemons. Registered
+only when `daemon.cluster.enabled` is set, and only on a master.
+
+| Method | Effect |
+| ------ | ------ |
+| `requestVote({candidateId, term})` | Vote in an election |
+| `leaderHeartbeat({leaderId, term})` | Leader liveness, resets the follower's election timer |
+| `getClusterState()` | This node's term, state, leader and peer count |
+| `stepDown()` | Relinquish leadership |
+| `isLeader()` | Whether this node currently leads |
+
+Peers call the first two over plain HTTP at the daemon's RPC port
+with no credential, so both are `allowAnonymous`; `getClusterState`
+gates on `viewer`. `LeaderElection` rejects a vote or a heartbeat
+whose `candidateId` / `leaderId` is not in the fleet registry,
+which stops an arbitrary outsider — but a node id is discoverable
+and forgeable, so this is membership, not authentication. Keep
+`daemon.host` at its loopback default unless the fleet plane is on
+a trusted network.
 
 ### `OmnitronTraces` — `trace-collector.rpc-service.ts`
 
