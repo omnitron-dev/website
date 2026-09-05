@@ -121,9 +121,12 @@ omnitron backup list
 omnitron backup restore <id>
 ```
 
-For scheduled backups, drive `omnitron backup create` from cron
-(see the [bare-metal guide](./bare-metal.md#backups)) — there is
-no built-in backup scheduler command.
+For scheduled backups use `omnitron backup schedule <target>
+<cron|hourly|daily|weekly|ms>`; schedules persist across daemon
+restarts, and `omnitron backup schedules` lists them. Host cron
+driving `omnitron backup create` is the alternative when the
+backup must run whether or not the daemon is up — see the
+[bare-metal guide](./bare-metal.md#backups).
 
 ### Zero-downtime deploys
 
