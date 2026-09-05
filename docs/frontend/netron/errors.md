@@ -291,7 +291,7 @@ for form submissions.
 For synchronous render errors (rare with proper data fetching):
 
 ```tsx
-import { ErrorBoundary } from '@omnitron-dev/prism/components/error-boundary';
+import { ErrorBoundary } from '@omnitron-dev/prism';
 
 <ErrorBoundary
   fallback={(error, reset) => (

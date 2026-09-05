@@ -32,7 +32,7 @@ dependency of Prism but is **not** re-exported, so import it directly
 
 ```tsx
 import { Field } from '@omnitron-dev/prism';            // namespace
-// or: import { Field } from '@omnitron-dev/prism/components/field';
+// or: import { Field } from '@omnitron-dev/prism';
 import { FormAlert } from '@omnitron-dev/prism';
 import { FormProvider, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -196,7 +196,7 @@ For inputs without a `Field.*` wrapper, drop to `<Controller>` (or
 
 ```tsx
 import { Controller } from 'react-hook-form';
-import { DateRangePicker } from '@omnitron-dev/prism/components/date-range-picker';
+import { DateRangePicker } from '@omnitron-dev/prism';
 
 <Controller
   name="range"
@@ -402,7 +402,7 @@ items: z.array(z.object({
 ## Multi-step wizards
 
 ```tsx
-import { Stepper } from '@omnitron-dev/prism/components/stepper';
+import { Stepper } from '@omnitron-dev/prism';
 
 const Schema = z.object({
   account: z.object({ email: z.string().email(), password: z.string().min(8) }),

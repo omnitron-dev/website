@@ -171,7 +171,7 @@ const users = useBackendService<UserService>('auth', 'users');
 | Theme, colors, typography | `@omnitron-dev/prism/theme` |
 | Dashboard / auth / data-grid shell | `@omnitron-dev/prism/blocks` |
 | Sidebar + topbar layout | `@omnitron-dev/prism/layouts` |
-| Card / Table / Drawer / Form field | `@omnitron-dev/prism/components/*` |
+| Card / Table / Drawer / Form field | `@omnitron-dev/prism` or `@omnitron-dev/prism/components` |
 | Schema-aware forms | `@omnitron-dev/prism/forms` |
 | Persisted UI state (sidebar open, dark mode) | `@omnitron-dev/prism/state` |
 | Plain React hooks (`useArray`, `useFocusTrap`, …) | `@omnitron-dev/prism/hooks` |
@@ -192,8 +192,11 @@ const users = useBackendService<UserService>('auth', 'users');
 | Per-route page | Lazy-load with `React.lazy()` — pages add 10–30 kB each |
 | Charts / editor / lightbox | Lazy import only on routes that use them |
 
-Use subpath imports (`@omnitron-dev/prism/components/card`)
-rather than the root import for the leanest payload.
+Import from the root or from `@omnitron-dev/prism/components`; both
+tree-shake, and there is no per-component subpath to reach for. The two
+exceptions are `@omnitron-dev/prism/components/editor` and
+`.../emoji-picker`, which are separate entry points precisely so a route
+that does not use them never pays for them — lazy-import those.
 
 ## Production reference
 

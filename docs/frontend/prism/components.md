@@ -19,7 +19,7 @@ see [Layouts](./layouts.md).
 ### `<Alert>` / `<FormAlert>`
 
 ```tsx
-import { Alert, FormAlert } from '@omnitron-dev/prism/components/alert';
+import { Alert, FormAlert } from '@omnitron-dev/prism';
 
 <Alert severity="warning" title="Storage low">
   90% of the bucket quota is in use.
@@ -62,7 +62,7 @@ Transient global notifications. Mounted once by `<PrismProvider>`;
 fire from anywhere:
 
 ```tsx
-import { useSnackbar } from '@omnitron-dev/prism/components/snackbar';
+import { useSnackbar } from '@omnitron-dev/prism';
 
 function CopyButton({ text }: { text: string }) {
   const { show } = useSnackbar();
@@ -96,7 +96,7 @@ provider level (`maxSnackbars`).
 `onClose` / `onConfirm` (there is no `useConfirmDialog` hook):
 
 ```tsx
-import { ConfirmDialog } from '@omnitron-dev/prism/components/confirm-dialog';
+import { ConfirmDialog } from '@omnitron-dev/prism';
 
 function DeleteButton({ onDelete }: { onDelete: () => void }) {
   const [open, setOpen] = useState(false);
@@ -125,7 +125,7 @@ while it resolves. A `<DeleteDialog>` preset is also exported.
 ### `<Tooltip>`
 
 ```tsx
-import { Tooltip } from '@omnitron-dev/prism/components/tooltip';
+import { Tooltip } from '@omnitron-dev/prism';
 
 <Tooltip title="Restart this app" placement="top">
   <IconButton onClick={restart}>
@@ -142,7 +142,7 @@ single child element (not a fragment).
 Full-viewport loading bar — typical use is the Suspense fallback:
 
 ```tsx
-import { LoadingScreen } from '@omnitron-dev/prism/components/loading-screen';
+import { LoadingScreen } from '@omnitron-dev/prism';
 
 <Suspense fallback={<LoadingScreen />}>
   <Outlet />
@@ -160,7 +160,7 @@ Animated placeholder while data loads.
 
 ```tsx
 import { Skeleton, CardSkeleton, TableSkeleton }
-  from '@omnitron-dev/prism/components/skeleton';
+  from '@omnitron-dev/prism';
 
 {isLoading ? <Skeleton variant="rectangular" height={200} /> : <Chart type="line" series={series} />}
 ```
@@ -174,7 +174,7 @@ dedicated `<CardSkeleton>` and `<TableSkeleton>` exports.
 Friendly empty-state card. Use on every list that may be empty.
 
 ```tsx
-import { EmptyContent } from '@omnitron-dev/prism/components/empty-content';
+import { EmptyContent } from '@omnitron-dev/prism';
 
 {items.length === 0 ? (
   <EmptyContent
@@ -200,7 +200,7 @@ variants.
 (`{ error, errorInfo, parsedStack, resetErrorBoundary }`):
 
 ```tsx
-import { ErrorBoundary } from '@omnitron-dev/prism/components/error-boundary';
+import { ErrorBoundary } from '@omnitron-dev/prism';
 
 <ErrorBoundary
   fallback={({ error, resetErrorBoundary }) =>
@@ -221,7 +221,7 @@ stack details).
 
 ```tsx
 import { LinearProgress, CircularProgress, ProgressBar, CountdownRing }
-  from '@omnitron-dev/prism/components/progress';
+  from '@omnitron-dev/prism';
 
 <ProgressBar value={75} />                {/* labelled linear bar */}
 <LinearProgress />                         {/* indeterminate */}
@@ -245,7 +245,7 @@ it and the ring starts full. It switches to `warningColor` below
 ### `<Card>`
 
 ```tsx
-import { Card, StatCard } from '@omnitron-dev/prism/components/card';
+import { Card, StatCard } from '@omnitron-dev/prism';
 
 <Card title="Active users" subheader="last 30 days">
   <Typography variant="h3">1,234</Typography>
@@ -290,7 +290,7 @@ itself doesn't handle layout.
 ### `<Avatar>`
 
 ```tsx
-import { Avatar, CustomAvatarGroup } from '@omnitron-dev/prism/components/avatar';
+import { Avatar, CustomAvatarGroup } from '@omnitron-dev/prism';
 
 <Avatar src={user.avatarUrl} name={user.name} size="md" />
 <Avatar name="Alice" online />
@@ -323,7 +323,7 @@ status dot:
 
 ```tsx
 import { Badge, CountBadge, StatusDot }
-  from '@omnitron-dev/prism/components/badge';
+  from '@omnitron-dev/prism';
 
 <Badge badgeContent={5}>
   <NotificationsIcon />
@@ -354,7 +354,7 @@ which add filtering, sorting, pagination, row actions.
 a MUI-style composition of `<TableRow>` / `<TableCell>`):
 
 ```tsx
-import { Table } from '@omnitron-dev/prism/components/table';
+import { Table } from '@omnitron-dev/prism';
 
 <Table
   rowKey="id"
@@ -377,7 +377,7 @@ and `loading` props (see `TableProps`).
 ApexCharts wrapper with theme-aware defaults.
 
 ```tsx
-import { Chart, useChart } from '@omnitron-dev/prism/components/chart';
+import { Chart, useChart } from '@omnitron-dev/prism';
 
 function CpuChart({ series }: { series: TimeSeries[] }) {
   const options = useChart({
@@ -406,7 +406,7 @@ Supported `type` values: `line`, `area`, `bar`, `pie`, `donut`,
 Slides are passed as **children** (not a `slides` array prop):
 
 ```tsx
-import { Carousel } from '@omnitron-dev/prism/components/carousel';
+import { Carousel } from '@omnitron-dev/prism';
 
 <Carousel autoplay autoplayInterval={5000} dots arrows>
   {images.map((src) => <img key={src} src={src} />)}
@@ -433,7 +433,7 @@ Drive open/index state with `useLightbox`, then spread
 array). There is no `controller` prop:
 
 ```tsx
-import { Lightbox, useLightbox } from '@omnitron-dev/prism/components/lightbox';
+import { Lightbox, useLightbox } from '@omnitron-dev/prism';
 
 function Gallery({ images }: { images: string[] }) {
   const lightbox = useLightbox({ totalSlides: images.length });
@@ -455,7 +455,7 @@ counter, optional download/share buttons.
 ### `<Image>`
 
 ```tsx
-import { Image } from '@omnitron-dev/prism/components/image';
+import { Image } from '@omnitron-dev/prism';
 
 <Image
   src={user.avatarUrl}
@@ -475,7 +475,7 @@ optional loading `placeholder`. (`ratio` is the prop name — not
 ### `<TagCloud>`
 
 ```tsx
-import { TagCloud } from '@omnitron-dev/prism/components/tag-cloud';
+import { TagCloud } from '@omnitron-dev/prism';
 
 <TagCloud
   tags={[
@@ -497,7 +497,7 @@ ranked list instead. `onTagClick` receives the full tag object.
 ### `<Breadcrumbs>`
 
 ```tsx
-import { Breadcrumbs } from '@omnitron-dev/prism/components/breadcrumbs';
+import { Breadcrumbs } from '@omnitron-dev/prism';
 
 <Breadcrumbs
   heading="Alpha"
@@ -530,7 +530,7 @@ drive open/anchor state with the `useMenu` hook. There are no
 `<MenuItem>` / `<MenuDivider>` child components:
 
 ```tsx
-import { Menu, useMenu } from '@omnitron-dev/prism/components/menu';
+import { Menu, useMenu } from '@omnitron-dev/prism';
 
 function UserMenu() {
   const menu = useMenu();
@@ -563,7 +563,7 @@ child component). Use `MegaMenu` (auto), or the explicit
 variants:
 
 ```tsx
-import { MegaMenu } from '@omnitron-dev/prism/components/mega-menu';
+import { MegaMenu } from '@omnitron-dev/prism';
 
 <MegaMenu
   data={[
@@ -643,7 +643,7 @@ it the current `pathname` (and optionally `search`) from the
 router; it completes when those change:
 
 ```tsx
-import { NavigationProgress } from '@omnitron-dev/prism/components/navigation-progress';
+import { NavigationProgress } from '@omnitron-dev/prism';
 import { useLocation } from 'react-router-dom';
 
 const { pathname, search } = useLocation();
@@ -659,7 +659,7 @@ const { pathname, search } = useLocation();
 separate `<Step>` component):
 
 ```tsx
-import { Stepper } from '@omnitron-dev/prism/components/stepper';
+import { Stepper } from '@omnitron-dev/prism';
 
 const [activeStep, setActiveStep] = useState(0);
 
@@ -687,7 +687,7 @@ children — `<Tabs>` builds the tab strip from each panel's
 receives the new value directly.
 
 ```tsx
-import { Tabs, TabPanel } from '@omnitron-dev/prism/components/tabs';
+import { Tabs, TabPanel } from '@omnitron-dev/prism';
 
 // Config-driven:
 <Tabs
@@ -720,7 +720,7 @@ nav. There is no all-in-one `<ScrollSpy items={…}>` nav widget:
 
 ```tsx
 import { ScrollSpyProvider, ScrollSpySection, useScrollSpy }
-  from '@omnitron-dev/prism/components/scroll-spy';
+  from '@omnitron-dev/prism';
 
 function Toc() {
   const { activeId } = useScrollSpy();
@@ -752,7 +752,7 @@ Scrolls the window back to the top whenever the route changes —
 pass the current `pathname` from the router:
 
 ```tsx
-import { ScrollToTop } from '@omnitron-dev/prism/components/scroll-to-top';
+import { ScrollToTop } from '@omnitron-dev/prism';
 import { useLocation } from 'react-router-dom';
 
 <ScrollToTop pathname={useLocation().pathname} />
@@ -764,7 +764,7 @@ import { useLocation } from 'react-router-dom';
 ### `<Scrollbar>`
 
 ```tsx
-import { Scrollbar } from '@omnitron-dev/prism/components/scrollbar';
+import { Scrollbar } from '@omnitron-dev/prism';
 
 <Scrollbar sx={{ maxHeight: 400 }}>
   <LongContent />
@@ -784,7 +784,7 @@ not a single polymorphic `<Field>` element. Each field reads from
 the surrounding react-hook-form `FormProvider` by `name`:
 
 ```tsx
-import { Field } from '@omnitron-dev/prism/components/field';
+import { Field } from '@omnitron-dev/prism';
 import { useForm, FormProvider } from 'react-hook-form';
 
 const methods = useForm();
@@ -827,7 +827,7 @@ A small status/category chip (not an HTML form `<label>`). Use
 
 ```tsx
 import { Label, StatusLabel, BooleanLabel }
-  from '@omnitron-dev/prism/components/label';
+  from '@omnitron-dev/prism';
 
 <Label color="success" variant="soft">Active</Label>
 <Label color="warning" startIcon={<ClockIcon />}>Pending</Label>
@@ -839,7 +839,7 @@ import { Label, StatusLabel, BooleanLabel }
 Debounced search input with a clear button:
 
 ```tsx
-import { SearchInput } from '@omnitron-dev/prism/components/search-input';
+import { SearchInput } from '@omnitron-dev/prism';
 
 <SearchInput
   value={query}
@@ -862,7 +862,7 @@ built in.
 
 ```tsx
 import { DateRangePicker, useDateRangePicker }
-  from '@omnitron-dev/prism/components/date-range-picker';
+  from '@omnitron-dev/prism';
 
 function Filter() {
   const range = useDateRangePicker();
@@ -921,7 +921,7 @@ TipTap-based rich-text editor and read-only renderer. The
 
 ```tsx
 import { Editor } from '@omnitron-dev/prism/components/editor';
-import { TipTapRenderer } from '@omnitron-dev/prism/components/tiptap-renderer';
+import { TipTapRenderer } from '@omnitron-dev/prism';
 
 // Edit mode (onChange receives a string — JSON by default, or HTML
 // when format="html"):
@@ -962,7 +962,7 @@ router-aware `Link` to keep internal links client-side).
 
 ```tsx
 import { CommandPalette }
-  from '@omnitron-dev/prism/components/command-palette';
+  from '@omnitron-dev/prism';
 
 function App() {
   return (
@@ -993,7 +993,7 @@ types. State is centralised: declare `filters` (a
 one `onChange`:
 
 ```tsx
-import { FilterToolbar } from '@omnitron-dev/prism/components/admin-filters';
+import { FilterToolbar } from '@omnitron-dev/prism';
 
 const [values, setValues] = useState({});
 
@@ -1024,7 +1024,7 @@ built-in save-as-view.)
 Side panel — left, right, top, bottom:
 
 ```tsx
-import { Drawer } from '@omnitron-dev/prism/components/drawer';
+import { Drawer } from '@omnitron-dev/prism';
 
 const [open, setOpen] = useState(false);
 
@@ -1071,7 +1071,7 @@ on-this-page nav. The right-rail "table of contents" is
 
 ```tsx
 import { DocLayout, DocSidebar, DocSectionNav }
-  from '@omnitron-dev/prism/components/doc-layout';
+  from '@omnitron-dev/prism';
 
 <DocLayout
   sidebar={<DocSidebar items={navItems} />}
@@ -1088,7 +1088,7 @@ no `<Accordion.Item>` child). Single-open by default; pass
 `multiple` to allow several panels open:
 
 ```tsx
-import { Accordion } from '@omnitron-dev/prism/components/accordion';
+import { Accordion } from '@omnitron-dev/prism';
 
 <Accordion
   multiple
@@ -1111,7 +1111,7 @@ lazy-loads framer-motion features (there is no generic
 
 ```tsx
 import { AnimateBorder, MotionLazy }
-  from '@omnitron-dev/prism/components/animate';
+  from '@omnitron-dev/prism';
 
 // Animated gradient border around any content:
 <AnimateBorder duration={8}>
@@ -1145,7 +1145,7 @@ single `<Settings>` component with `open`/`onClose` props:
 
 ```tsx
 import { SettingsProvider, SettingsDrawer, useSettingsDrawer }
-  from '@omnitron-dev/prism/components/settings';
+  from '@omnitron-dev/prism';
 
 function Header() {
   const drawer = useSettingsDrawer();
@@ -1169,7 +1169,7 @@ component — compose a `<ChangelogTimeline>` of
 
 ```tsx
 import { ChangelogTimeline, ChangelogEntry }
-  from '@omnitron-dev/prism/components/changelog';
+  from '@omnitron-dev/prism';
 
 <ChangelogTimeline>
   <ChangelogEntry version="1.4.0" date="2026-05-16">
@@ -1263,9 +1263,9 @@ Each component is also importable from its own subpath:
 import { Card, Table, Drawer } from '@omnitron-dev/prism';
 
 // Tree-shaken (smaller bundle):
-import { Card }   from '@omnitron-dev/prism/components/card';
-import { Table }  from '@omnitron-dev/prism/components/table';
-import { Drawer } from '@omnitron-dev/prism/components/drawer';
+import { Card }   from '@omnitron-dev/prism';
+import { Table }  from '@omnitron-dev/prism';
+import { Drawer } from '@omnitron-dev/prism';
 ```
 
 Use subpaths in production for the leanest payload.

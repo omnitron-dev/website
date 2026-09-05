@@ -301,9 +301,9 @@ MUI X `<DataGrid>` directly (or `<FilterToolbar>` + the Prism
 ## Subpath imports
 
 ```tsx
-import { AuthBlock      } from '@omnitron-dev/prism/blocks/auth-block';
-import { DashboardBlock } from '@omnitron-dev/prism/blocks/dashboard-block';
-import { DataGridBlock  } from '@omnitron-dev/prism/blocks/data-grid-block';
+import { AuthBlock      } from '@omnitron-dev/prism/blocks';
+import { DashboardBlock } from '@omnitron-dev/prism/blocks';
+import { DataGridBlock  } from '@omnitron-dev/prism/blocks';
 ```
 
 ## See also

@@ -441,7 +441,7 @@ component:
 
 | Hook | Component / area |
 | ---- | --------- |
-| `useMenu` | `<Menu>` (from `@omnitron-dev/prism/components/menu`) |
+| `useMenu` | `<Menu>` (from `@omnitron-dev/prism`) |
 | `useSnackbar` | `<Snackbar>` |
 | `useLightbox` | `<Lightbox>` |
 | `useChart` | `<Chart>` |
