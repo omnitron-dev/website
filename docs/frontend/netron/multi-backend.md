@@ -215,14 +215,26 @@ one refresh serve every backend.
 
 `BackendPool` — the layer under the client — can poll its
 backends: `enableHealthChecks` (off by default) and
-`healthCheckInterval` (30s). That is the whole of it.
+`healthCheckInterval` (30s). What that buys is **observability,
+not switching**.
 
-There is no health-aware **routing**: nothing re-routes a call
-away from an unhealthy backend, and there is no `failover` map,
-no `onUnhealthy` policy and no request queue. A call to a backend
-that is down fails like any other call. If you need failover,
-build it above this layer — catch the error and retry against
-another backend by name with `client.backend('…')`.
+Nothing inside the library reads the resulting flag:
+`invoke(backend, service, method)` takes the backend name from
+the caller, so there is no routing decision for a health result
+to change. The only consumers are the public
+`getHealthyBackends()` / `getUnhealthyBackends()` — useful for a
+status indicator, and the place to build failover yourself.
+
+So there is no `failover` map, no `onUnhealthy` policy and no
+request queue. A call to a backend that is down fails like any
+other call.
+
+:::note The same option means something else on the server
+`@omnitron-dev/titan`'s multi-backend does route on health — it
+skips backends marked unhealthy and has a circuit breaker. One
+option name, two packages in the same monorepo, and the browser
+one is where it does not decide anything.
+:::
 
 ## Shared cache
 
