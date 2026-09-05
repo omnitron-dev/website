@@ -13,8 +13,17 @@ single-source-of-truth lookup: what each decorator does, which
 package to import it from, and which decorators share a name
 across packages (so you don't accidentally import the wrong one).
 
-All entries verified against source via grep for `^export
-(function|const) [A-Z]` returning a decorator type.
+Every entry below is checked against the packages' real exports by a
+script, not by hand — a hand check is true on the day it is made and
+decays silently afterwards:
+
+```bash
+node internal/website/scripts/check-titan-inventories.mjs .
+```
+
+It exits non-zero if this page names a decorator no package exports, or
+if the set the root re-exports stops being exactly the nine listed
+above.
 
 ## Quick lookup by purpose
 

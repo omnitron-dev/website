@@ -223,8 +223,14 @@ or a 50-pod fleet.
   parent's stdout.
 - [ ] **Restart limits set.** Without `maxRestarts`, a crash loop
   is a CPU DoS vector against the supervisor.
-- [ ] **Health-check command bounded.** A hanging health-check
-  starves the supervisor; set `healthCheckTimeout`.
+- [ ] **Health-check command bounded.** There is no
+  `healthCheckTimeout`. Per-process monitoring takes
+  `health: { interval, timeout, retries }` (timeout default 5000 ms);
+  the pool's own check has no timeout field of its own and is bounded
+  instead by the service proxy's `requestTimeout` (default 30000 ms),
+  which caps every RPC. Set both deliberately — the pool serialises its
+  checks, so one slow worker delays the whole sweep by up to
+  `requestTimeout`.
 - [ ] **No untrusted command paths.** `command` must resolve to
   a known binary — never to a user-supplied path.
 - [ ] **Audit `pm@1.0.0` if exposed.** PM control = code
@@ -259,8 +265,12 @@ or a 50-pod fleet.
   [module map](./module-map.mdx#where-redis-sits) table).
 - [ ] **`enableReadyCheck` and `lazyConnect` aligned with
   reconnect policy.**
-- [ ] **`commandQueueMaxLength` set.** Prevents memory blow-up
-  when Redis is unreachable.
+- [ ] **Offline queue bounded.** There is no
+  `commandQueueMaxLength` — not in this module and not in ioredis.
+  What prevents the memory blow-up while Redis is unreachable is
+  `enableOfflineQueue: false` (fail commands immediately instead of
+  buffering them) and `maxRetriesPerRequest`, both passed through to
+  ioredis.
 - [ ] **Disable dangerous commands.** Server-side `rename-command`
   for `FLUSHALL`, `FLUSHDB`, `KEYS`, `CONFIG` in shared
   environments.
