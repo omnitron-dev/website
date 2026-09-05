@@ -237,8 +237,23 @@ class Serializer {
 class SmartBuffer { /* writeXxx / readXxx / toBuffer / static wrap, fromBuffer */ }
 ```
 
-There is no `registerError`, `unregister`, or `tryDecode` method on
-`Serializer`, and no top-level `Encoder` / `Decoder` export.
+`Serializer` has no `registerError` or `unregister` method, and there is
+no top-level `Encoder` / `Decoder` export.
+
+`tryDecode` is not a method either — but it **does** exist, as a free
+function from `@omnitron-dev/msgpack`. It returns
+`{ value, bytesConsumed }`, or `null` when the buffer does not yet hold a
+complete value, which is what you want when decoding off a stream:
+
+```typescript
+import { tryDecode } from '@omnitron-dev/msgpack';
+
+const result = tryDecode(buffer);
+if (result) {
+  handle(result.value);
+  buffer = buffer.subarray(result.bytesConsumed);
+}
+```
 
 ## Where it's used in the stack
 
