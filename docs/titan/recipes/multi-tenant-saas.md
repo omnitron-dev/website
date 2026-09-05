@@ -146,7 +146,10 @@ import { rlsContext } from '@kysera/rls';
 
 @Repository<Order>({ table: 'orders' })
 @Policy({ skipFor: ['admin', 'service_role'] })       // these roles bypass RLS
-class OrdersRepository extends BaseRepository<Database, 'orders', Order> {
+// BaseRepository is an alias of @kysera/repository's ContextAwareRepository,
+// which takes two parameters: the DB schema and the table name. The row type
+// comes from Database['orders'] — there is no third parameter.
+class OrdersRepository extends BaseRepository<Database, 'orders'> {
   // Filter: auto-adds a WHERE clause to reads. The context is the
   // @kysera/rls auth context (ctx.auth), NOT the DI ContextManager.
   @Filter({ operations: ['select', 'update', 'delete'] })

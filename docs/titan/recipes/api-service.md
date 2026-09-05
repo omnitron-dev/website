@@ -61,6 +61,7 @@ import { TitanCacheModule } from '@omnitron-dev/titan-cache';
 import { TitanRateLimitModule } from '@omnitron-dev/titan-ratelimit';
 import { TitanHealthModule } from '@omnitron-dev/titan-health';
 import { TitanMetricsModule } from '@omnitron-dev/titan-metrics';
+import { sql } from 'kysely';
 
 const AppConfigSchema = z.object({
   env: z.enum(['development', 'staging', 'production']),
@@ -176,17 +177,20 @@ const AppConfigSchema = z.object({
 
     // ── Health probes ──────────────────────────────────────────────────
     TitanHealthModule.forRootAsync({
-      // DatabaseManager.getConnection() is async — await it in the factory
-      // so the indicator gets a live Kysely instance, not a Promise.
+      // The database indicator wants an object with raw(), execute() or
+      // query() — a Kysely instance has none of them, so wrap it. Passing the
+      // connection straight through throws on the first check.
       useFactory: async (db: DatabaseManager, redis: RedisService) => ({
         enableMemoryIndicator:    true,
         enableEventLoopIndicator: true,
         enableDatabaseIndicator:  true,
-        databaseConnection:       await db.getConnection(),
+        databaseConnection: {
+          execute: async (q: string) => { await sql.raw(q).execute(await db.getConnection()); },
+        },
         enableRedisIndicator:     true,
         redisClient:              redis.getClient('default'),
         memoryThresholds:         { heapDegradedThreshold: 0.8, heapUnhealthyThreshold: 0.95 },
-        eventLoopThresholds:      { degradedThreshold: 50, unhealthyThreshold: 200 },
+        eventLoopThresholds:      { lagDegradedThreshold: 50, lagUnhealthyThreshold: 200 },
         timeout:                  3_000,
         enableCaching:            true,
         cacheTtl:                 1_000,
