@@ -26,8 +26,8 @@ each issue's location is a **dotted-string `path`**:
   message:    'Validation failed',
   details: {
     errors: [
-      { path: 'email', message: 'Invalid email format', code: 'invalid_string' },
-      { path: 'age',   message: 'Number must be greater than 12', code: 'too_small' },
+      { path: 'email', message: 'Invalid email address', code: 'invalid_format' },
+      { path: 'age',   message: 'Too small: expected number to be >=13', code: 'too_small' },
     ],
   },
   timestamp:  1747339200000,
@@ -74,7 +74,7 @@ Each entry in `validationErrors` (mirrored at `details.errors`):
 | ---------- | ---------- | --------------------------------------------- |
 | `path`     | `string`   | Dotted path to the bad field (`'address.zip'`)|
 | `message`  | `string`   | Human-readable message (from Zod or override) |
-| `code`     | `string`   | Zod issue code (`invalid_string`, `too_small`)|
+| `code`     | `string`   | Zod issue code (`invalid_format`, `too_small`) |
 | `expected` | `unknown?` | What was expected (when applicable)           |
 | `received` | `unknown?` | What was received (when applicable)           |
 
@@ -107,11 +107,14 @@ Or globally through a custom error map:
 ```typescript
 import { z } from '@omnitron-dev/titan/validation';
 
-z.setErrorMap((issue, ctx) => {
-  if (issue.code === 'invalid_string' && issue.validation === 'email') {
+// zod 4: the map takes ONE argument. A second parameter makes the function
+// unassignable to `$ZodErrorMap`, and there is no `ctx.defaultError` — return
+// `undefined` to fall through to zod's own message.
+z.setErrorMap((issue) => {
+  if (issue.code === 'invalid_format' && issue.format === 'email') {
     return { message: 'Bad email.' };
   }
-  return { message: ctx.defaultError };
+  return undefined;
 });
 ```
 

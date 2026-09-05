@@ -70,11 +70,14 @@ interface ILogger {
 ## The minimal usage
 
 ```typescript
-import { LoggerService } from '@omnitron-dev/titan/module/logger';
+import { LOGGER_TOKEN, type ILogger } from '@omnitron-dev/titan/module/logger';
 
 @Service({ name: 'users' })
 class UsersService {
-  constructor(private readonly logger: LoggerService) {}
+  // LOGGER_TOKEN yields an ILogger — the thing with the level methods.
+  // `LoggerService` is the module facade and has no `.info()`; from it you
+  // reach a logger through `.logger` or `.child({ … })`.
+  constructor(@Inject(LOGGER_TOKEN) private readonly logger: ILogger) {}
 
   @Public()
   async findById(id: string) {

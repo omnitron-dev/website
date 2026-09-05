@@ -107,7 +107,7 @@ matters.
 ## Custom middleware via `createMiddleware`
 
 ```typescript
-import { createMiddleware } from '@omnitron-dev/titan/nexus';
+import { createMiddleware, getTokenName } from '@omnitron-dev/titan/nexus';
 
 const InstrumentationMiddleware = createMiddleware({
   name:    'instrumentation',
@@ -115,11 +115,13 @@ const InstrumentationMiddleware = createMiddleware({
     const t0 = performance.now();
     try {
       const instance = await next();
-      metrics.histogram('di.resolve.ms', { token: ctx.token.name })
+      // `ctx.token` is a ServiceIdentifier: a class, a string, a symbol or a
+      // Token. Only two of those have `.name`, so use the exported helper.
+      metrics.histogram('di.resolve.ms', { token: getTokenName(ctx.token) })
         .observe(performance.now() - t0);
       return instance;
     } catch (e) {
-      metrics.counter('di.resolve.errors', { token: ctx.token.name }).inc();
+      metrics.counter('di.resolve.errors', { token: getTokenName(ctx.token) }).inc();
       throw e;
     }
   },
