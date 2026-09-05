@@ -6,56 +6,73 @@ description: One frontend, many Netron servers — routing, hooks, components.
 
 # Multi-backend
 
-When the app talks to several Netron servers — typical in a
-fan-out architecture — wrap them in a `MultiBackendProvider`
-and let route patterns decide which backend each call hits.
+When the app talks to several Netron backends — typical in a
+fan-out architecture — build a client for all of them and hand
+it to `MultiBackendProvider`.
+
+Two things follow from the shape of that client and are worth
+knowing before the examples. Backends live behind **one
+`baseUrl`, separated by path** — a gateway with `/auth`,
+`/media`, `/streams` under it, not a client per hostname. And the
+provider does not build the client: it takes one you built, which
+is why the same client can be used outside React (a worker, an
+SSR pass, a test) without a second configuration.
 
 ## Setup
 
 ```tsx
+import { createMultiBackendClient } from '@omnitron-dev/netron-browser';
 import { MultiBackendProvider, useBackendService }
   from '@omnitron-dev/netron-react';
 
+const client = createMultiBackendClient({
+  baseUrl: 'https://api.example.com',
+  backends: {
+    auth:    { path: '/auth' },
+    media:   { path: '/media' },
+    streams: { path: '/streams', transport: 'websocket' },
+    reports: { path: '/reports', transport: 'http' },
+  },
+  defaultBackend: 'auth',
+  routing: {
+    services: { objects: 'media', transforms: 'media' },
+    patterns: [
+      { pattern: 'users',    backend: 'auth' },
+      { pattern: 'sessions', backend: 'auth' },
+      { pattern: /^events\./, backend: 'streams' },
+    ],
+  },
+});
+
 function App() {
   return (
-    <MultiBackendProvider
-      backends={{
-        auth:    { url: 'https://auth.example.com',    transport: 'auto' },
-        media:   { url: 'https://media.example.com',   transport: 'auto' },
-        streams: { url: 'wss://streams.example.com',   transport: 'websocket' },
-        reports: { url: 'https://reports.example.com', transport: 'http' },
-      }}
-      routes={{
-        'users.*':    'auth',
-        'sessions.*': 'auth',
-        'objects.*':  'media',
-        'transforms.*': 'media',
-        'events.*':   'streams',
-        'reports.*':  'reports',
-      }}
-      autoConnect={true}
-    >
+    <MultiBackendProvider client={client} autoConnect>
       <Outlet />
     </MultiBackendProvider>
   );
 }
 ```
 
-Route patterns are glob-style — `users.*` matches every
-service under the `users` namespace. Calls not matching any
-pattern throw `BackendNotConfiguredError`.
+A string pattern matches by **prefix**, not as a glob — see
+[Routing patterns](#routing-patterns). A call that matches
+nothing goes to `defaultBackend`; it does not throw.
 
 ## Default backend
 
+`defaultBackend` is where anything unrouted lands, and it is
+required in practice — without it the first backend in the
+config is used, which makes the fallback depend on key order.
+
 ```tsx
-<MultiBackendProvider
-  backends={{
-    main:  { url: '/api/main',  transport: 'auto' },
-    media: { url: '/api/media', transport: 'auto' },
-  }}
-  routes={{ 'objects.*': 'media' }}
-  defaultBackend="main"
->
+const client = createMultiBackendClient({
+  baseUrl: '/api',
+  backends: {
+    main:  { path: '/main' },
+    media: { path: '/media' },
+  },
+  defaultBackend: 'main',
+  routing: { services: { objects: 'media' } },
+});
 ```
 
 Anything not matched routes to `defaultBackend`. Useful when
@@ -91,7 +108,7 @@ from the service name:
 import { useService } from '@omnitron-dev/netron-react';
 
 function UserCard({ userId }: { userId: string }) {
-  // Router sees 'users' → matches 'users.*' → routes to 'auth' backend
+  // Router sees 'users' → matches the 'users' prefix → 'auth' backend
   const users = useService<UserService>('users');
   const { data } = users.getUser.useQuery([userId]);
 }
@@ -168,47 +185,44 @@ import {
 
 ## Per-backend auth
 
-Each backend can carry its own auth:
+A backend's `auth` takes an `AuthenticationClient` you already
+built, or `AuthOptions` for the client to build one:
 
 ```tsx
-<MultiBackendProvider
-  backends={{
-    auth:   { url: 'https://auth.example.com',   transport: 'auto', auth: { /* uses primary AuthenticationClient */ } },
-    public: { url: 'https://public.example.com', transport: 'http', auth: false },
-  }}
-  routes={{
-    'users.*':  'auth',
-    'public.*': 'public',
-  }}
-/>
+import { AuthenticationClient } from '@omnitron-dev/netron-browser';
+
+const jwtAuth = new AuthenticationClient({ storage: 'local' });
+
+const client = createMultiBackendClient({
+  baseUrl: 'https://api.example.com',
+  backends: {
+    auth:   { path: '/auth',   auth: jwtAuth },
+    public: { path: '/public' },          // omit `auth` — no credentials sent
+  },
+  defaultBackend: 'auth',
+});
 ```
 
-`auth: false` disables auth for that backend (e.g., a public CMS
-endpoint).
+Omitting `auth` is how a backend goes unauthenticated; there is
+no `auth: false`.
 
-For most setups, **one shared `AuthenticationClient`** across all
+For most setups **one shared `AuthenticationClient`** across all
 backends is right — the same JWT verifies everywhere in a
-fan-out architecture.
+fan-out architecture, and passing the same instance is what makes
+one refresh serve every backend.
 
-## Health-aware routing
+## Health checks
 
-```tsx
-<MultiBackendProvider
-  backends={{ ... }}
-  routes={{ ... }}
-  healthCheck={{
-    interval:     30_000,
-    timeout:      2_000,
-    onUnhealthy:  'fail',         // 'fail' | 'fallback' | 'queue'
-  }}
-  failover={{
-    'reports': 'reports-backup',  // when 'reports' is unhealthy, try 'reports-backup'
-  }}
-/>
-```
+`BackendPool` — the layer under the client — can poll its
+backends: `enableHealthChecks` (off by default) and
+`healthCheckInterval` (30s). That is the whole of it.
 
-When `onUnhealthy: 'fallback'` and a failover backend is
-configured, calls to the unhealthy backend get re-routed.
+There is no health-aware **routing**: nothing re-routes a call
+away from an unhealthy backend, and there is no `failover` map,
+no `onUnhealthy` policy and no request queue. A call to a backend
+that is down fails like any other call. If you need failover,
+build it above this layer — catch the error and retry against
+another backend by name with `client.backend('…')`.
 
 ## Shared cache
 
@@ -238,57 +252,80 @@ function CacheManager() {
 For vanilla JS / web workers / SSR:
 
 ```typescript
-import { BackendPool, BackendClient } from '@omnitron-dev/netron-browser';
+import { createMultiBackendClient } from '@omnitron-dev/netron-browser';
 
-const pool = new BackendPool({
+// One gateway, several backends behind it — the model is a shared origin
+// with a path per backend, not a client per host. That is what makes one
+// auth client, one middleware chain and one set of shared options apply
+// across all of them.
+const client = createMultiBackendClient({
+  baseUrl: 'https://api.example.com',
   backends: {
-    auth:    new BackendClient({ url: 'https://auth.example.com' }),
-    media:   new BackendClient({ url: 'https://media.example.com' }),
-    streams: new BackendClient({ url: 'wss://streams.example.com',
-                                 transport: 'websocket' }),
-  },
-  routes: {
-    'users.*':    'auth',
-    'objects.*':  'media',
-    'events.*':   'streams',
+    auth:    { path: '/auth' },
+    media:   { path: '/media' },
+    streams: { path: '/streams', transport: 'websocket' },
   },
   defaultBackend: 'auth',
+  routing: {
+    // Explicit mappings win over patterns.
+    services: { objects: 'media' },
+    // A string pattern is a PREFIX, not a glob — 'users' matches
+    // `users`, `users.admin`, `usersLegacy`. Use a RegExp when you need
+    // more than that.
+    patterns: [
+      { pattern: 'users',        backend: 'auth' },
+      { pattern: /^events\./,    backend: 'streams' },
+    ],
+  },
 });
 
-await pool.connectAll();
-
-const users = pool.service<UserService>('users');
-// Automatically routed to 'auth' backend
-const user = await users.getUser('u_42');
+const users = client.service<UserService>('users');
+const user = await users.getUser('u_42');   // routed to 'auth'
 ```
 
-`MultiBackendProvider` wraps a `BackendPool` under the hood —
-same routing logic, plus the React subscription glue.
+To reach a backend by name rather than by routing, `client.backend('media')`
+returns its `BackendClient`. `BackendPool` — the layer underneath — is the
+registry alone: `get(name)`, `connect(name)`, `connectAll()`, with no routing
+of its own.
+
+`MultiBackendProvider` takes this same client — the routing
+lives in the client, the provider adds the React subscription
+glue. That separation is why the client above works unchanged in
+a worker or an SSR pass.
 
 ## Routing patterns
 
-Glob-style; left-to-right wins; longer patterns match first.
+Not glob. A string pattern matches by **prefix** (or exactly);
+anything more expressive is a `RegExp`. Patterns are tried in
+array order and the first match wins — length plays no part.
 
-| Pattern | Matches |
-| ------- | ------- |
-| `'users.*'` | `users.getUser`, `users.list`, etc. |
-| `'*.public'` | Any service with `.public` method |
-| `'admin.*'` | All admin services |
-| `'OmnitronDaemon'` | Exact service name |
-| `'**'` | Everything (default-backend fallback) |
+| Pattern | Matches | Does not match |
+| ------- | ------- | -------------- |
+| `'users'` | `users`, `users.admin`, `usersLegacy` | `adminUsers` |
+| `/^admin\./` | `admin.settings`, `admin.audit` | `superadmin.x` |
+| `'OmnitronDaemon'` | that name exactly, and anything starting with it | — |
 
-For more complex matching, pass a function instead of a pattern
-map:
+`'users.*'`, `'*.public'` and `'**'` are ordinary strings here:
+`*` has no special meaning, so `'users.*'` matches only a service
+literally named `users.*…`. For "everything else", set
+`defaultBackend` — that is the fallback, and it applies whenever
+no explicit mapping and no pattern matched.
 
-```tsx
-<MultiBackendProvider
-  backends={{ auth: ..., media: ..., default: ... }}
-  routes={(service, method) => {
-    if (service.startsWith('Auth'))  return 'auth';
-    if (service.startsWith('Media')) return 'media';
-    return 'default';
-  }}
-/>
+Resolution order: `routing.services` (exact, wins outright) →
+`routing.patterns` (in order) → `defaultBackend`.
+
+There is no function form: `routing` takes `services` and
+`patterns`, and a `RegExp` pattern is the escape hatch for
+anything a prefix cannot express.
+
+```typescript
+routing: {
+  patterns: [
+    { pattern: /^Auth/,  backend: 'auth' },
+    { pattern: /^Media/, backend: 'media' },
+  ],
+},
+defaultBackend: 'default',
 ```
 
 ## Prism integration
@@ -329,8 +366,10 @@ hooks into the Prism context.
   architectures.
 - **`RequireBackendConnection`** for routes that need a specific
   backend up — fail-fast UX beats mystery loading state.
-- **Per-backend health probes** in production — surface
-  individual backend health to operators.
+- **Handle a backend being down where you can act on it.** The
+  client does not re-route away from an unhealthy backend, so a
+  component that must survive one going away needs its own
+  fallback.
 
 ## Anti-patterns
 
@@ -339,8 +378,8 @@ hooks into the Prism context.
 - **Per-backend `AuthenticationClient`** in a fan-out architecture.
   Multiple instances, mismatched tokens, sign-out doesn't
   propagate.
-- **Glob `'**'`** as the only pattern. Defeats routing; use
-  `defaultBackend` instead.
+- **A catch-all pattern.** There is no glob to write one with,
+  and `defaultBackend` already is the fallback.
 - **Hard-coding backend names in components.** Use `useService`
   (routed) so components stay transport-agnostic.
 
