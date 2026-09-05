@@ -83,15 +83,43 @@ expect(logger.info).toHaveBeenCalledWith('findById', expect.objectContaining({ i
 Mock `JWTService` to bypass real signing:
 
 ```typescript
-import type { IJWTService, IAuthContext } from '@omnitron-dev/titan-auth';
+import type { IJWTService, IAuthContext, IJWTPayload } from '@omnitron-dev/titan-auth';
+
+const claims: IJWTPayload = { sub: 'u_42', role: 'user' };
 
 const fakeJwt: IJWTService = {
-  verify:         vi.fn(async () => ({ sub: 'u_42', roles: ['user'] })),
-  createContext:  vi.fn(async () => ({ userId: 'u_42', roles: ['user'] } as IAuthContext)),
-  clearCache:     vi.fn(),
-  getCacheStats:  () => ({ size: 0, maxSize: 1000, hits: 0, misses: 0, hitRate: 0 }),
-} as any;
+  verify:        vi.fn(async () => claims),
+  createContext: vi.fn(
+    async (): Promise<IAuthContext> => ({
+      userId: 'u_42',
+      role: 'user',            // singular, and a string — not `roles: string[]`
+      tenantId: 't_1',
+      isServiceRole: false,
+      claims,
+    }),
+  ),
+  clearCache:    vi.fn(),
+  getCacheStats: () => ({ size: 0, maxSize: 1000, hits: 0, misses: 0, hitRate: 0 }),
+};
 ```
+
+:::caution Three different auth contexts share these names
+
+The fake above is typed against `IAuthContext` from
+`@omnitron-dev/titan-auth`: `{ userId, role, tenantId, isServiceRole,
+claims }`, all required. Two others exist and are not interchangeable:
+
+| Type | Where | Shape |
+| ---- | ----- | ----- |
+| `IAuthContext` | `@omnitron-dev/titan-auth` | `role: string`, plus `tenantId`, `isServiceRole`, `claims` — all required |
+| `IAuthContext` | titan `netron/interfaces/core-types` | `roles?: string[]`, `permissions?`, `claims?` — all optional |
+| `AuthContext`  | titan `netron/auth/types` | `roles: string[]`, `permissions: string[]`, `scopes?`, `token?` |
+
+An earlier version of this example wrote `{ userId, roles: ['user'] }`
+— correct for the netron shapes, wrong for the one it imported. If a
+context literal will not typecheck, check which of the three you have
+before adding a cast; the cast is how the mismatch reaches runtime.
+:::
 
 For `@RequireAuth` decorator tests, supply a mock middleware:
 
