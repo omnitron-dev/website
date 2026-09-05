@@ -189,11 +189,15 @@ Internal auto-growing buffer-builder, exported from the
 
 ```typescript
 import { SmartBuffer } from '@omnitron-dev/msgpack/smart-buffer';
+import Long from 'long';
 
 const buf = new SmartBuffer();        // optional initialCapacity arg
 buf.writeUInt32BE(0xdeadbeef);
 buf.writeUInt8(0x2a);
-buf.writeInt64BE(123n);
+// 64-bit takes `number | Long`, NOT a bigint literal — `123n` does not
+// typecheck. Pass a number when the value fits in a double, or a `Long`.
+buf.writeInt64BE(123);
+buf.writeInt64BE(Long.fromString('9007199254740993'));
 const out = buf.toBuffer();
 
 // Reading back:

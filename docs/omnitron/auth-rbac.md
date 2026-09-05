@@ -25,7 +25,7 @@ This page covers the pieces and how they compose.
 | ------- | ------------ | --------- |
 | Local CLI | OS-level file permission (Unix socket `0o600`) | Implicit admin — no JWT needed |
 | Webapp / remote CLI | JWT issued by `OmnitronAuth.signIn` | Bearer token on every HTTP/TCP call |
-| Service-to-service (cluster, fleet, sync) | JWT minted by the issuing daemon | Same as webapp; verified server-side |
+| Service-to-service (cluster, fleet, sync) | See the caution below — no credential is minted today | — |
 
 Apps in your ecosystem add a **fourth** surface — end users
 authenticating against one of your apps. The recommended
@@ -43,8 +43,18 @@ pattern (used by the production reference) is:
 | `operator` | `operator`, `admin` | Viewer + lifecycle: start / stop / restart / reload / scale / exec |
 | `admin` | `admin` only | Operator + destructive: shutdown / reloadConfig / secrets / setMetricsEnabled |
 
-Role hierarchy is **additive**: admin includes operator includes
-viewer. Methods declare the **minimum** role required.
+The hierarchy is additive in effect, but a method does **not**
+declare a minimum — it declares the full list of roles that may
+call it, and `VIEWER_ROLES` / `OPERATOR_ROLES` / `ADMIN_ROLES`
+spell those lists out. `hasMinimumRole()` exists in
+`shared/roles.ts` and has no caller; it is the only place a rank
+order is written down, and nothing on the request path consults
+it.
+
+The distinction matters when a role is added. A new role is not
+implicitly below `viewer` or above it — it is simply absent from
+every list, and therefore permitted nowhere, until it is added to
+each list by hand.
 
 ```typescript
 // From the daemon RPC service:
@@ -283,10 +293,33 @@ auth: {
 },
 ```
 
-Now every database query — from any `@Service` method — runs
-inside an AsyncLocalStorage scope that exposes `user_id`,
-`is_system`, `tenant_id` to RLS policies. Repositories pick this
-up automatically via the kysera RLS plugin.
+Now every database query — from any `@Service` method reached
+**over HTTP** — runs inside an AsyncLocalStorage scope that
+exposes `user_id`, `is_system`, `tenant_id` to RLS policies.
+Repositories pick this up automatically via the kysera RLS plugin.
+
+:::caution HTTP only — the WebSocket transport ignores this option
+`invocationWrapper` is read by
+`netron/transport/http/server.ts` and by nothing under
+`transport/websocket/`. A call arriving over WebSocket (or TCP,
+or the Unix socket) is dispatched by `remote-peer.ts` straight to
+`stub.call(method, args)`: authorisation still runs —
+`enforceMethodAccess` precedes it — but no AsyncLocalStorage
+frame is established.
+
+So a service method invoked over WebSocket runs with **no RLS
+context**. kysera fails closed there: `SELECT` gets an impossible
+predicate and `UPDATE` / `DELETE` touch no rows, with a warning
+in the log. Nothing leaks — queries simply return nothing, which
+is the kind of failure that gets reported as "the realtime page
+is empty" rather than as an auth bug.
+
+Both call sites in Omnitron pass the option to the WebSocket
+transport anyway, so it begins working the day the transport
+honours it; `apps/omnitron/test/unit/websocket-wrapper-gap.test.ts`
+fails when that day comes. Until then, keep anything that depends
+on RLS on the HTTP transport.
+:::
 
 ## Role hierarchy patterns for end-user RBAC
 
@@ -345,9 +378,26 @@ async getProfile() { /* ... */ }
 async receiveBatch(data: SyncBatch) { /* ... */ }
 ```
 
-The `service_role` is a special role the daemon mints for
-cross-app calls (e.g., `OmnitronSync.receiveBatch` between
-master and slave daemons). End-user JWTs never carry it.
+:::caution `service_role` cannot currently be obtained
+`OmnitronSync`'s three write methods list it, and
+`auth.utils.createServiceContext()` in `@omnitron-dev/titan-auth`
+produces it — reached only from `validateApiKey()`, when a
+`serviceKey` is configured. The daemon configures none: it wires
+`TitanAuthModule` with a JWT secret and nothing else, and the role
+in a daemon JWT comes from the `role` column of `omnitron_users`,
+which only ever holds `admin`, `operator` or `viewer`.
+
+So no caller can present `service_role` today, and
+`isServiceRole` in the daemon's auth context is always false. In
+practice the sync methods are reachable by `admin` and `operator`.
+
+This is one end of an unfinished feature rather than an oversight
+on its own: `SyncService.setMasterConnection()`, the slave's
+channel to the master, has no caller outside tests either. When
+the cross-daemon path is finished it needs a credential —
+configuring `serviceKey` is the smallest form — and until then
+this row describes an intent, not a mechanism.
+:::
 
 ## API key pattern (for headless integrations)
 
