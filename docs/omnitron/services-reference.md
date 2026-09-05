@@ -63,11 +63,40 @@ Plus the core supervisor:
 | ---- | ---------- | ------- | --------- |
 | `daemon/daemon.rpc-service.ts` | `OmnitronDaemon` | 25 | mixed — see [Daemon](./daemon.md#rpc-surface--omnitrondaemon-service) |
 
+And two the daemon does not declare at all — they come from Titan
+modules it imports, and are registered by those modules:
+
+| File | Service id | Methods | Role gate |
+| ---- | ---------- | ------- | --------- |
+| `packages/titan-metrics/src/rpc-service.ts` | `OmnitronMetrics` | 6 | **3 anonymous** (`getSnapshot`, `querySeries`, `getPrometheusText`) + authenticated (`cleanup`, `flush`, `evictApp`) |
+| `packages/titan-health/src/health.rpc-service.ts` | `Health@1.0.0` | 7 | **all 7 anonymous** |
+
+Both are worth knowing about for a reason beyond completeness: they are
+the daemon's anonymous surface. Ten of their thirteen methods answer
+without credentials, because `allowAnonymous` is declared in the
+packages and the daemon cannot override it. That is harmless while
+`daemon.host` is `127.0.0.1` and an exposure the moment it is not —
+`omnitron doctor` reports it as `auth.anonymous-surface`.
+
 ## Naming convention
 
-Service ids all use the `Omnitron<Subsystem>` PascalCase shape
-(no version suffix). Query them via Netron's standard interface
-mechanism:
+Most service ids use the `Omnitron<Subsystem>` PascalCase shape with no
+version suffix. `Health@1.0.0` is the exception, and it is not going to
+be renamed: the id is Netron's own versioned form, declared by
+`@omnitron-dev/titan-health` for every application that imports the
+module, so it is not omnitron's to change. Query it with the suffix
+included.
+
+## What `availableServices` lists
+
+When a `query_interface` fails, the daemon logs the ids it does have.
+That list is a **superset** of this page: managed applications register
+their own services into the same Netron registry, so a host running
+`daos` shows entries like `TransformWorker` alongside the daemon's own.
+A name in that list is not evidence of a daemon service, and its absence
+from this page is not evidence of a gap.
+
+Query services via Netron's standard interface mechanism:
 
 ```typescript
 import type { IProjectRpcService } from '@omnitron-dev/omnitron/dto/services';
