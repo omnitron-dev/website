@@ -63,7 +63,9 @@ import { NotificationsModule } from '@omnitron-dev/titan-notifications';
       targetResolver:   NOTIFICATION_TARGET_RESOLVER,
       persister:        NOTIFICATION_PERSISTER,
       realtimeSignaler: NOTIFICATION_REALTIME_SIGNALER,
-      workerOptions:    { concurrency: 8 },
+      // There is no `concurrency` — the worker runs one XREADGROUP loop and
+      // takes a batch per read. `readCount` sizes the batch.
+      workerOptions:    { readCount: 100, blockTimeoutMs: 5_000 },
     }),
   ],
   providers: [
@@ -114,8 +116,8 @@ class NotifyService {
   @Public()
   async welcome(user: User) {
     await this.notify.send(
-      { userId: user.id, email: user.email },
-      { template: 'welcome', data: { name: user.name } },
+      { id: user.id, email: user.email },
+      { type: 'info', title: 'Welcome', message: `Hello, ${user.name}` },
       { channels: ['email', 'inapp'] },
     );
   }
@@ -128,12 +130,75 @@ class NotifyService {
 | `broadcast(recipients[], payload, options?)`                             | `Promise<BroadcastResult>` |
 | `schedule(recipient, payload, scheduledAt)`                              | `Promise<ScheduleResult>`  |
 
+`NotificationPayload` requires `type`, `title` and `message`. There is
+no `template` field on it — see below.
+
 The service:
 1. Checks rate limits per channel per recipient.
 2. Checks preferences (does the user opt in to this channel?).
-3. Routes to the right channel via `IChannelRouter`.
-4. Renders the template (if `template` is in the payload).
-5. Hands off to the channel implementation.
+3. Routes to the right channel via `IChannelRouter` — only if one is
+   registered; the injection is `@Optional()`, and without it the
+   `channels` you pass in the options are used as given.
+4. Hands off to the registered channel implementations.
+5. Records the send against the rate limiter.
+
+### Templates are opt-in and caller-driven
+
+`send()` does not render templates. `TemplateEngine` is a separate
+service exported under `NOTIFICATIONS_TEMPLATE_ENGINE`; nothing inside
+the package calls it. You apply it yourself and pass the result on:
+
+```typescript
+import {
+  NOTIFICATIONS_TEMPLATE_ENGINE, NOTIFICATIONS_SERVICE,
+  TemplateEngine, NotificationsService,
+} from '@omnitron-dev/titan-notifications';
+
+@Service({ name: 'notify' })
+class NotifyService {
+  constructor(
+    @Inject(NOTIFICATIONS_SERVICE) private readonly notify: NotificationsService,
+    @Inject(NOTIFICATIONS_TEMPLATE_ENGINE) private readonly templates: TemplateEngine,
+  ) {}
+
+  @Public()
+  async welcome(user: User) {
+    const payload = this.templates.applyToPayload(
+      'welcome',
+      { type: 'info', title: '', message: '' },
+      { name: user.name },
+    );
+    await this.notify.send({ id: user.id, email: user.email }, payload);
+  }
+}
+```
+
+`applyToPayload` overlays the rendered `title`/`message` onto the
+payload and stashes the full render under `data._rendered`. The
+`templates` block in the module options configures that engine
+(caching, TTL) — it does not switch on rendering inside `send()`.
+
+### `NotificationRecipient.id` is the only required field, and it is load-bearing
+
+```typescript
+interface NotificationRecipient {
+  id: string;              // required
+  email?: string; phone?: string; pushTokens?: string[];
+  webhookUrl?: string; locale?: string;
+}
+```
+
+Every step above keys off `id`: the rate-limit bucket
+(`checkLimit(recipient.id, …)`), the preference lookup, the realtime
+channel the delivery is published to
+(`notifications.{type}.{recipient.id}`), and the in-app channel's own
+`canDeliver` check, which is literally `!!recipient.id`.
+
+That makes a misspelt key — `userId`, say — quiet rather than loud: the
+send resolves, in-app delivery is skipped for failing `canDeliver`, and
+everything else is published to `notifications.welcome.undefined`,
+where no subscriber is listening. Nothing throws. TypeScript is the
+only thing that catches it, so do not widen this argument to `any`.
 
 ## Channels
 
