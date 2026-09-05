@@ -398,7 +398,9 @@ static bundle and proxies RPC to the daemon:
 nginx (`:9800`) proxies `/netron/*` to the daemon's HTTP listener
 (`httpPort + 1`, default `:9801`) and `/ws` to the daemon's Netron
 WebSocket transport (`httpPort + 2`, default `:9802`). In dev mode
-Vite talks to the same daemon HTTP/WS ports directly. See
+Vite serves the console on `:9810` and proxies the same two paths to
+the same daemon ports, so the browser asks for `/netron/*` and `/ws`
+on its own origin either way and the client hard-codes neither. See
 [Console](./console.md) for the full port map.
 
 ## Auth model — three roles
