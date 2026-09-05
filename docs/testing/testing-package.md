@@ -44,8 +44,13 @@ adapter.test('my test', () => { /* ... */ });
 adapter.expect(actual).toBe(expected);
 ```
 
-The same test code path runs unchanged on Node + Bun (via
-Vitest) and Deno (via Deno's native `Deno.test`).
+The same test code path runs unchanged on Node + Bun (via Vitest) and
+Deno (via Deno's native `Deno.test`) for `describe`, `it`, `test`,
+`expect`, the four hooks and `fakeTimers` — a surface test in the
+package fails if the three adapters drift apart.
+
+**Mocking is the exception**: it is `vi` on Node and Bun, `mockFn` on
+Deno. If your test mocks, that part is not portable as written.
 
 ## Typed mock function
 

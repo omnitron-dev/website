@@ -98,8 +98,10 @@ describe('UsersService', () => {
     const container = new Container();
     const fakeRepo  = { findById: vi.fn().mockResolvedValue(MOCK_USER) };
 
-    container.register({ provide: UserRepo,     useValue: fakeRepo });
-    container.register({ provide: UsersService, useClass: UsersService });
+    // Container.register takes the token separately — the { provide, … }
+    // form is for a module's `providers` array, not for this call.
+    container.register(UserRepo, { useValue: fakeRepo });
+    container.register(UsersService);          // a bare class is its own token
 
     const service = await container.resolveAsync(UsersService);
     const user    = await service.findById('u_42');
