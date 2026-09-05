@@ -13,6 +13,15 @@ every Netron RPC service a module registers. Useful when you can't
 remember which token you need to inject, or when reviewing the
 external RPC surface of an app for security/audit purposes.
 
+The token list is checked against the packages by a script rather than
+asserted to have been verified — run it yourself:
+
+```bash
+node internal/website/scripts/check-titan-inventories.mjs .
+```
+
+It exits non-zero if this page names a token no Titan package exports.
+
 ## Built-in module tokens
 
 <ModuleBadge origin="built-in" pkg="@omnitron-dev/titan" />
