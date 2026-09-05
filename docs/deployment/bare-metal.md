@@ -283,16 +283,29 @@ Daily Postgres backup via cron:
 30 2 * * *  postgres  pg_dump platform | gzip > /var/backups/platform-$(date +\%Y\%m\%d).sql.gz
 ```
 
-Or drive Omnitron's built-in `pg_dump`-based backup from cron
-(it writes compressed dumps to `~/.omnitron/backups/`):
+Or let the daemon schedule it. `omnitron backup schedule` takes a
+target and a specification, persists it, and re-arms it on every
+daemon start:
+
+```bash
+omnitron backup schedule main "0 3 * * *"   # cron, or hourly|daily|weekly, or a number of ms
+omnitron backup schedule all daily          # 'all' = every database in a running stack
+omnitron backup schedules                   # list what is configured
+omnitron backup unschedule main
+```
+
+An unparseable specification is rejected when you set it, rather
+than defaulting to some time nobody chose.
+
+Cron on the host works too, and is the right choice when you want
+the backup to run whether or not the daemon is up:
 
 ```bash
 # /etc/cron.d/omnitron-app-backups — 'main' is the app database name
 0 3 * * *  omnitron  cd /home/omnitron/platform && /usr/bin/pnpm omnitron backup create main
 ```
 
-There is no `omnitron backup schedule` command — schedule it via
-cron as above. The daemon's state under `~/.omnitron/` (including
+The daemon's state under `~/.omnitron/` (including
 the SQLite store at `~/.omnitron/data/daemon-state.db`) is
 regenerable — back it up if you want history (uptime bars,
 secrets store).
