@@ -402,7 +402,7 @@ items: z.array(z.object({
 ## Multi-step wizards
 
 ```tsx
-import { Stepper, Step } from '@omnitron-dev/prism/components/stepper';
+import { Stepper } from '@omnitron-dev/prism/components/stepper';
 
 const Schema = z.object({
   account: z.object({ email: z.string().email(), password: z.string().min(8) }),
@@ -424,11 +424,14 @@ function Wizard() {
 
   return (
     <FormProvider {...form}>
-      <Stepper activeStep={step}>
-        <Step label="Account" />
-        <Step label="Profile" />
-        <Step label="Plan" />
-      </Stepper>
+      <Stepper
+        activeStep={step}
+        steps={[
+          { label: 'Account', description: 'Email and password' },
+          { label: 'Profile', description: 'Your name' },
+          { label: 'Plan' },
+        ]}
+      />
 
       {step === 0 && <AccountStep />}
       {step === 1 && <ProfileStep />}

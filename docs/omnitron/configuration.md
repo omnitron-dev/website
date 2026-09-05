@@ -274,7 +274,6 @@ export default defineSystem({
 | `omnitronConfig` | `OmnitronAppConfig` — declarative infra (database, redis, s3, custom services)                                                      |          |
 | `env`            | `Record<string, string>`                                                                                                            |          |
 | `cwd`            | `string`                                                                                                                            |          |
-| `dev`            | `{ port?, logLevel?, sourceMaps?, env? }` — applied with `omnitron dev`                                                            |          |
 | `observability`  | `{ metrics?, tracing?, logging? }`                                                                                                  |          |
 
 ### `IProcessEntry` — the heart of `defineSystem`
@@ -422,21 +421,6 @@ injects resolved env vars (`DATABASE_URL`, `REDIS_URL`,
 infrastructure addresses.
 
 → Full reference: [Infrastructure](./infrastructure.md).
-
-### Dev-mode overrides
-
-```typescript
-dev: {
-  port:       3001,            // override HTTP port
-  logLevel:   'debug',
-  sourceMaps: true,
-  env:        { NODE_ENV: 'development' },
-}
-```
-
-Applied only when running via `omnitron dev` or with
-`NODE_ENV !== 'production'`. Per-process `dev` is not yet
-supported — overrides apply app-wide.
 
 ### Lifecycle hooks
 

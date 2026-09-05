@@ -224,7 +224,7 @@ a retry (the HTTP transport re-sends once); 403 and 429 surface
 through callbacks. Register it on the `ERROR` stage.
 
 ```typescript
-import { AuthenticationClient } from '@omnitron-dev/netron-browser/auth';
+import { AuthenticationClient } from '@omnitron-dev/netron-browser';
 import {
   createAuthErrorMiddleware,
   MiddlewareStage,

@@ -262,12 +262,16 @@ always require JWT.
 
 ## Daemon client — `daemon-client.ts`
 
-The typed Netron client used by every CLI command:
+The typed Netron client used by every CLI command. It is internal to the
+package — `@omnitron-dev/omnitron` publishes `.`, `./config`,
+`./dto/services` and `./dto/events`, and nothing else — so this is how the
+CLI reaches it from inside, not an import you can write from outside:
 
 ```typescript
-import { DaemonClient } from '@omnitron-dev/omnitron/internal';
+// apps/omnitron/src/commands/*.ts
+import { createDaemonClient } from '../daemon/daemon-client.js';
 
-const client = new DaemonClient();
+const client = createDaemonClient();      // default socket, default timeout
 await client.ping();                       // probe
 await client.startApp({ name: 'api' });
 await client.getMetrics({ name: 'api' });

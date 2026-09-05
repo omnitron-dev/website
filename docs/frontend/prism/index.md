@@ -72,7 +72,7 @@ Pick the level that matches your need:
 | Subpath | What it exports |
 | ------- | --------------- |
 | `@omnitron-dev/prism` | Everything; convenient but largest |
-| `@omnitron-dev/prism/theme` | `createTheme()`, palette, typography, shadows, presets |
+| `@omnitron-dev/prism/theme` | `createPrismTheme()`, palette, typography, shadows, presets |
 | `@omnitron-dev/prism/core` | `<PrismProvider>`, `<ProviderStack>`, context primitives |
 | `@omnitron-dev/prism/layouts` | `<DashboardLayout>`, `<AuthCenteredLayout>` / `<AuthSplitLayout>` / `<AuthSimpleLayout>`, `<LayoutProvider>` |
 | `@omnitron-dev/prism/blocks` | `<AuthBlock>`, `<DashboardBlock>`, `<DataGridBlock>` |
@@ -95,9 +95,9 @@ your bundler needs.
 
 ```tsx
 import { PrismProvider } from '@omnitron-dev/prism/core';
-import { createTheme }   from '@omnitron-dev/prism/theme';
+import { createPrismTheme } from '@omnitron-dev/prism/theme';
 
-const theme = createTheme({ palette: { mode: 'dark', primary: { main: '#7c4dff' } } });
+const theme = createPrismTheme({ mode: 'dark', primaryColor: '#7c4dff' });
 
 function App() {
   return (
