@@ -205,6 +205,35 @@ if (src.size === 0) {
   }
   console.log(`control ok — injected wrong default for \`${name}\` was caught`);
 
+  // The opposite error. Everything above proves the probe CAN report; a scan
+  // that reported every option would satisfy all of it, since the planted
+  // option is among "every". This proves it does not report when the page is
+  // right — and it has to be its own page rather than the real docs, or the
+  // property would hold only for as long as the real docs happen to agree.
+  {
+    const agreeing = fs.mkdtempSync(path.join(process.cwd(), '.doc-defaults-control-'));
+    let why = null;
+    try {
+      fs.writeFileSync(
+        path.join(agreeing, `${entries[0].pkg.replace('titan-', '')}.mdx`),
+        `- \`${name}\` — as declared (default: \`${norm(entries[0].value)}\`).\n`
+      );
+      const got = scan(agreeing, src);
+      if (got.length > 0) {
+        why =
+          `CONTROL FAILED: a page that agrees with the source was reported anyway` +
+          ` — ${got.length} finding(s), about ${got.map((f) => f.name).join(', ')}. Aborting.`;
+      }
+    } finally {
+      fs.rmSync(agreeing, { recursive: true, force: true });
+    }
+    if (why) {
+      console.error(why);
+      process.exit(2);
+    }
+    console.log('control ok — a page that agrees with the source was not reported');
+  }
+
   // Three filters were added to stop this probe reporting correct sentences:
   // positional pairing for "`a` / `b` — Defaults `x` / `y`", duration-aware
   // comparison so "5 s" equals `5000`, and skipping a "value" that is really

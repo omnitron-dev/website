@@ -179,13 +179,23 @@ function control(real, documented) {
   const kinds = new Set(found.map((l) => l.split(/\s+/)[0]));
   const extra = found.length - baseline;
   const missing = ['MISSING', 'COUNT', 'STALE'].filter((k) => !kinds.has(k));
-  return {
-    ok: extra === 3 && missing.length === 0,
-    extra,
-    missing,
-    why: `got ${extra} planted disagreement(s), expected 3` +
-      (missing.length ? `; branch(es) that did not fire: ${missing.join(', ')}` : ''),
-  };
+
+  // The opposite error. Everything above proves the comparison CAN report; a
+  // comparison that reported every service would satisfy it too, since the
+  // planted ones are among "every". Inputs that agree by construction must
+  // produce nothing — and this is not the same as the real run coming back
+  // clean, which only holds for as long as the page happens to agree.
+  const matchingRows = new Map([...real].map(([id, v]) => [id, v.methods.length]));
+  const spurious = compare(real, matchingRows);
+
+  const problems = [];
+  if (extra !== 3) problems.push(`got ${extra} planted disagreement(s), expected 3`);
+  if (missing.length) problems.push(`branch(es) that did not fire: ${missing.join(', ')}`);
+  if (spurious.length) {
+    problems.push(`reported ${spurious.length} disagreement(s) between inventories that agree: ${spurious[0]}`);
+  }
+
+  return { ok: problems.length === 0, extra, missing, why: problems.join('; ') };
 }
 
 const real = realServices();
