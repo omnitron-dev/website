@@ -311,14 +311,25 @@ for (const line of raw.split('\n')) {
 const controlErrors = raw
   .split('\n')
   .filter((l) => l.includes(CONTROL) && /error TS2\d+/.test(l));
-if (controlErrors.length === 0) {
+// The control file carries exactly this many deliberate errors. Accepting "at
+// least one" is how one of the two went unnoticed for as long as it existed:
+// the run printed "1 deliberate error(s) detected" on every invocation, next to
+// a file with two lines in it, and nobody — including the people maintaining
+// this script — read that number as a claim. A control that reports a bare "ok"
+// cannot be contradicted; one that prints what it got beside what it expected
+// can be.
+const CONTROL_EXPECTED = 2;
+if (controlErrors.length !== CONTROL_EXPECTED) {
   console.error(
-    'CONTROL FAILED: the deliberate API errors in the control file were not reported.\n' +
-      'The packages are not resolving, so every result below would be a false clean.'
+    `CONTROL FAILED: got ${controlErrors.length} deliberate error(s), expected ${CONTROL_EXPECTED}.\n` +
+      (controlErrors.length === 0
+        ? 'The packages are not resolving, so every result below would be a false clean.'
+        : 'One of the deliberate errors stopped being reported — this probe now checks less than it claims.\n' +
+          controlErrors.map((l) => `  ${l.trim()}`).join('\n'))
   );
   process.exit(1);
 }
-console.log(`control ok — ${controlErrors.length} deliberate error(s) detected\n`);
+console.log(`control ok — ${controlErrors.length}/${CONTROL_EXPECTED} deliberate errors detected\n`);
 
 let reported = 0;
 for (const { c, errors } of [...byCase.values()].sort((a, b) => a.c.file.localeCompare(b.c.file))) {

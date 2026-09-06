@@ -57,6 +57,9 @@ const titanPkgs = fs
   .map((e) => path.join(pkgRoot, e.name));
 
 let failures = 0;
+/** [what, got, expected] — each one printed, and each one able to fail. */
+const controls = [];
+
 const fail = (msg) => {
   console.error(`FAIL  ${msg}`);
   failures++;
@@ -83,9 +86,30 @@ const fail = (msg) => {
     fail(`tokens-reference.mdx yielded only ${documented.size} names — extraction broke`);
   }
 
-  const missing = [...documented].filter((n) => !declared.has(n)).sort();
+  // The comparison, as a function, so the control below can run through THE
+  // SAME code and not a copy of it. The first version of that control rebuilt
+  // the filter itself; breaking the real comparison left it passing, which made
+  // it exactly the decorative control this file was given one to avoid.
+  const undocumented = (names) => [...names].filter((n) => !declared.has(n)).sort();
+
+  const missing = undocumented(documented);
   for (const n of missing) fail(`tokens-reference.mdx documents \`${n}\`, which no titan package exports`);
   if (missing.length === 0) console.log(`ok — ${documented.size} documented tokens all exist`);
+
+  // Control. The size floors above catch an extraction that broke OUTRIGHT;
+  // they say nothing about one that still returns plenty of names while the
+  // comparison has stopped comparing. So put a name in the documented set that
+  // certainly is not exported and require it to be caught.
+  //
+  // Printed as got/expected rather than as "ok", because a control that reports
+  // a bare pass cannot be contradicted by anything: the example checker in this
+  // directory printed "1 deliberate error(s) detected" beside a control file
+  // with TWO of them, on every run, for as long as it existed.
+  controls.push([
+    'a documented token that no package exports',
+    undocumented(new Set([...documented, '__CONTROL_TOKEN_THAT_DOES_NOT_EXIST__'])).length,
+    missing.length + 1,
+  ]);
 }
 
 // ---------------------------------------------------------------------------
@@ -109,9 +133,16 @@ const fail = (msg) => {
     fail(`decorators-catalog.mdx yielded only ${documented.size} names — extraction broke`);
   }
 
-  const missing = [...documented].filter((n) => !declared.has(n)).sort();
+  const undocumented = (names) => [...names].filter((n) => !declared.has(n)).sort();
+  const missing = undocumented(documented);
   for (const n of missing) fail(`decorators-catalog.mdx documents \`@${n}\`, which no titan package exports`);
   if (missing.length === 0) console.log(`ok — ${documented.size} documented decorators all exist`);
+
+  controls.push([
+    'a documented decorator that no package exports',
+    undocumented(new Set([...documented, 'ControlDecoratorThatDoesNotExist'])).length,
+    missing.length + 1,
+  ]);
 
   // The page states the root re-exports exactly these nine. That sentence is
   // the kind that rots: adding one export to titan's index silently makes it
@@ -178,6 +209,21 @@ const fail = (msg) => {
       console.log(`ok — the root re-exports exactly the ${actual.length} decorators the page names`);
     }
   }
+}
+
+// ---------------------------------------------------------------------------
+// Controls — reported last, so a broken comparison cannot hide behind a clean
+// diff above it.
+// ---------------------------------------------------------------------------
+let controlFailed = false;
+for (const [what, got, expected] of controls) {
+  const okay = got === expected;
+  if (!okay) controlFailed = true;
+  console.log(`${okay ? 'control ok' : 'CONTROL FAILED'} — ${what}: got ${got}, expected ${expected}`);
+}
+if (controlFailed) {
+  console.error('\nA control did not fire: the comparison above is not checking what it reports.');
+  process.exit(2);
 }
 
 process.exit(failures > 0 ? 1 : 0);
