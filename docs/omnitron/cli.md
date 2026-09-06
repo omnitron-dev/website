@@ -34,7 +34,7 @@ Verified against `src/cli/omnitron.ts` and `src/commands/*`.
 | **Information** | `list` (alias `ls`), `status`, `config`, `init` |
 | **Monitoring** | `logs`, `monit`, `health`, `metrics`, `health-check`, `discover` |
 | **Scaling** | `scale` |
-| **Diagnostics** | `inspect`, `exec`, `env` |
+| **Diagnostics** | `doctor`, `inspect`, `exec`, `env` |
 | **Remote** | `remote add`, `remote remove`, `remote list`, `remote status` |
 | **Fleet** | `fleet status`, `fleet health`, `fleet metrics` |
 | **Cluster** | `cluster status`, `cluster step-down` |
@@ -182,6 +182,62 @@ respects the app's `IProcessEntry.scaling` constraints
 (`maxInstances`, `targetCPU`, etc.).
 
 ## Diagnostics
+
+### `omnitron doctor`
+
+One pass over the whole installation — daemon, apps, ports,
+infrastructure containers, the internal database, the disk, the
+build on disk and the console — reporting problems with the
+evidence that identifies them and the command that fixes them.
+
+It reads the database directly rather than through the daemon,
+because a daemon whose schema has gone missing still answers RPCs
+perfectly well.
+
+| Option | Effect |
+| ------ | ------ |
+| `--json` | Machine-readable output (see below) |
+
+Exit code is `1` when any finding has severity `error`, so it
+works as a CI gate.
+
+**What "no problems found" means.** A check that cannot run is
+reported separately from one that ran and found nothing:
+
+```
+[?] 5 area(s) not examined:
+      db.pending-migrations — not checked: whether every migration
+        has been applied — the database stopped answering
+      ...
+```
+
+An unreachable database takes five checks down with it and a
+daemon that is not answering takes seven. Without that section a
+silent gap and a clean result print identically, and they point an
+operator in opposite directions.
+
+In `--json` the same distinction is two fields:
+
+```json
+{
+  "ok": false,
+  "complete": false,
+  "worst": "error",
+  "findings": [ { "id": "db.unreachable", "severity": "error", "title": "…",
+                  "evidence": ["…"], "remedy": "…" } ],
+  "skipped":  [ { "id": "logs.*", "reason": "not checked: … — the database stopped answering" } ]
+}
+```
+
+`ok` is "nothing was found"; `complete` is "everything was
+looked at". A gate that reads only `ok` cannot tell a healthy
+installation from an unexamined one.
+
+Findings carry a stable `id` — `db.unreachable`,
+`app.port-unreachable`, `infra.detached`, `build.stale-sources`,
+`auth.anonymous-surface`, `logs.retry-loop` and so on. A `skipped`
+entry names the id its check would have reported under, or
+`prefix.*` where a check reports several.
 
 ### `omnitron inspect <app>`
 
