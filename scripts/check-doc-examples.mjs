@@ -70,6 +70,59 @@ for (const root of DOCS) {
   })(root);
 }
 
+/**
+ * A snippet that uses `this` outside a class is the body of a method, printed
+ * without the class around it. At module scope TypeScript types `this` as
+ * `undefined`, so every such line reported TS2532 "Object is possibly
+ * 'undefined'" — six of them in this docs tree, none of them a defect in the
+ * example.
+ *
+ * A checker with a known false positive is worse than a stricter one: the
+ * response to it becomes skimming, and skimming is what every real finding
+ * depends on not happening. So give those snippets the context they were
+ * written inside — imports stay at the top, the rest becomes a method body on a
+ * class whose members are open. `this.*` was never checkable in a fragment that
+ * elides its class; everything else on those lines still is.
+ */
+function wrapMethodBody(code) {
+  const usesThis = /(^|[^\w.$'"`])this\s*\./.test(code.replace(/^\s*(?:import|export)\b.*$/gm, ''));
+  if (!usesThis) return code;
+
+  const lines = code.split('\n');
+  const head = [];
+  let i = 0;
+  // An import can span several lines, so consuming only lines that START with
+  // `import` cut them in half and produced a syntax error — which tsc reports
+  // and then STOPS on, taking the control file's deliberate errors with it. The
+  // control caught that immediately, which is the whole reason it exists.
+  let insideImport = false;
+  for (; i < lines.length; i++) {
+    const t = lines[i].trim();
+    if (insideImport) {
+      head.push(lines[i]);
+      if (/\bfrom\s+['"]/.test(t) || t.endsWith(';')) insideImport = false;
+      continue;
+    }
+    if (t === '' || t.startsWith('//')) { head.push(lines[i]); continue; }
+    if (/^import\b/.test(t)) {
+      head.push(lines[i]);
+      if (!/\bfrom\s+['"]/.test(t) && !t.endsWith(';')) insideImport = true;
+      continue;
+    }
+    break;
+  }
+  if (insideImport) return code; // unterminated — leave the snippet alone
+  const body = lines.slice(i);
+  return [
+    ...head,
+    'declare class __DocFragmentHost { [member: string]: any; }',
+    'async function __docFragment(this: __DocFragmentHost) {',
+    ...body.map((l) => (l.trim() ? `  ${l}` : l)),
+    '}',
+    'void __docFragment;',
+  ].join('\n');
+}
+
 // Only blocks that import from the packages — those are the checkable ones.
 const cases = [];
 let skipped = 0;
@@ -94,7 +147,7 @@ for (const f of files) {
       process.exit(2);
     }
     cases.push({ file: f, line, name, code });
-    fs.writeFileSync(path.join(OUT, name), code);
+    fs.writeFileSync(path.join(OUT, name), wrapMethodBody(code));
   }
 }
 
@@ -172,7 +225,12 @@ const CONTROL = '__control__.ts';
 fs.writeFileSync(path.join(OUT, CONTROL), [
   "import { Errors } from '@omnitron-dev/titan/errors';",
   "export const a = Errors.badRequest('m', {}, 'extra', 'args');",
-  "export const b = (Errors as { noSuchFactory?: () => void }).noSuchFactory!();",
+  // Was `(Errors as { noSuchFactory?: () => void }).noSuchFactory!()`, which the
+  // cast and the `!` made perfectly legal — a control line that could not fail,
+  // so the control only ever proved that ARITY checking worked. Member
+  // existence is the other half of what this probe looks for, and it was
+  // unguarded. Written plainly, it reports TS2339.
+  'export const b = Errors.noSuchFactory();',
   '',
 ].join('\n'));
 
