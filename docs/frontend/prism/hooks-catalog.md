@@ -443,11 +443,17 @@ component:
 | ---- | --------- |
 | `useMenu` | `<Menu>` (from `@omnitron-dev/prism`) |
 | `useSnackbar` | `<Snackbar>` |
-| `useLightbox` | `<Lightbox>` |
+| `useLightbox` | `<Lightbox>` — open and index only; the component owns its zoom |
 | `useChart` | `<Chart>` |
 | `usePrismContext` | `<PrismProvider>` (from `/core`) |
 | `useSettingsStore` | settings / theme mode / density (from `/state`) |
 | `useLayoutContext` | layouts (from `/layouts`) |
+
+`useCarousel` is deliberately absent from that table. It exports
+carousel state — index, bounds, autoplay — for a slider you render
+yourself, and it does **not** drive `<Carousel>`: that component keeps
+its own copy of the same state and takes no controlled props, so nothing
+you do with the hook can move it. Use one or the other.
 
 Dark mode is driven through `useSettingsStore` (`mode`, `setMode`,
 `toggleMode`) — there is no `useColorMode` hook. `<ConfirmDialog>` and
