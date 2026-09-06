@@ -14,8 +14,16 @@ const config: Config = {
   organizationName: process.env.GH_ORG_NAME || 'omnitron-dev',
   projectName: process.env.GH_PROJECT_NAME || 'omni',
   trailingSlash: false,
-  onBrokenLinks: 'warn',
-  onBrokenAnchors: 'warn',
+  // A warning in a build log is a check whose result nobody has to read: the
+  // build succeeds, CI is green, and the broken link ships. The site currently
+  // produces zero of these — measured, not assumed — so raising the bar costs
+  // nothing today and stops the first one that appears.
+  //
+  // The in-page anchor system generates section ids at build time and
+  // cross-links resolve against them, so an anchor that stops matching is the
+  // most likely of the three to appear and the least likely to be noticed.
+  onBrokenLinks: 'throw',
+  onBrokenAnchors: 'throw',
 
   i18n: {
     defaultLocale: 'en',
@@ -63,7 +71,7 @@ const config: Config = {
     mermaid: true,
     format: 'detect',     // .md → markdown, .mdx → MDX with JSX
     hooks: {
-      onBrokenMarkdownLinks: 'warn',
+      onBrokenMarkdownLinks: 'throw',
     },
   },
 
