@@ -166,7 +166,9 @@ export const usersErrors = {
   emailTaken: (email: string) => Errors.alreadyExists('user', email),
   inactive:   (id: string)    => Errors.conflict('user inactive', { userId: id }),
 };
+```
 
+```typescript
 // users/users.service.ts
 import { usersErrors } from './errors.js';
 

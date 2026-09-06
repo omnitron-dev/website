@@ -174,9 +174,11 @@ the default export of the package) wraps everything:
 ```typescript
 import titan from '@omnitron-dev/titan/application';
 
+// Either a module…
 const app = await titan(AppModule);
-// or
-const app = await titan({ port: 3000, redis: 'localhost:6379' });
+
+// …or a bare config, which builds the module for you:
+const appFromConfig = await titan({ port: 3000, redis: 'localhost:6379' });
 ```
 
 Smart defaults: pretty logging in dev, JSON in prod, graceful
