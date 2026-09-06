@@ -50,16 +50,19 @@ single `@omnitron-dev/titan` package):
 
 ```typescript
 // Core framework:
-import { Application, Module, Service, Public, Injectable }
+import { Application, Module, Service, Injectable }
   from '@omnitron-dev/titan';
 
-// Lifecycle interfaces:
-import { OnInit, OnStart, OnStop, OnDestroy }
-  from '@omnitron-dev/titan';
+// Lifecycle interfaces. The root exports OnInit and OnDestroy only;
+// the other two come from the application subpath:
+import { OnInit, OnDestroy }   from '@omnitron-dev/titan';
+import { OnStart, OnStop }     from '@omnitron-dev/titan/application';
 
-// Server-side Netron API:
-import { Netron, ServiceDescriptor, AuthenticationManager }
-  from '@omnitron-dev/titan/netron';
+// Server-side Netron API. The auth managers live under their own
+// subpath — `netron` itself does not re-export them:
+import { Netron, ServiceDescriptor }        from '@omnitron-dev/titan/netron';
+import { AuthenticationManager, AuthorizationManager }
+  from '@omnitron-dev/titan/netron/auth';
 
 // Per-transport server (each can be enabled independently):
 import { HttpTransport }      from '@omnitron-dev/titan/netron/transport/http';
@@ -67,12 +70,13 @@ import { WebSocketTransport } from '@omnitron-dev/titan/netron/transport/websock
 import { TcpTransport }       from '@omnitron-dev/titan/netron/transport/tcp';
 import { UnixTransport }      from '@omnitron-dev/titan/netron/transport/unix';
 
-// Server-side HTTP middleware:
-import { AuthMiddleware, RateLimitMiddleware }
+// Server-side HTTP middleware. Authentication is a factory, and the
+// built-ins (rate limiting among them) are static methods on one class:
+import { createAuthMiddleware, NetronBuiltinMiddleware }
   from '@omnitron-dev/titan/netron/transport/http/middleware';
 
 // Multi-backend (server-side):
-import { MultiBackend }
+import { MultiBackendClient, createMultiBackendClient }
   from '@omnitron-dev/titan/netron/multi-backend';
 
 // Built-in modules:
@@ -357,8 +361,10 @@ directly in the caller — same API:
 
 ```typescript
 import { Netron } from '@omnitron-dev/titan/netron';
+import { createNullLogger } from '@omnitron-dev/titan/module/logger';
 
-const netron = new Netron();
+// A logger is required; `create` also starts it, which `connect` needs.
+const netron = await Netron.create(createNullLogger());
 const peer   = await netron.connect('tcp://other-service:4001');
 const users  = await peer.queryInterface<UsersService>('users@1.0.0');
 ```

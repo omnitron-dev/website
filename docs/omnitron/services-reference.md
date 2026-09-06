@@ -463,12 +463,16 @@ Methods on the same service can vary in role:
 
 ```typescript
 import { Netron } from '@omnitron-dev/titan/netron';
+import { createNullLogger } from '@omnitron-dev/titan/module/logger';
 import type {
   IProjectRpcService,
   IDaemonService,
 } from '@omnitron-dev/omnitron/dto/services';
 
-const netron = new Netron();
+// `Netron` takes a logger — pass your application's, or
+// `createNullLogger()` to discard Netron's own output. `create` also
+// starts it, which `connect` requires.
+const netron = await Netron.create(createNullLogger());
 const peer   = await netron.connect('unix://~/.omnitron/daemon.sock');
 
 const project = await peer.queryInterface<IProjectRpcService>('OmnitronProject');

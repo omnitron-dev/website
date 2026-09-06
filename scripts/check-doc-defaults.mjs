@@ -178,16 +178,30 @@ if (src.size === 0) {
     console.error('CONTROL IMPOSSIBLE: no numeric default found to test with. Aborting.');
     process.exit(2);
   }
+  // `process.exit` inside the try would skip the `finally`, so a control
+  // that fails leaves its temp directory in the working tree — a path that
+  // only runs when the control fails, which is to say almost never.
   const tmp = fs.mkdtempSync(path.join(process.cwd(), '.doc-defaults-control-'));
+  let failure = null;
   try {
     fs.writeFileSync(path.join(tmp, `${entries[0].pkg.replace('titan-', '')}.mdx`),
       `| \`${name}\` | something (default: \`424242\`) |\n`);
-    if (scan(tmp, src).length === 0) {
-      console.error(`CONTROL FAILED: an injected wrong default for \`${name}\` was not caught. Aborting.`);
-      process.exit(2);
+    // Not `length === 0`: a filter that breaks can start reporting a
+    // different, spurious finding, and a control that only counts would
+    // read that as success. The finding has to be about the option we
+    // planted the wrong value on.
+    const got = scan(tmp, src);
+    if (!got.some((f) => f.name === name)) {
+      failure =
+        `CONTROL FAILED: an injected wrong default for \`${name}\` was not caught` +
+        ` — ${got.length} finding(s), about ${got.map((f) => f.name).join(', ') || 'nothing'}. Aborting.`;
     }
   } finally {
     fs.rmSync(tmp, { recursive: true, force: true });
+  }
+  if (failure) {
+    console.error(failure);
+    process.exit(2);
   }
   console.log(`control ok — injected wrong default for \`${name}\` was caught`);
 
@@ -213,17 +227,24 @@ if (src.size === 0) {
   ];
   for (const c of controls) {
     const dir = fs.mkdtempSync(path.join(process.cwd(), '.doc-defaults-control-'));
+    let why = null;
     try {
       fs.writeFileSync(
         path.join(dir, `${entries[0].pkg.replace('titan-', '')}.mdx`),
         c.page(name, norm(entries[0].value)),
       );
-      if (scan(dir, src).length === 0) {
-        console.error(`CONTROL FAILED: ${c.what} was not caught. Aborting.`);
-        process.exit(2);
+      const got = scan(dir, src);
+      if (!got.some((f) => f.name === name)) {
+        why =
+          `CONTROL FAILED: ${c.what} was not caught` +
+          ` — ${got.length} finding(s), about ${got.map((f) => f.name).join(', ') || 'nothing'}. Aborting.`;
       }
     } finally {
       fs.rmSync(dir, { recursive: true, force: true });
+    }
+    if (why) {
+      console.error(why);
+      process.exit(2);
     }
     console.log(`control ok — ${c.what} was caught`);
   }
