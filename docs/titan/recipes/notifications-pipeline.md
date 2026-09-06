@@ -239,6 +239,7 @@ Register it via `forRoot({ channels: [new SmtpEmailChannel()] })`.
 | Realtime + in-app                | `RealtimeSignaler` pushes to WS/SSE; in-app channel persists the notification to the inbox             |
 | Webhook signature                | `webhookConfig.signatureSecret` + `signatureHeader` for HMAC-signed delivery                            |
 | DLQ                              | Failed deliveries land in a Rotif dead-letter queue (see Rotif config)                                  |
+| Redis retention                  | Off in every form unless configured — see the checklist item below                                      |
 
 ## Production checklist
 
@@ -247,6 +248,15 @@ Register it via `forRoot({ channels: [new SmtpEmailChannel()] })`.
 - [ ] **`preferenceStoreConfig.defaultPreferences` set** — compliance with user opt-outs
 - [ ] **Templates registered** at boot, not at first use
 - [ ] **DLQ monitored** — repeated failures should alert
+- [ ] **Redis retention configured** — every retention mechanism Rotif has is OFF by default, so a
+      pipeline that never sets them grows in Redis memory for as long as it runs:
+      - `maxStreamLength` (or `minStreamId`) — without one of these `publish` never trims the stream
+        it writes to. The trim runs inside the publish script, so it is also the producer that bounds
+        the stream: a stream stops being trimmed when publishing stops, at whatever size it reached.
+      - `dlqCleanup.enabled` — defaults to `false`, and the sibling limits it gates
+        (`dlqCleanup.maxAge`, `dlqCleanup.maxSize`) carry usable values that simply do not apply
+        until it is turned on. A monitored DLQ is still an unbounded one.
+      Sizing these is a deployment decision, but leaving all three unset is not a neutral default.
 - [ ] **Channel-specific timeouts** — e.g. `webhookConfig.timeout: 5_000`
 - [ ] **Realtime signaler graceful degradation** — if WS gateway is down, notification is still persisted
 - [ ] **Persistence backend backed up** — in-app inbox should survive redis loss
