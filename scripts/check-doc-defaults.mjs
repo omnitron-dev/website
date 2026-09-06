@@ -81,6 +81,29 @@ const norm = (v) =>
   v.trim().replace(/^`|`$/g, '').replace(/\s*\(.*?\)\s*$/, '')
     .replace(/[_'"]/g, '').replace(/\s+/g, ' ').trim().replace(/\.$/, '').toLowerCase();
 
+/**
+ * Durations are written one way in source and another in prose: `5000` next to
+ * "5 s", `30000` next to "30 seconds". Comparing the strings reported those as
+ * disagreements, which is a checker complaining that two spellings of the same
+ * number are not the same number.
+ *
+ * Returns milliseconds for anything that looks like a duration, else null.
+ */
+const asMillis = (v) => {
+  const m = norm(v).match(/^(\d+(?:\.\d+)?)\s*(ms|millis(?:econds?)?|s|secs?|seconds?|m|mins?|minutes?|h|hours?|d|days?)?$/);
+  if (!m) return null;
+  const n = Number(m[1]);
+  if (!Number.isFinite(n)) return null;
+  const unit = m[2] ?? 'ms';
+  const scale = /^(ms|millis)/.test(unit) ? 1
+    : /^(s|sec)/.test(unit) ? 1_000
+    : /^(m$|min)/.test(unit) ? 60_000
+    : /^h/.test(unit) ? 3_600_000
+    : /^d/.test(unit) ? 86_400_000
+    : 1;
+  return n * scale;
+};
+
 function scan(docRoot, src) {
   const findings = [];
   for (const f of walk(docRoot)) {
@@ -91,18 +114,50 @@ function scan(docRoot, src) {
     lines.forEach((line, i) => {
       if (!/default/i.test(line)) return;
       const names = [...line.matchAll(/`([A-Za-z_$][\w$]*)`/g)].map((m) => m[1]);
-      const vals = [...line.matchAll(/[Dd]efaults?\s*(?:to|:)?\s*`([^`]+)`|\(default:?\s*`?([^`)]+)`?\)/g)]
-        .map((m) => m[1] ?? m[2]);
+      // A line very often names several options and then gives their defaults
+      // in the same order — "`initialDelay` / `maxDelay` — bounds (ms).
+      // Defaults `100` / `30_000`." Reading only the first value and comparing
+      // it against EVERY name on the line reported that correct sentence as a
+      // disagreement, which is the one thing a checker guarding docs must not
+      // do: a warning that always fires stops being read.
+      const vals = [...line.matchAll(
+        /[Dd]efaults?\s*(?:to|:)?\s*((?:`[^`]+`(?:\s*(?:\/|,|or|and)\s*)?)+)|\(default:?\s*`?([^`)]+)`?\)/g,
+      )].flatMap((m) => (m[1] ? [...m[1].matchAll(/`([^`]+)`/g)].map((v) => v[1]) : [m[2]]));
       if (!names.length || !vals.length) return;
-      for (const n of names) {
+      // Same count: the sentence is a list, so pair by position — that still
+      // catches a swap. Otherwise a name only needs to match SOME value on the
+      // line; a claim naming a value that appears nowhere is still reported.
+      const paired = names.length === vals.length;
+      names.forEach((n, idx) => {
         const entries = (src.get(n) ?? []).filter((e) => !scope || e.pkg === scope);
-        if (!entries.length) continue;
-        const claimed = norm(vals[0]);
+        if (!entries.length) return;
+        // "Default to `defaultTTL`" points at another option; it is a
+        // reference, not a claim about a value, and reading it as one reported
+        // the option as disagreeing with itself.
+        const candidates = (paired ? [vals[idx]] : vals)
+          .filter((v) => !src.has(v.trim().replace(/^`|`$/g, '')))
+          .map(norm)
+          .filter(Boolean);
+        if (!candidates.length) return;
         const actual = entries.map((e) => norm(e.value));
-        if (claimed && !actual.some((a) => a === claimed || a.includes(claimed) || claimed.includes(a))) {
-          findings.push({ file: f, line: i + 1, name: n, claimed: vals[0].trim(), entries });
+        const agrees = candidates.some((c) =>
+          actual.some((a) => {
+            if (a === c || a.includes(c) || c.includes(a)) return true;
+            const am = asMillis(a);
+            const cm = asMillis(c);
+            return am !== null && cm !== null && am === cm;
+          }),
+        );
+        if (!agrees) {
+          findings.push({
+            file: f,
+            line: i + 1,
+            name: n,
+            claimed: (paired ? vals[idx] : vals.join(' / ')).trim(),
+            entries,
+          });
         }
-      }
+      });
     });
   }
   return findings;
@@ -135,6 +190,43 @@ if (src.size === 0) {
     fs.rmSync(tmp, { recursive: true, force: true });
   }
   console.log(`control ok — injected wrong default for \`${name}\` was caught`);
+
+  // Three filters were added to stop this probe reporting correct sentences:
+  // positional pairing for "`a` / `b` — Defaults `x` / `y`", duration-aware
+  // comparison so "5 s" equals `5000`, and skipping a "value" that is really
+  // another option's NAME. Each of them can blind the probe as easily as it
+  // quiets it, so each gets a control of its own. A filter without one is a
+  // silent exemption.
+  const controls = [
+    {
+      what: 'a swapped pair on one line',
+      page: (n, v) => `- \`${n}\` / \`someOtherKnob\` — bounds. Defaults \`424242\` / \`${v}\`.\n`,
+    },
+    {
+      what: 'a wrong duration written in seconds',
+      page: (n) => `- \`${n}\` — how long (default 4242 s).\n`,
+    },
+    {
+      what: 'a wrong value alongside a reference to another option',
+      page: (n) => `- \`${n}\` — default to \`${name}\`, otherwise (default: \`424242\`).\n`,
+    },
+  ];
+  for (const c of controls) {
+    const dir = fs.mkdtempSync(path.join(process.cwd(), '.doc-defaults-control-'));
+    try {
+      fs.writeFileSync(
+        path.join(dir, `${entries[0].pkg.replace('titan-', '')}.mdx`),
+        c.page(name, norm(entries[0].value)),
+      );
+      if (scan(dir, src).length === 0) {
+        console.error(`CONTROL FAILED: ${c.what} was not caught. Aborting.`);
+        process.exit(2);
+      }
+    } finally {
+      fs.rmSync(dir, { recursive: true, force: true });
+    }
+    console.log(`control ok — ${c.what} was caught`);
+  }
 }
 
 const findings = scan(path.join(process.cwd(), 'docs', 'titan'), src);
