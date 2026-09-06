@@ -235,9 +235,18 @@ installation from an unexamined one.
 
 Findings carry a stable `id` — `db.unreachable`,
 `app.port-unreachable`, `infra.detached`, `build.stale-sources`,
-`auth.anonymous-surface`, `logs.retry-loop` and so on. A `skipped`
-entry names the id its check would have reported under, or
-`prefix.*` where a check reports several.
+`auth.anonymous-surface`, `logs.retry-loop`,
+`project.config-unloadable` and so on. A `skipped` entry names the
+id its check would have reported under, or `prefix.*` where a check
+reports several.
+
+`project.config-unloadable` is worth knowing about before you need
+it: the daemon refuses to start against a config it cannot load,
+rather than starting with no apps, so this finding is what a failed
+`omnitron up` in that project's directory would have told you. The
+check reads the files rather than asking the daemon, because a
+daemon holding a config it loaded hours ago cannot tell you the
+file has been edited since.
 
 ### `omnitron inspect <app>`
 
