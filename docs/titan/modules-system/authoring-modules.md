@@ -151,6 +151,7 @@ export class FooService {
       this.logger.debug('fetch', { path });
     }
     // …actual work using this.options.apiKey, this.options.timeoutMs
+    return { path };
   }
 
   // Lifecycle hooks — implement if the service holds external state

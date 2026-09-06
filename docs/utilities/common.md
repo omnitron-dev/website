@@ -75,11 +75,13 @@ await delay(60_000, undefined, { unref: true });    // doesn't block event loop
 import { defer } from '@omnitron-dev/common';
 
 const d = defer<User>();
-// somewhere else:
-d.resolve(user);
+
+// somewhere else, once the value is known:
+d.resolve(currentUser);
 // or:
 d.reject(new Error('cancelled'));
 
+// wherever it is needed:
 const user = await d.promise;
 ```
 
