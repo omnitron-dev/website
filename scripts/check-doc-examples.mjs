@@ -240,6 +240,12 @@ for (const line of raw.split('\n')) {
   if (own && new RegExp(`\\b(class|interface|type)\\s+${own[1]}\\b`).test(c.code)) continue;
   // Same for locals the prose typed and the snippet left as `unknown`.
   if (/on type 'unknown'/.test(msg)) continue;
+  // `import.meta.env` is Vite's, injected by the bundler through
+  // `vite/client` — the same class as `Buffer` and `process` above, which
+  // this harness also does not load. Narrowed to `ImportMeta` rather than
+  // added to the blanket TS2339 ignore, because that code is the one that
+  // catches a real wrong method name.
+  if (/does not exist on type 'ImportMeta'/.test(msg)) continue;
   if (!byCase.has(base)) byCase.set(base, { c, errors: [] });
   byCase.get(base).errors.push(`    L${ln}  TS${code}: ${msg}`);
 }
