@@ -62,14 +62,47 @@ function SignInPage() {
 | Prop | Type | Notes |
 | ---- | ---- | ----- |
 | `onSubmit` | `(data) => Promise<void> \| void` | Submit handler for the form |
-| `loading` | `boolean` | Disables + shows progress while submitting |
+| `loading` | `boolean` | Disables + shows progress. Optional — see below |
 | `disabled` | `boolean` | Disable the form |
 | `schema` | `z.ZodSchema` | Override the built-in Zod validation |
 | `labels` | per-field label overrides | i18n / copy customisation |
+| `sx` | `SxProps<Theme>` | Styles for the form wrapper |
 | `slotProps` | `{ wrapper, submitButton, textField }` | MUI slot overrides |
 
 The forms use react-hook-form + Zod internally — you get email
 validation and field-level errors for free.
+
+**You do not have to pass `loading` to prevent a double submit.**
+The form awaits your `onSubmit` and falls back to react-hook-form's
+own `isSubmitting`, so every control is disabled for as long as the
+promise is pending. Pass `loading` when the *parent* owns a pending
+state the form cannot see — a redirect that runs after sign-in, say,
+where the button should stay disabled past the resolution of
+`onSubmit`.
+
+**Error messages from `onSubmit` are shown, sanitized.** A rejection
+is caught and its message rendered above the form, unless it looks
+like something internal — a stack frame, an errno, a SQL fragment, a
+file path, or a leaked credential value. It matches the *value*, so
+"Password must contain at least 2 digits" and "Reset token expired"
+reach the user; `password=hunter2` and a JWT do not.
+
+### Per-form props
+
+| Form | Prop | Notes |
+| ---- | ---- | ----- |
+| Login | `showRememberMe`, `showForgotPassword`, `onForgotPassword` | |
+| Login | `showSocialLogin`, `socialProviders` | `{ id, name, icon, onClick }[]` |
+| Register | `showNameFields`, `requireTerms`, `onTermsClick`, `onPrivacyClick` | |
+| Register / ResetPassword | `minPasswordLength` | Feeds the built-in schema |
+| ForgotPassword | `onBackToLogin` | |
+| VerifyCode | `codeLength` | Default 6 |
+| VerifyCode | `onResendCode`, `resendCooldown` | Seconds before Resend re-enables (default 60) |
+
+Resend is guarded against a second click while the first request is
+still open, so a double-click sends one code rather than two — which
+matters on a rate-limited endpoint, where the second attempt is what
+locks the user out of the flow they are finishing.
 
 ### Route guards
 
