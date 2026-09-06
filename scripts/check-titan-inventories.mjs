@@ -105,10 +105,15 @@ const fail = (msg) => {
   // a bare pass cannot be contradicted by anything: the example checker in this
   // directory printed "1 deliberate error(s) detected" beside a control file
   // with TWO of them, on every run, for as long as it existed.
+  // Checks WHICH name came back, not just how many. A count alone passes when
+  // the comparison starts reporting a different, spurious name — the shape
+  // omni-4b hit in the services checker, where a planted MISSING error was
+  // silently counted by the COUNT branch and the total still matched.
+  const planted = '__CONTROL_TOKEN_THAT_DOES_NOT_EXIST__';
   controls.push([
     'a documented token that no package exports',
-    undocumented(new Set([...documented, '__CONTROL_TOKEN_THAT_DOES_NOT_EXIST__'])).length,
-    missing.length + 1,
+    undocumented(new Set([...documented, planted])).includes(planted) ? planted : 'not reported',
+    planted,
   ]);
 }
 
@@ -138,10 +143,13 @@ const fail = (msg) => {
   for (const n of missing) fail(`decorators-catalog.mdx documents \`@${n}\`, which no titan package exports`);
   if (missing.length === 0) console.log(`ok — ${documented.size} documented decorators all exist`);
 
+  const plantedDecorator = 'ControlDecoratorThatDoesNotExist';
   controls.push([
     'a documented decorator that no package exports',
-    undocumented(new Set([...documented, 'ControlDecoratorThatDoesNotExist'])).length,
-    missing.length + 1,
+    undocumented(new Set([...documented, plantedDecorator])).includes(plantedDecorator)
+      ? plantedDecorator
+      : 'not reported',
+    plantedDecorator,
   ]);
 
   // The page states the root re-exports exactly these nine. That sentence is

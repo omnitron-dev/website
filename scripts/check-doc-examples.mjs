@@ -318,18 +318,24 @@ const controlErrors = raw
 // this script — read that number as a claim. A control that reports a bare "ok"
 // cannot be contradicted; one that prints what it got beside what it expected
 // can be.
-const CONTROL_EXPECTED = 2;
-if (controlErrors.length !== CONTROL_EXPECTED) {
+// Checked by CODE, not by count. The two control lines exercise different
+// things — TS2554 is arity, TS2339 is member existence — and a count alone
+// passes when one of them stops firing while some unrelated error takes its
+// place. That is not hypothetical: this control already spent its whole life
+// reporting "1 deliberate error(s)" beside a file with two in it.
+const CONTROL_EXPECTED = ['TS2554', 'TS2339'];
+const controlCodes = [...new Set(controlErrors.map((l) => (l.match(/error (TS\d+)/) ?? [])[1]).filter(Boolean))].sort();
+const controlMissing = CONTROL_EXPECTED.filter((c) => !controlCodes.includes(c));
+if (controlMissing.length > 0) {
   console.error(
-    `CONTROL FAILED: got ${controlErrors.length} deliberate error(s), expected ${CONTROL_EXPECTED}.\n` +
-      (controlErrors.length === 0
+    `CONTROL FAILED: got [${controlCodes.join(', ') || 'nothing'}], expected [${CONTROL_EXPECTED.join(', ')}].\n` +
+      (controlCodes.length === 0
         ? 'The packages are not resolving, so every result below would be a false clean.'
-        : 'One of the deliberate errors stopped being reported — this probe now checks less than it claims.\n' +
-          controlErrors.map((l) => `  ${l.trim()}`).join('\n'))
+        : `${controlMissing.join(', ')} stopped being reported — this probe now checks less than it claims.`)
   );
   process.exit(1);
 }
-console.log(`control ok — ${controlErrors.length}/${CONTROL_EXPECTED} deliberate errors detected\n`);
+console.log(`control ok — deliberate errors [${controlCodes.join(', ')}] detected as expected\n`);
 
 let reported = 0;
 for (const { c, errors } of [...byCase.values()].sort((a, b) => a.c.file.localeCompare(b.c.file))) {
