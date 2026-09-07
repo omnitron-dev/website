@@ -48,7 +48,7 @@ export default defineEcosystem({
 | `gateway`      | `{ port?, configDir?, image? }`                            |          | port `8080`, image `openresty/openresty:alpine` |
 | `supervision`  | `{ strategy, maxRestarts, window, backoff }`               |    ✓     | one_for_one / 5 / 60 000 ms / expo  |
 | `monitoring`   | `{ healthCheck, metrics }`                                 |    ✓     | 15 s / 5 s                           |
-| `logging`      | `{ level, maxSize, maxFiles, compress }`                   |    ✓     | info / 50 MB / 10 / true             |
+| `logging`      | `{ level, maxSize, maxFiles, compress, databaseRetentionDays }` |    ✓     | info / 50 MB / 10 / true / 14 days   |
 
 `StackName` is `'dev' | 'test' | 'staging' | 'prod' | string`.
 
@@ -209,12 +209,32 @@ monitoring: {
 
 ```typescript
 logging: {
-  level:    'info',         // fatal | error | warn | info | debug | trace
-  maxSize:  '50mb',         // per-app file size threshold
-  maxFiles: 10,             // rotated files to keep
-  compress: true,           // gzip rotated files
+  level:    'info',            // fatal | error | warn | info | debug | trace
+  maxSize:  '50mb',            // per-app file size threshold
+  maxFiles: 10,                // rotated files to keep
+  compress: true,              // gzip rotated files
+  databaseRetentionDays: 14,   // age limit for rows in the `logs` table
 }
 ```
+
+`maxSize` and `maxFiles` bound the rotated **files** on disk.
+`databaseRetentionDays` bounds the **table** — a different store with a
+different failure mode, and until it existed the table had no bound at all: the
+development host reached 13 GB of `logs`. Two weeks is long enough to
+investigate an incident from the weekend and short enough that the table stops
+being the largest thing on the disk.
+
+Retention deletes rows; it does not shrink the file. Postgres keeps the freed
+pages inside the table and reuses them, so a table that has been large stays
+large on disk — `doctor` reports that separately as `db.bloated` and tells you
+to reclaim it with `VACUUM FULL` or `pg_repack`. A `logs` table far bigger than
+its live row count means retention is working and the space is simply not being
+returned.
+
+The daemon turns retention **off** when the key is absent from the config it
+receives — a wrong default chosen inside the collector would delete history
+nobody asked it to delete. Configs loaded the normal way carry the default
+above; one assembled by hand does not.
 
 Per-app overrides live in `IAppDefinition.observability.logging`
 (see `defineSystem` below).
@@ -412,8 +432,21 @@ Lives in `config/default.json` under the `omnitron` key (not in
 | `database`        | `boolean \| { dialect?, pool?, extensions?, dedicated? }`     |
 | `redis`           | `boolean \| { prefix?, dedicated? }`                          |
 | `s3`              | `boolean \| { bucket?, quota? }`                              |
-| `services`        | `{ discovery?, notifications?, ... }`                         |
+| `services`        | `{ discovery?, notifications?, priceverse? }`                 |
 | `infrastructure`  | `Record<string, IServiceRequirement>` — custom containers     |
+
+`services` switches on shared capabilities the daemon wires for you rather
+than infrastructure it provisions:
+
+| Flag | What it wires |
+| ---- | ------------- |
+| `discovery` | Registers the app with service discovery |
+| `notifications` | Connects the app to the notifications Redis database |
+| `priceverse` | Injects `priceverseRedis` — host, port, password and the **priceverse app's own Redis database index** — so this app can read price data at the source instead of asking priceverse over RPC |
+
+`priceverse` is the one worth knowing exists: it is cross-app by design, the
+database index is allocated by the daemon rather than written by you, and
+nothing else gives an app a connection into another app's Redis.
 
 Omnitron reads these, provisions missing infrastructure, and
 injects resolved env vars (`DATABASE_URL`, `REDIS_URL`,
