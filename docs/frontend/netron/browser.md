@@ -534,18 +534,20 @@ for the full code reference.
 
 | Subpath | Contents |
 | ------- | -------- |
-| `@omnitron-dev/netron-browser` | Everything; convenient root |
+| `@omnitron-dev/netron-browser` | Everything, including `AuthenticationClient` and the token storage + transport helpers |
 | `@omnitron-dev/netron-browser/client` | `NetronClient`, `HttpClient`, `WebSocketClient`, `BackendPool` |
-| `@omnitron-dev/netron-browser` | `AuthenticationClient`, token storage + token-transport helpers |
+| `@omnitron-dev/netron-browser/client/http` | `HttpClient` alone |
+| `@omnitron-dev/netron-browser/client/websocket` | `WebSocketClient` alone |
 | `@omnitron-dev/netron-browser/middleware` | All built-in middleware |
-| `@omnitron-dev/netron-browser/core` | Types, defaults, factory helpers |
-| `@omnitron-dev/netron-browser/core-tasks` | Built-in service tasks (`$system.describe`, etc.) |
-| `@omnitron-dev/netron-browser/transport` | Low-level transport adapters |
 | `@omnitron-dev/netron-browser/packet` | Wire-format helpers (rarely used directly) |
 | `@omnitron-dev/netron-browser/errors` | `TitanError` hierarchy mirror |
 | `@omnitron-dev/netron-browser/utils` | URL parsing, header normalisation, `LRUCache` |
-| `@omnitron-dev/netron-browser/routing` | Multi-backend route matching |
 | `@omnitron-dev/netron-browser/types` | All public types |
+
+There is no `/core`, `/core-tasks`, `/transport` or `/routing` subpath — those
+rows described a layout the package does not have, and an import following any
+of them fails to resolve. What they named is in the root or under `/client`.
+`AuthenticationClient` is likewise at the root, not under an `/auth` subpath.
 
 ## Performance characteristics
 

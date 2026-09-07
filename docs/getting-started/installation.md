@@ -194,9 +194,8 @@ Subpaths:
 
 | Subpath | Contains |
 | ------- | -------- |
-| `@omnitron-dev/netron-browser` | Root — convenient `createClient` |
+| `@omnitron-dev/netron-browser` | Root — `createClient`, plus `AuthenticationClient`, token storage and transports |
 | `@omnitron-dev/netron-browser/client` | `NetronClient`, `HttpClient`, `WebSocketClient`, `BackendPool` |
-| `@omnitron-dev/netron-browser/auth` | `AuthenticationClient`, token storage + transports |
 | `@omnitron-dev/netron-browser/middleware` | All built-in middleware |
 | `@omnitron-dev/netron-browser/errors` | Typed error hierarchy |
 
