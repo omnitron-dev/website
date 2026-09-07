@@ -185,14 +185,30 @@ respects the app's `IProcessEntry.scaling` constraints
 
 ### `omnitron doctor`
 
-One pass over the whole installation — daemon, apps, ports,
-infrastructure containers, the internal database, the disk, the
-build on disk and the console — reporting problems with the
+One pass over the whole installation, reporting problems with the
 evidence that identifies them and the command that fixes them.
 
 It reads the database directly rather than through the daemon,
 because a daemon whose schema has gone missing still answers RPCs
 perfectly well.
+
+**What it examines.** Every finding's `id` begins with the area it
+came from, so this table is the same list the output uses:
+
+| Area | What it looks at |
+| ---- | ---------------- |
+| `daemon` | Whether it answers, how fast, whether it restarted recently, whether it is aggregating metrics |
+| `app` | Managed apps and their sub-processes, and the ports they claim against the ports they answer on |
+| `infra` | Infrastructure containers, their health, their published ports, and containers detached from the stack |
+| `db` | Reachability, the tables the daemon needs, pending migrations, and a table that is bloated rather than merely large |
+| `build` | Sources newer than their build output, sources never built, and a daemon older than the build it is running |
+| `webapp` | Whether the console is being served and whether its proxy reaches the daemon |
+| `logs` | One message dominating the day's errors, lines stored twice, and an operation being retried without limit |
+| `alerts` | Enabled alert rules whose expression can never fire |
+| `metrics` | Whether any CPU or memory reading is arriving at all |
+| `project` | Every registered project's config, read from the file rather than from the daemon |
+| `auth` | Which RPC methods answer without credentials, and whether the daemon is reachable off this host |
+| `doctor` | A check that failed on its own account, so a gap is never silent |
 
 | Option | Effect |
 | ------ | ------ |
