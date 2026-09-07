@@ -207,6 +207,18 @@ raw result); on throw it emits `<event>.error` (payload =
 `mapError(error)` if provided, else the error) and re-throws. Options
 are `event`, `mapResult?`, `mapError?` only.
 
+Two things about it surprise people, and both are silent.
+
+**Subscribers must use the suffixed names.** `event: 'user.created'` never
+emits `user.created`; subscribing to that bare name receives nothing.
+
+**The emitter is found by convention, not injected.** The decorator reads
+`this.__eventEmitter__`, then `this.eventEmitter`. On an instance with
+neither it runs the method and emits nothing — no warning, no error. A service
+that calls its emitter something else gets a decorator that does nothing at
+all — and something else is the norm: all 24 services in the daos backends that
+hold an emitter call it `events`. The property name is part of the contract.
+
 ### `@ScheduleEvent(options)`
 
 ```typescript

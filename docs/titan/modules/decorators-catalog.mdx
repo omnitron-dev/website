@@ -40,7 +40,7 @@ above.
 | Run at a cron schedule                        | `@Cron('0 * * * *')` *(titan-scheduler)*                 |
 | Run on an interval                            | `@Interval(60_000)` *(titan-scheduler)*                  |
 | Subscribe to a typed event                    | `@OnEvent('user.created')` *(titan-events)*              |
-| Auto-emit an event from a method              | `@EmitEvent('user.created')` *(titan-events)*            |
+| Auto-emit an event from a method              | `@EmitEvent({ event: 'user.created' })` *(titan-events)* |
 | Wrap a method in a distributed lock           | `@WithDistributedLock(key, ttl)` *(titan-lock)*          |
 | Instrument a method with RPC counters + latency | `@Metrics(metricName?)` *(titan-metrics)*               |
 | Define a worker process class                 | `@Process()` *(titan-pm)*                                |
@@ -236,7 +236,7 @@ option. Service announce / lookup is automatic.
 | `@OnceEvent(event, opts?)`                 | method    | Subscribe once, then unsubscribe                             |
 | `@OnAnyEvent(opts?)`                       | method    | Subscribe to every event (firehose — use with care)          |
 | `@OnModuleEvent(module, event, opts?)`     | method    | Subscribe across module boundaries                           |
-| `@EmitEvent(event, opts?)`                 | method    | Auto-emit the event after a successful return                |
+| `@EmitEvent({ event, mapResult?, mapError? })` | method | Emits `<event>.success` after a return, `<event>.error` on a throw |
 | `@ScheduleEvent(event, opts?)`             | method    | Emit on a schedule (cron-like, via this module's scheduler)  |
 | `@BatchEvents(event, opts?)`               | method    | Batch handler — invoked once per batch                       |
 | `@EventEmitter(opts?)`                     | class     | Marks the class as a typed event source                      |
