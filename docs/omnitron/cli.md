@@ -203,7 +203,7 @@ came from, so this table is the same list the output uses:
 | `db` | Reachability, the tables the daemon needs, pending migrations, and a table that is bloated rather than merely large |
 | `build` | Sources newer than their build output, sources never built, and a daemon older than the build it is running |
 | `webapp` | Whether the console is being served and whether its proxy reaches the daemon |
-| `logs` | One message dominating the day's errors, lines stored twice, and an operation being retried without limit |
+| `logs` | One message dominating the day's errors; repetition dominating while no single message does; lines stored twice; an operation being retried without limit |
 | `alerts` | Enabled alert rules whose expression can never fire |
 | `metrics` | Whether any CPU or memory reading is arriving at all |
 | `project` | Every registered project's config, read from the file rather than from the daemon |
