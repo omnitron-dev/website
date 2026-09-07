@@ -507,6 +507,7 @@ can be found, which is what was missing.
 
 | Hook | Signature | What it does |
 | ---- | --------- | ------------ |
+| `useBoolean` | `(defaultValue = false): UseBooleanReturn` | A boolean with `setTrue` / `setFalse` / `toggle`, for the open-close state every dialog needs |
 | `useSetState` | `<T extends Record<string, unknown>>(initial: T \| (() => T))` | `setState` with partial updates, like a class component's |
 | `useMultiSelect` | `<T>(options?: UseMultiSelectOptions<T>)` | Multi-selection state — select, deselect, toggle, select-all |
 | `usePrevious` | `<T>(value: T): T \| undefined` | The value from the previous render |
@@ -520,6 +521,9 @@ can be found, which is what was missing.
 | `useTimeout` | `(callback: () => void, delay: number)` | `setTimeout` that survives a changing callback and clears on unmount |
 | `useDebounceCallback` | `<T extends (...args: never[]) => unknown>(fn: T, delay = 500)` | Debounces the call, where `useDebounce` debounces the value |
 | `useThrottleCallback` | `<T extends (...args: unknown[]) => unknown>(fn: T, delay: number)` | The callback counterpart of `useThrottle` |
+| `useInterval` | `(callback: () => void, delay: number \| null)` | `setInterval` that survives a changing callback; **`null` pauses it** rather than requiring a conditional hook |
+| `useEventListener` | `<K extends keyof WindowEventMap>(…)` | Adds a listener and removes it on unmount, typed by event name |
+| `useIsClient` | `(): UseIsClientReturn` | False during SSR and the first render, true afterwards — the hydration guard |
 | `useMounted` | `(): UseMountedReturn` | Whether the component is still mounted — for guarding async completions |
 | `useUpdateLayoutEffect` | `(effect: EffectCallback, deps?: DependencyList)` | `useLayoutEffect` that skips the first render |
 
@@ -528,6 +532,7 @@ can be found, which is what was missing.
 | Hook | Signature | What it does |
 | ---- | --------- | ------------ |
 | `useBreakpoint` | `(custom?: Partial<Breakpoints>): 'xs' \| 'sm' \| 'md' \| 'lg' \| 'xl'` | The current breakpoint as one value |
+| `useBreakpoints` | `(): UseBreakpointsReturn` | Every breakpoint's state at once — reach for this when a component branches on several |
 | `useBreakpointChecks` | `(custom?: Partial<Breakpoints>): BreakpointChecks` | The same, as a set of booleans to branch on |
 | `useMediaQuery` | `(query: string): boolean` | One media query |
 | `useResponsiveQuery` | `(query: string): UseResponsiveQueryReturn` | A media query with its match state broken out |
