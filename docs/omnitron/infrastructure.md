@@ -443,18 +443,54 @@ flowchart LR
   List --> Diff[Diff declared vs actual]
   Diff --> Decide{action}
   Decide -- missing --> Create[Create + start]
+  Decide -- stopped --> Start[Start it again]
   Decide -- wrong-image --> Recreate[Stop + remove + create]
-  Decide -- unhealthy --> Restart[Restart]
+  Decide -- unhealthy --> Confirm{2nd tick?}
+  Confirm -- no --> Wait[Wait one tick]
+  Confirm -- yes --> Rebuild[Remove + create]
+  Decide -- restarting --> Yield[Yield to Docker]
   Decide -- orphan --> Remove[Stop + remove]
   Decide -- ok --> NoOp[Skip]
   Create --> Update[Update state]
+  Start --> Update
   Recreate --> Update
-  Restart --> Update
+  Rebuild --> Update
   Remove --> Update
 ```
 
-The reconciler runs every 30 s by default, plus on demand
-(`omnitron infra up` / `infra down`).
+The reconciler runs every 30 s, plus on demand (`omnitron infra up` /
+`infra down`).
+
+### A container you stopped comes back
+
+This is the branch operators meet first and it is easy to mistake for
+something else. **A declared service that is not running is started again
+within one tick** — up to 30 seconds after you stopped it, `docker stop`
+looks undone. The daemon logs `Service not running — auto-restarting`.
+
+It is worth knowing before you try to reproduce an outage against
+infrastructure: `docker stop daos-dev-redis` does not give you a three-minute
+outage, it gives you about six seconds. The container's own `RestartCount`
+stays `0` — Docker did not do it — while `StartedAt` moves, which is how you
+tell this apart from a Docker restart policy. To hold a service down, stop it
+through `omnitron infra down` (which is a declared intent, not a drift the
+reconciler corrects), or run a throwaway container the daemon does not manage.
+
+### When it stops trying
+
+A restart that throws puts the service in an exponential backoff — 30 s
+doubling to a ceiling of 15 minutes — and ticks inside that window are skipped
+with `Service not running — in restart backoff, skipping tick` at debug level.
+A container that cannot start therefore does not hammer the supervisor every
+30 s, and does not fill the log with one message either. One successful start
+clears the counter.
+
+An **unhealthy** container is treated more slowly than a stopped one: it must
+report unhealthy on two consecutive ticks — 60 seconds of grace — before it is
+removed and recreated. A single failed healthcheck during a slow start is not a
+reason to destroy a container. And a container Docker is already restarting
+under its own policy is left alone, so the two supervisors cannot both act on
+it.
 
 ## Phantom endpoint janitor
 
