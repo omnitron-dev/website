@@ -171,6 +171,23 @@ any `@Injectable()` class.
 | `metadata?`       | `Record<string, any>`                                                 |
 | `preventOverlap?` | `boolean` — reject concurrent executions of the same job              |
 
+### A job that fails to register stops the boot
+
+`disabled: true` is the only way a job is silently absent, and it is silent
+because you asked for it.
+
+Every other registration failure now throws at startup rather than dropping the
+job. The realistic one is a name collision: two definitions claiming the same
+name make `registerJob` throw a conflict — `Job with this name already
+exists: <name>` — and the loser used to be
+discarded with nothing logged — the application reported a successful start and
+the first evidence was a nightly task that had not run. Give jobs distinct
+`name`s, or leave `name` off and let it be derived.
+
+This matches what the module already does elsewhere with configuration that
+would otherwise be silently wrong: `onStart` refuses distributed mode without a
+lock provider rather than let every instance fire every job.
+
 ## `CronExpression` enum
 
 ```typescript

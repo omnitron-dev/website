@@ -44,6 +44,26 @@ Reads a file on startup. Format is auto-detected from extension if
 > `properties` — passing `toml`/`ini` throws at load time. Use one
 > of the supported formats until loader support lands.
 
+#### What `optional` forgives
+
+`optional: true` means the file may be ABSENT. It does not mean the file may
+be WRONG.
+
+A missing path returns `{}` and the boot continues, which is the point of the
+option — a git-ignored `config/local.yaml` that most machines do not have. But
+a file that EXISTS and cannot be used — unparseable content, an unsupported
+`format`, a path that cannot be read — throws, `optional` or not.
+
+The line is drawn where the loader already draws it: the existence check. A
+typo in an optional YAML file used to be skipped as readily as a missing one,
+so the application booted on defaults with nothing to indicate that the file it
+was told to read had been ignored. That is the failure `optional` is least able
+to afford, because the operator who wrote the file believes it is in effect.
+
+The two cases are told apart in code — the loader marks the error `malformed`
+— rather than by matching the text of a message, so this does not change if the
+wording does.
+
 ### Environment variables
 
 ```typescript

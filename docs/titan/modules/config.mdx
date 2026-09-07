@@ -312,6 +312,10 @@ sources: [
 When `optional: true`, a remote-source failure is logged and the
 boot continues with file defaults only.
 
+`optional` means something narrower for a **file** source: the file may be
+absent, but a file that exists and cannot be parsed or read still throws. See
+[what `optional` forgives](../configuration/sources.md#what-optional-forgives).
+
 ## Validation error UX
 
 Schema failure on boot raises `Errors.badRequest('Configuration
