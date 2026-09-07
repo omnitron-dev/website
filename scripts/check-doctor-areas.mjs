@@ -112,6 +112,38 @@ if (inventedIds.length > 0) {
   process.exit(2);
 }
 
+/**
+ * The other direction: a finding this checker never saw.
+ *
+ * The verbatim guard above catches an extractor that invents a name. It cannot
+ * see one that LOSES a name, because a name that was never extracted is absent
+ * from every set here — and for a checker reporting absence, losing is the
+ * dangerous direction: fewer ids means fewer areas means a greener report.
+ *
+ * A peer's import checker read `import … from` and not `export … from`, missing
+ * forty-two symbols and reporting four packages as unused that were not. The
+ * same shape is one refactor away here: a finding emitted through a helper
+ * rather than a literal `findings.add({ … })` would be invisible, and the
+ * report would simply get shorter.
+ *
+ * So cross-check against a naive reading: every dotted id in the file must have
+ * been extracted, or be excluded for a reason that can be stated. There is
+ * exactly one such reason today, and it is not dotted — `checkAnonymous` sends
+ * an RPC body carrying `id: 'doctor-anon'`, which is a request id and not a
+ * finding.
+ */
+const naiveIds = new Set(
+  [...source.matchAll(/id:\s*'([a-z][a-z0-9]*\.[a-z0-9.*-]+)'/g)].map((m) => m[1])
+);
+const lostIds = [...naiveIds].filter((id) => !ids.has(id));
+if (lostIds.length > 0) {
+  console.error(
+    `the checker is broken, not the code: a plain scan finds ${lostIds.join(', ')}, ` +
+      'which the findings.add parse did not extract'
+  );
+  process.exit(2);
+}
+
 const areas = new Set([...ids].map((id) => id.split('.')[0]));
 const documented = documentedAreas(doc);
 if (documented.size === 0) {
