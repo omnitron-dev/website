@@ -38,8 +38,8 @@ import { ProcessManagerModule } from '@omnitron-dev/titan-pm';
 @Module({
   imports: [
     ProcessManagerModule.forRoot({
-      isolation: 'worker',                       // 'worker' | 'process' | 'thread'
-      transport: 'unix',                          // 'unix' | 'tcp' | 'websocket'
+      isolation: 'worker',                       // 'none' | 'worker' | 'child'
+      transport: 'unix',                          // 'unix' | 'tcp' | 'ws'
       restartPolicy: {
         enabled:     true,
         maxRestarts: 3,
@@ -69,8 +69,8 @@ Async config via `forRootAsync({ useFactory, inject?, useExisting? })`.
 
 | Option            | Type                                                                                                |
 | ----------------- | --------------------------------------------------------------------------------------------------- |
-| `isolation`       | `'worker' \| 'process' \| 'thread'`                                                                 |
-| `transport`       | `'unix' \| 'tcp' \| 'websocket'`                                                                    |
+| `isolation`       | `'none' \| 'worker' \| 'child'` — default `'worker'`                                                |
+| `transport`       | `'unix' \| 'tcp' \| 'ws'` — default `'unix'`                                                        |
 | `restartPolicy`   | `{ enabled, maxRestarts, window, delay, backoff?: { type, initial, max, factor? } }`               |
 | `resources`       | `{ maxMemory, maxCpu, timeout }`                                                                    |
 | `monitoring`      | `{ healthCheck: { interval, timeout }, metrics, tracing }`                                          |
@@ -264,11 +264,20 @@ gracefully terminate every spawned process and pool (respects
 
 ## Isolation modes
 
-| Isolation | Backed by              | Best for                                                  |
-| --------- | ---------------------- | --------------------------------------------------------- |
-| `worker`  | `worker_threads`       | CPU-bound work, low IPC latency; shared memory option     |
-| `process` | `child_process.fork`   | Strong isolation, ability to crash without taking down peers |
-| `thread`  | Native threads (where supported) | Specialised workloads                            |
+| Isolation | Backed by            | Best for                                                     |
+| --------- | -------------------- | ------------------------------------------------------------ |
+| `worker`  | `worker_threads`     | CPU-bound work, low IPC latency; shared memory option (default) |
+| `child`   | `child_process.fork` | Strong isolation, ability to crash without taking down peers   |
+| `none`    | The calling process  | Tests. No Netron management client is created for the worker.  |
+
+`execArgv` forces `child` even when `isolation` is `'worker'`: worker threads
+do not accept Node CLI flags.
+
+Sandboxing is a separate option, `security.isolation` on a spawn
+(`'none' | 'vm' | 'container'`). It does not select a spawn strategy. Neither
+`'vm'` nor `'container'` is implemented — both spawn an ordinary child process
+that shares the parent's filesystem and network, and say so in a warning at
+spawn time. Do not rely on either as a security boundary.
 
 ## Transport choice
 
@@ -276,11 +285,11 @@ gracefully terminate every spawned process and pool (respects
 | ----------- | --------------------------------------------------- |
 | `unix`      | Local IPC; lowest latency on the same host          |
 | `tcp`       | Cross-host workers; encrypt with TLS if needed     |
-| `websocket` | Long-lived workers behind a proxy                   |
+| `ws`        | Long-lived workers behind a proxy                   |
 
 ## Anti-patterns
 
-- **Tiny tasks in `process` isolation.** Process fork has ~50 ms
+- **Tiny tasks in `child` isolation.** Process fork has ~50 ms
   startup cost. Reserve for long-lived work or pre-warmed pools.
 - **No restart policy.** A crashing worker keeps respawning at
   full speed without `restartPolicy: { backoff }`. Always set
