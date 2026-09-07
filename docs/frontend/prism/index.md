@@ -65,7 +65,7 @@ Pick the level that matches your need:
   density, dark mode.
 - [**Forms**](./forms.md) — schema-aware forms with `<Field>` +
   `SchemaProvider`.
-- [**Hooks catalog**](./hooks-catalog.md) — 25+ React hooks.
+- [**Hooks catalog**](./hooks-catalog.md) — all 48 React hooks.
 
 ## Subpath exports
 
@@ -94,7 +94,7 @@ or from `./components`; the bundler tree-shakes either.
 | `@omnitron-dev/prism/components/editor` | `<Editor>` alone, as its own chunk |
 | `@omnitron-dev/prism/components/emoji-picker` | `<EmojiPicker>` alone — the dataset is ~80 kB gz |
 | `@omnitron-dev/prism/forms` | Schema-aware form helpers |
-| `@omnitron-dev/prism/hooks` | 25+ React hooks |
+| `@omnitron-dev/prism/hooks` | 48 React hooks |
 | `@omnitron-dev/prism/state` | Zustand-based store factory |
 | `@omnitron-dev/prism/accessibility` | A11y primitives + ARIA helpers |
 | `@omnitron-dev/prism/netron` | Pre-wired Netron auth/UI bindings |

@@ -1,7 +1,7 @@
 ---
 sidebar_position: 6
 title: Hooks catalog
-description: 25+ production-ready React hooks shipped with Prism.
+description: The 48 React hooks exported from @omnitron-dev/prism/hooks.
 ---
 
 # Hooks catalog
@@ -494,3 +494,57 @@ function ProductGrid({ filters }: { filters: ProductFilters }) {
 - [Forms](./forms.md) — hooks used in form patterns
 - [netron-react hooks](../netron/react.md) — RPC-specific hooks
   (use those, not these, for data fetching from a Titan backend)
+
+
+## Also exported
+
+Twenty-one further hooks are exported from `@omnitron-dev/prism/hooks` and had
+no entry here. They are listed with their real signatures rather than written
+up with invented examples — the point of this section is that they exist and
+can be found, which is what was missing.
+
+### State
+
+| Hook | Signature | What it does |
+| ---- | --------- | ------------ |
+| `useSetState` | `<T extends Record<string, unknown>>(initial: T \| (() => T))` | `setState` with partial updates, like a class component's |
+| `useMultiSelect` | `<T>(options?: UseMultiSelectOptions<T>)` | Multi-selection state — select, deselect, toggle, select-all |
+| `usePrevious` | `<T>(value: T): T \| undefined` | The value from the previous render |
+| `useCopyToClipboard` | `(options?: UseCopyToClipboardOptions)` | Copy with a `copied` flag that resets itself |
+
+### Timers and lifecycle
+
+| Hook | Signature | What it does |
+| ---- | --------- | ------------ |
+| `useCountdown` | `(options: UseCountdownOptions)` | Countdown from a duration; see also `useCountdownDate` / `useCountdownSeconds` above |
+| `useTimeout` | `(callback: () => void, delay: number)` | `setTimeout` that survives a changing callback and clears on unmount |
+| `useDebounceCallback` | `<T extends (...args: never[]) => unknown>(fn: T, delay = 500)` | Debounces the call, where `useDebounce` debounces the value |
+| `useThrottleCallback` | `<T extends (...args: unknown[]) => unknown>(fn: T, delay: number)` | The callback counterpart of `useThrottle` |
+| `useMounted` | `(): UseMountedReturn` | Whether the component is still mounted — for guarding async completions |
+| `useUpdateLayoutEffect` | `(effect: EffectCallback, deps?: DependencyList)` | `useLayoutEffect` that skips the first render |
+
+### Layout and sizing
+
+| Hook | Signature | What it does |
+| ---- | --------- | ------------ |
+| `useBreakpoint` | `(custom?: Partial<Breakpoints>): 'xs' \| 'sm' \| 'md' \| 'lg' \| 'xl'` | The current breakpoint as one value |
+| `useBreakpointChecks` | `(custom?: Partial<Breakpoints>): BreakpointChecks` | The same, as a set of booleans to branch on |
+| `useMediaQuery` | `(query: string): boolean` | One media query |
+| `useResponsiveQuery` | `(query: string): UseResponsiveQueryReturn` | A media query with its match state broken out |
+| `useScrollLock` | `(): { lock, unlock, isLocked }` | Locks body scroll — what a modal needs |
+| `useScrollToTop` | `(options?: { threshold?: number })` | `scrollToTop` plus whether the button should show |
+| `useMultipleImageDimensions` | `(urls: (string \| null \| undefined)[], options?)` | Dimensions of several images at once |
+
+### Pointer and keyboard
+
+| Hook | Signature | What it does |
+| ---- | --------- | ------------ |
+| `useClickOutside` | `<T extends HTMLElement>(handler: (e: MouseEvent \| TouchEvent) => void)` | Fires when a click lands outside the returned ref |
+| `usePopover` | `<T extends HTMLElement>(): UsePopoverReturn<T>` | Anchor + open state for a popover, without a component |
+| `useEnterKey` | `(callback: (e: KeyboardEvent) => void, options?)` | Enter, over `useKeyboardShortcut` |
+| `useEscapeKey` | `(callback: (e: KeyboardEvent) => void, options?)` | Escape, over `useKeyboardShortcut` |
+
+Hooks named on other pages — `useSnackbar`, `useLightbox`, `useCarousel`,
+`useChart`, `useMenu`, `usePrismContext`, `useLayoutContext`,
+`useSettingsStore` — are exported from `/components`, `/core`, `/layouts` and
+`/state` rather than from `/hooks`, which is why they are not in this list.
