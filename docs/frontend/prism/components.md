@@ -1,7 +1,7 @@
 ---
 sidebar_position: 2
 title: Components catalog
-description: Per-component reference for the 50+ widgets in Prism.
+description: Per-component reference for the widgets in Prism.
 ---
 
 # Components catalog
@@ -1277,3 +1277,59 @@ Use subpaths in production for the leanest payload.
 - [Forms](./forms.md) — `<Field>` + schema-driven forms
 - [Hooks catalog](./hooks-catalog.md) — 25+ React hooks
 - [Theme](./theme.md) — colours, typography, dark mode
+
+
+## Also exported
+
+These are exported from `@omnitron-dev/prism/components` and had no entry
+here. Listed with their real signatures rather than invented examples — what
+was missing is that they exist.
+
+### Lists and layout
+
+| Component | Signature | What it is |
+| --------- | --------- | ---------- |
+| `VirtualList<T>` | `{ items, getKey, children, estimateSize?, overscan?, maxHeight? }` | Windowed list over `@tanstack/react-virtual`. Measures rows as they mount, so **variable heights work** and a row may expand without breaking the scroll. `getKey` must be stable — it is what survives a reorder. Set `maxHeight` when the parent is not height-bounded, e.g. inside a Dialog |
+| `CardGrid` | `{ children, columns = 2, gap, sx }` | Wraps each direct child in a grid cell |
+| `ContentRoot` | styled `div` | The typographic container the content renderer paints into |
+| `DocSidebar` | `{ items, activeId, onItemClick, title }` | Sidebar for a documentation-style layout |
+
+### Content
+
+| Component | Signature | What it is |
+| --------- | --------- | ---------- |
+| `Markdown` | `{ children, className, … }` | Markdown renderer used by the content pages |
+| `Emoji` | `{ native, set = 'twitter', size, alt }` | One emoji from a set, without loading the picker's dataset |
+| `FlagIcon` | `{ code, … }` | Country flag, as used by `Field.CountrySelect` |
+| `ImageWithDefault` | `(props: ImageProps)` | `<Image>` that falls back to an icon when the source fails |
+
+### Feedback and overlays
+
+| Component | Signature | What it is |
+| --------- | --------- | ---------- |
+| `InlineAlert` | `{ severity = 'info', message, icon }` | Alert inside the flow rather than at the page edge. For form errors see the policy in [Forms](./forms.md) |
+| `SimpleSnackbar` | `{ … }` | Snackbar without the provider — for a surface that has no `<PrismProvider>` above it |
+| `CustomPopover` | `{ … }` | The popover `usePopover()` is built for |
+| `CustomAvatarGroup` | `{ avatars, size = 'sm', max = 4, sx }` | Overlapping avatars with an overflow count |
+
+### Charts
+
+| Component | Signature | What it is |
+| --------- | --------- | ---------- |
+| `ChartLegends` | `{ … }` | Legend rows, usable apart from a chart |
+| `ChartLoading` | `{ sx, className, type }` | Chart-shaped skeleton |
+
+### Navigation internals
+
+`NavSection`, `NavSectionVertical`, `NavSectionHorizontal` and `NavSectionMini`
+are the navigation API and are documented above. The parts they are assembled
+from — `Nav`, `NavList`, `NavSubList`, `NavItem`, `NavItemBase`, `NavUl`,
+`NavLi`, `NavIcon`, `NavTexts`, `NavInfo`, `NavArrow`, `NavSubheader` — are
+exported so a project can build a navigation shape the four presets do not
+cover. Reach for them only then; the presets carry the accessibility
+behaviour.
+
+### Elsewhere
+
+`Map`, `MapMarker`, `MapPointPicker` and `MapCoverageLayer` have their own
+page: [Maps](./maps.md). The `Field.*` inputs are in [Forms](./forms.md).
