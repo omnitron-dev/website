@@ -250,11 +250,68 @@ Construct via the static `Decimal.from(value, precision?)` /
 `subtract`, `multiply(n)` / `multiplyBy(other)`, `divide(n)` /
 `divideBy(other)`, `abs`, `negate`, comparisons (`equals`, `gt`,
 `gte`, `lt`, `lte`, `compare`), `round`/`floor`/`ceil(decimalPlaces)`,
-and `toString` / `toNumber` / `toBigInt`. The module also exports
-standalone string helpers (`addDecimals`, `multiplyDecimals`,
-`compareDecimals`, `satoshisToBtc`, …) for fixed-precision math.
+and `toString` / `toNumber` / `toBigInt`.
 
 For money / currency. Never trust `Number` for those.
+
+#### The standalone helpers
+
+The module also exports 31 string-in / string-out functions for fixed-precision
+maths. They are the whole surface, listed rather than sampled, because an
+incomplete list of money helpers is an invitation to write a thirty-second one
+by hand. Every one takes a trailing `precision` argument defaulting to
+`DEFAULT_PRECISION` (12).
+
+| Arithmetic | |
+| --- | --- |
+| `addDecimals(a, b)` · `subtractDecimals(a, b)` | both operands are strings |
+| `multiplyDecimal(a, multiplier: number)` | scale by a plain number |
+| `multiplyDecimals(a, b: string)` | multiply two decimal strings |
+| `divideDecimal(a, divisor: number)` | divide by a plain number; throws on 0 |
+| `divideDecimals(a, b: string)` | divide two decimal strings |
+| `sumDecimals(values: string[])` | sum an array |
+| `percentOf(amount, percent)` | `percentOf('100', '2.5')` → `'2.500000000000'` |
+| `absDecimal(v)` · `minDecimal(a, b)` · `maxDecimal(a, b)` · `zero()` | |
+
+**Watch the singular/plural pair.** `multiplyDecimal` takes a `number`;
+`multiplyDecimals` takes a decimal `string`. Same for `divideDecimal` /
+`divideDecimals`. One letter apart and a different second argument — the
+compiler catches a swap, an `any` does not.
+
+| Comparison | |
+| --- | --- |
+| `compareDecimals(a, b)` | `-1 \| 0 \| 1` |
+| `isGreater` · `isGreaterOrEqual` · `isLess` · `isLessOrEqual` `(a, b)` | |
+| `isZero(v)` · `isPositive(v)` · `isNegative(v)` | |
+
+| Rounding and formatting | |
+| --- | --- |
+| `roundDecimal(v, decimalPlaces)` · `floorDecimal` · `ceilDecimal` | |
+| `formatDecimal(v)` | normalise to the precision |
+| `parseDecimal(v: string \| number)` | accepts a number at the boundary |
+
+| Crypto units | |
+| --- | --- |
+| `satoshisToBtc(sat: bigint \| number \| string)` → string | |
+| `btcToSatoshis(btc: string)` → `bigint` | |
+| `atomicToXmr(atomic: bigint \| number \| string)` → string | |
+| `xmrToAtomic(xmr: string)` → `bigint` | |
+
+| Validation | |
+| --- | --- |
+| `isValidDecimal(v)` | format only |
+| `validateAmount(amount, { minAmount?, maxAmount?, precision?, allowZero?, allowNegative? })` | returns `{ valid, error? }`; `allowZero` defaults true, `allowNegative` false |
+
+**Results are padded to the precision**, not trimmed: `percentOf('100', '2.5')`
+is `'2.500000000000'`, not `'2.5'`. Compare with `compareDecimals` or
+`isZero`, never with `===` against a literal you typed by hand.
+
+The unit converters are the exception — they answer in their coin's own
+precision, so `satoshisToBtc(100000000n)` is `'1.00000000'` (8 places), not 12.
+
+They return `bigint` in the atomic direction on purpose: satoshis and piconeros
+exceed `Number.MAX_SAFE_INTEGER` for large amounts, so a `number` there is the
+same lossy trap `Decimal` exists to avoid.
 
 ## Primitives
 
