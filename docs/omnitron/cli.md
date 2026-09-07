@@ -83,6 +83,37 @@ down.
 Force-kill the daemon process. Use only when `down` doesn't
 respond.
 
+### `omnitron service install|uninstall|status`
+
+Hand supervision of the daemon itself to the operating system.
+Omnitron supervises apps and infrastructure; without this, nothing
+supervises the daemon, so a daemon crash — disk full, a load spike,
+a container-runtime hiccup — leaves every managed app down until
+someone runs `omnitron up` by hand.
+
+| Command | Effect |
+| ------- | ------ |
+| `omnitron service install` | Register and start the OS service |
+| `omnitron service uninstall` | Stop the supervised daemon and remove the service |
+| `omnitron service status` | Whether the OS is supervising, and what it reports |
+
+| Platform | What is written |
+| -------- | --------------- |
+| macOS | LaunchAgent at `~/Library/LaunchAgents/dev.omnitron.daemon.plist` |
+| Linux | systemd user unit at `~/.config/systemd/user/omnitron-daemon.service` |
+
+**Restarts are crash-only**, so `up` and `down` keep meaning what
+they meant. A graceful `omnitron down` exits 0 and stays down; a
+crash or a `SIGKILL` exits abnormally and is respawned
+(`KeepAlive={SuccessfulExit:false}` on launchd, `Restart=on-failure`
+on systemd). Installing the service does not take `down` away from
+you.
+
+The supervisor runs the same `daemon-entry.js` that `omnitron up`
+forks — one daemon codepath with two launchers — and that entry
+point holds a single-instance pid guard, so the two can never both
+bind.
+
 ## Project management
 
 A *project* is a named directory containing an
@@ -130,10 +161,30 @@ operate on **all** managed apps.
 
 | Command | Effect |
 | ------- | ------ |
-| `omnitron list` (alias `ls`) | One-line summary per process |
+| `omnitron list` (alias `ls`) | One row per app, then one per topology process |
 | `omnitron status` | Daemon-wide overview (apps, uptime, leader, infra) |
 | `omnitron config [--json]` | Print the resolved ecosystem config |
 | `omnitron init` | Scaffold `omnitron.config.ts` in the CWD |
+
+**Reading the child rows of `omnitron list`.** Each indented row is
+one entry of the app's process topology, and two of its columns say
+something a single number cannot.
+
+A pool entry — one declaring `instances > 1` — runs several
+processes and the row prints one of their pids, so it also prints
+its live worker count: `transform (worker) ×2`. When that count has
+drifted from what the topology declares it is shown as `×1/2` in
+yellow; `doctor` reports the same drift as a finding.
+
+`RST` shows `-`, not `0`, when nothing counts that row's restarts.
+The supervisor keeps a restart count per child, and a pool is not a
+supervisor child, so for a pool row the honest answer is that it is
+not tracked. `0` would leave "never restarted" and "not counted"
+looking identical.
+
+`UPTIME` is the uptime of the process whose pid the row prints —
+not the app's. A child that restarted an hour ago under an app that
+has been up for a week reads one hour.
 
 ## Monitoring
 
