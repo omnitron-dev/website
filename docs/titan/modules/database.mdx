@@ -311,6 +311,59 @@ Migrations discovered via the configured `migrationsPath`; run in
 `transactional: true` (the default), each migration runs in its own
 transaction and rolls back on failure.
 
+### The hardened runner
+
+`createHardenedRunner(...)` wraps `@kysera/migrations` to close three gaps that
+each produce a database nobody can safely re-run against. Use it in production;
+the differences are not stylistic.
+
+**One transaction per migration, covering the bookkeeping.** The schema change,
+the `migrations` row and the checksum are written together. Vanilla kysera
+defaults `useTransactions` to false and, separately, writes the bookkeeping
+row OUTSIDE the migration's transaction — so a connection dropped between the
+two leaves a migration applied but unrecorded, and the next run re-applies it.
+
+**A Postgres advisory lock** (`pg_try_advisory_lock`) gates every up and down,
+so two concurrent deploys against one database refuse rather than interleave
+their bookkeeping.
+
+**Content checksums** in a sidecar table (`migration_checksums`). Every applied
+migration is re-hashed at startup and compared. Editing a migration that has
+already run in production halts the runner and names the file — without this,
+the directory reads as the source of truth while production runs something
+else, and nothing anywhere disagrees.
+
+On first run against an existing database the checksums are backfilled
+trust-on-first-use, so legacy environments do not fail immediately. The
+backfill is logged, and `verify` prints what was recorded.
+
+## What comes through from `@kysera/*`
+
+This package re-exports about sixty symbols from the `@kysera` family, so they
+are importable from `@omnitron-dev/titan-database` and a reader has no reason
+to guess that a second package is involved. They are listed here by origin
+rather than described — their own documentation is authoritative, and copying
+it here would rot.
+
+| From                  | What                                                                 |
+| --------------------- | -------------------------------------------------------------------- |
+| `@kysera/core`        | error mapping (`parseDatabaseError`, `ErrorCodes`, `UniqueConstraintError`, `ForeignKeyError`, `NotNullError`), pagination (`paginate`, `paginateCursor`, `applyOffset`, `applyDateRange`, `executeCount`) |
+| `@kysera/repository`  | `upsert`, `upsertMany`, `atomicStatusTransition`, `ContextAwareRepository` (also exported as `BaseRepository`), and the `WHERE`-operator helpers |
+| `@kysera/infra`       | `withRetry`, `withTransactionRetry`, `CircuitBreaker`, `isTransientError`, `isSerializationError`, `HealthMonitor`, `checkDatabaseHealth` |
+| `@kysera/rls`         | `defineRLSSchema`, `allow`, `deny`, `filter`, `rlsPlugin`             |
+| `@kysera/dialects`    | `getAdapter`, `createDialectAdapter`, and the per-dialect adapters    |
+| plugins               | `softDeletePlugin`, `timestampsPlugin`, `auditPlugin`                 |
+| `kysely`              | `Kysely`, `Transaction`, `Selectable`, `Insertable`, `Updateable` (types) |
+
+Three of kysera's error classes are renamed on the way through:
+`DatabaseError`, `NotFoundError` and `BadRequestError` are exported as
+`KyseraDatabaseError`, `KyseraNotFoundError` and `KyseraBadRequestError`. The
+unprefixed names are NOT exported from this package at all — reach for
+`NotFoundError` here and the import fails rather than resolving to something
+that merely looks right, which is the intended outcome: those names belong to
+your application's own error hierarchy or to Titan's, and a database driver's
+version of them is a different type.
+
 ## Plugin lifecycle ordering
 
 ```mermaid
