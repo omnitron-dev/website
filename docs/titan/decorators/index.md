@@ -203,6 +203,13 @@ async searchDocuments(query: string) { /* … */ }
 The actual `RateLimitConfig` lives in
 `@omnitron-dev/titan/netron/auth/rate-limiter.ts`.
 
+This decorator RECORDS the limit: it writes metadata that Netron's
+authorization layer reads. A second decorator of the same name, exported from
+`@omnitron-dev/titan-ratelimit`, WRAPS the method and enforces the limit
+itself. They are told apart by the import path and by their options — `window`
+here, `windowMs` there — so a stack that mixes them compiles and does something
+other than what it reads like.
+
 → [titan-ratelimit](../modules/ratelimit.mdx)
 
 ### `@Cache(config)`
