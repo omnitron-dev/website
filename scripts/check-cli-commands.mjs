@@ -81,6 +81,20 @@ if (top.length < 30) {
   console.error(`the checker is broken, not the docs: only ${top.length} top-level commands extracted`);
   process.exit(2);
 }
+/**
+ * A command registered by some other means would be invisible here, and the
+ * report would simply get shorter — the failure direction a threshold cannot
+ * see. Commander offers `addCommand()` alongside `.command()`, so this asserts
+ * that the file uses one mechanism, rather than assuming it.
+ */
+if (/\.addCommand\s*\(|\.command\s*\(\s*new\s/.test(cli)) {
+  console.error(
+    'the checker is broken, not the CLI: commands are registered through addCommand() ' +
+      'or a Command instance, which this checker does not read'
+  );
+  process.exit(2);
+}
+
 const CONTROL_DOCUMENTED = ['doctor', 'up', 'logs', 'list'];
 const controlMissed = CONTROL_DOCUMENTED.filter((c) => !documentedIn(docs, c));
 if (controlMissed.length > 0) {
