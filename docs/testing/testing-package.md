@@ -150,8 +150,51 @@ expect(someState).toBe(/* … */);
 
 ```typescript
 const result = await withTimeout(longRunning(), 3_000);  // throws TimeoutError
-const value = await retry(() => flakyCall(), { attempts: 3 });
+const value = await retry(() => flakyCall(), { retries: 3, delay: 100, backoff: 2 });
 ```
+
+`RetryOptions` is `{ retries?, delay?, backoff?, onRetry? }`. `retries`
+defaults to 3, so a call that passes an unrecognised key still runs three
+times and looks like it worked — this page previously documented
+`{ attempts: 3 }`, which is not read at all.
+
+`onRetry(error, attempt)` fires between attempts, which is the hook to use when
+a flaky test needs to say WHY it retried rather than only that it passed.
+
+### `createDeferred()` / `defer()` — a promise resolved from outside
+
+Two shapes of the same idea, and the difference is what you get back:
+
+```typescript
+const d = defer<string>();          // { promise, resolve, reject } — a plain object
+emitter.once('ready', () => d.resolve('ok'));
+await d.promise;
+
+const p = createDeferred<string>(); // a DeferredPromise<T> instance
+```
+
+`defer()` returns a bare `Deferred<T>` — `{ promise, resolve, reject }`, no
+class. `createDeferred()` returns a `DeferredPromise<T>`, which adds one thing:
+the `isSettled` getter.
+
+That is the whole difference, and it is worth stating plainly because the
+obvious guess is wrong. A second `resolve` is ignored by BOTH — that is
+ordinary Promise semantics, not something the class adds. What the class adds
+is the ability to ASK whether the promise has settled without awaiting it,
+which a test needs when it has to assert that something has NOT happened yet.
+
+Use `defer()` unless you need that question answered.
+
+Either is the right answer when a test must wait for something a callback
+signals, and the wrong answer when a condition can simply be polled —
+`waitFor` exists for that and does not leave a promise dangling if the event
+never arrives.
+
+### `collectEvents(target, event, condition, timeout?)`
+
+Gathers emissions of one event until `condition(events)` returns true, then
+resolves with them. `waitForEvents` above waits for one of EACH named event;
+this waits for as many of ONE as the condition asks for.
 
 ### `createMockTimer()` / `MockTimerController`
 
