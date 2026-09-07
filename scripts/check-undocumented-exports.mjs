@@ -52,12 +52,48 @@ function walk(dir, exts, out = []) {
   return out;
 }
 
-const IMPORT = /import\s+(?:type\s+)?\{([^}]*)\}\s*from\s*'(@omnitron-dev\/[^']+)'/gs;
+// `export { … } from` counts too: an app that re-exports a symbol through its
+// own barrel is surfacing it deliberately, which is the same evidence of
+// consumer-facing API as importing it. Excluding re-exports was the first
+// draft's choice and it discarded real signal — three barrels in paysys and
+// storage re-export the lock and health surfaces and import them nowhere else.
+const IMPORT = /(?:import|export)\s+(?:type\s+)?\{([^}]*)\}\s*from\s*'(@omnitron-dev\/[^']+)'/gs;
+/** Every mention of the package family, however it is written. */
+const ANY_MENTION = /from\s*'(@omnitron-dev\/[^']+)'/g;
+/** Forms this probe deliberately does not read, each with a reason. */
+const EXCLUDED = [
+  [/import\s*\(/, 'a dynamic import — the specifier list is not static'],
+  // A comment naming the package tells a reader where something lives; it
+  // imports nothing. Both live instances say exactly that ("For direct usage,
+  // import from …"), which is prose about the API, not use of it.
+  [/^\s*(\/\/|\*|\/\*)/, 'a comment mentioning the package, not an import'],
+];
 const used = new Map(); // package -> Set<symbol>
 const invented = [];
+const unaccounted = [];
 
 for (const file of walk(DAOS, ['.ts', '.tsx'])) {
   const text = readFileSync(file, 'utf8');
+
+  // A DELIBERATELY NAIVE second reading. The structured regex above requires
+  // `{ … }`, so a default or namespace import is not merely mis-parsed — it is
+  // never seen, and an unseen import is a question the probe never asks. The
+  // "verbatim" invariant cannot help: it catches names INVENTED, and this is
+  // the opposite failure. Loss is the more dangerous direction for a probe
+  // that hunts omissions, because less extracted means fewer questions asked
+  // means a greener report.
+  //
+  // So: every mention of the package family must be either matched by the
+  // structured read or excluded for a reason named in EXCLUDED.
+  const structured = [...text.matchAll(IMPORT)].map((m) => m.index);
+  for (const m of text.matchAll(ANY_MENTION)) {
+    const lineStart = text.lastIndexOf('\n', m.index) + 1;
+    const line = text.slice(lineStart, text.indexOf('\n', m.index) + 1 || undefined);
+    if (EXCLUDED.some(([re]) => re.test(line))) continue;
+    const covered = structured.some((start) => start <= m.index && m.index <= start + 4000);
+    if (!covered) unaccounted.push([line.trim().slice(0, 70), relative(DAOS, file)]);
+  }
+
   for (const m of text.matchAll(IMPORT)) {
     const pkg = m[2].split('/')[1];
     for (const raw of m[1].split(',')) {
@@ -97,6 +133,11 @@ for (const dir of DOCS) {
   }
 }
 
+if (unaccounted.length) {
+  console.error('PROBE IS BROKEN, not the docs — these imports were neither read nor excluded:');
+  for (const [line, where] of unaccounted.slice(0, 10)) console.error(`    ${where}: ${line}`);
+  process.exit(2);
+}
 if (invented.length) {
   console.error('PROBE IS BROKEN, not the docs — it produced names absent from the source it read:');
   for (const [name, where] of invented.slice(0, 10)) console.error(`    '${name}'  (not found in ${where})`);
