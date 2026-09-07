@@ -78,12 +78,14 @@ import { useHydration } from '@omnitron-dev/netron-react';
 
 function ColorMode() {
   const isHydrated = useHydration();
-  const mode = useColorMode();
 
-  // Avoid hydration mismatch by deferring colour-mode-dependent UI:
+  // Avoid a hydration mismatch by deferring browser-only state entirely.
+  // Reading it above this line would run it on the server too, where
+  // `window` does not exist.
   if (!isHydrated) return null;
 
-  return <Icon name={mode === 'dark' ? 'sun' : 'moon'} />;
+  const dark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+  return <Icon name={dark ? 'sun' : 'moon'} />;
 }
 ```
 
