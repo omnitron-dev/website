@@ -82,9 +82,35 @@ for (const cat of CATALOGUES) {
     }
   }
 
-  const exported = barrelExports(fs.readFileSync(barrelPath, 'utf8'), cat.only);
+  const barrelSource = fs.readFileSync(barrelPath, 'utf8');
+  const exported = barrelExports(barrelSource, cat.only);
   const page = fs.readFileSync(pagePath, 'utf8');
   const named = namesOnPage(page, cat.only);
+
+  /**
+   * Every extracted name must appear VERBATIM in the text it came from.
+   *
+   * A checker that mangles its input reports invented symbols and reports them
+   * confidently — a peer's `lstrip('type ')` stripped the CHARACTER SET
+   * {t,y,p,e,space} rather than the prefix, so `percentOf` came out as
+   * `rcentOf` and was duly reported as undocumented. Nothing above catches
+   * that: extraction was non-empty, and a hand-picked control name survives
+   * unless it happens to start with an affected character.
+   *
+   * This does, for any mangling, because it tests the property that matters
+   * rather than an example of it: a name that is not in the source is a name
+   * this checker made up.
+   */
+  const invented = [...exported].filter((n) => !barrelSource.includes(n));
+  if (invented.length > 0) {
+    console.error(
+      `the checker is broken, not the docs: it extracted ${invented
+        .slice(0, 5)
+        .map((n) => `\`${n}\``)
+        .join(', ')}, which do not appear in ${cat.barrel}`
+    );
+    process.exit(2);
+  }
 
   // A zero must be able to mean only "agrees", never "the extraction broke".
   if (exported.size < 10) {
