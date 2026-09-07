@@ -66,6 +66,8 @@ Pick the level that matches your need:
 - [**Forms**](./forms.md) — schema-aware forms with `<Field>` +
   `SchemaProvider`.
 - [**Hooks catalog**](./hooks-catalog.md) — all 48 React hooks.
+- [**Maps**](./maps.md) — self-hosted MapLibre map, markers,
+  point picker and coverage layer.
 
 ## Subpath exports
 
