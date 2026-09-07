@@ -99,6 +99,19 @@ if (ids.size < 20) {
 }
 console.log(`control ok — the extractor finds all ${CONTROL_IDS.length} ids known to exist`);
 
+// Every extracted id must appear verbatim in the source. A hand-picked control
+// only proves the extractor works on the example chosen; this proves it did not
+// invent anything at all, which is the failure a fail-on-empty guard cannot
+// see — extraction is non-empty and confidently wrong.
+const inventedIds = [...ids].filter((id) => !source.includes(`'${id}'`));
+if (inventedIds.length > 0) {
+  console.error(
+    `the checker is broken, not the code: it extracted ${inventedIds.slice(0, 5).join(', ')}, ` +
+      'which do not appear in doctor.ts'
+  );
+  process.exit(2);
+}
+
 const areas = new Set([...ids].map((id) => id.split('.')[0]));
 const documented = documentedAreas(doc);
 if (documented.size === 0) {

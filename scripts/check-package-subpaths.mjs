@@ -57,7 +57,20 @@ function packageIndex(root) {
           subpaths.add('*');
           continue;
         }
-        subpaths.add(key === '.' ? '' : key.replace(/^\.\//, '/'));
+        const normalised = key === '.' ? '' : key.replace(/^\.\//, '/');
+        // Every derived subpath must still be present in the key it came from.
+        // A checker that mangles its input reports invented paths and reports
+        // them confidently; a fail-on-empty guard cannot see it, because the
+        // extraction is non-empty and wrong. `./theme` -> `/theme` keeps
+        // `theme`, so this holds for the transformation and breaks for any
+        // corruption of it.
+        if (normalised && !key.includes(normalised.slice(1))) {
+          console.error(
+            `the checker is broken: exports key "${key}" of ${pkg.name} became "${normalised}"`
+          );
+          process.exit(2);
+        }
+        subpaths.add(normalised);
       }
       index.set(pkg.name, subpaths);
     }
