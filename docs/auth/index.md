@@ -22,6 +22,7 @@ should be picked by what you're trying to do.
 | Apply attribute-based conditions (time window, MFA, IP)        | [ABAC conditions](./abac-conditions.md)   |
 | Project the auth context onto a `@kysera/rls` policy           | [RLS bridge](./rls-bridge.md)             |
 | Capture every authorisation decision for audit                 | [Audit trail](./audit-trail.md)           |
+| Get tokens to the client — cookies or bearer, and CSRF          | [Token issuance & transports](./token-issuance.md) |
 | Understand how the four layers fit together                    | [Mental model](./mental-model.md)         |
 | Migrate from `@RequireRole(...)` to permission strings         | [Migration: auth v1 → v2](../titan/migrations/auth-1-to-2.md) |
 
