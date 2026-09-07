@@ -43,7 +43,19 @@ const CATALOGUES = [
 function barrelExports(source, only) {
   const names = new Set();
   for (const block of source.matchAll(/export\s*\{([^}]*)\}\s*from/gs)) {
-    for (const part of block[1].split(',')) {
+    // Line comments first. A grouped barrel writes
+    //
+    //   export {
+    //     // State Management
+    //     useBoolean,
+    //
+    // and splitting on commas hands the comment and the name that follows it
+    // to the same iteration, so the name fails the identifier test and is
+    // dropped in silence. Seven were, here, five of them undocumented — and
+    // the checker reported the page complete, because a lost name is a name
+    // it never asks about.
+    const body = block[1].replace(/\/\/[^\n]*/g, '');
+    for (const part of body.split(',')) {
       const name = part.trim().split(/\s+as\s+/).pop()?.trim();
       if (name && only.test(name)) names.add(name);
     }
@@ -101,6 +113,36 @@ for (const cat of CATALOGUES) {
    * rather than an example of it: a name that is not in the source is a name
    * this checker made up.
    */
+  /**
+   * And the other direction, which the invariant below cannot see.
+   *
+   * "Every extracted name is in the source" catches a checker that INVENTS.
+   * It says nothing about one that LOSES, and for a checker that reports
+   * absence, losing is the dangerous direction: fewer names extracted means
+   * fewer questions asked means a greener report. Every threshold guard here
+   * is gross — it catches losing most, never losing seven.
+   *
+   * So cross-check against a deliberately naive second reading: every token
+   * shaped like a hook, anywhere in the barrel, must either have been
+   * extracted or be excluded for a reason that can be stated. The only
+   * legitimate exclusion is a mention in a comment, which is why the comments
+   * are stripped for this pass too and compared against the same stripped
+   * text.
+   */
+  const withoutComments = barrelSource.replace(/\/\/[^\n]*/g, '');
+  const naive = new Set(
+    [...withoutComments.matchAll(/\b[A-Za-z_][A-Za-z0-9_]*\b/g)].map((m) => m[0]).filter((n) => cat.only.test(n))
+  );
+  const lost = [...naive].filter((n) => !exported.has(n));
+  if (lost.length > 0) {
+    console.error(
+      `the checker is broken, not the docs: a plain scan of ${cat.barrel} finds ` +
+        `${lost.slice(0, 6).join(', ')}${lost.length > 6 ? ` and ${lost.length - 6} more` : ''}, ` +
+        'which the export parse did not extract'
+    );
+    process.exit(2);
+  }
+
   const invented = [...exported].filter((n) => !barrelSource.includes(n));
   if (invented.length > 0) {
     console.error(
