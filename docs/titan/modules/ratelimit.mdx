@@ -208,6 +208,25 @@ import { RateLimit } from '@omnitron-dev/titan-ratelimit';
 async createUser(input: CreateInput) { /* … */ }
 ```
 
+**What has to be true for this to enforce anything.** The decorator resolves
+its service as `this.__rateLimitService__ ?? <the module's own instance>`, so
+importing `TitanRateLimitModule` is enough — the module publishes itself for
+the decorators at init and withdraws on destroy. Injecting the service under
+that exact field name still wins, which is how a per-class override or a test
+double is installed.
+
+With neither — the module absent, or destroyed — the decorator **allows the
+request**. It writes a warning first, but only if the instance happens to carry
+a `logger` or `loggerModule`, so on a class without one the limit is silently
+not applied. A declared limit that does nothing is the failure this note exists
+to prevent: check that the module is imported before trusting a `@RateLimit`.
+
+Two different decorators are called `RateLimit` in this repository. This one —
+from `@omnitron-dev/titan-ratelimit` — wraps the method and enforces, and takes
+`windowMs`. The one exported from `@omnitron-dev/titan` records metadata for
+Netron's authorization layer to read, and takes `window`. The import path is
+the whole difference, and the field names are the tell.
+
 ### `@Throttle(rps)` — convenience
 
 ```typescript
