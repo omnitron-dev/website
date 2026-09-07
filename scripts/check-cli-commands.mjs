@@ -111,10 +111,89 @@ if (documentedIn(withoutList, 'list')) {
 }
 console.log('control ok — a command stripped from the docs is reported');
 
+/**
+ * Sub-command leaves, checked separately.
+ *
+ * The top-level scan misses the case that actually bit: `omnitron backup`
+ * exists and is documented, while four of its seven leaves — `full`,
+ * `schedule`, `schedules`, `unschedule` — were absent from the reference
+ * table, and `backup full` was named nowhere at all. That is the command
+ * which takes the object storage, the Tor keys and the daemon state: the
+ * parts a restored stack is useless without.
+ *
+ * The receiver variable is not the command path. `k8sDeploy.command('scale')`
+ * is `omnitron k8s deploy scale`, and reading the variable name reports a
+ * command that does not exist, under a name nobody would search for. So the
+ * chain is resolved back through the `const x = y.command('name')`
+ * declarations, and a leaf whose path does not reach `program` is skipped
+ * rather than guessed at.
+ */
+const chain = new Map();
+for (const m of cli.matchAll(/const\s+(\w+)\s*=\s*(\w+)\s*\.command\('([a-z][a-z0-9-]*)'/g)) {
+  chain.set(m[1], { parent: m[2], name: m[3] });
+}
+function pathOf(receiver) {
+  const parts = [];
+  let cur = receiver;
+  while (chain.has(cur)) {
+    const link = chain.get(cur);
+    parts.unshift(link.name);
+    cur = link.parent;
+  }
+  return cur === 'program' && parts.length > 0 ? parts : null;
+}
+
+const leaves = [];
+for (const m of cli.matchAll(/(\w+)\s*\n?\s*\.command\('([a-z][a-z0-9-]*)/g)) {
+  if (m[1] === 'program') continue;
+  const path = pathOf(m[1]);
+  if (path) leaves.push([...path, m[2]].join(' '));
+}
+const uniqueLeaves = [...new Set(leaves)];
+if (uniqueLeaves.length < 40) {
+  console.error(`the checker is broken, not the CLI: only ${uniqueLeaves.length} sub-command leaves resolved`);
+  process.exit(2);
+}
+/**
+ * The control must not depend on the state being tested.
+ *
+ * This first read `if (!documentedIn(docs, 'backup full'))` — a leaf that was
+ * documented in the same commit that added this check. Run against the docs as
+ * they were before it, the control fired "the checker is broken" and MASKED the
+ * four real findings it exists to surface. A control naming a specific
+ * documented thing asserts the docs, not the checker.
+ *
+ * These two do not. If the matcher answered false for everything, all 65 leaves
+ * would be reported; if it answered true for everything, the planted name would
+ * pass. Neither depends on what any page currently says.
+ */
+if (documentedIn(docs, 'backup nosuchleafplanted')) {
+  console.error('the checker is broken: an invented leaf matched the documentation');
+  process.exit(2);
+}
+const matchedLeaves = uniqueLeaves.filter((l) => documentedIn(docs, l)).length;
+if (matchedLeaves < uniqueLeaves.length / 2) {
+  console.error(
+    `the checker is broken: only ${matchedLeaves} of ${uniqueLeaves.length} leaves matched — ` +
+      'the matcher is not finding documentation that exists'
+  );
+  process.exit(2);
+}
+console.log(
+  `control ok — ${uniqueLeaves.length} leaves resolved, ${matchedLeaves} matched, an invented one did not`
+);
+
+const undocumentedLeaves = uniqueLeaves.filter((l) => !documentedIn(docs, l));
+for (const l of undocumentedLeaves) {
+  console.error(`\`omnitron ${l}\` is not named anywhere in docs/`);
+}
+
 const undocumented = top.filter((c) => !documentedIn(docs, c));
 for (const c of undocumented) {
   const a = aliases.get(c);
   console.error(`\`omnitron ${c}\`${a ? ` (alias ${a.join(', ')})` : ''} is not named anywhere in docs/`);
 }
-if (undocumented.length > 0) process.exit(1);
-console.log(`ok — all ${top.length} top-level commands are named in the docs`);
+if (undocumented.length > 0 || undocumentedLeaves.length > 0) process.exit(1);
+console.log(
+  `ok — all ${top.length} top-level commands and ${uniqueLeaves.length} sub-command leaves are named in the docs`
+);
