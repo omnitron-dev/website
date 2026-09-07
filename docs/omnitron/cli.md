@@ -447,9 +447,24 @@ custom) provisioned per app's `omnitronConfig.infrastructure`.
 
 | Command | Effect |
 | ------- | ------ |
-| `omnitron backup create [database]` | Create a database backup |
+| `omnitron backup create [database]` | Back up one database, or every running-stack database with no argument |
+| `omnitron backup full` | **Everything**: all stack databases plus MinIO storage, Tor keys and the daemon's own state |
 | `omnitron backup list` | List available backups |
 | `omnitron backup restore <id>` | Restore from a backup |
+| `omnitron backup schedule <target> <cron>` | Schedule a backup; `<target>` may be `all` |
+| `omnitron backup schedules` | List configured schedules |
+| `omnitron backup unschedule <target>` | Remove a schedule |
+
+**`full` is not a bigger `create`.** `create` backs up databases; `full` also
+takes the object storage, the Tor keys and the daemon state — the three things
+that are not in any database and that a restored stack is useless without. It
+reports per target, so a partial result is visible rather than aggregated into
+one success or failure, and it says so plainly when there is nothing to back up
+because no stack is running.
+
+Schedules live in the daemon and survive its restarts, so `schedule` is not a
+substitute for host cron in one respect only: nothing runs while the daemon is
+down. `<target>` takes `all` to mean every database of every running stack.
 
 ## Kubernetes
 
