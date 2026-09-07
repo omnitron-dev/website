@@ -154,8 +154,8 @@ The same fake works at every test level — unit, integration, e2e.
 ## The `@omnitron-dev/testing/titan` helpers
 
 The testing package ships container-level test helpers under the
-**`@omnitron-dev/testing/titan`** subpath (declared in
-`packages/testing/package.json:47`). They are **not** exported from
+**`@omnitron-dev/testing/titan`** subpath (the `"./titan"` entry in the
+package's `exports` map). They are **not** exported from
 the package root — always import from the subpath:
 
 ```typescript
