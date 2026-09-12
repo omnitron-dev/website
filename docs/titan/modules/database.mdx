@@ -399,20 +399,40 @@ before/after.
   connection. Crucial during dev with file watchers — without this,
   rapid restarts exhaust PG connection slots.
 
-## Plugin registry
+## Adding your own kysera plugins
 
-For applications that build their own repositories without
-inheriting from the base class, register table-level plugins
-explicitly:
+Plugins go on the CONNECTION, through `kysera.plugins`. They are
+applied when the executor is built, so every query on that
+connection passes through them — including hand-written Kysely,
+which is how applications that do not use the base repository
+class get covered:
 
 ```typescript
-import { registerTablePlugins } from '@omnitron-dev/titan-database';
-
-registerTablePlugins('users', [
-  /* soft-delete plugin instance */,
-  /* timestamps plugin instance */,
-]);
+TitanDatabaseModule.forRootAsync({
+  useFactory: () => ({
+    connection: { /* … */ },
+    kysera: {
+      plugins: [rlsPlugin({ schema, bypassRoles }), myPlugin()],
+    },
+  }),
+});
 ```
+
+`kysera.plugins` and the built-in `plugins` block are MERGED, not
+alternatives — configuring one of them does not silently drop the
+other.
+
+:::warning Removed: `registerTablePlugins`
+There used to be a per-table registry documented here, recommended
+for exactly the case above. Plugins registered through it were
+always skipped: `DATABASE_CONNECTION` already resolves to a kysera
+executor, and the reader correctly declines to wrap a connection
+that is already plugin-aware — so the registry's own reader was
+unreachable by construction. It was deleted rather than fixed,
+because `kysera.plugins` is the path that works. If you are
+following an older copy of this page, move the plugin list into
+the module options as above.
+:::
 
 ## Anti-patterns
 
