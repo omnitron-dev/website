@@ -95,7 +95,10 @@ if (index.size < 10) {
 }
 
 const docsRoot = path.join(import.meta.dirname, '..', 'docs');
-const ROW = /^\|\s*`(@omnitron-dev\/[a-z0-9-]+)((?:\/[a-z0-9-]+)*)`\s*\|/;
+// Case-insensitive on purpose. A row naming `@omnitron-dev/Prism/Theme` is
+// either a real entry point or a typo; either way the reader needs to be told,
+// and a lower-case-only pattern would skip it and count the page as complete.
+const ROW = /^\|\s*`(@omnitron-dev\/[A-Za-z0-9-]+)((?:\/[A-Za-z0-9-]+)*)`\s*\|/;
 
 const rows = [];
 for (const file of docFiles(docsRoot)) {
