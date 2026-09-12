@@ -45,12 +45,12 @@ const cli = fs.readFileSync(cliPath, 'utf8');
  * and requiring every leaf would report `omnitron backup full` as missing
  * while the backup page documents it in a table under another heading.
  */
-const commands = [...cli.matchAll(/program\s*\n?\s*\.command\('([a-z][a-z0-9-]*)/g)].map((m) => m[1]);
+const commands = [...cli.matchAll(/program\s*\n?\s*\.command\('([A-Za-z][A-Za-z0-9-]*)/g)].map((m) => m[1]);
 const top = [...new Set(commands)].sort();
 
 /** `.aliases(['ls'])` on the same chain — `omnitron ls` documents `list`. */
 const aliases = new Map();
-for (const m of cli.matchAll(/\.command\('([a-z][a-z0-9-]*)'[^\n]*\)\s*\n?\s*\.aliases\(\[([^\]]*)\]/g)) {
+for (const m of cli.matchAll(/\.command\('([A-Za-z][A-Za-z0-9-]*)'[^\n]*\)\s*\n?\s*\.aliases\(\[([^\]]*)\]/g)) {
   aliases.set(m[1], [...m[2].matchAll(/'([a-z-]+)'/g)].map((a) => a[1]));
 }
 
@@ -95,6 +95,16 @@ if (/\.addCommand\s*\(|\.command\s*\(\s*new\s/.test(cli)) {
   process.exit(2);
 }
 
+// Command names are lower-case by convention, and that is now asserted rather
+// than assumed: a pattern matching only lower-case does not enforce a
+// convention, it silently drops what breaks it and reports the shorter list as
+// agreement.
+const misCasedCmds = top.filter((c) => c !== c.toLowerCase());
+if (misCasedCmds.length > 0) {
+  console.error(`the CLI registers command(s) that are not lower-case: ${misCasedCmds.join(', ')}`);
+  process.exit(1);
+}
+
 const CONTROL_DOCUMENTED = ['doctor', 'up', 'logs', 'list'];
 const controlMissed = CONTROL_DOCUMENTED.filter((c) => !documentedIn(docs, c));
 if (controlMissed.length > 0) {
@@ -129,7 +139,7 @@ console.log('control ok — a command stripped from the docs is reported');
  * rather than guessed at.
  */
 const chain = new Map();
-for (const m of cli.matchAll(/const\s+(\w+)\s*=\s*(\w+)\s*\.command\('([a-z][a-z0-9-]*)'/g)) {
+for (const m of cli.matchAll(/const\s+(\w+)\s*=\s*(\w+)\s*\.command\('([A-Za-z][A-Za-z0-9-]*)'/g)) {
   chain.set(m[1], { parent: m[2], name: m[3] });
 }
 function pathOf(receiver) {
@@ -144,7 +154,7 @@ function pathOf(receiver) {
 }
 
 const leaves = [];
-for (const m of cli.matchAll(/(\w+)\s*\n?\s*\.command\('([a-z][a-z0-9-]*)/g)) {
+for (const m of cli.matchAll(/(\w+)\s*\n?\s*\.command\('([A-Za-z][A-Za-z0-9-]*)/g)) {
   if (m[1] === 'program') continue;
   const path = pathOf(m[1]);
   if (path) leaves.push([...path, m[2]].join(' '));

@@ -63,7 +63,11 @@ function findingIds(source) {
       else if (source[end] === '}' && --depth === 0) break;
     }
     const body = source.slice(open, end + 1);
-    const id = body.match(/id:\s*'([a-z][a-z0-9.-]*)'/);
+    // Case-INSENSITIVE, then checked. A pattern that only matches lowercase
+    // does not enforce the convention — it silently drops anything that
+    // breaks it, and reports the smaller number as agreement. A peer lost 23
+    // of 150 declarations to exactly this and reported "44 agreed".
+    const id = body.match(/id:\s*'([A-Za-z][A-Za-z0-9.-]*)'/);
     // `severity` is what separates a finding from an unrelated object that
     // happens to carry an `id` — the RPC request body in `checkAnonymous`
     // sends `id: 'doctor-anon'` and is not a finding.
@@ -132,8 +136,12 @@ if (inventedIds.length > 0) {
  * an RPC body carrying `id: 'doctor-anon'`, which is a request id and not a
  * finding.
  */
+// Also case-insensitive — and that matters more here than above. This scan
+// exists to catch what the structured parse LOSES, and a second reading that
+// shares the first one's assumption is not a second reading. It would have
+// been blind to precisely the case it was added to detect.
 const naiveIds = new Set(
-  [...source.matchAll(/id:\s*'([a-z][a-z0-9]*\.[a-z0-9.*-]+)'/g)].map((m) => m[1])
+  [...source.matchAll(/id:\s*'([A-Za-z][A-Za-z0-9]*\.[A-Za-z0-9.*-]+)'/g)].map((m) => m[1])
 );
 const lostIds = [...naiveIds].filter((id) => !ids.has(id));
 if (lostIds.length > 0) {
@@ -142,6 +150,18 @@ if (lostIds.length > 0) {
       'which the findings.add parse did not extract'
   );
   process.exit(2);
+}
+
+// Finding ids are lower-case by convention. That convention is now ASSERTED
+// rather than assumed: an id breaking it is reported, where before it was
+// quietly skipped and the shorter list read as agreement.
+const misCased = [...ids].filter((id) => id !== id.toLowerCase());
+if (misCased.length > 0) {
+  console.error(
+    `doctor.ts declares finding id(s) that are not lower-case: ${misCased.join(', ')} — ` +
+      'the convention every consumer of these ids relies on'
+  );
+  process.exit(1);
 }
 
 const areas = new Set([...ids].map((id) => id.split('.')[0]));
