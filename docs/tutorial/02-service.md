@@ -266,4 +266,4 @@ role-gated methods.
 | `ECONNREFUSED 5432` | Postgres not running; `docker start pg` |
 | `password authentication failed` | Wrong `DATABASE_URL`; check env |
 | `relation "users" does not exist` | Migration didn't run; re-run the psql command |
-| `Errors.notFound is not a function` | Import path: `import { Errors } from '@omnitron-dev/titan';` |
+| `Errors.notFound is not a function` | Import path: `import { Errors } from '@omnitron-dev/titan/errors';` |

@@ -14,7 +14,7 @@ A Titan service is a class with a `@Service` decorator. Methods marked
 `@Public()` are exposed over the configured RPC transports.
 
 ```typescript title="src/users.service.ts"
-import { Service, Public } from '@omnitron-dev/titan';
+import { Service, Public } from '@omnitron-dev/titan/decorators';
 
 export interface User {
   id: string;
