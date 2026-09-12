@@ -55,6 +55,9 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      - name: Public content boundary
+        run: pnpm check:content
+
       - name: TypeScript check
         run: pnpm typecheck
 

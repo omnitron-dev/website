@@ -17,10 +17,40 @@ cd apps/api
 pnpm add -D vitest @omnitron-dev/testing
 
 cd ../web
-pnpm add -D vitest @testing-library/react @testing-library/user-event jsdom
+pnpm add -D vitest @testing-library/react @testing-library/user-event @testing-library/jest-dom jsdom
 ```
 
-## Unit test (api)
+## Compile backend decorators
+
+Titan's constructor injection needs emitted decorator metadata. Run the
+backend tests against TypeScript's compiled output rather than relying on
+Vitest's default TypeScript transform.
+
+`apps/api/tsconfig.test.json`:
+
+```json
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": { "rootDir": ".", "outDir": ".test-build" },
+  "include": ["src/**/*.ts", "test/**/*.ts"]
+}
+```
+
+`apps/api/vitest.config.ts`:
+
+```typescript
+import { defineConfig } from 'vitest/config';
+export default defineConfig({
+  test: { include: ['.test-build/**/*.test.js'] },
+});
+```
+
+Set the API's test script to
+`"test": "tsc -p tsconfig.test.json && vitest run"` and add `.test-build/`
+to `.gitignore`. Set `DATABASE_URL` to a disposable database before running
+repository or integration tests; the tests below do not roll back their writes.
+
+## Repository integration test (api)
 
 `apps/api/src/users/user.repo.test.ts`:
 
@@ -44,8 +74,9 @@ describe('UserRepo', () => {
   afterEach(() => app.close());
 
   it('creates and finds', async () => {
-    const u = await repo.create({ email: 'a@b.c', name: 'Alice' });
-    expect(u.email).toBe('a@b.c');
+    const email = `test-${crypto.randomUUID()}@example.com`;
+    const u = await repo.create({ email, name: 'Alice' });
+    expect(u.email).toBe(email);
 
     const fetched = await repo.findById(u.id);
     expect(fetched).toEqual(u);
@@ -98,47 +129,55 @@ Pure DI test — no real DB, no real Application.
 
 ## Integration test (real api over the wire)
 
+This example exercises the public service from step 2. After adding
+authentication in step 3, sign in with a seeded test account and attach
+its token before making protected calls. Use a disposable test database.
+
 `apps/api/test/users.integration.test.ts`:
 
 ```typescript
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
-import { TestApplication } from '@omnitron-dev/testing/titan';
+import { Application } from '@omnitron-dev/titan';
+import { HttpTransport } from '@omnitron-dev/titan/netron/transport/http';
 import { createClient }    from '@omnitron-dev/netron-browser';
 import { AppModule }       from '../src/app.module.js';
 
 describe('users service end-to-end', () => {
-  let app:    TestApplication;
+  let app:    Application;
   let client: ReturnType<typeof createClient>;
 
   beforeAll(async () => {
-    // Transport options belong to the application config, the same shape
-    // production uses — there is no test-only netron block.
-    app = await TestApplication.create(AppModule, {
-      netron: { transports: { http: { port: 0 } } },   // 0 → pick free port
+    app = await Application.create(AppModule, { disableGracefulShutdown: true });
+    if (!app.netron) throw new Error('Netron is unavailable');
+    app.netron.registerTransport('http', () => new HttpTransport());
+    app.netron.registerTransportServer('http', {
+      name: 'api',
+      options: { host: '127.0.0.1', port: 0 },
     });
-
-    const netron = app.getApplication().netron;
-    // `port` reports what the OS actually bound, so `port: 0` works.
-    const { port } = netron.transportServers.get('http') as { port: number };
-    client = createClient({ url: `http://localhost:${port}` });
+    await app.start();
+    const server = app.netron.transportServers.get('http');
+    if (!server) throw new Error('HTTP server did not start');
+    const { port } = server as typeof server & { port: number };
+    client = createClient({ url: `http://127.0.0.1:${port}` });
     await client.connect();
   });
 
   afterAll(async () => {
     await client.disconnect();
-    await app.close();
+    await app.stop();
   });
 
   it('CRUD round-trip', async () => {
-    const u = await client.invoke('users', 'create', [{ email: 'i@t.c', name: 'I' }]);
-    expect(u.email).toBe('i@t.c');
+    const email = `wire-${crypto.randomUUID()}@example.com`;
+    const u = await client.invoke('users@1.0.0', 'create', [{ email, name: 'I' }]);
+    expect(u.email).toBe(email);
 
-    const fetched = await client.invoke('users', 'findById', [u.id]);
+    const fetched = await client.invoke('users@1.0.0', 'findById', [u.id]);
     expect(fetched).toEqual(u);
   });
 
   it('rejects missing user with NOT_FOUND', async () => {
-    await expect(client.invoke('users', 'findById', ['missing']))
+    await expect(client.invoke('users@1.0.0', 'findById', ['missing']))
       .rejects.toMatchObject({ code: 'NOT_FOUND' });
   });
 });
@@ -153,6 +192,7 @@ Catches a class of bugs unit tests miss.
 
 ```tsx
 import { describe, it, expect } from 'vitest';
+import '@testing-library/jest-dom/vitest';
 import { render, screen } from '@testing-library/react';
 import { TestNetronProvider } from '@omnitron-dev/netron-react/test';
 import { UsersPage } from './UsersPage.js';
@@ -325,7 +365,7 @@ jobs:
 | Layer | What | Speed |
 | ----- | ---- | ----- |
 | Unit | `UsersService.findById` with mocked repo | ms |
-| Module | `UserRepo` with real DB + rollback | tens of ms |
+| Repository | `UserRepo` with a disposable database | tens of ms |
 | Integration | Full app + Netron client | hundreds of ms |
 | Component | `<UsersPage>` with mocked services | tens of ms |
 | E2E | Real browser → real api | seconds |
@@ -355,6 +395,6 @@ into Docker + ship to a server.
 | Symptom | Fix |
 | ------- | --- |
 | `cannot find module '@my-platform/api-contracts'` in tests | Check `pnpm install` ran after adding the workspace dep |
-| Vitest hangs | Likely an unhandled promise from a real DB connection — use `database: 'rollback'` |
+| Vitest hangs | Await client disconnect and application close; release any database connections created by the test |
 | Playwright fails to start servers | Check `webServer.url` matches reality |
 | `act()` warnings in React tests | Use `findBy*` (async) instead of `getBy*` (sync) |

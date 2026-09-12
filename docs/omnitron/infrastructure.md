@@ -469,8 +469,8 @@ within one tick** — up to 30 seconds after you stopped it, `docker stop`
 looks undone. The daemon logs `Service not running — auto-restarting`.
 
 It is worth knowing before you try to reproduce an outage against
-infrastructure: `docker stop sample-dev-redis` does not give you a three-minute
-outage, it gives you about six seconds. The container's own `RestartCount`
+infrastructure: `docker stop sample-dev-redis` lasts only until the next
+reconciliation tick, rather than holding the service down. The container's own `RestartCount`
 stays `0` — Docker did not do it — while `StartedAt` moves, which is how you
 tell this apart from a Docker restart policy. To hold a service down, stop it
 through `omnitron infra down` (which is a declared intent, not a drift the

@@ -38,16 +38,15 @@ class UsersService {
 }
 
 const app = await Application.create(AppModule);
-await app.start();
-
 app.netron!.registerTransport('http', () => new HttpTransport());
-await app.netron!.registerTransportServer('http', { name: 'api', options: { port: 3000 } });
+app.netron!.registerTransportServer('http', { name: 'api', options: { host: '127.0.0.1', port: 3000 } });
+await app.start();
 ```
 
 Client — connect to get a `RemotePeer`, then resolve a typed proxy:
 
 ```typescript
-const peer  = await app.netron!.connect('ws://localhost:3001');
+const peer  = await app.netron!.connect('http://127.0.0.1:3000');
 const users = await peer.queryInterface<UsersService>('users@1.0.0');
 const user  = await users.findById('u_42');
 ```

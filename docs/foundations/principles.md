@@ -1,85 +1,64 @@
 ---
 sidebar_position: 1
 title: Principles
-description: The three rules that shape every layer of the stack.
+description: Shared contracts, explicit composition, visible lifecycle, and operational accountability.
 ---
 
 # Principles
 
-Omnitron exists to remove the seams between layers of a typical
-TypeScript stack. Every design choice falls out of three rules.
+Omnitron brings application code and operations into one TypeScript
+toolchain. Its value depends on boundaries that a developer can inspect,
+test and change.
 
-## 1. The contract is a TypeScript type
+## Share contracts
 
-Most stacks treat the wire as a separate world: OpenAPI, protobuf,
-GraphQL schema, RPC IDL — each one a translation layer with its own
-toolchain, codegen step, and drift problem.
+Netron clients can compile against service interfaces without generating a
+client SDK. Keep those types in a shared package or use type-only imports.
+Version the contract when independently deployed callers need different
+behaviour.
 
-Omnitron treats the **service interface itself** as the contract.
-The class that runs on the backend and the type that the client
-resolves are the same TypeScript declaration. There is no codegen
-between them. A method signature change is a build error on every
-caller in the same `tsc` pass.
+A TypeScript signature is a compile-time constraint. At runtime, validate
+inputs, authenticate callers and authorise each protected operation.
+Serialization does not replace those checks.
 
-## 2. Pay only for what you use
+## Compose explicitly
 
-The base framework does not import an opinionated runtime. You add
-modules when you need them:
+Declare providers, imports and exports in modules. Use injection tokens
+where implementations vary. Configuration and logging are registered as
+core modules by default; additional capabilities are opt-in.
 
-- Need configuration? Add `ConfigModule`.
-- Need logging? Add `LoggerModule`.
-- Need scheduled jobs? Add `SchedulerModule`.
+Module dependencies still matter. A distributed lock needs Redis; a
+database module needs a driver and a live connection. Read the
+[module map](../titan/modules/module-map.mdx) before composing a system.
 
-A Titan app with a single service and no opt-in modules has no
-hidden allocator, no ambient tracing, no global thread-locals. It
-is the code you wrote plus the container's wire-up.
+Titan supports optional filesystem discovery, but explicit module
+registration makes startup dependencies easier to review.
 
-This applies upward too. Need a frontend? Add Prism. Don't need
-one? The server doesn't bundle React. Need to operate a fleet?
-Add the Omnitron CLI. Don't? Your service runs as a normal
-Node.js process.
+## Make lifecycle observable
 
-## 3. The same primitives operate the system
+Services acquire resources during initialization and startup, then release
+them during shutdown. Set timeouts and make shutdown safe for in-flight
+work. Test failed startup and interrupted shutdown as well as the happy path.
 
-The Omnitron CLI talks to a running Titan app over the same Netron
-protocol your browser uses. The web console aggregates dashboards
-over the same metrics your services emit to. There is no separate
-"operator API" that drifts from the runtime API.
+The [lifecycle reference](../titan/application/lifecycle.md) describes
+ordering. Avoid relying on the exact interleaving of unrelated providers.
 
-This means:
+## Separate runtime from supervision
 
-- `omnitron logs` tailing a remote service uses the service's own
-  log module, not a sidecar agent.
-- `omnitron status` against a running app calls the same health
-  module the load balancer probes.
-- The web console and the CLI share the same client library; if
-  one works, the other does too.
+A Titan application is a normal process. Use a process supervisor appropriate
+to your deployment. Add Omnitron when you need its project model,
+infrastructure management, release workflow or remote operations.
 
-## What follows
+The CLI and web console use the daemon's RPC services. Operational access
+has its own identity and permissions; sharing a transport does not grant
+the same authority to every caller.
 
-- **No ambient state.** All dependencies are explicit; the
-  container resolves them. There are no thread-locals, no `this`
-  magic, no `process.env` reads inside business logic.
-- **Decorators describe intent, not behaviour.** `@Service`,
-  `@Public`, `@Inject`, `@Validate` — each one is a contract the
-  framework enforces, not a runtime hook that injects code.
-- **Lifecycle is observable.** Modules report `onInit`, `onStart`,
-  `onStop`, `onDestroy`. The container fires them in dependency
-  order. Failures surface as typed errors, not stack traces from
-  half-initialised state.
-- **Errors are values.** Service methods raise typed errors that
-  travel intact across the wire; thrown exceptions are reserved
-  for bugs the framework should catch.
+## Report what happened
 
-## What this is not
+Return typed errors, log enough context to diagnose failures, and keep
+sensitive details out of public responses. Readiness, successful process
+startup and a successful deployment are different claims. Verify each at
+the layer that owns it.
 
-- **Not a magic auto-wire.** The container is explicit. You
-  declare providers in `@Module({...})`; nothing is auto-discovered
-  from the filesystem.
-- **Not a "do everything" runtime.** Modules are independently
-  versioned packages. You can run a Titan app with one of them.
-- **Not a replacement for Node.js.** Titan runs on Node.js (and
-  is tested on Bun and Deno). The platform is the platform.
-
-Read on: [Architecture](./architecture.md) — how the layers
-compose at runtime.
+For deployment practice, continue with
+[Production readiness](../deployment/production-readiness.md).

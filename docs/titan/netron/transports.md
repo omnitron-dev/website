@@ -22,9 +22,9 @@ middleware stack.
 
 ## Configuring transports
 
-Transports are bound imperatively on the running `Netron` instance.
-Each one is *registered* (its factory added to the registry) and then
-a *server* is started for it via `registerTransportServer`:
+Register transports on the application's `Netron` instance **before
+startup**. `registerTransportServer` stores a server configuration;
+`app.start()` starts the registered listeners:
 
 ```typescript
 import { HttpTransport } from '@omnitron-dev/titan/netron/transport/http';
@@ -32,14 +32,14 @@ import { HttpTransport } from '@omnitron-dev/titan/netron/transport/http';
 // registered explicitly.
 
 const app = await Application.create(AppModule);
-await app.start();
 const netron = app.netron!;
 
 netron.registerTransport('http', () => new HttpTransport());
-await netron.registerTransportServer('http',      { name: 'api',  options: { port: 3000 } });
-await netron.registerTransportServer('websocket', { name: 'ws',   options: { port: 3001 } });
-await netron.registerTransportServer('tcp',       { name: 'tcp',  options: { port: 4001 } });
-await netron.registerTransportServer('unix',      { name: 'sock', options: { path: '/run/myapp.sock' } });
+netron.registerTransportServer('http',      { name: 'api',  options: { port: 3000 } });
+netron.registerTransportServer('websocket', { name: 'ws',   options: { port: 3001 } });
+netron.registerTransportServer('tcp',       { name: 'tcp',  options: { port: 4001 } });
+netron.registerTransportServer('unix',      { name: 'sock', options: { path: '/tmp/myapp.sock' } });
+await app.start();
 ```
 
 `registerTransportServer(name, { name, options })` takes a transport

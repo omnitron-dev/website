@@ -16,7 +16,7 @@ optional, framework-bound vs framework-agnostic).
 
 | Package | What | Required? |
 | ------- | ---- | :-------: |
-| `@omnitron-dev/titan` | Backend framework — DI, modules, lifecycle, **server-side Netron with all 4 transports (HTTP/WS/TCP/Unix) built in**, validation, errors | ✓ |
+| [`@omnitron-dev/titan`](../titan/overview.md) | Backend framework — DI, modules, lifecycle, **server-side Netron with all 4 transports (HTTP/WS/TCP/Unix) built in**, validation, errors | ✓ |
 
 `@omnitron-dev/titan` is **self-sufficient**. Server-side
 Netron — including every transport — ships inside it as subpath
@@ -30,28 +30,28 @@ Independently versioned. Add only what your app uses.
 
 | Package | Purpose |
 | ------- | ------- |
-| `@omnitron-dev/titan-auth` | JWT authentication (HS256 / RS256 / ES256, JWKS, token cache) |
-| `@omnitron-dev/titan-cache` | Multi-tier caching (L1 LRU/LFU + L2 Redis) |
-| `@omnitron-dev/titan-database` | Kysely + migrations + RLS plugin |
-| `@omnitron-dev/titan-discovery` | Redis-backed service discovery + heartbeats |
-| `@omnitron-dev/titan-events` | In-process event bus with history |
-| `@omnitron-dev/titan-health` | Health + readiness probes (k8s-shaped) |
-| `@omnitron-dev/titan-lock` | Distributed Redis locks (Lua scripts, UUID ownership) |
-| `@omnitron-dev/titan-metrics` | Counters / gauges / histograms; Prom exposition |
-| `@omnitron-dev/titan-notifications` | Multi-channel delivery + DLQ + rotif messaging |
-| `@omnitron-dev/titan-pm` | Process manager / worker pools / autoscaling |
-| `@omnitron-dev/titan-ratelimit` | Token-bucket / sliding-window / fixed-window |
-| `@omnitron-dev/titan-redis` | Redis client (clusters, sentinel, named instances) |
-| `@omnitron-dev/titan-scheduler` | Cron / interval / timeout with persistence |
-| `@omnitron-dev/titan-telemetry-relay` | Store-and-forward telemetry (WAL-backed) |
+| [`@omnitron-dev/titan-auth`](../titan/modules/auth.mdx) | JWT authentication (HS256 / RS256 / ES256, JWKS, token cache) |
+| [`@omnitron-dev/titan-cache`](../titan/modules/cache.mdx) | Multi-tier caching (L1 LRU/LFU + L2 Redis) |
+| [`@omnitron-dev/titan-database`](../titan/modules/database.mdx) | Kysely + migrations + RLS plugin |
+| [`@omnitron-dev/titan-discovery`](../titan/modules/discovery.mdx) | Redis-backed service discovery + heartbeats |
+| [`@omnitron-dev/titan-events`](../titan/modules/events.mdx) | In-process event bus with history |
+| [`@omnitron-dev/titan-health`](../titan/modules/health.mdx) | Health + readiness probes (k8s-shaped) |
+| [`@omnitron-dev/titan-lock`](../titan/modules/lock.mdx) | Distributed Redis locks (Lua scripts, UUID ownership) |
+| [`@omnitron-dev/titan-metrics`](../titan/modules/metrics.mdx) | Counters / gauges / histograms; Prom exposition |
+| [`@omnitron-dev/titan-notifications`](../titan/modules/notifications.mdx) | Multi-channel delivery + DLQ + rotif messaging |
+| [`@omnitron-dev/titan-pm`](../titan/modules/pm.mdx) | Process manager / worker pools / autoscaling |
+| [`@omnitron-dev/titan-ratelimit`](../titan/modules/ratelimit.mdx) | Token-bucket / sliding-window / fixed-window |
+| [`@omnitron-dev/titan-redis`](../titan/modules/redis.mdx) | Redis client (clusters, sentinel, named instances) |
+| [`@omnitron-dev/titan-scheduler`](../titan/modules/scheduler.mdx) | Cron / interval / timeout with persistence |
+| [`@omnitron-dev/titan-telemetry-relay`](../titan/modules/telemetry-relay.mdx) | Store-and-forward telemetry (WAL-backed) |
 
 ## Browser-side / Frontend
 
 | Package | Framework | Required when |
 | ------- | --------- | ------------- |
-| `@omnitron-dev/netron-browser` | **Framework-agnostic** — vanilla JS, Vue, Svelte, Solid, Angular, Lit, React, Web Workers | You build a browser client that calls a Titan backend |
-| `@omnitron-dev/netron-react` | **React-only** — optional layer on top of netron-browser | Your frontend uses React |
-| `@omnitron-dev/prism` | **React-only** — MUI v9 design system | Your frontend uses React and you want pre-built components |
+| [`@omnitron-dev/netron-browser`](../frontend/netron/browser.md) | **Framework-agnostic** — vanilla JS, Vue, Svelte, Solid, Angular, Lit, React, Web Workers | You build a browser client that calls a Titan backend |
+| [`@omnitron-dev/netron-react`](../frontend/netron/react.md) | **React-only** — optional layer on top of netron-browser | Your frontend uses React |
+| [`@omnitron-dev/prism`](../frontend/prism/index.md) | **React-only** — MUI v9 design system | Your frontend uses React and you want pre-built components |
 
 **Use matrix:**
 
@@ -63,14 +63,14 @@ Independently versioned. Add only what your app uses.
 | Solid | `netron-browser` only (wrap in signals) |
 | Angular | `netron-browser` only (wrap in services / RxJS) |
 | Lit | `netron-browser` only |
-| React 18 / 19 | `netron-browser` + `netron-react` (+ optional `prism`) |
+| React 19 (Prism) | `netron-browser` + `netron-react` (+ optional `prism`) |
 | Web Worker | `netron-browser` only |
 
 ## Supervisor (opt-in)
 
 | Package | What |
 | ------- | ---- |
-| `@omnitron-dev/omnitron` | Application supervisor + CLI + web console + MCP server. Optional. See [Titan vs Omnitron](../foundations/titan-vs-omnitron.md). |
+| [`@omnitron-dev/omnitron`](../omnitron/overview.md) | Application supervisor + CLI + web console + MCP server. Optional. See [Titan vs Omnitron](../foundations/titan-vs-omnitron.md). |
 
 ## Shared utilities (framework-agnostic)
 
@@ -79,12 +79,12 @@ above; reusable in non-Omnitron projects.
 
 | Package | Purpose |
 | ------- | ------- |
-| `@omnitron-dev/common` | Type predicates, promise helpers, object tools, data structures |
-| `@omnitron-dev/cuid` | Collision-resistant URL-safe unique IDs |
-| `@omnitron-dev/eventemitter` | Async event emitter with parallel/serial/reduce |
-| `@omnitron-dev/msgpack` | Extensible MessagePack with native JS types (Date, Map, Set, BigInt, Error) |
-| `@omnitron-dev/kb` | Knowledge-base framework (backs `omnitron kb mcp`) |
-| `@omnitron-dev/testing` | Cross-runtime testing utilities (Node + Bun + Deno) |
+| [`@omnitron-dev/common`](../utilities/common.md) | Type predicates, promise helpers, object tools, data structures |
+| [`@omnitron-dev/cuid`](../utilities/cuid.md) | Collision-resistant URL-safe unique IDs |
+| [`@omnitron-dev/eventemitter`](../utilities/eventemitter.md) | Async event emitter with parallel/serial/reduce |
+| [`@omnitron-dev/msgpack`](../utilities/msgpack.md) | Extensible MessagePack with native JS types (Date, Map, Set, BigInt, Error) |
+| [`@omnitron-dev/kb`](../utilities/kb.md) | Knowledge-base framework (backs `omnitron kb mcp`) |
+| [`@omnitron-dev/testing`](../testing/testing-package.md) | Cross-runtime testing utilities (Node + Bun + Deno) |
 
 ### Shared internals
 
@@ -95,11 +95,14 @@ pair of copies drifting apart on either side of the wire.
 
 | Package | Purpose |
 | ------- | ------- |
-| `@omnitron-dev/netron-protocol` | The on-the-wire contract: UID generation, wire constants. Dependency-free |
-| `@omnitron-dev/netron-http-core` | Environment-neutral HTTP primitives — cache manager, retry manager, query builder, request batcher |
+| [`@omnitron-dev/netron-protocol`](./protocol.md) | Wire packets, service definitions, identifiers and the shared error hierarchy. Dependency-free |
+| [`@omnitron-dev/netron-http-core`](./protocol.md) | Environment-neutral HTTP primitives — cache manager, retry manager, query builder, configurable request proxy |
 
 Their versions move with the packages that consume them; pin
 those, not these.
+
+See [Protocol and HTTP primitives](./protocol.md) for these packages and
+[API index](./api-index.mdx) for all declared entry points.
 
 ## License
 

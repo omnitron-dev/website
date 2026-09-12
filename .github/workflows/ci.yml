@@ -46,6 +46,19 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      - name: Public content boundary
+        run: pnpm check:content
+
+      - name: Check out runtime source
+        uses: actions/checkout@v4
+        with:
+          repository: omnitron-dev/omni
+          path: .source/omni
+          persist-credentials: false
+
+      - name: Verify documentation inventories
+        run: pnpm check:source .source/omni
+
       - name: TypeScript check
         run: pnpm typecheck
 

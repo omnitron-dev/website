@@ -6,8 +6,8 @@ description: Every RPC service exposed by the daemon — names, methods, roles.
 
 # Services reference
 
-The Omnitron daemon registers **19 built-in Netron RPC services** plus
-the `OmnitronDaemon` service itself. All share the same auth model
+The Omnitron daemon exposes the RPC services below. Some are conditional
+on enabled modules or daemon configuration. All share the same auth model
 (see [Daemon / Auth flow](./daemon.md#auth-flow)) and address the
 same socket / TCP / HTTP planes.
 
@@ -19,33 +19,27 @@ Re-check this page against the source with
 reads `@Service`/`@Public` out of `src/**/*.rpc-service.ts` and
 diffs them against the index table below.
 
-That script exists because this paragraph used to read "verified
-against `src/services/*.rpc-service.ts`" while six counts
-undercounted — every one of them a method added after the page was
-written — and `OmnitronCluster` was missing altogether. A claim of
-verification is the one sentence on a page that nothing can check,
-so it is the one that drifts furthest; the remedy is a command a
-reader can run, not a stronger assurance.
-
 ## Quick index
 
 | File | Service id (Netron) | Methods | Role gate (typical) |
 | ---- | ------------------- | ------- | ------------------- |
 | `alert.rpc-service.ts` | `OmnitronAlerts` | 8 | viewer (read) + operator (mutate) |
+| `audit.rpc-service.ts` | `OmnitronAudit` | 2 | admin |
 | `auth.rpc-service.ts` | `OmnitronAuth` | 7 | mixed (5 allowAnonymous; 2 authenticated) |
-| `backup.rpc-service.ts` | `OmnitronBackups` | 10 | viewer (read) + admin (mutate) |
+| `backup.rpc-service.ts` | `OmnitronBackups` | 11 | viewer (read) + admin (mutate) |
 | `deploy.rpc-service.ts` | `OmnitronDeploy` | 4 | viewer (history) + operator (deploy/rollback) |
 | `discovery.rpc-service.ts` | `OmnitronDiscovery` | 3 | viewer |
-| `event-broadcaster.rpc-service.ts` | `OmnitronEvents` | 4 | viewer (sub/stats) + admin (pushEvent) |
+| `event-broadcaster.rpc-service.ts` | `OmnitronEvents` | 3 | viewer (subscribe, unsubscribe, stats) |
 | `fleet.rpc-service.ts` | `OmnitronFleet` | 8 | viewer (read) + operator (mutate); heartbeat anonymous |
 | `health-check.rpc-service.ts` | `OmnitronHealth` | 4 | viewer |
-| `infrastructure.rpc-service.ts` | `OmnitronInfra` | 7 | viewer (read) + operator (start/stop/remove) |
+| `infrastructure.rpc-service.ts` | `OmnitronInfra` | 9 | viewer (read) + operator (start/stop/remove) |
 | `kubernetes.rpc-service.ts` | `OmnitronKubernetes` | 9 | admin |
 | `log-collector.rpc-service.ts` | `OmnitronLogs` | 4 | viewer |
-| `node-manager.rpc-service.ts` | `OmnitronNodes` | 14 | viewer (read) + operator (mutate) |
+| `node-manager.rpc-service.ts` | `OmnitronNodes` | 30 | viewer (read) + operator (mutate) |
 | `pipeline.rpc-service.ts` | `OmnitronPipelines` | 8 | viewer (read) + operator (mutate) |
-| `project.rpc-service.ts` | `OmnitronProject` | 14 | viewer (read) + operator (start/stop) + admin (CRUD) |
-| `secrets.rpc-service.ts` | `OmnitronSecrets` | 4 | admin |
+| `project.rpc-service.ts` | `OmnitronProject` | 23 | viewer (read) + operator (start/stop) + admin (CRUD) |
+| `release.rpc-service.ts` | `OmnitronRelease` | 12 | viewer (read), operator (build/attest), admin (prune) |
+| `secrets.rpc-service.ts` | `OmnitronSecrets` | 6 | admin |
 | `sync.rpc-service.ts` | `OmnitronSync` | 4 | service-to-service (getSyncStatus is viewer) |
 | `system-info.rpc-service.ts` | `OmnitronSystemInfo` | 1 | viewer |
 | `telemetry.rpc-service.ts` | `OmnitronTelemetry` | 2 | pushBatch anonymous; getRelayStats viewer |
@@ -61,7 +55,7 @@ Plus the core supervisor:
 
 | File | Service id | Methods | Role gate |
 | ---- | ---------- | ------- | --------- |
-| `daemon/daemon.rpc-service.ts` | `OmnitronDaemon` | 25 | mixed — see [Daemon](./daemon.md#rpc-surface--omnitrondaemon-service) |
+| `daemon/daemon.rpc-service.ts` | `OmnitronDaemon` | 26 | mixed — see [Daemon](./daemon.md#rpc-surface--omnitrondaemon-service) |
 
 And two the daemon does not declare at all — they come from Titan
 modules it imports, and are registered by those modules:
@@ -91,8 +85,8 @@ included.
 
 When a `query_interface` fails, the daemon logs the ids it does have.
 That list is a **superset** of this page: managed applications register
-their own services into the same Netron registry, so a host running
-`sample` shows entries like `TransformWorker` alongside the daemon's own.
+their own services into the same Netron registry. An application can
+register `TransformWorker` alongside the daemon's own services.
 A name in that list is not evidence of a daemon service, and its absence
 from this page is not evidence of a gap.
 
@@ -507,3 +501,15 @@ The same code works against a remote daemon by swapping the URL
 - [Architecture](./architecture.md) — where these services live
 - [CLI](./cli.md) — most commands map directly to one method here
 - [Console](./console.md) — webapp uses the same services
+
+## Release and audit services
+
+`OmnitronRelease` provides `preflight`, `list`, `get`, `getLog`, `builds`,
+`getBuild`, `build`, `stopBuild`, `prune`, `attest`, `attestOnNode` and
+`deployments`. Build execution and artifact state are separate from deployment
+history. See [Releases and verification](./releases.md) for the workflow.
+
+`OmnitronAudit` exposes `available` and `list`, both gated to administrators.
+Check availability before interpreting an empty result as proof that no
+operation took place. The audit trail records who requested control-plane
+changes and their outcomes.

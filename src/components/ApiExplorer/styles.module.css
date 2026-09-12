@@ -1,0 +1,24 @@
+.explorer { margin-block: 2rem; }
+.inventory, .results { font-family: var(--ifm-font-family-monospace); color: var(--omni-muted); font-size: 0.7rem; }
+.filters { display: flex; gap: 12px; flex-wrap: wrap; padding-block: 20px; border-block: 1px solid var(--omni-border); }
+.filters label { display: flex; flex-direction: column; gap: 8px; font-size: 0.75rem; }
+.search { flex: 1; min-width: 190px; }
+.filters input, .filters select { font: inherit; min-height: 42px; border: 1px solid var(--omni-border); border-radius: 2px; background: var(--omni-panel); color: var(--ifm-font-color-base); padding: 8px 10px; }
+.results { margin-block: 20px; }
+.list { list-style: none; padding: 0; margin: 0; }
+.list > li { padding: 18px 0; border-top: 1px solid var(--omni-border); }
+.symbol { display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap; }
+.symbol > code { font-size: 0.88rem; color: var(--ifm-color-primary); border: 0; padding: 0; background: none; overflow-wrap: anywhere; }
+.symbol > span { color: var(--omni-muted); font-size: 0.65rem; }
+.source { margin-left: auto; font-size: 0.7rem; }
+.imports { margin-top: 10px; }
+.imports > div { display: flex; align-items: baseline; justify-content: space-between; gap: 16px; margin-top: 6px; }
+.imports code { font-size: 0.66rem; border: 0; padding: 0; background: none; color: var(--omni-muted); overflow-wrap: anywhere; }
+.imports a { flex-shrink: 0; font-size: 0.7rem; }
+.pagination { display: flex; justify-content: space-between; align-items: center; gap: 10px; padding-block: 20px; border-block: 1px solid var(--omni-border); font-size: 0.75rem; }
+.pagination button { font: inherit; background: var(--omni-panel); color: var(--ifm-font-color-base); border: 1px solid var(--omni-border); padding: 10px 12px; cursor: pointer; }
+.pagination button:disabled { opacity: 0.4; cursor: default; }
+.entries { margin-top: 28px; font-size: 0.8rem; }
+.entries summary { cursor: pointer; color: var(--ifm-color-primary); }
+.entries li { margin-block: 8px; overflow-wrap: anywhere; }
+@media (max-width: 640px) { .filters > label { flex: 1; } .search { flex-basis: 100% !important; } .pagination { font-size: 0.65rem; } }

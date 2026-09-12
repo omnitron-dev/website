@@ -98,7 +98,7 @@ or from `./components`; the bundler tree-shakes either.
 | `@omnitron-dev/prism/forms` | Schema-aware form helpers |
 | `@omnitron-dev/prism/hooks` | 48 React hooks |
 | `@omnitron-dev/prism/state` | Zustand-based store factory |
-| `@omnitron-dev/prism/accessibility` | A11y primitives + ARIA helpers |
+| `@omnitron-dev/prism/accessibility` | Vision simulation provider and controls |
 | `@omnitron-dev/prism/netron` | Pre-wired Netron auth/UI bindings |
 | `@omnitron-dev/prism/http` | HTTP fetcher helpers |
 | `@omnitron-dev/prism/cli` | CLI helpers (used by `prism` bin) |
@@ -128,8 +128,8 @@ prop to hand it to. It reads the settings store (persisted, so a
 user's own choices survive a reload), falls back to
 `defaultSettings` for anything unset, resolves `mode: 'system'`
 against the OS preference, and calls `createPrismTheme()` with
-the result. Both production consumers — the SAMPLE portal and the
-Omnitron console — pass exactly `{ mode, preset, direction }`.
+the result. The Omnitron console supplies `mode`, `preset` and
+`direction` through this settings interface.
 
 `defaultSettings` accepts `mode`, `preset`, `direction`,
 `primaryColor`, `contrast`, `fontSize`, `fontFamily` and
@@ -209,17 +209,10 @@ versioned-settings helpers in `@omnitron-dev/prism/state`.)
 
 ## Accessibility
 
-`@omnitron-dev/prism/accessibility` ships primitives that the
-components use internally and that you can reuse:
-
-- `<VisuallyHidden>` — screen-reader-only text.
-- `useFocusTrap` — trap focus in modals.
-- `useEscapeKey` — fire on Esc with optional stop-propagation.
-- `useReturnFocus` — restore focus when an overlay closes.
-- ARIA helpers for combobox / listbox / tablist patterns.
-
-All `<Field>`-based forms produce correct labelling
-automatically.
+`@omnitron-dev/prism/accessibility` exports vision simulation through
+`VisionModeProvider`, `useVisionMode`, `VISION_MODE_OPTIONS` and
+`getVisionModeStyles`. See [Accessibility](./accessibility.md) for
+the actual surface and an application-level verification workflow.
 
 ## Netron integration — `@omnitron-dev/prism/netron`
 
@@ -270,8 +263,8 @@ reference.
 
 ```bash
 prism init                 # scaffold Prism config in current project
-prism add component card   # generate boilerplate using registered template
-prism list components      # show available components
+prism add card   # generate boilerplate using registered template
+prism list --components      # show available components
 ```
 
 The CLI uses templates from `templates/` (shipped with the
@@ -286,8 +279,8 @@ component metadata.
   + components when you need flexibility.
 - **One `<PrismProvider>` per app.** Multiple providers create
   duplicate snackbar hosts and confused theme contexts.
-- **Subpath imports for bundle size.** Per-component imports
-  keep first-paint fast.
+- **Use declared entry points.** Consult the [API index](../../reference/api-index.mdx);
+  arbitrary per-component paths are not published.
 - **Use schema-driven forms.** [`<Field>` +
   `SchemaProvider`](./forms.md) produces consistent UX with zero
   per-field boilerplate.
@@ -306,7 +299,14 @@ component metadata.
 - [Layouts](./layouts.md) — three app shells
 - [Theme](./theme.md) — palette, typography, dark mode
 - [Forms](./forms.md) — schema-aware form patterns
-- [Hooks catalog](./hooks-catalog.md) — 25+ React hooks
+- [Hooks catalog](./hooks-catalog.md) — React hooks
 - [netron-browser](../netron/browser.md) — the RPC client
 - [netron-react](../netron/react.md) — React hooks for RPC
 - [Frontend overview](../overview.md) — the three-package picture
+
+## Further guides
+
+- [State and persistence](./state.md) — stores, hydration and migrations.
+- [HTTP client](./http.md) — REST requests, cancellation and interceptors.
+- [Component CLI](./cli.md) — copy and maintain local component source.
+- [API index](../../reference/api-index.mdx) — every declared public export.

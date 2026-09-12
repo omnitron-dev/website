@@ -8,14 +8,14 @@ import ModuleBadge from '@site/src/components/ModuleBadge';
 # Titan Modules
 
 The Titan ecosystem has three module tiers, each rendered with a
-colour-coded badge so you can tell at a glance where a module comes
+origin badge so you can tell at a glance where a module comes
 from and what its guarantees are.
 
-| Tier         | Badge colour | Where it lives                                | Guarantees                                          |
+| Tier         | Origin | Where it lives                                | Guarantees                                          |
 | ------------ | ------------ | --------------------------------------------- | --------------------------------------------------- |
-| **Built-in** | Emerald 🟢   | `@omnitron-dev/titan/src/modules/*`           | Ships with the framework; same release cadence     |
-| **Official** | Violet 🟣    | `packages/titan-*` in the `omnitron-dev` monorepo | Maintained by the Omnitron team; independent versions |
-| **Community**| Amber 🟡     | Third-party npm packages                      | Audit before adopting; no maintenance commitment    |
+| **Built-in** | Built-in   | `@omnitron-dev/titan/module/*`           | Ships with the framework; same release cadence     |
+| **Official** | Official    | `packages/titan-*` in the `omnitron-dev` monorepo | Maintained by the Omnitron team; independent versions |
+| **Community**| Community     | Third-party npm packages                      | Audit before adopting; no maintenance commitment    |
 
 Every module page in this section starts with a `<ModuleBadge ... />`
 chip that reflects its tier.
@@ -28,14 +28,15 @@ chip that reflects its tier.
 
 <ModuleBadge origin="built-in" pkg="@omnitron-dev/titan" subpath="/module/*" />
 
-Shipped inside `@omnitron-dev/titan`. **Auto-loaded** by every Titan
-application unless you pass `disableCoreModules: true`. No extra
-install needed.
+Config and Logger ship inside `@omnitron-dev/titan` and are **auto-loaded**
+unless you pass `disableCoreModules: true`. RLS guards are imported explicitly.
+No extra Titan package is needed for these entry points.
 
 | Module                        | Subpath                  | Purpose                                                                |
 | ----------------------------- | ------------------------ | ---------------------------------------------------------------------- |
 | [`ConfigModule`](./config.mdx) | `/module/config`         | Layered, validated, hot-reloadable configuration                       |
 | [`LoggerModule`](./logger.mdx) | `/module/logger`         | Structured pino-based logging with transports + processors             |
+| [RLS guards](./rls.md) | `/module/rls` | Context guard decorators; no module registration |
 
 ## Official modules (`titan-*` packages)
 

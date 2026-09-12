@@ -1,187 +1,92 @@
 ---
 sidebar_position: 1
 title: Introduction
-description: What Omnitron is, what ships with it, and where to go for what you need.
+description: Choose the Omnitron layers you need, understand their boundaries, and build your first service.
 ---
 
-# Introduction
+# Build the system you control
 
-A unified TypeScript stack for building, shipping, and operating
-real systems. One toolchain across every layer — from a
-decorator on a service class to a supervised pod cluster —
-with no codegen step in between.
+Omnitron is a TypeScript stack for building and operating services. **Titan**
+provides the application runtime. **Netron** connects services and clients.
+**Prism** supplies React interface components. The **Omnitron supervisor**
+manages applications and infrastructure.
 
-> **Read first:** [Titan vs Omnitron](./foundations/titan-vs-omnitron.md) —
-> the stack is two layers. **Titan** is the runtime (you'll
-> almost always use it). **Omnitron** is an opt-in supervisor +
-> control plane on top (you may or may not need it). Most
-> projects start with Titan alone; add Omnitron when complexity
-> demands it.
+Start with a Titan application. Add the client, interface and supervision
+layers when your system needs them.
+
+## Choose a starting point
+
+| Your goal | Start here | What you will produce |
+| --- | --- | --- |
+| Run your first service | [Quickstart](./getting-started/quickstart.md) | A compiled application and a typed HTTP client |
+| Understand the boundaries | [Titan vs Omnitron](./foundations/titan-vs-omnitron.md) | A decision about runtime and supervision |
+| Build a complete application | [Tutorial](./tutorial/index.md) | A backend, authentication, interface and tests |
+| Connect an existing interface | [Browser client](./frontend/netron/browser.md) | HTTP calls or WebSocket connections |
+| Prepare a deployment | [Production readiness](./deployment/production-readiness.md) | A release and recovery plan |
+| Find an API | [API index](./reference/api-index.mdx) | A symbol, supported import path, guide and implementation |
+
+Use the [developer map](./getting-started/developer-map.md) for task-based
+routes through the manual, including a verification step for each route.
 
 ## The stack
 
-| Layer | Package(s) | What it gives you |
-| ----- | ---------- | ----------------- |
-| **Backend framework** | `@omnitron-dev/titan` | Decorator-driven DI (Nexus container), lifecycle hooks, modules, validation (zod), structured logging (pino), typed errors that travel the wire. **Server-side Netron with all 4 transports (HTTP / WebSocket / TCP / Unix) is built in.** |
-| **Browser RPC client** | `@omnitron-dev/netron-browser` | **Framework-agnostic** — works with vanilla JS, Vue, Svelte, Solid, Angular, Lit, React, anywhere. Middleware pipeline (auth, retry, cache, rate-limit, tracing). AsyncIterable streaming. `AuthenticationClient` with cross-tab sync |
-| **React bindings** | `@omnitron-dev/netron-react` | **Optional, React-only.** Typed `useQuery` / `useMutation` / `useSubscription` / `useService` hooks on top of netron-browser. Don't install if your frontend isn't React |
-| **Design system** | `@omnitron-dev/prism` | **Optional, React-only.** 50+ MUI v9 components, 3 layouts, 3 blocks, schema-aware forms, 25+ React hooks, dark mode without flicker |
-| **Supervisor (opt-in)** | `@omnitron-dev/omnitron` | **Optional.** Long-running daemon, 20+ RPC services, 75+ CLI subcommands, React+Vite web console, declarative infrastructure provisioning, MCP server for agents |
+| Layer | Package | Boundary |
+| --- | --- | --- |
+| Runtime | `@omnitron-dev/titan` | Dependency injection, modules, lifecycle, validation, logging and server-side Netron |
+| Browser client | `@omnitron-dev/netron-browser` | HTTP and WebSocket RPC; independent of the UI framework |
+| React bindings | `@omnitron-dev/netron-react` | Providers and typed query, mutation and subscription hooks |
+| Interface | `@omnitron-dev/prism` | React components, layouts, themes and forms |
+| Operations | `@omnitron-dev/omnitron` | Daemon, process supervision, infrastructure, CLI, web console and MCP |
 
-Add a row to your stack incrementally — Titan alone for a backend, `+ netron-browser`
-for a JS client, `+ netron-react` + Prism for React, `+ omnitron` when you scale to
-many services / nodes. Each layer is the next import, never the next framework.
+Server-side Netron ships inside Titan. A Titan process can run directly under
+Node.js; installing the Omnitron supervisor is optional. Prism and the React
+bindings are also optional. See the [architecture](./foundations/architecture.md)
+for the runtime relationships.
 
-## Three claims, no caveats
+## Contracts across the wire
 
-### 1. One stack, end-to-end TypeScript
+A client can import a service's TypeScript type and call its methods through a
+Netron proxy. Sharing that type catches incompatible calls **when both sides
+compile against the same contract**. It does not synchronise independently
+deployed versions or validate an arbitrary request at runtime.
 
-The service signature on the server **is** the React hook contract. Refactor a
-method, the build fails on every caller — server, client, console, CLI, mobile.
+Use [validation](./titan/validation/overview.md) for untrusted inputs,
+[authentication](./titan/netron/authentication.md) for access control and
+[service versioning](./titan/netron/services.md) when contracts evolve.
+The [quickstart](./getting-started/quickstart.md) shows the complete registration
+and transport setup.
 
-```typescript
-// Server:
-@Service('users@1.0.0')
-class UsersService {
-  @Public() async findById(id: string): Promise<User> { /* ... */ }
-}
+## Add capabilities deliberately
 
-// Browser:
-const users = useService<UsersService>('users');
-const { data } = users.findById.useQuery(['u_42']);
-//      ^? User | undefined   ← traced through, no codegen
-```
+Titan modules are separate packages. Their dependency and lifecycle contracts
+are documented alongside their configuration.
 
-No OpenAPI, no protobuf, no `.d.ts` sync. The TypeScript compiler is the only
-source of truth.
+| Capability | Reference |
+| --- | --- |
+| Persistence, migrations, transactions and RLS | [Database](./titan/modules/database.mdx) |
+| JWT verification and token transport | [Authentication](./titan/modules/auth.mdx) · [Token issuance](./auth/token-issuance.md) |
+| Caching and distributed coordination | [Cache](./titan/modules/cache.mdx) · [Redis](./titan/modules/redis.mdx) · [Locks](./titan/modules/lock.mdx) |
+| Background work | [Scheduler](./titan/modules/scheduler.mdx) · [Process management](./titan/modules/pm.mdx) |
+| Operational signals | [Health](./titan/modules/health.mdx) · [Metrics](./titan/modules/metrics.mdx) |
+| A complete module inventory | [Module map](./titan/modules/module-map.mdx) |
 
-### 2. Pay only for what you use
+## Read implementation status before adopting a design
 
-Each Titan module is opt-in. Each Netron transport is opt-in. Each Prism
-subpath is tree-shaken. The base framework does not ship a runtime that you
-cannot remove.
+The module and API references describe shipped code. Pages labelled
+**Design RFC** describe architectural proposals and application patterns that
+may need your own implementation. In particular, the
+[authorisation design](./auth/index.md) goes beyond the daemon's
+[operator roles](./omnitron/auth-rbac.md).
 
-| Want minimal | Want batteries |
-| ------------ | -------------- |
-| One `@Module({ providers: [...] })` over plain classes | All 14 official modules: auth, cache, database, discovery, events, health, lock, metrics, notifications, pm, ratelimit, redis, scheduler, telemetry-relay (+ config + logger built into titan core) |
-| HTTP-only Netron client (~12 kB gz) | Full client with cache + retry + circuit-breaker + auth manager (~25 kB gz) |
-| Per-component Prism import | Root `import * from '@omnitron-dev/prism'` |
-| One Titan app, `node dist/index.js` | Omnitron daemon supervising N apps × M projects × K stacks across a fleet |
+The project is pre-1.0. Pin package versions, read the
+[release notes](./community/changelog.md), and test server/client combinations
+before upgrading. See [compatibility](./reference/compatibility.md) for runtime
+requirements and support boundaries.
 
-### 3. Operate from the same primitives you developed with
+## Work from source
 
-The Omnitron CLI talks to running Titan apps over the same Netron protocol
-the frontend uses. The web console aggregates dashboards over the same
-metrics module your services emit to. AI agents call the same RPC surface
-via MCP. There is no separate "ops API".
-
-## The hello-world flow
-
-```typescript
-// 1. Declare a service. Decorator = contract.
-@Service('users@1.0.0')
-export class UsersService {
-  @Public()
-  async findById(id: string): Promise<User> { return this.repo.findById(id); }
-}
-
-// 2. Compose modules. Container handles DI + lifecycle + RPC exposure.
-@Module({ imports: [DatabaseModule], providers: [UserRepo, UsersService] })
-export class AppModule {}
-
-// 3. Boot.
-const app = await Application.create(AppModule);
-await app.start();
-
-// 4. Call from React.
-function UserCard({ id }: { id: string }) {
-  const users = useService<UsersService>('users');
-  const { data } = users.findById.useQuery([id]);
-  return data ? <h3>{data.email}</h3> : <Skeleton />;
-}
-```
-
-That's the entire wire format. The rest is opt-in.
-
-## Where to go next
-
-### If you want to build something now
-
-- **[Installation](./getting-started/installation.md)** — install the packages, get your tooling in place.
-- **[Quickstart](./getting-started/quickstart.md)** — service → module → app → React, in five minutes.
-- **[Project structure](./getting-started/project-structure.md)** — the canonical monorepo layout.
-
-### If you want to understand the design
-
-- **[Principles](./foundations/principles.md)** — why decorator DI, why one type system end-to-end.
-- **[Architecture](./foundations/architecture.md)** — every layer and how they compose.
-- **[Monorepo](./foundations/monorepo.md)** — how the workspace is organised.
-
-### Reference by layer
-
-| Layer | Start here |
-| ----- | ---------- |
-| Backend | [Titan overview](./titan/overview.md) → [Application & DI](./titan/application) → [Modules](./titan/modules) |
-| RPC | [Netron](./titan/netron) — server side; [netron-browser](./frontend/netron/browser.md) + [netron-react](./frontend/netron/react.md) — client side |
-| Frontend | [Prism overview](./frontend/prism) → [Components catalog](./frontend/prism/components.md) → [Layouts + Blocks](./frontend/prism/blocks.md) |
-| Modules | [Module map](./titan/modules/module-map.mdx) — visual dependency graph of all 14 modules |
-| Operate | [Omnitron overview](./omnitron/overview.md) → [CLI reference](./omnitron/cli.md) → [Recipes](./omnitron/recipes.md) |
-
-### Reference by task
-
-| Goal | Page |
-| ---- | ---- |
-| Add JWT auth to my app | [`titan-auth`](./titan/modules/auth.mdx) + [Auth & RBAC](./omnitron/auth-rbac.md) |
-| Persist data | [`titan-database`](./titan/modules/database.mdx) |
-| Multi-process app with worker pools | [`titan-pm`](./titan/modules/pm.mdx) + [Orchestrator](./omnitron/orchestrator.md) |
-| Cache reads | [`titan-cache`](./titan/modules/cache.mdx) |
-| Cron / scheduled jobs | [`titan-scheduler`](./titan/modules/scheduler.mdx) |
-| Distributed locks | [`titan-lock`](./titan/modules/lock.mdx) |
-| Send email / push / SMS | [`titan-notifications`](./titan/modules/notifications.mdx) |
-| Real-time updates to the browser | [Subscriptions over WebSocket](./frontend/netron/transports.md) |
-| Migrate from NestJS / Express / prom-client | [Migration guides](./titan/migrations) |
-| Build a React admin console | [Prism + netron-react](./frontend/netron/index.md) |
-| Set up an AI agent for the codebase | [MCP integration](./omnitron/mcp.md) |
-| Multi-node cluster + leader election | [Cluster + Fleet](./omnitron/cluster.md) |
-
-### Reference by capability
-
-8 cross-cutting reference pages cover every module from a single angle:
-
-| Lookup | Page |
-| ------ | ---- |
-| Which module does X? | [Module map](./titan/modules/module-map.mdx) |
-| How do I configure module X? | [Options patterns](./titan/modules/options-patterns.mdx) |
-| What runs when in module X? | [Lifecycle reference](./titan/modules/lifecycle-reference.mdx) |
-| What DI tokens does X export? | [Tokens reference](./titan/modules/tokens-reference.mdx) |
-| What does X log / emit / measure? | [Observability matrix](./titan/modules/observability-matrix.mdx) |
-| Is module X production-safe? | [Security checklist](./titan/modules/security-checklist.mdx) |
-| What does X throw and how do I handle it? | [Errors catalog](./titan/modules/errors-catalog.mdx) |
-| What `@Decorator` does X export? | [Decorators catalog](./titan/modules/decorators-catalog.mdx) |
-
-## Compatibility
-
-| Component | Requirement |
-| --------- | ----------- |
-| **Node.js** | 22+ (engines require `>=22`; CI runs 22 and 24) |
-| **TypeScript** | 7.x (5.x works for consumers); strict mode recommended |
-| **Bun / Deno** | App-level support (test matrix covers Node + Bun + Deno); Omnitron daemon expects Node |
-| **OS** | macOS, Linux. Windows: CLI + apps OK; Omnitron daemon assumes Unix sockets |
-| **React** | 18 or 19 |
-| **Docker** | Required for `omnitron infra` provisioning |
-| **PostgreSQL / Redis / MinIO** | Auto-provisioned by Omnitron in dev; bare-metal or managed in prod |
-
-## License
-
-MIT across every package.
-
-## The thinking
-
-If you want to know **why** the stack looks like this — why decorator DI,
-why transport-agnostic RPC, why one type system end-to-end — start with
-[Principles](./foundations/principles.md). Every other design decision
-follows from those rules.
-
----
-
-Built on TypeScript. End-to-end. No bridges. No drift.
+The framework, packages and supervisor live in the
+[Omnitron repository](https://github.com/omnitron-dev/omni). This manual has its
+own [documentation repository](https://github.com/omnitron-dev/website).
+Both use the MIT license. See [Contributing](./community/contributing.md)
+for reproducible setup and verification commands.

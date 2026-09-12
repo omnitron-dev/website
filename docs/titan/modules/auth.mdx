@@ -309,3 +309,9 @@ eviction.
   authorisation
 - [`@RequireAuth`](#requireauthoptions) — vs `@Public({ auth: …  })`
   (the inline form on `@Public`)
+
+## Shared sessions across backends
+
+The shipped [shared-session preset](./shared-session.md) configures JWT claim
+validation, session-registry checks and an optional canonical-store fallback.
+Read it before composing a multi-backend authentication system.

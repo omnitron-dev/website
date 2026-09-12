@@ -7,12 +7,12 @@ const siteBaseUrl = process.env.SITE_BASE_URL || '/';
 
 const config: Config = {
   title: 'Omnitron',
-  tagline: 'A unified TypeScript stack for verifiable systems — backend, RPC, UI, and orchestration in one toolchain',
+  tagline: 'Own the whole system. Build, connect and operate in TypeScript.',
   favicon: 'img/favicon.ico',
   url: siteUrl,
   baseUrl: siteBaseUrl,
   organizationName: process.env.GH_ORG_NAME || 'omnitron-dev',
-  projectName: process.env.GH_PROJECT_NAME || 'omni',
+  projectName: process.env.GH_PROJECT_NAME || 'website',
   trailingSlash: false,
   // A warning in a build log is a check whose result nobody has to read: the
   // build succeeds, CI is green, and the broken link ships. The site currently
@@ -105,11 +105,11 @@ const config: Config = {
       {name: 'keywords', content: 'omnitron, titan, netron, prism, typescript, rpc, dependency injection, framework, monorepo'},
       {name: 'description', content: 'Omnitron is a unified TypeScript stack: Titan backend framework, Netron type-safe RPC, Prism design system, and an orchestrator app — one toolchain across the full systems-engineering spectrum.'},
     ],
-    image: 'img/social-card.png',
+    image: 'img/logo.png',
     colorMode: {
       defaultMode: 'dark',
       disableSwitch: false,
-      respectPrefersColorScheme: true,
+      respectPrefersColorScheme: false,
     },
     docs: {
       sidebar: {
@@ -118,6 +118,7 @@ const config: Config = {
       },
     },
     navbar: {
+      title: 'omnitron',
       logo: {
         alt: 'Omnitron Logo',
         src: 'img/logo.svg',
@@ -145,7 +146,7 @@ const config: Config = {
           type: 'docSidebar',
           sidebarId: 'omnitron',
           position: 'left',
-          label: 'Omnitron App',
+          label: 'Operations',
         },
         {
           type: 'docSidebar',
@@ -153,7 +154,6 @@ const config: Config = {
           position: 'left',
           label: 'Reference',
         },
-        {to: '/blog', label: 'Blog', position: 'left'},
         {
           href: 'https://github.com/omnitron-dev/omni',
           label: 'GitHub',
@@ -162,64 +162,30 @@ const config: Config = {
       ],
     },
     footer: {
-      style: 'dark',
       links: [
-        {
-          title: 'Get started',
-          items: [
-            {label: 'Introduction', to: '/docs/intro'},
-            {label: 'Installation', to: '/docs/getting-started/installation'},
-            {label: 'Quickstart', to: '/docs/getting-started/quickstart'},
-            {label: 'Project structure', to: '/docs/getting-started/project-structure'},
-            {label: 'Architecture', to: '/docs/foundations/architecture'},
-            {label: 'Principles', to: '/docs/foundations/principles'},
-          ],
-        },
-        {
-          title: 'Titan',
-          items: [
-            {label: 'Overview', to: '/docs/titan/overview'},
-            {label: 'Application & DI', to: '/docs/titan/application'},
-            {label: 'Decorators', to: '/docs/titan/decorators'},
-            {label: 'Netron RPC', to: '/docs/titan/netron'},
-            {label: '16 modules', to: '/docs/titan/modules'},
-            {label: 'Migrations', to: '/docs/titan/migrations'},
-          ],
-        },
-        {
-          title: 'Frontend',
-          items: [
-            {label: 'Overview', to: '/docs/frontend/overview'},
-            {label: 'Prism design system', to: '/docs/frontend/prism'},
-            {label: 'Prism components', to: '/docs/frontend/prism/components'},
-            {label: 'netron-browser', to: '/docs/frontend/netron/browser'},
-            {label: 'netron-react', to: '/docs/frontend/netron/react'},
-            {label: 'Multi-backend', to: '/docs/frontend/netron/multi-backend'},
-          ],
-        },
-        {
-          title: 'Omnitron',
-          items: [
-            {label: 'Overview', to: '/docs/omnitron/overview'},
-            {label: 'Architecture', to: '/docs/omnitron/architecture'},
-            {label: 'CLI reference', to: '/docs/omnitron/cli'},
-            {label: 'Web console', to: '/docs/omnitron/console'},
-            {label: 'Recipes', to: '/docs/omnitron/recipes'},
-            {label: 'MCP server', to: '/docs/omnitron/mcp'},
-          ],
-        },
-        {
-          title: 'Community',
-          items: [
-            {label: 'Contributing', to: '/docs/community/contributing'},
-            {label: 'Glossary', to: '/docs/reference/glossary'},
-            {label: 'Packages', to: '/docs/reference/packages'},
-            {label: 'GitHub', href: 'https://github.com/omnitron-dev/omni'},
-            {label: 'Blog', to: '/blog'},
-          ],
-        },
+        {title: 'Start', items: [
+          {label: 'Introduction', to: '/docs/intro'},
+          {label: 'Quickstart', to: '/docs/getting-started/quickstart'},
+          {label: 'Architecture', to: '/docs/foundations/architecture'},
+        ]},
+        {title: 'Build', items: [
+          {label: 'Titan runtime', to: '/docs/titan/overview'},
+          {label: 'Netron RPC', to: '/docs/titan/netron'},
+          {label: 'Prism interfaces', to: '/docs/frontend/prism'},
+        ]},
+        {title: 'Operate', items: [
+          {label: 'Production readiness', to: '/docs/deployment/production-readiness'},
+          {label: 'CLI reference', to: '/docs/omnitron/cli'},
+          {label: 'Troubleshooting', to: '/docs/troubleshooting'},
+        ]},
+        {title: 'Project', items: [
+          {label: 'Source', href: 'https://github.com/omnitron-dev/omni'},
+          {label: 'Contributing', to: '/docs/community/contributing'},
+          {label: 'Compatibility', to: '/docs/reference/compatibility'},
+          {label: 'Changelog', to: '/docs/community/changelog'},
+        ]},
       ],
-      copyright: `© ${new Date().getFullYear()} Omnitron Project · MIT licensed · Built with TypeScript end-to-end.`,
+      copyright: `© ${new Date().getFullYear()} Omnitron · Open source / MIT`,
     },
     prism: {
       theme: prismThemes.oneLight,

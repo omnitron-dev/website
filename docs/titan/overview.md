@@ -44,8 +44,8 @@ that compose into the runtime you actually want.
 - **Not a "do everything" runtime.** Modules are independently versioned
   packages. You can run a Titan app with one of them.
 - **Not opinion-free.** Titan has strong opinions about explicitness:
-  no ambient state, no thread-locals, no auto-discovery from the
-  filesystem. Every dependency is declared.
+  declared providers and explicit lifecycle ownership. Request context
+  uses AsyncLocalStorage where the transport and authentication APIs require it.
 - **Not a NestJS clone.** Titan shares the decorator-driven aesthetic
   with NestJS, but the underlying container (Nexus) is a different
   design — multi-token providers, contextual injection, middleware
@@ -121,19 +121,15 @@ and assumes you have read the
 | [Best Practices](./best-practices/structuring-services.md)    | When you want the team to converge on conventions     |
 | [Modules Catalogue](./modules/index.mdx)                       | The 14 ecosystem modules in detail                    |
 
-## Versioning and stability
+## Versioning and public boundaries
 
-Titan follows semver. Every public API is annotated in source with a
-stability marker:
+Titan is pre-1.0. Use declared package entry points, pin versions and verify
+upgrades against the contracts your application consumes. A minor release
+can change a public contract. See [compatibility](../reference/compatibility.md).
 
-| Marker          | Meaning                                                     |
-| --------------- | ----------------------------------------------------------- |
-| `@stable`       | Public API. Breaking changes are major-version only.        |
-| `@experimental` | Public API but may change in minor versions. Opt in.        |
-| `@internal`     | Not part of the public API. Do not import.                  |
-| `@deprecated`   | Slated for removal. Documented migration path provided.     |
-
-Internal subpaths (`@omnitron-dev/titan/internal/*`) are explicitly
-unstable and reserved for the framework itself.
+The [API index](../reference/api-index.mdx) derives import paths from package
+manifests and symbols from TypeScript exports. Source files that are not
+reachable through those entry points are implementation details. A source
+annotation alone does not make an arbitrary deep import supported.
 
 Read on: [Design Principles](./concepts/design-principles.md).

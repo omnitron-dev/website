@@ -18,7 +18,7 @@ script, not by hand — a hand check is true on the day it is made and
 decays silently afterwards:
 
 ```bash
-node internal/website/scripts/check-titan-inventories.mjs .
+node scripts/check-titan-inventories.mjs ../omni
 ```
 
 It exits non-zero if this page names a decorator no package exports, or
@@ -61,9 +61,8 @@ them. The package **root** re-exports exactly nine — `Service`,
 `Injectable`, `Inject`, `Optional`, `Singleton`, `Transient`,
 `Module`, `PostConstruct`, `PreDestroy` — and nothing else, so
 `@Public`, `@Validate`, `@Timeout`, `@RateLimit`, `@Cache` and the
-rest below are **not** importable from `@omnitron-dev/titan`. Real
-code follows this: every one of the 52 `@Public` imports in the SAMPLE
-backends reads `from '@omnitron-dev/titan/decorators'`.
+rest below must be imported from `@omnitron-dev/titan/decorators`.
+Use that subpath consistently in application code.
 
 ### DI
 
@@ -306,9 +305,8 @@ The decorator releases the lock in `finally` — even on throw.
 > decorators in `@omnitron-dev/titan` / `titan-ratelimit` /
 > `titan-cache`.
 
-> A `@SelfHeal(action)` decorator is defined in the package but is
-> **not** re-exported from the `@omnitron-dev/titan-pm` barrel — it
-> isn't importable from the package root.
+> Self-healing configuration is currently unimplemented. Use the documented
+> restart policy for automatic process recovery.
 
 ### `titan-ratelimit`
 

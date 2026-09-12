@@ -42,7 +42,7 @@ const PAGE_PKG = {
   health: 'titan-health', lock: 'titan-lock', metrics: 'titan-metrics',
   notifications: 'titan-notifications', pm: 'titan-pm', ratelimit: 'titan-ratelimit',
   scheduler: 'titan-scheduler', 'telemetry-relay': 'titan-telemetry-relay',
-  config: 'titan', logger: 'titan',
+  config: 'titan', logger: 'titan', 'shared-session': 'titan-auth', 'rls': 'titan',
 };
 
 function walk(dir, out = []) {
@@ -66,7 +66,12 @@ function sourceDefaults() {
       const text = fs.readFileSync(f, 'utf8');
       for (const m of text.matchAll(JSDOC)) {
         const [, doc, name] = m;
-        const d = doc.match(/@default\s+([^\s*][^\n*]*)/) ?? doc.match(/\(default:?\s*([^)]+)\)/);
+        const d = doc.match(/@default\s+([^\s*][^\n*]*)/)
+          // Enum prose: "'worker': Worker threads (default, fast)" names
+          // the value before the explanation, not "fast" as the default.
+          ?? doc.match(/(?:^|\n)\s*\*?\s*-\s*['"`]([^'"`\n]+)['"`][^\n]*\(default(?:[,\s][^)]*)?\)/i)
+          ?? doc.match(/\(default(?::|\s)\s*([^)]+)\)/i)
+          ?? doc.match(/default:\s*([^\n*]+)/i);
         if (!d) continue;
         const value = d[1].trim().replace(/\*\/$/, '').trim();
         if (!map.has(name)) map.set(name, []);

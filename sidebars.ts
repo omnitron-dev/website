@@ -4,7 +4,6 @@ const sidebars: SidebarsConfig = {
   docs: [
     'intro',
     'comparison',
-    'troubleshooting',
     {
       type: 'category',
       label: 'Getting Started',
@@ -12,20 +11,8 @@ const sidebars: SidebarsConfig = {
       items: [
         'getting-started/installation',
         'getting-started/quickstart',
+        'getting-started/developer-map',
         'getting-started/project-structure',
-      ],
-    },
-    {
-      type: 'category',
-      label: 'Authentication & Authorisation',
-      link: {type: 'doc', id: 'auth/index'},
-      items: [
-        'auth/mental-model',
-        'auth/permissions',
-        'auth/overrides',
-        'auth/abac-conditions',
-        'auth/rls-bridge',
-        'auth/audit-trail',
       ],
     },
     {
@@ -80,12 +67,28 @@ const sidebars: SidebarsConfig = {
       label: 'Deployment',
       link: {type: 'doc', id: 'deployment/index'},
       items: [
+        'deployment/production-readiness',
         'deployment/docker',
         'deployment/kubernetes',
         'deployment/paas',
         'deployment/bare-metal',
       ],
     },
+    {
+      type: 'category',
+      label: 'Authorisation Designs',
+      link: {type: 'doc', id: 'auth/index'},
+      items: [
+        'auth/token-issuance',
+        'auth/mental-model',
+        'auth/permissions',
+        'auth/overrides',
+        'auth/abac-conditions',
+        'auth/rls-bridge',
+        'auth/audit-trail',
+      ],
+    },
+    'troubleshooting',
     {
       type: 'category',
       label: 'Community',
@@ -124,7 +127,7 @@ const sidebars: SidebarsConfig = {
     },
     {
       type: 'category',
-      label: 'Modules',
+      label: 'Module System',
       link: {type: 'generated-index', slug: '/titan/modules-system'},
       items: [
         'titan/modules-system/defining-modules',
@@ -154,7 +157,6 @@ const sidebars: SidebarsConfig = {
       label: 'Decorators',
       link: {type: 'doc', id: 'titan/decorators/index'},
       items: [
-        'titan/decorators/index',
         'titan/decorators/lifecycle',
         'titan/decorators/method-traits',
       ],
@@ -185,7 +187,6 @@ const sidebars: SidebarsConfig = {
       label: 'Netron RPC',
       link: {type: 'doc', id: 'titan/netron'},
       items: [
-        'titan/netron',
         'titan/netron/services',
         'titan/netron/transports',
         'titan/netron/middleware',
@@ -267,7 +268,7 @@ const sidebars: SidebarsConfig = {
     },
     {
       type: 'category',
-      label: 'Modules',
+      label: 'Module Catalogue',
       link: {type: 'doc', id: 'titan/modules/index'},
       items: [
         'titan/modules/module-map',
@@ -285,6 +286,7 @@ const sidebars: SidebarsConfig = {
           items: [
             'titan/modules/config',
             'titan/modules/logger',
+            'titan/modules/rls',
           ],
         },
         {
@@ -293,6 +295,7 @@ const sidebars: SidebarsConfig = {
           collapsed: false,
           items: [
             'titan/modules/auth',
+            'titan/modules/shared-session',
             'titan/modules/cache',
             'titan/modules/database',
             'titan/modules/discovery',
@@ -344,6 +347,10 @@ const sidebars: SidebarsConfig = {
         'frontend/prism/forms',
         'frontend/prism/hooks-catalog',
         'frontend/prism/theme',
+        'frontend/prism/state',
+        'frontend/prism/http',
+        'frontend/prism/accessibility',
+        'frontend/prism/cli',
       ],
     },
     {
@@ -371,6 +378,7 @@ const sidebars: SidebarsConfig = {
     'omnitron/cli',
     'omnitron/daemon',
     'omnitron/orchestrator',
+    'omnitron/releases',
     'omnitron/services-reference',
     'omnitron/configuration',
     'omnitron/infrastructure',
@@ -385,6 +393,9 @@ const sidebars: SidebarsConfig = {
 
   reference: [
     'reference/packages',
+    'reference/api-index',
+    'reference/protocol',
+    'reference/compatibility',
     'reference/glossary',
   ],
 };

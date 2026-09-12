@@ -87,9 +87,9 @@ cd apps/api
   "name":    "api",
   "private": true,
   "type":    "module",
-  "main":    "dist/index.js",
+  "main":    "dist/main.js",
   "scripts": {
-    "dev":   "tsx watch src/main.ts",
+    "dev":   "pnpm build && node --watch dist/main.js",
     "build": "tsc -p tsconfig.json",
     "start": "node dist/main.js"
   },
@@ -97,7 +97,7 @@ cd apps/api
     "@omnitron-dev/titan": "latest"
   },
   "devDependencies": {
-    "tsx":         "latest",
+    "@types/node": "latest",
     "typescript":  "latest"
   }
 }
@@ -121,7 +121,8 @@ cd apps/api
 `apps/api/src/main.ts`:
 
 ```typescript
-import { Application, Module, Injectable, Service } from '@omnitron-dev/titan';
+import { Application, Module, Service } from '@omnitron-dev/titan';
+import { HttpTransport } from '@omnitron-dev/titan/netron/transport/http';
 import { Public } from '@omnitron-dev/titan/decorators';
 
 // 1. A trivial service.
@@ -138,18 +139,17 @@ class GreetingsService {
 class AppModule {}
 
 // 3. Boot.
-const app = await Application.create(AppModule, {
-  netron: {
-    http: { port: 3001, host: '0.0.0.0' },
-  },
+const app = await Application.create(AppModule);
+if (!app.netron) throw new Error('Netron is unavailable');
+app.netron.registerTransport('http', () => new HttpTransport());
+app.netron.registerTransportServer('http', {
+  name: 'api',
+  options: { port: 3001, host: '127.0.0.1' },
 });
-
 await app.start();
 console.log('api ready on http://localhost:3001');
 
-// Graceful shutdown
-process.on('SIGTERM', () => app.stop());
-process.on('SIGINT',  () => app.stop());
+// Application installs graceful shutdown handlers by default.
 ```
 
 Install + run:
@@ -166,30 +166,26 @@ You should see:
 api ready on http://localhost:3001
 ```
 
+The development command compiles decorators with their metadata before
+starting Node. In a second terminal, run `pnpm -F api exec tsc --watch`
+to recompile edits; Node restarts when the emitted JavaScript changes.
+
 ## Verify
 
-In another terminal:
-
-```bash
-curl -X POST http://localhost:3001/netron \
-  -H 'Content-Type: application/msgpack' \
-  -d '...' # MessagePack-encoded RPC call
-```
-
-Easier — use the client we'll build in step 4. For now, install
-the CLI tool to test:
+In another terminal, from the workspace root:
 
 ```bash
 pnpm add -wD @omnitron-dev/netron-browser
-
-node -e "
-const { createClient } = require('@omnitron-dev/netron-browser');
-(async () => {
-  const c = createClient({ url: 'http://localhost:3001' });
-  await c.connect();
-  console.log(await c.invoke('greetings', 'hello', ['World']));
-})();
-"
+node --input-type=module <<'JS'
+import { createClient } from '@omnitron-dev/netron-browser';
+const client = createClient({ url: 'http://127.0.0.1:3001' });
+try {
+  await client.connect();
+  console.log(await client.invoke('greetings@1.0.0', 'hello', ['World']));
+} finally {
+  await client.disconnect();
+}
+JS
 ```
 
 Output:
@@ -204,17 +200,17 @@ reach `:3001`.
 
 ## What just happened
 
-Three lines you wrote, four things the framework did:
+The startup sequence has four explicit responsibilities:
 
 | Your line | What it triggered |
 | --------- | ----------------- |
 | `@Service('greetings@1.0.0')` | Registered the class as a Netron RPC service identified by `greetings@1.0.0` |
 | `@Public()` | Exposed the method on the wire (default: anonymous-allowed) |
 | `@Module({providers: [...]})` | Registered the class with the DI container |
-| `Application.create(AppModule, {netron})` | Spun up the container, started lifecycle hooks, bound the Netron HTTP listener |
+| `Application.create` → register transports → `app.start()` | Creates the module graph, then starts lifecycle hooks and opens the registered listener |
 
-The 4-line setup gave you:
-- ✓ Type-safe RPC
+The setup provides:
+- RPC with an explicit service identity
 - ✓ MessagePack wire format
 - ✓ DI container
 - ✓ Lifecycle management
@@ -238,5 +234,5 @@ service with a real one backed by a database.
 | ------- | --- |
 | `Cannot use import statement outside a module` | Ensure `"type": "module"` in `apps/api/package.json` |
 | `Decorators are not valid here` | Check `experimentalDecorators` + `emitDecoratorMetadata` in `tsconfig.json` |
-| `EADDRINUSE :::3001` | Another process on 3001; change the port or kill the other process |
+| `EADDRINUSE :::3001` | Another process on 3001; choose a free port in the server and client |
 | TypeScript errors on `@Service` | Run `pnpm install` again; ensure `@omnitron-dev/titan` resolved |

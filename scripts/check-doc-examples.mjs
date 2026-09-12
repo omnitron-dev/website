@@ -27,11 +27,7 @@ if (!fs.existsSync(path.join(ROOT, 'packages/titan/package.json'))) {
   process.exit(2);
 }
 
-// TS 5.9 from the store: TypeScript 7 no longer exposes the compiler API to JS,
-// and this is only used to PARSE snippets, never to check them.
-const ts = createRequire(import.meta.url)(
-  path.join(ROOT, 'node_modules/.pnpm/typescript@5.9.3/node_modules/typescript')
-);
+const ts = createRequire(import.meta.url)('typescript');
 
 /**
  * Does this snippet parse at all?
@@ -54,8 +50,8 @@ if (DOCS.length === 0) {
   process.exit(2);
 }
 
-const OUT = '/tmp/doc-typecheck';
-fs.rmSync(OUT, { recursive: true, force: true });
+const OUT = fs.mkdtempSync('/tmp/omnitron-doc-typecheck-');
+process.on('exit', () => fs.rmSync(OUT, { recursive: true, force: true }));
 fs.mkdirSync(OUT, { recursive: true });
 
 const files = [];
@@ -129,7 +125,7 @@ let skipped = 0;
 for (const f of files) {
   const text = fs.readFileSync(f, 'utf8');
   let i = 0;
-  for (const m of text.matchAll(/```(?:ts|typescript)\n([\s\S]*?)```/g)) {
+  for (const m of text.matchAll(/```(?:ts|typescript)(?:[ \t][^\n]*)?\n([\s\S]*?)```/g)) {
     const code = m[1];
     if (!/from '@omnitron-dev\//.test(code)) continue;
     if (/^\s*\/\/\s*…|\.\.\./m.test(code) && code.split('\n').length < 6) continue;

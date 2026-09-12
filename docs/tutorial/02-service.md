@@ -13,7 +13,8 @@ By the end: a `UsersService` with `findById` / `create` /
 
 ```bash
 cd apps/api
-pnpm add @omnitron-dev/titan-database @omnitron-dev/titan-redis zod
+pnpm add @omnitron-dev/titan-database @omnitron-dev/titan-redis @omnitron-dev/cuid kysely pg zod
+cd ../..
 ```
 
 `ConfigModule` and `LoggerModule` need no install — they ship
@@ -26,7 +27,7 @@ package by that name and fails.
 Spin up Postgres locally:
 
 ```bash
-docker run -d --name pg -e POSTGRES_PASSWORD=dev -e POSTGRES_DB=platform -p 5432:5432 postgres:16-alpine
+docker run -d --name pg -e POSTGRES_PASSWORD=dev -e POSTGRES_DB=platform -p 127.0.0.1:5432:5432 postgres:16-alpine
 ```
 
 ## Schema
@@ -64,7 +65,7 @@ CREATE TABLE users (
 Run it:
 
 ```bash
-psql -U postgres -h localhost -d platform < apps/api/migrations/001_users.sql
+PGPASSWORD=dev psql -U postgres -h localhost -d platform < apps/api/migrations/001_users.sql
 ```
 
 ## Repository
@@ -172,6 +173,7 @@ import { UsersService } from './users/users.service.js';
       sources: [{ type: 'env', prefix: 'API_' }],
     }),
     TitanDatabaseModule.forRoot({
+      camelCase: true, // created_at in SQL ↔ createdAt in TypeScript
       // `connection` is the whole connection, not just its URL — dialect and
       // DSN travel together, which is what lets `connections: { … }` name
       // several of them.
@@ -190,17 +192,20 @@ Update `apps/api/src/main.ts`:
 
 ```typescript
 import { Application } from '@omnitron-dev/titan';
+import { HttpTransport } from '@omnitron-dev/titan/netron/transport/http';
 import { AppModule }   from './app.module.js';
 
-const app = await Application.create(AppModule, {
-  netron: { http: { port: 3001, host: '0.0.0.0' } },
+const app = await Application.create(AppModule);
+if (!app.netron) throw new Error('Netron is unavailable');
+app.netron.registerTransport('http', () => new HttpTransport());
+app.netron.registerTransportServer('http', {
+  name: 'api',
+  options: { host: '127.0.0.1', port: 3001 },
 });
-
 await app.start();
 console.log('api ready');
 
-process.on('SIGTERM', () => app.stop());
-process.on('SIGINT',  () => app.stop());
+// Application owns signal handling and shutdown.
 ```
 
 Run + test:
@@ -210,28 +215,30 @@ pnpm dev
 ```
 
 ```bash
-node -e "
-const { createClient } = require('@omnitron-dev/netron-browser');
-(async () => {
-  const c = createClient({ url: 'http://localhost:3001' });
+node --input-type=module <<'JS'
+import { createClient } from '@omnitron-dev/netron-browser';
+const c = createClient({ url: 'http://127.0.0.1:3001' });
+try {
   await c.connect();
 
   // Create:
-  const u = await c.invoke('users', 'create', [{ email: 'alice@example.com', name: 'Alice' }]);
+  const u = await c.invoke('users@1.0.0', 'create', [{ email: 'alice@example.com', name: 'Alice' }]);
   console.log('created:', u);
 
   // Fetch:
-  const fetched = await c.invoke('users', 'findById', [u.id]);
+  const fetched = await c.invoke('users@1.0.0', 'findById', [u.id]);
   console.log('found:', fetched);
 
   // List:
-  const all = await c.invoke('users', 'list', []);
+  const all = await c.invoke('users@1.0.0', 'list', []);
   console.log('all:', all);
-})();
-"
+} finally {
+  await c.disconnect();
+}
+JS
 ```
 
-The CRUD round-trip works; types flow end-to-end.
+The round trip exercises the database through the HTTP transport. Use a typed service proxy, as in the [quickstart](../getting-started/quickstart.md), when calling from TypeScript.
 
 ## What changed
 

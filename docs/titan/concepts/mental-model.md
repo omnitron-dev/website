@@ -107,8 +107,10 @@ The framework guarantees:
   logged, and the next provider's `onStop` runs.
 
 This is the same guarantee modern DI frameworks (Spring, Guice, Dagger)
-provide. The implementation is in
-`@omnitron-dev/titan/application/_internal/lifecycle-state.ts`.
+provide. The lifecycle state implementation is available in the
++[source repository](https://github.com/omnitron-dev/omni/blob/main/packages/titan/src/application/_internal/lifecycle-state.ts).
++That source file is not a supported package import; use the public
++[application and lifecycle APIs](../../reference/api-index.mdx).
 
 ## Three things to internalise
 

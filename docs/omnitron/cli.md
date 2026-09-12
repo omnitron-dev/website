@@ -553,3 +553,28 @@ agent pipeline.
 - [Services reference](./services-reference.md) — the RPC surface every
   CLI command targets
 - [Console](./console.md) — the GUI equivalent
+
+## Releases
+
+`omnitron release` builds and verifies artifacts from project and runtime
+commits. See [Releases and verification](./releases.md) for build, attestation,
+artifact-store transfer and retention commands.
+
+## Additional operational commands
+
+| Command | Behaviour and important options |
+| --- | --- |
+| `omnitron stack account <project> <stack>` | Runs the project's account tool on a remote stack. `--username` creates an account and stores its generated password in the vault; `--show` and `--census` inspect it. `--remove` requires the account id. The project supplies its role model and tool implementation. |
+| `omnitron stack maintenance <project> <stack> [action]` | Reads the gateway maintenance lock by default. `on --minutes 15` sets a bounded lock; `off` releases it. |
+| `omnitron remote restart <alias> <app>` | Restarts the named application on a registered remote daemon. |
+| `omnitron fleet upgrade [nodes...]` | Builds and installs Omnitron on registered nodes. Start with `--dry-run`; `--keep` controls retained versions. A dirty working tree requires `--allow-dirty`. |
+| `omnitron secret generate <key>` | Generates a vault secret without printing its value. `--bytes` accepts 16–1024, default 32; `--encoding` accepts base64, base64url or hex. |
+| `omnitron secret copy <from> <to>` | Copies a value between vault keys without printing it. |
+| `omnitron secret rotate-rpcauth <passwordKey>` | Generates a paired RPC password and bitcoind authentication value. Requires `--user-key` and `--auth-key`. |
+| `omnitron infra inspect <project/stack>` | Inspects remote host services without changing them. Optional repeatable selectors: `--unit`, `--path`, `--snap`, `--config`. Credential configuration keys are refused. |
+| `omnitron audit` | Lists control-plane changes, newest first. Filter with `--action`, `--resource`, `--actor` and `--before`; `--limit` accepts 1–500, default 50. |
+
+Account cleanup modes belong to the project's tool: `--leftovers` performs a
+census, `--leftovers rehearse` previews removal in rolled-back transactions,
+and `--leftovers apply` requests committed removal. Inspect the census and
+project policy before applying cleanup.
