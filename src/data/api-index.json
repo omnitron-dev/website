@@ -18709,7 +18709,7 @@
       "name": "defaultResearchEditorLabels",
       "package": "@omnitron-dev/prism",
       "kind": "value",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/research-editor/editor.tsx#L21",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/research-editor/editor.tsx#L24",
       "imports": [
         {
           "path": "@omnitron-dev/prism/components/research-editor",
@@ -27449,7 +27449,7 @@
       "name": "ResearchEditor",
       "package": "@omnitron-dev/prism",
       "kind": "function",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/research-editor/editor.tsx#L87",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/research-editor/editor.tsx#L94",
       "imports": [
         {
           "path": "@omnitron-dev/prism/components/research-editor",
@@ -27461,7 +27461,7 @@
       "name": "ResearchEditorHandle",
       "package": "@omnitron-dev/prism",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/research-editor/editor.tsx#L62",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/research-editor/editor.tsx#L67",
       "imports": [
         {
           "path": "@omnitron-dev/prism/components/research-editor",
@@ -27473,7 +27473,7 @@
       "name": "ResearchEditorLabels",
       "package": "@omnitron-dev/prism",
       "kind": "type",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/research-editor/editor.tsx#L55",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/research-editor/editor.tsx#L60",
       "imports": [
         {
           "path": "@omnitron-dev/prism/components/research-editor",
@@ -27485,7 +27485,7 @@
       "name": "ResearchEditorProps",
       "package": "@omnitron-dev/prism",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/research-editor/editor.tsx#L66",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/research-editor/editor.tsx#L71",
       "imports": [
         {
           "path": "@omnitron-dev/prism/components/research-editor",
@@ -27497,7 +27497,7 @@
       "name": "ResearchInsertion",
       "package": "@omnitron-dev/prism",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/research-editor/editor.tsx#L56",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/research-editor/editor.tsx#L61",
       "imports": [
         {
           "path": "@omnitron-dev/prism/components/research-editor",

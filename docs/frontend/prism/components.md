@@ -1401,15 +1401,24 @@ conflicts and collaboration.
 | `labels`, `previewLabels` | Editor controls and shared scientific preview labels. |
 | `widgets` | Explicit, scoped `ResearchWidgets` registry. |
 | `insertions` | Additional `{ id, label, source, keywords? }` block recipes supplied by the host. |
+| `blockControls` | Show one contextual block gutter (default `true`). Keyboard commands remain available when hidden. |
 | `className`, `sx` | Theme-compatible presentation customization. |
 
 Type `/` in an empty paragraph to open the insertion palette. Headings, lists,
 task lists, code, inline equations and plain GFM tables have editable structure.
 Block equations, diagrams, registered widgets and unsupported syntax preserve
 source as atomic blocks with a scientific preview and a source dialog. The
-block controls move, duplicate or remove a block; undo and redo use the same
-transaction history. Whole-document and block-source edits are explicit
-operations. Unsupported table spans and over-budget operations are rejected,
+contextual gutter offers insertion and a block menu at the hovered or selected
+block. Drag the grip to reorder; use the menu on touch devices. Ctrl/Command +
+Alt + Up/Down moves the current block without a pointer. All three paths share
+identity-based ProseMirror transactions, reject stale identities, and preserve
+the cursor inside a moved paragraph. Each discrete block operation is an
+independent undo step, separated from adjacent typing. `blockMenu` and `dragBlock`
+labels are localizable. Only one gutter is mounted for the document; scientific
+content is not copied into a second editable DOM tree. Whole-document and
+block-source edits are explicit operations. Switching to `readOnly` closes open
+editing dialogs and locks transaction commands. Unsupported table spans and
+over-budget operations are rejected,
 not silently flattened or truncated.
 
 Untouched blocks preserve original line endings and syntax. Edited supported
@@ -1504,3 +1513,13 @@ choices for aggregate overviews after measuring actual scale. The current
 component is not an unrestricted million-node canvas or a semantic reasoning
 engine. Both components support application-owned labels, data, policies and
 extension registries; neither requires a particular domain backend.
+
+The Prism research editor is an independently implemented interface on the open
+Tiptap/ProseMirror core. It does not include the paid Tiptap Notion template.
+Block interaction style is not a storage format or a proof model. Real-time
+collaboration, durable block identities, offline drafts, Noesis semantic commands
+and proof checking require explicit host protocols and are not implied by the
+block controls. The browser acceptance suite covers actual dragging, keyboard
+movement, narrow dark layouts, accessibility and exact serialized source snapshots.
+A separate 2000-block typing sample records beforeinput-to-animation-frame timings;
+these are local diagnostic measurements, not field INP or a fastest-editor claim.
