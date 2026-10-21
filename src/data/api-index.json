@@ -210,6 +210,16 @@
       "guide": "/docs/frontend/prism/components"
     },
     {
+      "path": "@omnitron-dev/prism/components/research",
+      "guide": "/docs/frontend/prism/components"
+    },
+    {
+      "path": "@omnitron-dev/prism/components/research/styles.css",
+      "guide": "/docs/frontend/prism/components",
+      "kind": "stylesheet",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/research/research.css"
+    },
+    {
       "path": "@omnitron-dev/prism/core",
       "guide": "/docs/frontend/prism/theme"
     },
@@ -18664,6 +18674,18 @@
       ]
     },
     {
+      "name": "defaultResearchLabels",
+      "package": "@omnitron-dev/prism",
+      "kind": "value",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/research/document.tsx#L36",
+      "imports": [
+        {
+          "path": "@omnitron-dev/prism/components/research",
+          "guide": "/docs/frontend/prism/components"
+        }
+      ]
+    },
+    {
       "name": "DefaultsContextValue",
       "package": "@omnitron-dev/prism",
       "kind": "interface",
@@ -18688,6 +18710,18 @@
         {
           "path": "@omnitron-dev/prism",
           "guide": "/docs/frontend/prism"
+        }
+      ]
+    },
+    {
+      "name": "defineResearchWidget",
+      "package": "@omnitron-dev/prism",
+      "kind": "function",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/research/document.tsx#L15",
+      "imports": [
+        {
+          "path": "@omnitron-dev/prism/components/research",
+          "guide": "/docs/frontend/prism/components"
         }
       ]
     },
@@ -26124,6 +26158,18 @@
       ]
     },
     {
+      "name": "parseResearchMarkdown",
+      "package": "@omnitron-dev/prism",
+      "kind": "function",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/research/parse.ts#L29",
+      "imports": [
+        {
+          "path": "@omnitron-dev/prism/components/research",
+          "guide": "/docs/frontend/prism/components"
+        }
+      ]
+    },
+    {
       "name": "parseStackTrace",
       "package": "@omnitron-dev/prism",
       "kind": "function",
@@ -26879,7 +26925,7 @@
       "name": "registerTipTapNode",
       "package": "@omnitron-dev/prism",
       "kind": "function",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/tiptap-renderer/tiptap-renderer.tsx#L97",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/tiptap-renderer/tiptap-renderer.tsx#L98",
       "imports": [
         {
           "path": "@omnitron-dev/prism",
@@ -27148,6 +27194,90 @@
         {
           "path": "@omnitron-dev/prism/netron",
           "guide": "/docs/frontend/netron/react"
+        }
+      ]
+    },
+    {
+      "name": "ResearchDiagnostic",
+      "package": "@omnitron-dev/prism",
+      "kind": "interface",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/research/parse.ts#L15",
+      "imports": [
+        {
+          "path": "@omnitron-dev/prism/components/research",
+          "guide": "/docs/frontend/prism/components"
+        }
+      ]
+    },
+    {
+      "name": "ResearchDocument",
+      "package": "@omnitron-dev/prism",
+      "kind": "function",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/research/document.tsx#L111",
+      "imports": [
+        {
+          "path": "@omnitron-dev/prism/components/research",
+          "guide": "/docs/frontend/prism/components"
+        }
+      ]
+    },
+    {
+      "name": "ResearchDocumentData",
+      "package": "@omnitron-dev/prism",
+      "kind": "interface",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/research/parse.ts#L19",
+      "imports": [
+        {
+          "path": "@omnitron-dev/prism/components/research",
+          "guide": "/docs/frontend/prism/components"
+        }
+      ]
+    },
+    {
+      "name": "ResearchDocumentProps",
+      "package": "@omnitron-dev/prism",
+      "kind": "interface",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/research/document.tsx#L44",
+      "imports": [
+        {
+          "path": "@omnitron-dev/prism/components/research",
+          "guide": "/docs/frontend/prism/components"
+        }
+      ]
+    },
+    {
+      "name": "ResearchLabels",
+      "package": "@omnitron-dev/prism",
+      "kind": "interface",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/research/document.tsx#L28",
+      "imports": [
+        {
+          "path": "@omnitron-dev/prism/components/research",
+          "guide": "/docs/frontend/prism/components"
+        }
+      ]
+    },
+    {
+      "name": "researchLimits",
+      "package": "@omnitron-dev/prism",
+      "kind": "value",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/research/parse.ts#L25",
+      "imports": [
+        {
+          "path": "@omnitron-dev/prism/components/research",
+          "guide": "/docs/frontend/prism/components"
+        }
+      ]
+    },
+    {
+      "name": "ResearchWidgets",
+      "package": "@omnitron-dev/prism",
+      "kind": "type",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/research/document.tsx#L14",
+      "imports": [
+        {
+          "path": "@omnitron-dev/prism/components/research",
+          "guide": "/docs/frontend/prism/components"
         }
       ]
     },
@@ -29587,7 +29717,7 @@
       "name": "TipTapDoc",
       "package": "@omnitron-dev/prism",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/tiptap-renderer/tiptap-renderer.tsx#L85",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/tiptap-renderer/tiptap-renderer.tsx#L86",
       "imports": [
         {
           "path": "@omnitron-dev/prism",
@@ -29603,7 +29733,7 @@
       "name": "TipTapMark",
       "package": "@omnitron-dev/prism",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/tiptap-renderer/tiptap-renderer.tsx#L72",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/tiptap-renderer/tiptap-renderer.tsx#L73",
       "imports": [
         {
           "path": "@omnitron-dev/prism",
@@ -29619,7 +29749,7 @@
       "name": "TipTapNode",
       "package": "@omnitron-dev/prism",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/tiptap-renderer/tiptap-renderer.tsx#L77",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/tiptap-renderer/tiptap-renderer.tsx#L78",
       "imports": [
         {
           "path": "@omnitron-dev/prism",
@@ -29635,7 +29765,7 @@
       "name": "TipTapRenderer",
       "package": "@omnitron-dev/prism",
       "kind": "function",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/tiptap-renderer/tiptap-renderer.tsx#L544",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/tiptap-renderer/tiptap-renderer.tsx#L553",
       "imports": [
         {
           "path": "@omnitron-dev/prism",
@@ -29651,7 +29781,7 @@
       "name": "TipTapRendererProps",
       "package": "@omnitron-dev/prism",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/tiptap-renderer/tiptap-renderer.tsx#L528",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/tiptap-renderer/tiptap-renderer.tsx#L535",
       "imports": [
         {
           "path": "@omnitron-dev/prism",

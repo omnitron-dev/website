@@ -32,11 +32,23 @@ for (const folder of ['packages', 'apps']) {
       if (!publicKeys.includes(key)) throw new Error(`Stale guide mapping: ${pkg.name}/${key}`);
     }
     for (const key of publicKeys) {
-      const guide = guides[key];
+      const mapping = guides[key];
+      const guide = typeof mapping === 'string' ? mapping : mapping?.guide;
       if (!guide || !existsSync(join(root, 'docs', guide))) throw new Error(`Missing guide: ${pkg.name}${key} → ${guide}`);
       const entry = exports[key];
       const target = typeof entry === 'string' ? entry : entry.types ?? entry.import?.types ?? entry.import ?? entry.default;
       if (typeof target !== 'string') throw new Error(`Unrecognised export target: ${pkg.name}${key}`);
+      // Stylesheets are public entry points too, but not TypeScript modules.
+      // A bundled asset needs an explicit source mapping: guessing index.css's
+      // source would confuse generated output with the authored stylesheet.
+      if (target.endsWith('.css')) {
+        const source = mapping?.assetSource && resolve(base, mapping.assetSource);
+        if (!source || !source.startsWith(base + '/') || !source.endsWith('.css') || !existsSync(source)) {
+          throw new Error(`Missing stylesheet source for ${pkg.name}${key}`);
+        }
+        entries.push({package: pkg.name, path: `${pkg.name}/${key.slice(2)}`, source, guide, kind: 'stylesheet'});
+        continue;
+      }
       const stem = target.replace(/^(?:\.\/)?dist\//, './src/').replace(/\.d\.ts$/, '.ts').replace(/\.js$/, '.ts');
       const source = [stem, stem.replace(/\.ts$/, '.tsx')].map(p => join(base, p)).find(existsSync);
       if (!source) throw new Error(`No source for ${pkg.name}${key}: ${target}`);
@@ -46,7 +58,8 @@ for (const folder of ['packages', 'apps']) {
   }
 }
 for (const pkg of Object.keys(catalog)) if (!packages.includes(pkg)) throw new Error(`Stale package: ${pkg}`);
-const paths = Object.fromEntries(entries.map(entry => [entry.path, [entry.source]]));
+const modules = entries.filter(entry => entry.kind !== 'stylesheet');
+const paths = Object.fromEntries(modules.map(entry => [entry.path, [entry.source]]));
 const compilerOptions = {
   target: ts.ScriptTarget.ESNext, module: ts.ModuleKind.ESNext,
   moduleResolution: ts.ModuleResolutionKind.Bundler, jsx: ts.JsxEmit.ReactJSX,
@@ -67,7 +80,7 @@ host.getSourceFile = (file, languageVersion) => {
   const text = host.readFile(file);
   return text === undefined ? undefined : ts.createSourceFile(file, text, languageVersion, true);
 };
-const program = ts.createProgram(entries.map(entry => entry.source), compilerOptions, host);
+const program = ts.createProgram(modules.map(entry => entry.source), compilerOptions, host);
 const checker = program.getTypeChecker();
 const rows = new Map();
 const corpus = [];
@@ -88,7 +101,7 @@ function docRoute(guide) {
   if (parts.at(-1) === 'index') parts.pop();
   return `/docs/${parts.join('/')}`;
 }
-for (const entry of entries) {
+for (const entry of modules) {
   const source = program.getSourceFile(entry.source);
   const module = source && checker.getSymbolAtLocation(source);
   const symbols = module && checker.getExportsOfModule(module);
@@ -121,7 +134,7 @@ const symbols = [...rows.values()].sort((a, b) => a.package.localeCompare(b.pack
 for (const row of symbols) row.imports.sort((a, b) => a.path.localeCompare(b.path, 'en'));
 const data = {
   packages: packages.sort(),
-  entryPoints: entries.map(({path, guide}) => ({path, guide: docRoute(guide)})).sort((a, b) => a.path.localeCompare(b.path, 'en')),
+  entryPoints: entries.map(({path, guide, kind, source}) => ({path, guide: docRoute(guide), ...(kind ? {kind, source: `https://github.com/omnitron-dev/omni/blob/main/${relative(repo, source)}`} : {})})).sort((a, b) => a.path.localeCompare(b.path, 'en')),
   symbols,
 };
 const serialized = `${JSON.stringify(data, null, 2)}\n`;

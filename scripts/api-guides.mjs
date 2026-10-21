@@ -56,6 +56,11 @@ export default {
     "./components": "frontend/prism/components.md",
     "./components/editor": "frontend/prism/components.md",
     "./components/emoji-picker": "frontend/prism/components.md",
+    "./components/research": "frontend/prism/components.md",
+    "./components/research/styles.css": {
+      guide: "frontend/prism/components.md",
+      assetSource: "src/components/research/research.css"
+    },
     "./state": "frontend/prism/state.md",
     "./hooks": "frontend/prism/hooks-catalog.md",
     "./forms": "frontend/prism/forms.md",

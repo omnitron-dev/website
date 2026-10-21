@@ -83,7 +83,9 @@ export default function ApiExplorer() {
         <summary>Browse all package entry points</summary>
         <ul>
           {data.entryPoints.map(entry => (
-            <li key={entry.path}><Link to={entry.guide}><code>{entry.path}</code></Link></li>
+            <li key={entry.path}><Link to={entry.guide}><code>{entry.path}</code></Link>
+              {'kind' in entry && <> · {entry.kind} · <a href={entry.source}>Source ↗</a></>}
+            </li>
           ))}
         </ul>
       </details>
