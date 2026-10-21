@@ -210,8 +210,28 @@
       "guide": "/docs/frontend/prism/components"
     },
     {
+      "path": "@omnitron-dev/prism/components/knowledge-graph",
+      "guide": "/docs/frontend/prism/components"
+    },
+    {
+      "path": "@omnitron-dev/prism/components/knowledge-graph/styles.css",
+      "guide": "/docs/frontend/prism/components",
+      "kind": "stylesheet",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/knowledge-graph/graph.css"
+    },
+    {
       "path": "@omnitron-dev/prism/components/research",
       "guide": "/docs/frontend/prism/components"
+    },
+    {
+      "path": "@omnitron-dev/prism/components/research-editor",
+      "guide": "/docs/frontend/prism/components"
+    },
+    {
+      "path": "@omnitron-dev/prism/components/research-editor/styles.css",
+      "guide": "/docs/frontend/prism/components",
+      "kind": "stylesheet",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/research-editor/editor.css"
     },
     {
       "path": "@omnitron-dev/prism/components/research/styles.css",
@@ -18586,6 +18606,18 @@
       ]
     },
     {
+      "name": "defaultKnowledgeGraphLabels",
+      "package": "@omnitron-dev/prism",
+      "kind": "value",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/knowledge-graph/graph.tsx#L33",
+      "imports": [
+        {
+          "path": "@omnitron-dev/prism/components/knowledge-graph",
+          "guide": "/docs/frontend/prism/components"
+        }
+      ]
+    },
+    {
       "name": "defaultLayoutConfig",
       "package": "@omnitron-dev/prism",
       "kind": "value",
@@ -18670,6 +18702,18 @@
         {
           "path": "@omnitron-dev/prism",
           "guide": "/docs/frontend/prism"
+        }
+      ]
+    },
+    {
+      "name": "defaultResearchEditorLabels",
+      "package": "@omnitron-dev/prism",
+      "kind": "value",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/research-editor/editor.tsx#L21",
+      "imports": [
+        {
+          "path": "@omnitron-dev/prism/components/research-editor",
+          "guide": "/docs/frontend/prism/components"
         }
       ]
     },
@@ -19021,7 +19065,7 @@
       "name": "Editor",
       "package": "@omnitron-dev/prism",
       "kind": "function",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/editor/editor.tsx#L45",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/editor/editor.tsx#L43",
       "imports": [
         {
           "path": "@omnitron-dev/prism",
@@ -19370,6 +19414,18 @@
         {
           "path": "@omnitron-dev/prism",
           "guide": "/docs/frontend/prism"
+        }
+      ]
+    },
+    {
+      "name": "entityNodeId",
+      "package": "@omnitron-dev/prism",
+      "kind": "value",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/knowledge-graph/model.ts#L93",
+      "imports": [
+        {
+          "path": "@omnitron-dev/prism/components/knowledge-graph",
+          "guide": "/docs/frontend/prism/components"
         }
       ]
     },
@@ -22550,6 +22606,18 @@
       ]
     },
     {
+      "name": "incidenceGraph",
+      "package": "@omnitron-dev/prism",
+      "kind": "function",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/knowledge-graph/model.ts#L95",
+      "imports": [
+        {
+          "path": "@omnitron-dev/prism/components/knowledge-graph",
+          "guide": "/docs/frontend/prism/components"
+        }
+      ]
+    },
+    {
       "name": "InfiniteFetchFn",
       "package": "@omnitron-dev/prism",
       "kind": "type",
@@ -23110,6 +23178,114 @@
         {
           "path": "@omnitron-dev/prism/hooks",
           "guide": "/docs/frontend/prism/hooks-catalog"
+        }
+      ]
+    },
+    {
+      "name": "KnowledgeEntity",
+      "package": "@omnitron-dev/prism",
+      "kind": "interface",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/knowledge-graph/model.ts#L2",
+      "imports": [
+        {
+          "path": "@omnitron-dev/prism/components/knowledge-graph",
+          "guide": "/docs/frontend/prism/components"
+        }
+      ]
+    },
+    {
+      "name": "KnowledgeGraph",
+      "package": "@omnitron-dev/prism",
+      "kind": "function",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/knowledge-graph/graph.tsx#L136",
+      "imports": [
+        {
+          "path": "@omnitron-dev/prism/components/knowledge-graph",
+          "guide": "/docs/frontend/prism/components"
+        }
+      ]
+    },
+    {
+      "name": "KnowledgeGraphData",
+      "package": "@omnitron-dev/prism",
+      "kind": "interface",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/knowledge-graph/model.ts#L20",
+      "imports": [
+        {
+          "path": "@omnitron-dev/prism/components/knowledge-graph",
+          "guide": "/docs/frontend/prism/components"
+        }
+      ]
+    },
+    {
+      "name": "KnowledgeGraphLabels",
+      "package": "@omnitron-dev/prism",
+      "kind": "type",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/knowledge-graph/graph.tsx#L56",
+      "imports": [
+        {
+          "path": "@omnitron-dev/prism/components/knowledge-graph",
+          "guide": "/docs/frontend/prism/components"
+        }
+      ]
+    },
+    {
+      "name": "KnowledgeGraphProps",
+      "package": "@omnitron-dev/prism",
+      "kind": "interface",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/knowledge-graph/graph.tsx#L68",
+      "imports": [
+        {
+          "path": "@omnitron-dev/prism/components/knowledge-graph",
+          "guide": "/docs/frontend/prism/components"
+        }
+      ]
+    },
+    {
+      "name": "KnowledgePort",
+      "package": "@omnitron-dev/prism",
+      "kind": "interface",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/knowledge-graph/model.ts#L8",
+      "imports": [
+        {
+          "path": "@omnitron-dev/prism/components/knowledge-graph",
+          "guide": "/docs/frontend/prism/components"
+        }
+      ]
+    },
+    {
+      "name": "KnowledgeProjection",
+      "package": "@omnitron-dev/prism",
+      "kind": "interface",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/knowledge-graph/model.ts#L25",
+      "imports": [
+        {
+          "path": "@omnitron-dev/prism/components/knowledge-graph",
+          "guide": "/docs/frontend/prism/components"
+        }
+      ]
+    },
+    {
+      "name": "KnowledgeRelation",
+      "package": "@omnitron-dev/prism",
+      "kind": "interface",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/knowledge-graph/model.ts#L12",
+      "imports": [
+        {
+          "path": "@omnitron-dev/prism/components/knowledge-graph",
+          "guide": "/docs/frontend/prism/components"
+        }
+      ]
+    },
+    {
+      "name": "KnowledgeSelection",
+      "package": "@omnitron-dev/prism",
+      "kind": "type",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/knowledge-graph/model.ts#L24",
+      "imports": [
+        {
+          "path": "@omnitron-dev/prism/components/knowledge-graph",
+          "guide": "/docs/frontend/prism/components"
         }
       ]
     },
@@ -26586,6 +26762,18 @@
       ]
     },
     {
+      "name": "projectKnowledgeGraph",
+      "package": "@omnitron-dev/prism",
+      "kind": "function",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/knowledge-graph/model.ts#L56",
+      "imports": [
+        {
+          "path": "@omnitron-dev/prism/components/knowledge-graph",
+          "guide": "/docs/frontend/prism/components"
+        }
+      ]
+    },
+    {
       "name": "ProviderConfig",
       "package": "@omnitron-dev/prism",
       "kind": "type",
@@ -26998,6 +27186,18 @@
       ]
     },
     {
+      "name": "relationNodeId",
+      "package": "@omnitron-dev/prism",
+      "kind": "value",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/knowledge-graph/model.ts#L94",
+      "imports": [
+        {
+          "path": "@omnitron-dev/prism/components/knowledge-graph",
+          "guide": "/docs/frontend/prism/components"
+        }
+      ]
+    },
+    {
       "name": "relativeTimeLeft",
       "package": "@omnitron-dev/prism",
       "kind": "function",
@@ -27246,6 +27446,66 @@
       ]
     },
     {
+      "name": "ResearchEditor",
+      "package": "@omnitron-dev/prism",
+      "kind": "function",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/research-editor/editor.tsx#L87",
+      "imports": [
+        {
+          "path": "@omnitron-dev/prism/components/research-editor",
+          "guide": "/docs/frontend/prism/components"
+        }
+      ]
+    },
+    {
+      "name": "ResearchEditorHandle",
+      "package": "@omnitron-dev/prism",
+      "kind": "interface",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/research-editor/editor.tsx#L62",
+      "imports": [
+        {
+          "path": "@omnitron-dev/prism/components/research-editor",
+          "guide": "/docs/frontend/prism/components"
+        }
+      ]
+    },
+    {
+      "name": "ResearchEditorLabels",
+      "package": "@omnitron-dev/prism",
+      "kind": "type",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/research-editor/editor.tsx#L55",
+      "imports": [
+        {
+          "path": "@omnitron-dev/prism/components/research-editor",
+          "guide": "/docs/frontend/prism/components"
+        }
+      ]
+    },
+    {
+      "name": "ResearchEditorProps",
+      "package": "@omnitron-dev/prism",
+      "kind": "interface",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/research-editor/editor.tsx#L66",
+      "imports": [
+        {
+          "path": "@omnitron-dev/prism/components/research-editor",
+          "guide": "/docs/frontend/prism/components"
+        }
+      ]
+    },
+    {
+      "name": "ResearchInsertion",
+      "package": "@omnitron-dev/prism",
+      "kind": "interface",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/research-editor/editor.tsx#L56",
+      "imports": [
+        {
+          "path": "@omnitron-dev/prism/components/research-editor",
+          "guide": "/docs/frontend/prism/components"
+        }
+      ]
+    },
+    {
       "name": "ResearchLabels",
       "package": "@omnitron-dev/prism",
       "kind": "interface",
@@ -27265,6 +27525,18 @@
       "imports": [
         {
           "path": "@omnitron-dev/prism/components/research",
+          "guide": "/docs/frontend/prism/components"
+        }
+      ]
+    },
+    {
+      "name": "ResearchSnapshot",
+      "package": "@omnitron-dev/prism",
+      "kind": "interface",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/research-editor/source.ts#L201",
+      "imports": [
+        {
+          "path": "@omnitron-dev/prism/components/research-editor",
           "guide": "/docs/frontend/prism/components"
         }
       ]
@@ -33218,6 +33490,18 @@
         {
           "path": "@omnitron-dev/prism",
           "guide": "/docs/frontend/prism"
+        }
+      ]
+    },
+    {
+      "name": "validateKnowledgeGraph",
+      "package": "@omnitron-dev/prism",
+      "kind": "function",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/knowledge-graph/model.ts#L32",
+      "imports": [
+        {
+          "path": "@omnitron-dev/prism/components/knowledge-graph",
+          "guide": "/docs/frontend/prism/components"
         }
       ]
     },

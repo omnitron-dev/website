@@ -936,6 +936,8 @@ import { TipTapRenderer } from '@omnitron-dev/prism';
 <TipTapRenderer content={post.content} />
 ```
 
+Changes are delivered synchronously on the editor transaction; debounce expensive persistence or previews in the host, not the authoritative draft.
+
 Storage format is TipTap's JSON document — portable across
 edit/view, indexable for full-text search, safer than raw HTML.
 (The renderer export is `TipTapRenderer` — note the capital T.)
@@ -1354,3 +1356,151 @@ const widgets = {
 Use `$...$` / `$$...$$` for math, a `mermaid` fence for diagrams, and a `prism` fence containing `{"type":"quantity","version":1,"props":{"value":3}}` for a registered widget. `:::note`, `:::warning`, and `:::tabs` with nested `:::tab{label="..."}` use directive syntax. Custom widgets are ordinary host-owned React components with explicit versioned prop validation. The source cannot import JavaScript, register components or grant access. Registries belong to each document, not to process-wide state. `TipTapRenderer` also exposes `nodeRenderers` and `inheritRegisteredNodes`; existing global registrations remain supported by default, while `ResearchDocument` disables inheritance.
 
 Raw HTML and unsupported constructs remain inert with source diagnostics. Unsupported diagram engines retain their source; Pintora is not interpreted as Mermaid. TeX runs with trust disabled and expansion/size limits. Mermaid source cannot change renderer configuration; rendered SVG is sanitized and displayed as an isolated SVG image, preserving the layout styles without inserting document-controlled CSS into the page. Active elements and links are removed; the browser image boundary disables scripting and external resources. Theme changes are serialized. Source/AST/block/edge limits bound accepted input, **not execution time**: Mermaid runs on the browser main thread. Host-owned widgets must independently obey the host's accessibility, resource, network and permission policies. This renderer provides presentation, not proof checking or Noesis semantics. The host owns immutable revision identity, digest verification, authorization and publication. Unknown or failing blocks preserve source rather than masquerading as successful verification.
+
+### `<ResearchEditor>`
+
+A block-oriented scientific editor using Tiptap/ProseMirror and the same
+Markdown, math, diagram and widget contract as `ResearchDocument`.
+
+```tsx
+import { useRef, useState } from 'react';
+import {
+  ResearchEditor, type ResearchEditorHandle,
+} from '@omnitron-dev/prism/components/research-editor';
+import '@omnitron-dev/prism/components/research-editor/styles.css';
+
+function PaperEditor({ edition, source, save }) {
+  const editor = useRef<ResearchEditorHandle>(null);
+  const [dirty, setDirty] = useState(false);
+  return <>
+    <ResearchEditor key={edition} ref={editor} initialSource={source}
+      maxSourceLength={20000}
+      onChange={snapshot => setDirty(snapshot.getSource() !== source)} />
+    <button disabled={!dirty} onClick={() => save(editor.current!.getSnapshot().getSource())}>
+      Save edition
+    </button>
+  </>;
+}
+```
+
+`initialSource` is intentionally initial, not a controlled string on every
+keystroke. Replace the React `key` when loading another edition or explicitly
+reconciling a conflict. `onChange` receives a synchronous immutable
+`ResearchSnapshot` (`format`, `blocks`, `getSource()`); a save operation does not
+wait for a debounced update. Persist the returned Markdown, not internal
+ProseMirror JSON. The host owns revisions, authorization, save requests,
+conflicts and collaboration.
+
+| Prop | Purpose |
+| ---- | ------- |
+| `initialSource` | Initial Markdown. Original source is retained for unchanged blocks. |
+| `onChange` | Transaction snapshot; retain the latest snapshot in a ref to avoid rerendering the whole application. |
+| `ref` | `getSnapshot()` and `focus()`. |
+| `readOnly` | Locks both controls and the editable surface. |
+| `maxSourceLength` | Source length limit in UTF-16 code units, bounded by the research parser's global limit. |
+| `labels`, `previewLabels` | Editor controls and shared scientific preview labels. |
+| `widgets` | Explicit, scoped `ResearchWidgets` registry. |
+| `insertions` | Additional `{ id, label, source, keywords? }` block recipes supplied by the host. |
+| `className`, `sx` | Theme-compatible presentation customization. |
+
+Type `/` in an empty paragraph to open the insertion palette. Headings, lists,
+task lists, code, inline equations and plain GFM tables have editable structure.
+Block equations, diagrams, registered widgets and unsupported syntax preserve
+source as atomic blocks with a scientific preview and a source dialog. The
+block controls move, duplicate or remove a block; undo and redo use the same
+transaction history. Whole-document and block-source edits are explicit
+operations. Unsupported table spans and over-budget operations are rejected,
+not silently flattened or truncated.
+
+Untouched blocks preserve original line endings and syntax. Edited supported
+blocks are serialized with Markdown escaping. This is **not** a claim of exact
+byte preservation after every edit: HTML clipboard transfer can canonicalize
+ordinary Markdown. Formula atoms, opaque scientific source and supported
+formatting are retained. Reference-style links, aligned tables and unknown
+constructs remain source blocks rather than being destructively approximated.
+Session block IDs are not stable publication or citation IDs; keep immutable
+edition identity and source locators in the application's model.
+
+Scientific previews are activated near the viewport. React does not rerender
+the parent document for each transaction; unchanged block serialization is
+cached by immutable ProseMirror node. Serialization and structural validation
+still have costs proportional to the document, and React node views have a
+cost. Measure browser input latency separately from parsing or serialization;
+no constant-time editing or arbitrary document-size guarantee is made.
+
+### `<KnowledgeGraph>`
+
+A configurable React Flow surface for typed knowledge relations. The data
+model is independent of React Flow node coordinates. A relation is a first-class
+node with ordered, named input and output occurrences; it is not flattened into
+unrelated pairwise edges.
+
+```tsx
+import { KnowledgeGraph } from '@omnitron-dev/prism/components/knowledge-graph';
+import '@omnitron-dev/prism/components/knowledge-graph/styles.css';
+
+const knowledge = {
+  entities: [
+    { id: 'premise-a', kind: 'assumption', label: 'A' },
+    { id: 'premise-b', kind: 'assumption', label: 'B' },
+    { id: 'claim', kind: 'claim', label: 'C' },
+  ],
+  relations: [{
+    id: 'derivation', kind: 'candidate derivation', label: 'Joint premises',
+    inputs: [{ entity: 'premise-a', role: 'first' }, { entity: 'premise-b', role: 'second' }],
+    outputs: [{ entity: 'claim', role: 'conclusion' }],
+  }],
+};
+<KnowledgeGraph data={knowledge} visibleBudget={300}
+  onSelect={selection => inspect(selection)}
+  renderDetails={selection => <ObjectDetails selection={selection} />} />;
+```
+
+The component does not certify the relation. The host determines whether it
+represents citation, hypothesis, derivation or another relation. Repeated
+participants in different roles are preserved, and cycles are allowed. Input
+validation rejects duplicate identities and dangling references. Entity and
+relation IDs have independent namespaces.
+
+| Prop | Purpose |
+| ---- | ------- |
+| `data` | `KnowledgeGraphData` with entities and relations. |
+| `visibleBudget` | Maximum visible entity + relation nodes; default 300. |
+| `labels` | Localized controls, instructions and diagnostics. |
+| `onSelect` | Entity or relation selection, including clearing. |
+| `layout` | Host-supplied coordinates for a `KnowledgeProjection`. |
+| `onLayoutChange` | Visual coordinates after a drag; not a semantic graph mutation. |
+| `renderDetails` | Host inspector for the selected object. |
+| `height` | Map height, default 560px. |
+| `className`, `sx` | Styling and theme integration. |
+
+The searchable index and map share selection. The expand control opens an accessible full-screen workspace while retaining selection and layout; Escape closes it. Keyboard-accessible index
+controls and a list view provide alternatives to spatial navigation. A bounded
+neighbourhood admits a relation only together with all its endpoints. The UI
+reports omitted relations explicitly. A large graph starts with an index from
+which the user chooses a neighbourhood; an absent edge on that view does not
+mean an absent relationship. Pass only authorized data: this presentation
+budget is not access control, a storage limit or a substitute for server-side
+pagination. The default grid is a deterministic starting layout, not a causal
+ordering. Use `entityNodeId` and `relationNodeId` when supplying coordinates.
+
+### Engine choices and scope
+
+The scientific editor extends the existing Tiptap/ProseMirror stack, avoiding
+a second incompatible document model. BlockNote provides a ready-made block
+experience on ProseMirror; Lexical provides another editor state and plugin
+system; Slate/Plate, Milkdown, Editor.js and Quill offer different integration
+contracts. None is automatically faster for this workload. The selected path
+keeps Prism's host-owned MUI design, Markdown preservation and scientific
+rendering under one contract. Tiptap's
+[performance guidance](https://tiptap.dev/docs/guides/performance) informed
+transaction subscriptions and isolated React rendering.
+
+React Flow is used for inspectable interactive relation diagrams. Its
+[performance guidance](https://reactflow.dev/learn/advanced-use/performance)
+informs stable node components, memoized projections and bounded views.
+Canvas or WebGL renderers such as Cytoscape or Sigma remain possible host-level
+choices for aggregate overviews after measuring actual scale. The current
+component is not an unrestricted million-node canvas or a semantic reasoning
+engine. Both components support application-owned labels, data, policies and
+extension registries; neither requires a particular domain backend.

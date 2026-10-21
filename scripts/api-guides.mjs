@@ -56,6 +56,10 @@ export default {
     "./components": "frontend/prism/components.md",
     "./components/editor": "frontend/prism/components.md",
     "./components/emoji-picker": "frontend/prism/components.md",
+    "./components/research-editor": "frontend/prism/components.md",
+    "./components/research-editor/styles.css": {guide: "frontend/prism/components.md", assetSource: "src/components/research-editor/editor.css"},
+    "./components/knowledge-graph": "frontend/prism/components.md",
+    "./components/knowledge-graph/styles.css": {guide: "frontend/prism/components.md", assetSource: "src/components/knowledge-graph/graph.css"},
     "./components/research": "frontend/prism/components.md",
     "./components/research/styles.css": {
       guide: "frontend/prism/components.md",
