@@ -232,6 +232,7 @@ netron.configureAuth(authenticationManager, authorizationManager, {
     csrf,
   }),
   httpSecurity: {
+    authenticateEndpoint: 'disabled', // Auth.login owns the application's sign-in flow
     origin: { allowedOrigins: ['https://app.example'], alwaysEnforce: true },
     csrf: { csrf, accessCookieName: 'app_session', exempt: ['Auth.login'] },
   },
@@ -242,6 +243,19 @@ The HTTP server installs these gates during peer binding, before `listen`, for
 both single and batch invocations. Configuring HTTP security after transport
 startup is rejected. Exempting an initial login from double-submit CSRF does not
 exempt it from the Origin gate.
+
+`httpSecurity.authenticateEndpoint` controls the built-in `/netron/authenticate`
+endpoint. It defaults to `'enabled'` for existing clients. Applications with their
+own native sign-in service should set it to `'disabled'`: the built-in route then
+returns 404 without executing the credential provider or returning an auth context.
+When enabled, it enforces the configured Origin policy even when no cookie is sent.
+The RPC CSRF exemption list does not exempt this endpoint from Origin validation.
+
+The Node HTTP transport rejects declared or streamed request bodies above
+`maxRequestSize` with HTTP 413 before invoking a service. Rejection must not escape
+the Node request callback or terminate the server. A client disconnect also cancels
+a pending response stream, including when the response becomes ready after the
+connection has already closed.
 
 The credential verifier can resolve an opaque session against a database; a JWT
 is not required. Disable the authentication token cache if role/session revocation
