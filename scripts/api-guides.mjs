@@ -141,6 +141,11 @@ export default {
   "@omnitron-dev/titan-lock": {
     ".": "titan/modules/lock.mdx"
   },
+  "@omnitron-dev/titan-mailer": {
+    ".": "titan/modules/mailer.mdx",
+    "./notifications": "titan/modules/mailer.mdx",
+    "./postgres": "titan/modules/mailer.mdx"
+  },
   "@omnitron-dev/titan-metrics": {
     ".": "titan/modules/metrics.mdx"
   },
@@ -167,6 +172,7 @@ export default {
   "@omnitron-dev/omnitron": {
     ".": "omnitron/services-reference.md",
     "./config": "omnitron/configuration.md",
+    "./operations": "omnitron/releases.md",
     "./dto/services": "omnitron/services-reference.md",
     "./dto/events": "omnitron/services-reference.md",
     "./alerts": "omnitron/observability.md",

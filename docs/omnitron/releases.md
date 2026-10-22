@@ -101,6 +101,13 @@ containers use a custom prefix.
 This contract lets a private application remain an integration test bed
 without making its identity part of the framework.
 
+Operator-side TypeScript tools can import `createDaemonClient`,
+`ExecutionService`, `RemoteDeployer`, `buildBundle`, `archiveBundle` and
+`StackInfrastructureManager` from `@omnitron-dev/omnitron/operations`.
+This is a server/CLI entry point: keep it out of browser bundles and let the
+daemon retain transport credentials in its vault. The regular CLI and Console
+pipelines remain the interface for running and tracking deployments.
+
 ## Command reference
 
 | Command | Purpose |
