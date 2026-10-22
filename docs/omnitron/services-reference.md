@@ -331,6 +331,14 @@ Project + stack registry. 14 methods covering both layers.
 | Project apps | `getProjectApps` |
 | Stacks | `listStacks`, `getStack`, `getStackStatus`, `createStack`, `deleteStack`, `startStack`, `stopStack` |
 
+`updateProject({ name, path })` changes the registered location while preserving the
+project name, registration history, enabled-stack settings and workspace namespace.
+The directory basename is not a rename request. Stop running/starting stacks before
+moving a project to another release directory. Configuration is reloaded from the
+new path on the next start. A rejected path leaves the registration unchanged.
+Use an immutable release directory for updates; a mutable `current` symlink can
+otherwise make process definitions and installed package identities disagree.
+
 Roles: all reads (`listProjects`, `getProject`, `scanRequirements`,
 `getProjectApps`, `listStacks`, `getStack`, `getStackStatus`) gate on
 `viewer`; `startStack` / `stopStack` on `operator`; project CRUD
