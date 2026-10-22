@@ -41649,7 +41649,7 @@
       "name": "HttpNativeServer",
       "package": "@omnitron-dev/titan",
       "kind": "class",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan/src/netron/transport/http/server.ts#L295",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan/src/netron/transport/http/server.ts#L290",
       "imports": [
         {
           "path": "@omnitron-dev/titan/netron/transport/http",

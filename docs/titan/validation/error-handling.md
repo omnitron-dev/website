@@ -176,3 +176,19 @@ async create(input: z.infer<typeof CreateUserSchema>) {
   and the body. Throw the error; let the framework signal failure.
 
 → Back to [Validation Overview](./overview.md).
+
+## Rejected HTTP uploads
+
+The native Node HTTP transport returns a correlated `413` before invoking a
+service when either the declared length or the streamed body exceeds
+`maxRequestSize`. It discards the remaining input without retaining its chunks.
+Closing the socket immediately after sending the refusal can reset an upload
+still in flight, causing a client to see `EPIPE` or `ECONNRESET` instead of the
+HTTP result. The transport therefore allows the response and request directions
+to finish before a requested close.
+
+Rejected uploads remain bounded by `requestTimeout`; if ordinary request
+execution has explicitly disabled that timeout, the normal 30-second default
+still bounds disposal of a refused body. A client that never completes the
+upload cannot keep that rejected request alive indefinitely. Admission limits
+and service validation remain independent.
