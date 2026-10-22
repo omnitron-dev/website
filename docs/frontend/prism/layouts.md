@@ -40,6 +40,7 @@ import {
 | ------ | ---------- |
 | `DashboardLayout` | Full app shell — sidenav / topnav / combo + header + content |
 | `DashboardContent` | Padded content wrapper for use inside the dashboard `<main>` |
+| `PanelLayout` / `SidebarToggle` | Nested navigation with independent collapse state and a shared edge control |
 | `Sidenav` / `MobileSidenav` | The desktop / mobile sidebar (rendered by `DashboardLayout`) |
 | `AuthCenteredLayout` | Card-centered auth shell (sign-in / sign-up / reset) |
 | `AuthSplitLayout` | Split-screen auth shell (illustration + form) |
@@ -53,6 +54,58 @@ There is **no** single `<AuthLayout>` component (only an
 `AuthLayoutProps` / `AuthLayoutVariant` _type_), and there is **no**
 `<CoreLayout>` — the minimal shell is composed from `LayoutSection` +
 `HeaderSection`, or you reach for `AuthSimpleLayout`.
+
+## Secondary navigation with `<PanelLayout>`
+
+Use one application `DashboardLayout` and place `PanelLayout` inside it for
+corpus contents, document navigation, graph indexes or administration tools.
+Each panel can collapse independently. The main editor remains mounted when a
+panel collapses or its mobile drawer opens. Render the panel as a function to
+provide compact navigation while retaining the same component and its state.
+A plain React node remains mounted but hidden when collapsed. Mobile drawers
+retain their body between openings.
+
+```tsx
+import { PanelLayout } from '@omnitron-dev/prism/layouts';
+
+<PanelLayout
+  title="Document contents"
+  labels={{ expand: 'Expand contents', collapse: 'Collapse contents', close: 'Close contents' }}
+  persistKey="research.document-contents"
+  navigationKey={selectedDocumentId}
+  panel={({ collapsed }) => <DocumentContents compact={collapsed} />}
+>
+  <DocumentEditor />
+</PanelLayout>
+```
+
+`PanelLayout` does not require a router. `navigationKey` closes the mobile
+drawer after the host changes selection; route-based applications can pass
+`useLocation().key`. It does not reset the desktop preference. Use distinct
+`persistKey` values for the application sidebar and each kind of nested panel.
+The default desktop breakpoint is `md`, expanded width is 264 px, and sticky
+offset is 88 px. The compact rail is 64 px wide. Its height is identical in both
+modes: by default `calc(100dvh - (offset + 24px))`. Override `height` for embedded
+surfaces such as a graph, and `collapsedWidth`, `layoutQuery`, `width`, `offset`
+and `sx` as needed. `DocSidebar` supports `compact`, full tooltip/accessibility
+labels, active destination identity and optional item `shortLabel` values.
+Hide auxiliary search controls instead of unmounting them when retaining their
+input state matters. The dashboard and nested panels share `SidebarToggle` and
+the themed `Scrollbar`; scrollbar styling also applies to nested overflow
+regions through Prism's CSS baseline. Forced-colors mode keeps native scrollbar
+colors and dimensions.
+
+It uses native MUI controls and the shared Prism settings store, including its
+storage-failure fallback. The panel body may remount when crossing the mobile
+breakpoint; lift durable drafts and search state into the owning feature.
+
+`DashboardLayout.labels` localizes opening/closing navigation, collapse/expand,
+main landmark and skip link. `slotProps.main.id` and `className` integrate with
+the application's focus and fragment navigation. Its mobile drawer closes on
+actual router navigation; collapsed destinations retain accessible names and
+`aria-current` values. A public website and a workspace should render separate
+shells, rather than placing the full application inside a bounded marketing
+container.
 
 ## `<DashboardLayout>`
 

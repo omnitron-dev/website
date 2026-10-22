@@ -36,7 +36,7 @@ diffs them against the index table below.
 | `kubernetes.rpc-service.ts` | `OmnitronKubernetes` | 9 | admin |
 | `log-collector.rpc-service.ts` | `OmnitronLogs` | 4 | viewer |
 | `node-manager.rpc-service.ts` | `OmnitronNodes` | 30 | viewer (read) + operator (mutate) |
-| `pipeline.rpc-service.ts` | `OmnitronPipelines` | 8 | viewer (read) + operator (mutate) |
+| `pipeline.rpc-service.ts` | `OmnitronPipelines` | 9 | viewer (read) + operator (mutate) |
 | `project.rpc-service.ts` | `OmnitronProject` | 23 | viewer (read) + operator (start/stop) + admin (CRUD) |
 | `release.rpc-service.ts` | `OmnitronRelease` | 12 | viewer (read), operator (build/attest), admin (prune) |
 | `secrets.rpc-service.ts` | `OmnitronSecrets` | 6 | admin |
