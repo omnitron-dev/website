@@ -303,6 +303,7 @@ const sidebars: SidebarsConfig = {
             'titan/modules/health',
             'titan/modules/lock',
             'titan/modules/metrics',
+            'titan/modules/mailer',
             'titan/modules/notifications',
             'titan/modules/pm',
             'titan/modules/ratelimit',

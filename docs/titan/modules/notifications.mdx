@@ -18,6 +18,12 @@ notification events from Rotif.
 pnpm add @omnitron-dev/titan-notifications @omnitron-dev/titan-events @omnitron-dev/titan-redis
 ```
 
+For SMTP email, use [titan-mailer](./mailer): a concrete Nodemailer channel,
+strict TLS, typed templates, bounded pools and a durable outbox worker over this
+module's Redis transport. Business-state changes and queued email are committed
+together; only opaque delivery IDs travel through Redis. SMTP acceptance is not
+an exactly-once or inbox-delivery guarantee.
+
 ## When you need it
 
 - **Multi-channel delivery.** Same payload, different channels per
