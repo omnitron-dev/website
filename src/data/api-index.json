@@ -19031,6 +19031,18 @@
       ]
     },
     {
+      "name": "defaultMathInputLabels",
+      "package": "@omnitron-dev/prism",
+      "kind": "value",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/research-editor/math-input.tsx#L16",
+      "imports": [
+        {
+          "path": "@omnitron-dev/prism/components/research-editor",
+          "guide": "/docs/frontend/prism/components"
+        }
+      ]
+    },
+    {
       "name": "DefaultOptions",
       "package": "@omnitron-dev/prism",
       "kind": "interface",
@@ -19090,7 +19102,7 @@
       "name": "defaultResearchEditorLabels",
       "package": "@omnitron-dev/prism",
       "kind": "value",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/research-editor/editor.tsx#L24",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/research-editor/editor.tsx#L25",
       "imports": [
         {
           "path": "@omnitron-dev/prism/components/research-editor",
@@ -24947,6 +24959,54 @@
       ]
     },
     {
+      "name": "MathExit",
+      "package": "@omnitron-dev/prism",
+      "kind": "type",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/research-editor/math-input.tsx#L27",
+      "imports": [
+        {
+          "path": "@omnitron-dev/prism/components/research-editor",
+          "guide": "/docs/frontend/prism/components"
+        }
+      ]
+    },
+    {
+      "name": "MathInput",
+      "package": "@omnitron-dev/prism",
+      "kind": "function",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/research-editor/math-input.tsx#L61",
+      "imports": [
+        {
+          "path": "@omnitron-dev/prism/components/research-editor",
+          "guide": "/docs/frontend/prism/components"
+        }
+      ]
+    },
+    {
+      "name": "MathInputLabels",
+      "package": "@omnitron-dev/prism",
+      "kind": "type",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/research-editor/math-input.tsx#L26",
+      "imports": [
+        {
+          "path": "@omnitron-dev/prism/components/research-editor",
+          "guide": "/docs/frontend/prism/components"
+        }
+      ]
+    },
+    {
+      "name": "MathInputProps",
+      "package": "@omnitron-dev/prism",
+      "kind": "interface",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/research-editor/math-input.tsx#L28",
+      "imports": [
+        {
+          "path": "@omnitron-dev/prism/components/research-editor",
+          "guide": "/docs/frontend/prism/components"
+        }
+      ]
+    },
+    {
       "name": "MegaMenu",
       "package": "@omnitron-dev/prism",
       "kind": "function",
@@ -28182,7 +28242,7 @@
       "name": "ResearchEditor",
       "package": "@omnitron-dev/prism",
       "kind": "function",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/research-editor/editor.tsx#L94",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/research-editor/editor.tsx#L97",
       "imports": [
         {
           "path": "@omnitron-dev/prism/components/research-editor",
@@ -28194,7 +28254,7 @@
       "name": "ResearchEditorHandle",
       "package": "@omnitron-dev/prism",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/research-editor/editor.tsx#L67",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/research-editor/editor.tsx#L68",
       "imports": [
         {
           "path": "@omnitron-dev/prism/components/research-editor",
@@ -28206,7 +28266,7 @@
       "name": "ResearchEditorLabels",
       "package": "@omnitron-dev/prism",
       "kind": "type",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/research-editor/editor.tsx#L60",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/research-editor/editor.tsx#L61",
       "imports": [
         {
           "path": "@omnitron-dev/prism/components/research-editor",
@@ -28218,7 +28278,7 @@
       "name": "ResearchEditorProps",
       "package": "@omnitron-dev/prism",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/research-editor/editor.tsx#L71",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/research-editor/editor.tsx#L72",
       "imports": [
         {
           "path": "@omnitron-dev/prism/components/research-editor",
@@ -28230,7 +28290,7 @@
       "name": "ResearchInsertion",
       "package": "@omnitron-dev/prism",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/research-editor/editor.tsx#L61",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/research-editor/editor.tsx#L62",
       "imports": [
         {
           "path": "@omnitron-dev/prism/components/research-editor",
@@ -28263,10 +28323,22 @@
       ]
     },
     {
+      "name": "ResearchMathOptions",
+      "package": "@omnitron-dev/prism",
+      "kind": "type",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/research-editor/math-node.tsx#L10",
+      "imports": [
+        {
+          "path": "@omnitron-dev/prism/components/research-editor",
+          "guide": "/docs/frontend/prism/components"
+        }
+      ]
+    },
+    {
       "name": "ResearchSnapshot",
       "package": "@omnitron-dev/prism",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/research-editor/source.ts#L210",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/research-editor/source.ts#L211",
       "imports": [
         {
           "path": "@omnitron-dev/prism/components/research-editor",
