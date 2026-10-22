@@ -18990,7 +18990,7 @@
       "name": "defaultKnowledgeGraphLabels",
       "package": "@omnitron-dev/prism",
       "kind": "value",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/knowledge-graph/graph.tsx#L39",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/knowledge-graph/graph.tsx#L43",
       "imports": [
         {
           "path": "@omnitron-dev/prism/components/knowledge-graph",
@@ -23790,7 +23790,7 @@
       "name": "KnowledgeGraph",
       "package": "@omnitron-dev/prism",
       "kind": "function",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/knowledge-graph/graph.tsx#L168",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/knowledge-graph/graph.tsx#L213",
       "imports": [
         {
           "path": "@omnitron-dev/prism/components/knowledge-graph",
@@ -23814,7 +23814,7 @@
       "name": "KnowledgeGraphLabels",
       "package": "@omnitron-dev/prism",
       "kind": "type",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/knowledge-graph/graph.tsx#L66",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/knowledge-graph/graph.tsx#L70",
       "imports": [
         {
           "path": "@omnitron-dev/prism/components/knowledge-graph",
@@ -23826,7 +23826,7 @@
       "name": "KnowledgeGraphProps",
       "package": "@omnitron-dev/prism",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/knowledge-graph/graph.tsx#L79",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/knowledge-graph/graph.tsx#L83",
       "imports": [
         {
           "path": "@omnitron-dev/prism/components/knowledge-graph",
