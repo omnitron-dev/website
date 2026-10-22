@@ -49,6 +49,8 @@ export default {
   },
   "@omnitron-dev/prism": {
     ".": "frontend/prism/index.md",
+    "./ui": "frontend/prism/theme.md",
+    "./components/doc-layout": "frontend/prism/components.md",
     "./theme": "frontend/prism/theme.md",
     "./core": "frontend/prism/theme.md",
     "./layouts": "frontend/prism/layouts.md",

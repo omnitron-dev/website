@@ -202,6 +202,10 @@
       "guide": "/docs/frontend/prism/components"
     },
     {
+      "path": "@omnitron-dev/prism/components/doc-layout",
+      "guide": "/docs/frontend/prism/components"
+    },
+    {
       "path": "@omnitron-dev/prism/components/editor",
       "guide": "/docs/frontend/prism/components"
     },
@@ -269,6 +273,10 @@
     },
     {
       "path": "@omnitron-dev/prism/theme",
+      "guide": "/docs/frontend/prism/theme"
+    },
+    {
+      "path": "@omnitron-dev/prism/ui",
       "guide": "/docs/frontend/prism/theme"
     },
     {
@@ -3549,7 +3557,7 @@
       "name": "BackendClient",
       "package": "@omnitron-dev/netron-browser",
       "kind": "class",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/netron-browser/src/client/backend-client.ts#L91",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/netron-browser/src/client/backend-client.ts#L92",
       "imports": [
         {
           "path": "@omnitron-dev/netron-browser",
@@ -3565,7 +3573,7 @@
       "name": "BackendClientOptions",
       "package": "@omnitron-dev/netron-browser",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/netron-browser/src/client/backend-client.ts#L34",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/netron-browser/src/client/backend-client.ts#L35",
       "imports": [
         {
           "path": "@omnitron-dev/netron-browser",
@@ -3613,7 +3621,7 @@
       "name": "BackendPoolEntry",
       "package": "@omnitron-dev/netron-browser",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/netron-browser/src/types/multi-backend.ts#L532",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/netron-browser/src/types/multi-backend.ts#L510",
       "imports": [
         {
           "path": "@omnitron-dev/netron-browser",
@@ -3881,7 +3889,7 @@
       "name": "ConnectionMetrics",
       "package": "@omnitron-dev/netron-browser",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/netron-browser/src/types/index.ts#L274",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/netron-browser/src/types/index.ts#L294",
       "imports": [
         {
           "path": "@omnitron-dev/netron-browser",
@@ -3909,7 +3917,7 @@
       "name": "ConnectionState",
       "package": "@omnitron-dev/netron-browser",
       "kind": "type",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/netron-browser/src/types/index.ts#L262",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/netron-browser/src/types/index.ts#L282",
       "imports": [
         {
           "path": "@omnitron-dev/netron-browser",
@@ -4137,7 +4145,7 @@
       "name": "createClient",
       "package": "@omnitron-dev/netron-browser",
       "kind": "function",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/netron-browser/src/client/index.ts#L170",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/netron-browser/src/client/index.ts#L166",
       "imports": [
         {
           "path": "@omnitron-dev/netron-browser",
@@ -5037,7 +5045,7 @@
       "name": "HttpClient",
       "package": "@omnitron-dev/netron-browser",
       "kind": "class",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/netron-browser/src/client/http-client.ts#L109",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/netron-browser/src/client/http-client.ts#L149",
       "imports": [
         {
           "path": "@omnitron-dev/netron-browser",
@@ -5057,7 +5065,7 @@
       "name": "HttpClientOptions",
       "package": "@omnitron-dev/netron-browser",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/netron-browser/src/client/http-client.ts#L30",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/netron-browser/src/client/http-client.ts#L29",
       "imports": [
         {
           "path": "@omnitron-dev/netron-browser",
@@ -5089,7 +5097,7 @@
       "name": "HttpRequestMessage",
       "package": "@omnitron-dev/netron-browser",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/netron-browser/src/types/index.ts#L148",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/netron-browser/src/types/index.ts#L168",
       "imports": [
         {
           "path": "@omnitron-dev/netron-browser",
@@ -5105,7 +5113,7 @@
       "name": "HttpResponseMessage",
       "package": "@omnitron-dev/netron-browser",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/netron-browser/src/types/index.ts#L183",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/netron-browser/src/types/index.ts#L203",
       "imports": [
         {
           "path": "@omnitron-dev/netron-browser",
@@ -5161,7 +5169,7 @@
       "name": "IBackendClient",
       "package": "@omnitron-dev/netron-browser",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/netron-browser/src/types/multi-backend.ts#L356",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/netron-browser/src/types/multi-backend.ts#L334",
       "imports": [
         {
           "path": "@omnitron-dev/netron-browser",
@@ -5229,7 +5237,7 @@
       "name": "IMultiBackendClient",
       "package": "@omnitron-dev/netron-browser",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/netron-browser/src/types/multi-backend.ts#L412",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/netron-browser/src/types/multi-backend.ts#L390",
       "imports": [
         {
           "path": "@omnitron-dev/netron-browser",
@@ -5317,6 +5325,22 @@
       "imports": [
         {
           "path": "@omnitron-dev/netron-browser",
+          "guide": "/docs/frontend/netron/browser"
+        }
+      ]
+    },
+    {
+      "name": "InvocationOptions",
+      "package": "@omnitron-dev/netron-browser",
+      "kind": "interface",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/netron-browser/src/types/index.ts#L146",
+      "imports": [
+        {
+          "path": "@omnitron-dev/netron-browser",
+          "guide": "/docs/frontend/netron/browser"
+        },
+        {
+          "path": "@omnitron-dev/netron-browser/types",
           "guide": "/docs/frontend/netron/browser"
         }
       ]
@@ -6005,7 +6029,7 @@
       "name": "MethodDescriptor",
       "package": "@omnitron-dev/netron-browser",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/netron-browser/src/types/index.ts#L329",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/netron-browser/src/types/index.ts#L349",
       "imports": [
         {
           "path": "@omnitron-dev/netron-browser",
@@ -6217,7 +6241,7 @@
       "name": "MultiBackendMetrics",
       "package": "@omnitron-dev/netron-browser",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/netron-browser/src/types/multi-backend.ts#L315",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/netron-browser/src/types/multi-backend.ts#L293",
       "imports": [
         {
           "path": "@omnitron-dev/netron-browser",
@@ -6297,7 +6321,7 @@
       "name": "NetronClient",
       "package": "@omnitron-dev/netron-browser",
       "kind": "class",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/netron-browser/src/client/index.ts#L29",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/netron-browser/src/client/index.ts#L28",
       "imports": [
         {
           "path": "@omnitron-dev/netron-browser",
@@ -6429,7 +6453,7 @@
       "name": "Packet",
       "package": "@omnitron-dev/netron-browser",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/netron-browser/src/types/index.ts#L242",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/netron-browser/src/types/index.ts#L262",
       "imports": [
         {
           "path": "@omnitron-dev/netron-browser",
@@ -6469,7 +6493,7 @@
       "name": "PacketType",
       "package": "@omnitron-dev/netron-browser",
       "kind": "enum",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/netron-browser/src/types/index.ts#L228",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/netron-browser/src/types/index.ts#L248",
       "imports": [
         {
           "path": "@omnitron-dev/netron-browser",
@@ -6497,7 +6521,7 @@
       "name": "ParameterDescriptor",
       "package": "@omnitron-dev/netron-browser",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/netron-browser/src/types/index.ts#L359",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/netron-browser/src/types/index.ts#L379",
       "imports": [
         {
           "path": "@omnitron-dev/netron-browser",
@@ -6525,7 +6549,7 @@
       "name": "ParsedServiceName",
       "package": "@omnitron-dev/netron-browser",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/netron-browser/src/types/multi-backend.ts#L517",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/netron-browser/src/types/multi-backend.ts#L495",
       "imports": [
         {
           "path": "@omnitron-dev/netron-browser",
@@ -6957,7 +6981,7 @@
       "name": "ServiceDescriptor",
       "package": "@omnitron-dev/netron-browser",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/netron-browser/src/types/index.ts#L379",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/netron-browser/src/types/index.ts#L399",
       "imports": [
         {
           "path": "@omnitron-dev/netron-browser",
@@ -7257,7 +7281,7 @@
       "name": "TaskHandler",
       "package": "@omnitron-dev/netron-browser",
       "kind": "type",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/netron-browser/src/client/ws-client.ts#L115",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/netron-browser/src/client/ws-client.ts#L116",
       "imports": [
         {
           "path": "@omnitron-dev/netron-browser",
@@ -7553,7 +7577,7 @@
       "name": "TypedServiceProxy",
       "package": "@omnitron-dev/netron-browser",
       "kind": "type",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/netron-browser/src/types/multi-backend.ts#L346",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/netron-browser/src/types/multi-backend.ts#L324",
       "imports": [
         {
           "path": "@omnitron-dev/netron-browser",
@@ -7725,7 +7749,7 @@
       "name": "WebSocketClient",
       "package": "@omnitron-dev/netron-browser",
       "kind": "class",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/netron-browser/src/client/ws-client.ts#L173",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/netron-browser/src/client/ws-client.ts#L174",
       "imports": [
         {
           "path": "@omnitron-dev/netron-browser",
@@ -7745,7 +7769,7 @@
       "name": "WebSocketClientOptions",
       "package": "@omnitron-dev/netron-browser",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/netron-browser/src/client/ws-client.ts#L25",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/netron-browser/src/client/ws-client.ts#L26",
       "imports": [
         {
           "path": "@omnitron-dev/netron-browser",
@@ -8869,7 +8893,7 @@
       "name": "createNetronClient",
       "package": "@omnitron-dev/netron-react",
       "kind": "function",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/netron-react/src/core/client.ts#L549",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/netron-react/src/core/client.ts#L550",
       "imports": [
         {
           "path": "@omnitron-dev/netron-react",
@@ -8893,7 +8917,7 @@
       "name": "createServiceHook",
       "package": "@omnitron-dev/netron-react",
       "kind": "function",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/netron-react/src/hooks/useService.ts#L118",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/netron-react/src/hooks/useService.ts#L119",
       "imports": [
         {
           "path": "@omnitron-dev/netron-react",
@@ -9153,7 +9177,7 @@
       "name": "IBackendClient",
       "package": "@omnitron-dev/netron-react",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/netron-browser/src/types/multi-backend.ts#L356",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/netron-browser/src/types/multi-backend.ts#L334",
       "imports": [
         {
           "path": "@omnitron-dev/netron-react",
@@ -9165,7 +9189,7 @@
       "name": "IMultiBackendClient",
       "package": "@omnitron-dev/netron-react",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/netron-browser/src/types/multi-backend.ts#L412",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/netron-browser/src/types/multi-backend.ts#L390",
       "imports": [
         {
           "path": "@omnitron-dev/netron-react",
@@ -9597,7 +9621,7 @@
       "name": "NetronTypedServiceProxy",
       "package": "@omnitron-dev/netron-react",
       "kind": "type",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/netron-browser/src/types/multi-backend.ts#L346",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/netron-browser/src/types/multi-backend.ts#L324",
       "imports": [
         {
           "path": "@omnitron-dev/netron-react",
@@ -10209,7 +10233,7 @@
       "name": "useAllBackendsConnected",
       "package": "@omnitron-dev/netron-react",
       "kind": "function",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/netron-react/src/multi-backend/hooks.ts#L409",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/netron-react/src/multi-backend/hooks.ts#L411",
       "imports": [
         {
           "path": "@omnitron-dev/netron-react",
@@ -10221,7 +10245,7 @@
       "name": "useAnyBackendConnected",
       "package": "@omnitron-dev/netron-react",
       "kind": "function",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/netron-react/src/multi-backend/hooks.ts#L423",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/netron-react/src/multi-backend/hooks.ts#L425",
       "imports": [
         {
           "path": "@omnitron-dev/netron-react",
@@ -10269,7 +10293,7 @@
       "name": "useBackendConnectionState",
       "package": "@omnitron-dev/netron-react",
       "kind": "function",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/netron-react/src/multi-backend/hooks.ts#L376",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/netron-react/src/multi-backend/hooks.ts#L378",
       "imports": [
         {
           "path": "@omnitron-dev/netron-react",
@@ -10281,7 +10305,7 @@
       "name": "useBackendMutation",
       "package": "@omnitron-dev/netron-react",
       "kind": "function",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/netron-react/src/multi-backend/hooks.ts#L331",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/netron-react/src/multi-backend/hooks.ts#L333",
       "imports": [
         {
           "path": "@omnitron-dev/netron-react",
@@ -10305,7 +10329,7 @@
       "name": "useBackendQuery",
       "package": "@omnitron-dev/netron-react",
       "kind": "function",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/netron-react/src/multi-backend/hooks.ts#L268",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/netron-react/src/multi-backend/hooks.ts#L269",
       "imports": [
         {
           "path": "@omnitron-dev/netron-react",
@@ -13738,6 +13762,30 @@
       ]
     },
     {
+      "name": "Accordion",
+      "package": "@omnitron-dev/prism",
+      "kind": "value",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/ui/index.ts#L10",
+      "imports": [
+        {
+          "path": "@omnitron-dev/prism/ui",
+          "guide": "/docs/frontend/prism/theme"
+        }
+      ]
+    },
+    {
+      "name": "AccordionDetails",
+      "package": "@omnitron-dev/prism",
+      "kind": "value",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/ui/index.ts#L12",
+      "imports": [
+        {
+          "path": "@omnitron-dev/prism/ui",
+          "guide": "/docs/frontend/prism/theme"
+        }
+      ]
+    },
+    {
       "name": "AccordionItem",
       "package": "@omnitron-dev/prism",
       "kind": "interface",
@@ -13766,6 +13814,18 @@
         {
           "path": "@omnitron-dev/prism/components",
           "guide": "/docs/frontend/prism/components"
+        }
+      ]
+    },
+    {
+      "name": "AccordionSummary",
+      "package": "@omnitron-dev/prism",
+      "kind": "value",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/ui/index.ts#L11",
+      "imports": [
+        {
+          "path": "@omnitron-dev/prism/ui",
+          "guide": "/docs/frontend/prism/theme"
         }
       ]
     },
@@ -13878,6 +13938,18 @@
         {
           "path": "@omnitron-dev/prism/components",
           "guide": "/docs/frontend/prism/components"
+        }
+      ]
+    },
+    {
+      "name": "Alert",
+      "package": "@omnitron-dev/prism",
+      "kind": "value",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/ui/index.ts#L9",
+      "imports": [
+        {
+          "path": "@omnitron-dev/prism/ui",
+          "guide": "/docs/frontend/prism/theme"
         }
       ]
     },
@@ -15194,6 +15266,18 @@
       ]
     },
     {
+      "name": "Box",
+      "package": "@omnitron-dev/prism",
+      "kind": "value",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/ui/index.ts#L13",
+      "imports": [
+        {
+          "path": "@omnitron-dev/prism/ui",
+          "guide": "/docs/frontend/prism/theme"
+        }
+      ]
+    },
+    {
       "name": "BreadcrumbLinkProps",
       "package": "@omnitron-dev/prism",
       "kind": "interface",
@@ -15222,6 +15306,18 @@
         {
           "path": "@omnitron-dev/prism/components",
           "guide": "/docs/frontend/prism/components"
+        }
+      ]
+    },
+    {
+      "name": "Breadcrumbs",
+      "package": "@omnitron-dev/prism",
+      "kind": "value",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/ui/index.ts#L58",
+      "imports": [
+        {
+          "path": "@omnitron-dev/prism/ui",
+          "guide": "/docs/frontend/prism/theme"
         }
       ]
     },
@@ -15470,6 +15566,30 @@
       ]
     },
     {
+      "name": "Button",
+      "package": "@omnitron-dev/prism",
+      "kind": "value",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/ui/index.ts#L14",
+      "imports": [
+        {
+          "path": "@omnitron-dev/prism/ui",
+          "guide": "/docs/frontend/prism/theme"
+        }
+      ]
+    },
+    {
+      "name": "ButtonProps",
+      "package": "@omnitron-dev/prism",
+      "kind": "type",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/ui/index.ts#L54",
+      "imports": [
+        {
+          "path": "@omnitron-dev/prism/ui",
+          "guide": "/docs/frontend/prism/theme"
+        }
+      ]
+    },
+    {
       "name": "ButtonVariant",
       "package": "@omnitron-dev/prism",
       "kind": "type",
@@ -15546,6 +15666,42 @@
         {
           "path": "@omnitron-dev/prism/components",
           "guide": "/docs/frontend/prism/components"
+        }
+      ]
+    },
+    {
+      "name": "Card",
+      "package": "@omnitron-dev/prism",
+      "kind": "value",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/ui/index.ts#L15",
+      "imports": [
+        {
+          "path": "@omnitron-dev/prism/ui",
+          "guide": "/docs/frontend/prism/theme"
+        }
+      ]
+    },
+    {
+      "name": "CardActionArea",
+      "package": "@omnitron-dev/prism",
+      "kind": "value",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/ui/index.ts#L16",
+      "imports": [
+        {
+          "path": "@omnitron-dev/prism/ui",
+          "guide": "/docs/frontend/prism/theme"
+        }
+      ]
+    },
+    {
+      "name": "CardContent",
+      "package": "@omnitron-dev/prism",
+      "kind": "value",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/ui/index.ts#L17",
+      "imports": [
+        {
+          "path": "@omnitron-dev/prism/ui",
+          "guide": "/docs/frontend/prism/theme"
         }
       ]
     },
@@ -16026,6 +16182,18 @@
       ]
     },
     {
+      "name": "Chip",
+      "package": "@omnitron-dev/prism",
+      "kind": "value",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/ui/index.ts#L18",
+      "imports": [
+        {
+          "path": "@omnitron-dev/prism/ui",
+          "guide": "/docs/frontend/prism/theme"
+        }
+      ]
+    },
+    {
       "name": "CircularProgress",
       "package": "@omnitron-dev/prism",
       "kind": "function",
@@ -16038,6 +16206,18 @@
         {
           "path": "@omnitron-dev/prism/components",
           "guide": "/docs/frontend/prism/components"
+        }
+      ]
+    },
+    {
+      "name": "CircularProgress",
+      "package": "@omnitron-dev/prism",
+      "kind": "value",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/ui/index.ts#L19",
+      "imports": [
+        {
+          "path": "@omnitron-dev/prism/ui",
+          "guide": "/docs/frontend/prism/theme"
         }
       ]
     },
@@ -16649,7 +16829,7 @@
       "name": "ConnectionState",
       "package": "@omnitron-dev/prism",
       "kind": "type",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/netron-browser/src/types/index.ts#L262",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/netron-browser/src/types/index.ts#L282",
       "imports": [
         {
           "path": "@omnitron-dev/prism",
@@ -17337,7 +17517,7 @@
       "name": "createNetronClient",
       "package": "@omnitron-dev/prism",
       "kind": "function",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/netron-react/src/core/client.ts#L549",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/netron-react/src/core/client.ts#L550",
       "imports": [
         {
           "path": "@omnitron-dev/prism",
@@ -17353,7 +17533,7 @@
       "name": "createNetronServiceHook",
       "package": "@omnitron-dev/prism",
       "kind": "function",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/netron-react/src/hooks/useService.ts#L118",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/netron-react/src/hooks/useService.ts#L119",
       "imports": [
         {
           "path": "@omnitron-dev/prism",
@@ -18721,7 +18901,7 @@
       "name": "defaultResearchLabels",
       "package": "@omnitron-dev/prism",
       "kind": "value",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/research/document.tsx#L36",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/research/document.tsx#L38",
       "imports": [
         {
           "path": "@omnitron-dev/prism/components/research",
@@ -18761,7 +18941,7 @@
       "name": "defineResearchWidget",
       "package": "@omnitron-dev/prism",
       "kind": "function",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/research/document.tsx#L15",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/research/document.tsx#L16",
       "imports": [
         {
           "path": "@omnitron-dev/prism/components/research",
@@ -18818,6 +18998,66 @@
       ]
     },
     {
+      "name": "Dialog",
+      "package": "@omnitron-dev/prism",
+      "kind": "value",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/ui/index.ts#L22",
+      "imports": [
+        {
+          "path": "@omnitron-dev/prism/ui",
+          "guide": "/docs/frontend/prism/theme"
+        }
+      ]
+    },
+    {
+      "name": "DialogActions",
+      "package": "@omnitron-dev/prism",
+      "kind": "value",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/ui/index.ts#L26",
+      "imports": [
+        {
+          "path": "@omnitron-dev/prism/ui",
+          "guide": "/docs/frontend/prism/theme"
+        }
+      ]
+    },
+    {
+      "name": "DialogContent",
+      "package": "@omnitron-dev/prism",
+      "kind": "value",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/ui/index.ts#L24",
+      "imports": [
+        {
+          "path": "@omnitron-dev/prism/ui",
+          "guide": "/docs/frontend/prism/theme"
+        }
+      ]
+    },
+    {
+      "name": "DialogContentText",
+      "package": "@omnitron-dev/prism",
+      "kind": "value",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/ui/index.ts#L25",
+      "imports": [
+        {
+          "path": "@omnitron-dev/prism/ui",
+          "guide": "/docs/frontend/prism/theme"
+        }
+      ]
+    },
+    {
+      "name": "DialogTitle",
+      "package": "@omnitron-dev/prism",
+      "kind": "value",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/ui/index.ts#L23",
+      "imports": [
+        {
+          "path": "@omnitron-dev/prism/ui",
+          "guide": "/docs/frontend/prism/theme"
+        }
+      ]
+    },
+    {
       "name": "diffCommand",
       "package": "@omnitron-dev/prism",
       "kind": "function",
@@ -18842,6 +19082,18 @@
       ]
     },
     {
+      "name": "Divider",
+      "package": "@omnitron-dev/prism",
+      "kind": "value",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/ui/index.ts#L20",
+      "imports": [
+        {
+          "path": "@omnitron-dev/prism/ui",
+          "guide": "/docs/frontend/prism/theme"
+        }
+      ]
+    },
+    {
       "name": "DocHeading",
       "package": "@omnitron-dev/prism",
       "kind": "interface",
@@ -18853,6 +19105,10 @@
         },
         {
           "path": "@omnitron-dev/prism/components",
+          "guide": "/docs/frontend/prism/components"
+        },
+        {
+          "path": "@omnitron-dev/prism/components/doc-layout",
           "guide": "/docs/frontend/prism/components"
         }
       ]
@@ -18870,6 +19126,10 @@
         {
           "path": "@omnitron-dev/prism/components",
           "guide": "/docs/frontend/prism/components"
+        },
+        {
+          "path": "@omnitron-dev/prism/components/doc-layout",
+          "guide": "/docs/frontend/prism/components"
         }
       ]
     },
@@ -18885,6 +19145,10 @@
         },
         {
           "path": "@omnitron-dev/prism/components",
+          "guide": "/docs/frontend/prism/components"
+        },
+        {
+          "path": "@omnitron-dev/prism/components/doc-layout",
           "guide": "/docs/frontend/prism/components"
         }
       ]
@@ -18902,6 +19166,10 @@
         {
           "path": "@omnitron-dev/prism/components",
           "guide": "/docs/frontend/prism/components"
+        },
+        {
+          "path": "@omnitron-dev/prism/components/doc-layout",
+          "guide": "/docs/frontend/prism/components"
         }
       ]
     },
@@ -18917,6 +19185,10 @@
         },
         {
           "path": "@omnitron-dev/prism/components",
+          "guide": "/docs/frontend/prism/components"
+        },
+        {
+          "path": "@omnitron-dev/prism/components/doc-layout",
           "guide": "/docs/frontend/prism/components"
         }
       ]
@@ -18962,6 +19234,18 @@
         {
           "path": "@omnitron-dev/prism/components",
           "guide": "/docs/frontend/prism/components"
+        }
+      ]
+    },
+    {
+      "name": "Drawer",
+      "package": "@omnitron-dev/prism",
+      "kind": "value",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/ui/index.ts#L21",
+      "imports": [
+        {
+          "path": "@omnitron-dev/prism/ui",
+          "guide": "/docs/frontend/prism/theme"
         }
       ]
     },
@@ -20970,6 +21254,30 @@
       ]
     },
     {
+      "name": "FormControl",
+      "package": "@omnitron-dev/prism",
+      "kind": "value",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/ui/index.ts#L27",
+      "imports": [
+        {
+          "path": "@omnitron-dev/prism/ui",
+          "guide": "/docs/frontend/prism/theme"
+        }
+      ]
+    },
+    {
+      "name": "FormControlLabel",
+      "package": "@omnitron-dev/prism",
+      "kind": "value",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/ui/index.ts#L28",
+      "imports": [
+        {
+          "path": "@omnitron-dev/prism/ui",
+          "guide": "/docs/frontend/prism/theme"
+        }
+      ]
+    },
+    {
       "name": "FormFieldProps",
       "package": "@omnitron-dev/prism",
       "kind": "interface",
@@ -21002,6 +21310,30 @@
         {
           "path": "@omnitron-dev/prism",
           "guide": "/docs/frontend/prism"
+        }
+      ]
+    },
+    {
+      "name": "FormHelperText",
+      "package": "@omnitron-dev/prism",
+      "kind": "value",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/ui/index.ts#L30",
+      "imports": [
+        {
+          "path": "@omnitron-dev/prism/ui",
+          "guide": "/docs/frontend/prism/theme"
+        }
+      ]
+    },
+    {
+      "name": "FormLabel",
+      "package": "@omnitron-dev/prism",
+      "kind": "value",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/ui/index.ts#L29",
+      "imports": [
+        {
+          "path": "@omnitron-dev/prism/ui",
+          "guide": "/docs/frontend/prism/theme"
         }
       ]
     },
@@ -22441,7 +22773,7 @@
       "name": "IBackendClient",
       "package": "@omnitron-dev/prism",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/netron-browser/src/types/multi-backend.ts#L356",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/netron-browser/src/types/multi-backend.ts#L334",
       "imports": [
         {
           "path": "@omnitron-dev/prism",
@@ -22466,6 +22798,18 @@
         {
           "path": "@omnitron-dev/prism/netron",
           "guide": "/docs/frontend/netron/react"
+        }
+      ]
+    },
+    {
+      "name": "IconButton",
+      "package": "@omnitron-dev/prism",
+      "kind": "value",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/ui/index.ts#L31",
+      "imports": [
+        {
+          "path": "@omnitron-dev/prism/ui",
+          "guide": "/docs/frontend/prism/theme"
         }
       ]
     },
@@ -22593,7 +22937,7 @@
       "name": "IMultiBackendClient",
       "package": "@omnitron-dev/prism",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/netron-browser/src/types/multi-backend.ts#L412",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/netron-browser/src/types/multi-backend.ts#L390",
       "imports": [
         {
           "path": "@omnitron-dev/prism",
@@ -22718,6 +23062,30 @@
         {
           "path": "@omnitron-dev/prism/components/editor",
           "guide": "/docs/frontend/prism/components"
+        }
+      ]
+    },
+    {
+      "name": "InputAdornment",
+      "package": "@omnitron-dev/prism",
+      "kind": "value",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/ui/index.ts#L32",
+      "imports": [
+        {
+          "path": "@omnitron-dev/prism/ui",
+          "guide": "/docs/frontend/prism/theme"
+        }
+      ]
+    },
+    {
+      "name": "InputLabel",
+      "package": "@omnitron-dev/prism",
+      "kind": "value",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/ui/index.ts#L33",
+      "imports": [
+        {
+          "path": "@omnitron-dev/prism/ui",
+          "guide": "/docs/frontend/prism/theme"
         }
       ]
     },
@@ -23750,6 +24118,18 @@
       ]
     },
     {
+      "name": "LinearProgress",
+      "package": "@omnitron-dev/prism",
+      "kind": "value",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/ui/index.ts#L34",
+      "imports": [
+        {
+          "path": "@omnitron-dev/prism/ui",
+          "guide": "/docs/frontend/prism/theme"
+        }
+      ]
+    },
+    {
       "name": "LinearProgressProps",
       "package": "@omnitron-dev/prism",
       "kind": "interface",
@@ -23762,6 +24142,18 @@
         {
           "path": "@omnitron-dev/prism/components",
           "guide": "/docs/frontend/prism/components"
+        }
+      ]
+    },
+    {
+      "name": "Link",
+      "package": "@omnitron-dev/prism",
+      "kind": "value",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/ui/index.ts#L35",
+      "imports": [
+        {
+          "path": "@omnitron-dev/prism/ui",
+          "guide": "/docs/frontend/prism/theme"
         }
       ]
     },
@@ -23790,6 +24182,18 @@
       ]
     },
     {
+      "name": "List",
+      "package": "@omnitron-dev/prism",
+      "kind": "value",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/ui/index.ts#L36",
+      "imports": [
+        {
+          "path": "@omnitron-dev/prism/ui",
+          "guide": "/docs/frontend/prism/theme"
+        }
+      ]
+    },
+    {
       "name": "listCommand",
       "package": "@omnitron-dev/prism",
       "kind": "function",
@@ -23798,6 +24202,42 @@
         {
           "path": "@omnitron-dev/prism/cli",
           "guide": "/docs/frontend/prism/cli"
+        }
+      ]
+    },
+    {
+      "name": "ListItem",
+      "package": "@omnitron-dev/prism",
+      "kind": "value",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/ui/index.ts#L37",
+      "imports": [
+        {
+          "path": "@omnitron-dev/prism/ui",
+          "guide": "/docs/frontend/prism/theme"
+        }
+      ]
+    },
+    {
+      "name": "ListItemButton",
+      "package": "@omnitron-dev/prism",
+      "kind": "value",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/ui/index.ts#L38",
+      "imports": [
+        {
+          "path": "@omnitron-dev/prism/ui",
+          "guide": "/docs/frontend/prism/theme"
+        }
+      ]
+    },
+    {
+      "name": "ListItemText",
+      "package": "@omnitron-dev/prism",
+      "kind": "value",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/ui/index.ts#L39",
+      "imports": [
+        {
+          "path": "@omnitron-dev/prism/ui",
+          "guide": "/docs/frontend/prism/theme"
         }
       ]
     },
@@ -24686,6 +25126,18 @@
         {
           "path": "@omnitron-dev/prism/components",
           "guide": "/docs/frontend/prism/components"
+        }
+      ]
+    },
+    {
+      "name": "MenuItem",
+      "package": "@omnitron-dev/prism",
+      "kind": "value",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/ui/index.ts#L40",
+      "imports": [
+        {
+          "path": "@omnitron-dev/prism/ui",
+          "guide": "/docs/frontend/prism/theme"
         }
       ]
     },
@@ -26337,7 +26789,7 @@
       "name": "parseResearchMarkdown",
       "package": "@omnitron-dev/prism",
       "kind": "function",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/research/parse.ts#L29",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/research/parse.ts#L31",
       "imports": [
         {
           "path": "@omnitron-dev/prism/components/research",
@@ -26714,6 +27166,18 @@
       ]
     },
     {
+      "name": "PrismThemeProvider",
+      "package": "@omnitron-dev/prism",
+      "kind": "value",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/ui/index.ts#L55",
+      "imports": [
+        {
+          "path": "@omnitron-dev/prism/ui",
+          "guide": "/docs/frontend/prism/theme"
+        }
+      ]
+    },
+    {
       "name": "ProgressBar",
       "package": "@omnitron-dev/prism",
       "kind": "function",
@@ -26986,6 +27450,30 @@
       ]
     },
     {
+      "name": "Radio",
+      "package": "@omnitron-dev/prism",
+      "kind": "value",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/ui/index.ts#L41",
+      "imports": [
+        {
+          "path": "@omnitron-dev/prism/ui",
+          "guide": "/docs/frontend/prism/theme"
+        }
+      ]
+    },
+    {
+      "name": "RadioGroup",
+      "package": "@omnitron-dev/prism",
+      "kind": "value",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/ui/index.ts#L42",
+      "imports": [
+        {
+          "path": "@omnitron-dev/prism/ui",
+          "guide": "/docs/frontend/prism/theme"
+        }
+      ]
+    },
+    {
       "name": "RadioOption",
       "package": "@omnitron-dev/prism",
       "kind": "interface",
@@ -27113,7 +27601,7 @@
       "name": "registerTipTapNode",
       "package": "@omnitron-dev/prism",
       "kind": "function",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/tiptap-renderer/tiptap-renderer.tsx#L98",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/tiptap-renderer/tiptap-renderer.tsx#L99",
       "imports": [
         {
           "path": "@omnitron-dev/prism",
@@ -27401,7 +27889,7 @@
       "name": "ResearchDiagnostic",
       "package": "@omnitron-dev/prism",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/research/parse.ts#L15",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/research/parse.ts#L16",
       "imports": [
         {
           "path": "@omnitron-dev/prism/components/research",
@@ -27413,7 +27901,7 @@
       "name": "ResearchDocument",
       "package": "@omnitron-dev/prism",
       "kind": "function",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/research/document.tsx#L111",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/research/document.tsx#L116",
       "imports": [
         {
           "path": "@omnitron-dev/prism/components/research",
@@ -27425,7 +27913,7 @@
       "name": "ResearchDocumentData",
       "package": "@omnitron-dev/prism",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/research/parse.ts#L19",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/research/parse.ts#L20",
       "imports": [
         {
           "path": "@omnitron-dev/prism/components/research",
@@ -27437,7 +27925,7 @@
       "name": "ResearchDocumentProps",
       "package": "@omnitron-dev/prism",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/research/document.tsx#L44",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/research/document.tsx#L47",
       "imports": [
         {
           "path": "@omnitron-dev/prism/components/research",
@@ -27509,7 +27997,7 @@
       "name": "ResearchLabels",
       "package": "@omnitron-dev/prism",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/research/document.tsx#L28",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/research/document.tsx#L29",
       "imports": [
         {
           "path": "@omnitron-dev/prism/components/research",
@@ -27521,7 +28009,7 @@
       "name": "researchLimits",
       "package": "@omnitron-dev/prism",
       "kind": "value",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/research/parse.ts#L25",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/research/parse.ts#L27",
       "imports": [
         {
           "path": "@omnitron-dev/prism/components/research",
@@ -27533,7 +28021,7 @@
       "name": "ResearchSnapshot",
       "package": "@omnitron-dev/prism",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/research-editor/source.ts#L201",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/research-editor/source.ts#L210",
       "imports": [
         {
           "path": "@omnitron-dev/prism/components/research-editor",
@@ -27545,7 +28033,7 @@
       "name": "ResearchWidgets",
       "package": "@omnitron-dev/prism",
       "kind": "type",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/research/document.tsx#L14",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/research/document.tsx#L15",
       "imports": [
         {
           "path": "@omnitron-dev/prism/components/research",
@@ -28174,6 +28662,18 @@
       ]
     },
     {
+      "name": "Select",
+      "package": "@omnitron-dev/prism",
+      "kind": "value",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/ui/index.ts#L43",
+      "imports": [
+        {
+          "path": "@omnitron-dev/prism/ui",
+          "guide": "/docs/frontend/prism/theme"
+        }
+      ]
+    },
+    {
       "name": "SelectOption",
       "package": "@omnitron-dev/prism",
       "kind": "interface",
@@ -28730,6 +29230,18 @@
       ]
     },
     {
+      "name": "Skeleton",
+      "package": "@omnitron-dev/prism",
+      "kind": "value",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/ui/index.ts#L44",
+      "imports": [
+        {
+          "path": "@omnitron-dev/prism/ui",
+          "guide": "/docs/frontend/prism/theme"
+        }
+      ]
+    },
+    {
       "name": "SkeletonProps",
       "package": "@omnitron-dev/prism",
       "kind": "interface",
@@ -28789,6 +29301,30 @@
         },
         {
           "path": "@omnitron-dev/prism/core",
+          "guide": "/docs/frontend/prism/theme"
+        }
+      ]
+    },
+    {
+      "name": "Slider",
+      "package": "@omnitron-dev/prism",
+      "kind": "value",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/ui/index.ts#L45",
+      "imports": [
+        {
+          "path": "@omnitron-dev/prism/ui",
+          "guide": "/docs/frontend/prism/theme"
+        }
+      ]
+    },
+    {
+      "name": "SliderProps",
+      "package": "@omnitron-dev/prism",
+      "kind": "type",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/ui/index.ts#L54",
+      "imports": [
+        {
+          "path": "@omnitron-dev/prism/ui",
           "guide": "/docs/frontend/prism/theme"
         }
       ]
@@ -29061,6 +29597,18 @@
         },
         {
           "path": "@omnitron-dev/prism/core",
+          "guide": "/docs/frontend/prism/theme"
+        }
+      ]
+    },
+    {
+      "name": "Stack",
+      "package": "@omnitron-dev/prism",
+      "kind": "value",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/ui/index.ts#L46",
+      "imports": [
+        {
+          "path": "@omnitron-dev/prism/ui",
           "guide": "/docs/frontend/prism/theme"
         }
       ]
@@ -29510,6 +30058,42 @@
       ]
     },
     {
+      "name": "Switch",
+      "package": "@omnitron-dev/prism",
+      "kind": "value",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/ui/index.ts#L47",
+      "imports": [
+        {
+          "path": "@omnitron-dev/prism/ui",
+          "guide": "/docs/frontend/prism/theme"
+        }
+      ]
+    },
+    {
+      "name": "SxProps",
+      "package": "@omnitron-dev/prism",
+      "kind": "type",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/ui/index.ts#L54",
+      "imports": [
+        {
+          "path": "@omnitron-dev/prism/ui",
+          "guide": "/docs/frontend/prism/theme"
+        }
+      ]
+    },
+    {
+      "name": "Tab",
+      "package": "@omnitron-dev/prism",
+      "kind": "value",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/ui/index.ts#L48",
+      "imports": [
+        {
+          "path": "@omnitron-dev/prism/ui",
+          "guide": "/docs/frontend/prism/theme"
+        }
+      ]
+    },
+    {
       "name": "TabItem",
       "package": "@omnitron-dev/prism",
       "kind": "interface",
@@ -29666,6 +30250,18 @@
       ]
     },
     {
+      "name": "Tabs",
+      "package": "@omnitron-dev/prism",
+      "kind": "value",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/ui/index.ts#L49",
+      "imports": [
+        {
+          "path": "@omnitron-dev/prism/ui",
+          "guide": "/docs/frontend/prism/theme"
+        }
+      ]
+    },
+    {
       "name": "TabsProps",
       "package": "@omnitron-dev/prism",
       "kind": "interface",
@@ -29786,6 +30382,30 @@
       ]
     },
     {
+      "name": "TextField",
+      "package": "@omnitron-dev/prism",
+      "kind": "value",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/ui/index.ts#L50",
+      "imports": [
+        {
+          "path": "@omnitron-dev/prism/ui",
+          "guide": "/docs/frontend/prism/theme"
+        }
+      ]
+    },
+    {
+      "name": "TextFieldProps",
+      "package": "@omnitron-dev/prism",
+      "kind": "type",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/ui/index.ts#L54",
+      "imports": [
+        {
+          "path": "@omnitron-dev/prism/ui",
+          "guide": "/docs/frontend/prism/theme"
+        }
+      ]
+    },
+    {
       "name": "TextPalette",
       "package": "@omnitron-dev/prism",
       "kind": "interface",
@@ -29830,6 +30450,18 @@
         {
           "path": "@omnitron-dev/prism/components/editor",
           "guide": "/docs/frontend/prism/components"
+        }
+      ]
+    },
+    {
+      "name": "Theme",
+      "package": "@omnitron-dev/prism",
+      "kind": "type",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/ui/index.ts#L54",
+      "imports": [
+        {
+          "path": "@omnitron-dev/prism/ui",
+          "guide": "/docs/frontend/prism/theme"
         }
       ]
     },
@@ -29989,7 +30621,7 @@
       "name": "TipTapDoc",
       "package": "@omnitron-dev/prism",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/tiptap-renderer/tiptap-renderer.tsx#L86",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/tiptap-renderer/tiptap-renderer.tsx#L87",
       "imports": [
         {
           "path": "@omnitron-dev/prism",
@@ -30005,7 +30637,7 @@
       "name": "TipTapMark",
       "package": "@omnitron-dev/prism",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/tiptap-renderer/tiptap-renderer.tsx#L73",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/tiptap-renderer/tiptap-renderer.tsx#L74",
       "imports": [
         {
           "path": "@omnitron-dev/prism",
@@ -30021,7 +30653,7 @@
       "name": "TipTapNode",
       "package": "@omnitron-dev/prism",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/tiptap-renderer/tiptap-renderer.tsx#L78",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/tiptap-renderer/tiptap-renderer.tsx#L79",
       "imports": [
         {
           "path": "@omnitron-dev/prism",
@@ -30037,7 +30669,7 @@
       "name": "TipTapRenderer",
       "package": "@omnitron-dev/prism",
       "kind": "function",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/tiptap-renderer/tiptap-renderer.tsx#L553",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/tiptap-renderer/tiptap-renderer.tsx#L555",
       "imports": [
         {
           "path": "@omnitron-dev/prism",
@@ -30053,7 +30685,7 @@
       "name": "TipTapRendererProps",
       "package": "@omnitron-dev/prism",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/tiptap-renderer/tiptap-renderer.tsx#L535",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/tiptap-renderer/tiptap-renderer.tsx#L537",
       "imports": [
         {
           "path": "@omnitron-dev/prism",
@@ -30202,6 +30834,18 @@
         {
           "path": "@omnitron-dev/prism/components",
           "guide": "/docs/frontend/prism/components"
+        }
+      ]
+    },
+    {
+      "name": "Tooltip",
+      "package": "@omnitron-dev/prism",
+      "kind": "value",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/ui/index.ts#L51",
+      "imports": [
+        {
+          "path": "@omnitron-dev/prism/ui",
+          "guide": "/docs/frontend/prism/theme"
         }
       ]
     },
@@ -30406,6 +31050,18 @@
       ]
     },
     {
+      "name": "Typography",
+      "package": "@omnitron-dev/prism",
+      "kind": "value",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/ui/index.ts#L52",
+      "imports": [
+        {
+          "path": "@omnitron-dev/prism/ui",
+          "guide": "/docs/frontend/prism/theme"
+        }
+      ]
+    },
+    {
       "name": "UIState",
       "package": "@omnitron-dev/prism",
       "kind": "interface",
@@ -30569,7 +31225,7 @@
       "name": "useAllBackendsConnected",
       "package": "@omnitron-dev/prism",
       "kind": "function",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/netron-react/src/multi-backend/hooks.ts#L409",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/netron-react/src/multi-backend/hooks.ts#L411",
       "imports": [
         {
           "path": "@omnitron-dev/prism",
@@ -30585,7 +31241,7 @@
       "name": "useAnyBackendConnected",
       "package": "@omnitron-dev/prism",
       "kind": "function",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/netron-react/src/multi-backend/hooks.ts#L423",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/netron-react/src/multi-backend/hooks.ts#L425",
       "imports": [
         {
           "path": "@omnitron-dev/prism",
@@ -30789,7 +31445,7 @@
       "name": "useBackendConnectionState",
       "package": "@omnitron-dev/prism",
       "kind": "function",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/netron-react/src/multi-backend/hooks.ts#L376",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/netron-react/src/multi-backend/hooks.ts#L378",
       "imports": [
         {
           "path": "@omnitron-dev/prism",
@@ -30805,7 +31461,7 @@
       "name": "useBackendMutation",
       "package": "@omnitron-dev/prism",
       "kind": "function",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/netron-react/src/multi-backend/hooks.ts#L331",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/netron-react/src/multi-backend/hooks.ts#L333",
       "imports": [
         {
           "path": "@omnitron-dev/prism",
@@ -30821,7 +31477,7 @@
       "name": "useBackendQuery",
       "package": "@omnitron-dev/prism",
       "kind": "function",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/netron-react/src/multi-backend/hooks.ts#L268",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/netron-react/src/multi-backend/hooks.ts#L269",
       "imports": [
         {
           "path": "@omnitron-dev/prism",
@@ -32138,6 +32794,18 @@
       ]
     },
     {
+      "name": "useMediaQuery",
+      "package": "@omnitron-dev/prism",
+      "kind": "value",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/ui/index.ts#L56",
+      "imports": [
+        {
+          "path": "@omnitron-dev/prism/ui",
+          "guide": "/docs/frontend/prism/theme"
+        }
+      ]
+    },
+    {
       "name": "useMenu",
       "package": "@omnitron-dev/prism",
       "kind": "function",
@@ -33242,6 +33910,18 @@
       ]
     },
     {
+      "name": "useTheme",
+      "package": "@omnitron-dev/prism",
+      "kind": "value",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/ui/index.ts#L55",
+      "imports": [
+        {
+          "path": "@omnitron-dev/prism/ui",
+          "guide": "/docs/frontend/prism/theme"
+        }
+      ]
+    },
+    {
       "name": "useThemeStore",
       "package": "@omnitron-dev/prism",
       "kind": "value",
@@ -33729,7 +34409,7 @@
       "name": "WebSocketClient",
       "package": "@omnitron-dev/prism",
       "kind": "class",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/netron-browser/src/client/ws-client.ts#L173",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/netron-browser/src/client/ws-client.ts#L174",
       "imports": [
         {
           "path": "@omnitron-dev/prism",
@@ -40406,6 +41086,18 @@
       ]
     },
     {
+      "name": "getCurrentRLSAuthContext",
+      "package": "@omnitron-dev/titan",
+      "kind": "function",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan/src/netron/auth/rls-bridge.ts#L150",
+      "imports": [
+        {
+          "path": "@omnitron-dev/titan/netron/auth",
+          "guide": "/docs/titan/netron/authentication"
+        }
+      ]
+    },
+    {
       "name": "getCustomMetadata",
       "package": "@omnitron-dev/titan",
       "kind": "function",
@@ -40786,6 +41478,18 @@
       ]
     },
     {
+      "name": "HttpAuthSecurity",
+      "package": "@omnitron-dev/titan",
+      "kind": "interface",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan/src/netron/auth/types.ts#L326",
+      "imports": [
+        {
+          "path": "@omnitron-dev/titan/netron/auth",
+          "guide": "/docs/titan/netron/authentication"
+        }
+      ]
+    },
+    {
       "name": "HttpBatchRequest",
       "package": "@omnitron-dev/titan",
       "kind": "interface",
@@ -40933,7 +41637,7 @@
       "name": "HttpNativeServer",
       "package": "@omnitron-dev/titan",
       "kind": "class",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan/src/netron/transport/http/server.ts#L292",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan/src/netron/transport/http/server.ts#L294",
       "imports": [
         {
           "path": "@omnitron-dev/titan/netron/transport/http",
@@ -41053,7 +41757,7 @@
       "name": "HttpTrafficSnapshot",
       "package": "@omnitron-dev/titan",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan/src/netron/transport/http/server.ts#L50",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan/src/netron/transport/http/server.ts#L52",
       "imports": [
         {
           "path": "@omnitron-dev/titan/netron/transport/http",

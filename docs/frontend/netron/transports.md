@@ -39,20 +39,49 @@ const client = createClient({
 });
 ```
 
-| Feature | Behaviour |
-| ------- | --------- |
-| **Request batching** | Concurrent calls in the same tick coalesce into one HTTP POST when the server supports it |
-| **Caching** | Server's `Cache-Control` honoured by the LRU cache |
-| **Retry** | `network` / `5xx` failures retry with exponential backoff |
-| **Compression** | `Accept-Encoding: gzip, br` automatic |
-| **Idempotency keys** | Generated for mutating retries (no double-send) |
-| **CORS** | Standard browser CORS; server must allow your origin |
+### Invocation lifetime and replay
 
-### Sample HTTP wire format
+```typescript
+const controller = new AbortController();
+const result = await client.invoke('Catalog', 'list', [], {
+  signal: controller.signal,
+  timeout: 10_000,
+  idempotent: true,
+});
+```
 
-POST to `/<endpoint>` with msgpack body containing
-`{service, method, args, ctx}`. Response is `{result}` or
-`{error}` with a typed shape — see [Error handling](./errors.md).
+`signal` is local control state, never part of the wire payload. Cancellation
+rejects with `signal.reason`. The deadline covers transport attempts, backoff,
+response-body decoding and response middleware. A response whose headers arrive
+before the deadline can still time out while its body is being read.
+Cancellation and deadline expiry do not trigger network retry or auth refresh.
+Aborting the caller does not roll back an operation already accepted by the server.
+
+Network retries require **both** client `http.retry: true` and invocation
+`idempotent: true`. The second option is the caller's assertion about the operation,
+not an idempotency key or a server deduplication guarantee. Do not set it for a
+write merely because a failed connection returned no answer. Use a domain
+operation ID with server-side replay semantics when a write must be retried.
+The direct HTTP client does not infer this property from a method name.
+
+Query hooks forward TanStack Query's cancellation signal. A component unmount does
+not automatically cancel a mutation: its server-side outcome may already be committed.
+
+### HTTP wire format
+
+The direct browser transport posts JSON to `/netron/invoke`:
+
+```json
+{"id":"request-id","service":"Catalog","method":"list","args":[]}
+```
+
+A successful reply contains the same `id`, `success: true`, and `data`.
+A failed invocation contains `success: false` and a structured `error`. Titan may
+also reject a request before RPC admission with an HTTP transport error. The
+client distinguishes that refusal from a successful RPC envelope. A mismatched
+ID, malformed envelope or an HTTP failure carrying an RPC success is rejected.
+Application payloads still require their own runtime schemas; a TypeScript
+return type cannot validate bytes received over the network.
 
 ### When HTTP loses
 

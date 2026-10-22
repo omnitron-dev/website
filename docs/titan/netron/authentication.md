@@ -213,6 +213,49 @@ class OrdersService {
 Use `inherit` / `override` flags in `AuthConfig` to control
 combination semantics for fine-grained cases.
 
+## Install HTTP authority before listening
+
+Configure native authentication and cookie security before starting the HTTP
+transport. Do not reach into a transport's private middleware pipeline from an
+`afterStart` hook: the socket can already accept requests at that point.
+
+```typescript
+import { CookieTokenTransport, CsrfManager } from '@omnitron-dev/titan/netron/auth';
+
+const csrf = new CsrfManager({
+  headerName: 'X-CSRF-Token',
+  cookie: { name: 'app_csrf', path: '/', secure: true, sameSite: 'Lax' },
+});
+netron.configureAuth(authenticationManager, authorizationManager, {
+  tokenTransport: new CookieTokenTransport({
+    accessCookie: { name: 'app_session', path: '/', httpOnly: true, secure: true, sameSite: 'Lax' },
+    csrf,
+  }),
+  httpSecurity: {
+    origin: { allowedOrigins: ['https://app.example'], alwaysEnforce: true },
+    csrf: { csrf, accessCookieName: 'app_session', exempt: ['Auth.login'] },
+  },
+});
+```
+
+The HTTP server installs these gates during peer binding, before `listen`, for
+both single and batch invocations. Configuring HTTP security after transport
+startup is rejected. Exempting an initial login from double-submit CSRF does not
+exempt it from the Origin gate.
+
+The credential verifier can resolve an opaque session against a database; a JWT
+is not required. Disable the authentication token cache if role/session revocation
+must affect the very next request and there is no explicit cache-invalidation
+protocol. Sensitive state transitions should recheck session ownership inside
+the same transaction that changes the credential.
+
+`issueTokens` and `clearTokens` publish cookies through the native request scope.
+Never accept token-issuance metadata or `authContext` from a client. The HTTP
+transport reconstructs authority from the verified credential. A service using
+`withAuthRLSContext` can read the current server scope through
+`getCurrentRLSAuthContext()`; anonymous invocations must receive their own empty
+scope rather than inherit an enclosing actor.
+
 ## Failure semantics
 
 The Netron enforcement path throws a plain `TitanError` carrying an
