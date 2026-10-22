@@ -537,7 +537,7 @@
       "name": "aix",
       "package": "@omnitron-dev/common",
       "kind": "value",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/common/src/predicates.ts#L46",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/common/src/predicates.ts#L54",
       "imports": [
         {
           "path": "@omnitron-dev/common",
@@ -621,7 +621,7 @@
       "name": "darwin",
       "package": "@omnitron-dev/common",
       "kind": "value",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/common/src/predicates.ts#L42",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/common/src/predicates.ts#L50",
       "imports": [
         {
           "path": "@omnitron-dev/common",
@@ -801,7 +801,7 @@
       "name": "freebsd",
       "package": "@omnitron-dev/common",
       "kind": "value",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/common/src/predicates.ts#L38",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/common/src/predicates.ts#L46",
       "imports": [
         {
           "path": "@omnitron-dev/common",
@@ -849,7 +849,7 @@
       "name": "isArray",
       "package": "@omnitron-dev/common",
       "kind": "value",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/common/src/predicates.ts#L53",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/common/src/predicates.ts#L61",
       "imports": [
         {
           "path": "@omnitron-dev/common",
@@ -861,7 +861,7 @@
       "name": "isArrayBuffer",
       "package": "@omnitron-dev/common",
       "kind": "value",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/common/src/predicates.ts#L270",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/common/src/predicates.ts#L278",
       "imports": [
         {
           "path": "@omnitron-dev/common",
@@ -873,7 +873,7 @@
       "name": "isArrayBufferView",
       "package": "@omnitron-dev/common",
       "kind": "value",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/common/src/predicates.ts#L273",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/common/src/predicates.ts#L281",
       "imports": [
         {
           "path": "@omnitron-dev/common",
@@ -885,7 +885,7 @@
       "name": "isAsyncFunction",
       "package": "@omnitron-dev/common",
       "kind": "value",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/common/src/predicates.ts#L322",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/common/src/predicates.ts#L330",
       "imports": [
         {
           "path": "@omnitron-dev/common",
@@ -897,7 +897,7 @@
       "name": "isAsyncGenerator",
       "package": "@omnitron-dev/common",
       "kind": "value",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/common/src/predicates.ts#L336",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/common/src/predicates.ts#L344",
       "imports": [
         {
           "path": "@omnitron-dev/common",
@@ -909,7 +909,7 @@
       "name": "isBigInt",
       "package": "@omnitron-dev/common",
       "kind": "value",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/common/src/predicates.ts#L162",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/common/src/predicates.ts#L170",
       "imports": [
         {
           "path": "@omnitron-dev/common",
@@ -921,7 +921,7 @@
       "name": "isBoolean",
       "package": "@omnitron-dev/common",
       "kind": "value",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/common/src/predicates.ts#L267",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/common/src/predicates.ts#L275",
       "imports": [
         {
           "path": "@omnitron-dev/common",
@@ -933,7 +933,7 @@
       "name": "isBuffer",
       "package": "@omnitron-dev/common",
       "kind": "value",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/common/src/predicates.ts#L65",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/common/src/predicates.ts#L73",
       "imports": [
         {
           "path": "@omnitron-dev/common",
@@ -945,7 +945,7 @@
       "name": "isClass",
       "package": "@omnitron-dev/common",
       "kind": "value",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/common/src/predicates.ts#L111",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/common/src/predicates.ts#L119",
       "imports": [
         {
           "path": "@omnitron-dev/common",
@@ -957,7 +957,7 @@
       "name": "isDate",
       "package": "@omnitron-dev/common",
       "kind": "value",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/common/src/predicates.ts#L276",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/common/src/predicates.ts#L284",
       "imports": [
         {
           "path": "@omnitron-dev/common",
@@ -969,7 +969,7 @@
       "name": "isEmptyObject",
       "package": "@omnitron-dev/common",
       "kind": "value",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/common/src/predicates.ts#L301",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/common/src/predicates.ts#L309",
       "imports": [
         {
           "path": "@omnitron-dev/common",
@@ -981,7 +981,7 @@
       "name": "isEmptyString",
       "package": "@omnitron-dev/common",
       "kind": "value",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/common/src/predicates.ts#L137",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/common/src/predicates.ts#L145",
       "imports": [
         {
           "path": "@omnitron-dev/common",
@@ -993,7 +993,7 @@
       "name": "isError",
       "package": "@omnitron-dev/common",
       "kind": "value",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/common/src/predicates.ts#L279",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/common/src/predicates.ts#L287",
       "imports": [
         {
           "path": "@omnitron-dev/common",
@@ -1005,7 +1005,7 @@
       "name": "isEven",
       "package": "@omnitron-dev/common",
       "kind": "value",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/common/src/predicates.ts#L197",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/common/src/predicates.ts#L205",
       "imports": [
         {
           "path": "@omnitron-dev/common",
@@ -1017,7 +1017,7 @@
       "name": "isExist",
       "package": "@omnitron-dev/common",
       "kind": "value",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/common/src/predicates.ts#L131",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/common/src/predicates.ts#L139",
       "imports": [
         {
           "path": "@omnitron-dev/common",
@@ -1029,7 +1029,7 @@
       "name": "isFinite",
       "package": "@omnitron-dev/common",
       "kind": "value",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/common/src/predicates.ts#L122",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/common/src/predicates.ts#L130",
       "imports": [
         {
           "path": "@omnitron-dev/common",
@@ -1041,7 +1041,7 @@
       "name": "isFloat",
       "package": "@omnitron-dev/common",
       "kind": "value",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/common/src/predicates.ts#L200",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/common/src/predicates.ts#L208",
       "imports": [
         {
           "path": "@omnitron-dev/common",
@@ -1053,7 +1053,7 @@
       "name": "isFunction",
       "package": "@omnitron-dev/common",
       "kind": "value",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/common/src/predicates.ts#L56",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/common/src/predicates.ts#L64",
       "imports": [
         {
           "path": "@omnitron-dev/common",
@@ -1089,7 +1089,7 @@
       "name": "isInfinite",
       "package": "@omnitron-dev/common",
       "kind": "value",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/common/src/predicates.ts#L191",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/common/src/predicates.ts#L199",
       "imports": [
         {
           "path": "@omnitron-dev/common",
@@ -1101,7 +1101,7 @@
       "name": "isInteger",
       "package": "@omnitron-dev/common",
       "kind": "value",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/common/src/predicates.ts#L125",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/common/src/predicates.ts#L133",
       "imports": [
         {
           "path": "@omnitron-dev/common",
@@ -1137,7 +1137,7 @@
       "name": "isMap",
       "package": "@omnitron-dev/common",
       "kind": "value",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/common/src/predicates.ts#L282",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/common/src/predicates.ts#L290",
       "imports": [
         {
           "path": "@omnitron-dev/common",
@@ -1149,7 +1149,7 @@
       "name": "isNan",
       "package": "@omnitron-dev/common",
       "kind": "value",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/common/src/predicates.ts#L119",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/common/src/predicates.ts#L127",
       "imports": [
         {
           "path": "@omnitron-dev/common",
@@ -1173,7 +1173,7 @@
       "name": "isNegativeZero",
       "package": "@omnitron-dev/common",
       "kind": "value",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/common/src/predicates.ts#L203",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/common/src/predicates.ts#L211",
       "imports": [
         {
           "path": "@omnitron-dev/common",
@@ -1185,7 +1185,7 @@
       "name": "isNil",
       "package": "@omnitron-dev/common",
       "kind": "value",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/common/src/predicates.ts#L134",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/common/src/predicates.ts#L142",
       "imports": [
         {
           "path": "@omnitron-dev/common",
@@ -1197,7 +1197,7 @@
       "name": "isNodejs",
       "package": "@omnitron-dev/common",
       "kind": "value",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/common/src/predicates.ts#L49",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/common/src/predicates.ts#L57",
       "imports": [
         {
           "path": "@omnitron-dev/common",
@@ -1209,7 +1209,7 @@
       "name": "isNull",
       "package": "@omnitron-dev/common",
       "kind": "value",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/common/src/predicates.ts#L105",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/common/src/predicates.ts#L113",
       "imports": [
         {
           "path": "@omnitron-dev/common",
@@ -1221,7 +1221,7 @@
       "name": "isNumber",
       "package": "@omnitron-dev/common",
       "kind": "value",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/common/src/predicates.ts#L62",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/common/src/predicates.ts#L70",
       "imports": [
         {
           "path": "@omnitron-dev/common",
@@ -1233,7 +1233,7 @@
       "name": "isNumeral",
       "package": "@omnitron-dev/common",
       "kind": "value",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/common/src/predicates.ts#L142",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/common/src/predicates.ts#L150",
       "imports": [
         {
           "path": "@omnitron-dev/common",
@@ -1245,7 +1245,7 @@
       "name": "isNumeralBigInt",
       "package": "@omnitron-dev/common",
       "kind": "value",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/common/src/predicates.ts#L165",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/common/src/predicates.ts#L173",
       "imports": [
         {
           "path": "@omnitron-dev/common",
@@ -1257,7 +1257,7 @@
       "name": "isNumeralInteger",
       "package": "@omnitron-dev/common",
       "kind": "value",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/common/src/predicates.ts#L171",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/common/src/predicates.ts#L179",
       "imports": [
         {
           "path": "@omnitron-dev/common",
@@ -1269,7 +1269,7 @@
       "name": "isObject",
       "package": "@omnitron-dev/common",
       "kind": "value",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/common/src/predicates.ts#L298",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/common/src/predicates.ts#L306",
       "imports": [
         {
           "path": "@omnitron-dev/common",
@@ -1281,7 +1281,7 @@
       "name": "isOdd",
       "package": "@omnitron-dev/common",
       "kind": "value",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/common/src/predicates.ts#L194",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/common/src/predicates.ts#L202",
       "imports": [
         {
           "path": "@omnitron-dev/common",
@@ -1293,7 +1293,7 @@
       "name": "isPlainObject",
       "package": "@omnitron-dev/common",
       "kind": "value",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/common/src/predicates.ts#L71",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/common/src/predicates.ts#L79",
       "imports": [
         {
           "path": "@omnitron-dev/common",
@@ -1317,7 +1317,7 @@
       "name": "isPrefix",
       "package": "@omnitron-dev/common",
       "kind": "value",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/common/src/predicates.ts#L255",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/common/src/predicates.ts#L263",
       "imports": [
         {
           "path": "@omnitron-dev/common",
@@ -1329,7 +1329,7 @@
       "name": "isPrimitive",
       "package": "@omnitron-dev/common",
       "kind": "value",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/common/src/predicates.ts#L294",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/common/src/predicates.ts#L302",
       "imports": [
         {
           "path": "@omnitron-dev/common",
@@ -1341,7 +1341,7 @@
       "name": "isPromise",
       "package": "@omnitron-dev/common",
       "kind": "value",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/common/src/predicates.ts#L347",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/common/src/predicates.ts#L355",
       "imports": [
         {
           "path": "@omnitron-dev/common",
@@ -1353,7 +1353,7 @@
       "name": "isPropertyDefined",
       "package": "@omnitron-dev/common",
       "kind": "value",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/common/src/predicates.ts#L304",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/common/src/predicates.ts#L312",
       "imports": [
         {
           "path": "@omnitron-dev/common",
@@ -1365,7 +1365,7 @@
       "name": "isPropertyOwned",
       "package": "@omnitron-dev/common",
       "kind": "value",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/common/src/predicates.ts#L102",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/common/src/predicates.ts#L110",
       "imports": [
         {
           "path": "@omnitron-dev/common",
@@ -1377,7 +1377,7 @@
       "name": "isRegexp",
       "package": "@omnitron-dev/common",
       "kind": "value",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/common/src/predicates.ts#L285",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/common/src/predicates.ts#L293",
       "imports": [
         {
           "path": "@omnitron-dev/common",
@@ -1389,7 +1389,7 @@
       "name": "isSafeInteger",
       "package": "@omnitron-dev/common",
       "kind": "value",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/common/src/predicates.ts#L128",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/common/src/predicates.ts#L136",
       "imports": [
         {
           "path": "@omnitron-dev/common",
@@ -1401,7 +1401,7 @@
       "name": "isSet",
       "package": "@omnitron-dev/common",
       "kind": "value",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/common/src/predicates.ts#L288",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/common/src/predicates.ts#L296",
       "imports": [
         {
           "path": "@omnitron-dev/common",
@@ -1413,7 +1413,7 @@
       "name": "isString",
       "package": "@omnitron-dev/common",
       "kind": "value",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/common/src/predicates.ts#L59",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/common/src/predicates.ts#L67",
       "imports": [
         {
           "path": "@omnitron-dev/common",
@@ -1425,7 +1425,7 @@
       "name": "isSubstring",
       "package": "@omnitron-dev/common",
       "kind": "value",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/common/src/predicates.ts#L206",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/common/src/predicates.ts#L214",
       "imports": [
         {
           "path": "@omnitron-dev/common",
@@ -1437,7 +1437,7 @@
       "name": "isSuffix",
       "package": "@omnitron-dev/common",
       "kind": "value",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/common/src/predicates.ts#L261",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/common/src/predicates.ts#L269",
       "imports": [
         {
           "path": "@omnitron-dev/common",
@@ -1449,7 +1449,7 @@
       "name": "isSymbol",
       "package": "@omnitron-dev/common",
       "kind": "value",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/common/src/predicates.ts#L291",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/common/src/predicates.ts#L299",
       "imports": [
         {
           "path": "@omnitron-dev/common",
@@ -1461,7 +1461,7 @@
       "name": "isUndefined",
       "package": "@omnitron-dev/common",
       "kind": "value",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/common/src/predicates.ts#L108",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/common/src/predicates.ts#L116",
       "imports": [
         {
           "path": "@omnitron-dev/common",
@@ -1485,7 +1485,7 @@
       "name": "isWindows",
       "package": "@omnitron-dev/common",
       "kind": "value",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/common/src/predicates.ts#L34",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/common/src/predicates.ts#L42",
       "imports": [
         {
           "path": "@omnitron-dev/common",
@@ -1545,7 +1545,7 @@
       "name": "linux",
       "package": "@omnitron-dev/common",
       "kind": "value",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/common/src/predicates.ts#L36",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/common/src/predicates.ts#L44",
       "imports": [
         {
           "path": "@omnitron-dev/common",
@@ -1653,7 +1653,7 @@
       "name": "openbsd",
       "package": "@omnitron-dev/common",
       "kind": "value",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/common/src/predicates.ts#L40",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/common/src/predicates.ts#L48",
       "imports": [
         {
           "path": "@omnitron-dev/common",
@@ -1845,7 +1845,7 @@
       "name": "sunos",
       "package": "@omnitron-dev/common",
       "kind": "value",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/common/src/predicates.ts#L44",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/common/src/predicates.ts#L52",
       "imports": [
         {
           "path": "@omnitron-dev/common",
@@ -37525,7 +37525,19 @@
       "name": "AuthenticationManager",
       "package": "@omnitron-dev/titan",
       "kind": "class",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan/src/netron/auth/authentication-manager.ts#L34",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan/src/netron/auth/authentication-manager.ts#L53",
+      "imports": [
+        {
+          "path": "@omnitron-dev/titan/netron/auth",
+          "guide": "/docs/titan/netron/authentication"
+        }
+      ]
+    },
+    {
+      "name": "AuthenticationUnavailableError",
+      "package": "@omnitron-dev/titan",
+      "kind": "class",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan/src/netron/auth/authentication-manager.ts#L22",
       "imports": [
         {
           "path": "@omnitron-dev/titan/netron/auth",
@@ -41637,7 +41649,7 @@
       "name": "HttpNativeServer",
       "package": "@omnitron-dev/titan",
       "kind": "class",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan/src/netron/transport/http/server.ts#L294",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan/src/netron/transport/http/server.ts#L295",
       "imports": [
         {
           "path": "@omnitron-dev/titan/netron/transport/http",
@@ -41757,7 +41769,7 @@
       "name": "HttpTrafficSnapshot",
       "package": "@omnitron-dev/titan",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan/src/netron/transport/http/server.ts#L52",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan/src/netron/transport/http/server.ts#L53",
       "imports": [
         {
           "path": "@omnitron-dev/titan/netron/transport/http",

@@ -256,6 +256,35 @@ transport reconstructs authority from the verified credential. A service using
 `getCurrentRLSAuthContext()`; anonymous invocations must receive their own empty
 scope rather than inherit an enclosing actor.
 
+## Verification failure versus service failure
+
+A rejected credential and an unavailable credential verifier have different
+meanings. Return the ordinary invalid-credential outcome for a token that the
+verifier successfully checked and refused. Throw `AuthenticationUnavailableError`
+for a database, identity-provider or equivalent verification infrastructure failure.
+The native authentication timeout uses the same unavailable result.
+
+```typescript
+import { AuthenticationUnavailableError } from '@omnitron-dev/titan/netron/auth';
+
+async function validateToken(token: string) {
+  let session;
+  try { session = await sessions.resolve(token); }
+  catch (cause) {
+    throw new AuthenticationUnavailableError(cause instanceof Error ? cause : undefined);
+  }
+  if (!session) throw new Error('invalid_session');
+  return session.authContext;
+}
+```
+
+An unavailable verifier returns HTTP 503 with stable error code
+`authentication_unavailable`; it does not execute an anonymous handler or clear
+cookies. This distinction is preserved in single requests and both sequential
+and parallel batches. It lets an editor retain its draft during an outage without
+granting authority from a cached browser identity. The public response omits the
+underlying database/provider error.
+
 ## Failure semantics
 
 The Netron enforcement path throws a plain `TitanError` carrying an
