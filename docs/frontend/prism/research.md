@@ -123,3 +123,14 @@ This is notation editing. It does not establish mathematical equivalence,
 validate a proof or grant a certificate; those operations belong to the host's
 verification service. Length limits do not establish a time bound for arbitrary
 LaTeX or trusted user-defined macros.
+
+### Observation badges in knowledge graphs
+
+`KnowledgeEntity` and `KnowledgeRelation` accept optional `badges: readonly KnowledgeBadge[]`.
+Each badge has a `label` and an optional MUI `tone` (`default`, `info`, `success`, `warning`, `error`).
+The canvas and index render the same wrapping MUI chips; badge text participates in index search.
+Updating observations preserves object identity, selection and the incidence structure.
+
+Badges are host-supplied observations. Prism does not infer proof validity or dependency currency
+from a colour, a relation or a successful layout. Keep independent dimensions separate, for example
+`Judgment verified` and `Review dependencies`, and retain the exact observation identity in the inspector.
