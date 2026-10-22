@@ -24974,7 +24974,7 @@
       "name": "MathInput",
       "package": "@omnitron-dev/prism",
       "kind": "function",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/research-editor/math-input.tsx#L61",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/research-editor/math-input.tsx#L63",
       "imports": [
         {
           "path": "@omnitron-dev/prism/components/research-editor",
