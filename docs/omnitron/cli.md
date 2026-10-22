@@ -498,9 +498,25 @@ targets that may or may not run a daemon.
 | `--ssh-user <user>` | — | `root` |
 | `--ssh-auth <method>` | — | `key` (or `password`) |
 | `--ssh-key <path>` | — | — |
+| `--ssh-secret-stdin` | — | Hidden terminal prompt, or read from a pipe |
 | `--runtime <node|bun>` | — | `node` |
 | `--daemon-port <port>` | — | `9700` |
 | `--tags <a,b,c>` | — | — |
+
+With `--ssh-secret-stdin`, an interactive terminal displays a masked prompt: **Enter**
+submits the password or key passphrase, and **Ctrl+C** cancels without changing the node.
+A pipe is read until EOF; one final LF/CRLF is removed, while spaces are preserved.
+Input is limited to 64 KiB. Secrets are never command-line arguments.
+
+```bash
+omnitron node add --name production --host server.example.org \
+  --ssh-key ~/.ssh/id_ed25519 --ssh-secret-stdin
+omnitron node update production --ssh-secret-stdin
+```
+
+On `node update`, the secret belongs to the node's registered authentication method unless
+`--ssh-auth` explicitly changes it. Thus an existing key-authenticated node receives a key
+passphrase without needing to repeat `--ssh-auth key`.
 
 ## Webapp (console UI)
 
