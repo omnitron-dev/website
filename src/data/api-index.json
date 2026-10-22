@@ -22630,7 +22630,7 @@
       "name": "HeaderToolbar",
       "package": "@omnitron-dev/prism",
       "kind": "function",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/layouts/core/header-section.tsx#L307",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/layouts/core/header-section.tsx#L308",
       "imports": [
         {
           "path": "@omnitron-dev/prism",
@@ -22646,7 +22646,7 @@
       "name": "HeaderToolbarProps",
       "package": "@omnitron-dev/prism",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/layouts/core/header-section.tsx#L296",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/layouts/core/header-section.tsx#L297",
       "imports": [
         {
           "path": "@omnitron-dev/prism",
