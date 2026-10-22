@@ -12,7 +12,7 @@ shows a representative example, and notes accessibility &
 integration concerns.
 
 For full-page composites see [Blocks](./blocks.md); for layouts
-see [Layouts](./layouts.md).
+see [Layouts](./layouts.md). For scientific documents, block editing and typed knowledge graphs, see [Research workspaces](./research.md).
 
 ## Status & feedback
 
