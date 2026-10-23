@@ -265,6 +265,10 @@
       "guide": "/docs/frontend/prism/http"
     },
     {
+      "path": "@omnitron-dev/prism/icons",
+      "guide": "/docs/frontend/prism/theme"
+    },
+    {
       "path": "@omnitron-dev/prism/layouts",
       "guide": "/docs/frontend/prism/layouts"
     },
@@ -14067,6 +14071,18 @@
       ]
     },
     {
+      "name": "AddIcon",
+      "package": "@omnitron-dev/prism",
+      "kind": "value",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/icons/controls.tsx#L31",
+      "imports": [
+        {
+          "path": "@omnitron-dev/prism/icons",
+          "guide": "/docs/frontend/prism/theme"
+        }
+      ]
+    },
+    {
       "name": "addMonths",
       "package": "@omnitron-dev/prism",
       "kind": "function",
@@ -14082,7 +14098,7 @@
       "name": "AdminDataTable",
       "package": "@omnitron-dev/prism",
       "kind": "function",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/admin-filters/admin-data-table.tsx#L287",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/admin-filters/admin-data-table.tsx#L269",
       "imports": [
         {
           "path": "@omnitron-dev/prism",
@@ -14098,7 +14114,7 @@
       "name": "AdminDataTableProps",
       "package": "@omnitron-dev/prism",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/admin-filters/admin-data-table.tsx#L51",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/admin-filters/admin-data-table.tsx#L53",
       "imports": [
         {
           "path": "@omnitron-dev/prism",
@@ -14190,7 +14206,7 @@
       "name": "AlignCenterIcon",
       "package": "@omnitron-dev/prism",
       "kind": "value",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/editor/icons/index.tsx#L251",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/editor/icons/index.tsx#L604",
       "imports": [
         {
           "path": "@omnitron-dev/prism/components/editor",
@@ -14202,7 +14218,7 @@
       "name": "AlignJustifyIcon",
       "package": "@omnitron-dev/prism",
       "kind": "value",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/editor/icons/index.tsx#L269",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/editor/icons/index.tsx#L608",
       "imports": [
         {
           "path": "@omnitron-dev/prism/components/editor",
@@ -14214,7 +14230,7 @@
       "name": "AlignLeftIcon",
       "package": "@omnitron-dev/prism",
       "kind": "value",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/editor/icons/index.tsx#L242",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/editor/icons/index.tsx#L602",
       "imports": [
         {
           "path": "@omnitron-dev/prism/components/editor",
@@ -14226,7 +14242,7 @@
       "name": "AlignRightIcon",
       "package": "@omnitron-dev/prism",
       "kind": "value",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/editor/icons/index.tsx#L260",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/editor/icons/index.tsx#L606",
       "imports": [
         {
           "path": "@omnitron-dev/prism/components/editor",
@@ -14395,6 +14411,30 @@
       ]
     },
     {
+      "name": "ArrowDownIcon",
+      "package": "@omnitron-dev/prism",
+      "kind": "value",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/icons/controls.tsx#L17",
+      "imports": [
+        {
+          "path": "@omnitron-dev/prism/icons",
+          "guide": "/docs/frontend/prism/theme"
+        }
+      ]
+    },
+    {
+      "name": "ArrowLeftIcon",
+      "package": "@omnitron-dev/prism",
+      "kind": "value",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/icons/controls.tsx#L19",
+      "imports": [
+        {
+          "path": "@omnitron-dev/prism/icons",
+          "guide": "/docs/frontend/prism/theme"
+        }
+      ]
+    },
+    {
       "name": "ArrowPlacement",
       "package": "@omnitron-dev/prism",
       "kind": "type",
@@ -14407,6 +14447,42 @@
         {
           "path": "@omnitron-dev/prism/components",
           "guide": "/docs/frontend/prism/components"
+        }
+      ]
+    },
+    {
+      "name": "ArrowRightIcon",
+      "package": "@omnitron-dev/prism",
+      "kind": "value",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/icons/controls.tsx#L21",
+      "imports": [
+        {
+          "path": "@omnitron-dev/prism/icons",
+          "guide": "/docs/frontend/prism/theme"
+        }
+      ]
+    },
+    {
+      "name": "ArrowUpIcon",
+      "package": "@omnitron-dev/prism",
+      "kind": "value",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/icons/controls.tsx#L15",
+      "imports": [
+        {
+          "path": "@omnitron-dev/prism/icons",
+          "guide": "/docs/frontend/prism/theme"
+        }
+      ]
+    },
+    {
+      "name": "ArrowUpRightIcon",
+      "package": "@omnitron-dev/prism",
+      "kind": "value",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/icons/controls.tsx#L23",
+      "imports": [
+        {
+          "path": "@omnitron-dev/prism/icons",
+          "guide": "/docs/frontend/prism/theme"
         }
       ]
     },
@@ -15426,7 +15502,7 @@
       "name": "BoldIcon",
       "package": "@omnitron-dev/prism",
       "kind": "value",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/editor/icons/index.tsx#L21",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/editor/icons/index.tsx#L576",
       "imports": [
         {
           "path": "@omnitron-dev/prism/components/editor",
@@ -15498,7 +15574,7 @@
       "name": "Breadcrumbs",
       "package": "@omnitron-dev/prism",
       "kind": "value",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/ui/index.ts#L65",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/ui/index.ts#L66",
       "imports": [
         {
           "path": "@omnitron-dev/prism/ui",
@@ -15742,7 +15818,7 @@
       "name": "BulletListIcon",
       "package": "@omnitron-dev/prism",
       "kind": "value",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/editor/icons/index.tsx#L282",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/editor/icons/index.tsx#L610",
       "imports": [
         {
           "path": "@omnitron-dev/prism/components/editor",
@@ -15766,7 +15842,7 @@
       "name": "ButtonProps",
       "package": "@omnitron-dev/prism",
       "kind": "type",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/ui/index.ts#L61",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/ui/index.ts#L62",
       "imports": [
         {
           "path": "@omnitron-dev/prism/ui",
@@ -15811,6 +15887,18 @@
         {
           "path": "@omnitron-dev/prism",
           "guide": "/docs/frontend/prism"
+        }
+      ]
+    },
+    {
+      "name": "CalendarIcon",
+      "package": "@omnitron-dev/prism",
+      "kind": "value",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/icons/controls.tsx#L65",
+      "imports": [
+        {
+          "path": "@omnitron-dev/prism/icons",
+          "guide": "/docs/frontend/prism/theme"
         }
       ]
     },
@@ -16339,10 +16427,58 @@
       ]
     },
     {
+      "name": "CheckboxCheckedIcon",
+      "package": "@omnitron-dev/prism",
+      "kind": "value",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/icons/controls.tsx#L49",
+      "imports": [
+        {
+          "path": "@omnitron-dev/prism/icons",
+          "guide": "/docs/frontend/prism/theme"
+        }
+      ]
+    },
+    {
+      "name": "CheckboxIcon",
+      "package": "@omnitron-dev/prism",
+      "kind": "value",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/icons/controls.tsx#L47",
+      "imports": [
+        {
+          "path": "@omnitron-dev/prism/icons",
+          "guide": "/docs/frontend/prism/theme"
+        }
+      ]
+    },
+    {
+      "name": "CheckboxMixedIcon",
+      "package": "@omnitron-dev/prism",
+      "kind": "value",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/icons/controls.tsx#L51",
+      "imports": [
+        {
+          "path": "@omnitron-dev/prism/icons",
+          "guide": "/docs/frontend/prism/theme"
+        }
+      ]
+    },
+    {
+      "name": "CheckIcon",
+      "package": "@omnitron-dev/prism",
+      "kind": "value",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/icons/controls.tsx#L37",
+      "imports": [
+        {
+          "path": "@omnitron-dev/prism/icons",
+          "guide": "/docs/frontend/prism/theme"
+        }
+      ]
+    },
+    {
       "name": "CheckListIcon",
       "package": "@omnitron-dev/prism",
       "kind": "value",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/editor/icons/index.tsx#L327",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/editor/icons/index.tsx#L614",
       "imports": [
         {
           "path": "@omnitron-dev/prism/components/editor",
@@ -16363,6 +16499,54 @@
         {
           "path": "@omnitron-dev/prism/state",
           "guide": "/docs/frontend/prism/state"
+        }
+      ]
+    },
+    {
+      "name": "ChevronDownIcon",
+      "package": "@omnitron-dev/prism",
+      "kind": "value",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/icons/controls.tsx#L7",
+      "imports": [
+        {
+          "path": "@omnitron-dev/prism/icons",
+          "guide": "/docs/frontend/prism/theme"
+        }
+      ]
+    },
+    {
+      "name": "ChevronLeftIcon",
+      "package": "@omnitron-dev/prism",
+      "kind": "value",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/icons/controls.tsx#L11",
+      "imports": [
+        {
+          "path": "@omnitron-dev/prism/icons",
+          "guide": "/docs/frontend/prism/theme"
+        }
+      ]
+    },
+    {
+      "name": "ChevronRightIcon",
+      "package": "@omnitron-dev/prism",
+      "kind": "value",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/icons/controls.tsx#L13",
+      "imports": [
+        {
+          "path": "@omnitron-dev/prism/icons",
+          "guide": "/docs/frontend/prism/theme"
+        }
+      ]
+    },
+    {
+      "name": "ChevronUpIcon",
+      "package": "@omnitron-dev/prism",
+      "kind": "value",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/icons/controls.tsx#L9",
+      "imports": [
+        {
+          "path": "@omnitron-dev/prism/icons",
+          "guide": "/docs/frontend/prism/theme"
         }
       ]
     },
@@ -16474,7 +16658,7 @@
       "name": "ClearMarksIcon",
       "package": "@omnitron-dev/prism",
       "kind": "value",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/editor/icons/index.tsx#L481",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/editor/icons/index.tsx#L628",
       "imports": [
         {
           "path": "@omnitron-dev/prism/components/editor",
@@ -16523,6 +16707,18 @@
       ]
     },
     {
+      "name": "CloseIcon",
+      "package": "@omnitron-dev/prism",
+      "kind": "value",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/icons/controls.tsx#L5",
+      "imports": [
+        {
+          "path": "@omnitron-dev/prism/icons",
+          "guide": "/docs/frontend/prism/theme"
+        }
+      ]
+    },
+    {
       "name": "cn",
       "package": "@omnitron-dev/prism",
       "kind": "function",
@@ -16538,7 +16734,7 @@
       "name": "CodeBlockIcon",
       "package": "@omnitron-dev/prism",
       "kind": "value",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/editor/icons/index.tsx#L101",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/editor/icons/index.tsx#L586",
       "imports": [
         {
           "path": "@omnitron-dev/prism/components/editor",
@@ -16586,7 +16782,7 @@
       "name": "COLOR_GROUPS",
       "package": "@omnitron-dev/prism",
       "kind": "value",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/theme/create-theme.ts#L439",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/theme/create-theme.ts#L440",
       "imports": [
         {
           "path": "@omnitron-dev/prism",
@@ -16666,7 +16862,7 @@
       "name": "ColumnDef",
       "package": "@omnitron-dev/prism",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/admin-filters/admin-data-table.tsx#L36",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/admin-filters/admin-data-table.tsx#L38",
       "imports": [
         {
           "path": "@omnitron-dev/prism",
@@ -17187,6 +17383,18 @@
         {
           "path": "@omnitron-dev/prism",
           "guide": "/docs/frontend/prism"
+        }
+      ]
+    },
+    {
+      "name": "CopyIcon",
+      "package": "@omnitron-dev/prism",
+      "kind": "value",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/icons/controls.tsx#L63",
+      "imports": [
+        {
+          "path": "@omnitron-dev/prism/icons",
+          "guide": "/docs/frontend/prism/theme"
         }
       ]
     },
@@ -17775,6 +17983,18 @@
       ]
     },
     {
+      "name": "createPrismIcon",
+      "package": "@omnitron-dev/prism",
+      "kind": "function",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/icons/context.tsx#L104",
+      "imports": [
+        {
+          "path": "@omnitron-dev/prism/icons",
+          "guide": "/docs/frontend/prism/theme"
+        }
+      ]
+    },
+    {
       "name": "createPrismStore",
       "package": "@omnitron-dev/prism",
       "kind": "function",
@@ -17794,7 +18014,7 @@
       "name": "createPrismTheme",
       "package": "@omnitron-dev/prism",
       "kind": "function",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/theme/create-theme.ts#L642",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/theme/create-theme.ts#L643",
       "imports": [
         {
           "path": "@omnitron-dev/prism",
@@ -17810,7 +18030,7 @@
       "name": "CreatePrismThemeOptions",
       "package": "@omnitron-dev/prism",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/theme/create-theme.ts#L83",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/theme/create-theme.ts#L84",
       "imports": [
         {
           "path": "@omnitron-dev/prism",
@@ -18194,7 +18414,7 @@
       "name": "customScrollbarMixin",
       "package": "@omnitron-dev/prism",
       "kind": "function",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/theme/mixins.ts#L548",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/theme/mixins.ts#L565",
       "imports": [
         {
           "path": "@omnitron-dev/prism",
@@ -18410,7 +18630,7 @@
       "name": "DashboardContent",
       "package": "@omnitron-dev/prism",
       "kind": "function",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/layouts/dashboard/layout.tsx#L355",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/layouts/dashboard/layout.tsx#L346",
       "imports": [
         {
           "path": "@omnitron-dev/prism",
@@ -18426,7 +18646,7 @@
       "name": "DashboardContentProps",
       "package": "@omnitron-dev/prism",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/layouts/dashboard/layout.tsx#L340",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/layouts/dashboard/layout.tsx#L331",
       "imports": [
         {
           "path": "@omnitron-dev/prism",
@@ -18458,7 +18678,7 @@
       "name": "DashboardLayout",
       "package": "@omnitron-dev/prism",
       "kind": "function",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/layouts/dashboard/layout.tsx#L305",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/layouts/dashboard/layout.tsx#L296",
       "imports": [
         {
           "path": "@omnitron-dev/prism",
@@ -18474,7 +18694,7 @@
       "name": "DashboardLayoutProps",
       "package": "@omnitron-dev/prism",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/layouts/dashboard/layout.tsx#L240",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/layouts/dashboard/layout.tsx#L231",
       "imports": [
         {
           "path": "@omnitron-dev/prism",
@@ -18990,7 +19210,7 @@
       "name": "defaultKnowledgeGraphLabels",
       "package": "@omnitron-dev/prism",
       "kind": "value",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/knowledge-graph/graph.tsx#L43",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/knowledge-graph/graph.tsx#L44",
       "imports": [
         {
           "path": "@omnitron-dev/prism/components/knowledge-graph",
@@ -19102,7 +19322,7 @@
       "name": "defaultResearchEditorLabels",
       "package": "@omnitron-dev/prism",
       "kind": "value",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/research-editor/editor.tsx#L25",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/research-editor/editor.tsx#L28",
       "imports": [
         {
           "path": "@omnitron-dev/prism/components/research-editor",
@@ -19114,7 +19334,7 @@
       "name": "defaultResearchLabels",
       "package": "@omnitron-dev/prism",
       "kind": "value",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/research/document.tsx#L38",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/research/document.tsx#L40",
       "imports": [
         {
           "path": "@omnitron-dev/prism/components/research",
@@ -19154,7 +19374,7 @@
       "name": "defineResearchWidget",
       "package": "@omnitron-dev/prism",
       "kind": "function",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/research/document.tsx#L16",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/research/document.tsx#L18",
       "imports": [
         {
           "path": "@omnitron-dev/prism/components/research",
@@ -19370,7 +19590,7 @@
       "name": "DocSidebar",
       "package": "@omnitron-dev/prism",
       "kind": "function",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/doc-layout/doc-sidebar.tsx#L44",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/doc-layout/doc-sidebar.tsx#L46",
       "imports": [
         {
           "path": "@omnitron-dev/prism",
@@ -19390,7 +19610,7 @@
       "name": "DocSidebarItem",
       "package": "@omnitron-dev/prism",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/doc-layout/doc-sidebar.tsx#L12",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/doc-layout/doc-sidebar.tsx#L14",
       "imports": [
         {
           "path": "@omnitron-dev/prism",
@@ -19431,6 +19651,30 @@
         {
           "path": "@omnitron-dev/prism/hooks",
           "guide": "/docs/frontend/prism/hooks-catalog"
+        }
+      ]
+    },
+    {
+      "name": "DownloadIcon",
+      "package": "@omnitron-dev/prism",
+      "kind": "value",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/icons/controls.tsx#L67",
+      "imports": [
+        {
+          "path": "@omnitron-dev/prism/icons",
+          "guide": "/docs/frontend/prism/theme"
+        }
+      ]
+    },
+    {
+      "name": "DragIcon",
+      "package": "@omnitron-dev/prism",
+      "kind": "value",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/icons/controls.tsx#L35",
+      "imports": [
+        {
+          "path": "@omnitron-dev/prism/icons",
+          "guide": "/docs/frontend/prism/theme"
         }
       ]
     },
@@ -19903,6 +20147,18 @@
       ]
     },
     {
+      "name": "EmptyIcon",
+      "package": "@omnitron-dev/prism",
+      "kind": "value",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/icons/controls.tsx#L61",
+      "imports": [
+        {
+          "path": "@omnitron-dev/prism/icons",
+          "guide": "/docs/frontend/prism/theme"
+        }
+      ]
+    },
+    {
       "name": "endOfDay",
       "package": "@omnitron-dev/prism",
       "kind": "function",
@@ -19930,7 +20186,7 @@
       "name": "ErrorBoundary",
       "package": "@omnitron-dev/prism",
       "kind": "class",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/error-boundary/error-boundary.tsx#L434",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/error-boundary/error-boundary.tsx#L437",
       "imports": [
         {
           "path": "@omnitron-dev/prism",
@@ -19991,6 +20247,18 @@
         {
           "path": "@omnitron-dev/prism",
           "guide": "/docs/frontend/prism"
+        }
+      ]
+    },
+    {
+      "name": "ErrorIcon",
+      "package": "@omnitron-dev/prism",
+      "kind": "value",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/icons/controls.tsx#L43",
+      "imports": [
+        {
+          "path": "@omnitron-dev/prism/icons",
+          "guide": "/docs/frontend/prism/theme"
         }
       ]
     },
@@ -20058,7 +20326,7 @@
       "name": "ExitFullscreenIcon",
       "package": "@omnitron-dev/prism",
       "kind": "value",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/editor/icons/index.tsx#L562",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/editor/icons/index.tsx#L638",
       "imports": [
         {
           "path": "@omnitron-dev/prism/components/editor",
@@ -20115,6 +20383,30 @@
         {
           "path": "@omnitron-dev/prism",
           "guide": "/docs/frontend/prism"
+        }
+      ]
+    },
+    {
+      "name": "EyeIcon",
+      "package": "@omnitron-dev/prism",
+      "kind": "value",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/icons/controls.tsx#L85",
+      "imports": [
+        {
+          "path": "@omnitron-dev/prism/icons",
+          "guide": "/docs/frontend/prism/theme"
+        }
+      ]
+    },
+    {
+      "name": "EyeOffIcon",
+      "package": "@omnitron-dev/prism",
+      "kind": "value",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/icons/controls.tsx#L87",
+      "imports": [
+        {
+          "path": "@omnitron-dev/prism/icons",
+          "guide": "/docs/frontend/prism/theme"
         }
       ]
     },
@@ -21074,7 +21366,7 @@
       "name": "FilterConfig",
       "package": "@omnitron-dev/prism",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/admin-filters/filter-toolbar.tsx#L41",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/admin-filters/filter-toolbar.tsx#L43",
       "imports": [
         {
           "path": "@omnitron-dev/prism",
@@ -21087,10 +21379,22 @@
       ]
     },
     {
+      "name": "FilterIcon",
+      "package": "@omnitron-dev/prism",
+      "kind": "value",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/icons/controls.tsx#L59",
+      "imports": [
+        {
+          "path": "@omnitron-dev/prism/icons",
+          "guide": "/docs/frontend/prism/theme"
+        }
+      ]
+    },
+    {
       "name": "FilterOption",
       "package": "@omnitron-dev/prism",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/admin-filters/filter-toolbar.tsx#L35",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/admin-filters/filter-toolbar.tsx#L37",
       "imports": [
         {
           "path": "@omnitron-dev/prism",
@@ -21122,7 +21426,7 @@
       "name": "FilterToolbar",
       "package": "@omnitron-dev/prism",
       "kind": "function",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/admin-filters/filter-toolbar.tsx#L172",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/admin-filters/filter-toolbar.tsx#L157",
       "imports": [
         {
           "path": "@omnitron-dev/prism",
@@ -21138,7 +21442,7 @@
       "name": "FilterToolbarProps",
       "package": "@omnitron-dev/prism",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/admin-filters/filter-toolbar.tsx#L65",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/admin-filters/filter-toolbar.tsx#L67",
       "imports": [
         {
           "path": "@omnitron-dev/prism",
@@ -21154,7 +21458,7 @@
       "name": "FilterType",
       "package": "@omnitron-dev/prism",
       "kind": "type",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/admin-filters/filter-toolbar.tsx#L33",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/admin-filters/filter-toolbar.tsx#L35",
       "imports": [
         {
           "path": "@omnitron-dev/prism",
@@ -21170,7 +21474,7 @@
       "name": "FilterValues",
       "package": "@omnitron-dev/prism",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/admin-filters/filter-toolbar.tsx#L58",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/admin-filters/filter-toolbar.tsx#L60",
       "imports": [
         {
           "path": "@omnitron-dev/prism",
@@ -21179,6 +21483,30 @@
         {
           "path": "@omnitron-dev/prism/components",
           "guide": "/docs/frontend/prism/components"
+        }
+      ]
+    },
+    {
+      "name": "FirstPageIcon",
+      "package": "@omnitron-dev/prism",
+      "kind": "value",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/icons/controls.tsx#L99",
+      "imports": [
+        {
+          "path": "@omnitron-dev/prism/icons",
+          "guide": "/docs/frontend/prism/theme"
+        }
+      ]
+    },
+    {
+      "name": "FitViewIcon",
+      "package": "@omnitron-dev/prism",
+      "kind": "value",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/icons/controls.tsx#L75",
+      "imports": [
+        {
+          "path": "@omnitron-dev/prism/icons",
+          "guide": "/docs/frontend/prism/theme"
         }
       ]
     },
@@ -21258,7 +21586,7 @@
       "name": "focusRingMixin",
       "package": "@omnitron-dev/prism",
       "kind": "value",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/theme/mixins.ts#L576",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/theme/mixins.ts#L593",
       "imports": [
         {
           "path": "@omnitron-dev/prism",
@@ -21635,14 +21963,38 @@
       ]
     },
     {
+      "name": "FullscreenExitIcon",
+      "package": "@omnitron-dev/prism",
+      "kind": "value",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/icons/controls.tsx#L79",
+      "imports": [
+        {
+          "path": "@omnitron-dev/prism/icons",
+          "guide": "/docs/frontend/prism/theme"
+        }
+      ]
+    },
+    {
       "name": "FullscreenIcon",
       "package": "@omnitron-dev/prism",
       "kind": "value",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/editor/icons/index.tsx#L549",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/editor/icons/index.tsx#L636",
       "imports": [
         {
           "path": "@omnitron-dev/prism/components/editor",
           "guide": "/docs/frontend/prism/components"
+        }
+      ]
+    },
+    {
+      "name": "FullscreenIcon",
+      "package": "@omnitron-dev/prism",
+      "kind": "value",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/icons/controls.tsx#L77",
+      "imports": [
+        {
+          "path": "@omnitron-dev/prism/icons",
+          "guide": "/docs/frontend/prism/theme"
         }
       ]
     },
@@ -22066,7 +22418,7 @@
       "name": "getPresetDisplayName",
       "package": "@omnitron-dev/prism",
       "kind": "function",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/theme/create-theme.ts#L848",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/theme/create-theme.ts#L850",
       "imports": [
         {
           "path": "@omnitron-dev/prism",
@@ -22202,7 +22554,7 @@
       "name": "glassMixin",
       "package": "@omnitron-dev/prism",
       "kind": "value",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/theme/mixins.ts#L586",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/theme/mixins.ts#L603",
       "imports": [
         {
           "path": "@omnitron-dev/prism",
@@ -22390,7 +22742,7 @@
       "name": "H1Icon",
       "package": "@omnitron-dev/prism",
       "kind": "value",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/editor/icons/index.tsx#L131",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/editor/icons/index.tsx#L588",
       "imports": [
         {
           "path": "@omnitron-dev/prism/components/editor",
@@ -22402,7 +22754,7 @@
       "name": "H2Icon",
       "package": "@omnitron-dev/prism",
       "kind": "value",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/editor/icons/index.tsx#L146",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/editor/icons/index.tsx#L590",
       "imports": [
         {
           "path": "@omnitron-dev/prism/components/editor",
@@ -22414,7 +22766,7 @@
       "name": "H3Icon",
       "package": "@omnitron-dev/prism",
       "kind": "value",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/editor/icons/index.tsx#L162",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/editor/icons/index.tsx#L592",
       "imports": [
         {
           "path": "@omnitron-dev/prism/components/editor",
@@ -22426,7 +22778,7 @@
       "name": "H4Icon",
       "package": "@omnitron-dev/prism",
       "kind": "value",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/editor/icons/index.tsx#L178",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/editor/icons/index.tsx#L594",
       "imports": [
         {
           "path": "@omnitron-dev/prism/components/editor",
@@ -22438,7 +22790,7 @@
       "name": "H5Icon",
       "package": "@omnitron-dev/prism",
       "kind": "value",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/editor/icons/index.tsx#L194",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/editor/icons/index.tsx#L596",
       "imports": [
         {
           "path": "@omnitron-dev/prism/components/editor",
@@ -22450,7 +22802,7 @@
       "name": "H6Icon",
       "package": "@omnitron-dev/prism",
       "kind": "value",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/editor/icons/index.tsx#L210",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/editor/icons/index.tsx#L598",
       "imports": [
         {
           "path": "@omnitron-dev/prism/components/editor",
@@ -22478,7 +22830,7 @@
       "name": "HardBreakIcon",
       "package": "@omnitron-dev/prism",
       "kind": "value",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/editor/icons/index.tsx#L528",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/editor/icons/index.tsx#L634",
       "imports": [
         {
           "path": "@omnitron-dev/prism/components/editor",
@@ -22738,7 +23090,7 @@
       "name": "hideScrollbarMixin",
       "package": "@omnitron-dev/prism",
       "kind": "value",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/theme/mixins.ts#L537",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/theme/mixins.ts#L554",
       "imports": [
         {
           "path": "@omnitron-dev/prism",
@@ -22766,7 +23118,7 @@
       "name": "HorizontalRuleIcon",
       "package": "@omnitron-dev/prism",
       "kind": "value",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/editor/icons/index.tsx#L384",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/editor/icons/index.tsx#L618",
       "imports": [
         {
           "path": "@omnitron-dev/prism/components/editor",
@@ -23090,7 +23442,7 @@
       "name": "ImageIcon",
       "package": "@omnitron-dev/prism",
       "kind": "value",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/editor/icons/index.tsx#L450",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/editor/icons/index.tsx#L626",
       "imports": [
         {
           "path": "@omnitron-dev/prism/components/editor",
@@ -23223,6 +23575,18 @@
       ]
     },
     {
+      "name": "InfoIcon",
+      "package": "@omnitron-dev/prism",
+      "kind": "value",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/icons/controls.tsx#L39",
+      "imports": [
+        {
+          "path": "@omnitron-dev/prism/icons",
+          "guide": "/docs/frontend/prism/theme"
+        }
+      ]
+    },
+    {
       "name": "initCommand",
       "package": "@omnitron-dev/prism",
       "kind": "function",
@@ -23270,7 +23634,7 @@
       "name": "InlineCodeIcon",
       "package": "@omnitron-dev/prism",
       "kind": "value",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/editor/icons/index.tsx#L79",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/editor/icons/index.tsx#L584",
       "imports": [
         {
           "path": "@omnitron-dev/prism/components/editor",
@@ -23654,7 +24018,7 @@
       "name": "ItalicIcon",
       "package": "@omnitron-dev/prism",
       "kind": "value",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/editor/icons/index.tsx#L44",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/editor/icons/index.tsx#L578",
       "imports": [
         {
           "path": "@omnitron-dev/prism/components/editor",
@@ -23747,6 +24111,18 @@
       ]
     },
     {
+      "name": "KeyboardIcon",
+      "package": "@omnitron-dev/prism",
+      "kind": "value",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/icons/controls.tsx#L89",
+      "imports": [
+        {
+          "path": "@omnitron-dev/prism/icons",
+          "guide": "/docs/frontend/prism/theme"
+        }
+      ]
+    },
+    {
       "name": "KeyboardShortcut",
       "package": "@omnitron-dev/prism",
       "kind": "interface",
@@ -23790,7 +24166,7 @@
       "name": "KnowledgeGraph",
       "package": "@omnitron-dev/prism",
       "kind": "function",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/knowledge-graph/graph.tsx#L213",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/knowledge-graph/graph.tsx#L192",
       "imports": [
         {
           "path": "@omnitron-dev/prism/components/knowledge-graph",
@@ -23814,7 +24190,7 @@
       "name": "KnowledgeGraphLabels",
       "package": "@omnitron-dev/prism",
       "kind": "type",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/knowledge-graph/graph.tsx#L70",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/knowledge-graph/graph.tsx#L71",
       "imports": [
         {
           "path": "@omnitron-dev/prism/components/knowledge-graph",
@@ -23826,7 +24202,7 @@
       "name": "KnowledgeGraphProps",
       "package": "@omnitron-dev/prism",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/knowledge-graph/graph.tsx#L83",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/knowledge-graph/graph.tsx#L84",
       "imports": [
         {
           "path": "@omnitron-dev/prism/components/knowledge-graph",
@@ -23943,6 +24319,18 @@
         {
           "path": "@omnitron-dev/prism/components",
           "guide": "/docs/frontend/prism/components"
+        }
+      ]
+    },
+    {
+      "name": "LastPageIcon",
+      "package": "@omnitron-dev/prism",
+      "kind": "value",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/icons/controls.tsx#L101",
+      "imports": [
+        {
+          "path": "@omnitron-dev/prism/icons",
+          "guide": "/docs/frontend/prism/theme"
         }
       ]
     },
@@ -24398,7 +24786,7 @@
       "name": "LinkIcon",
       "package": "@omnitron-dev/prism",
       "kind": "value",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/editor/icons/index.tsx#L411",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/editor/icons/index.tsx#L622",
       "imports": [
         {
           "path": "@omnitron-dev/prism/components/editor",
@@ -24446,6 +24834,18 @@
       "name": "ListItemButton",
       "package": "@omnitron-dev/prism",
       "kind": "value",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/ui/index.ts#L39",
+      "imports": [
+        {
+          "path": "@omnitron-dev/prism/ui",
+          "guide": "/docs/frontend/prism/theme"
+        }
+      ]
+    },
+    {
+      "name": "ListItemIcon",
+      "package": "@omnitron-dev/prism",
+      "kind": "value",
       "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/ui/index.ts#L38",
       "imports": [
         {
@@ -24458,7 +24858,7 @@
       "name": "ListItemText",
       "package": "@omnitron-dev/prism",
       "kind": "value",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/ui/index.ts#L39",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/ui/index.ts#L40",
       "imports": [
         {
           "path": "@omnitron-dev/prism/ui",
@@ -24547,6 +24947,18 @@
         {
           "path": "@omnitron-dev/prism",
           "guide": "/docs/frontend/prism"
+        }
+      ]
+    },
+    {
+      "name": "LockIcon",
+      "package": "@omnitron-dev/prism",
+      "kind": "value",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/icons/controls.tsx#L91",
+      "imports": [
+        {
+          "path": "@omnitron-dev/prism/icons",
+          "guide": "/docs/frontend/prism/theme"
         }
       ]
     },
@@ -25406,7 +25818,7 @@
       "name": "Menu",
       "package": "@omnitron-dev/prism",
       "kind": "value",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/ui/index.ts#L40",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/ui/index.ts#L41",
       "imports": [
         {
           "path": "@omnitron-dev/prism/ui",
@@ -25415,10 +25827,22 @@
       ]
     },
     {
+      "name": "MenuIcon",
+      "package": "@omnitron-dev/prism",
+      "kind": "value",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/icons/controls.tsx#L29",
+      "imports": [
+        {
+          "path": "@omnitron-dev/prism/icons",
+          "guide": "/docs/frontend/prism/theme"
+        }
+      ]
+    },
+    {
       "name": "MenuItem",
       "package": "@omnitron-dev/prism",
       "kind": "value",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/ui/index.ts#L41",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/ui/index.ts#L42",
       "imports": [
         {
           "path": "@omnitron-dev/prism/ui",
@@ -25610,7 +26034,7 @@
       "name": "mixins",
       "package": "@omnitron-dev/prism",
       "kind": "value",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/theme/mixins.ts#L495",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/theme/mixins.ts#L512",
       "imports": [
         {
           "path": "@omnitron-dev/prism",
@@ -25626,7 +26050,7 @@
       "name": "MobileSidenav",
       "package": "@omnitron-dev/prism",
       "kind": "function",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/layouts/dashboard/sidenav.tsx#L245",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/layouts/dashboard/sidenav.tsx#L246",
       "imports": [
         {
           "path": "@omnitron-dev/prism",
@@ -25642,7 +26066,7 @@
       "name": "MobileSidenavProps",
       "package": "@omnitron-dev/prism",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/layouts/dashboard/sidenav.tsx#L236",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/layouts/dashboard/sidenav.tsx#L237",
       "imports": [
         {
           "path": "@omnitron-dev/prism",
@@ -25651,6 +26075,18 @@
         {
           "path": "@omnitron-dev/prism/layouts",
           "guide": "/docs/frontend/prism/layouts"
+        }
+      ]
+    },
+    {
+      "name": "MoreIcon",
+      "package": "@omnitron-dev/prism",
+      "kind": "value",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/icons/controls.tsx#L57",
+      "imports": [
+        {
+          "path": "@omnitron-dev/prism/icons",
+          "guide": "/docs/frontend/prism/theme"
         }
       ]
     },
@@ -25802,7 +26238,7 @@
       "name": "multiLineEllipsisMixin",
       "package": "@omnitron-dev/prism",
       "kind": "function",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/theme/mixins.ts#L564",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/theme/mixins.ts#L581",
       "imports": [
         {
           "path": "@omnitron-dev/prism",
@@ -26914,7 +27350,7 @@
       "name": "OrderedListIcon",
       "package": "@omnitron-dev/prism",
       "kind": "value",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/editor/icons/index.tsx#L304",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/editor/icons/index.tsx#L612",
       "imports": [
         {
           "path": "@omnitron-dev/prism/components/editor",
@@ -27003,6 +27439,30 @@
       ]
     },
     {
+      "name": "PanelCollapseIcon",
+      "package": "@omnitron-dev/prism",
+      "kind": "value",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/icons/controls.tsx#L25",
+      "imports": [
+        {
+          "path": "@omnitron-dev/prism/icons",
+          "guide": "/docs/frontend/prism/theme"
+        }
+      ]
+    },
+    {
+      "name": "PanelExpandIcon",
+      "package": "@omnitron-dev/prism",
+      "kind": "value",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/icons/controls.tsx#L27",
+      "imports": [
+        {
+          "path": "@omnitron-dev/prism/icons",
+          "guide": "/docs/frontend/prism/theme"
+        }
+      ]
+    },
+    {
       "name": "PanelLayout",
       "package": "@omnitron-dev/prism",
       "kind": "function",
@@ -27038,7 +27498,7 @@
       "name": "ParagraphIcon",
       "package": "@omnitron-dev/prism",
       "kind": "value",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/editor/icons/index.tsx#L226",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/editor/icons/index.tsx#L600",
       "imports": [
         {
           "path": "@omnitron-dev/prism/components/editor",
@@ -27231,6 +27691,18 @@
       ]
     },
     {
+      "name": "PlayIcon",
+      "package": "@omnitron-dev/prism",
+      "kind": "value",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/icons/controls.tsx#L83",
+      "imports": [
+        {
+          "path": "@omnitron-dev/prism/icons",
+          "guide": "/docs/frontend/prism/theme"
+        }
+      ]
+    },
+    {
       "name": "PolymorphicComponentProps",
       "package": "@omnitron-dev/prism",
       "kind": "type",
@@ -27262,7 +27734,7 @@
       "name": "PRESET_DISPLAY_NAMES",
       "package": "@omnitron-dev/prism",
       "kind": "value",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/theme/create-theme.ts#L814",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/theme/create-theme.ts#L816",
       "imports": [
         {
           "path": "@omnitron-dev/prism",
@@ -27278,7 +27750,7 @@
       "name": "PRESET_INHERENT_MODE",
       "package": "@omnitron-dev/prism",
       "kind": "value",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/theme/create-theme.ts#L832",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/theme/create-theme.ts#L834",
       "imports": [
         {
           "path": "@omnitron-dev/prism",
@@ -27294,7 +27766,7 @@
       "name": "PRESET_NAMES",
       "package": "@omnitron-dev/prism",
       "kind": "value",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/theme/create-theme.ts#L798",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/theme/create-theme.ts#L800",
       "imports": [
         {
           "path": "@omnitron-dev/prism",
@@ -27411,6 +27883,86 @@
       ]
     },
     {
+      "name": "PrismIconComponent",
+      "package": "@omnitron-dev/prism",
+      "kind": "type",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/icons/context.tsx#L89",
+      "imports": [
+        {
+          "path": "@omnitron-dev/prism/icons",
+          "guide": "/docs/frontend/prism/theme"
+        },
+        {
+          "path": "@omnitron-dev/prism/ui",
+          "guide": "/docs/frontend/prism/theme"
+        }
+      ]
+    },
+    {
+      "name": "PrismIconName",
+      "package": "@omnitron-dev/prism",
+      "kind": "type",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/icons/context.tsx#L88",
+      "imports": [
+        {
+          "path": "@omnitron-dev/prism/icons",
+          "guide": "/docs/frontend/prism/theme"
+        },
+        {
+          "path": "@omnitron-dev/prism/ui",
+          "guide": "/docs/frontend/prism/theme"
+        }
+      ]
+    },
+    {
+      "name": "prismIconNames",
+      "package": "@omnitron-dev/prism",
+      "kind": "value",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/icons/context.tsx#L6",
+      "imports": [
+        {
+          "path": "@omnitron-dev/prism/icons",
+          "guide": "/docs/frontend/prism/theme"
+        },
+        {
+          "path": "@omnitron-dev/prism/ui",
+          "guide": "/docs/frontend/prism/theme"
+        }
+      ]
+    },
+    {
+      "name": "PrismIconProvider",
+      "package": "@omnitron-dev/prism",
+      "kind": "function",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/icons/context.tsx#L97",
+      "imports": [
+        {
+          "path": "@omnitron-dev/prism/icons",
+          "guide": "/docs/frontend/prism/theme"
+        },
+        {
+          "path": "@omnitron-dev/prism/ui",
+          "guide": "/docs/frontend/prism/theme"
+        }
+      ]
+    },
+    {
+      "name": "PrismIconSet",
+      "package": "@omnitron-dev/prism",
+      "kind": "type",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/icons/context.tsx#L90",
+      "imports": [
+        {
+          "path": "@omnitron-dev/prism/icons",
+          "guide": "/docs/frontend/prism/theme"
+        },
+        {
+          "path": "@omnitron-dev/prism/ui",
+          "guide": "/docs/frontend/prism/theme"
+        }
+      ]
+    },
+    {
       "name": "PrismInstaller",
       "package": "@omnitron-dev/prism",
       "kind": "class",
@@ -27486,7 +28038,7 @@
       "name": "PrismThemeProvider",
       "package": "@omnitron-dev/prism",
       "kind": "value",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/ui/index.ts#L62",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/ui/index.ts#L63",
       "imports": [
         {
           "path": "@omnitron-dev/prism/ui",
@@ -27758,7 +28310,7 @@
       "name": "QuoteIcon",
       "package": "@omnitron-dev/prism",
       "kind": "value",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/editor/icons/index.tsx#L353",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/editor/icons/index.tsx#L616",
       "imports": [
         {
           "path": "@omnitron-dev/prism/components/editor",
@@ -27770,7 +28322,7 @@
       "name": "Radio",
       "package": "@omnitron-dev/prism",
       "kind": "value",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/ui/index.ts#L42",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/ui/index.ts#L43",
       "imports": [
         {
           "path": "@omnitron-dev/prism/ui",
@@ -27779,13 +28331,37 @@
       ]
     },
     {
+      "name": "RadioCheckedIcon",
+      "package": "@omnitron-dev/prism",
+      "kind": "value",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/icons/controls.tsx#L55",
+      "imports": [
+        {
+          "path": "@omnitron-dev/prism/icons",
+          "guide": "/docs/frontend/prism/theme"
+        }
+      ]
+    },
+    {
       "name": "RadioGroup",
       "package": "@omnitron-dev/prism",
       "kind": "value",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/ui/index.ts#L43",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/ui/index.ts#L44",
       "imports": [
         {
           "path": "@omnitron-dev/prism/ui",
+          "guide": "/docs/frontend/prism/theme"
+        }
+      ]
+    },
+    {
+      "name": "RadioIcon",
+      "package": "@omnitron-dev/prism",
+      "kind": "value",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/icons/controls.tsx#L53",
+      "imports": [
+        {
+          "path": "@omnitron-dev/prism/icons",
           "guide": "/docs/frontend/prism/theme"
         }
       ]
@@ -27810,7 +28386,7 @@
       "name": "Rail",
       "package": "@omnitron-dev/prism",
       "kind": "function",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/rail/rail.tsx#L52",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/rail/rail.tsx#L49",
       "imports": [
         {
           "path": "@omnitron-dev/prism",
@@ -27826,7 +28402,7 @@
       "name": "RailProps",
       "package": "@omnitron-dev/prism",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/rail/rail.tsx#L21",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/rail/rail.tsx#L22",
       "imports": [
         {
           "path": "@omnitron-dev/prism",
@@ -27870,7 +28446,7 @@
       "name": "RedoIcon",
       "package": "@omnitron-dev/prism",
       "kind": "value",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/editor/icons/index.tsx#L515",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/editor/icons/index.tsx#L632",
       "imports": [
         {
           "path": "@omnitron-dev/prism/components/editor",
@@ -28055,6 +28631,18 @@
       ]
     },
     {
+      "name": "RemoveIcon",
+      "package": "@omnitron-dev/prism",
+      "kind": "value",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/icons/controls.tsx#L33",
+      "imports": [
+        {
+          "path": "@omnitron-dev/prism/icons",
+          "guide": "/docs/frontend/prism/theme"
+        }
+      ]
+    },
+    {
       "name": "removeLastSlash",
       "package": "@omnitron-dev/prism",
       "kind": "function",
@@ -28218,7 +28806,7 @@
       "name": "ResearchDocument",
       "package": "@omnitron-dev/prism",
       "kind": "function",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/research/document.tsx#L116",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/research/document.tsx#L118",
       "imports": [
         {
           "path": "@omnitron-dev/prism/components/research",
@@ -28242,7 +28830,7 @@
       "name": "ResearchDocumentProps",
       "package": "@omnitron-dev/prism",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/research/document.tsx#L47",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/research/document.tsx#L49",
       "imports": [
         {
           "path": "@omnitron-dev/prism/components/research",
@@ -28254,7 +28842,7 @@
       "name": "ResearchEditor",
       "package": "@omnitron-dev/prism",
       "kind": "function",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/research-editor/editor.tsx#L97",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/research-editor/editor.tsx#L100",
       "imports": [
         {
           "path": "@omnitron-dev/prism/components/research-editor",
@@ -28266,7 +28854,7 @@
       "name": "ResearchEditorHandle",
       "package": "@omnitron-dev/prism",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/research-editor/editor.tsx#L68",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/research-editor/editor.tsx#L71",
       "imports": [
         {
           "path": "@omnitron-dev/prism/components/research-editor",
@@ -28278,7 +28866,7 @@
       "name": "ResearchEditorLabels",
       "package": "@omnitron-dev/prism",
       "kind": "type",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/research-editor/editor.tsx#L61",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/research-editor/editor.tsx#L64",
       "imports": [
         {
           "path": "@omnitron-dev/prism/components/research-editor",
@@ -28290,7 +28878,7 @@
       "name": "ResearchEditorProps",
       "package": "@omnitron-dev/prism",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/research-editor/editor.tsx#L72",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/research-editor/editor.tsx#L75",
       "imports": [
         {
           "path": "@omnitron-dev/prism/components/research-editor",
@@ -28302,7 +28890,7 @@
       "name": "ResearchInsertion",
       "package": "@omnitron-dev/prism",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/research-editor/editor.tsx#L62",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/research-editor/editor.tsx#L65",
       "imports": [
         {
           "path": "@omnitron-dev/prism/components/research-editor",
@@ -28314,7 +28902,7 @@
       "name": "ResearchLabels",
       "package": "@omnitron-dev/prism",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/research/document.tsx#L29",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/research/document.tsx#L31",
       "imports": [
         {
           "path": "@omnitron-dev/prism/components/research",
@@ -28362,7 +28950,7 @@
       "name": "ResearchWidgets",
       "package": "@omnitron-dev/prism",
       "kind": "type",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/research/document.tsx#L15",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/research/document.tsx#L17",
       "imports": [
         {
           "path": "@omnitron-dev/prism/components/research",
@@ -28806,7 +29394,7 @@
       "name": "Scrollbar",
       "package": "@omnitron-dev/prism",
       "kind": "function",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/scrollbar/scrollbar.tsx#L114",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/scrollbar/scrollbar.tsx#L117",
       "imports": [
         {
           "path": "@omnitron-dev/prism",
@@ -28947,10 +29535,22 @@
       ]
     },
     {
+      "name": "SearchIcon",
+      "package": "@omnitron-dev/prism",
+      "kind": "value",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/icons/controls.tsx#L3",
+      "imports": [
+        {
+          "path": "@omnitron-dev/prism/icons",
+          "guide": "/docs/frontend/prism/theme"
+        }
+      ]
+    },
+    {
       "name": "SearchInput",
       "package": "@omnitron-dev/prism",
       "kind": "function",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/search-input/search-input.tsx#L99",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/search-input/search-input.tsx#L72",
       "imports": [
         {
           "path": "@omnitron-dev/prism",
@@ -28966,7 +29566,7 @@
       "name": "SearchInputProps",
       "package": "@omnitron-dev/prism",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/search-input/search-input.tsx#L64",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/search-input/search-input.tsx#L37",
       "imports": [
         {
           "path": "@omnitron-dev/prism",
@@ -28994,7 +29594,7 @@
       "name": "Select",
       "package": "@omnitron-dev/prism",
       "kind": "value",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/ui/index.ts#L44",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/ui/index.ts#L45",
       "imports": [
         {
           "path": "@omnitron-dev/prism/ui",
@@ -29343,6 +29943,18 @@
       ]
     },
     {
+      "name": "ShareIcon",
+      "package": "@omnitron-dev/prism",
+      "kind": "value",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/icons/controls.tsx#L81",
+      "imports": [
+        {
+          "path": "@omnitron-dev/prism/icons",
+          "guide": "/docs/frontend/prism/theme"
+        }
+      ]
+    },
+    {
       "name": "Show",
       "package": "@omnitron-dev/prism",
       "kind": "function",
@@ -29406,7 +30018,7 @@
       "name": "Sidenav",
       "package": "@omnitron-dev/prism",
       "kind": "function",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/layouts/dashboard/sidenav.tsx#L122",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/layouts/dashboard/sidenav.tsx#L123",
       "imports": [
         {
           "path": "@omnitron-dev/prism",
@@ -29422,7 +30034,7 @@
       "name": "SidenavProps",
       "package": "@omnitron-dev/prism",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/layouts/dashboard/sidenav.tsx#L85",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/layouts/dashboard/sidenav.tsx#L86",
       "imports": [
         {
           "path": "@omnitron-dev/prism",
@@ -29594,7 +30206,7 @@
       "name": "Skeleton",
       "package": "@omnitron-dev/prism",
       "kind": "value",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/ui/index.ts#L45",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/ui/index.ts#L46",
       "imports": [
         {
           "path": "@omnitron-dev/prism/ui",
@@ -29670,7 +30282,7 @@
       "name": "Slider",
       "package": "@omnitron-dev/prism",
       "kind": "value",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/ui/index.ts#L46",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/ui/index.ts#L47",
       "imports": [
         {
           "path": "@omnitron-dev/prism/ui",
@@ -29682,7 +30294,7 @@
       "name": "SliderProps",
       "package": "@omnitron-dev/prism",
       "kind": "type",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/ui/index.ts#L61",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/ui/index.ts#L62",
       "imports": [
         {
           "path": "@omnitron-dev/prism/ui",
@@ -29966,7 +30578,7 @@
       "name": "Stack",
       "package": "@omnitron-dev/prism",
       "kind": "value",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/ui/index.ts#L47",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/ui/index.ts#L48",
       "imports": [
         {
           "path": "@omnitron-dev/prism/ui",
@@ -29987,6 +30599,30 @@
         {
           "path": "@omnitron-dev/prism/components",
           "guide": "/docs/frontend/prism/components"
+        }
+      ]
+    },
+    {
+      "name": "StarEmptyIcon",
+      "package": "@omnitron-dev/prism",
+      "kind": "value",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/icons/controls.tsx#L97",
+      "imports": [
+        {
+          "path": "@omnitron-dev/prism/icons",
+          "guide": "/docs/frontend/prism/theme"
+        }
+      ]
+    },
+    {
+      "name": "StarIcon",
+      "package": "@omnitron-dev/prism",
+      "kind": "value",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/icons/controls.tsx#L95",
+      "imports": [
+        {
+          "path": "@omnitron-dev/prism/icons",
+          "guide": "/docs/frontend/prism/theme"
         }
       ]
     },
@@ -30282,7 +30918,7 @@
       "name": "StrikeIcon",
       "package": "@omnitron-dev/prism",
       "kind": "value",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/editor/icons/index.tsx#L66",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/editor/icons/index.tsx#L582",
       "imports": [
         {
           "path": "@omnitron-dev/prism/components/editor",
@@ -30359,6 +30995,18 @@
       ]
     },
     {
+      "name": "SuccessIcon",
+      "package": "@omnitron-dev/prism",
+      "kind": "value",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/icons/controls.tsx#L45",
+      "imports": [
+        {
+          "path": "@omnitron-dev/prism/icons",
+          "guide": "/docs/frontend/prism/theme"
+        }
+      ]
+    },
+    {
       "name": "sumDecimalStrings",
       "package": "@omnitron-dev/prism",
       "kind": "function",
@@ -30374,7 +31022,7 @@
       "name": "SupportedLocale",
       "package": "@omnitron-dev/prism",
       "kind": "type",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/theme/create-theme.ts#L59",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/theme/create-theme.ts#L60",
       "imports": [
         {
           "path": "@omnitron-dev/prism",
@@ -30419,10 +31067,34 @@
       ]
     },
     {
+      "name": "SvgIcon",
+      "package": "@omnitron-dev/prism",
+      "kind": "value",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/ui/index.ts#L68",
+      "imports": [
+        {
+          "path": "@omnitron-dev/prism/ui",
+          "guide": "/docs/frontend/prism/theme"
+        }
+      ]
+    },
+    {
+      "name": "SvgIconProps",
+      "package": "@omnitron-dev/prism",
+      "kind": "type",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/ui/index.ts#L69",
+      "imports": [
+        {
+          "path": "@omnitron-dev/prism/ui",
+          "guide": "/docs/frontend/prism/theme"
+        }
+      ]
+    },
+    {
       "name": "Switch",
       "package": "@omnitron-dev/prism",
       "kind": "value",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/ui/index.ts#L48",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/ui/index.ts#L49",
       "imports": [
         {
           "path": "@omnitron-dev/prism/ui",
@@ -30434,7 +31106,7 @@
       "name": "SxProps",
       "package": "@omnitron-dev/prism",
       "kind": "type",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/ui/index.ts#L61",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/ui/index.ts#L62",
       "imports": [
         {
           "path": "@omnitron-dev/prism/ui",
@@ -30446,7 +31118,7 @@
       "name": "Tab",
       "package": "@omnitron-dev/prism",
       "kind": "value",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/ui/index.ts#L55",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/ui/index.ts#L56",
       "imports": [
         {
           "path": "@omnitron-dev/prism/ui",
@@ -30490,7 +31162,7 @@
       "name": "Table",
       "package": "@omnitron-dev/prism",
       "kind": "value",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/ui/index.ts#L49",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/ui/index.ts#L50",
       "imports": [
         {
           "path": "@omnitron-dev/prism/ui",
@@ -30502,7 +31174,7 @@
       "name": "TableBody",
       "package": "@omnitron-dev/prism",
       "kind": "value",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/ui/index.ts#L50",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/ui/index.ts#L51",
       "imports": [
         {
           "path": "@omnitron-dev/prism/ui",
@@ -30514,7 +31186,7 @@
       "name": "TableCell",
       "package": "@omnitron-dev/prism",
       "kind": "value",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/ui/index.ts#L51",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/ui/index.ts#L52",
       "imports": [
         {
           "path": "@omnitron-dev/prism/ui",
@@ -30542,7 +31214,7 @@
       "name": "TableContainer",
       "package": "@omnitron-dev/prism",
       "kind": "value",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/ui/index.ts#L52",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/ui/index.ts#L53",
       "imports": [
         {
           "path": "@omnitron-dev/prism/ui",
@@ -30554,7 +31226,7 @@
       "name": "TableHead",
       "package": "@omnitron-dev/prism",
       "kind": "value",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/ui/index.ts#L53",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/ui/index.ts#L54",
       "imports": [
         {
           "path": "@omnitron-dev/prism/ui",
@@ -30566,7 +31238,7 @@
       "name": "TableIcon",
       "package": "@omnitron-dev/prism",
       "kind": "value",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/editor/icons/index.tsx#L390",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/editor/icons/index.tsx#L620",
       "imports": [
         {
           "path": "@omnitron-dev/prism/components/editor",
@@ -30594,7 +31266,7 @@
       "name": "TableRow",
       "package": "@omnitron-dev/prism",
       "kind": "value",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/ui/index.ts#L54",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/ui/index.ts#L55",
       "imports": [
         {
           "path": "@omnitron-dev/prism/ui",
@@ -30686,7 +31358,7 @@
       "name": "Tabs",
       "package": "@omnitron-dev/prism",
       "kind": "value",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/ui/index.ts#L56",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/ui/index.ts#L57",
       "imports": [
         {
           "path": "@omnitron-dev/prism/ui",
@@ -30802,7 +31474,7 @@
       "name": "textEllipsisMixin",
       "package": "@omnitron-dev/prism",
       "kind": "value",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/theme/mixins.ts#L555",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/theme/mixins.ts#L572",
       "imports": [
         {
           "path": "@omnitron-dev/prism",
@@ -30818,7 +31490,7 @@
       "name": "TextField",
       "package": "@omnitron-dev/prism",
       "kind": "value",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/ui/index.ts#L57",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/ui/index.ts#L58",
       "imports": [
         {
           "path": "@omnitron-dev/prism/ui",
@@ -30830,7 +31502,7 @@
       "name": "TextFieldProps",
       "package": "@omnitron-dev/prism",
       "kind": "type",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/ui/index.ts#L61",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/ui/index.ts#L62",
       "imports": [
         {
           "path": "@omnitron-dev/prism/ui",
@@ -30890,7 +31562,7 @@
       "name": "Theme",
       "package": "@omnitron-dev/prism",
       "kind": "type",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/ui/index.ts#L61",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/ui/index.ts#L62",
       "imports": [
         {
           "path": "@omnitron-dev/prism/ui",
@@ -31274,7 +31946,7 @@
       "name": "Tooltip",
       "package": "@omnitron-dev/prism",
       "kind": "value",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/ui/index.ts#L58",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/ui/index.ts#L59",
       "imports": [
         {
           "path": "@omnitron-dev/prism/ui",
@@ -31486,7 +32158,7 @@
       "name": "Typography",
       "package": "@omnitron-dev/prism",
       "kind": "value",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/ui/index.ts#L59",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/ui/index.ts#L60",
       "imports": [
         {
           "path": "@omnitron-dev/prism/ui",
@@ -31530,7 +32202,7 @@
       "name": "UnderlineIcon",
       "package": "@omnitron-dev/prism",
       "kind": "value",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/editor/icons/index.tsx#L52",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/editor/icons/index.tsx#L580",
       "imports": [
         {
           "path": "@omnitron-dev/prism/components/editor",
@@ -31542,7 +32214,7 @@
       "name": "UndoIcon",
       "package": "@omnitron-dev/prism",
       "kind": "value",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/editor/icons/index.tsx#L502",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/editor/icons/index.tsx#L630",
       "imports": [
         {
           "path": "@omnitron-dev/prism/components/editor",
@@ -31554,11 +32226,23 @@
       "name": "UnlinkIcon",
       "package": "@omnitron-dev/prism",
       "kind": "value",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/editor/icons/index.tsx#L424",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/editor/icons/index.tsx#L624",
       "imports": [
         {
           "path": "@omnitron-dev/prism/components/editor",
           "guide": "/docs/frontend/prism/components"
+        }
+      ]
+    },
+    {
+      "name": "UnlockIcon",
+      "package": "@omnitron-dev/prism",
+      "kind": "value",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/icons/controls.tsx#L93",
+      "imports": [
+        {
+          "path": "@omnitron-dev/prism/icons",
+          "guide": "/docs/frontend/prism/theme"
         }
       ]
     },
@@ -31571,6 +32255,18 @@
         {
           "path": "@omnitron-dev/prism/cli",
           "guide": "/docs/frontend/prism/cli"
+        }
+      ]
+    },
+    {
+      "name": "UploadIcon",
+      "package": "@omnitron-dev/prism",
+      "kind": "value",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/icons/controls.tsx#L69",
+      "imports": [
+        {
+          "path": "@omnitron-dev/prism/icons",
+          "guide": "/docs/frontend/prism/theme"
         }
       ]
     },
@@ -31610,7 +32306,7 @@
       "name": "useAccordion",
       "package": "@omnitron-dev/prism",
       "kind": "function",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/accordion/accordion.tsx#L290",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/accordion/accordion.tsx#L291",
       "imports": [
         {
           "path": "@omnitron-dev/prism",
@@ -31626,7 +32322,7 @@
       "name": "UseAccordionOptions",
       "package": "@omnitron-dev/prism",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/accordion/accordion.tsx#L237",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/accordion/accordion.tsx#L238",
       "imports": [
         {
           "path": "@omnitron-dev/prism",
@@ -31642,7 +32338,7 @@
       "name": "UseAccordionReturn",
       "package": "@omnitron-dev/prism",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/accordion/accordion.tsx#L246",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/accordion/accordion.tsx#L247",
       "imports": [
         {
           "path": "@omnitron-dev/prism",
@@ -32690,7 +33386,7 @@
       "name": "useErrorBoundary",
       "package": "@omnitron-dev/prism",
       "kind": "function",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/error-boundary/error-boundary.tsx#L543",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/error-boundary/error-boundary.tsx#L546",
       "imports": [
         {
           "path": "@omnitron-dev/prism",
@@ -33230,7 +33926,7 @@
       "name": "useMediaQuery",
       "package": "@omnitron-dev/prism",
       "kind": "value",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/ui/index.ts#L63",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/ui/index.ts#L64",
       "imports": [
         {
           "path": "@omnitron-dev/prism/ui",
@@ -34346,7 +35042,7 @@
       "name": "useTheme",
       "package": "@omnitron-dev/prism",
       "kind": "value",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/ui/index.ts#L62",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/ui/index.ts#L63",
       "imports": [
         {
           "path": "@omnitron-dev/prism/ui",
@@ -34839,6 +35535,18 @@
       ]
     },
     {
+      "name": "WarningIcon",
+      "package": "@omnitron-dev/prism",
+      "kind": "value",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/icons/controls.tsx#L41",
+      "imports": [
+        {
+          "path": "@omnitron-dev/prism/icons",
+          "guide": "/docs/frontend/prism/theme"
+        }
+      ]
+    },
+    {
       "name": "WebSocketClient",
       "package": "@omnitron-dev/prism",
       "kind": "class",
@@ -34919,6 +35627,30 @@
         {
           "path": "@omnitron-dev/prism",
           "guide": "/docs/frontend/prism"
+        }
+      ]
+    },
+    {
+      "name": "ZoomInIcon",
+      "package": "@omnitron-dev/prism",
+      "kind": "value",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/icons/controls.tsx#L71",
+      "imports": [
+        {
+          "path": "@omnitron-dev/prism/icons",
+          "guide": "/docs/frontend/prism/theme"
+        }
+      ]
+    },
+    {
+      "name": "ZoomOutIcon",
+      "package": "@omnitron-dev/prism",
+      "kind": "value",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/icons/controls.tsx#L73",
+      "imports": [
+        {
+          "path": "@omnitron-dev/prism/icons",
+          "guide": "/docs/frontend/prism/theme"
         }
       ]
     },

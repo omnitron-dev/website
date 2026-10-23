@@ -771,8 +771,14 @@ import { Scrollbar } from '@omnitron-dev/prism';
 </Scrollbar>
 ```
 
-Cross-browser custom scrollbar styling. Doesn't replace native
-scroll — just themes the bar.
+Cross-browser styling of native scrolling. On a fine pointer, the thumb is
+transparent while idle and appears on container hover or keyboard focus inside.
+Visibility does not change the scrollport's size. Touch input and forced-colors
+mode keep native controls discoverable.
+
+`autoHide` defaults to `true`; set `autoHide={false}` for a persistent thumb.
+`hideScrollbar` still explicitly hides the bar while preserving scrolling.
+The shared CSS baseline gives nested overflow regions the same behaviour.
 
 ## Input & form
 
