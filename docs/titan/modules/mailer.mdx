@@ -127,7 +127,7 @@ the durable outbox path, not optional marketing notification preferences.
 `pnpm test` uses a real local SMTP server and independent MIME parser, tests STARTTLS
 refusal, reply/header injection, mixed content, rejected recipients, queue capacity and
 actual Titan DI disposal. Worker contract tests cover lost wake-ups, failed commits, poison
-envelopes and draining. EXAMPLE also exercises the complete PostgreSQL → Redis → SMTP path
+envelopes and draining. An independent consumer also exercises the complete PostgreSQL → Redis → SMTP path
 with competing workers and checks the resulting Mailpit messages.
 
 Design references: [NestJS Mailer](https://nest-modules.github.io/mailer/docs/configuration/),

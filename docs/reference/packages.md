@@ -6,9 +6,12 @@ description: Every package shipped from the monorepo, grouped by role.
 
 # Package Index
 
-Every package published from `github.com/omnitron-dev/omni`,
+Public packages defined in `github.com/omnitron-dev/omni`,
 grouped by role and clearly labelled (server/client, required/
-optional, framework-bound vs framework-agnostic).
+optional, framework-bound vs framework-agnostic). This index follows current
+source; an installed registry release may expose fewer packages or entry points.
+See [source-workspace installation](../auth/access-policy.md)
+and [composition boundaries](../foundations/composition.md) when integrating unreleased APIs.
 
 ## Server-side / Backend
 
@@ -42,6 +45,7 @@ Independently versioned. Add only what your app uses.
 | [`@omnitron-dev/titan-pm`](../titan/modules/pm.mdx) | Process manager / worker pools / autoscaling |
 | [`@omnitron-dev/titan-ratelimit`](../titan/modules/ratelimit.mdx) | Token-bucket / sliding-window / fixed-window |
 | [`@omnitron-dev/titan-redis`](../titan/modules/redis.mdx) | Redis client (clusters, sentinel, named instances) |
+| [`@omnitron-dev/titan-storage`](../titan/modules/storage.md) | Local and S3 object adapters |
 | [`@omnitron-dev/titan-scheduler`](../titan/modules/scheduler.mdx) | Cron / interval / timeout with persistence |
 | [`@omnitron-dev/titan-telemetry-relay`](../titan/modules/telemetry-relay.mdx) | Store-and-forward telemetry (WAL-backed) |
 
@@ -74,11 +78,12 @@ Independently versioned. Add only what your app uses.
 
 ## Shared utilities (framework-agnostic)
 
-Six small focused packages. Used internally by everything
+Focused packages. Used internally by everything
 above; reusable in non-Omnitron projects.
 
 | Package | Purpose |
 | ------- | ------- |
+| [`@omnitron-dev/access`](../auth/access-policy.md) | Dependency-free roles, permission catalogs and compiled checks |
 | [`@omnitron-dev/common`](../utilities/common.md) | Type predicates, promise helpers, object tools, data structures |
 | [`@omnitron-dev/cuid`](../utilities/cuid.md) | Collision-resistant URL-safe unique IDs |
 | [`@omnitron-dev/eventemitter`](../utilities/eventemitter.md) | Async event emitter with parallel/serial/reduce |

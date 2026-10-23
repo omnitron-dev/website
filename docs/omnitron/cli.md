@@ -594,3 +594,16 @@ Account cleanup modes belong to the project's tool: `--leftovers` performs a
 census, `--leftovers rehearse` previews removal in rolled-back transactions,
 and `--leftovers apply` requests committed removal. Inspect the census and
 project policy before applying cleanup.
+
+## Fleet recovery and host ingress
+
+`omnitron fleet recover <node> <receipt>` asks the selected node to recover a
+bundle activation from its receipt. Use the receipt produced by the relevant
+operation; recovery is not a fresh release or a command to deploy arbitrary files.
+
+`omnitron infra ingress` manages host-owned ingress independently of application
+stacks. `status` reads configured and observed generation; `recover` recovers an
+interrupted publication. Manifest-driven operations use the expected generation
+for compare-and-swap checks, so a stale plan cannot overwrite a newer owner state.
+Consult `omnitron infra ingress --help` for the available operations and supply
+the JSON manifest belonging to the intended host and owner.

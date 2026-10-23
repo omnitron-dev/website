@@ -35,6 +35,7 @@ const sidebars: SidebarsConfig = {
       items: [
         'foundations/principles',
         'foundations/architecture',
+        'foundations/composition',
         'foundations/titan-vs-omnitron',
         'foundations/monorepo',
       ],
@@ -76,9 +77,10 @@ const sidebars: SidebarsConfig = {
     },
     {
       type: 'category',
-      label: 'Authorisation Designs',
+      label: 'Authentication and Access',
       link: {type: 'doc', id: 'auth/index'},
       items: [
+        'auth/access-policy',
         'auth/token-issuance',
         'auth/mental-model',
         'auth/permissions',
@@ -296,6 +298,7 @@ const sidebars: SidebarsConfig = {
           items: [
             'titan/modules/auth',
             'titan/modules/shared-session',
+            'titan/modules/storage',
             'titan/modules/cache',
             'titan/modules/database',
             'titan/modules/discovery',

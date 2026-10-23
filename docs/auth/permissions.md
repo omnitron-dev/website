@@ -5,14 +5,11 @@ sidebar_position: 1
 
 # Permissions
 
-:::caution Design RFC
-Permission strings, hierarchical wildcards, and the `@Auth({permissions})` gate described here are part of the planned authorisation stack. Today's Omnitron gates RPCs by role only (`viewer` / `operator` / `admin`); permission-string evaluation is the target design.
-:::
-
-A **permission** is a dot-separated string that names a
-capability. Every gate in the platform — `@Auth({permissions})`,
-`@kysera/rls` policy, frontend `usePermission()` hook —
-resolves the same matcher against the same set of strings.
+Permission matching is implemented in [the shared access core](./access-policy.md).
+Netron's `@Auth({ permissions })` uses **explicit** matching. Application policies
+can choose **hierarchical** matching, the default of `access/permissions`.
+The examples on this page describe transport gates and application catalogs;
+the supervisor's operator roles remain a separate policy.
 
 ## Grammar
 
@@ -27,7 +24,7 @@ resolves the same matcher against the same set of strings.
 | `action`    | `list`, `view`, `create`, `edit`, `delete`| Verb on the resource                          |
 | `sub`       | `own`, `assigned`                         | Optional refinement (e.g. `posts.edit.own`)   |
 
-Examples drawn from the canonical registry:
+Example keys for an application-owned registry:
 
 ```
 admin.users.list
@@ -51,7 +48,7 @@ Granting a wildcard authorises every key matching the prefix.
 
 The trailing `.*` is the explicit (and only) wildcard form: the
 granted entry must end in `.*` for prefix expansion to apply. A
-bare prefix without the star (`admin.users`) authorises **only**
+bare prefix without the star (`admin.users`) in **explicit mode** authorises **only**
 the exact key `admin.users` — it does not implicitly grant the
 keys below it. Spell out the `.*` when you mean "everything under
 here".

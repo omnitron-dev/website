@@ -1,5 +1,6 @@
 {
   "packages": [
+    "@omnitron-dev/access",
     "@omnitron-dev/common",
     "@omnitron-dev/cuid",
     "@omnitron-dev/eventemitter",
@@ -27,9 +28,26 @@
     "@omnitron-dev/titan-ratelimit",
     "@omnitron-dev/titan-redis",
     "@omnitron-dev/titan-scheduler",
+    "@omnitron-dev/titan-storage",
     "@omnitron-dev/titan-telemetry-relay"
   ],
   "entryPoints": [
+    {
+      "path": "@omnitron-dev/access",
+      "guide": "/docs/auth/access-policy"
+    },
+    {
+      "path": "@omnitron-dev/access/permissions",
+      "guide": "/docs/auth/access-policy"
+    },
+    {
+      "path": "@omnitron-dev/access/platform",
+      "guide": "/docs/auth/access-policy"
+    },
+    {
+      "path": "@omnitron-dev/access/roles",
+      "guide": "/docs/auth/access-policy"
+    },
     {
       "path": "@omnitron-dev/common",
       "guide": "/docs/utilities/common"
@@ -229,6 +247,16 @@
       "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/knowledge-graph/graph.css"
     },
     {
+      "path": "@omnitron-dev/prism/components/map",
+      "guide": "/docs/frontend/prism/maps"
+    },
+    {
+      "path": "@omnitron-dev/prism/components/map/styles.css",
+      "guide": "/docs/frontend/prism/maps",
+      "kind": "stylesheet",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/map/map.css"
+    },
+    {
       "path": "@omnitron-dev/prism/components/research",
       "guide": "/docs/frontend/prism/components"
     },
@@ -341,6 +369,10 @@
       "guide": "/docs/titan/modules/auth"
     },
     {
+      "path": "@omnitron-dev/titan-auth/access",
+      "guide": "/docs/auth/access-policy"
+    },
+    {
       "path": "@omnitron-dev/titan-auth/preset/shared-session",
       "guide": "/docs/titan/modules/shared-session"
     },
@@ -441,6 +473,10 @@
       "guide": "/docs/titan/modules/scheduler"
     },
     {
+      "path": "@omnitron-dev/titan-storage",
+      "guide": "/docs/titan/modules/storage"
+    },
+    {
       "path": "@omnitron-dev/titan-telemetry-relay",
       "guide": "/docs/titan/modules/telemetry-relay"
     },
@@ -530,6 +566,394 @@
     }
   ],
   "symbols": [
+    {
+      "name": "assignableRolesFor",
+      "package": "@omnitron-dev/access",
+      "kind": "function",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/access/src/platform-roles.ts#L49",
+      "imports": [
+        {
+          "path": "@omnitron-dev/access/platform",
+          "guide": "/docs/auth/access-policy"
+        }
+      ]
+    },
+    {
+      "name": "canModerateUserWithRole",
+      "package": "@omnitron-dev/access",
+      "kind": "function",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/access/src/platform-roles.ts#L37",
+      "imports": [
+        {
+          "path": "@omnitron-dev/access/platform",
+          "guide": "/docs/auth/access-policy"
+        }
+      ]
+    },
+    {
+      "name": "canSeeUserWithRole",
+      "package": "@omnitron-dev/access",
+      "kind": "function",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/access/src/platform-roles.ts#L32",
+      "imports": [
+        {
+          "path": "@omnitron-dev/access/platform",
+          "guide": "/docs/auth/access-policy"
+        }
+      ]
+    },
+    {
+      "name": "createPermissionChecker",
+      "package": "@omnitron-dev/access",
+      "kind": "function",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/access/src/permissions.ts#L77",
+      "imports": [
+        {
+          "path": "@omnitron-dev/access",
+          "guide": "/docs/auth/access-policy"
+        },
+        {
+          "path": "@omnitron-dev/access/permissions",
+          "guide": "/docs/auth/access-policy"
+        }
+      ]
+    },
+    {
+      "name": "createRoleHierarchy",
+      "package": "@omnitron-dev/access",
+      "kind": "function",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/access/src/role-hierarchy.ts#L35",
+      "imports": [
+        {
+          "path": "@omnitron-dev/access",
+          "guide": "/docs/auth/access-policy"
+        },
+        {
+          "path": "@omnitron-dev/access/roles",
+          "guide": "/docs/auth/access-policy"
+        }
+      ]
+    },
+    {
+      "name": "definePermission",
+      "package": "@omnitron-dev/access",
+      "kind": "function",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/access/src/permissions.ts#L163",
+      "imports": [
+        {
+          "path": "@omnitron-dev/access",
+          "guide": "/docs/auth/access-policy"
+        },
+        {
+          "path": "@omnitron-dev/access/permissions",
+          "guide": "/docs/auth/access-policy"
+        }
+      ]
+    },
+    {
+      "name": "effectiveLevel",
+      "package": "@omnitron-dev/access",
+      "kind": "function",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/access/src/platform-roles.ts#L27",
+      "imports": [
+        {
+          "path": "@omnitron-dev/access/platform",
+          "guide": "/docs/auth/access-policy"
+        }
+      ]
+    },
+    {
+      "name": "expandRoles",
+      "package": "@omnitron-dev/access",
+      "kind": "function",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/access/src/platform-roles.ts#L60",
+      "imports": [
+        {
+          "path": "@omnitron-dev/access/platform",
+          "guide": "/docs/auth/access-policy"
+        }
+      ]
+    },
+    {
+      "name": "expandRoleSet",
+      "package": "@omnitron-dev/access",
+      "kind": "function",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/access/src/platform-roles.ts#L64",
+      "imports": [
+        {
+          "path": "@omnitron-dev/access/platform",
+          "guide": "/docs/auth/access-policy"
+        }
+      ]
+    },
+    {
+      "name": "expandWildcards",
+      "package": "@omnitron-dev/access",
+      "kind": "function",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/access/src/permissions.ts#L134",
+      "imports": [
+        {
+          "path": "@omnitron-dev/access",
+          "guide": "/docs/auth/access-policy"
+        },
+        {
+          "path": "@omnitron-dev/access/permissions",
+          "guide": "/docs/auth/access-policy"
+        }
+      ]
+    },
+    {
+      "name": "hasAllPermissions",
+      "package": "@omnitron-dev/access",
+      "kind": "function",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/access/src/permissions.ts#L94",
+      "imports": [
+        {
+          "path": "@omnitron-dev/access",
+          "guide": "/docs/auth/access-policy"
+        },
+        {
+          "path": "@omnitron-dev/access/permissions",
+          "guide": "/docs/auth/access-policy"
+        }
+      ]
+    },
+    {
+      "name": "hasAnyPermission",
+      "package": "@omnitron-dev/access",
+      "kind": "function",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/access/src/permissions.ts#L101",
+      "imports": [
+        {
+          "path": "@omnitron-dev/access",
+          "guide": "/docs/auth/access-policy"
+        },
+        {
+          "path": "@omnitron-dev/access/permissions",
+          "guide": "/docs/auth/access-policy"
+        }
+      ]
+    },
+    {
+      "name": "hasPermission",
+      "package": "@omnitron-dev/access",
+      "kind": "function",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/access/src/permissions.ts#L65",
+      "imports": [
+        {
+          "path": "@omnitron-dev/access",
+          "guide": "/docs/auth/access-policy"
+        },
+        {
+          "path": "@omnitron-dev/access/permissions",
+          "guide": "/docs/auth/access-policy"
+        }
+      ]
+    },
+    {
+      "name": "isValidPermissionKey",
+      "package": "@omnitron-dev/access",
+      "kind": "function",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/access/src/permissions.ts#L119",
+      "imports": [
+        {
+          "path": "@omnitron-dev/access",
+          "guide": "/docs/auth/access-policy"
+        },
+        {
+          "path": "@omnitron-dev/access/permissions",
+          "guide": "/docs/auth/access-policy"
+        }
+      ]
+    },
+    {
+      "name": "PermissionDefinition",
+      "package": "@omnitron-dev/access",
+      "kind": "interface",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/access/src/permissions.ts#L24",
+      "imports": [
+        {
+          "path": "@omnitron-dev/access",
+          "guide": "/docs/auth/access-policy"
+        },
+        {
+          "path": "@omnitron-dev/access/permissions",
+          "guide": "/docs/auth/access-policy"
+        }
+      ]
+    },
+    {
+      "name": "permissionGrants",
+      "package": "@omnitron-dev/access",
+      "kind": "function",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/access/src/permissions.ts#L53",
+      "imports": [
+        {
+          "path": "@omnitron-dev/access",
+          "guide": "/docs/auth/access-policy"
+        },
+        {
+          "path": "@omnitron-dev/access/permissions",
+          "guide": "/docs/auth/access-policy"
+        }
+      ]
+    },
+    {
+      "name": "PermissionMatchMode",
+      "package": "@omnitron-dev/access",
+      "kind": "type",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/access/src/permissions.ts#L50",
+      "imports": [
+        {
+          "path": "@omnitron-dev/access",
+          "guide": "/docs/auth/access-policy"
+        },
+        {
+          "path": "@omnitron-dev/access/permissions",
+          "guide": "/docs/auth/access-policy"
+        }
+      ]
+    },
+    {
+      "name": "PermissionRisk",
+      "package": "@omnitron-dev/access",
+      "kind": "type",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/access/src/permissions.ts#L18",
+      "imports": [
+        {
+          "path": "@omnitron-dev/access",
+          "guide": "/docs/auth/access-policy"
+        },
+        {
+          "path": "@omnitron-dev/access/permissions",
+          "guide": "/docs/auth/access-policy"
+        }
+      ]
+    },
+    {
+      "name": "PermissionScope",
+      "package": "@omnitron-dev/access",
+      "kind": "type",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/access/src/permissions.ts#L15",
+      "imports": [
+        {
+          "path": "@omnitron-dev/access",
+          "guide": "/docs/auth/access-policy"
+        },
+        {
+          "path": "@omnitron-dev/access/permissions",
+          "guide": "/docs/auth/access-policy"
+        }
+      ]
+    },
+    {
+      "name": "PLATFORM_ROLES",
+      "package": "@omnitron-dev/access",
+      "kind": "value",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/access/src/platform-roles.ts#L17",
+      "imports": [
+        {
+          "path": "@omnitron-dev/access/platform",
+          "guide": "/docs/auth/access-policy"
+        }
+      ]
+    },
+    {
+      "name": "PlatformRole",
+      "package": "@omnitron-dev/access",
+      "kind": "type",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/access/src/platform-roles.ts#L16",
+      "imports": [
+        {
+          "path": "@omnitron-dev/access/platform",
+          "guide": "/docs/auth/access-policy"
+        }
+      ]
+    },
+    {
+      "name": "resolvePermissions",
+      "package": "@omnitron-dev/access",
+      "kind": "function",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/access/src/permissions.ts#L176",
+      "imports": [
+        {
+          "path": "@omnitron-dev/access",
+          "guide": "/docs/auth/access-policy"
+        },
+        {
+          "path": "@omnitron-dev/access/permissions",
+          "guide": "/docs/auth/access-policy"
+        }
+      ]
+    },
+    {
+      "name": "ROLE_PRIORITY",
+      "package": "@omnitron-dev/access",
+      "kind": "value",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/access/src/platform-roles.ts#L20",
+      "imports": [
+        {
+          "path": "@omnitron-dev/access/platform",
+          "guide": "/docs/auth/access-policy"
+        }
+      ]
+    },
+    {
+      "name": "RoleDefinition",
+      "package": "@omnitron-dev/access",
+      "kind": "interface",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/access/src/role-hierarchy.ts#L2",
+      "imports": [
+        {
+          "path": "@omnitron-dev/access",
+          "guide": "/docs/auth/access-policy"
+        },
+        {
+          "path": "@omnitron-dev/access/roles",
+          "guide": "/docs/auth/access-policy"
+        }
+      ]
+    },
+    {
+      "name": "RoleHierarchy",
+      "package": "@omnitron-dev/access",
+      "kind": "interface",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/access/src/role-hierarchy.ts#L12",
+      "imports": [
+        {
+          "path": "@omnitron-dev/access",
+          "guide": "/docs/auth/access-policy"
+        },
+        {
+          "path": "@omnitron-dev/access/roles",
+          "guide": "/docs/auth/access-policy"
+        }
+      ]
+    },
+    {
+      "name": "rolePriority",
+      "package": "@omnitron-dev/access",
+      "kind": "function",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/access/src/platform-roles.ts#L23",
+      "imports": [
+        {
+          "path": "@omnitron-dev/access/platform",
+          "guide": "/docs/auth/access-policy"
+        }
+      ]
+    },
+    {
+      "name": "visibleRolesFor",
+      "package": "@omnitron-dev/access",
+      "kind": "function",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/access/src/platform-roles.ts#L41",
+      "imports": [
+        {
+          "path": "@omnitron-dev/access/platform",
+          "guide": "/docs/auth/access-policy"
+        }
+      ]
+    },
     {
       "name": "absDecimal",
       "package": "@omnitron-dev/common",
@@ -10818,7 +11242,7 @@
       "name": "AggregatedHealthDto",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/config/types.ts#L1066",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/config/types.ts#L1069",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron",
@@ -10838,7 +11262,7 @@
       "name": "AggregatedMetricsDto",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/config/types.ts#L1029",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/config/types.ts#L1032",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron",
@@ -11078,7 +11502,7 @@
       "name": "AppDiagnosticsDto",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/config/types.ts#L1184",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/config/types.ts#L1187",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron",
@@ -11178,7 +11602,7 @@
       "name": "AppStatus",
       "package": "@omnitron-dev/omnitron",
       "kind": "type",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/config/types.ts#L954",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/config/types.ts#L957",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron",
@@ -11222,7 +11646,7 @@
       "name": "AttestStored",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/shared/dto/services.ts#L816",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/shared/dto/services.ts#L828",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/dto/services",
@@ -11294,7 +11718,7 @@
       "name": "ChildDiagnosticsDto",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/config/types.ts#L1134",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/config/types.ts#L1137",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/config",
@@ -11311,6 +11735,18 @@
         {
           "path": "@omnitron-dev/omnitron/config",
           "guide": "/docs/omnitron/configuration"
+        }
+      ]
+    },
+    {
+      "name": "compileCustomRoutes",
+      "package": "@omnitron-dev/omnitron",
+      "kind": "function",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/orchestrator/http-routes.ts#L4",
+      "imports": [
+        {
+          "path": "@omnitron-dev/omnitron/operations",
+          "guide": "/docs/omnitron/releases"
         }
       ]
     },
@@ -11426,7 +11862,7 @@
       "name": "DaemonStatusDto",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/config/types.ts#L1009",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/config/types.ts#L1012",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron",
@@ -11562,7 +11998,7 @@
       "name": "DeployTarget",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/services/remote-deployer.service.ts#L146",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/services/remote-deployer.service.ts#L156",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/operations",
@@ -11610,7 +12046,7 @@
       "name": "ExecutionService",
       "package": "@omnitron-dev/omnitron",
       "kind": "class",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/execution/execution.service.ts#L201",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/execution/execution.service.ts#L211",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/operations",
@@ -11715,10 +12151,22 @@
       ]
     },
     {
+      "name": "HostOperationAllowance",
+      "package": "@omnitron-dev/omnitron",
+      "kind": "interface",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/services/host-operation-barrier.ts#L4",
+      "imports": [
+        {
+          "path": "@omnitron-dev/omnitron/operations",
+          "guide": "/docs/omnitron/releases"
+        }
+      ]
+    },
+    {
       "name": "IAlertSink",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/config/types.ts#L863",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/config/types.ts#L866",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/config",
@@ -11758,7 +12206,7 @@
       "name": "IDaemonConfig",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/config/types.ts#L695",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/config/types.ts#L698",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/config",
@@ -11782,7 +12230,7 @@
       "name": "IEcosystemAppEntry",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/config/types.ts#L619",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/config/types.ts#L620",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron",
@@ -11798,7 +12246,7 @@
       "name": "IEcosystemConfig",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/config/types.ts#L877",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/config/types.ts#L880",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron",
@@ -11814,7 +12262,7 @@
       "name": "IHttpTransportConfig",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/config/types.ts#L591",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/config/types.ts#L592",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron",
@@ -11847,6 +12295,18 @@
         {
           "path": "@omnitron-dev/omnitron/dto/services",
           "guide": "/docs/omnitron/services-reference"
+        }
+      ]
+    },
+    {
+      "name": "immutableAssetsRoot",
+      "package": "@omnitron-dev/omnitron",
+      "kind": "function",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/services/static-carry-forward.ts#L188",
+      "imports": [
+        {
+          "path": "@omnitron-dev/omnitron/operations",
+          "guide": "/docs/omnitron/releases"
         }
       ]
     },
@@ -11914,7 +12374,7 @@
       "name": "InfrastructureState",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/infrastructure/types.ts#L258",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/infrastructure/types.ts#L260",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/dto/services",
@@ -12074,7 +12534,7 @@
       "name": "IOmnitronAlertsService",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/shared/dto/services.ts#L401",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/shared/dto/services.ts#L402",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/dto/services",
@@ -12086,7 +12546,7 @@
       "name": "IOmnitronAuditService",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/shared/dto/services.ts#L576",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/shared/dto/services.ts#L587",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/dto/services",
@@ -12110,7 +12570,7 @@
       "name": "IOmnitronBackupsService",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/shared/dto/services.ts#L527",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/shared/dto/services.ts#L538",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/dto/services",
@@ -12122,7 +12582,7 @@
       "name": "IOmnitronDeployService",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/shared/dto/services.ts#L425",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/shared/dto/services.ts#L426",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/dto/services",
@@ -12134,7 +12594,7 @@
       "name": "IOmnitronDiscoveryService",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/shared/dto/services.ts#L564",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/shared/dto/services.ts#L575",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/dto/services",
@@ -12146,7 +12606,7 @@
       "name": "IOmnitronFleetService",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/shared/dto/services.ts#L475",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/shared/dto/services.ts#L486",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/dto/services",
@@ -12158,7 +12618,7 @@
       "name": "IOmnitronHealthService",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/shared/dto/services.ts#L556",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/shared/dto/services.ts#L567",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/dto/services",
@@ -12170,7 +12630,7 @@
       "name": "IOmnitronInfraService",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/shared/dto/services.ts#L443",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/shared/dto/services.ts#L444",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/dto/services",
@@ -12182,7 +12642,7 @@
       "name": "IOmnitronKubernetesService",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/shared/dto/services.ts#L543",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/shared/dto/services.ts#L554",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/dto/services",
@@ -12206,7 +12666,7 @@
       "name": "IOmnitronMetricsService",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/shared/dto/services.ts#L737",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/shared/dto/services.ts#L749",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/dto/services",
@@ -12218,7 +12678,7 @@
       "name": "IOmnitronNodesService",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/shared/dto/services.ts#L605",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/shared/dto/services.ts#L616",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/dto/services",
@@ -12230,7 +12690,7 @@
       "name": "IOmnitronPipelinesService",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/shared/dto/services.ts#L491",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/shared/dto/services.ts#L502",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/dto/services",
@@ -12246,7 +12706,7 @@
       "name": "IOmnitronReleaseService",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/shared/dto/services.ts#L823",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/shared/dto/services.ts#L835",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/dto/services",
@@ -12258,7 +12718,7 @@
       "name": "IOmnitronSecretsService",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/shared/dto/services.ts#L583",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/shared/dto/services.ts#L594",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/dto/services",
@@ -12274,7 +12734,7 @@
       "name": "IOmnitronSystemInfoService",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/shared/dto/services.ts#L513",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/shared/dto/services.ts#L524",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/dto/services",
@@ -12286,7 +12746,7 @@
       "name": "IOmnitronTracesService",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/shared/dto/services.ts#L504",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/shared/dto/services.ts#L515",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/dto/services",
@@ -12314,7 +12774,7 @@
       "name": "IProcessTopologyEntry",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/config/types.ts#L546",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/config/types.ts#L547",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron",
@@ -12546,7 +13006,7 @@
       "name": "IWatchConfig",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/config/types.ts#L671",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/config/types.ts#L674",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron",
@@ -12562,7 +13022,7 @@
       "name": "IWebSocketTransportConfig",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/config/types.ts#L608",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/config/types.ts#L609",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron",
@@ -12614,7 +13074,7 @@
       "name": "LastExitDto",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/config/types.ts#L1106",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/config/types.ts#L1109",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/config",
@@ -12662,7 +13122,7 @@
       "name": "LogEntryDto",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/config/types.ts#L1092",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/config/types.ts#L1095",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron",
@@ -12694,7 +13154,7 @@
       "name": "LogPathsDto",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/config/types.ts#L1177",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/config/types.ts#L1180",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/config",
@@ -13222,7 +13682,7 @@
       "name": "PoolDiagnosticsDto",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/config/types.ts#L1158",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/config/types.ts#L1161",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/config",
@@ -13234,7 +13694,7 @@
       "name": "ProcessInfoDto",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/config/types.ts#L956",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/config/types.ts#L959",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron",
@@ -13374,7 +13834,7 @@
       "name": "ReleaseDeploymentDto",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/shared/dto/services.ts#L769",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/shared/dto/services.ts#L781",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/dto/services",
@@ -13422,7 +13882,7 @@
       "name": "ReleasePreflightDto",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/shared/dto/services.ts#L757",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/shared/dto/services.ts#L769",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/dto/services",
@@ -13434,7 +13894,7 @@
       "name": "ReleasePruneAnswer",
       "package": "@omnitron-dev/omnitron",
       "kind": "type",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/shared/dto/services.ts#L795",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/shared/dto/services.ts#L807",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/dto/services",
@@ -13458,7 +13918,7 @@
       "name": "RemoteDeployer",
       "package": "@omnitron-dev/omnitron",
       "kind": "class",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/services/remote-deployer.service.ts#L367",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/services/remote-deployer.service.ts#L377",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/operations",
@@ -13518,7 +13978,7 @@
       "name": "SSHTarget",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/execution/execution.service.ts#L26",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/execution/execution.service.ts#L29",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/operations",
@@ -13578,7 +14038,7 @@
       "name": "StackInfrastructureManager",
       "package": "@omnitron-dev/omnitron",
       "kind": "class",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/infrastructure/stack-infra-manager.ts#L46",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/infrastructure/stack-infra-manager.ts#L47",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/operations",
@@ -13731,6 +14191,54 @@
       ]
     },
     {
+      "name": "StaticAssetOwner",
+      "package": "@omnitron-dev/omnitron",
+      "kind": "type",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/services/static-carry-forward.ts#L173",
+      "imports": [
+        {
+          "path": "@omnitron-dev/omnitron/operations",
+          "guide": "/docs/omnitron/releases"
+        }
+      ]
+    },
+    {
+      "name": "StaticAssetPublication",
+      "package": "@omnitron-dev/omnitron",
+      "kind": "type",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/services/static-carry-forward.ts#L175",
+      "imports": [
+        {
+          "path": "@omnitron-dev/omnitron/operations",
+          "guide": "/docs/omnitron/releases"
+        }
+      ]
+    },
+    {
+      "name": "StaticAssetReceipt",
+      "package": "@omnitron-dev/omnitron",
+      "kind": "type",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/services/static-carry-forward.ts#L179",
+      "imports": [
+        {
+          "path": "@omnitron-dev/omnitron/operations",
+          "guide": "/docs/omnitron/releases"
+        }
+      ]
+    },
+    {
+      "name": "StaticAssetSource",
+      "package": "@omnitron-dev/omnitron",
+      "kind": "type",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/services/static-carry-forward.ts#L174",
+      "imports": [
+        {
+          "path": "@omnitron-dev/omnitron/operations",
+          "guide": "/docs/omnitron/releases"
+        }
+      ]
+    },
+    {
       "name": "StoredAttestation",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
@@ -13746,7 +14254,7 @@
       "name": "SubProcessInfoDto",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/config/types.ts#L975",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/config/types.ts#L978",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron",
@@ -16782,7 +17290,7 @@
       "name": "COLOR_GROUPS",
       "package": "@omnitron-dev/prism",
       "kind": "value",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/theme/create-theme.ts#L440",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/theme/create-theme.ts#L443",
       "imports": [
         {
           "path": "@omnitron-dev/prism",
@@ -17615,6 +18123,10 @@
         {
           "path": "@omnitron-dev/prism/components",
           "guide": "/docs/frontend/prism/components"
+        },
+        {
+          "path": "@omnitron-dev/prism/components/map",
+          "guide": "/docs/frontend/prism/maps"
         }
       ]
     },
@@ -17666,7 +18178,7 @@
       "name": "createButtonBaseOverrides",
       "package": "@omnitron-dev/prism",
       "kind": "function",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/theme/components/Button.ts#L282",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/theme/components/Button.ts#L280",
       "imports": [
         {
           "path": "@omnitron-dev/prism",
@@ -17682,7 +18194,7 @@
       "name": "createButtonGroupOverrides",
       "package": "@omnitron-dev/prism",
       "kind": "function",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/theme/components/Button.ts#L290",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/theme/components/Button.ts#L288",
       "imports": [
         {
           "path": "@omnitron-dev/prism",
@@ -18014,7 +18526,7 @@
       "name": "createPrismTheme",
       "package": "@omnitron-dev/prism",
       "kind": "function",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/theme/create-theme.ts#L643",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/theme/create-theme.ts#L646",
       "imports": [
         {
           "path": "@omnitron-dev/prism",
@@ -18030,7 +18542,7 @@
       "name": "CreatePrismThemeOptions",
       "package": "@omnitron-dev/prism",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/theme/create-theme.ts#L84",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/theme/create-theme.ts#L87",
       "imports": [
         {
           "path": "@omnitron-dev/prism",
@@ -18630,7 +19142,7 @@
       "name": "DashboardContent",
       "package": "@omnitron-dev/prism",
       "kind": "function",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/layouts/dashboard/layout.tsx#L346",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/layouts/dashboard/layout.tsx#L354",
       "imports": [
         {
           "path": "@omnitron-dev/prism",
@@ -18646,7 +19158,7 @@
       "name": "DashboardContentProps",
       "package": "@omnitron-dev/prism",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/layouts/dashboard/layout.tsx#L331",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/layouts/dashboard/layout.tsx#L339",
       "imports": [
         {
           "path": "@omnitron-dev/prism",
@@ -18678,7 +19190,7 @@
       "name": "DashboardLayout",
       "package": "@omnitron-dev/prism",
       "kind": "function",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/layouts/dashboard/layout.tsx#L296",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/layouts/dashboard/layout.tsx#L302",
       "imports": [
         {
           "path": "@omnitron-dev/prism",
@@ -18694,7 +19206,7 @@
       "name": "DashboardLayoutProps",
       "package": "@omnitron-dev/prism",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/layouts/dashboard/layout.tsx#L231",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/layouts/dashboard/layout.tsx#L235",
       "imports": [
         {
           "path": "@omnitron-dev/prism",
@@ -18883,6 +19395,30 @@
         {
           "path": "@omnitron-dev/prism",
           "guide": "/docs/frontend/prism"
+        }
+      ]
+    },
+    {
+      "name": "datePickerEnUS",
+      "package": "@omnitron-dev/prism",
+      "kind": "value",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/ui/index.ts#L86",
+      "imports": [
+        {
+          "path": "@omnitron-dev/prism/ui",
+          "guide": "/docs/frontend/prism/theme"
+        }
+      ]
+    },
+    {
+      "name": "datePickerRuRU",
+      "package": "@omnitron-dev/prism",
+      "kind": "value",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/ui/index.ts#L85",
+      "imports": [
+        {
+          "path": "@omnitron-dev/prism/ui",
+          "guide": "/docs/frontend/prism/theme"
         }
       ]
     },
@@ -22418,7 +22954,7 @@
       "name": "getPresetDisplayName",
       "package": "@omnitron-dev/prism",
       "kind": "function",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/theme/create-theme.ts#L850",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/theme/create-theme.ts#L859",
       "imports": [
         {
           "path": "@omnitron-dev/prism",
@@ -23867,6 +24403,18 @@
       ]
     },
     {
+      "name": "isMapPoint",
+      "package": "@omnitron-dev/prism",
+      "kind": "function",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/map/coordinates.ts#L6",
+      "imports": [
+        {
+          "path": "@omnitron-dev/prism/components/map",
+          "guide": "/docs/frontend/prism/maps"
+        }
+      ]
+    },
+    {
       "name": "isMarkdownContent",
       "package": "@omnitron-dev/prism",
       "kind": "function",
@@ -25178,7 +25726,7 @@
       "name": "Map",
       "package": "@omnitron-dev/prism",
       "kind": "value",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/map/Map.tsx#L109",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/map/Map.tsx#L58",
       "imports": [
         {
           "path": "@omnitron-dev/prism",
@@ -25187,6 +25735,10 @@
         {
           "path": "@omnitron-dev/prism/components",
           "guide": "/docs/frontend/prism/components"
+        },
+        {
+          "path": "@omnitron-dev/prism/components/map",
+          "guide": "/docs/frontend/prism/maps"
         }
       ]
     },
@@ -25203,6 +25755,10 @@
         {
           "path": "@omnitron-dev/prism/components",
           "guide": "/docs/frontend/prism/components"
+        },
+        {
+          "path": "@omnitron-dev/prism/components/map",
+          "guide": "/docs/frontend/prism/maps"
         }
       ]
     },
@@ -25219,6 +25775,38 @@
         {
           "path": "@omnitron-dev/prism/components",
           "guide": "/docs/frontend/prism/components"
+        },
+        {
+          "path": "@omnitron-dev/prism/components/map",
+          "guide": "/docs/frontend/prism/maps"
+        }
+      ]
+    },
+    {
+      "name": "MapLayer",
+      "package": "@omnitron-dev/prism",
+      "kind": "value",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/index.ts#L610",
+      "imports": [
+        {
+          "path": "@omnitron-dev/prism",
+          "guide": "/docs/frontend/prism"
+        },
+        {
+          "path": "@omnitron-dev/prism/components",
+          "guide": "/docs/frontend/prism/components"
+        }
+      ]
+    },
+    {
+      "name": "MapLayer",
+      "package": "@omnitron-dev/prism",
+      "kind": "value",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/map/index.ts#L20",
+      "imports": [
+        {
+          "path": "@omnitron-dev/prism/components/map",
+          "guide": "/docs/frontend/prism/maps"
         }
       ]
     },
@@ -25235,6 +25823,10 @@
         {
           "path": "@omnitron-dev/prism/components",
           "guide": "/docs/frontend/prism/components"
+        },
+        {
+          "path": "@omnitron-dev/prism/components/map",
+          "guide": "/docs/frontend/prism/maps"
         }
       ]
     },
@@ -25251,6 +25843,110 @@
         {
           "path": "@omnitron-dev/prism/components",
           "guide": "/docs/frontend/prism/components"
+        },
+        {
+          "path": "@omnitron-dev/prism/components/map",
+          "guide": "/docs/frontend/prism/maps"
+        }
+      ]
+    },
+    {
+      "name": "MapMessages",
+      "package": "@omnitron-dev/prism",
+      "kind": "interface",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/map/Map.tsx#L28",
+      "imports": [
+        {
+          "path": "@omnitron-dev/prism",
+          "guide": "/docs/frontend/prism"
+        },
+        {
+          "path": "@omnitron-dev/prism/components",
+          "guide": "/docs/frontend/prism/components"
+        },
+        {
+          "path": "@omnitron-dev/prism/components/map",
+          "guide": "/docs/frontend/prism/maps"
+        }
+      ]
+    },
+    {
+      "name": "MapPlace",
+      "package": "@omnitron-dev/prism",
+      "kind": "interface",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/map/MapPlaceSearch.tsx#L8",
+      "imports": [
+        {
+          "path": "@omnitron-dev/prism",
+          "guide": "/docs/frontend/prism"
+        },
+        {
+          "path": "@omnitron-dev/prism/components",
+          "guide": "/docs/frontend/prism/components"
+        },
+        {
+          "path": "@omnitron-dev/prism/components/map",
+          "guide": "/docs/frontend/prism/maps"
+        }
+      ]
+    },
+    {
+      "name": "MapPlaceSearch",
+      "package": "@omnitron-dev/prism",
+      "kind": "function",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/map/MapPlaceSearch.tsx#L44",
+      "imports": [
+        {
+          "path": "@omnitron-dev/prism",
+          "guide": "/docs/frontend/prism"
+        },
+        {
+          "path": "@omnitron-dev/prism/components",
+          "guide": "/docs/frontend/prism/components"
+        },
+        {
+          "path": "@omnitron-dev/prism/components/map",
+          "guide": "/docs/frontend/prism/maps"
+        }
+      ]
+    },
+    {
+      "name": "MapPlaceSearchLabels",
+      "package": "@omnitron-dev/prism",
+      "kind": "interface",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/map/MapPlaceSearch.tsx#L14",
+      "imports": [
+        {
+          "path": "@omnitron-dev/prism",
+          "guide": "/docs/frontend/prism"
+        },
+        {
+          "path": "@omnitron-dev/prism/components",
+          "guide": "/docs/frontend/prism/components"
+        },
+        {
+          "path": "@omnitron-dev/prism/components/map",
+          "guide": "/docs/frontend/prism/maps"
+        }
+      ]
+    },
+    {
+      "name": "MapPlaceSearchProps",
+      "package": "@omnitron-dev/prism",
+      "kind": "interface",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/map/MapPlaceSearch.tsx#L32",
+      "imports": [
+        {
+          "path": "@omnitron-dev/prism",
+          "guide": "/docs/frontend/prism"
+        },
+        {
+          "path": "@omnitron-dev/prism/components",
+          "guide": "/docs/frontend/prism/components"
+        },
+        {
+          "path": "@omnitron-dev/prism/components/map",
+          "guide": "/docs/frontend/prism/maps"
         }
       ]
     },
@@ -25258,7 +25954,7 @@
       "name": "MapPointPicker",
       "package": "@omnitron-dev/prism",
       "kind": "function",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/map/MapPointPicker.tsx#L53",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/map/MapPointPicker.tsx#L52",
       "imports": [
         {
           "path": "@omnitron-dev/prism",
@@ -25267,6 +25963,30 @@
         {
           "path": "@omnitron-dev/prism/components",
           "guide": "/docs/frontend/prism/components"
+        },
+        {
+          "path": "@omnitron-dev/prism/components/map",
+          "guide": "/docs/frontend/prism/maps"
+        }
+      ]
+    },
+    {
+      "name": "MapPointPickerLabels",
+      "package": "@omnitron-dev/prism",
+      "kind": "interface",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/map/MapPointPicker.tsx#L13",
+      "imports": [
+        {
+          "path": "@omnitron-dev/prism",
+          "guide": "/docs/frontend/prism"
+        },
+        {
+          "path": "@omnitron-dev/prism/components",
+          "guide": "/docs/frontend/prism/components"
+        },
+        {
+          "path": "@omnitron-dev/prism/components/map",
+          "guide": "/docs/frontend/prism/maps"
         }
       ]
     },
@@ -25274,7 +25994,7 @@
       "name": "MapPointPickerProps",
       "package": "@omnitron-dev/prism",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/map/MapPointPicker.tsx#L34",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/map/MapPointPicker.tsx#L33",
       "imports": [
         {
           "path": "@omnitron-dev/prism",
@@ -25283,6 +26003,10 @@
         {
           "path": "@omnitron-dev/prism/components",
           "guide": "/docs/frontend/prism/components"
+        },
+        {
+          "path": "@omnitron-dev/prism/components/map",
+          "guide": "/docs/frontend/prism/maps"
         }
       ]
     },
@@ -25290,7 +26014,7 @@
       "name": "MapPointPickerValue",
       "package": "@omnitron-dev/prism",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/map/MapPointPicker.tsx#L29",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/map/coordinates.ts#L2",
       "imports": [
         {
           "path": "@omnitron-dev/prism",
@@ -25299,6 +26023,38 @@
         {
           "path": "@omnitron-dev/prism/components",
           "guide": "/docs/frontend/prism/components"
+        },
+        {
+          "path": "@omnitron-dev/prism/components/map",
+          "guide": "/docs/frontend/prism/maps"
+        }
+      ]
+    },
+    {
+      "name": "MapPopup",
+      "package": "@omnitron-dev/prism",
+      "kind": "value",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/index.ts#L611",
+      "imports": [
+        {
+          "path": "@omnitron-dev/prism",
+          "guide": "/docs/frontend/prism"
+        },
+        {
+          "path": "@omnitron-dev/prism/components",
+          "guide": "/docs/frontend/prism/components"
+        }
+      ]
+    },
+    {
+      "name": "MapPopup",
+      "package": "@omnitron-dev/prism",
+      "kind": "value",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/map/index.ts#L20",
+      "imports": [
+        {
+          "path": "@omnitron-dev/prism/components/map",
+          "guide": "/docs/frontend/prism/maps"
         }
       ]
     },
@@ -25306,7 +26062,39 @@
       "name": "MapProps",
       "package": "@omnitron-dev/prism",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/map/Map.tsx#L57",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/map/Map.tsx#L40",
+      "imports": [
+        {
+          "path": "@omnitron-dev/prism",
+          "guide": "/docs/frontend/prism"
+        },
+        {
+          "path": "@omnitron-dev/prism/components",
+          "guide": "/docs/frontend/prism/components"
+        },
+        {
+          "path": "@omnitron-dev/prism/components/map",
+          "guide": "/docs/frontend/prism/maps"
+        }
+      ]
+    },
+    {
+      "name": "MapRef",
+      "package": "@omnitron-dev/prism",
+      "kind": "type",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/map/index.ts#L21",
+      "imports": [
+        {
+          "path": "@omnitron-dev/prism/components/map",
+          "guide": "/docs/frontend/prism/maps"
+        }
+      ]
+    },
+    {
+      "name": "MapSource",
+      "package": "@omnitron-dev/prism",
+      "kind": "value",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/index.ts#L609",
       "imports": [
         {
           "path": "@omnitron-dev/prism",
@@ -25319,10 +26107,22 @@
       ]
     },
     {
-      "name": "MapViewport",
+      "name": "MapSource",
       "package": "@omnitron-dev/prism",
-      "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/map/Map.tsx#L49",
+      "kind": "value",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/map/index.ts#L20",
+      "imports": [
+        {
+          "path": "@omnitron-dev/prism/components/map",
+          "guide": "/docs/frontend/prism/maps"
+        }
+      ]
+    },
+    {
+      "name": "MapStyle",
+      "package": "@omnitron-dev/prism",
+      "kind": "type",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/map/Map.tsx#L27",
       "imports": [
         {
           "path": "@omnitron-dev/prism",
@@ -25331,6 +26131,30 @@
         {
           "path": "@omnitron-dev/prism/components",
           "guide": "/docs/frontend/prism/components"
+        },
+        {
+          "path": "@omnitron-dev/prism/components/map",
+          "guide": "/docs/frontend/prism/maps"
+        }
+      ]
+    },
+    {
+      "name": "MapViewport",
+      "package": "@omnitron-dev/prism",
+      "kind": "interface",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/map/Map.tsx#L20",
+      "imports": [
+        {
+          "path": "@omnitron-dev/prism",
+          "guide": "/docs/frontend/prism"
+        },
+        {
+          "path": "@omnitron-dev/prism/components",
+          "guide": "/docs/frontend/prism/components"
+        },
+        {
+          "path": "@omnitron-dev/prism/components/map",
+          "guide": "/docs/frontend/prism/maps"
         }
       ]
     },
@@ -26050,7 +26874,7 @@
       "name": "MobileSidenav",
       "package": "@omnitron-dev/prism",
       "kind": "function",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/layouts/dashboard/sidenav.tsx#L246",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/layouts/dashboard/sidenav.tsx#L249",
       "imports": [
         {
           "path": "@omnitron-dev/prism",
@@ -26066,7 +26890,7 @@
       "name": "MobileSidenavProps",
       "package": "@omnitron-dev/prism",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/layouts/dashboard/sidenav.tsx#L237",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/layouts/dashboard/sidenav.tsx#L240",
       "imports": [
         {
           "path": "@omnitron-dev/prism",
@@ -27307,6 +28131,18 @@
       ]
     },
     {
+      "name": "normalizeMapPoint",
+      "package": "@omnitron-dev/prism",
+      "kind": "function",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/map/coordinates.ts#L17",
+      "imports": [
+        {
+          "path": "@omnitron-dev/prism/components/map",
+          "guide": "/docs/frontend/prism/maps"
+        }
+      ]
+    },
+    {
       "name": "noRtlFlip",
       "package": "@omnitron-dev/prism",
       "kind": "function",
@@ -27734,7 +28570,7 @@
       "name": "PRESET_DISPLAY_NAMES",
       "package": "@omnitron-dev/prism",
       "kind": "value",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/theme/create-theme.ts#L816",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/theme/create-theme.ts#L825",
       "imports": [
         {
           "path": "@omnitron-dev/prism",
@@ -27750,7 +28586,7 @@
       "name": "PRESET_INHERENT_MODE",
       "package": "@omnitron-dev/prism",
       "kind": "value",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/theme/create-theme.ts#L834",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/theme/create-theme.ts#L843",
       "imports": [
         {
           "path": "@omnitron-dev/prism",
@@ -27766,7 +28602,7 @@
       "name": "PRESET_NAMES",
       "package": "@omnitron-dev/prism",
       "kind": "value",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/theme/create-theme.ts#L800",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/theme/create-theme.ts#L809",
       "imports": [
         {
           "path": "@omnitron-dev/prism",
@@ -27815,6 +28651,18 @@
         {
           "path": "@omnitron-dev/prism/cli",
           "guide": "/docs/frontend/prism/cli"
+        }
+      ]
+    },
+    {
+      "name": "PrismCalendarInputProps",
+      "package": "@omnitron-dev/prism",
+      "kind": "interface",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/date-input/date-input.tsx#L9",
+      "imports": [
+        {
+          "path": "@omnitron-dev/prism/ui",
+          "guide": "/docs/frontend/prism/theme"
         }
       ]
     },
@@ -27878,6 +28726,30 @@
         },
         {
           "path": "@omnitron-dev/prism/core",
+          "guide": "/docs/frontend/prism/theme"
+        }
+      ]
+    },
+    {
+      "name": "PrismDatePicker",
+      "package": "@omnitron-dev/prism",
+      "kind": "function",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/date-input/date-input.tsx#L128",
+      "imports": [
+        {
+          "path": "@omnitron-dev/prism/ui",
+          "guide": "/docs/frontend/prism/theme"
+        }
+      ]
+    },
+    {
+      "name": "PrismDateTimePicker",
+      "package": "@omnitron-dev/prism",
+      "kind": "function",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/date-input/date-input.tsx#L134",
+      "imports": [
+        {
+          "path": "@omnitron-dev/prism/ui",
           "guide": "/docs/frontend/prism/theme"
         }
       ]
@@ -27990,7 +28862,7 @@
       "name": "PrismProvider",
       "package": "@omnitron-dev/prism",
       "kind": "function",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/core/provider.tsx#L111",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/core/provider.tsx#L120",
       "imports": [
         {
           "path": "@omnitron-dev/prism",
@@ -28006,7 +28878,7 @@
       "name": "PrismProviderProps",
       "package": "@omnitron-dev/prism",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/core/provider.tsx#L32",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/core/provider.tsx#L41",
       "imports": [
         {
           "path": "@omnitron-dev/prism",
@@ -28035,10 +28907,54 @@
       ]
     },
     {
+      "name": "PrismThemeOverrideContext",
+      "package": "@omnitron-dev/prism",
+      "kind": "interface",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/core/provider.tsx#L29",
+      "imports": [
+        {
+          "path": "@omnitron-dev/prism",
+          "guide": "/docs/frontend/prism"
+        },
+        {
+          "path": "@omnitron-dev/prism/core",
+          "guide": "/docs/frontend/prism/theme"
+        }
+      ]
+    },
+    {
+      "name": "PrismThemeOverrides",
+      "package": "@omnitron-dev/prism",
+      "kind": "type",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/core/provider.tsx#L34",
+      "imports": [
+        {
+          "path": "@omnitron-dev/prism",
+          "guide": "/docs/frontend/prism"
+        },
+        {
+          "path": "@omnitron-dev/prism/core",
+          "guide": "/docs/frontend/prism/theme"
+        }
+      ]
+    },
+    {
       "name": "PrismThemeProvider",
       "package": "@omnitron-dev/prism",
       "kind": "value",
       "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/ui/index.ts#L63",
+      "imports": [
+        {
+          "path": "@omnitron-dev/prism/ui",
+          "guide": "/docs/frontend/prism/theme"
+        }
+      ]
+    },
+    {
+      "name": "PrismTimePicker",
+      "package": "@omnitron-dev/prism",
+      "kind": "function",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/date-input/date-input.tsx#L131",
       "imports": [
         {
           "path": "@omnitron-dev/prism/ui",
@@ -29403,6 +30319,10 @@
         {
           "path": "@omnitron-dev/prism/components",
           "guide": "/docs/frontend/prism/components"
+        },
+        {
+          "path": "@omnitron-dev/prism/ui",
+          "guide": "/docs/frontend/prism/theme"
         }
       ]
     },
@@ -29419,6 +30339,10 @@
         {
           "path": "@omnitron-dev/prism/components",
           "guide": "/docs/frontend/prism/components"
+        },
+        {
+          "path": "@omnitron-dev/prism/ui",
+          "guide": "/docs/frontend/prism/theme"
         }
       ]
     },
@@ -30018,7 +30942,7 @@
       "name": "Sidenav",
       "package": "@omnitron-dev/prism",
       "kind": "function",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/layouts/dashboard/sidenav.tsx#L123",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/layouts/dashboard/sidenav.tsx#L125",
       "imports": [
         {
           "path": "@omnitron-dev/prism",
@@ -31022,7 +31946,7 @@
       "name": "SupportedLocale",
       "package": "@omnitron-dev/prism",
       "kind": "type",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/theme/create-theme.ts#L60",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/theme/create-theme.ts#L61",
       "imports": [
         {
           "path": "@omnitron-dev/prism",
@@ -33891,6 +34815,18 @@
         {
           "path": "@omnitron-dev/prism/hooks",
           "guide": "/docs/frontend/prism/hooks-catalog"
+        }
+      ]
+    },
+    {
+      "name": "useMap",
+      "package": "@omnitron-dev/prism",
+      "kind": "value",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/map/index.ts#L20",
+      "imports": [
+        {
+          "path": "@omnitron-dev/prism/components/map",
+          "guide": "/docs/frontend/prism/maps"
         }
       ]
     },
@@ -38310,7 +39246,7 @@
       "name": "AccessRequirements",
       "package": "@omnitron-dev/titan",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan/src/netron/auth/utils.ts#L108",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan/src/netron/auth/utils.ts#L82",
       "imports": [
         {
           "path": "@omnitron-dev/titan/netron/auth",
@@ -40754,7 +41690,7 @@
       "name": "createPermissionChecker",
       "package": "@omnitron-dev/titan",
       "kind": "function",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan/src/netron/auth/utils.ts#L90",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan/src/netron/auth/utils.ts#L75",
       "imports": [
         {
           "path": "@omnitron-dev/titan/netron/auth",
@@ -41906,7 +42842,7 @@
       "name": "extractBearerToken",
       "package": "@omnitron-dev/titan",
       "kind": "function",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan/src/netron/auth/utils.ts#L177",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan/src/netron/auth/utils.ts#L152",
       "imports": [
         {
           "path": "@omnitron-dev/titan/netron/auth",
@@ -42586,7 +43522,7 @@
       "name": "hasPermission",
       "package": "@omnitron-dev/titan",
       "kind": "function",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan/src/netron/auth/utils.ts#L73",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan/src/netron/auth/utils.ts#L70",
       "imports": [
         {
           "path": "@omnitron-dev/titan/netron/auth",
@@ -46502,7 +47438,7 @@
       "name": "permissionMatches",
       "package": "@omnitron-dev/titan",
       "kind": "function",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan/src/netron/auth/utils.ts#L56",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan/src/netron/auth/utils.ts#L59",
       "imports": [
         {
           "path": "@omnitron-dev/titan/netron/auth",
@@ -47570,7 +48506,7 @@
       "name": "safeCompare",
       "package": "@omnitron-dev/titan",
       "kind": "function",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan/src/netron/auth/utils.ts#L22",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan/src/netron/auth/utils.ts#L25",
       "imports": [
         {
           "path": "@omnitron-dev/titan/netron/auth",
@@ -49006,7 +49942,7 @@
       "name": "validateAccessRequirements",
       "package": "@omnitron-dev/titan",
       "kind": "function",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan/src/netron/auth/utils.ts#L127",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan/src/netron/auth/utils.ts#L101",
       "imports": [
         {
           "path": "@omnitron-dev/titan/netron/auth",
@@ -49447,6 +50383,18 @@
       ]
     },
     {
+      "name": "assignableRolesFor",
+      "package": "@omnitron-dev/titan-auth",
+      "kind": "function",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/access/src/platform-roles.ts#L49",
+      "imports": [
+        {
+          "path": "@omnitron-dev/titan-auth/access",
+          "guide": "/docs/auth/access-policy"
+        }
+      ]
+    },
+    {
       "name": "AUTH_METADATA_KEY",
       "package": "@omnitron-dev/titan-auth",
       "kind": "value",
@@ -49527,6 +50475,30 @@
         {
           "path": "@omnitron-dev/titan-auth",
           "guide": "/docs/titan/modules/auth"
+        }
+      ]
+    },
+    {
+      "name": "canModerateUserWithRole",
+      "package": "@omnitron-dev/titan-auth",
+      "kind": "function",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/access/src/platform-roles.ts#L37",
+      "imports": [
+        {
+          "path": "@omnitron-dev/titan-auth/access",
+          "guide": "/docs/auth/access-policy"
+        }
+      ]
+    },
+    {
+      "name": "canSeeUserWithRole",
+      "package": "@omnitron-dev/titan-auth",
+      "kind": "function",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/access/src/platform-roles.ts#L32",
+      "imports": [
+        {
+          "path": "@omnitron-dev/titan-auth/access",
+          "guide": "/docs/auth/access-policy"
         }
       ]
     },
@@ -49651,6 +50623,30 @@
       ]
     },
     {
+      "name": "createPermissionChecker",
+      "package": "@omnitron-dev/titan-auth",
+      "kind": "function",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/access/src/permissions.ts#L77",
+      "imports": [
+        {
+          "path": "@omnitron-dev/titan-auth/access",
+          "guide": "/docs/auth/access-policy"
+        }
+      ]
+    },
+    {
+      "name": "createRoleHierarchy",
+      "package": "@omnitron-dev/titan-auth",
+      "kind": "function",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/access/src/role-hierarchy.ts#L35",
+      "imports": [
+        {
+          "path": "@omnitron-dev/titan-auth/access",
+          "guide": "/docs/auth/access-policy"
+        }
+      ]
+    },
+    {
       "name": "createServiceContext",
       "package": "@omnitron-dev/titan-auth",
       "kind": "function",
@@ -49683,6 +50679,66 @@
         {
           "path": "@omnitron-dev/titan-auth",
           "guide": "/docs/titan/modules/auth"
+        }
+      ]
+    },
+    {
+      "name": "definePermission",
+      "package": "@omnitron-dev/titan-auth",
+      "kind": "function",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/access/src/permissions.ts#L163",
+      "imports": [
+        {
+          "path": "@omnitron-dev/titan-auth/access",
+          "guide": "/docs/auth/access-policy"
+        }
+      ]
+    },
+    {
+      "name": "effectiveLevel",
+      "package": "@omnitron-dev/titan-auth",
+      "kind": "function",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/access/src/platform-roles.ts#L27",
+      "imports": [
+        {
+          "path": "@omnitron-dev/titan-auth/access",
+          "guide": "/docs/auth/access-policy"
+        }
+      ]
+    },
+    {
+      "name": "expandRoles",
+      "package": "@omnitron-dev/titan-auth",
+      "kind": "function",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/access/src/platform-roles.ts#L60",
+      "imports": [
+        {
+          "path": "@omnitron-dev/titan-auth/access",
+          "guide": "/docs/auth/access-policy"
+        }
+      ]
+    },
+    {
+      "name": "expandRoleSet",
+      "package": "@omnitron-dev/titan-auth",
+      "kind": "function",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/access/src/platform-roles.ts#L64",
+      "imports": [
+        {
+          "path": "@omnitron-dev/titan-auth/access",
+          "guide": "/docs/auth/access-policy"
+        }
+      ]
+    },
+    {
+      "name": "expandWildcards",
+      "package": "@omnitron-dev/titan-auth",
+      "kind": "function",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/access/src/permissions.ts#L134",
+      "imports": [
+        {
+          "path": "@omnitron-dev/titan-auth/access",
+          "guide": "/docs/auth/access-policy"
         }
       ]
     },
@@ -49743,6 +50799,42 @@
         {
           "path": "@omnitron-dev/titan-auth",
           "guide": "/docs/titan/modules/auth"
+        }
+      ]
+    },
+    {
+      "name": "hasAllPermissions",
+      "package": "@omnitron-dev/titan-auth",
+      "kind": "function",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/access/src/permissions.ts#L94",
+      "imports": [
+        {
+          "path": "@omnitron-dev/titan-auth/access",
+          "guide": "/docs/auth/access-policy"
+        }
+      ]
+    },
+    {
+      "name": "hasAnyPermission",
+      "package": "@omnitron-dev/titan-auth",
+      "kind": "function",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/access/src/permissions.ts#L101",
+      "imports": [
+        {
+          "path": "@omnitron-dev/titan-auth/access",
+          "guide": "/docs/auth/access-policy"
+        }
+      ]
+    },
+    {
+      "name": "hasPermission",
+      "package": "@omnitron-dev/titan-auth",
+      "kind": "function",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/access/src/permissions.ts#L65",
+      "imports": [
+        {
+          "path": "@omnitron-dev/titan-auth/access",
+          "guide": "/docs/auth/access-policy"
         }
       ]
     },
@@ -49999,6 +51091,18 @@
       ]
     },
     {
+      "name": "isValidPermissionKey",
+      "package": "@omnitron-dev/titan-auth",
+      "kind": "function",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/access/src/permissions.ts#L119",
+      "imports": [
+        {
+          "path": "@omnitron-dev/titan-auth/access",
+          "guide": "/docs/auth/access-policy"
+        }
+      ]
+    },
+    {
       "name": "ITokenCacheEntry",
       "package": "@omnitron-dev/titan-auth",
       "kind": "interface",
@@ -50083,6 +51187,90 @@
       ]
     },
     {
+      "name": "PermissionDefinition",
+      "package": "@omnitron-dev/titan-auth",
+      "kind": "interface",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/access/src/permissions.ts#L24",
+      "imports": [
+        {
+          "path": "@omnitron-dev/titan-auth/access",
+          "guide": "/docs/auth/access-policy"
+        }
+      ]
+    },
+    {
+      "name": "permissionGrants",
+      "package": "@omnitron-dev/titan-auth",
+      "kind": "function",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/access/src/permissions.ts#L53",
+      "imports": [
+        {
+          "path": "@omnitron-dev/titan-auth/access",
+          "guide": "/docs/auth/access-policy"
+        }
+      ]
+    },
+    {
+      "name": "PermissionMatchMode",
+      "package": "@omnitron-dev/titan-auth",
+      "kind": "type",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/access/src/permissions.ts#L50",
+      "imports": [
+        {
+          "path": "@omnitron-dev/titan-auth/access",
+          "guide": "/docs/auth/access-policy"
+        }
+      ]
+    },
+    {
+      "name": "PermissionRisk",
+      "package": "@omnitron-dev/titan-auth",
+      "kind": "type",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/access/src/permissions.ts#L18",
+      "imports": [
+        {
+          "path": "@omnitron-dev/titan-auth/access",
+          "guide": "/docs/auth/access-policy"
+        }
+      ]
+    },
+    {
+      "name": "PermissionScope",
+      "package": "@omnitron-dev/titan-auth",
+      "kind": "type",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/access/src/permissions.ts#L15",
+      "imports": [
+        {
+          "path": "@omnitron-dev/titan-auth/access",
+          "guide": "/docs/auth/access-policy"
+        }
+      ]
+    },
+    {
+      "name": "PLATFORM_ROLES",
+      "package": "@omnitron-dev/titan-auth",
+      "kind": "value",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/access/src/platform-roles.ts#L17",
+      "imports": [
+        {
+          "path": "@omnitron-dev/titan-auth/access",
+          "guide": "/docs/auth/access-policy"
+        }
+      ]
+    },
+    {
+      "name": "PlatformRole",
+      "package": "@omnitron-dev/titan-auth",
+      "kind": "type",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/access/src/platform-roles.ts#L16",
+      "imports": [
+        {
+          "path": "@omnitron-dev/titan-auth/access",
+          "guide": "/docs/auth/access-policy"
+        }
+      ]
+    },
+    {
       "name": "Public",
       "package": "@omnitron-dev/titan-auth",
       "kind": "function",
@@ -50155,6 +51343,42 @@
       ]
     },
     {
+      "name": "resolvePermissions",
+      "package": "@omnitron-dev/titan-auth",
+      "kind": "function",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/access/src/permissions.ts#L176",
+      "imports": [
+        {
+          "path": "@omnitron-dev/titan-auth/access",
+          "guide": "/docs/auth/access-policy"
+        }
+      ]
+    },
+    {
+      "name": "ROLE_PRIORITY",
+      "package": "@omnitron-dev/titan-auth",
+      "kind": "value",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/access/src/platform-roles.ts#L20",
+      "imports": [
+        {
+          "path": "@omnitron-dev/titan-auth/access",
+          "guide": "/docs/auth/access-policy"
+        }
+      ]
+    },
+    {
+      "name": "RoleDefinition",
+      "package": "@omnitron-dev/titan-auth",
+      "kind": "interface",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/access/src/role-hierarchy.ts#L2",
+      "imports": [
+        {
+          "path": "@omnitron-dev/titan-auth/access",
+          "guide": "/docs/auth/access-policy"
+        }
+      ]
+    },
+    {
       "name": "RoleGuard",
       "package": "@omnitron-dev/titan-auth",
       "kind": "class",
@@ -50163,6 +51387,30 @@
         {
           "path": "@omnitron-dev/titan-auth",
           "guide": "/docs/titan/modules/auth"
+        }
+      ]
+    },
+    {
+      "name": "RoleHierarchy",
+      "package": "@omnitron-dev/titan-auth",
+      "kind": "interface",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/access/src/role-hierarchy.ts#L12",
+      "imports": [
+        {
+          "path": "@omnitron-dev/titan-auth/access",
+          "guide": "/docs/auth/access-policy"
+        }
+      ]
+    },
+    {
+      "name": "rolePriority",
+      "package": "@omnitron-dev/titan-auth",
+      "kind": "function",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/access/src/platform-roles.ts#L23",
+      "imports": [
+        {
+          "path": "@omnitron-dev/titan-auth/access",
+          "guide": "/docs/auth/access-policy"
         }
       ]
     },
@@ -50259,6 +51507,18 @@
         {
           "path": "@omnitron-dev/titan-auth",
           "guide": "/docs/titan/modules/auth"
+        }
+      ]
+    },
+    {
+      "name": "visibleRolesFor",
+      "package": "@omnitron-dev/titan-auth",
+      "kind": "function",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/access/src/platform-roles.ts#L41",
+      "imports": [
+        {
+          "path": "@omnitron-dev/titan-auth/access",
+          "guide": "/docs/auth/access-policy"
         }
       ]
     },
@@ -63363,6 +64623,210 @@
         {
           "path": "@omnitron-dev/titan-scheduler",
           "guide": "/docs/titan/modules/scheduler"
+        }
+      ]
+    },
+    {
+      "name": "CompletedPart",
+      "package": "@omnitron-dev/titan-storage",
+      "kind": "interface",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-storage/src/adapter.interface.ts#L73",
+      "imports": [
+        {
+          "path": "@omnitron-dev/titan-storage",
+          "guide": "/docs/titan/modules/storage"
+        }
+      ]
+    },
+    {
+      "name": "CopyOptions",
+      "package": "@omnitron-dev/titan-storage",
+      "kind": "interface",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-storage/src/adapter.interface.ts#L53",
+      "imports": [
+        {
+          "path": "@omnitron-dev/titan-storage",
+          "guide": "/docs/titan/modules/storage"
+        }
+      ]
+    },
+    {
+      "name": "GetOptions",
+      "package": "@omnitron-dev/titan-storage",
+      "kind": "interface",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-storage/src/adapter.interface.ts#L22",
+      "imports": [
+        {
+          "path": "@omnitron-dev/titan-storage",
+          "guide": "/docs/titan/modules/storage"
+        }
+      ]
+    },
+    {
+      "name": "GetResult",
+      "package": "@omnitron-dev/titan-storage",
+      "kind": "interface",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-storage/src/adapter.interface.ts#L28",
+      "imports": [
+        {
+          "path": "@omnitron-dev/titan-storage",
+          "guide": "/docs/titan/modules/storage"
+        }
+      ]
+    },
+    {
+      "name": "ListOptions",
+      "package": "@omnitron-dev/titan-storage",
+      "kind": "interface",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-storage/src/adapter.interface.ts#L39",
+      "imports": [
+        {
+          "path": "@omnitron-dev/titan-storage",
+          "guide": "/docs/titan/modules/storage"
+        }
+      ]
+    },
+    {
+      "name": "ListResult",
+      "package": "@omnitron-dev/titan-storage",
+      "kind": "interface",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-storage/src/adapter.interface.ts#L46",
+      "imports": [
+        {
+          "path": "@omnitron-dev/titan-storage",
+          "guide": "/docs/titan/modules/storage"
+        }
+      ]
+    },
+    {
+      "name": "LocalAdapter",
+      "package": "@omnitron-dev/titan-storage",
+      "kind": "class",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-storage/src/local.adapter.ts#L49",
+      "imports": [
+        {
+          "path": "@omnitron-dev/titan-storage",
+          "guide": "/docs/titan/modules/storage"
+        }
+      ]
+    },
+    {
+      "name": "MultipartUploadInit",
+      "package": "@omnitron-dev/titan-storage",
+      "kind": "interface",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-storage/src/adapter.interface.ts#L60",
+      "imports": [
+        {
+          "path": "@omnitron-dev/titan-storage",
+          "guide": "/docs/titan/modules/storage"
+        }
+      ]
+    },
+    {
+      "name": "PutOptions",
+      "package": "@omnitron-dev/titan-storage",
+      "kind": "interface",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-storage/src/adapter.interface.ts#L12",
+      "imports": [
+        {
+          "path": "@omnitron-dev/titan-storage",
+          "guide": "/docs/titan/modules/storage"
+        }
+      ]
+    },
+    {
+      "name": "S3Adapter",
+      "package": "@omnitron-dev/titan-storage",
+      "kind": "class",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-storage/src/s3.adapter.ts#L61",
+      "imports": [
+        {
+          "path": "@omnitron-dev/titan-storage",
+          "guide": "/docs/titan/modules/storage"
+        }
+      ]
+    },
+    {
+      "name": "STORAGE_ADAPTER",
+      "package": "@omnitron-dev/titan-storage",
+      "kind": "value",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-storage/src/storage.module.ts#L6",
+      "imports": [
+        {
+          "path": "@omnitron-dev/titan-storage",
+          "guide": "/docs/titan/modules/storage"
+        }
+      ]
+    },
+    {
+      "name": "StorageAdapter",
+      "package": "@omnitron-dev/titan-storage",
+      "kind": "interface",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-storage/src/adapter.interface.ts#L89",
+      "imports": [
+        {
+          "path": "@omnitron-dev/titan-storage",
+          "guide": "/docs/titan/modules/storage"
+        }
+      ]
+    },
+    {
+      "name": "StorageInfo",
+      "package": "@omnitron-dev/titan-storage",
+      "kind": "interface",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-storage/src/adapter.interface.ts#L84",
+      "imports": [
+        {
+          "path": "@omnitron-dev/titan-storage",
+          "guide": "/docs/titan/modules/storage"
+        }
+      ]
+    },
+    {
+      "name": "StorageModule",
+      "package": "@omnitron-dev/titan-storage",
+      "kind": "class",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-storage/src/storage.module.ts#L8",
+      "imports": [
+        {
+          "path": "@omnitron-dev/titan-storage",
+          "guide": "/docs/titan/modules/storage"
+        }
+      ]
+    },
+    {
+      "name": "StorageObject",
+      "package": "@omnitron-dev/titan-storage",
+      "kind": "interface",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-storage/src/adapter.interface.ts#L3",
+      "imports": [
+        {
+          "path": "@omnitron-dev/titan-storage",
+          "guide": "/docs/titan/modules/storage"
+        }
+      ]
+    },
+    {
+      "name": "UploadedPart",
+      "package": "@omnitron-dev/titan-storage",
+      "kind": "interface",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-storage/src/adapter.interface.ts#L79",
+      "imports": [
+        {
+          "path": "@omnitron-dev/titan-storage",
+          "guide": "/docs/titan/modules/storage"
+        }
+      ]
+    },
+    {
+      "name": "UploadPart",
+      "package": "@omnitron-dev/titan-storage",
+      "kind": "interface",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-storage/src/adapter.interface.ts#L66",
+      "imports": [
+        {
+          "path": "@omnitron-dev/titan-storage",
+          "guide": "/docs/titan/modules/storage"
         }
       ]
     },

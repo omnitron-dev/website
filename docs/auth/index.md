@@ -5,8 +5,8 @@ sidebar_position: 0
 
 # Authentication & Authorisation
 
-:::caution Design RFC
-The roles + permissions + ABAC + RLS-bridge stack documented in this section is an in-progress architectural target. The current Omnitron daemon ships JWT issuance, session lifecycle, and the `admin`, `operator` and `viewer` roles (see `OmnitronAuth` in [services-reference](../omnitron/services-reference.md#omnitronauth--authrpc-servicets)). These pages describe the broader application authorisation design. See [operator authentication](../omnitron/auth-rbac.md) for the implemented daemon role checks.
+:::info Implementation status
+The [shared access policy](./access-policy.md), Titan JWT/session adapters and Netron authorization gates are implemented. Pages explicitly marked Design RFC describe additional application architecture. The current Omnitron daemon ships JWT issuance, session lifecycle, and the `admin`, `operator` and `viewer` roles (see `OmnitronAuth` in [services-reference](../omnitron/services-reference.md#omnitronauth--authrpc-servicets)). These pages describe the broader application authorisation design. See [operator authentication](../omnitron/auth-rbac.md) for the implemented daemon role checks.
 :::
 
 The Titan/Omnitron auth surface is split into four layers. Each
@@ -15,6 +15,7 @@ should be picked by what you're trying to do.
 
 | If you want to…                                                | Start here                                |
 |----------------------------------------------------------------|-------------------------------------------|
+| Share roles and permissions between server and UI | [Shared access policy](./access-policy.md) |
 | Verify a JWT and resolve a user                                | [`@titan-auth` JWT primitives](../titan/modules/auth.mdx) |
 | Gate an RPC method on a role / permission / policy             | [`@Auth` decorator & PolicyEngine](../titan/netron/authentication.md) |
 | Compose a permission string (grammar, wildcards, hierarchy)    | [Permissions](./permissions.md)           |

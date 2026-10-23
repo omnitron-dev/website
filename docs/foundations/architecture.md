@@ -86,7 +86,7 @@ type of the service method**. No translation step.
 | `@omnitron-dev/netron-react`   | React hooks built on netron-browser; cache and devtools                      |
 | `@omnitron-dev/prism`     | Design system: theme, layouts, blocks, forms, accessibility                        |
 | `@omnitron-dev/omnitron`  | Application supervisor, CLI, web console, observability                            |
-| `titan-*` (14 packages)   | Optional Titan modules: auth, cache, db, discovery, events, etc.                   |
+| `titan-*` modules   | Optional Titan modules: auth, cache, db, discovery, events, etc.                   |
 | `@omnitron-dev/common`, `cuid`, `eventemitter`, `msgpack`, `testing` | Shared primitives                       |
 
 ## Cross-cutting concerns
@@ -103,3 +103,5 @@ type of the service method**. No translation step.
 
 Next: [Monorepo](./monorepo.md) — how the Omnitron source tree itself
 is organised.
+
+Choose optional layers and verify bundle boundaries with [Composition and build boundaries](./composition.md).

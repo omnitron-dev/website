@@ -315,3 +315,9 @@ eviction.
 The shipped [shared-session preset](./shared-session.md) configures JWT claim
 validation, session-registry checks and an optional canonical-store fallback.
 Read it before composing a multi-backend authentication system.
+
+## Portable role and permission policy
+
+Use [`@omnitron-dev/access`](../../auth/access-policy.md) for shared browser/server
+policy without installing JWT infrastructure. `titan-auth/access` remains a
+compatibility facade. The JWT module and shared-session preset are optional adapters.

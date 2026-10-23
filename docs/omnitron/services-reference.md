@@ -32,12 +32,12 @@ diffs them against the index table below.
 | `event-broadcaster.rpc-service.ts` | `OmnitronEvents` | 3 | viewer (subscribe, unsubscribe, stats) |
 | `fleet.rpc-service.ts` | `OmnitronFleet` | 8 | viewer (read) + operator (mutate); heartbeat anonymous |
 | `health-check.rpc-service.ts` | `OmnitronHealth` | 4 | viewer |
-| `infrastructure.rpc-service.ts` | `OmnitronInfra` | 9 | viewer (read) + operator (start/stop/remove) |
+| `infrastructure.rpc-service.ts` | `OmnitronInfra` | 18 | viewer (read) + operator (start/stop/remove) |
 | `kubernetes.rpc-service.ts` | `OmnitronKubernetes` | 9 | admin |
 | `log-collector.rpc-service.ts` | `OmnitronLogs` | 4 | viewer |
-| `node-manager.rpc-service.ts` | `OmnitronNodes` | 30 | viewer (read) + operator (mutate) |
+| `node-manager.rpc-service.ts` | `OmnitronNodes` | 31 | viewer (read) + operator (mutate) |
 | `pipeline.rpc-service.ts` | `OmnitronPipelines` | 9 | viewer (read) + operator (mutate) |
-| `project.rpc-service.ts` | `OmnitronProject` | 23 | viewer (read) + operator (start/stop) + admin (CRUD) |
+| `project.rpc-service.ts` | `OmnitronProject` | 24 | viewer (read) + operator (start/stop) + admin (CRUD) |
 | `release.rpc-service.ts` | `OmnitronRelease` | 12 | viewer (read), operator (build/attest), admin (prune) |
 | `secrets.rpc-service.ts` | `OmnitronSecrets` | 6 | admin |
 | `sync.rpc-service.ts` | `OmnitronSync` | 4 | service-to-service (getSyncStatus is viewer) |
@@ -242,7 +242,7 @@ Active health probes — runs HTTP / TCP / DB checks on demand.
 
 ### `OmnitronInfra` — `infrastructure.rpc-service.ts`
 
-Read-only inventory of provisioned infrastructure.
+Provisioned infrastructure inventory, container control and host-owned ingress.
 
 | Method | Effect |
 | ------ | ------ |
@@ -253,9 +253,18 @@ Read-only inventory of provisioned infrastructure.
 | `startContainer({container})` | Start a managed container |
 | `stopContainer({container})` | Stop a managed container |
 | `removeContainer({container})` | Remove a managed container |
+| `provisionStack` / `inspectHostServices` | Reconcile or inspect infrastructure on the executing host |
+| `configureHostIngress` / `getHostIngress` | Configure ingress ownership or read configured/observed state |
+| `checkHostIngress` / `validateHostIngress` | Inspect the proposed change and validate publication inputs |
+| `applyHostIngress` / `removeHostIngress` | Publish or remove an owner’s ingress with generation checks |
+| `restoreHostIngressOwner` / `rollbackHostIngressTakeover` | Restore an owner or reverse a takeover using the expected generation |
+| `recoverHostIngress` | Recover an interrupted ingress publication |
 
 Reads gate on `viewer`; `startContainer`, `stopContainer` and
-`removeContainer` on `operator`.
+`removeContainer` on `operator`. Ingress configuration, takeover rollback and
+recovery require `admin` or trusted `service_role`; check/apply/remove/owner
+restore use control-plane roles. Read the generated API signature and the
+method’s declared gate before composing an operational workflow.
 
 ### `OmnitronKubernetes` — `kubernetes.rpc-service.ts`
 
@@ -293,15 +302,18 @@ subscription open.
 
 ### `OmnitronNodes` — `node-manager.rpc-service.ts`
 
-Node inventory + health history (14 methods — the largest service
-beyond `OmnitronDaemon`).
+Node inventory, health history, bundle activation and recovery: 31 public methods.
 
 | Method category | Methods |
 | --------------- | ------- |
 | Inventory | `listNodes`, `getNode`, `addNode`, `updateNode`, `removeNode` |
 | Checks | `checkNodeStatus`, `checkAllNodes`, `triggerNodeCheck` |
 | History | `getCheckHistory`, `getUptimeBar`, `getNodeHealthSummaries` |
-| Misc | `listSshKeys`, `getCheckConfig`, `setCheckConfig` |
+| Misc | `listSshKeys`, `getCheckConfig`, `setCheckConfig`, `getHistoryConfig` |
+| Remote daemon | `getNodeDaemonStatus`, `getNodeDaemonHealth`, `getNodeDaemonMetrics`, `getNodeClusterState` |
+| Mesh and telemetry | `getMeshStatus`, `getNodeRelayStats`, `getNodeSyncStatus`, `getNodeIndicators` |
+| Bundle operations | `installBundleOnNode`, `activateBundleOnNode`, `recoverBundleOnNode` |
+| Upgrades | `planUpgrade`, `upgradeNode`, `upgradeNodes`, `getUpgradeProgress`, `cancelUpgrade` |
 
 Includes the uptime-bar machinery the webapp uses to draw
 green/yellow/red availability bars.
@@ -323,13 +335,16 @@ CI/CD pipeline definition and execution.
 
 ### `OmnitronProject` — `project.rpc-service.ts`
 
-Project + stack registry. 14 methods covering both layers.
+Project and stack registry: 24 public methods, including release checks, account operations and infrastructure ownership.
 
 | Method category | Methods |
 | --------------- | ------- |
 | Projects | `listProjects`, `getProject`, `scanRequirements`, `addProject`, `updateProject`, `removeProject` |
 | Project apps | `getProjectApps` |
 | Stacks | `listStacks`, `getStack`, `getStackStatus`, `createStack`, `deleteStack`, `startStack`, `stopStack` |
+| Infrastructure ownership | `refreshInfrastructureOwnership`, `inspectStackHost`, `probeLeftovers`, `stackMaintenance` |
+| Stack accounts | `censusStackAccounts`, `createStackAccount`, `removeStackAccount`, `showStackAccount` |
+| Release inspection | `checkRelease`, `getDeployProgress` |
 
 `updateProject({ name, path })` changes the registered location while preserving the
 project name, registration history, enabled-stack settings and workspace namespace.

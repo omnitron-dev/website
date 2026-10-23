@@ -73,7 +73,7 @@ canonical-store failure, expiry and revocation.
 | `sessionKeyPrefix` | Defaults to `omni:session:` |
 | `cacheTtl` | Authentication cache lifetime in milliseconds; defaults to `60_000` |
 | `cnfHmacSecret` | Enables confirmation-claim verification when the token and session record supply the required fields |
-| `roleExpander` | Optional application-supplied role expansion |
+| `roleExpander` | Unset preserves claims verbatim; pass an application hierarchy’s `expandRoleSet` or the optional platform expander |
 
 Redis accepts the legacy user-ID string and the structured session value
 with user and refresh-token IDs. A legacy record without a refresh-token
@@ -94,3 +94,18 @@ Verify the actual behaviour of already-cached tokens in your deployment.
 Use the [module auth reference](./auth.mdx) for JWT configuration and
 [RPC authentication](../netron/authentication.md) for authentication,
 authorization and HTTP token transport as distinct responsibilities.
+
+## A shared application hierarchy
+
+```ts
+import { createRoleHierarchy } from '@omnitron-dev/access/roles';
+const roles = createRoleHierarchy({
+  reader: { level: 0 },
+  editor: { level: 1, inherits: ['reader'] },
+});
+// Pass roleExpander: roles.expandRoleSet to createSharedSessionAuthManager.
+// Use roles.expandRoleSet during token issuance as well.
+```
+
+[Shared access policy](../../auth/access-policy.md) describes unknown claims,
+service identity, rank boundaries and the optional platform preset.

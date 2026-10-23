@@ -1,5 +1,12 @@
 // Every current public entry point has an explicit guide. New exports require a deliberate mapping.
 export default {
+  "@omnitron-dev/access": {
+    ".": "auth/access-policy.md",
+    "./roles": "auth/access-policy.md",
+    "./permissions": "auth/access-policy.md",
+    "./platform": "auth/access-policy.md"
+  },
+  "@omnitron-dev/titan-storage": { ".": "titan/modules/storage.md" },
   "@omnitron-dev/common": {
     ".": "utilities/common.md"
   },
@@ -57,6 +64,8 @@ export default {
     "./layouts": "frontend/prism/layouts.md",
     "./blocks": "frontend/prism/blocks.md",
     "./components": "frontend/prism/components.md",
+    "./components/map": "frontend/prism/maps.md",
+    "./components/map/styles.css": {guide: "frontend/prism/maps.md", assetSource: "src/components/map/map.css"},
     "./components/editor": "frontend/prism/components.md",
     "./components/emoji-picker": "frontend/prism/components.md",
     "./components/research-editor": "frontend/prism/components.md",
@@ -115,7 +124,8 @@ export default {
   },
   "@omnitron-dev/titan-auth": {
     ".": "titan/modules/auth.mdx",
-    "./preset/shared-session": "titan/modules/shared-session.md"
+    "./preset/shared-session": "titan/modules/shared-session.md",
+    "./access": "auth/access-policy.md"
   },
   "@omnitron-dev/titan-cache": {
     ".": "titan/modules/cache.mdx"
