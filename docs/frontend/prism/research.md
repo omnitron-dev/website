@@ -64,6 +64,12 @@ projection and bounds the displayed neighbourhood with `visibleBudget`.
 Omitted relations are counted explicitly. Dragging changes visual coordinates
 through `onLayoutChange`; it does not change the knowledge relation.
 
+Edge roles are measured and placed together, with nonoverlapping label boxes
+that also avoid node bounds. Dotted leaders retain the association with displaced
+labels; repeated roles are never merged. `edgeLabelGap` and `edgeLabelMaxWidth`
+configure spacing and wrapping. Fit-to-view includes the label extent. Clicking
+a line selects the relation; dragging continues to change only coordinates.
+
 The host owns persistence, permissions, revision selection and proof checking.
 A visual selection or rendered equation is not a proof certificate. Supply
 verified status and diagnostics from the host through `renderDetails` and
