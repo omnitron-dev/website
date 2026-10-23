@@ -1481,6 +1481,8 @@ relation IDs have independent namespaces.
 | `onLayoutChange` | Visual coordinates after a drag; not a semantic graph mutation. |
 | `renderDetails` | Host inspector for the selected object. |
 | `height` | Map height, default 560px. |
+| `edgeLabelGap` | Minimum canvas-space gap between measured role labels and nodes; default 8. |
+| `edgeLabelMaxWidth` | Maximum label width before wrapping, in canvas units; default 240. |
 | `className`, `sx` | Styling and theme integration. |
 
 The searchable index and map share selection. The expand control opens an accessible full-screen workspace while retaining selection and layout; Escape closes it. Keyboard-accessible index
@@ -1492,6 +1494,21 @@ mean an absent relationship. Pass only authorized data: this presentation
 budget is not access control, a storage limit or a substitute for server-side
 pagination. The default grid is a deterministic starting layout, not a causal
 ordering. Use `entityNodeId` and `relationNodeId` when supplying coordinates.
+
+Role labels share one measured placement layer. Every ordered occurrence keeps
+its full text and identity, including repeated participants. Prism measures the
+rendered label box, wraps long roles, and places boxes clear of other labels and
+nodes. Shifted labels have a dotted leader to their own path midpoint. The
+placement is deterministic for the measured geometry; it does not assert a
+globally minimal layout or encode semantic priority through position.
+
+The component recomputes placement when paths, text, fonts or node dimensions
+change. Pan and zoom transform the same world geometry. The fit control includes
+labels outside the node bounds; subsequent edits preserve the user's viewport.
+All admitted edges remain mounted so viewport culling cannot silently discard
+roles or change their placement. `visibleBudget` still limits the admitted
+incidence projection. Select a line to inspect its relation and its complete
+ordered port list; the searchable index remains a keyboard alternative.
 
 ### Engine choices and scope
 
