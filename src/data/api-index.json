@@ -229,6 +229,16 @@
       "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/knowledge-graph/graph.css"
     },
     {
+      "path": "@omnitron-dev/prism/components/map",
+      "guide": "/docs/frontend/prism/maps"
+    },
+    {
+      "path": "@omnitron-dev/prism/components/map/styles.css",
+      "guide": "/docs/frontend/prism/maps",
+      "kind": "stylesheet",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/map/map.css"
+    },
+    {
       "path": "@omnitron-dev/prism/components/research",
       "guide": "/docs/frontend/prism/components"
     },
@@ -17615,6 +17625,10 @@
         {
           "path": "@omnitron-dev/prism/components",
           "guide": "/docs/frontend/prism/components"
+        },
+        {
+          "path": "@omnitron-dev/prism/components/map",
+          "guide": "/docs/frontend/prism/maps"
         }
       ]
     },
@@ -23867,6 +23881,18 @@
       ]
     },
     {
+      "name": "isMapPoint",
+      "package": "@omnitron-dev/prism",
+      "kind": "function",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/map/coordinates.ts#L6",
+      "imports": [
+        {
+          "path": "@omnitron-dev/prism/components/map",
+          "guide": "/docs/frontend/prism/maps"
+        }
+      ]
+    },
+    {
       "name": "isMarkdownContent",
       "package": "@omnitron-dev/prism",
       "kind": "function",
@@ -25178,7 +25204,7 @@
       "name": "Map",
       "package": "@omnitron-dev/prism",
       "kind": "value",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/map/Map.tsx#L109",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/map/Map.tsx#L58",
       "imports": [
         {
           "path": "@omnitron-dev/prism",
@@ -25187,6 +25213,10 @@
         {
           "path": "@omnitron-dev/prism/components",
           "guide": "/docs/frontend/prism/components"
+        },
+        {
+          "path": "@omnitron-dev/prism/components/map",
+          "guide": "/docs/frontend/prism/maps"
         }
       ]
     },
@@ -25203,6 +25233,10 @@
         {
           "path": "@omnitron-dev/prism/components",
           "guide": "/docs/frontend/prism/components"
+        },
+        {
+          "path": "@omnitron-dev/prism/components/map",
+          "guide": "/docs/frontend/prism/maps"
         }
       ]
     },
@@ -25219,6 +25253,38 @@
         {
           "path": "@omnitron-dev/prism/components",
           "guide": "/docs/frontend/prism/components"
+        },
+        {
+          "path": "@omnitron-dev/prism/components/map",
+          "guide": "/docs/frontend/prism/maps"
+        }
+      ]
+    },
+    {
+      "name": "MapLayer",
+      "package": "@omnitron-dev/prism",
+      "kind": "value",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/index.ts#L610",
+      "imports": [
+        {
+          "path": "@omnitron-dev/prism",
+          "guide": "/docs/frontend/prism"
+        },
+        {
+          "path": "@omnitron-dev/prism/components",
+          "guide": "/docs/frontend/prism/components"
+        }
+      ]
+    },
+    {
+      "name": "MapLayer",
+      "package": "@omnitron-dev/prism",
+      "kind": "value",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/map/index.ts#L20",
+      "imports": [
+        {
+          "path": "@omnitron-dev/prism/components/map",
+          "guide": "/docs/frontend/prism/maps"
         }
       ]
     },
@@ -25235,6 +25301,10 @@
         {
           "path": "@omnitron-dev/prism/components",
           "guide": "/docs/frontend/prism/components"
+        },
+        {
+          "path": "@omnitron-dev/prism/components/map",
+          "guide": "/docs/frontend/prism/maps"
         }
       ]
     },
@@ -25251,6 +25321,110 @@
         {
           "path": "@omnitron-dev/prism/components",
           "guide": "/docs/frontend/prism/components"
+        },
+        {
+          "path": "@omnitron-dev/prism/components/map",
+          "guide": "/docs/frontend/prism/maps"
+        }
+      ]
+    },
+    {
+      "name": "MapMessages",
+      "package": "@omnitron-dev/prism",
+      "kind": "interface",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/map/Map.tsx#L28",
+      "imports": [
+        {
+          "path": "@omnitron-dev/prism",
+          "guide": "/docs/frontend/prism"
+        },
+        {
+          "path": "@omnitron-dev/prism/components",
+          "guide": "/docs/frontend/prism/components"
+        },
+        {
+          "path": "@omnitron-dev/prism/components/map",
+          "guide": "/docs/frontend/prism/maps"
+        }
+      ]
+    },
+    {
+      "name": "MapPlace",
+      "package": "@omnitron-dev/prism",
+      "kind": "interface",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/map/MapPlaceSearch.tsx#L8",
+      "imports": [
+        {
+          "path": "@omnitron-dev/prism",
+          "guide": "/docs/frontend/prism"
+        },
+        {
+          "path": "@omnitron-dev/prism/components",
+          "guide": "/docs/frontend/prism/components"
+        },
+        {
+          "path": "@omnitron-dev/prism/components/map",
+          "guide": "/docs/frontend/prism/maps"
+        }
+      ]
+    },
+    {
+      "name": "MapPlaceSearch",
+      "package": "@omnitron-dev/prism",
+      "kind": "function",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/map/MapPlaceSearch.tsx#L44",
+      "imports": [
+        {
+          "path": "@omnitron-dev/prism",
+          "guide": "/docs/frontend/prism"
+        },
+        {
+          "path": "@omnitron-dev/prism/components",
+          "guide": "/docs/frontend/prism/components"
+        },
+        {
+          "path": "@omnitron-dev/prism/components/map",
+          "guide": "/docs/frontend/prism/maps"
+        }
+      ]
+    },
+    {
+      "name": "MapPlaceSearchLabels",
+      "package": "@omnitron-dev/prism",
+      "kind": "interface",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/map/MapPlaceSearch.tsx#L14",
+      "imports": [
+        {
+          "path": "@omnitron-dev/prism",
+          "guide": "/docs/frontend/prism"
+        },
+        {
+          "path": "@omnitron-dev/prism/components",
+          "guide": "/docs/frontend/prism/components"
+        },
+        {
+          "path": "@omnitron-dev/prism/components/map",
+          "guide": "/docs/frontend/prism/maps"
+        }
+      ]
+    },
+    {
+      "name": "MapPlaceSearchProps",
+      "package": "@omnitron-dev/prism",
+      "kind": "interface",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/map/MapPlaceSearch.tsx#L32",
+      "imports": [
+        {
+          "path": "@omnitron-dev/prism",
+          "guide": "/docs/frontend/prism"
+        },
+        {
+          "path": "@omnitron-dev/prism/components",
+          "guide": "/docs/frontend/prism/components"
+        },
+        {
+          "path": "@omnitron-dev/prism/components/map",
+          "guide": "/docs/frontend/prism/maps"
         }
       ]
     },
@@ -25258,7 +25432,7 @@
       "name": "MapPointPicker",
       "package": "@omnitron-dev/prism",
       "kind": "function",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/map/MapPointPicker.tsx#L53",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/map/MapPointPicker.tsx#L52",
       "imports": [
         {
           "path": "@omnitron-dev/prism",
@@ -25267,6 +25441,30 @@
         {
           "path": "@omnitron-dev/prism/components",
           "guide": "/docs/frontend/prism/components"
+        },
+        {
+          "path": "@omnitron-dev/prism/components/map",
+          "guide": "/docs/frontend/prism/maps"
+        }
+      ]
+    },
+    {
+      "name": "MapPointPickerLabels",
+      "package": "@omnitron-dev/prism",
+      "kind": "interface",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/map/MapPointPicker.tsx#L13",
+      "imports": [
+        {
+          "path": "@omnitron-dev/prism",
+          "guide": "/docs/frontend/prism"
+        },
+        {
+          "path": "@omnitron-dev/prism/components",
+          "guide": "/docs/frontend/prism/components"
+        },
+        {
+          "path": "@omnitron-dev/prism/components/map",
+          "guide": "/docs/frontend/prism/maps"
         }
       ]
     },
@@ -25274,7 +25472,7 @@
       "name": "MapPointPickerProps",
       "package": "@omnitron-dev/prism",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/map/MapPointPicker.tsx#L34",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/map/MapPointPicker.tsx#L33",
       "imports": [
         {
           "path": "@omnitron-dev/prism",
@@ -25283,6 +25481,10 @@
         {
           "path": "@omnitron-dev/prism/components",
           "guide": "/docs/frontend/prism/components"
+        },
+        {
+          "path": "@omnitron-dev/prism/components/map",
+          "guide": "/docs/frontend/prism/maps"
         }
       ]
     },
@@ -25290,7 +25492,7 @@
       "name": "MapPointPickerValue",
       "package": "@omnitron-dev/prism",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/map/MapPointPicker.tsx#L29",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/map/coordinates.ts#L2",
       "imports": [
         {
           "path": "@omnitron-dev/prism",
@@ -25299,6 +25501,38 @@
         {
           "path": "@omnitron-dev/prism/components",
           "guide": "/docs/frontend/prism/components"
+        },
+        {
+          "path": "@omnitron-dev/prism/components/map",
+          "guide": "/docs/frontend/prism/maps"
+        }
+      ]
+    },
+    {
+      "name": "MapPopup",
+      "package": "@omnitron-dev/prism",
+      "kind": "value",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/index.ts#L611",
+      "imports": [
+        {
+          "path": "@omnitron-dev/prism",
+          "guide": "/docs/frontend/prism"
+        },
+        {
+          "path": "@omnitron-dev/prism/components",
+          "guide": "/docs/frontend/prism/components"
+        }
+      ]
+    },
+    {
+      "name": "MapPopup",
+      "package": "@omnitron-dev/prism",
+      "kind": "value",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/map/index.ts#L20",
+      "imports": [
+        {
+          "path": "@omnitron-dev/prism/components/map",
+          "guide": "/docs/frontend/prism/maps"
         }
       ]
     },
@@ -25306,7 +25540,39 @@
       "name": "MapProps",
       "package": "@omnitron-dev/prism",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/map/Map.tsx#L57",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/map/Map.tsx#L40",
+      "imports": [
+        {
+          "path": "@omnitron-dev/prism",
+          "guide": "/docs/frontend/prism"
+        },
+        {
+          "path": "@omnitron-dev/prism/components",
+          "guide": "/docs/frontend/prism/components"
+        },
+        {
+          "path": "@omnitron-dev/prism/components/map",
+          "guide": "/docs/frontend/prism/maps"
+        }
+      ]
+    },
+    {
+      "name": "MapRef",
+      "package": "@omnitron-dev/prism",
+      "kind": "type",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/map/index.ts#L21",
+      "imports": [
+        {
+          "path": "@omnitron-dev/prism/components/map",
+          "guide": "/docs/frontend/prism/maps"
+        }
+      ]
+    },
+    {
+      "name": "MapSource",
+      "package": "@omnitron-dev/prism",
+      "kind": "value",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/index.ts#L609",
       "imports": [
         {
           "path": "@omnitron-dev/prism",
@@ -25319,10 +25585,22 @@
       ]
     },
     {
-      "name": "MapViewport",
+      "name": "MapSource",
       "package": "@omnitron-dev/prism",
-      "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/map/Map.tsx#L49",
+      "kind": "value",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/map/index.ts#L20",
+      "imports": [
+        {
+          "path": "@omnitron-dev/prism/components/map",
+          "guide": "/docs/frontend/prism/maps"
+        }
+      ]
+    },
+    {
+      "name": "MapStyle",
+      "package": "@omnitron-dev/prism",
+      "kind": "type",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/map/Map.tsx#L27",
       "imports": [
         {
           "path": "@omnitron-dev/prism",
@@ -25331,6 +25609,30 @@
         {
           "path": "@omnitron-dev/prism/components",
           "guide": "/docs/frontend/prism/components"
+        },
+        {
+          "path": "@omnitron-dev/prism/components/map",
+          "guide": "/docs/frontend/prism/maps"
+        }
+      ]
+    },
+    {
+      "name": "MapViewport",
+      "package": "@omnitron-dev/prism",
+      "kind": "interface",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/map/Map.tsx#L20",
+      "imports": [
+        {
+          "path": "@omnitron-dev/prism",
+          "guide": "/docs/frontend/prism"
+        },
+        {
+          "path": "@omnitron-dev/prism/components",
+          "guide": "/docs/frontend/prism/components"
+        },
+        {
+          "path": "@omnitron-dev/prism/components/map",
+          "guide": "/docs/frontend/prism/maps"
         }
       ]
     },
@@ -27303,6 +27605,18 @@
         {
           "path": "@omnitron-dev/prism/netron",
           "guide": "/docs/frontend/netron/react"
+        }
+      ]
+    },
+    {
+      "name": "normalizeMapPoint",
+      "package": "@omnitron-dev/prism",
+      "kind": "function",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/map/coordinates.ts#L17",
+      "imports": [
+        {
+          "path": "@omnitron-dev/prism/components/map",
+          "guide": "/docs/frontend/prism/maps"
         }
       ]
     },
@@ -33891,6 +34205,18 @@
         {
           "path": "@omnitron-dev/prism/hooks",
           "guide": "/docs/frontend/prism/hooks-catalog"
+        }
+      ]
+    },
+    {
+      "name": "useMap",
+      "package": "@omnitron-dev/prism",
+      "kind": "value",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/map/index.ts#L20",
+      "imports": [
+        {
+          "path": "@omnitron-dev/prism/components/map",
+          "guide": "/docs/frontend/prism/maps"
         }
       ]
     },

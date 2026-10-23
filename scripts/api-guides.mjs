@@ -57,6 +57,8 @@ export default {
     "./layouts": "frontend/prism/layouts.md",
     "./blocks": "frontend/prism/blocks.md",
     "./components": "frontend/prism/components.md",
+    "./components/map": "frontend/prism/maps.md",
+    "./components/map/styles.css": {guide: "frontend/prism/maps.md", assetSource: "src/components/map/map.css"},
     "./components/editor": "frontend/prism/components.md",
     "./components/emoji-picker": "frontend/prism/components.md",
     "./components/research-editor": "frontend/prism/components.md",
