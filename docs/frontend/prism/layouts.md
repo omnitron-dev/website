@@ -92,8 +92,9 @@ labels, active destination identity and optional item `shortLabel` values.
 Hide auxiliary search controls instead of unmounting them when retaining their
 input state matters. The dashboard and nested panels share `SidebarToggle` and
 the themed `Scrollbar`; scrollbar styling also applies to nested overflow
-regions through Prism's CSS baseline. Forced-colors mode keeps native scrollbar
-colors and dimensions.
+regions through Prism's CSS baseline. On a fine pointer, thumbs reveal on hover
+or keyboard focus inside the region without changing layout. Touch input keeps
+the native controls visible; forced-colors mode keeps native colors and dimensions.
 
 It uses native MUI controls and the shared Prism settings store, including its
 storage-failure fallback. The panel body may remount when crossing the mobile

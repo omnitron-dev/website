@@ -248,7 +248,7 @@ Built-in mixins (keys on the `mixins` object):
 | `bgBlur({ blur, color })` | Backdrop blur |
 | `borderGradient({ color, borderWidth, borderRadius })` | Gradient border |
 | `maxLine({ lines, lineHeight })` | Multi-line truncation with ellipsis |
-| `scrollbarStyles(theme)` | Prism custom scrollbar |
+| `scrollbarStyles(theme, { autoHide: true })` | Native themed scrollbar; hover/focus reveal on fine pointers |
 | `hideScrollX` / `hideScrollY` | Hidden-scrollbar containers (objects) |
 
 (Standalone scrollbar/ellipsis helpers are also exported by name:
@@ -330,3 +330,25 @@ Useful for:
 - [Layouts](./layouts.md) — `<DashboardLayout>` reads density
 - [Hooks catalog](./hooks-catalog.md) — `useSettingsStore`, theme-aware hooks
 - [MUI v9 theming docs](https://mui.com/material-ui/customization/theming/) — underlying foundation
+
+## Application icon families
+
+`PrismIconProvider` from `@omnitron-dev/prism/icons` supplies a semantic icon set
+to layouts, editors, graphs and MUI slots, including portals. Its `icons` prop
+accepts a partial `PrismIconSet`; missing slots retain the parent or bundled icon.
+Use `Record<PrismIconName, PrismIconComponent>` for compile-time coverage of every
+slot, and `prismIconNames` to enumerate them. Supplied components accept
+`SvgIconProps`, forward the SVG ref and preserve MUI accessibility semantics.
+
+```tsx
+import { PrismIconProvider, type PrismIconSet } from '@omnitron-dev/prism/icons';
+
+const icons = { search: ApplicationSearchIcon } satisfies PrismIconSet;
+<PrismIconProvider icons={icons}>
+  <PrismThemeProvider theme={theme}>{children}</PrismThemeProvider>
+</PrismIconProvider>;
+```
+
+The application supplies and licenses its artwork. The provider does not fetch
+icons or replace rendered DOM. Component-level MUI slots and explicit icon props
+take precedence; nested providers inherit the outer set.
