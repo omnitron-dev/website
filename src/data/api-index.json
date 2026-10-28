@@ -16358,7 +16358,7 @@
       "name": "Breadcrumbs",
       "package": "@omnitron-dev/prism",
       "kind": "function",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/breadcrumbs/breadcrumbs.tsx#L335",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/breadcrumbs/breadcrumbs.tsx#L341",
       "imports": [
         {
           "path": "@omnitron-dev/prism",
@@ -19522,7 +19522,7 @@
       "name": "DashboardContent",
       "package": "@omnitron-dev/prism",
       "kind": "function",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/layouts/dashboard/layout.tsx#L354",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/layouts/dashboard/layout.tsx#L379",
       "imports": [
         {
           "path": "@omnitron-dev/prism",
@@ -19538,7 +19538,7 @@
       "name": "DashboardContentProps",
       "package": "@omnitron-dev/prism",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/layouts/dashboard/layout.tsx#L339",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/layouts/dashboard/layout.tsx#L364",
       "imports": [
         {
           "path": "@omnitron-dev/prism",
@@ -19570,7 +19570,7 @@
       "name": "DashboardLayout",
       "package": "@omnitron-dev/prism",
       "kind": "function",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/layouts/dashboard/layout.tsx#L302",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/layouts/dashboard/layout.tsx#L325",
       "imports": [
         {
           "path": "@omnitron-dev/prism",
@@ -19586,7 +19586,7 @@
       "name": "DashboardLayoutProps",
       "package": "@omnitron-dev/prism",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/layouts/dashboard/layout.tsx#L235",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/layouts/dashboard/layout.tsx#L256",
       "imports": [
         {
           "path": "@omnitron-dev/prism",
@@ -32722,7 +32722,7 @@
       "name": "TabItem",
       "package": "@omnitron-dev/prism",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/tabs/tabs.tsx#L20",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/tabs/tabs.tsx#L22",
       "imports": [
         {
           "path": "@omnitron-dev/prism",
@@ -32926,7 +32926,7 @@
       "name": "TabPanel",
       "package": "@omnitron-dev/prism",
       "kind": "function",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/tabs/tabs.tsx#L230",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/tabs/tabs.tsx#L335",
       "imports": [
         {
           "path": "@omnitron-dev/prism",
@@ -32946,7 +32946,7 @@
       "name": "TabPanelProps",
       "package": "@omnitron-dev/prism",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/tabs/tabs.tsx#L202",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/tabs/tabs.tsx#L304",
       "imports": [
         {
           "path": "@omnitron-dev/prism",
@@ -32966,7 +32966,7 @@
       "name": "Tabs",
       "package": "@omnitron-dev/prism",
       "kind": "function",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/tabs/tabs.tsx#L88",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/tabs/tabs.tsx#L98",
       "imports": [
         {
           "path": "@omnitron-dev/prism",
@@ -32998,7 +32998,7 @@
       "name": "TabsProps",
       "package": "@omnitron-dev/prism",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/tabs/tabs.tsx#L39",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/tabs/tabs.tsx#L47",
       "imports": [
         {
           "path": "@omnitron-dev/prism",
@@ -36682,7 +36682,7 @@
       "name": "useTabs",
       "package": "@omnitron-dev/prism",
       "kind": "function",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/tabs/tabs.tsx#L275",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/tabs/tabs.tsx#L380",
       "imports": [
         {
           "path": "@omnitron-dev/prism",
@@ -36702,7 +36702,7 @@
       "name": "UseTabsOptions",
       "package": "@omnitron-dev/prism",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/tabs/tabs.tsx#L239",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/tabs/tabs.tsx#L344",
       "imports": [
         {
           "path": "@omnitron-dev/prism",
@@ -36722,7 +36722,7 @@
       "name": "UseTabsReturn",
       "package": "@omnitron-dev/prism",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/tabs/tabs.tsx#L246",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/tabs/tabs.tsx#L351",
       "imports": [
         {
           "path": "@omnitron-dev/prism",

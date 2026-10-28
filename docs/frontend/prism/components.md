@@ -711,6 +711,36 @@ import { Tabs, TabPanel } from '@omnitron-dev/prism';
 The `useTabs` hook manages active-value state for you when you
 need it outside the component.
 
+For individually closable tabs, set `closable: true` on each item and supply
+`onClose(value)`. The close icon is part of that tab, and **Delete** requests
+closure when the tab has focus. Clicking close does not select an inactive tab.
+`closeDisabled` suspends closure while leaving selection available;
+`closeLabel` supplies a localized accessible name. The same options work on
+`TabPanel` children. Closure is a request: the caller owns confirmation and
+removal, plus selection in controlled mode. Focus moves to the next available
+tab after removal, or the preceding tab when closing the last one. When all tabs
+are removed, the caller should focus its creation control or another logical
+next action. Default tabs remain non-closable.
+
+```tsx
+import { Tabs } from '@omnitron-dev/prism/components/tabs';
+
+<Tabs
+  value={activeId}
+  onChange={setActiveId}
+  onClose={setPendingCloseId}
+  tabs={sessions.map(session => ({
+    value: session.id,
+    label: session.label,
+    closable: true,
+    closeDisabled: saving,
+    closeLabel: `Close ${session.label}`,
+  }))}
+  variant="scrollable"
+  aria-label="Sessions"
+/>
+```
+
 ### `<ScrollSpy>` / `<ScrollSpyProvider>`
 
 Wrap content in `<ScrollSpyProvider>`, mark each tracked region

@@ -355,3 +355,36 @@ persisted so an operator can inspect and intervene.
 - [Orchestrator](./orchestrator.md) — what the daemon hands apps off to
 - [Services reference](./services-reference.md) — all 19 RPC services
 - [CLI](./cli.md) — every command that talks to this daemon
+
+
+## Updating a source runtime
+
+A daemon restart stops its managed application processes. Prepare a controlled
+maintenance window when updating a source checkout; process handoff between
+daemon versions is not implemented.
+
+1. Record the active build, enabled stacks, application states and remote node
+   process IDs. Save the daemon configuration, account database, project registry,
+   runtime dependencies and builds needed for rollback. Preserve persistent data
+   volumes and existing experiment registrations.
+2. Build and validate the target revision separately. Use the repository's exact
+   `packageManager` version and test native dependencies with the Node executable
+   used by the installed service. Keep the package manager in a permanent path
+   available to that service.
+3. Unload the OS supervisor before replacing a watched checkout. Wait for owned
+   application processes to stop. Fast-forward clean working copies and install
+   from the verified lockfiles; preserve other branches and local configuration.
+4. Bind source-mode applications to the same physical Titan package as the daemon.
+   Matching version strings alone do not guarantee shared dependency-injection
+   identity. Verify transitive backend imports as well as direct dependencies.
+   Published deployments should use their pinned framework artifacts.
+5. Build the daemon and Console from the same revision, then restore OS supervision.
+   Check each enabled stack and its child processes against the saved baseline.
+   A responding daemon does not mean its applications have finished starting.
+6. Reload the Console and verify [access controls](./access.md),
+   [SSH host identity and sessions](./terminal.md), application health and audit
+   records. Confirm remote node processes remain unchanged for a local upgrade.
+
+Keep immutable experiment manifests intact when their recorded package trees are
+unavailable. Recover the original environment or create a separately registered
+experiment; changing old hashes would invalidate its reproducibility.

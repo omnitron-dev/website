@@ -176,11 +176,16 @@ function ConsoleShell() {
 }
 ```
 
+### Bounded workspaces
+
+For terminals, editors and infrastructure consoles, set `contentMode="workspace"`. The shell uses `100dvh`, keeps its header and footer in the available height, and gives the main region `minHeight: 0` and hidden overflow. Children should use flex sizing with `minHeight: 0` and `minWidth: 0`; put scrolling on the panel that owns it. To scroll ordinary pages inside the same shell, use `slotProps={{ main: { sx: { overflowY: 'auto' } } }}`. Default `document` mode retains normal page scrolling for other applications.
+
 ### Props
 
 | Prop | Type | Default | Notes |
 | ---- | ---- | ------- | ----- |
 | `children` | `ReactNode` | — | Page content (your `<Outlet />`) |
+| `contentMode` | `'document' \| 'workspace'` | `'document'` | Document flow, or a viewport-bounded shell whose panels own scrolling |
 | `navData` | `LayoutNavData` | — | Navigation tree — `LayoutNavSection[]` (see below) |
 | `headerSlots` | `HeaderSlots` | — | Header content per slot (`leftArea` / `centerArea` / `rightArea` / `topArea` / `bottomArea`) |
 | `logo` | `ReactNode` | — | Logo shown in the sidenav (and as the mobile header left slot) |

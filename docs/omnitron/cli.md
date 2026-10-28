@@ -20,8 +20,11 @@ Verified against `src/cli/omnitron.ts` and `src/commands/*`.
 | `--version`                               | Print CLI version                                      |
 | `--help`                                  | Per-command help                                       |
 
-> The `--json` flag is honoured by **every** command. Use it from
-> CI / scripts / agent bots so output is parseable.
+Commands that support `--json` return a structured result. A command without
+machine-readable output rejects the flag with a structured error and a nonzero
+exit code; do not parse its human-readable table. Finite commands drain stdout
+and stderr before exiting, so large log exports remain complete when piped
+into another process. Check both the JSON result and the exit status.
 
 ## Command index
 

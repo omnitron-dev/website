@@ -9,10 +9,18 @@ Open **SSH workspace** from the sidebar, or **SSH** on a registered node. Each t
 
 The service runs on a master with PostgreSQL-backed authentication and audit. The daemon owns the SSH connection. Credentials stay on the server. The browser renders the terminal through lazily loaded xterm.js; the CLI uses the same `OmnitronTerminal` RPC service. SSH runs through Xec's existing `NodeSSH` implementation, exposed by `@xec-sh/core/ssh`.
 
+## Working with tabs
+
+The breadcrumb trail identifies the workspace without a duplicate page title. The node selector and **New SSH tab** stay visible; **Workspace actions** contains host-key verification, the equivalent CLI command and the audit trail.
+
+The layout control reads **1 pane** by default: only the selected tab is shown. Selecting **2 panes** explicitly enables split view, showing the selected tab and another open session. Each pane is labeled with its stable tab name. The workspace shares the available space between the two sessions: side by side when the content area is at least 960 px wide, stacked otherwise. Both panes stay inside the window. Closing down to one tab resets the layout to one pane. Scrollback scrolls within each terminal, and resizing the window or sidebar updates the remote PTY dimensions. Tabs remain connected when following Console navigation, including breadcrumbs.
+
+Each pane exposes input mode, search and a **Terminal actions** menu. **READ** disables local keyboard and paste input; it does not change the remote account's permissions. Search opens with the magnifying glass or **Ctrl/⌘ + Shift + F**. Use **Enter** for the next match, **Shift + Enter** for the previous match and **Escape** to return to the shell. The actions menu provides copy selection and text sizes from 10 to 24 px, with a 14 px reset. Every tab has its own close button. **Delete** on a focused tab requests the same action. The confirmation names the target session, including when it is inactive. Closing the active tab selects its neighbor; closing the last tab returns focus to **New SSH tab**. Tab numbers remain stable when another tab is removed.
+
 ## Verify the host before connecting
 
 1. Register a node with its SSH hostname, port, user and credential using the [node commands](./cli.md#nodes-infrastructure-machines).
-2. Select **Verify host key**. The daemon observes the server's key in a handshake that does not authenticate.
+2. Open **Workspace actions** (the ellipsis beside the node selector), then select **Verify host key**. The daemon observes the server's key in a handshake that does not authenticate.
 3. Compare the SHA256 fingerprint with an independently trusted source, such as the host's provisioning console. For an OpenSSH host, an administrator can run:
 
    ```bash
