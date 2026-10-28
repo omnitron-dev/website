@@ -213,6 +213,10 @@
       "guide": "/docs/frontend/prism/accessibility"
     },
     {
+      "path": "@omnitron-dev/prism/auth",
+      "guide": "/docs/frontend/prism/blocks"
+    },
+    {
       "path": "@omnitron-dev/prism/blocks",
       "guide": "/docs/frontend/prism/blocks"
     },
@@ -222,6 +226,34 @@
     },
     {
       "path": "@omnitron-dev/prism/components",
+      "guide": "/docs/frontend/prism/components"
+    },
+    {
+      "path": "@omnitron-dev/prism/components/admin-filters",
+      "guide": "/docs/frontend/prism/components"
+    },
+    {
+      "path": "@omnitron-dev/prism/components/alert",
+      "guide": "/docs/frontend/prism/components"
+    },
+    {
+      "path": "@omnitron-dev/prism/components/animate",
+      "guide": "/docs/frontend/prism/components"
+    },
+    {
+      "path": "@omnitron-dev/prism/components/breadcrumbs",
+      "guide": "/docs/frontend/prism/components"
+    },
+    {
+      "path": "@omnitron-dev/prism/components/card",
+      "guide": "/docs/frontend/prism/components"
+    },
+    {
+      "path": "@omnitron-dev/prism/components/command-palette",
+      "guide": "/docs/frontend/prism/components"
+    },
+    {
+      "path": "@omnitron-dev/prism/components/confirm-dialog",
       "guide": "/docs/frontend/prism/components"
     },
     {
@@ -237,6 +269,14 @@
       "guide": "/docs/frontend/prism/components"
     },
     {
+      "path": "@omnitron-dev/prism/components/empty-content",
+      "guide": "/docs/frontend/prism/components"
+    },
+    {
+      "path": "@omnitron-dev/prism/components/error-boundary",
+      "guide": "/docs/frontend/prism/components"
+    },
+    {
       "path": "@omnitron-dev/prism/components/knowledge-graph",
       "guide": "/docs/frontend/prism/components"
     },
@@ -247,6 +287,14 @@
       "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/knowledge-graph/graph.css"
     },
     {
+      "path": "@omnitron-dev/prism/components/label",
+      "guide": "/docs/frontend/prism/components"
+    },
+    {
+      "path": "@omnitron-dev/prism/components/loading-screen",
+      "guide": "/docs/frontend/prism/components"
+    },
+    {
       "path": "@omnitron-dev/prism/components/map",
       "guide": "/docs/frontend/prism/maps"
     },
@@ -255,6 +303,18 @@
       "guide": "/docs/frontend/prism/maps",
       "kind": "stylesheet",
       "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/map/map.css"
+    },
+    {
+      "path": "@omnitron-dev/prism/components/navigation-progress",
+      "guide": "/docs/frontend/prism/components"
+    },
+    {
+      "path": "@omnitron-dev/prism/components/page-content",
+      "guide": "/docs/frontend/prism/components"
+    },
+    {
+      "path": "@omnitron-dev/prism/components/popover",
+      "guide": "/docs/frontend/prism/components"
     },
     {
       "path": "@omnitron-dev/prism/components/research",
@@ -275,6 +335,30 @@
       "guide": "/docs/frontend/prism/components",
       "kind": "stylesheet",
       "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/research/research.css"
+    },
+    {
+      "path": "@omnitron-dev/prism/components/scroll-to-top",
+      "guide": "/docs/frontend/prism/components"
+    },
+    {
+      "path": "@omnitron-dev/prism/components/skeleton",
+      "guide": "/docs/frontend/prism/components"
+    },
+    {
+      "path": "@omnitron-dev/prism/components/snackbar",
+      "guide": "/docs/frontend/prism/components"
+    },
+    {
+      "path": "@omnitron-dev/prism/components/stepper",
+      "guide": "/docs/frontend/prism/components"
+    },
+    {
+      "path": "@omnitron-dev/prism/components/table",
+      "guide": "/docs/frontend/prism/components"
+    },
+    {
+      "path": "@omnitron-dev/prism/components/tabs",
+      "guide": "/docs/frontend/prism/components"
     },
     {
       "path": "@omnitron-dev/prism/core",
@@ -11242,7 +11326,7 @@
       "name": "AggregatedHealthDto",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/config/types.ts#L1069",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/config/types.ts#L1071",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron",
@@ -11262,7 +11346,7 @@
       "name": "AggregatedMetricsDto",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/config/types.ts#L1032",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/config/types.ts#L1034",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron",
@@ -11502,7 +11586,7 @@
       "name": "AppDiagnosticsDto",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/config/types.ts#L1187",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/config/types.ts#L1189",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron",
@@ -11602,7 +11686,7 @@
       "name": "AppStatus",
       "package": "@omnitron-dev/omnitron",
       "kind": "type",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/config/types.ts#L957",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/config/types.ts#L959",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron",
@@ -11646,7 +11730,7 @@
       "name": "AttestStored",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/shared/dto/services.ts#L828",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/shared/dto/services.ts#L831",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/dto/services",
@@ -11718,7 +11802,7 @@
       "name": "ChildDiagnosticsDto",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/config/types.ts#L1137",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/config/types.ts#L1139",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/config",
@@ -11747,6 +11831,66 @@
         {
           "path": "@omnitron-dev/omnitron/operations",
           "guide": "/docs/omnitron/releases"
+        }
+      ]
+    },
+    {
+      "name": "ConsoleAccess",
+      "package": "@omnitron-dev/omnitron",
+      "kind": "interface",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/shared/dto/access.ts#L14",
+      "imports": [
+        {
+          "path": "@omnitron-dev/omnitron/dto/services",
+          "guide": "/docs/omnitron/services-reference"
+        }
+      ]
+    },
+    {
+      "name": "ConsoleAccount",
+      "package": "@omnitron-dev/omnitron",
+      "kind": "interface",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/shared/dto/access.ts#L21",
+      "imports": [
+        {
+          "path": "@omnitron-dev/omnitron/dto/services",
+          "guide": "/docs/omnitron/services-reference"
+        }
+      ]
+    },
+    {
+      "name": "ConsoleCapability",
+      "package": "@omnitron-dev/omnitron",
+      "kind": "interface",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/shared/dto/access.ts#L3",
+      "imports": [
+        {
+          "path": "@omnitron-dev/omnitron/dto/services",
+          "guide": "/docs/omnitron/services-reference"
+        }
+      ]
+    },
+    {
+      "name": "consolePasswordError",
+      "package": "@omnitron-dev/omnitron",
+      "kind": "function",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/shared/dto/auth.ts#L27",
+      "imports": [
+        {
+          "path": "@omnitron-dev/omnitron/dto/services",
+          "guide": "/docs/omnitron/services-reference"
+        }
+      ]
+    },
+    {
+      "name": "ConsoleRole",
+      "package": "@omnitron-dev/omnitron",
+      "kind": "type",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/shared/dto/access.ts#L1",
+      "imports": [
+        {
+          "path": "@omnitron-dev/omnitron/dto/services",
+          "guide": "/docs/omnitron/services-reference"
         }
       ]
     },
@@ -11862,7 +12006,7 @@
       "name": "DaemonStatusDto",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/config/types.ts#L1012",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/config/types.ts#L1014",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron",
@@ -11974,7 +12118,7 @@
       "name": "DeployProgressRecord",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/shared/dto/services.ts#L286",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/shared/dto/services.ts#L289",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/dto/services",
@@ -12082,7 +12226,7 @@
       "name": "FleetStatusDto",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/shared/dto/services.ts#L225",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/shared/dto/services.ts#L228",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/dto/services",
@@ -12166,7 +12310,7 @@
       "name": "IAlertSink",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/config/types.ts#L866",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/config/types.ts#L868",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/config",
@@ -12218,7 +12362,7 @@
       "name": "IDaemonService",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/shared/dto/services.ts#L30",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/shared/dto/services.ts#L32",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/dto/services",
@@ -12246,7 +12390,7 @@
       "name": "IEcosystemConfig",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/config/types.ts#L880",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/config/types.ts#L882",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron",
@@ -12278,7 +12422,7 @@
       "name": "IInfraService",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/shared/dto/services.ts#L231",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/shared/dto/services.ts#L234",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/dto/services",
@@ -12531,10 +12675,22 @@
       ]
     },
     {
+      "name": "IOmnitronAccessService",
+      "package": "@omnitron-dev/omnitron",
+      "kind": "interface",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/shared/dto/access.ts#L30",
+      "imports": [
+        {
+          "path": "@omnitron-dev/omnitron/dto/services",
+          "guide": "/docs/omnitron/services-reference"
+        }
+      ]
+    },
+    {
       "name": "IOmnitronAlertsService",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/shared/dto/services.ts#L402",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/shared/dto/services.ts#L405",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/dto/services",
@@ -12546,7 +12702,7 @@
       "name": "IOmnitronAuditService",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/shared/dto/services.ts#L587",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/shared/dto/services.ts#L590",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/dto/services",
@@ -12558,7 +12714,7 @@
       "name": "IOmnitronAuthService",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/shared/dto/services.ts#L138",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/shared/dto/services.ts#L140",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/dto/services",
@@ -12570,7 +12726,7 @@
       "name": "IOmnitronBackupsService",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/shared/dto/services.ts#L538",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/shared/dto/services.ts#L541",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/dto/services",
@@ -12582,7 +12738,7 @@
       "name": "IOmnitronDeployService",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/shared/dto/services.ts#L426",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/shared/dto/services.ts#L429",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/dto/services",
@@ -12594,7 +12750,7 @@
       "name": "IOmnitronDiscoveryService",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/shared/dto/services.ts#L575",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/shared/dto/services.ts#L578",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/dto/services",
@@ -12606,7 +12762,7 @@
       "name": "IOmnitronFleetService",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/shared/dto/services.ts#L486",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/shared/dto/services.ts#L489",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/dto/services",
@@ -12618,7 +12774,7 @@
       "name": "IOmnitronHealthService",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/shared/dto/services.ts#L567",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/shared/dto/services.ts#L570",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/dto/services",
@@ -12630,7 +12786,7 @@
       "name": "IOmnitronInfraService",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/shared/dto/services.ts#L444",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/shared/dto/services.ts#L447",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/dto/services",
@@ -12642,7 +12798,7 @@
       "name": "IOmnitronKubernetesService",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/shared/dto/services.ts#L554",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/shared/dto/services.ts#L557",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/dto/services",
@@ -12654,7 +12810,7 @@
       "name": "IOmnitronLogsService",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/shared/dto/services.ts#L183",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/shared/dto/services.ts#L185",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/dto/services",
@@ -12666,7 +12822,7 @@
       "name": "IOmnitronMetricsService",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/shared/dto/services.ts#L749",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/shared/dto/services.ts#L752",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/dto/services",
@@ -12678,7 +12834,7 @@
       "name": "IOmnitronNodesService",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/shared/dto/services.ts#L616",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/shared/dto/services.ts#L619",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/dto/services",
@@ -12690,7 +12846,7 @@
       "name": "IOmnitronPipelinesService",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/shared/dto/services.ts#L502",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/shared/dto/services.ts#L505",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/dto/services",
@@ -12706,7 +12862,7 @@
       "name": "IOmnitronReleaseService",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/shared/dto/services.ts#L835",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/shared/dto/services.ts#L838",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/dto/services",
@@ -12718,7 +12874,7 @@
       "name": "IOmnitronSecretsService",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/shared/dto/services.ts#L594",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/shared/dto/services.ts#L597",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/dto/services",
@@ -12734,7 +12890,19 @@
       "name": "IOmnitronSystemInfoService",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/shared/dto/services.ts#L524",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/shared/dto/services.ts#L527",
+      "imports": [
+        {
+          "path": "@omnitron-dev/omnitron/dto/services",
+          "guide": "/docs/omnitron/services-reference"
+        }
+      ]
+    },
+    {
+      "name": "IOmnitronTerminalService",
+      "package": "@omnitron-dev/omnitron",
+      "kind": "interface",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/shared/dto/services.ts#L874",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/dto/services",
@@ -12746,7 +12914,7 @@
       "name": "IOmnitronTracesService",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/shared/dto/services.ts#L515",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/shared/dto/services.ts#L518",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/dto/services",
@@ -12838,7 +13006,7 @@
       "name": "IProjectRpcService",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/shared/dto/services.ts#L298",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/shared/dto/services.ts#L301",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/dto/services",
@@ -13074,7 +13242,7 @@
       "name": "LastExitDto",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/config/types.ts#L1109",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/config/types.ts#L1111",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/config",
@@ -13122,7 +13290,7 @@
       "name": "LogEntryDto",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/config/types.ts#L1095",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/config/types.ts#L1097",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron",
@@ -13154,7 +13322,7 @@
       "name": "LogPathsDto",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/config/types.ts#L1180",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/config/types.ts#L1182",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/config",
@@ -13430,7 +13598,7 @@
       "name": "OmnitronActiveSession",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/shared/dto/auth.ts#L46",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/shared/dto/auth.ts#L52",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/dto/services",
@@ -13454,7 +13622,7 @@
       "name": "OmnitronAuthUser",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/shared/dto/auth.ts#L26",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/shared/dto/auth.ts#L32",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/dto/services",
@@ -13514,7 +13682,7 @@
       "name": "OmnitronSignInResult",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/shared/dto/auth.ts#L40",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/shared/dto/auth.ts#L46",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/dto/services",
@@ -13682,7 +13850,7 @@
       "name": "PoolDiagnosticsDto",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/config/types.ts#L1161",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/config/types.ts#L1163",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/config",
@@ -13694,7 +13862,7 @@
       "name": "ProcessInfoDto",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/config/types.ts#L959",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/config/types.ts#L961",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron",
@@ -13834,7 +14002,7 @@
       "name": "ReleaseDeploymentDto",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/shared/dto/services.ts#L781",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/shared/dto/services.ts#L784",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/dto/services",
@@ -13882,7 +14050,7 @@
       "name": "ReleasePreflightDto",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/shared/dto/services.ts#L769",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/shared/dto/services.ts#L772",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/dto/services",
@@ -13894,7 +14062,7 @@
       "name": "ReleasePruneAnswer",
       "package": "@omnitron-dev/omnitron",
       "kind": "type",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/shared/dto/services.ts#L807",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/shared/dto/services.ts#L810",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/dto/services",
@@ -13930,7 +14098,7 @@
       "name": "ServerInfoDto",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/shared/dto/services.ts#L216",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/shared/dto/services.ts#L219",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/dto/services",
@@ -14254,7 +14422,7 @@
       "name": "SubProcessInfoDto",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/config/types.ts#L978",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/config/types.ts#L980",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron",
@@ -14323,6 +14491,54 @@
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
       "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/shared/dto/system-info.ts#L14",
+      "imports": [
+        {
+          "path": "@omnitron-dev/omnitron/dto/services",
+          "guide": "/docs/omnitron/services-reference"
+        }
+      ]
+    },
+    {
+      "name": "TerminalHostKey",
+      "package": "@omnitron-dev/omnitron",
+      "kind": "interface",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/shared/dto/terminal.ts#L26",
+      "imports": [
+        {
+          "path": "@omnitron-dev/omnitron/dto/services",
+          "guide": "/docs/omnitron/services-reference"
+        }
+      ]
+    },
+    {
+      "name": "TerminalPolicy",
+      "package": "@omnitron-dev/omnitron",
+      "kind": "interface",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/shared/dto/terminal.ts#L2",
+      "imports": [
+        {
+          "path": "@omnitron-dev/omnitron/dto/services",
+          "guide": "/docs/omnitron/services-reference"
+        }
+      ]
+    },
+    {
+      "name": "TerminalRead",
+      "package": "@omnitron-dev/omnitron",
+      "kind": "interface",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/shared/dto/terminal.ts#L35",
+      "imports": [
+        {
+          "path": "@omnitron-dev/omnitron/dto/services",
+          "guide": "/docs/omnitron/services-reference"
+        }
+      ]
+    },
+    {
+      "name": "TerminalSession",
+      "package": "@omnitron-dev/omnitron",
+      "kind": "interface",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/shared/dto/terminal.ts#L11",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/dto/services",
@@ -14436,6 +14652,10 @@
       "kind": "type",
       "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/blocks/auth-block/guards.tsx#L238",
       "imports": [
+        {
+          "path": "@omnitron-dev/prism/auth",
+          "guide": "/docs/frontend/prism/blocks"
+        },
         {
           "path": "@omnitron-dev/prism/blocks",
           "guide": "/docs/frontend/prism/blocks"
@@ -14615,6 +14835,10 @@
         {
           "path": "@omnitron-dev/prism/components",
           "guide": "/docs/frontend/prism/components"
+        },
+        {
+          "path": "@omnitron-dev/prism/components/admin-filters",
+          "guide": "/docs/frontend/prism/components"
         }
       ]
     },
@@ -14631,6 +14855,10 @@
         {
           "path": "@omnitron-dev/prism/components",
           "guide": "/docs/frontend/prism/components"
+        },
+        {
+          "path": "@omnitron-dev/prism/components/admin-filters",
+          "guide": "/docs/frontend/prism/components"
         }
       ]
     },
@@ -14646,6 +14874,10 @@
         },
         {
           "path": "@omnitron-dev/prism/components",
+          "guide": "/docs/frontend/prism/components"
+        },
+        {
+          "path": "@omnitron-dev/prism/components/alert",
           "guide": "/docs/frontend/prism/components"
         }
       ]
@@ -14675,6 +14907,10 @@
         {
           "path": "@omnitron-dev/prism/components",
           "guide": "/docs/frontend/prism/components"
+        },
+        {
+          "path": "@omnitron-dev/prism/components/alert",
+          "guide": "/docs/frontend/prism/components"
         }
       ]
     },
@@ -14691,6 +14927,10 @@
         {
           "path": "@omnitron-dev/prism/components",
           "guide": "/docs/frontend/prism/components"
+        },
+        {
+          "path": "@omnitron-dev/prism/components/alert",
+          "guide": "/docs/frontend/prism/components"
         }
       ]
     },
@@ -14706,6 +14946,10 @@
         },
         {
           "path": "@omnitron-dev/prism/components",
+          "guide": "/docs/frontend/prism/components"
+        },
+        {
+          "path": "@omnitron-dev/prism/components/alert",
           "guide": "/docs/frontend/prism/components"
         }
       ]
@@ -14771,6 +15015,10 @@
         {
           "path": "@omnitron-dev/prism/components",
           "guide": "/docs/frontend/prism/components"
+        },
+        {
+          "path": "@omnitron-dev/prism/components/admin-filters",
+          "guide": "/docs/frontend/prism/components"
         }
       ]
     },
@@ -14786,6 +15034,10 @@
         },
         {
           "path": "@omnitron-dev/prism/components",
+          "guide": "/docs/frontend/prism/components"
+        },
+        {
+          "path": "@omnitron-dev/prism/components/admin-filters",
           "guide": "/docs/frontend/prism/components"
         }
       ]
@@ -14803,6 +15055,10 @@
         {
           "path": "@omnitron-dev/prism/components",
           "guide": "/docs/frontend/prism/components"
+        },
+        {
+          "path": "@omnitron-dev/prism/components/animate",
+          "guide": "/docs/frontend/prism/components"
         }
       ]
     },
@@ -14819,6 +15075,10 @@
         {
           "path": "@omnitron-dev/prism/components",
           "guide": "/docs/frontend/prism/components"
+        },
+        {
+          "path": "@omnitron-dev/prism/components/animate",
+          "guide": "/docs/frontend/prism/components"
         }
       ]
     },
@@ -14834,6 +15094,10 @@
         },
         {
           "path": "@omnitron-dev/prism/components",
+          "guide": "/docs/frontend/prism/components"
+        },
+        {
+          "path": "@omnitron-dev/prism/components/animate",
           "guide": "/docs/frontend/prism/components"
         }
       ]
@@ -14954,6 +15218,10 @@
         },
         {
           "path": "@omnitron-dev/prism/components",
+          "guide": "/docs/frontend/prism/components"
+        },
+        {
+          "path": "@omnitron-dev/prism/components/popover",
           "guide": "/docs/frontend/prism/components"
         }
       ]
@@ -15257,6 +15525,10 @@
       "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/blocks/auth-block/guards.tsx#L105",
       "imports": [
         {
+          "path": "@omnitron-dev/prism/auth",
+          "guide": "/docs/frontend/prism/blocks"
+        },
+        {
           "path": "@omnitron-dev/prism/blocks",
           "guide": "/docs/frontend/prism/blocks"
         }
@@ -15284,6 +15556,10 @@
       "kind": "interface",
       "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/blocks/auth-block/guards.tsx#L71",
       "imports": [
+        {
+          "path": "@omnitron-dev/prism/auth",
+          "guide": "/docs/frontend/prism/blocks"
+        },
         {
           "path": "@omnitron-dev/prism/blocks",
           "guide": "/docs/frontend/prism/blocks"
@@ -15513,6 +15789,10 @@
       "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/blocks/auth-block/guards.tsx#L47",
       "imports": [
         {
+          "path": "@omnitron-dev/prism/auth",
+          "guide": "/docs/frontend/prism/blocks"
+        },
+        {
           "path": "@omnitron-dev/prism/blocks",
           "guide": "/docs/frontend/prism/blocks"
         }
@@ -15584,6 +15864,10 @@
       "kind": "interface",
       "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/blocks/auth-block/guards.tsx#L31",
       "imports": [
+        {
+          "path": "@omnitron-dev/prism/auth",
+          "guide": "/docs/frontend/prism/blocks"
+        },
         {
           "path": "@omnitron-dev/prism/blocks",
           "guide": "/docs/frontend/prism/blocks"
@@ -16031,6 +16315,10 @@
         {
           "path": "@omnitron-dev/prism/components",
           "guide": "/docs/frontend/prism/components"
+        },
+        {
+          "path": "@omnitron-dev/prism/components/label",
+          "guide": "/docs/frontend/prism/components"
         }
       ]
     },
@@ -16059,6 +16347,10 @@
         {
           "path": "@omnitron-dev/prism/components",
           "guide": "/docs/frontend/prism/components"
+        },
+        {
+          "path": "@omnitron-dev/prism/components/breadcrumbs",
+          "guide": "/docs/frontend/prism/components"
         }
       ]
     },
@@ -16074,6 +16366,10 @@
         },
         {
           "path": "@omnitron-dev/prism/components",
+          "guide": "/docs/frontend/prism/components"
+        },
+        {
+          "path": "@omnitron-dev/prism/components/breadcrumbs",
           "guide": "/docs/frontend/prism/components"
         }
       ]
@@ -16103,6 +16399,10 @@
         {
           "path": "@omnitron-dev/prism/components",
           "guide": "/docs/frontend/prism/components"
+        },
+        {
+          "path": "@omnitron-dev/prism/components/breadcrumbs",
+          "guide": "/docs/frontend/prism/components"
         }
       ]
     },
@@ -16119,6 +16419,10 @@
         {
           "path": "@omnitron-dev/prism/components",
           "guide": "/docs/frontend/prism/components"
+        },
+        {
+          "path": "@omnitron-dev/prism/components/breadcrumbs",
+          "guide": "/docs/frontend/prism/components"
         }
       ]
     },
@@ -16134,6 +16438,10 @@
         },
         {
           "path": "@omnitron-dev/prism/components",
+          "guide": "/docs/frontend/prism/components"
+        },
+        {
+          "path": "@omnitron-dev/prism/components/breadcrumbs",
           "guide": "/docs/frontend/prism/components"
         }
       ]
@@ -16447,6 +16755,10 @@
         {
           "path": "@omnitron-dev/prism/components",
           "guide": "/docs/frontend/prism/components"
+        },
+        {
+          "path": "@omnitron-dev/prism/components/card",
+          "guide": "/docs/frontend/prism/components"
         }
       ]
     },
@@ -16499,6 +16811,10 @@
         {
           "path": "@omnitron-dev/prism/components",
           "guide": "/docs/frontend/prism/components"
+        },
+        {
+          "path": "@omnitron-dev/prism/components/page-content",
+          "guide": "/docs/frontend/prism/components"
         }
       ]
     },
@@ -16514,6 +16830,10 @@
         },
         {
           "path": "@omnitron-dev/prism/components",
+          "guide": "/docs/frontend/prism/components"
+        },
+        {
+          "path": "@omnitron-dev/prism/components/page-content",
           "guide": "/docs/frontend/prism/components"
         }
       ]
@@ -16531,6 +16851,10 @@
         {
           "path": "@omnitron-dev/prism/components",
           "guide": "/docs/frontend/prism/components"
+        },
+        {
+          "path": "@omnitron-dev/prism/components/card",
+          "guide": "/docs/frontend/prism/components"
         }
       ]
     },
@@ -16546,6 +16870,10 @@
         },
         {
           "path": "@omnitron-dev/prism/components",
+          "guide": "/docs/frontend/prism/components"
+        },
+        {
+          "path": "@omnitron-dev/prism/components/card",
           "guide": "/docs/frontend/prism/components"
         }
       ]
@@ -16563,6 +16891,10 @@
         {
           "path": "@omnitron-dev/prism/components",
           "guide": "/docs/frontend/prism/components"
+        },
+        {
+          "path": "@omnitron-dev/prism/components/card",
+          "guide": "/docs/frontend/prism/components"
         }
       ]
     },
@@ -16578,6 +16910,10 @@
         },
         {
           "path": "@omnitron-dev/prism/components",
+          "guide": "/docs/frontend/prism/components"
+        },
+        {
+          "path": "@omnitron-dev/prism/components/skeleton",
           "guide": "/docs/frontend/prism/components"
         }
       ]
@@ -16595,6 +16931,10 @@
         {
           "path": "@omnitron-dev/prism/components",
           "guide": "/docs/frontend/prism/components"
+        },
+        {
+          "path": "@omnitron-dev/prism/components/skeleton",
+          "guide": "/docs/frontend/prism/components"
         }
       ]
     },
@@ -16610,6 +16950,10 @@
         },
         {
           "path": "@omnitron-dev/prism/components",
+          "guide": "/docs/frontend/prism/components"
+        },
+        {
+          "path": "@omnitron-dev/prism/components/card",
           "guide": "/docs/frontend/prism/components"
         }
       ]
@@ -17379,6 +17723,10 @@
         {
           "path": "@omnitron-dev/prism/components",
           "guide": "/docs/frontend/prism/components"
+        },
+        {
+          "path": "@omnitron-dev/prism/components/admin-filters",
+          "guide": "/docs/frontend/prism/components"
         }
       ]
     },
@@ -17423,6 +17771,10 @@
         {
           "path": "@omnitron-dev/prism/components",
           "guide": "/docs/frontend/prism/components"
+        },
+        {
+          "path": "@omnitron-dev/prism/components/command-palette",
+          "guide": "/docs/frontend/prism/components"
         }
       ]
     },
@@ -17439,6 +17791,10 @@
         {
           "path": "@omnitron-dev/prism/components",
           "guide": "/docs/frontend/prism/components"
+        },
+        {
+          "path": "@omnitron-dev/prism/components/command-palette",
+          "guide": "/docs/frontend/prism/components"
         }
       ]
     },
@@ -17454,6 +17810,10 @@
         },
         {
           "path": "@omnitron-dev/prism/components",
+          "guide": "/docs/frontend/prism/components"
+        },
+        {
+          "path": "@omnitron-dev/prism/components/command-palette",
           "guide": "/docs/frontend/prism/components"
         }
       ]
@@ -17647,6 +18007,10 @@
         {
           "path": "@omnitron-dev/prism/components",
           "guide": "/docs/frontend/prism/components"
+        },
+        {
+          "path": "@omnitron-dev/prism/components/confirm-dialog",
+          "guide": "/docs/frontend/prism/components"
         }
       ]
     },
@@ -17662,6 +18026,10 @@
         },
         {
           "path": "@omnitron-dev/prism/components",
+          "guide": "/docs/frontend/prism/components"
+        },
+        {
+          "path": "@omnitron-dev/prism/components/confirm-dialog",
           "guide": "/docs/frontend/prism/components"
         }
       ]
@@ -18274,8 +18642,12 @@
       "name": "createConditionalRender",
       "package": "@omnitron-dev/prism",
       "kind": "function",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/blocks/auth-block/guards.tsx#L458",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/blocks/auth-block/guards.tsx#L409",
       "imports": [
+        {
+          "path": "@omnitron-dev/prism/auth",
+          "guide": "/docs/frontend/prism/blocks"
+        },
         {
           "path": "@omnitron-dev/prism/blocks",
           "guide": "/docs/frontend/prism/blocks"
@@ -18903,6 +19275,10 @@
         {
           "path": "@omnitron-dev/prism/components",
           "guide": "/docs/frontend/prism/components"
+        },
+        {
+          "path": "@omnitron-dev/prism/components/popover",
+          "guide": "/docs/frontend/prism/components"
         }
       ]
     },
@@ -18918,6 +19294,10 @@
         },
         {
           "path": "@omnitron-dev/prism/components",
+          "guide": "/docs/frontend/prism/components"
+        },
+        {
+          "path": "@omnitron-dev/prism/components/popover",
           "guide": "/docs/frontend/prism/components"
         }
       ]
@@ -19947,6 +20327,10 @@
         {
           "path": "@omnitron-dev/prism/components",
           "guide": "/docs/frontend/prism/components"
+        },
+        {
+          "path": "@omnitron-dev/prism/components/confirm-dialog",
+          "guide": "/docs/frontend/prism/components"
         }
       ]
     },
@@ -19962,6 +20346,10 @@
         },
         {
           "path": "@omnitron-dev/prism/components",
+          "guide": "/docs/frontend/prism/components"
+        },
+        {
+          "path": "@omnitron-dev/prism/components/confirm-dialog",
           "guide": "/docs/frontend/prism/components"
         }
       ]
@@ -20663,6 +21051,10 @@
         {
           "path": "@omnitron-dev/prism/components",
           "guide": "/docs/frontend/prism/components"
+        },
+        {
+          "path": "@omnitron-dev/prism/components/empty-content",
+          "guide": "/docs/frontend/prism/components"
         }
       ]
     },
@@ -20678,6 +21070,10 @@
         },
         {
           "path": "@omnitron-dev/prism/components",
+          "guide": "/docs/frontend/prism/components"
+        },
+        {
+          "path": "@omnitron-dev/prism/components/empty-content",
           "guide": "/docs/frontend/prism/components"
         }
       ]
@@ -20731,6 +21127,10 @@
         {
           "path": "@omnitron-dev/prism/components",
           "guide": "/docs/frontend/prism/components"
+        },
+        {
+          "path": "@omnitron-dev/prism/components/error-boundary",
+          "guide": "/docs/frontend/prism/components"
         }
       ]
     },
@@ -20746,6 +21146,10 @@
         },
         {
           "path": "@omnitron-dev/prism/components",
+          "guide": "/docs/frontend/prism/components"
+        },
+        {
+          "path": "@omnitron-dev/prism/components/error-boundary",
           "guide": "/docs/frontend/prism/components"
         }
       ]
@@ -20958,6 +21362,10 @@
         },
         {
           "path": "@omnitron-dev/prism/components",
+          "guide": "/docs/frontend/prism/components"
+        },
+        {
+          "path": "@omnitron-dev/prism/components/error-boundary",
           "guide": "/docs/frontend/prism/components"
         }
       ]
@@ -21911,6 +22319,10 @@
         {
           "path": "@omnitron-dev/prism/components",
           "guide": "/docs/frontend/prism/components"
+        },
+        {
+          "path": "@omnitron-dev/prism/components/admin-filters",
+          "guide": "/docs/frontend/prism/components"
         }
       ]
     },
@@ -21938,6 +22350,10 @@
         },
         {
           "path": "@omnitron-dev/prism/components",
+          "guide": "/docs/frontend/prism/components"
+        },
+        {
+          "path": "@omnitron-dev/prism/components/admin-filters",
           "guide": "/docs/frontend/prism/components"
         }
       ]
@@ -21971,6 +22387,10 @@
         {
           "path": "@omnitron-dev/prism/components",
           "guide": "/docs/frontend/prism/components"
+        },
+        {
+          "path": "@omnitron-dev/prism/components/admin-filters",
+          "guide": "/docs/frontend/prism/components"
         }
       ]
     },
@@ -21986,6 +22406,10 @@
         },
         {
           "path": "@omnitron-dev/prism/components",
+          "guide": "/docs/frontend/prism/components"
+        },
+        {
+          "path": "@omnitron-dev/prism/components/admin-filters",
           "guide": "/docs/frontend/prism/components"
         }
       ]
@@ -22003,6 +22427,10 @@
         {
           "path": "@omnitron-dev/prism/components",
           "guide": "/docs/frontend/prism/components"
+        },
+        {
+          "path": "@omnitron-dev/prism/components/admin-filters",
+          "guide": "/docs/frontend/prism/components"
         }
       ]
     },
@@ -22018,6 +22446,10 @@
         },
         {
           "path": "@omnitron-dev/prism/components",
+          "guide": "/docs/frontend/prism/components"
+        },
+        {
+          "path": "@omnitron-dev/prism/components/admin-filters",
           "guide": "/docs/frontend/prism/components"
         }
       ]
@@ -22211,6 +22643,10 @@
         {
           "path": "@omnitron-dev/prism/components",
           "guide": "/docs/frontend/prism/components"
+        },
+        {
+          "path": "@omnitron-dev/prism/components/alert",
+          "guide": "/docs/frontend/prism/components"
         }
       ]
     },
@@ -22226,6 +22662,10 @@
         },
         {
           "path": "@omnitron-dev/prism/components",
+          "guide": "/docs/frontend/prism/components"
+        },
+        {
+          "path": "@omnitron-dev/prism/components/alert",
           "guide": "/docs/frontend/prism/components"
         }
       ]
@@ -22807,6 +23247,10 @@
         {
           "path": "@omnitron-dev/prism/components",
           "guide": "/docs/frontend/prism/components"
+        },
+        {
+          "path": "@omnitron-dev/prism/components/error-boundary",
+          "guide": "/docs/frontend/prism/components"
         }
       ]
     },
@@ -23241,6 +23685,10 @@
       "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/blocks/auth-block/guards.tsx#L177",
       "imports": [
         {
+          "path": "@omnitron-dev/prism/auth",
+          "guide": "/docs/frontend/prism/blocks"
+        },
+        {
           "path": "@omnitron-dev/prism/blocks",
           "guide": "/docs/frontend/prism/blocks"
         }
@@ -23268,6 +23716,10 @@
       "kind": "interface",
       "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/blocks/auth-block/guards.tsx#L142",
       "imports": [
+        {
+          "path": "@omnitron-dev/prism/auth",
+          "guide": "/docs/frontend/prism/blocks"
+        },
         {
           "path": "@omnitron-dev/prism/blocks",
           "guide": "/docs/frontend/prism/blocks"
@@ -23418,8 +23870,12 @@
       "name": "hasPermission",
       "package": "@omnitron-dev/prism",
       "kind": "function",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/blocks/auth-block/guards.tsx#L424",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/blocks/auth-block/guards.tsx#L375",
       "imports": [
+        {
+          "path": "@omnitron-dev/prism/auth",
+          "guide": "/docs/frontend/prism/blocks"
+        },
         {
           "path": "@omnitron-dev/prism/blocks",
           "guide": "/docs/frontend/prism/blocks"
@@ -23442,8 +23898,12 @@
       "name": "hasRole",
       "package": "@omnitron-dev/prism",
       "kind": "function",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/blocks/auth-block/guards.tsx#L398",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/blocks/auth-block/guards.tsx#L349",
       "imports": [
+        {
+          "path": "@omnitron-dev/prism/auth",
+          "guide": "/docs/frontend/prism/blocks"
+        },
         {
           "path": "@omnitron-dev/prism/blocks",
           "guide": "/docs/frontend/prism/blocks"
@@ -24147,6 +24607,10 @@
         {
           "path": "@omnitron-dev/prism/components",
           "guide": "/docs/frontend/prism/components"
+        },
+        {
+          "path": "@omnitron-dev/prism/components/alert",
+          "guide": "/docs/frontend/prism/components"
         }
       ]
     },
@@ -24162,6 +24626,10 @@
         },
         {
           "path": "@omnitron-dev/prism/components",
+          "guide": "/docs/frontend/prism/components"
+        },
+        {
+          "path": "@omnitron-dev/prism/components/alert",
           "guide": "/docs/frontend/prism/components"
         }
       ]
@@ -24819,6 +25287,10 @@
         {
           "path": "@omnitron-dev/prism/components",
           "guide": "/docs/frontend/prism/components"
+        },
+        {
+          "path": "@omnitron-dev/prism/components/label",
+          "guide": "/docs/frontend/prism/components"
         }
       ]
     },
@@ -24834,6 +25306,10 @@
         },
         {
           "path": "@omnitron-dev/prism/components",
+          "guide": "/docs/frontend/prism/components"
+        },
+        {
+          "path": "@omnitron-dev/prism/components/label",
           "guide": "/docs/frontend/prism/components"
         }
       ]
@@ -24851,6 +25327,10 @@
         {
           "path": "@omnitron-dev/prism/components",
           "guide": "/docs/frontend/prism/components"
+        },
+        {
+          "path": "@omnitron-dev/prism/components/label",
+          "guide": "/docs/frontend/prism/components"
         }
       ]
     },
@@ -24866,6 +25346,10 @@
         },
         {
           "path": "@omnitron-dev/prism/components",
+          "guide": "/docs/frontend/prism/components"
+        },
+        {
+          "path": "@omnitron-dev/prism/components/label",
           "guide": "/docs/frontend/prism/components"
         }
       ]
@@ -25439,6 +25923,10 @@
         {
           "path": "@omnitron-dev/prism/components",
           "guide": "/docs/frontend/prism/components"
+        },
+        {
+          "path": "@omnitron-dev/prism/components/empty-content",
+          "guide": "/docs/frontend/prism/components"
         }
       ]
     },
@@ -25455,6 +25943,10 @@
         {
           "path": "@omnitron-dev/prism/components",
           "guide": "/docs/frontend/prism/components"
+        },
+        {
+          "path": "@omnitron-dev/prism/components/loading-screen",
+          "guide": "/docs/frontend/prism/components"
         }
       ]
     },
@@ -25470,6 +25962,10 @@
         },
         {
           "path": "@omnitron-dev/prism/components",
+          "guide": "/docs/frontend/prism/components"
+        },
+        {
+          "path": "@omnitron-dev/prism/components/loading-screen",
           "guide": "/docs/frontend/prism/components"
         }
       ]
@@ -26927,6 +27423,10 @@
         {
           "path": "@omnitron-dev/prism/components",
           "guide": "/docs/frontend/prism/components"
+        },
+        {
+          "path": "@omnitron-dev/prism/components/breadcrumbs",
+          "guide": "/docs/frontend/prism/components"
         }
       ]
     },
@@ -26943,6 +27443,10 @@
         {
           "path": "@omnitron-dev/prism/components",
           "guide": "/docs/frontend/prism/components"
+        },
+        {
+          "path": "@omnitron-dev/prism/components/animate",
+          "guide": "/docs/frontend/prism/components"
         }
       ]
     },
@@ -26958,6 +27462,10 @@
         },
         {
           "path": "@omnitron-dev/prism/components",
+          "guide": "/docs/frontend/prism/components"
+        },
+        {
+          "path": "@omnitron-dev/prism/components/animate",
           "guide": "/docs/frontend/prism/components"
         }
       ]
@@ -27423,6 +27931,10 @@
         {
           "path": "@omnitron-dev/prism/components",
           "guide": "/docs/frontend/prism/components"
+        },
+        {
+          "path": "@omnitron-dev/prism/components/navigation-progress",
+          "guide": "/docs/frontend/prism/components"
         }
       ]
     },
@@ -27438,6 +27950,10 @@
         },
         {
           "path": "@omnitron-dev/prism/components",
+          "guide": "/docs/frontend/prism/components"
+        },
+        {
+          "path": "@omnitron-dev/prism/components/navigation-progress",
           "guide": "/docs/frontend/prism/components"
         }
       ]
@@ -28207,6 +28723,10 @@
         {
           "path": "@omnitron-dev/prism/components",
           "guide": "/docs/frontend/prism/components"
+        },
+        {
+          "path": "@omnitron-dev/prism/components/page-content",
+          "guide": "/docs/frontend/prism/components"
         }
       ]
     },
@@ -28222,6 +28742,10 @@
         },
         {
           "path": "@omnitron-dev/prism/components",
+          "guide": "/docs/frontend/prism/components"
+        },
+        {
+          "path": "@omnitron-dev/prism/components/page-content",
           "guide": "/docs/frontend/prism/components"
         }
       ]
@@ -28371,6 +28895,10 @@
         {
           "path": "@omnitron-dev/prism/components",
           "guide": "/docs/frontend/prism/components"
+        },
+        {
+          "path": "@omnitron-dev/prism/components/error-boundary",
+          "guide": "/docs/frontend/prism/components"
         }
       ]
     },
@@ -28423,6 +28951,10 @@
         {
           "path": "@omnitron-dev/prism/components",
           "guide": "/docs/frontend/prism/components"
+        },
+        {
+          "path": "@omnitron-dev/prism/components/error-boundary",
+          "guide": "/docs/frontend/prism/components"
         }
       ]
     },
@@ -28456,6 +28988,10 @@
       "kind": "type",
       "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/blocks/auth-block/guards.tsx#L26",
       "imports": [
+        {
+          "path": "@omnitron-dev/prism/auth",
+          "guide": "/docs/frontend/prism/blocks"
+        },
         {
           "path": "@omnitron-dev/prism/blocks",
           "guide": "/docs/frontend/prism/blocks"
@@ -28562,6 +29098,10 @@
         },
         {
           "path": "@omnitron-dev/prism/components",
+          "guide": "/docs/frontend/prism/components"
+        },
+        {
+          "path": "@omnitron-dev/prism/components/popover",
           "guide": "/docs/frontend/prism/components"
         }
       ]
@@ -30097,6 +30637,10 @@
       "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/blocks/auth-block/guards.tsx#L21",
       "imports": [
         {
+          "path": "@omnitron-dev/prism/auth",
+          "guide": "/docs/frontend/prism/blocks"
+        },
+        {
           "path": "@omnitron-dev/prism/blocks",
           "guide": "/docs/frontend/prism/blocks"
         }
@@ -30109,6 +30653,10 @@
       "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/blocks/auth-block/guards.tsx#L305",
       "imports": [
         {
+          "path": "@omnitron-dev/prism/auth",
+          "guide": "/docs/frontend/prism/blocks"
+        },
+        {
           "path": "@omnitron-dev/prism/blocks",
           "guide": "/docs/frontend/prism/blocks"
         }
@@ -30120,6 +30668,10 @@
       "kind": "interface",
       "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/blocks/auth-block/guards.tsx#L214",
       "imports": [
+        {
+          "path": "@omnitron-dev/prism/auth",
+          "guide": "/docs/frontend/prism/blocks"
+        },
         {
           "path": "@omnitron-dev/prism/blocks",
           "guide": "/docs/frontend/prism/blocks"
@@ -30423,6 +30975,10 @@
         {
           "path": "@omnitron-dev/prism/components",
           "guide": "/docs/frontend/prism/components"
+        },
+        {
+          "path": "@omnitron-dev/prism/components/scroll-to-top",
+          "guide": "/docs/frontend/prism/components"
         }
       ]
     },
@@ -30439,6 +30995,10 @@
         {
           "path": "@omnitron-dev/prism/components",
           "guide": "/docs/frontend/prism/components"
+        },
+        {
+          "path": "@omnitron-dev/prism/components/scroll-to-top",
+          "guide": "/docs/frontend/prism/components"
         }
       ]
     },
@@ -30454,6 +31014,10 @@
         },
         {
           "path": "@omnitron-dev/prism/components",
+          "guide": "/docs/frontend/prism/components"
+        },
+        {
+          "path": "@omnitron-dev/prism/components/empty-content",
           "guide": "/docs/frontend/prism/components"
         }
       ]
@@ -31091,6 +31655,10 @@
         {
           "path": "@omnitron-dev/prism/components",
           "guide": "/docs/frontend/prism/components"
+        },
+        {
+          "path": "@omnitron-dev/prism/components/snackbar",
+          "guide": "/docs/frontend/prism/components"
         }
       ]
     },
@@ -31107,6 +31675,10 @@
         {
           "path": "@omnitron-dev/prism/components",
           "guide": "/docs/frontend/prism/components"
+        },
+        {
+          "path": "@omnitron-dev/prism/components/snackbar",
+          "guide": "/docs/frontend/prism/components"
         }
       ]
     },
@@ -31122,6 +31694,10 @@
         },
         {
           "path": "@omnitron-dev/prism/components",
+          "guide": "/docs/frontend/prism/components"
+        },
+        {
+          "path": "@omnitron-dev/prism/components/skeleton",
           "guide": "/docs/frontend/prism/components"
         }
       ]
@@ -31151,6 +31727,10 @@
         {
           "path": "@omnitron-dev/prism/components",
           "guide": "/docs/frontend/prism/components"
+        },
+        {
+          "path": "@omnitron-dev/prism/components/skeleton",
+          "guide": "/docs/frontend/prism/components"
         }
       ]
     },
@@ -31166,6 +31746,10 @@
         },
         {
           "path": "@omnitron-dev/prism/components",
+          "guide": "/docs/frontend/prism/components"
+        },
+        {
+          "path": "@omnitron-dev/prism/components/skeleton",
           "guide": "/docs/frontend/prism/components"
         }
       ]
@@ -31275,6 +31859,10 @@
         {
           "path": "@omnitron-dev/prism/components",
           "guide": "/docs/frontend/prism/components"
+        },
+        {
+          "path": "@omnitron-dev/prism/components/snackbar",
+          "guide": "/docs/frontend/prism/components"
         }
       ]
     },
@@ -31290,6 +31878,10 @@
         },
         {
           "path": "@omnitron-dev/prism/components",
+          "guide": "/docs/frontend/prism/components"
+        },
+        {
+          "path": "@omnitron-dev/prism/components/snackbar",
           "guide": "/docs/frontend/prism/components"
         }
       ]
@@ -31307,6 +31899,10 @@
         {
           "path": "@omnitron-dev/prism/components",
           "guide": "/docs/frontend/prism/components"
+        },
+        {
+          "path": "@omnitron-dev/prism/components/snackbar",
+          "guide": "/docs/frontend/prism/components"
         }
       ]
     },
@@ -31322,6 +31918,10 @@
         },
         {
           "path": "@omnitron-dev/prism/components",
+          "guide": "/docs/frontend/prism/components"
+        },
+        {
+          "path": "@omnitron-dev/prism/components/snackbar",
           "guide": "/docs/frontend/prism/components"
         }
       ]
@@ -31351,6 +31951,10 @@
         {
           "path": "@omnitron-dev/prism/components",
           "guide": "/docs/frontend/prism/components"
+        },
+        {
+          "path": "@omnitron-dev/prism/components/table",
+          "guide": "/docs/frontend/prism/components"
         }
       ]
     },
@@ -31366,6 +31970,10 @@
         },
         {
           "path": "@omnitron-dev/prism/components",
+          "guide": "/docs/frontend/prism/components"
+        },
+        {
+          "path": "@omnitron-dev/prism/components/loading-screen",
           "guide": "/docs/frontend/prism/components"
         }
       ]
@@ -31383,6 +31991,10 @@
         {
           "path": "@omnitron-dev/prism/components",
           "guide": "/docs/frontend/prism/components"
+        },
+        {
+          "path": "@omnitron-dev/prism/components/loading-screen",
+          "guide": "/docs/frontend/prism/components"
         }
       ]
     },
@@ -31399,6 +32011,10 @@
         {
           "path": "@omnitron-dev/prism/components",
           "guide": "/docs/frontend/prism/components"
+        },
+        {
+          "path": "@omnitron-dev/prism/components/loading-screen",
+          "guide": "/docs/frontend/prism/components"
         }
       ]
     },
@@ -31414,6 +32030,10 @@
         },
         {
           "path": "@omnitron-dev/prism/components",
+          "guide": "/docs/frontend/prism/components"
+        },
+        {
+          "path": "@omnitron-dev/prism/components/loading-screen",
           "guide": "/docs/frontend/prism/components"
         }
       ]
@@ -31523,6 +32143,10 @@
         {
           "path": "@omnitron-dev/prism/components",
           "guide": "/docs/frontend/prism/components"
+        },
+        {
+          "path": "@omnitron-dev/prism/components/error-boundary",
+          "guide": "/docs/frontend/prism/components"
         }
       ]
     },
@@ -31575,6 +32199,10 @@
         {
           "path": "@omnitron-dev/prism/components",
           "guide": "/docs/frontend/prism/components"
+        },
+        {
+          "path": "@omnitron-dev/prism/components/card",
+          "guide": "/docs/frontend/prism/components"
         }
       ]
     },
@@ -31590,6 +32218,10 @@
         },
         {
           "path": "@omnitron-dev/prism/components",
+          "guide": "/docs/frontend/prism/components"
+        },
+        {
+          "path": "@omnitron-dev/prism/components/card",
           "guide": "/docs/frontend/prism/components"
         }
       ]
@@ -31619,6 +32251,10 @@
         {
           "path": "@omnitron-dev/prism/components",
           "guide": "/docs/frontend/prism/components"
+        },
+        {
+          "path": "@omnitron-dev/prism/components/admin-filters",
+          "guide": "/docs/frontend/prism/components"
         }
       ]
     },
@@ -31635,6 +32271,10 @@
         {
           "path": "@omnitron-dev/prism/components",
           "guide": "/docs/frontend/prism/components"
+        },
+        {
+          "path": "@omnitron-dev/prism/components/admin-filters",
+          "guide": "/docs/frontend/prism/components"
         }
       ]
     },
@@ -31650,6 +32290,10 @@
         },
         {
           "path": "@omnitron-dev/prism/components",
+          "guide": "/docs/frontend/prism/components"
+        },
+        {
+          "path": "@omnitron-dev/prism/components/admin-filters",
           "guide": "/docs/frontend/prism/components"
         }
       ]
@@ -31715,6 +32359,10 @@
         {
           "path": "@omnitron-dev/prism/components",
           "guide": "/docs/frontend/prism/components"
+        },
+        {
+          "path": "@omnitron-dev/prism/components/label",
+          "guide": "/docs/frontend/prism/components"
         }
       ]
     },
@@ -31730,6 +32378,10 @@
         },
         {
           "path": "@omnitron-dev/prism/components",
+          "guide": "/docs/frontend/prism/components"
+        },
+        {
+          "path": "@omnitron-dev/prism/components/stepper",
           "guide": "/docs/frontend/prism/components"
         }
       ]
@@ -31747,6 +32399,10 @@
         {
           "path": "@omnitron-dev/prism/components",
           "guide": "/docs/frontend/prism/components"
+        },
+        {
+          "path": "@omnitron-dev/prism/components/stepper",
+          "guide": "/docs/frontend/prism/components"
         }
       ]
     },
@@ -31762,6 +32418,10 @@
         },
         {
           "path": "@omnitron-dev/prism/components",
+          "guide": "/docs/frontend/prism/components"
+        },
+        {
+          "path": "@omnitron-dev/prism/components/stepper",
           "guide": "/docs/frontend/prism/components"
         }
       ]
@@ -31779,6 +32439,10 @@
         {
           "path": "@omnitron-dev/prism/components",
           "guide": "/docs/frontend/prism/components"
+        },
+        {
+          "path": "@omnitron-dev/prism/components/stepper",
+          "guide": "/docs/frontend/prism/components"
         }
       ]
     },
@@ -31794,6 +32458,10 @@
         },
         {
           "path": "@omnitron-dev/prism/components",
+          "guide": "/docs/frontend/prism/components"
+        },
+        {
+          "path": "@omnitron-dev/prism/components/stepper",
           "guide": "/docs/frontend/prism/components"
         }
       ]
@@ -32063,6 +32731,10 @@
         {
           "path": "@omnitron-dev/prism/components",
           "guide": "/docs/frontend/prism/components"
+        },
+        {
+          "path": "@omnitron-dev/prism/components/tabs",
+          "guide": "/docs/frontend/prism/components"
         }
       ]
     },
@@ -32078,6 +32750,10 @@
         },
         {
           "path": "@omnitron-dev/prism/components",
+          "guide": "/docs/frontend/prism/components"
+        },
+        {
+          "path": "@omnitron-dev/prism/components/table",
           "guide": "/docs/frontend/prism/components"
         }
       ]
@@ -32131,6 +32807,10 @@
         {
           "path": "@omnitron-dev/prism/components",
           "guide": "/docs/frontend/prism/components"
+        },
+        {
+          "path": "@omnitron-dev/prism/components/table",
+          "guide": "/docs/frontend/prism/components"
         }
       ]
     },
@@ -32183,6 +32863,10 @@
         {
           "path": "@omnitron-dev/prism/components",
           "guide": "/docs/frontend/prism/components"
+        },
+        {
+          "path": "@omnitron-dev/prism/components/table",
+          "guide": "/docs/frontend/prism/components"
         }
       ]
     },
@@ -32211,6 +32895,10 @@
         {
           "path": "@omnitron-dev/prism/components",
           "guide": "/docs/frontend/prism/components"
+        },
+        {
+          "path": "@omnitron-dev/prism/components/skeleton",
+          "guide": "/docs/frontend/prism/components"
         }
       ]
     },
@@ -32226,6 +32914,10 @@
         },
         {
           "path": "@omnitron-dev/prism/components",
+          "guide": "/docs/frontend/prism/components"
+        },
+        {
+          "path": "@omnitron-dev/prism/components/skeleton",
           "guide": "/docs/frontend/prism/components"
         }
       ]
@@ -32243,6 +32935,10 @@
         {
           "path": "@omnitron-dev/prism/components",
           "guide": "/docs/frontend/prism/components"
+        },
+        {
+          "path": "@omnitron-dev/prism/components/tabs",
+          "guide": "/docs/frontend/prism/components"
         }
       ]
     },
@@ -32259,6 +32955,10 @@
         {
           "path": "@omnitron-dev/prism/components",
           "guide": "/docs/frontend/prism/components"
+        },
+        {
+          "path": "@omnitron-dev/prism/components/tabs",
+          "guide": "/docs/frontend/prism/components"
         }
       ]
     },
@@ -32274,6 +32974,10 @@
         },
         {
           "path": "@omnitron-dev/prism/components",
+          "guide": "/docs/frontend/prism/components"
+        },
+        {
+          "path": "@omnitron-dev/prism/components/tabs",
           "guide": "/docs/frontend/prism/components"
         }
       ]
@@ -32302,6 +33006,10 @@
         },
         {
           "path": "@omnitron-dev/prism/components",
+          "guide": "/docs/frontend/prism/components"
+        },
+        {
+          "path": "@omnitron-dev/prism/components/tabs",
           "guide": "/docs/frontend/prism/components"
         }
       ]
@@ -33441,6 +34149,10 @@
       "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/blocks/auth-block/guards.tsx#L60",
       "imports": [
         {
+          "path": "@omnitron-dev/prism/auth",
+          "guide": "/docs/frontend/prism/blocks"
+        },
+        {
           "path": "@omnitron-dev/prism/blocks",
           "guide": "/docs/frontend/prism/blocks"
         }
@@ -34318,6 +35030,10 @@
         },
         {
           "path": "@omnitron-dev/prism/components",
+          "guide": "/docs/frontend/prism/components"
+        },
+        {
+          "path": "@omnitron-dev/prism/components/error-boundary",
           "guide": "/docs/frontend/prism/components"
         }
       ]
@@ -35321,6 +36037,10 @@
           "guide": "/docs/frontend/prism/components"
         },
         {
+          "path": "@omnitron-dev/prism/components/popover",
+          "guide": "/docs/frontend/prism/components"
+        },
+        {
           "path": "@omnitron-dev/prism/hooks",
           "guide": "/docs/frontend/prism/hooks-catalog"
         }
@@ -35370,6 +36090,10 @@
         },
         {
           "path": "@omnitron-dev/prism/components",
+          "guide": "/docs/frontend/prism/components"
+        },
+        {
+          "path": "@omnitron-dev/prism/components/popover",
           "guide": "/docs/frontend/prism/components"
         },
         {
@@ -35827,6 +36551,10 @@
         {
           "path": "@omnitron-dev/prism/components",
           "guide": "/docs/frontend/prism/components"
+        },
+        {
+          "path": "@omnitron-dev/prism/components/snackbar",
+          "guide": "/docs/frontend/prism/components"
         }
       ]
     },
@@ -35842,6 +36570,10 @@
         },
         {
           "path": "@omnitron-dev/prism/components",
+          "guide": "/docs/frontend/prism/components"
+        },
+        {
+          "path": "@omnitron-dev/prism/components/stepper",
           "guide": "/docs/frontend/prism/components"
         }
       ]
@@ -35859,6 +36591,10 @@
         {
           "path": "@omnitron-dev/prism/components",
           "guide": "/docs/frontend/prism/components"
+        },
+        {
+          "path": "@omnitron-dev/prism/components/stepper",
+          "guide": "/docs/frontend/prism/components"
         }
       ]
     },
@@ -35874,6 +36610,10 @@
         },
         {
           "path": "@omnitron-dev/prism/components",
+          "guide": "/docs/frontend/prism/components"
+        },
+        {
+          "path": "@omnitron-dev/prism/components/stepper",
           "guide": "/docs/frontend/prism/components"
         }
       ]
@@ -35891,6 +36631,10 @@
         {
           "path": "@omnitron-dev/prism/components",
           "guide": "/docs/frontend/prism/components"
+        },
+        {
+          "path": "@omnitron-dev/prism/components/table",
+          "guide": "/docs/frontend/prism/components"
         }
       ]
     },
@@ -35906,6 +36650,10 @@
         },
         {
           "path": "@omnitron-dev/prism/components",
+          "guide": "/docs/frontend/prism/components"
+        },
+        {
+          "path": "@omnitron-dev/prism/components/table",
           "guide": "/docs/frontend/prism/components"
         }
       ]
@@ -35923,6 +36671,10 @@
         {
           "path": "@omnitron-dev/prism/components",
           "guide": "/docs/frontend/prism/components"
+        },
+        {
+          "path": "@omnitron-dev/prism/components/table",
+          "guide": "/docs/frontend/prism/components"
         }
       ]
     },
@@ -35938,6 +36690,10 @@
         },
         {
           "path": "@omnitron-dev/prism/components",
+          "guide": "/docs/frontend/prism/components"
+        },
+        {
+          "path": "@omnitron-dev/prism/components/tabs",
           "guide": "/docs/frontend/prism/components"
         }
       ]
@@ -35955,6 +36711,10 @@
         {
           "path": "@omnitron-dev/prism/components",
           "guide": "/docs/frontend/prism/components"
+        },
+        {
+          "path": "@omnitron-dev/prism/components/tabs",
+          "guide": "/docs/frontend/prism/components"
         }
       ]
     },
@@ -35970,6 +36730,10 @@
         },
         {
           "path": "@omnitron-dev/prism/components",
+          "guide": "/docs/frontend/prism/components"
+        },
+        {
+          "path": "@omnitron-dev/prism/components/tabs",
           "guide": "/docs/frontend/prism/components"
         }
       ]
@@ -59023,10 +59787,22 @@
       ]
     },
     {
+      "name": "MailDeliveryEvent",
+      "package": "@omnitron-dev/titan-mailer",
+      "kind": "interface",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-mailer/src/postgres.ts#L27",
+      "imports": [
+        {
+          "path": "@omnitron-dev/titan-mailer/postgres",
+          "guide": "/docs/titan/modules/mailer"
+        }
+      ]
+    },
+    {
       "name": "MailDeliveryState",
       "package": "@omnitron-dev/titan-mailer",
       "kind": "type",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-mailer/src/postgres.ts#L23",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-mailer/src/postgres.ts#L25",
       "imports": [
         {
           "path": "@omnitron-dev/titan-mailer/postgres",
@@ -59038,7 +59814,7 @@
       "name": "MailDeliveryStatus",
       "package": "@omnitron-dev/titan-mailer",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-mailer/src/postgres.ts#L24",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-mailer/src/postgres.ts#L34",
       "imports": [
         {
           "path": "@omnitron-dev/titan-mailer/postgres",
@@ -59050,7 +59826,7 @@
       "name": "MailDeliveryWorker",
       "package": "@omnitron-dev/titan-mailer",
       "kind": "class",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-mailer/src/notifications.ts#L32",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-mailer/src/notifications.ts#L34",
       "imports": [
         {
           "path": "@omnitron-dev/titan-mailer/notifications",
@@ -59110,7 +59886,7 @@
       "name": "MailerEmailChannel",
       "package": "@omnitron-dev/titan-mailer",
       "kind": "class",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-mailer/src/notifications.ts#L178",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-mailer/src/notifications.ts#L196",
       "imports": [
         {
           "path": "@omnitron-dev/titan-mailer/notifications",
@@ -59275,10 +60051,22 @@
       ]
     },
     {
+      "name": "MailWorkerFailureCode",
+      "package": "@omnitron-dev/titan-mailer",
+      "kind": "type",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-mailer/src/notifications.ts#L29",
+      "imports": [
+        {
+          "path": "@omnitron-dev/titan-mailer/notifications",
+          "guide": "/docs/titan/modules/mailer"
+        }
+      ]
+    },
+    {
       "name": "POSTGRES_MAIL_OUTBOX_SCHEMA",
       "package": "@omnitron-dev/titan-mailer",
       "kind": "value",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-mailer/src/postgres.ts#L41",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-mailer/src/postgres.ts#L51",
       "imports": [
         {
           "path": "@omnitron-dev/titan-mailer/postgres",
@@ -59290,7 +60078,7 @@
       "name": "PostgresMailOutbox",
       "package": "@omnitron-dev/titan-mailer",
       "kind": "class",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-mailer/src/postgres.ts#L56",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-mailer/src/postgres.ts#L66",
       "imports": [
         {
           "path": "@omnitron-dev/titan-mailer/postgres",

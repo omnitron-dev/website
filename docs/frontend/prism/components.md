@@ -1546,3 +1546,20 @@ block controls. The browser acceptance suite covers actual dragging, keyboard
 movement, narrow dark layouts, accessibility and exact serialized source snapshots.
 A separate 2000-block typing sample records beforeinput-to-animation-frame timings;
 these are local diagnostic measurements, not field INP or a fastest-editor claim.
+
+## Opt-in component imports
+
+Console imports its components through dedicated package entry points. Each entry has both JavaScript and declarations in the published build, so applications can use navigation, feedback and data tables without loading maps or rich-text editors.
+
+```tsx
+import { Breadcrumbs } from '@omnitron-dev/prism/components/breadcrumbs';
+import { SnackbarProvider, useSnackbar } from '@omnitron-dev/prism/components/snackbar';
+import { LoadingScreen } from '@omnitron-dev/prism/components/loading-screen';
+import { AdminDataTable } from '@omnitron-dev/prism/components/admin-filters';
+```
+
+The following component groups are independently importable:
+
+`@omnitron-dev/prism/components/admin-filters`, `@omnitron-dev/prism/components/alert`, `@omnitron-dev/prism/components/animate`, `@omnitron-dev/prism/components/breadcrumbs`, `@omnitron-dev/prism/components/card`, `@omnitron-dev/prism/components/command-palette`, `@omnitron-dev/prism/components/confirm-dialog`, `@omnitron-dev/prism/components/empty-content`, `@omnitron-dev/prism/components/error-boundary`, `@omnitron-dev/prism/components/label`, `@omnitron-dev/prism/components/loading-screen`, `@omnitron-dev/prism/components/navigation-progress`, `@omnitron-dev/prism/components/page-content`, `@omnitron-dev/prism/components/popover`, `@omnitron-dev/prism/components/scroll-to-top`, `@omnitron-dev/prism/components/skeleton`, `@omnitron-dev/prism/components/snackbar`, `@omnitron-dev/prism/components/stepper`, `@omnitron-dev/prism/components/table`, `@omnitron-dev/prism/components/tabs`.
+
+Use `@omnitron-dev/prism/core` for `PrismProvider` and its core hooks, `@omnitron-dev/prism/layouts` for layout composition, `@omnitron-dev/prism/state` for stores and `@omnitron-dev/prism/auth` for guards. Maps and editors retain their existing explicit subpaths and can be loaded only on the routes that need them. The root barrel remains compatible, but opt-in imports give a consumer tighter control of its dependency graph.

@@ -345,3 +345,25 @@ import { DataGridBlock  } from '@omnitron-dev/prism/blocks';
   composed of
 - [Layouts](./layouts.md) — shells that hold blocks
 - [Forms](./forms.md) — `<AuthBlock>` uses these primitives
+
+## Guard-only entry point
+
+Use `@omnitron-dev/prism/auth` when you need guards without forms or layout dependencies:
+
+```tsx
+import { RoleBasedGuard, hasPermission, type AuthState } from '@omnitron-dev/prism/auth';
+
+function TerminalArea() {
+  return (
+    <RoleBasedGuard useAuth={useConsoleAuthorization} permissions={['OmnitronTerminal.open']}
+      loadingComponent={<p>Checking access…</p>}
+      accessDeniedComponent={<p>Access unavailable</p>}>
+      <TerminalWorkspace />
+    </RoleBasedGuard>
+  );
+}
+```
+
+The entry exports `AuthGuard`, `GuestGuard`, `RoleBasedGuard`, `hasRole`, `hasPermission`, `createConditionalRender` and their types. Guards are router-independent. Supply an authentication hook backed by the application's session and current server policy. `RoleBasedGuard` evaluates grants during rendering, so revoked children cannot appear for a stale render while an effect updates state. UI guards never replace backend authorization.
+
+Omnitron uses this entry with [RPC-derived capabilities](../../omnitron/access.md), preserving the same role policy in Console and CLI.

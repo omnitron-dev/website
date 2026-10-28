@@ -89,9 +89,9 @@ Per-app overrides live in `IAppDefinition.observability.logging`.
 
 | Method | Effect |
 | ------ | ------ |
-| `queryLogs({app?, level?, search?, labels?, traceId?, from?, to?, limit?, offset?})` | Filter & return entries (note: full-text filter is `search`, not `grep`; page with `limit`/`offset`) |
-| `streamLogs({app?, level?, search?, tail?, since?})` | Return the last `tail` entries (default 100) in chronological order — poll for near-real-time tailing |
-| `getLogStats()` | Per-app file size + rotation count |
+| `queryLogs({app?, nodeId?, level?, search?, labels?, traceId?, from?, to?, limit?, offset?})` | Filter & return entries (note: full-text filter is `search`, not `grep`; page with `limit`/`offset`) |
+| `streamLogs({app?, nodeId?, level?, search?, labels?, tail?, since?})` | Return the last `tail` entries (default 100) in chronological order — poll for near-real-time tailing |
+| `getLogStats()` | Stored record counts, application/level breakdown and oldest/newest timestamps |
 
 `streamLogs` is a poll-friendly "recent entries" call rather than
 a push subscription; pass `since` to fetch only entries after a
@@ -104,7 +104,8 @@ omnitron logs                       # daemon log
 omnitron logs api                   # one app
 omnitron logs api -f -l warn -g err # follow + level filter + regex
 omnitron logs api --file            # read directly from files (bypass daemon)
-omnitron --json logs api            # NDJSON output
+omnitron --json logs api            # JSON envelope with source and entries
+omnitron logs sample/production/mail --node worker-1 -n 100
 ```
 
 ### Log entries — `LogEntryDto`

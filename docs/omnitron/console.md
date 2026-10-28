@@ -26,7 +26,7 @@ Verified against `apps/omnitron/webapp/src/`.
 | Charts | `react-apexcharts` |
 | Graphs | `@xyflow/react` (topology, dependency graphs) |
 | State | `zustand` stores in `src/stores/` |
-| Code splitting | Per-page `React.lazy()` |
+| Code splitting | Per-page `React.lazy()`; xterm loads with SSH; Prism components use explicit subpaths |
 
 ## Filesystem layout
 
@@ -55,12 +55,15 @@ webapp/
 ## Route map
 
 All routes other than `/auth/sign-in` are gated by `AuthGuard`.
+A session-keyed access provider retrieves effective RPC permissions, gates page entry and hides unavailable actions. See [Console access](./access.md).
 Routes marked **project-scoped** require an active project (via
 `ProjectGuard`) — selected from the project switcher in the
 sidebar.
 
 | Path | Page | Scope | Backing RPC |
 | ---- | ---- | ----- | ----------- |
+| `/access` | `AccessPage` | daemon | `OmnitronAccess` |
+| `/terminal` | `TerminalPage` | daemon | `OmnitronTerminal`, `OmnitronNodes` |
 | `/auth/sign-in` | `SignInPage` | guest | `OmnitronAuth.signIn` |
 | `/` | `DashboardPage` | global | aggregate from many services |
 | `/nodes` | `NodesPage` | global | `OmnitronNodes` |
@@ -129,20 +132,25 @@ infrastructure, runtime status. Start / stop the whole stack.
 
 ### Logs
 
-Cross-app log viewer. Three modes:
+The global viewer includes local and replicated application logs. Select one exact
+application handle and, optionally, a registered remote node. The default remains
+the daemon's log; choosing **All Apps** removes that application filter.
 
-- **Tail** — most recent N lines per app.
-- **Stream** — live append; auto-scroll; pause on hover.
-- **Search** — server-side regex over the log files.
+**Nodes → Diagnostics → Running on this node → Logs** carries both the application
+and registry node into `/logs?app=…&node=…`. This works for applications whose
+production project is not registered on the local machine. The same diagnostics
+show each application's health verdict and individual checks, separately from its
+process status: an online process can still have an unhealthy mail queue.
 
-Filters:
-- App selector (multi).
-- Level (≥).
-- Free-text regex.
-- Time range.
+Live mode polls `OmnitronLogs.streamLogs`; time ranges and older pages use
+`queryLogs`. Both apply the same node, application, level and label filters.
+Search matches literal message text in stored records. Level chips select exact
+levels; CLI `--level` selects that level and higher. Neither mode infers success
+from an empty result. Expanding a row reveals its source node and structured metadata.
 
-Uses `OmnitronLogs.streamLogs` for live mode; `queryLogs` for
-history.
+The copy control provides `omnitron logs '<project>/<stack>/<app>' --node '<id>' -n 100`
+for the selected application/node scope. Search, level and time filters are not
+included in that base command; CLI `--grep` is a regular expression.
 
 ### Metrics
 
@@ -216,7 +224,7 @@ interfaces. Refreshes on demand.
 
 ### Settings
 
-`/settings` — auth user management, change-password, system
+`/settings` — current account, change-password, system
 preferences.
 
 ## Auth flow
@@ -247,27 +255,21 @@ sequenceDiagram
 The access token is held in `sessionStorage` under the key
 `omnitron_token` (via Prism's `SessionTokenStorage`). Logout
 clears it and calls `OmnitronAuth.signOut({ sessionId })`. The
-`signIn` / `validateToken` / `refreshSession` methods are the
-only ones that don't require a bearer token.
+`signIn`, `validateToken`, `validateSession`, `refreshSession` and `signOut` methods declare anonymous transport access. Session IDs remain bearer credentials; authenticated sign-out additionally checks ownership.
 
 ## RBAC in the UI
 
-The webapp respects the same three roles as the daemon
-(`viewer` / `operator` / `admin`). Behaviour:
+The webapp uses the daemon's three human roles (`viewer`, `operator`, `admin`) through `OmnitronAccess.describe()`. The response is built from the active RPC decorators and authorization rules. There is no independently maintained role matrix in the browser.
 
-| Surface element | Visible to | Disabled for |
-| --------------- | ---------- | ------------ |
-| Read-only pages (Dashboard, Logs, Metrics, Traces) | everyone | — |
-| Start / Stop / Restart buttons | viewer (visible) | viewer (disabled with tooltip) |
-| Scale, Reload, Exec | operator + admin | viewer (hidden) |
-| Secrets editor | admin | non-admin (hidden) |
-| Shutdown daemon, Reload config | admin | non-admin (hidden) |
-| Settings → users | admin | non-admin (hidden) |
+| Surface | Behavior |
+| --- | --- |
+| Navigation and protected pages | Show only when the backing read method is granted |
+| Mutation controls and dialogs | Hide when the corresponding RPC capability is absent |
+| Access | Show the current account's method grants; administrator account controls require their own grants |
+| SSH workspace | Administrator only, with live session and ownership checks on every operation |
+| Settings | Current account/session preferences and password changes |
 
-Surface elements consult the `useAuthStore` (zustand) auth state
-and disable / hide accordingly. The daemon still enforces
-server-side via `@Public({ auth: { roles } })` on each RPC method
-— UI gating is convenience, not security.
+`useAccess()` and `Can` consume typed `service.method` capabilities; `AccessBoundary` uses Prism's guard-only auth entry. Missing or failed verification grants nothing. The daemon independently enforces every request. See [Console access](./access.md) for limits and extension points.
 
 ## Real-time event flow
 
@@ -317,7 +319,7 @@ could not start while the daemon it exists to talk to was running,
 and its own `/ws` proxy pointed back at itself. Sign in with the same account you use against the
 production build — the `001_initial_schema` migration seeds a single
 `admin` user with password `admin` on first daemon start, and the
-console's Change-password screen is the only way to change it.
+password must be changed through Settings → Security before external exposure. The existing Console startup falls back to loopback while this seed remains in use; fleet TCP publication only warns, so it still requires operator control.
 
 ### Production build
 
@@ -331,6 +333,41 @@ by the daemon directly — `omnitron webapp start` launches an
 `omnitron-nginx` container that mounts `dist/`, serves it on
 `:9800`, and reverse-proxies `/netron/*` to the daemon's HTTP
 listener (`:9801`) and `/ws` to its WebSocket transport (`:9802`).
+
+A running nginx container reads this directory directly. Building into `dist/`
+changes the live frontend immediately, even if the daemon still runs an older
+build. For validation while Console is serving traffic, use a separate output:
+
+```bash
+cd apps/omnitron/webapp
+pnpm typecheck
+pnpm exec vite build --outDir node_modules/.console-validation
+```
+
+Activate backend and frontend together when a change adds RPC services.
+`OmnitronAccess` and `OmnitronTerminal` are registered during master startup;
+copying browser assets cannot activate them. Plan the daemon restart around
+supervised workloads, verify the new services through CLI, then switch the
+served assets. Keep the previous frontend available for rollback.
+
+Before the restart, record each application's status and child-process state,
+not only the aggregate online count. Check that native executables still exist,
+that the installed dependency graph resolves the intended Titan instance, and
+that immutable runtime checks pass. Long-running processes can remain healthy
+after their on-disk dependencies have become incompatible with a fresh start.
+
+Preserve the previous backend, frontend, configuration, consistent database
+snapshot, lockfiles and actual dependency artifacts. A source revision or a
+hash manifest alone cannot reconstruct an unarchived development-linked runtime.
+Do not replace an experiment's old integrity hash to admit new dependencies;
+register a distinct continuation and retain its previous results.
+
+After activation, verify effective permissions with `omnitron access show`,
+compare every previously running process with the baseline, and check application
+health in addition to process status. Exercise admin, operator and viewer views,
+session revocation and an independently verified SSH connection. Verify that
+trust changes and terminal lifecycle events appear in Audit. Remove temporary
+test accounts and close test shells after verification.
 
 ### Open the webapp
 
@@ -414,3 +451,9 @@ everything as typed Netron services.
   select UI components (the bulk of the UI is MUI)
 - [netron-browser](../frontend/netron/browser.md) — the underlying
   browser RPC transport that Prism's netron client builds on
+
+## SSH and role administration
+
+[SSH workspace](./terminal.md) provides independent terminal tabs, split view, search, paste review and a shared CLI/backend lifecycle through Xec. It is lazily loaded and stays mounted across navigation after first use.
+
+[Access](./access.md) shows the running daemon’s policy to every human role. Administrators can create accounts, change roles and revoke sessions. Account changes and their audit rows commit together; account directory queries never return password hashes or second-factor secrets.

@@ -45,6 +45,8 @@ Verified against `src/cli/omnitron.ts` and `src/commands/*`.
 | **Backup** | `backup create`, `backup list`, `backup restore` |
 | **Kubernetes** | `k8s pods`, `k8s deploy scale` |
 | **Nodes** | `node list`, `node add`, `node update`, `node remove`, `node check`, `node ssh-keys` |
+| **Access** | `access show`, `access users`, `access create`, `access role`, `access revoke` |
+| **SSH** | `node ssh-key`, `node ssh`, `terminal list`, `terminal close` |
 | **Webapp** | `webapp build`, `webapp start`, `webapp stop`, `webapp status`, `webapp open` |
 | **Tor** | `tor` |
 | **Knowledge base** | `kb mcp`, `kb index`, `kb status`, `kb query` |
@@ -199,6 +201,19 @@ Tail logs. Omit `[app]` to read the daemon's own log.
 | `-l, --level <lvl>` | Min level: `trace|debug|info|warn|error|fatal` |
 | `-g, --grep <pattern>` | Filter by message regex |
 | `--file` | Read from log files (auto-fallback when daemon offline) |
+| `--node <name-or-id>` | Read replicated records from one registered remote node; never falls back to local files |
+
+Use the full application handle for production diagnostics:
+
+```bash
+omnitron logs sample/production/mail --node worker-1 -n 100
+omnitron --json logs sample/production/api --node worker-1 --grep 'auth\.login'
+```
+
+`--node` resolves a node name or unique ID prefix through the registry and uses
+the same `OmnitronLogs.streamLogs` contract as Console. `--node` and `--file`
+are mutually exclusive. Omit `--node` for the local machine. JSON output records
+the source and node; an empty result does not establish that no request occurred.
 
 ### `omnitron monit`
 
@@ -607,3 +622,33 @@ interrupted publication. Manifest-driven operations use the expected generation
 for compare-and-swap checks, so a stale plan cannot overwrite a newer owner state.
 Consult `omnitron infra ingress --help` for the available operations and supply
 the JSON manifest belonging to the intended host and owner.
+
+## Console access and interactive SSH
+
+`omnitron access` and `omnitron terminal` use the same services and policy as Console.
+
+```bash
+omnitron access show
+omnitron access users
+omnitron access create observer --role viewer --password-stdin
+omnitron access role <id> operator --expect viewer
+omnitron access revoke <id>
+omnitron node ssh-key edge-1
+omnitron node ssh edge-1
+omnitron terminal list
+omnitron terminal close <id>
+```
+
+See [Console access](./access.md) for password input, account pagination and atomic role changes. See [SSH workspace](./terminal.md) for independently verified host pins, session ownership and `Ctrl+]` disconnect.
+
+| Command | Result |
+| --- | --- |
+| `omnitron access show` | Effective RPC permissions from the running daemon |
+| `omnitron access users` | Safe account directory, with continuation cursor |
+| `omnitron access create` | Create an account with a password read from a hidden prompt or stdin |
+| `omnitron access role` | Compare-and-swap role change and session revocation |
+| `omnitron access revoke` | Revoke an account's sessions |
+| `omnitron node ssh-key` | Inspect or explicitly trust a host fingerprint |
+| `omnitron node ssh` | Interactive shell through Xec |
+| `omnitron terminal list` | List sessions owned by this caller |
+| `omnitron terminal close` | Close an owned terminal |

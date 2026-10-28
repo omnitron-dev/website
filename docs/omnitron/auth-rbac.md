@@ -14,10 +14,7 @@ per-user overrides, ABAC conditions, RLS bridge, audit
 trail), start at [Authentication & Authorisation](../auth/index.md).
 :::
 
-Omnitron ships a complete authentication and authorization model
-that covers operator surfaces (CLI, webapp, MCP), service-to-
-service calls, and your applications' own user-facing endpoints.
-This page covers the pieces and how they compose.
+Omnitron authenticates human operators and machine identities on the control plane. [Console access](./access.md) documents the implemented account-management flow shared by webapp and CLI. Examples about end-user identity below are application integration patterns; they are not additional Console login methods.
 
 ## Three identity surfaces
 
@@ -25,7 +22,7 @@ This page covers the pieces and how they compose.
 | ------- | ------------ | --------- |
 | Local CLI | OS-level file permission (Unix socket `0o600`) | Implicit admin — no JWT needed |
 | Webapp / remote CLI | JWT issued by `OmnitronAuth.signIn` | Bearer token on every HTTP/TCP call |
-| Service-to-service (cluster, fleet, sync) | See the caution below — no credential is minted today | — |
+| Service-to-service (cluster, fleet, sync) | Node-specific signing secret reached over the registered SSH connection | Short-lived `service_role` JWT on an authenticated peer |
 
 Apps in your ecosystem add a **fourth** surface — end users
 authenticating against one of your apps. The recommended
@@ -37,24 +34,15 @@ pattern (used by the production reference) is:
 
 ## Three RBAC roles
 
-| Role | Includes | What they can do |
+| Role | Inherits | What they can do |
 | ---- | -------- | ---------------- |
-| `viewer` | `viewer`, `operator`, `admin` | Read-only: list / inspect / status / metrics / health / logs |
-| `operator` | `operator`, `admin` | Viewer + lifecycle: start / stop / restart / reload / scale / exec |
-| `admin` | `admin` only | Operator + destructive: shutdown / reloadConfig / secrets / setMetricsEnabled |
+| `viewer` | — | Read-only: list / inspect / status / metrics / health / logs |
+| `operator` | `viewer` | Viewer + lifecycle: start / stop / restart / reload / scale / exec |
+| `admin` | `operator`, `viewer` | Operator + destructive: shutdown / reloadConfig / secrets / setMetricsEnabled |
 
-The hierarchy is additive in effect, but a method does **not**
-declare a minimum — it declares the full list of roles that may
-call it, and `VIEWER_ROLES` / `OPERATOR_ROLES` / `ADMIN_ROLES`
-spell those lists out. `hasMinimumRole()` exists in
-`shared/roles.ts` and has no caller; it is the only place a rank
-order is written down, and nothing on the request path consults
-it.
+Methods declare explicit role lists through `VIEWER_ROLES`, `OPERATOR_ROLES` and `ADMIN_ROLES`. The shared hierarchy in `@omnitron-dev/access/roles` also supports live principal checks at account and terminal boundaries. Unknown roles receive no implicit grants.
 
-The distinction matters when a role is added. A new role is not
-implicitly below `viewer` or above it — it is simply absent from
-every list, and therefore permitted nowhere, until it is added to
-each list by hand.
+Human token validation on the master reads the current account role from PostgreSQL. An old JWT role claim cannot preserve a demoted role. `OmnitronAccess.describe()` derives the UI catalog from the running services' decorators and Titan authorization rules. See [revocation behavior](./access.md#change-roles-and-revoke-sessions).
 
 ```typescript
 // From the daemon RPC service:
@@ -176,9 +164,7 @@ verified tokens:
 | `10_000` (10 s) | Auth app — short, to honour revocations fast |
 | `60_000` (1 min) | Other apps — fewer Redis calls per JWT |
 
-The cache is local per process. Revocation triggers re-check on
-every cached JWT only when the cache entry expires. Set
-identity-app's TTL low; relax others.
+Caches are local per process. Application token caches and Netron's transport cache are separate layers: applications must invalidate their own caches or wait for their TTL. The Omnitron master bounds Netron caching to 10 seconds and explicitly invalidates it after role changes, revocation, password changes and sign-out. Account and SSH operations additionally validate live sessions. Titan rejects an in-flight validation that races a cache invalidation, so it cannot restore obsolete authority.
 
 ## Token binding via `cnf.fp`
 
@@ -370,26 +356,9 @@ async getProfile() { /* ... */ }
 async receiveBatch(data: SyncBatch) { /* ... */ }
 ```
 
-:::caution `service_role` cannot currently be obtained
-`OmnitronSync`'s three write methods list it, and
-`auth.utils.createServiceContext()` in `@omnitron-dev/titan-auth`
-produces it — reached only from `validateApiKey()`, when a
-`serviceKey` is configured. The daemon configures none: it wires
-`TitanAuthModule` with a JWT secret and nothing else, and the role
-in a daemon JWT comes from the `role` column of `omnitron_users`,
-which only ever holds `admin`, `operator` or `viewer`.
+The master-to-node path is implemented in `cluster/mesh-link.ts` and `cluster/slave-connector.ts`. It uses the node's registered SSH connection to obtain that node's signing secret, mints an HS256 JWT with issuer `omnitron` and role `service_role` (five-minute default lifetime), then authenticates the persistent peer. Each RPC must explicitly permit that identity. `CONTROL_PLANE_ROLES` and `CONTROL_PLANE_READ_ROLES` make the distinction reusable.
 
-So no caller can present `service_role` today, and
-`isServiceRole` in the daemon's auth context is always false. In
-practice the sync methods are reachable by `admin` and `operator`.
-
-This is one end of an unfinished feature rather than an oversight
-on its own: `SyncService.setMasterConnection()`, the slave's
-channel to the master, has no caller outside tests either. When
-the cross-daemon path is finished it needs a credential —
-configuring `serviceKey` is the smallest form — and until then
-this row describes an intent, not a mechanism.
-:::
+Machine identity is outside the human role hierarchy. It does not grant account administration or interactive SSH. Do not create a human account with `service_role`, reuse a Console session as a machine credential, or infer machine access from a role rank.
 
 ## API key pattern (for headless integrations)
 
@@ -451,16 +420,7 @@ async signIn({ email, password, totpCode }) {
 
 WebAuthn / passkeys are stronger; same flow shape.
 
-For operator surfaces, **require 2FA for the admin role**:
-
-```typescript
-@Public({ auth: { roles: ADMIN_ROLES, requiresMfa: true } })
-async destructiveOperation() { /* ... */ }
-```
-
-(The `requiresMfa` flag is an application-level convention; the
-auth manager checks the session's `mfaVerified` claim before
-allowing.)
+Console currently has no MFA enrollment or verification flow. The stored `totpEnabled` / `pgpEnabled` fields do not implement one. `requiresMfa` is not an enforced Titan RPC option. A future second-factor gate must verify proof server-side, bind it to the current session and enforce it in the shared authorization path before a UI can advertise it.
 
 ## Auth in WebSockets
 
@@ -485,25 +445,11 @@ reconnects WS. No in-band protocol mess.
 
 ## Audit logging
 
-Every operator-level action should land in an append-only
-audit log:
+The daemon stores control-plane events through `AuditService`. The current wire fields are `action`, `resourceType`, `resourceId` and `details`; actor identity comes from the request context. Read events through Console's **Audit** page or `omnitron audit`.
 
-```typescript
-@Public({ auth: { roles: OPERATOR_ROLES } })
-async startApp({ name }: { name: string }, @Auth() ctx: AuthContext) {
-  await this.audit.record({
-    actor:     ctx.userId,
-    action:    'app.start',
-    target:    name,
-    timestamp: Date.now(),
-  });
-  return this.orchestrator.start(name);
-}
-```
+Account creation, role changes and session revocation write their audit rows in the same PostgreSQL transaction as the mutation. An audit failure rolls them back. Interactive SSH requires a successful audit write before host trust changes or session opening; lifecycle completion is best effort. Many older operational paths still use best-effort audit to preserve availability. These guarantees differ and must not be represented as a universal fail-closed audit policy.
 
-Recommended sink: a tamper-evident store (signed append-only
-log, S3 object-lock bucket, or external SIEM). Local files
-alone are insufficient for compliance.
+Tokens, passwords, SSH keys, commands and terminal transcripts are excluded from the new account/terminal audit details. The database trail is not a tamper-evident external archive; deployments requiring that property need a separately controlled audit sink.
 
 ## Anti-patterns
 
@@ -532,7 +478,9 @@ alone are insufficient for compliance.
 ## See also
 
 - [Daemon / Auth flow](./daemon.md#auth-flow) — the daemon's own auth
-- [Services reference](./services-reference.md) — `OmnitronAuth` methods
+- [Console access](./access.md) — account management and effective permissions
+- [SSH workspace](./terminal.md) — pinned terminals and ownership
+- [Services reference](./services-reference.md) — `OmnitronAuth`, `OmnitronAccess` and terminal methods
 - [Best practices / Shared authentication](./best-practices.md#shared-authentication-across-apps)
 - [`titan-auth`](../titan/modules/auth.mdx) — JWT module reference
 - [`titan-database`](../titan/modules/database.mdx) — RLS plugin

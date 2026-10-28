@@ -122,6 +122,46 @@ Use a dedicated Redis database/ACL, bounded streams and retention for durable de
 It shares, and does not close, its injected MailerService. Critical security messages use
 the durable outbox path, not optional marketing notification preferences.
 
+## Delivery diagnostics
+
+Use the `PostgresMailOutbox` option `onDelivery` to forward committed outcomes to
+Titan Logger and therefore Omnitron's Console and CLI:
+
+```ts
+const outbox = new PostgresMailOutbox(database, {
+  messageIdDomain: 'example.org',
+  onDelivery: (event) => {
+    const level = event.state === 'failed' ? 'error'
+      : event.state === 'accepted' ? 'info' : 'warn';
+    logger[level](
+      { event: 'mail.delivery', ...event },
+      `mail.delivery ${event.state} delivery=${event.deliveryId}`,
+    );
+  },
+});
+```
+
+`MailDeliveryEvent` contains `deliveryId`, `state`, `attempts` in the current retry
+cycle and `errorKind`. It has no recipient, body, credential or server response.
+The callback runs only after the transaction commits. Async callbacks are supported;
+a throwing or rejected observer cannot change a committed outcome or trigger another
+send. These are best-effort operational logs, not a second durable event queue:
+`status(id)` and the SQL receipt remain authoritative if the process exits before logging.
+
+`MailDeliveryWorker.onError(stage, code)` reports `outbox_read_failed`,
+`notification_publish_failed`, `outbox_delivery_failed` or `notification_ack_failed`.
+It never passes the raw exception. A recorded SMTP rejection belongs to the outbox
+outcome; it is not an uncommitted worker error. Report queue counts and
+`oldestDueSeconds` in an application's standard health checks as well as transport
+connectivity; a running process or connected Redis alone is insufficient.
+
+For authentication mail, record the request's `queued` or `skipped` decision in the
+application **after commit**, with its opaque delivery ID. Keep the public recovery
+response uniform for missing, disabled and existing accounts. Use a keyed, domain-separated
+subject reference for operator correlation, not a raw email or unkeyed email hash.
+An unknown account produces no mail; `queued` means SQL committed; `accepted` means
+SMTP accepted the message; none of these establishes arrival in the recipient's inbox.
+
 ## Verification
 
 `pnpm test` uses a real local SMTP server and independent MIME parser, tests STARTTLS

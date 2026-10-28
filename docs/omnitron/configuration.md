@@ -641,3 +641,7 @@ my-monorepo/
   at launch
 - [Infrastructure](./infrastructure.md) — `OmnitronAppConfig` deep dive
 - [CLI](./cli.md) — commands that read this config
+
+## Interactive SSH policy
+
+`daemon.terminal` accepts `enabled`, `maxSessions`, `maxSessionsPerOwner`, `idleTimeoutMs`, `absoluteTimeoutMs` and `disconnectTimeoutMs`. See the [SSH policy table and example](./terminal.md#session-lifetime-and-limits). This is startup policy enforced by the daemon, independent of browser settings.

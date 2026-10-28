@@ -23,6 +23,8 @@ diffs them against the index table below.
 
 | File | Service id (Netron) | Methods | Role gate (typical) |
 | ---- | ------------------- | ------- | ------------------- |
+| `access.rpc-service.ts` | `OmnitronAccess` | 5 | viewer (effective permissions) + admin (accounts) |
+| `terminal.rpc-service.ts` | `OmnitronTerminal` | 9 | admin + live human session / trusted local CLI |
 | `alert.rpc-service.ts` | `OmnitronAlerts` | 8 | viewer (read) + operator (mutate) |
 | `audit.rpc-service.ts` | `OmnitronAudit` | 2 | admin |
 | `auth.rpc-service.ts` | `OmnitronAuth` | 7 | mixed (5 allowAnonymous; 2 authenticated) |
@@ -536,3 +538,9 @@ history. See [Releases and verification](./releases.md) for the workflow.
 Check availability before interpreting an empty result as proof that no
 operation took place. The audit trail records who requested control-plane
 changes and their outcomes.
+
+## Console administration and SSH
+
+`OmnitronAccess`: `describe`, `listUsers`, `createUser`, `setRole`, `revokeSessions`. See [Console access](./access.md) for transactions, audit and revocation.
+
+`OmnitronTerminal`: `capabilities`, `inspectHost`, `trustHost`, `open`, `list`, `read`, `write`, `resize`, `close`. See [SSH workspace](./terminal.md) for ownership, host verification and bounded binary I/O. Both services are registered on a master; they are not application user-management APIs.
