@@ -75,6 +75,19 @@ artifacts and state snapshot for rollback. An immutable experiment that pins
 an older runtime needs a separate registration for an upgraded environment;
 replacing its recorded hashes changes the experiment rather than reproducing it.
 
+Unpublished Xec changes are supplied as archives under `vendor/`. Their manifest
+records the clean source commit and SHA-256/SHA-512 digests. Workspace overrides
+select the same Core, Kit, Loader and Ops artifacts throughout the dependency
+graph. Refresh the artifacts together after testing Xec; do not add a second SSH
+transport to Omnitron.
+
+A consumer that develops against Omnitron source can use relative `link:`
+dependencies into one checkout. Keep its manifests and workspace overrides in
+agreement. The release builder reproduces that layout with clean Git clones and
+checks that every framework link resolves into the selected clone. pnpm 12
+lockfiles contain separate YAML documents for tooling and application packages;
+release tooling reads the application importer graph across those documents.
+
 ## Work on the documentation
 
 From the parent directory of your source checkout:
