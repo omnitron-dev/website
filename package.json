@@ -2,7 +2,7 @@
   "name": "omnitron-docs",
   "version": "0.1.0",
   "private": true,
-  "description": "Omnitron \u2014 official documentation site",
+  "description": "Omnitron — official documentation site",
   "scripts": {
     "docusaurus": "docusaurus",
     "start": "docusaurus start",
@@ -20,29 +20,30 @@
     "check:api": "node scripts/build-api-index.mjs --check"
   },
   "dependencies": {
-    "@docusaurus/core": "3.10.1",
-    "@docusaurus/faster": "^3.10.1",
-    "@docusaurus/preset-classic": "3.10.1",
-    "@docusaurus/theme-mermaid": "3.10.1",
-    "@easyops-cn/docusaurus-search-local": "0.55.1",
-    "@mermaid-js/layout-elk": "^0.1.9",
+    "@docusaurus/core": "3.10.2",
+    "@docusaurus/faster": "^3.10.2",
+    "@docusaurus/preset-classic": "3.10.2",
+    "@docusaurus/theme-mermaid": "3.10.2",
+    "@easyops-cn/docusaurus-search-local": "0.55.3",
     "@mdx-js/react": "3.1.1",
+    "@mermaid-js/layout-elk": "^1.0.1",
     "clsx": "^2.1.1",
     "prism-react-renderer": "2.4.1",
-    "react": "^19.0.0",
-    "react-dom": "^19.0.0"
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1"
   },
   "devDependencies": {
-    "@docusaurus/module-type-aliases": "3.10.1",
-    "@docusaurus/tsconfig": "3.10.1",
-    "@docusaurus/types": "3.10.1",
-    "typescript": "^5.6.0"
+    "@docusaurus/module-type-aliases": "3.10.2",
+    "@docusaurus/types": "3.10.2",
+    "typescript": "npm:@typescript/typescript6@^6.0.2",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "@types/node": "^26.6.6",
+    "@typescript/native": "npm:typescript@^7.0.2"
   },
   "engines": {
-    "node": ">=20.0"
+    "node": ">=20.0",
+    "pnpm": ">=12.16.1"
   },
-  "overrides": {
-    "webpack": "5.99.9",
-    "webpackbar": "7.0.0"
-  }
+  "packageManager": "pnpm@12.16.1"
 }

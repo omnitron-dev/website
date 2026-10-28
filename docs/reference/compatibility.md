@@ -11,7 +11,7 @@ describes the current source tree; pin the versions you deploy.
 | Surface | Requirement or boundary |
 | --- | --- |
 | Titan and Omnitron | Node.js 22 or newer, ESM |
-| Source workspace | pnpm 10 or newer; use the version in the root `packageManager` field |
+| Source workspace | pnpm 12.16.1; use the version in the root `packageManager` field |
 | TypeScript applications | Legacy decorators and decorator metadata; see the [quickstart](../getting-started/quickstart.md) |
 | Browser RPC | `netron-browser`; HTTP and WebSocket, independent of the UI framework |
 | React integration | `netron-react` and Prism; consult their `peerDependencies` for React and UI dependencies |

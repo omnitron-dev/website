@@ -1,21 +1,33 @@
+// Docusaurus 3 still defines baseUrl, removed in TypeScript 7.
+// Keep its supported options here, with paths relative to this site.
 {
-  "extends": "@docusaurus/tsconfig",
+  "$schema": "https://json.schemastore.org/tsconfig",
   "compilerOptions": {
-    // Stays, and cannot be dropped while this config extends Docusaurus's.
-    //
-    // `@docusaurus/tsconfig` maps `@site/*` through its own `baseUrl: "."`,
-    // which resolves relative to the file that DECLARES it — inside
-    // `node_modules/@docusaurus/tsconfig`. This line re-roots it here.
-    //
-    // TypeScript 7 removed `baseUrl` entirely, and the omni monorepo is
-    // already on it, so moving this site to match is the obvious next step.
-    // It does not work: `tsc` 7 rejects the option in the INHERITED config
-    // before reading anything of ours (`TS5102`), so the upgrade is blocked
-    // on Docusaurus, not on this file. Declaring `paths` here instead does
-    // not help either — with a `baseUrl` still inherited, paths resolve
-    // against it rather than against this directory.
-    "baseUrl": "."
+    "allowJs": true,
+    "esModuleInterop": true,
+    "jsx": "preserve",
+    "target": "ES2022",
+    "lib": [
+      "ES2022",
+      "DOM"
+    ],
+    "moduleResolution": "bundler",
+    "module": "esnext",
+    "noEmit": true,
+    "paths": {
+      "@site/*": [
+        "./*"
+      ]
+    },
+    "skipLibCheck": true
   },
-  "include": ["src/", "docusaurus.config.ts", "sidebars.ts"],
-  "exclude": [".docusaurus", "build"]
+  "include": [
+    "src/",
+    "docusaurus.config.ts",
+    "sidebars.ts"
+  ],
+  "exclude": [
+    ".docusaurus",
+    "build"
+  ]
 }

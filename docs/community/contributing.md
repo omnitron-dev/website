@@ -42,6 +42,39 @@ The root `pnpm test` runs the workspace suite. Use `pnpm test:up` and
 [Testing](../testing/index.md) for the distinctions between unit,
 integration and cross-runtime tests.
 
+## Update dependencies together
+
+Update manifests and the lockfile in an isolated checkout, then build and test
+before changing a running deployment. Use the package manager version pinned in
+`package.json`; an older pnpm cannot read every lockfile produced by pnpm 12.
+The workspace keeps resolution rules, patches and explicit lifecycle-script
+permissions in `pnpm-workspace.yaml`.
+
+```bash
+pnpm -r update --latest --lockfile-only
+pnpm install --frozen-lockfile
+pnpm peers check
+pnpm build
+```
+
+Review major-version migrations and peer ranges. Do not force a transitive
+package onto a different major than its parent supports. Keep package-manager
+supply-chain checks and review any version-specific exceptions added by an
+explicit update. Run checks for the affected runtime, browser and CLI paths.
+
+The workspace installs the native TypeScript 7 compiler as `@typescript/native`
+and the current compatible Compiler API as `typescript` through the
+`@typescript/typescript6` npm alias. `tsc` uses the native compiler; ESLint and
+API-based tooling use the compatibility package. Both are development tools,
+not runtime requirements for applications.
+
+Keep published export paths backed by files in the package archive. Validate
+consumer applications against the same package artifacts and ensure Titan
+resolves to one instance per application. Preserve the previous lockfile,
+artifacts and state snapshot for rollback. An immutable experiment that pins
+an older runtime needs a separate registration for an upgraded environment;
+replacing its recorded hashes changes the experiment rather than reproducing it.
+
 ## Work on the documentation
 
 From the parent directory of your source checkout:
