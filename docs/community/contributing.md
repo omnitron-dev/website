@@ -55,6 +55,7 @@ pnpm -r update --latest --lockfile-only
 pnpm install --frozen-lockfile
 pnpm peers check
 pnpm build
+pnpm check:packages
 ```
 
 Review major-version migrations and peer ranges. Do not force a transitive
@@ -68,7 +69,11 @@ and the current compatible Compiler API as `typescript` through the
 API-based tooling use the compatibility package. Both are development tools,
 not runtime requirements for applications.
 
-Keep published export paths backed by files in the package archive. Validate
+`pnpm check:packages` packs every public workspace and verifies that all declared
+exports, types and command entry points exist in the archive. CI runs it after
+building. Netron React supplies both ESM and CommonJS declarations. The testing
+package uses Node.js 22.12+ native `require(esm)` support for its CommonJS entry
+conditions. Validate
 consumer applications against the same package artifacts and ensure Titan
 resolves to one instance per application. Preserve the previous lockfile,
 artifacts and state snapshot for rollback. An immutable experiment that pins
