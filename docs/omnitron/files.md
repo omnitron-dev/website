@@ -5,7 +5,7 @@ description: Navigate, edit and transfer files across Omnitron nodes through the
 
 # File workspace
 
-Open **Files** in Console. Panel **A** and panel **B** are independent locations: either can point to the local daemon or a registered remote node. A node must run a compatible Omnitron daemon. File operations use the authenticated Netron mesh; no SFTP server or browser-held SSH credential is required.
+Open **Files** in Console. Panel **A** and panel **B** are independent locations: either can point to the local daemon or a registered remote node. A node must run a compatible Omnitron daemon. After a node upgrade or policy change, use the panel’s **Refresh** button to reload its available roots and directory listing. Connection and permission failures remain visible until a successful retry; an unavailable node is not treated as an empty filesystem. File operations use the authenticated Netron mesh; no SFTP server or browser-held SSH credential is required.
 
 **Local means the daemon host.** Upload and Download refer to the computer running your browser. Selecting a project does not restrict filesystem authority: this is an administrator workspace.
 
@@ -68,7 +68,7 @@ Temporary writes and recoverable trash live in a private `.omnitron-files` direc
 
 `OmnitronFiles` is the human-facing service shared by Console and CLI. Every public method requires `admin`; sensitive calls revalidate the current human session independently of cached transport authorization. Reads and write intents are audited. Required intent persistence fails closed. File contents and chunk payloads are not written to audit details.
 
-`OmnitronFileNode` is the authenticated mesh endpoint. It requires a signed `service_role` identity with a `mesh:` subject and accepts the typed v1 file request union, never arbitrary RPC names or shell commands. The control-plane peer namespaces the actor identity; upload receipts and trash are owned by that actor. The master resolves registered node IDs through the existing `SlaveConnector`. Human browser credentials cannot call this internal endpoint.
+`OmnitronFileNode` is the authenticated mesh endpoint. It requires a signed `service_role` identity with a `mesh:` subject and accepts the typed v1 file request union, never arbitrary RPC names or shell commands. The control-plane peer namespaces the actor identity; upload receipts and trash are owned by that actor. The master resolves registered node IDs through the existing `SlaveConnector`. Human browser credentials cannot call this internal endpoint. The fleet TCP transport carries the verified peer identity into the same invocation context used by service guards and audit; missing identity fails closed.
 
 Upload admission has a caller-generated idempotency key, persisted before the remote begin request so a lost response does not allocate another session. A copy first creates a bounded manifest, then transfers one verified block at a time. The receiving node synchronizes bytes before advancing its durable acknowledgement. Duplicate frames are accepted only when their already-acknowledged contents match. SHA-256 protects each block; commit records the complete destination hash. Publication uses a no-overwrite link from private staging, so partial files are not visible under their final name. A lost commit response is reconciled against the recorded destination inode and receipt, not blindly repeated as a new copy.
 
