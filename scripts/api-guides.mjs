@@ -69,6 +69,7 @@ export default {
     "./components/navigation-progress": "frontend/prism/components.md",
     "./components/page-content": "frontend/prism/components.md",
     "./components/popover": "frontend/prism/components.md",
+    "./components/search-input": "frontend/prism/components.md",
     "./components/scroll-to-top": "frontend/prism/components.md",
     "./components/skeleton": "frontend/prism/components.md",
     "./components/snackbar": "frontend/prism/components.md",

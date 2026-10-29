@@ -370,7 +370,28 @@ import { Table } from '@omnitron-dev/prism';
 
 Columns are `{ id, label, align?, sortable?, render?, format? }`.
 The component also supports `selectable`, `sortable`, `paginated`,
-and `loading` props (see `TableProps`).
+and `loading` props (see `TableProps`). Both `Table` and `AdminDataTable` use a
+bounded, keyboard-focusable `TableViewport` with a localisable `scrollLabel`.
+Pagination remains outside the scroll region and adapts to the container width;
+`maxHeight` limits the rows. Sticky header cells use an opaque theme surface.
+Rows with `onRowClick` accept Enter and Space when the row itself is focused;
+keyboard events from nested controls retain their original behavior.
+
+Use `TableColumn.minWidth` or the table’s `sx` for readable columns.
+`AdminDataTable` accepts `minWidth` for the table and `ColumnDef.minWidth` for
+individual columns. For a composed MUI table, reuse the same viewport directly:
+
+```tsx
+import { TableViewport } from '@omnitron-dev/prism/components/table';
+import MuiTable from '@mui/material/Table';
+
+<TableViewport label="Deployment history" maxHeight={480}>
+  <MuiTable stickyHeader sx={{ minWidth: 640 }}>{/* table sections */}</MuiTable>
+</TableViewport>
+```
+
+Keep pagination outside `TableViewport`. It supplies the scroll region, not row
+data, sorting or a second pagination implementation.
 
 ### `<Chart>`
 
@@ -875,20 +896,22 @@ import { Label, StatusLabel, BooleanLabel }
 Debounced search input with a clear button:
 
 ```tsx
-import { SearchInput } from '@omnitron-dev/prism';
+import { SearchInput } from '@omnitron-dev/prism/components/search-input';
 
 <SearchInput
   value={query}
   onChange={(v) => setQuery(v)}
   debounce={300}
   placeholder="Search projects…"
+  aria-label="Search projects"
 />
 ```
 
 When `debounce > 0`, `onChange` fires that many ms after the
 user stops typing (it receives the raw string) — saves you
 wiring `useDebouncedValue` per call site. A clear button is
-built in.
+built in. `aria-label` names the input independently of its placeholder;
+`clearTooltip` names the clear button.
 
 ### `<DateRangePicker>`
 
@@ -1053,7 +1076,14 @@ const [values, setValues] = useState({});
 Each filter is `{ key, type, label, options?, … }`. The module
 also exports `AdminDataTable`, `StatusChip`, and `AmountCell` for
 admin table surfaces. (There is no `<AdminFilters>` export and no
-built-in save-as-view.)
+built-in save-as-view.) Controls wrap within their available width. A `search`
+filter grows to use spare space; select and range controls shrink before they
+can overflow. Use one debounced search field per toolbar.
+
+Date ranges store `<key>From` and `<key>To`; numeric ranges store `<key>Min` and
+`<key>Max`. Updating a date range emits both ends in one `onChange`, preserving
+other filter values. A partial range, including numeric zero, counts as active
+and can be reset. `onReset` lets the host restore its own defaults.
 
 ## Layout & utility
 
@@ -1590,6 +1620,6 @@ import { AdminDataTable } from '@omnitron-dev/prism/components/admin-filters';
 
 The following component groups are independently importable:
 
-`@omnitron-dev/prism/components/admin-filters`, `@omnitron-dev/prism/components/alert`, `@omnitron-dev/prism/components/animate`, `@omnitron-dev/prism/components/breadcrumbs`, `@omnitron-dev/prism/components/card`, `@omnitron-dev/prism/components/command-palette`, `@omnitron-dev/prism/components/confirm-dialog`, `@omnitron-dev/prism/components/empty-content`, `@omnitron-dev/prism/components/error-boundary`, `@omnitron-dev/prism/components/label`, `@omnitron-dev/prism/components/loading-screen`, `@omnitron-dev/prism/components/navigation-progress`, `@omnitron-dev/prism/components/page-content`, `@omnitron-dev/prism/components/popover`, `@omnitron-dev/prism/components/scroll-to-top`, `@omnitron-dev/prism/components/skeleton`, `@omnitron-dev/prism/components/snackbar`, `@omnitron-dev/prism/components/stepper`, `@omnitron-dev/prism/components/table`, `@omnitron-dev/prism/components/tabs`.
+`@omnitron-dev/prism/components/admin-filters`, `@omnitron-dev/prism/components/alert`, `@omnitron-dev/prism/components/animate`, `@omnitron-dev/prism/components/breadcrumbs`, `@omnitron-dev/prism/components/card`, `@omnitron-dev/prism/components/command-palette`, `@omnitron-dev/prism/components/confirm-dialog`, `@omnitron-dev/prism/components/empty-content`, `@omnitron-dev/prism/components/error-boundary`, `@omnitron-dev/prism/components/label`, `@omnitron-dev/prism/components/loading-screen`, `@omnitron-dev/prism/components/navigation-progress`, `@omnitron-dev/prism/components/page-content`, `@omnitron-dev/prism/components/popover`, `@omnitron-dev/prism/components/search-input`, `@omnitron-dev/prism/components/scroll-to-top`, `@omnitron-dev/prism/components/skeleton`, `@omnitron-dev/prism/components/snackbar`, `@omnitron-dev/prism/components/stepper`, `@omnitron-dev/prism/components/table`, `@omnitron-dev/prism/components/tabs`.
 
 Use `@omnitron-dev/prism/core` for `PrismProvider` and its core hooks, `@omnitron-dev/prism/layouts` for layout composition, `@omnitron-dev/prism/state` for stores and `@omnitron-dev/prism/auth` for guards. Maps and editors retain their existing explicit subpaths and can be loaded only on the routes that need them. The root barrel remains compatible, but opt-in imports give a consumer tighter control of its dependency graph.

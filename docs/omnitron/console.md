@@ -108,7 +108,9 @@ live pushes. There is no TanStack/React Query layer.
 
 `/apps` — table view of every managed app: status, instances,
 CPU, memory, restart count, mode (classic vs bootstrap),
-critical flag.
+critical flag. Search matches application and stack names; the status filter and
+result count share Prism’s `FilterToolbar`. Reset restores the current stack’s
+complete inventory. Wide tables scroll inside their own keyboard-focusable region.
 
 `/apps/:name` — single-app deep dive:
 - Live status with restart history timeline.
@@ -144,6 +146,12 @@ process status: an online process can still have an unhealthy mail queue.
 
 Live mode polls `OmnitronLogs.streamLogs`; time ranges and older pages use
 `queryLogs`. Both apply the same node, application, level and label filters.
+Application, node and message search remain visible. **Filters** expands labels,
+levels, time ranges and the copyable CLI command; its count shows active advanced
+filter groups even while collapsed. Collapsing this panel does not reset the query.
+Messages occupy a separate line on narrow screens and expand with Enter, Space or
+a pointer, including entries without structured metadata. Text and severity colors
+follow the active light or dark theme.
 Search matches literal message text in stored records. Level chips select exact
 levels; CLI `--level` selects that level and higher. Neither mode infers success
 from an empty result. Expanding a row reveals its source node and structured metadata.
@@ -463,3 +471,31 @@ everything as typed Netron services.
 Console pages use a single breadcrumb trail for location and navigation. A hidden level-one heading and the browser tab title retain the page name for accessibility. Parent crumbs use client-side routing, so navigating between sections preserves mounted workspaces and their SSH sessions. Page actions remain beside the trail; content headings still identify cards and subsections.
 
 The application shell occupies the available viewport. Its header, navigation and status bar stay within the window, while ordinary pages scroll in the main region. SSH panes and the topology canvas own their internal scrolling. The status bar progressively hides secondary details on narrow screens while retaining connection and application health. Prism theme tokens supply terminal background, text, cursor and selection colors.
+
+
+### Tables, filters and overlays
+
+The shared Prism `Table` and `AdminDataTable` contain horizontal scrolling inside
+`TableViewport`. Focus a named table region to scroll with the keyboard; rows with
+`onRowClick` also accept Enter and Space without intercepting nested links or
+buttons. Pagination stays outside the scrolling rows and rearranges when its
+container is narrow. `maxHeight` constrains the rows, not pagination. Console gives
+wide operational tables a minimum readable width instead of squeezing their
+columns into the window.
+
+Audit is a reading surface: at narrow widths, time, actor and origin move into the
+event cell. Details and resource identifiers wrap without overlapping other
+records. Access uses a compact account-action menu, a collapsible role reference
+and a clearable permission search with an explicit no-match state. Permissions
+continue to come from the daemon; visual rearrangement does not change policy.
+
+Forms and menus inherit Prism’s MUI overrides. Dialogs fill small viewports using
+`100dvh`; their content scrolls while action buttons remain reachable. Long menu
+labels wrap, form pairs stack on small windows, and secondary account actions
+return keyboard focus to their trigger when dismissed. Open a confirmation dialog
+to review an operation; merely opening a menu or form does not execute it.
+
+`src/theme.ts` defines Console’s light and dark surfaces through `PrismProvider`
+`themeOverrides`. Component geometry and interaction remain in Prism rather than
+being reimplemented in each page. For frontend-only changes, rebuild the Console
+assets and reload the browser; a daemon or application restart is unnecessary.

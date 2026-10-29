@@ -341,6 +341,10 @@
       "guide": "/docs/frontend/prism/components"
     },
     {
+      "path": "@omnitron-dev/prism/components/search-input",
+      "guide": "/docs/frontend/prism/components"
+    },
+    {
       "path": "@omnitron-dev/prism/components/skeleton",
       "guide": "/docs/frontend/prism/components"
     },
@@ -14826,7 +14830,7 @@
       "name": "AdminDataTable",
       "package": "@omnitron-dev/prism",
       "kind": "function",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/admin-filters/admin-data-table.tsx#L269",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/admin-filters/admin-data-table.tsx#L277",
       "imports": [
         {
           "path": "@omnitron-dev/prism",
@@ -14846,7 +14850,7 @@
       "name": "AdminDataTableProps",
       "package": "@omnitron-dev/prism",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/admin-filters/admin-data-table.tsx#L53",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/admin-filters/admin-data-table.tsx#L55",
       "imports": [
         {
           "path": "@omnitron-dev/prism",
@@ -22378,7 +22382,7 @@
       "name": "FilterToolbar",
       "package": "@omnitron-dev/prism",
       "kind": "function",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/admin-filters/filter-toolbar.tsx#L157",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/admin-filters/filter-toolbar.tsx#L165",
       "imports": [
         {
           "path": "@omnitron-dev/prism",
@@ -31038,7 +31042,7 @@
       "name": "SearchInput",
       "package": "@omnitron-dev/prism",
       "kind": "function",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/search-input/search-input.tsx#L72",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/search-input/search-input.tsx#L74",
       "imports": [
         {
           "path": "@omnitron-dev/prism",
@@ -31046,6 +31050,10 @@
         },
         {
           "path": "@omnitron-dev/prism/components",
+          "guide": "/docs/frontend/prism/components"
+        },
+        {
+          "path": "@omnitron-dev/prism/components/search-input",
           "guide": "/docs/frontend/prism/components"
         }
       ]
@@ -31062,6 +31070,10 @@
         },
         {
           "path": "@omnitron-dev/prism/components",
+          "guide": "/docs/frontend/prism/components"
+        },
+        {
+          "path": "@omnitron-dev/prism/components/search-input",
           "guide": "/docs/frontend/prism/components"
         }
       ]
@@ -31942,7 +31954,7 @@
       "name": "SortOrder",
       "package": "@omnitron-dev/prism",
       "kind": "type",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/table/table.tsx#L33",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/table/table.tsx#L34",
       "imports": [
         {
           "path": "@omnitron-dev/prism",
@@ -32742,7 +32754,7 @@
       "name": "Table",
       "package": "@omnitron-dev/prism",
       "kind": "function",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/table/table.tsx#L169",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/table/table.tsx#L174",
       "imports": [
         {
           "path": "@omnitron-dev/prism",
@@ -32798,7 +32810,7 @@
       "name": "TableColumn",
       "package": "@omnitron-dev/prism",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/table/table.tsx#L35",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/table/table.tsx#L36",
       "imports": [
         {
           "path": "@omnitron-dev/prism",
@@ -32854,7 +32866,7 @@
       "name": "TableProps",
       "package": "@omnitron-dev/prism",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/table/table.tsx#L54",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/table/table.tsx#L55",
       "imports": [
         {
           "path": "@omnitron-dev/prism",
@@ -32918,6 +32930,46 @@
         },
         {
           "path": "@omnitron-dev/prism/components/skeleton",
+          "guide": "/docs/frontend/prism/components"
+        }
+      ]
+    },
+    {
+      "name": "TableViewport",
+      "package": "@omnitron-dev/prism",
+      "kind": "function",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/table/table-viewport.tsx#L14",
+      "imports": [
+        {
+          "path": "@omnitron-dev/prism",
+          "guide": "/docs/frontend/prism"
+        },
+        {
+          "path": "@omnitron-dev/prism/components",
+          "guide": "/docs/frontend/prism/components"
+        },
+        {
+          "path": "@omnitron-dev/prism/components/table",
+          "guide": "/docs/frontend/prism/components"
+        }
+      ]
+    },
+    {
+      "name": "TableViewportProps",
+      "package": "@omnitron-dev/prism",
+      "kind": "interface",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/table/table-viewport.tsx#L6",
+      "imports": [
+        {
+          "path": "@omnitron-dev/prism",
+          "guide": "/docs/frontend/prism"
+        },
+        {
+          "path": "@omnitron-dev/prism/components",
+          "guide": "/docs/frontend/prism/components"
+        },
+        {
+          "path": "@omnitron-dev/prism/components/table",
           "guide": "/docs/frontend/prism/components"
         }
       ]
@@ -36622,7 +36674,7 @@
       "name": "useTable",
       "package": "@omnitron-dev/prism",
       "kind": "function",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/table/table.tsx#L489",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/table/table.tsx#L511",
       "imports": [
         {
           "path": "@omnitron-dev/prism",
@@ -36642,7 +36694,7 @@
       "name": "UseTableOptions",
       "package": "@omnitron-dev/prism",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/table/table.tsx#L412",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/table/table.tsx#L434",
       "imports": [
         {
           "path": "@omnitron-dev/prism",
@@ -36662,7 +36714,7 @@
       "name": "UseTableReturn",
       "package": "@omnitron-dev/prism",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/table/table.tsx#L427",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/table/table.tsx#L449",
       "imports": [
         {
           "path": "@omnitron-dev/prism",
