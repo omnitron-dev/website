@@ -645,3 +645,8 @@ my-monorepo/
 ## Interactive SSH policy
 
 `daemon.terminal` accepts `enabled`, `maxSessions`, `maxSessionsPerOwner`, `idleTimeoutMs`, `absoluteTimeoutMs` and `disconnectTimeoutMs`. See the [SSH policy table and example](./terminal.md#session-lifetime-and-limits). This is startup policy enforced by the daemon, independent of browser settings.
+
+
+## File workspace exports
+
+`daemon.files` configures administrator file access per node. Omission exposes the `/` filesystem within daemon OS permissions. Set `enabled: false` or `roots: []` to disable exports. An explicit `roots` array replaces the default with `{ id, label, path, readOnly? }` entries. See [File workspace](./files.md#configure-access-per-node) for configuration examples and boundaries.

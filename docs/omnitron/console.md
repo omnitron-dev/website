@@ -63,6 +63,7 @@ sidebar.
 | Path | Page | Scope | Backing RPC |
 | ---- | ---- | ----- | ----------- |
 | `/access` | `AccessPage` | daemon | `OmnitronAccess` |
+| `/files` | `FilesPage` | daemon | `OmnitronFiles`, `OmnitronNodes` |
 | `/terminal` | `TerminalPage` | daemon | `OmnitronTerminal`, `OmnitronNodes` |
 | `/auth/sign-in` | `SignInPage` | guest | `OmnitronAuth.signIn` |
 | `/` | `DashboardPage` | global | aggregate from many services |
@@ -560,3 +561,8 @@ This workspace is restricted to administrators because its scripts execute with 
 ## Watch configuration
 
 Re-enabling watch uses the daemon’s last accepted boot or reload configuration, including a configuration selected from a registered project. It does not rediscover an unrelated configuration from the caller’s working directory. Build watchers for registered applications appear in the same watch status as classic file watchers.
+
+
+## File workspace
+
+[Files](./files.md) provides two independent, tabbed node locations, version-checked text editing and durable cross-node copies. Prism tabs and table viewports share the Console shell; CodeMirror loads only when a document is opened. Narrow windows retain both panels behind an A/B switch. The default export is `/`, limited by administrator authorization and the daemon OS account; node configuration can restrict roots, make them read only or disable access.

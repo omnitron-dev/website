@@ -669,3 +669,8 @@ See [Console access](./access.md) for password input, account pagination and ato
 | `omnitron node ssh` | Interactive shell through Xec |
 | `omnitron terminal list` | List sessions owned by this caller |
 | `omnitron terminal close` | Close an owned terminal |
+
+
+## File workspace
+
+`omnitron files` shares the audited Console file service. Commands include `roots`, `list`, `stat`, `read`, `save`, `mkdir`, `rename`, `trash`, `trash-list`, `restore`, `copy`, `transfers`, `pause`, `resume`, `cancel`, `upload`, `download`, `upload-status`, `upload-finish` and `upload-abort`. All support `--json`; checked mutations use an observed `--version`. See [File workspace](./files.md) for flags, examples, ownership, limits and recovery.

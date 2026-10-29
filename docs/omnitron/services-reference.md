@@ -547,3 +547,15 @@ changes and their outcomes.
 `OmnitronAccess`: `describe`, `listUsers`, `createUser`, `setRole`, `revokeSessions`. See [Console access](./access.md) for transactions, audit and revocation.
 
 `OmnitronTerminal`: `capabilities`, `inspectHost`, `trustHost`, `open`, `list`, `read`, `write`, `resize`, `close`. See [SSH workspace](./terminal.md) for ownership, host verification and bounded binary I/O. Both services are registered on a master; they are not application user-management APIs.
+
+
+## File workspace services
+
+| File | Service id | Methods | Role gate |
+| --- | --- | --- | --- |
+| `files/files.rpc-service.ts` | `OmnitronFiles` | 20 | admin + live human session / trusted local CLI |
+| `files/file-node.rpc-service.ts` | `OmnitronFileNode` | 1 | authenticated mesh service identity |
+
+`OmnitronFiles` is the master-only administrator API: `roots`, `list`, `stat`, `readText`, `readChunk`, `saveText`, `mkdir`, `rename`, `trash`, `trashList`, `restore`, `beginUpload`, `uploadChunk`, `uploadStatus`, `finishUpload`, `acknowledgeUpload`, `abortUpload`, `copy`, `transfers`, `controlTransfer`. Each call revalidates human authority; mutations and content reads require audit intent.
+
+`OmnitronFileNode.invoke` runs on each node and accepts the v1 typed file protocol only for authenticated control-plane service peers. It implements OS access, private staging and durable write receipts. It is not a browser or application RPC proxy. See [File workspace](./files.md).
