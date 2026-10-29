@@ -16314,7 +16314,7 @@
       "name": "BooleanLabel",
       "package": "@omnitron-dev/prism",
       "kind": "function",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/label/label.tsx#L239",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/label/label.tsx#L260",
       "imports": [
         {
           "path": "@omnitron-dev/prism",
@@ -25326,7 +25326,7 @@
       "name": "Label",
       "package": "@omnitron-dev/prism",
       "kind": "function",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/label/label.tsx#L171",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/label/label.tsx#L192",
       "imports": [
         {
           "path": "@omnitron-dev/prism",
@@ -32406,7 +32406,7 @@
       "name": "StatusLabel",
       "package": "@omnitron-dev/prism",
       "kind": "function",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/label/label.tsx#L213",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/label/label.tsx#L234",
       "imports": [
         {
           "path": "@omnitron-dev/prism",

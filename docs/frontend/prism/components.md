@@ -903,6 +903,14 @@ import { Label, StatusLabel, BooleanLabel }
 <BooleanLabel value={isEnabled} />
 ```
 
+The isolated entry is `@omnitron-dev/prism/components/label`. Variants are
+`soft` (default), `filled`, `outlined` and `inverted`. Soft labels choose a
+contrasting palette tone for each color scheme, including Prism presets with
+inverted dark-mode tonal roles. Colors remain bound to the theme's CSS variables
+and custom prefix. When brand colors can only be resolved by the browser, the
+foreground falls back to the theme's primary text color. Keep a written state
+alongside color and use legible text sizes inside scaled visualizations.
+
 ### `<SearchInput>`
 
 Debounced search input with a clear button:

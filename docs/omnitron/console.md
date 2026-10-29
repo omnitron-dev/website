@@ -205,12 +205,26 @@ machines, applications, provisioned services and gateway of the selected stack.
 Edges represent declared service ownership/dependencies, not observed network
 traffic. An incomplete read is labelled explicitly.
 
+The graph opens at a readable scale (100% when one card fits), rather than
+shrinking every deployment into the window. Compact Prism cards show a name,
+state and key readings; process lists, image identifiers and full configuration
+remain in the inspector. Deployment groups reflow into one to four columns for
+the actual canvas width. A provisioned service stays beside its application;
+on a narrow screen the relationship runs vertically.
+
 The wrapping toolbar provides node search, graph/list view, zoom, fit, position
-locking, fullscreen and refresh. Positions are locked initially; after unlocking,
-dragged positions survive polling for the current page session. Resizing refits
-the graph (or the selected node) to the available canvas. The minimap appears on
-wide windows. While the canvas has focus, `+` / `-` zoom and `0` fits the graph;
-these shortcuts do not intercept typing or browser shortcuts.
+locking, fullscreen and refresh. **Fit graph** gives an overview of all nodes;
+click the percentage to return to a readable view. Scroll or drag to pan, pinch
+to zoom, or hold Ctrl/Command while scrolling to zoom. The minimap appears on
+wide windows. While the canvas has focus, arrow keys pan, `+` / `-` zoom, `0`
+fits the graph and `1` restores a readable view. These shortcuts do not intercept
+typing or browser shortcuts.
+
+Positions are locked initially. After unlocking and dragging a node, the manual
+layout survives polling and resizing for this page session; **Arrange nodes**
+restores responsive placement. Polling never resets a manual pan or zoom.
+Searching or selecting a node brings it into view at readable scale, including
+after closing its inspector. Resizing adapts the column count and available space.
 
 Selecting a node opens an inspector beside the graph on wide windows and a modal
 sheet on narrow windows. Prism tabs offer the available overview, config, metrics
