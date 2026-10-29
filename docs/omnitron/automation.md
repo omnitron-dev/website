@@ -40,6 +40,8 @@ omnitron pipeline cancel <run-id>
 
 `parameters.json` contains a JSON object, for example `{"label":"candidate"}`. Keep private parameter files outside version control. Parameter values travel as data and are represented as `[provided]` in run history. This does not make deliberate printing or copying of a secret safe.
 
+Every pipeline command supports the global `--json` flag or `OMNITRON_OUTPUT=json`. Successful requests emit one `{ok: true, data: ...}` object on stdout; request failures emit `{ok: false, error: ...}` on stderr. A status request for a failed, cancelled or interrupted run still returns its record, with exit code 1.
+
 To update an existing automation without replacing its identity, use `omnitron pipeline save inspect.json --id <pipeline-id>`. Prefer IDs when names are ambiguous.
 
 ## Steps and targets
