@@ -181,12 +181,20 @@
       "guide": "/docs/omnitron/configuration"
     },
     {
+      "path": "@omnitron-dev/omnitron/diagnostics",
+      "guide": "/docs/omnitron/diagnostics"
+    },
+    {
       "path": "@omnitron-dev/omnitron/dto/events",
       "guide": "/docs/omnitron/services-reference"
     },
     {
       "path": "@omnitron-dev/omnitron/dto/services",
       "guide": "/docs/omnitron/services-reference"
+    },
+    {
+      "path": "@omnitron-dev/omnitron/migration",
+      "guide": "/docs/omnitron/migrations"
     },
     {
       "path": "@omnitron-dev/omnitron/node-check",
@@ -541,6 +549,10 @@
       "guide": "/docs/titan/modules/notifications"
     },
     {
+      "path": "@omnitron-dev/titan-notifications/diagnostics",
+      "guide": "/docs/omnitron/diagnostics"
+    },
+    {
       "path": "@omnitron-dev/titan-notifications/rotif",
       "guide": "/docs/titan/modules/notifications"
     },
@@ -579,6 +591,10 @@
     {
       "path": "@omnitron-dev/titan/decorators",
       "guide": "/docs/titan/decorators"
+    },
+    {
+      "path": "@omnitron-dev/titan/diagnostics",
+      "guide": "/docs/omnitron/diagnostics"
     },
     {
       "path": "@omnitron-dev/titan/errors",
@@ -11334,7 +11350,7 @@
       "name": "AggregatedHealthDto",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/config/types.ts#L1071",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/config/types.ts#L1072",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron",
@@ -11354,7 +11370,7 @@
       "name": "AggregatedMetricsDto",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/config/types.ts#L1034",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/config/types.ts#L1035",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron",
@@ -11427,6 +11443,18 @@
         {
           "path": "@omnitron-dev/omnitron/alerts",
           "guide": "/docs/omnitron/observability"
+        }
+      ]
+    },
+    {
+      "name": "AlertDiagnosticInput",
+      "package": "@omnitron-dev/omnitron",
+      "kind": "interface",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/diagnostics/index.ts#L7",
+      "imports": [
+        {
+          "path": "@omnitron-dev/omnitron/diagnostics",
+          "guide": "/docs/omnitron/diagnostics"
         }
       ]
     },
@@ -11594,7 +11622,7 @@
       "name": "AppDiagnosticsDto",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/config/types.ts#L1189",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/config/types.ts#L1191",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron",
@@ -11614,7 +11642,7 @@
       "name": "AppHealthAnswer",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/config/types.ts#L21",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/config/types.ts#L22",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron",
@@ -11642,7 +11670,7 @@
       "name": "AppHealthHook",
       "package": "@omnitron-dev/omnitron",
       "kind": "type",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/config/types.ts#L33",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/config/types.ts#L34",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron",
@@ -11694,7 +11722,7 @@
       "name": "AppStatus",
       "package": "@omnitron-dev/omnitron",
       "kind": "type",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/config/types.ts#L959",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/config/types.ts#L960",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron",
@@ -11810,7 +11838,7 @@
       "name": "ChildDiagnosticsDto",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/config/types.ts#L1139",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/config/types.ts#L1141",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/config",
@@ -11915,6 +11943,18 @@
       ]
     },
     {
+      "name": "createAlertDiagnosticHandler",
+      "package": "@omnitron-dev/omnitron",
+      "kind": "function",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/diagnostics/index.ts#L17",
+      "imports": [
+        {
+          "path": "@omnitron-dev/omnitron/diagnostics",
+          "guide": "/docs/omnitron/diagnostics"
+        }
+      ]
+    },
+    {
       "name": "CreateAlertRuleInput",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
@@ -11939,6 +11979,102 @@
       ]
     },
     {
+      "name": "createHardenedRunner",
+      "package": "@omnitron-dev/omnitron",
+      "kind": "function",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-database/src/migration/hardened-runner.ts#L135",
+      "imports": [
+        {
+          "path": "@omnitron-dev/omnitron/migration",
+          "guide": "/docs/omnitron/migrations"
+        }
+      ]
+    },
+    {
+      "name": "createLoggingPlugin",
+      "package": "@omnitron-dev/omnitron",
+      "kind": "value",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/migration/index.ts#L20",
+      "imports": [
+        {
+          "path": "@omnitron-dev/omnitron/migration",
+          "guide": "/docs/omnitron/migrations"
+        }
+      ]
+    },
+    {
+      "name": "createMetricsPlugin",
+      "package": "@omnitron-dev/omnitron",
+      "kind": "value",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/migration/index.ts#L20",
+      "imports": [
+        {
+          "path": "@omnitron-dev/omnitron/migration",
+          "guide": "/docs/omnitron/migrations"
+        }
+      ]
+    },
+    {
+      "name": "createMigration",
+      "package": "@omnitron-dev/omnitron",
+      "kind": "value",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/migration/index.ts#L14",
+      "imports": [
+        {
+          "path": "@omnitron-dev/omnitron/migration",
+          "guide": "/docs/omnitron/migrations"
+        }
+      ]
+    },
+    {
+      "name": "createMigrationHistory",
+      "package": "@omnitron-dev/omnitron",
+      "kind": "value",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/migration/index.ts#L14",
+      "imports": [
+        {
+          "path": "@omnitron-dev/omnitron/migration",
+          "guide": "/docs/omnitron/migrations"
+        }
+      ]
+    },
+    {
+      "name": "createMigrationRunner",
+      "package": "@omnitron-dev/omnitron",
+      "kind": "function",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/migration/index.ts#L43",
+      "imports": [
+        {
+          "path": "@omnitron-dev/omnitron/migration",
+          "guide": "/docs/omnitron/migrations"
+        }
+      ]
+    },
+    {
+      "name": "createMigrationRunnerWithPlugins",
+      "package": "@omnitron-dev/omnitron",
+      "kind": "function",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/migration/index.ts#L47",
+      "imports": [
+        {
+          "path": "@omnitron-dev/omnitron/migration",
+          "guide": "/docs/omnitron/migrations"
+        }
+      ]
+    },
+    {
+      "name": "createMigrationWithMeta",
+      "package": "@omnitron-dev/omnitron",
+      "kind": "value",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/migration/index.ts#L14",
+      "imports": [
+        {
+          "path": "@omnitron-dev/omnitron/migration",
+          "guide": "/docs/omnitron/migrations"
+        }
+      ]
+    },
+    {
       "name": "createOmnitronConfigSchema",
       "package": "@omnitron-dev/omnitron",
       "kind": "function",
@@ -11947,6 +12083,18 @@
         {
           "path": "@omnitron-dev/omnitron/config",
           "guide": "/docs/omnitron/configuration"
+        }
+      ]
+    },
+    {
+      "name": "createPostgresMigrationDatabase",
+      "package": "@omnitron-dev/omnitron",
+      "kind": "function",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-database/src/migration/postgres.ts#L13",
+      "imports": [
+        {
+          "path": "@omnitron-dev/omnitron/migration",
+          "guide": "/docs/omnitron/migrations"
         }
       ]
     },
@@ -12002,7 +12150,7 @@
       "name": "DaemonRole",
       "package": "@omnitron-dev/omnitron",
       "kind": "type",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/config/types.ts#L366",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/config/types.ts#L367",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/config",
@@ -12014,7 +12162,7 @@
       "name": "DaemonStatusDto",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/config/types.ts#L1014",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/config/types.ts#L1015",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron",
@@ -12067,6 +12215,42 @@
         {
           "path": "@omnitron-dev/omnitron/config",
           "guide": "/docs/omnitron/configuration"
+        }
+      ]
+    },
+    {
+      "name": "defineMigrationConfig",
+      "package": "@omnitron-dev/omnitron",
+      "kind": "function",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/migration/index.ts#L66",
+      "imports": [
+        {
+          "path": "@omnitron-dev/omnitron/migration",
+          "guide": "/docs/omnitron/migrations"
+        }
+      ]
+    },
+    {
+      "name": "defineMigrations",
+      "package": "@omnitron-dev/omnitron",
+      "kind": "value",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/migration/index.ts#L14",
+      "imports": [
+        {
+          "path": "@omnitron-dev/omnitron/migration",
+          "guide": "/docs/omnitron/migrations"
+        }
+      ]
+    },
+    {
+      "name": "defineSqlMigration",
+      "package": "@omnitron-dev/omnitron",
+      "kind": "function",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-database/src/migration/postgres.ts#L32",
+      "imports": [
+        {
+          "path": "@omnitron-dev/omnitron/migration",
+          "guide": "/docs/omnitron/migrations"
         }
       ]
     },
@@ -12159,6 +12343,90 @@
       ]
     },
     {
+      "name": "describeError",
+      "package": "@omnitron-dev/omnitron",
+      "kind": "function",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan/src/diagnostics/index.ts#L41",
+      "imports": [
+        {
+          "path": "@omnitron-dev/omnitron/diagnostics",
+          "guide": "/docs/omnitron/diagnostics"
+        }
+      ]
+    },
+    {
+      "name": "diagnoseMigrationFailure",
+      "package": "@omnitron-dev/omnitron",
+      "kind": "function",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/migration/operation.ts#L52",
+      "imports": [
+        {
+          "path": "@omnitron-dev/omnitron/migration",
+          "guide": "/docs/omnitron/migrations"
+        }
+      ]
+    },
+    {
+      "name": "DiagnosticEvent",
+      "package": "@omnitron-dev/omnitron",
+      "kind": "interface",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan/src/diagnostics/index.ts#L11",
+      "imports": [
+        {
+          "path": "@omnitron-dev/omnitron/diagnostics",
+          "guide": "/docs/omnitron/diagnostics"
+        }
+      ]
+    },
+    {
+      "name": "DiagnosticFinding",
+      "package": "@omnitron-dev/omnitron",
+      "kind": "interface",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan/src/diagnostics/index.ts#L3",
+      "imports": [
+        {
+          "path": "@omnitron-dev/omnitron/diagnostics",
+          "guide": "/docs/omnitron/diagnostics"
+        }
+      ]
+    },
+    {
+      "name": "DiagnosticReceipt",
+      "package": "@omnitron-dev/omnitron",
+      "kind": "interface",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan/src/diagnostics/index.ts#L20",
+      "imports": [
+        {
+          "path": "@omnitron-dev/omnitron/diagnostics",
+          "guide": "/docs/omnitron/diagnostics"
+        }
+      ]
+    },
+    {
+      "name": "DiagnosticSeverity",
+      "package": "@omnitron-dev/omnitron",
+      "kind": "type",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan/src/diagnostics/index.ts#L2",
+      "imports": [
+        {
+          "path": "@omnitron-dev/omnitron/diagnostics",
+          "guide": "/docs/omnitron/diagnostics"
+        }
+      ]
+    },
+    {
+      "name": "DiagnosticSink",
+      "package": "@omnitron-dev/omnitron",
+      "kind": "interface",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan/src/diagnostics/index.ts#L25",
+      "imports": [
+        {
+          "path": "@omnitron-dev/omnitron/diagnostics",
+          "guide": "/docs/omnitron/diagnostics"
+        }
+      ]
+    },
+    {
       "name": "DiscoveryScanResult",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
@@ -12191,6 +12459,18 @@
         {
           "path": "@omnitron-dev/omnitron/dto/events",
           "guide": "/docs/omnitron/services-reference"
+        }
+      ]
+    },
+    {
+      "name": "executeMigrationOperation",
+      "package": "@omnitron-dev/omnitron",
+      "kind": "function",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/migration/operation.ts#L20",
+      "imports": [
+        {
+          "path": "@omnitron-dev/omnitron/migration",
+          "guide": "/docs/omnitron/migrations"
         }
       ]
     },
@@ -12279,6 +12559,42 @@
       ]
     },
     {
+      "name": "HardenedMigration",
+      "package": "@omnitron-dev/omnitron",
+      "kind": "type",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-database/src/migration/hardened-runner.ts#L16",
+      "imports": [
+        {
+          "path": "@omnitron-dev/omnitron/migration",
+          "guide": "/docs/omnitron/migrations"
+        }
+      ]
+    },
+    {
+      "name": "HardenedMigrationRunner",
+      "package": "@omnitron-dev/omnitron",
+      "kind": "class",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-database/src/migration/hardened-runner.ts#L64",
+      "imports": [
+        {
+          "path": "@omnitron-dev/omnitron/migration",
+          "guide": "/docs/omnitron/migrations"
+        }
+      ]
+    },
+    {
+      "name": "HardenedRunnerOptions",
+      "package": "@omnitron-dev/omnitron",
+      "kind": "interface",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-database/src/migration/hardened-runner.ts#L26",
+      "imports": [
+        {
+          "path": "@omnitron-dev/omnitron/migration",
+          "guide": "/docs/omnitron/migrations"
+        }
+      ]
+    },
+    {
       "name": "HealthCheckResult",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
@@ -12318,7 +12634,7 @@
       "name": "IAlertSink",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/config/types.ts#L868",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/config/types.ts#L869",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/config",
@@ -12330,7 +12646,7 @@
       "name": "IAppDefinition",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/config/types.ts#L35",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/config/types.ts#L36",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron",
@@ -12346,7 +12662,7 @@
       "name": "IAppRequirements",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/config/types.ts#L182",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/config/types.ts#L183",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/config",
@@ -12358,7 +12674,7 @@
       "name": "IDaemonConfig",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/config/types.ts#L698",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/config/types.ts#L699",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/config",
@@ -12382,7 +12698,7 @@
       "name": "IEcosystemAppEntry",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/config/types.ts#L620",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/config/types.ts#L621",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron",
@@ -12398,7 +12714,7 @@
       "name": "IEcosystemConfig",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/config/types.ts#L882",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/config/types.ts#L883",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron",
@@ -12414,7 +12730,7 @@
       "name": "IHttpTransportConfig",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/config/types.ts#L592",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/config/types.ts#L593",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron",
@@ -12934,7 +13250,7 @@
       "name": "IProcessEntry",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/config/types.ts#L425",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/config/types.ts#L426",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron",
@@ -12950,7 +13266,7 @@
       "name": "IProcessTopologyEntry",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/config/types.ts#L547",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/config/types.ts#L548",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron",
@@ -12990,7 +13306,7 @@
       "name": "IProjectRegistry",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/config/types.ts#L407",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/config/types.ts#L408",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/config",
@@ -13026,7 +13342,7 @@
       "name": "IResolvedAppConfig",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/config/types.ts#L210",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/config/types.ts#L211",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/config",
@@ -13050,7 +13366,7 @@
       "name": "ISeedProject",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/config/types.ts#L396",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/config/types.ts#L397",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/config",
@@ -13062,7 +13378,7 @@
       "name": "ISSHConfig",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/config/types.ts#L300",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/config/types.ts#L301",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/config",
@@ -13086,7 +13402,7 @@
       "name": "IStackConfig",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/config/types.ts#L235",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/config/types.ts#L236",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/config",
@@ -13122,7 +13438,7 @@
       "name": "IStackNode",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/config/types.ts#L285",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/config/types.ts#L286",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/config",
@@ -13146,7 +13462,7 @@
       "name": "IStackSettings",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/config/types.ts#L313",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/config/types.ts#L314",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/config",
@@ -13158,7 +13474,7 @@
       "name": "ISyncConfig",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/config/types.ts#L377",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/config/types.ts#L378",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/config",
@@ -13182,7 +13498,7 @@
       "name": "IWatchConfig",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/config/types.ts#L674",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/config/types.ts#L675",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron",
@@ -13198,7 +13514,7 @@
       "name": "IWebSocketTransportConfig",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/config/types.ts#L609",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/config/types.ts#L610",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron",
@@ -13247,14 +13563,50 @@
       ]
     },
     {
+      "name": "Kysely",
+      "package": "@omnitron-dev/omnitron",
+      "kind": "type",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/migration/index.ts#L29",
+      "imports": [
+        {
+          "path": "@omnitron-dev/omnitron/migration",
+          "guide": "/docs/omnitron/migrations"
+        }
+      ]
+    },
+    {
       "name": "LastExitDto",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/config/types.ts#L1111",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/config/types.ts#L1113",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/config",
           "guide": "/docs/omnitron/configuration"
+        }
+      ]
+    },
+    {
+      "name": "LegacyMigrationChecksumError",
+      "package": "@omnitron-dev/omnitron",
+      "kind": "class",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-database/src/migration/hardened-runner.ts#L53",
+      "imports": [
+        {
+          "path": "@omnitron-dev/omnitron/migration",
+          "guide": "/docs/omnitron/migrations"
+        }
+      ]
+    },
+    {
+      "name": "LegacyMigrationLockError",
+      "package": "@omnitron-dev/omnitron",
+      "kind": "class",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-database/src/migration/hardened-runner.ts#L49",
+      "imports": [
+        {
+          "path": "@omnitron-dev/omnitron/migration",
+          "guide": "/docs/omnitron/migrations"
         }
       ]
     },
@@ -13295,10 +13647,22 @@
       ]
     },
     {
+      "name": "loadMigrationFiles",
+      "package": "@omnitron-dev/omnitron",
+      "kind": "function",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-database/src/migration/cli.ts#L228",
+      "imports": [
+        {
+          "path": "@omnitron-dev/omnitron/migration",
+          "guide": "/docs/omnitron/migrations"
+        }
+      ]
+    },
+    {
       "name": "LogEntryDto",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/config/types.ts#L1097",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/config/types.ts#L1099",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron",
@@ -13330,7 +13694,7 @@
       "name": "LogPathsDto",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/config/types.ts#L1182",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/config/types.ts#L1184",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/config",
@@ -13443,6 +13807,318 @@
         {
           "path": "@omnitron-dev/omnitron/dto/services",
           "guide": "/docs/omnitron/services-reference"
+        }
+      ]
+    },
+    {
+      "name": "Migration",
+      "package": "@omnitron-dev/omnitron",
+      "kind": "type",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/migration/index.ts#L23",
+      "imports": [
+        {
+          "path": "@omnitron-dev/omnitron/migration",
+          "guide": "/docs/omnitron/migrations"
+        }
+      ]
+    },
+    {
+      "name": "MigrationAction",
+      "package": "@omnitron-dev/omnitron",
+      "kind": "type",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/migration/operation.ts#L4",
+      "imports": [
+        {
+          "path": "@omnitron-dev/omnitron/migration",
+          "guide": "/docs/omnitron/migrations"
+        }
+      ]
+    },
+    {
+      "name": "MigrationChecksumError",
+      "package": "@omnitron-dev/omnitron",
+      "kind": "value",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/migration/index.ts#L18",
+      "imports": [
+        {
+          "path": "@omnitron-dev/omnitron/migration",
+          "guide": "/docs/omnitron/migrations"
+        }
+      ]
+    },
+    {
+      "name": "MigrationCliOptions",
+      "package": "@omnitron-dev/omnitron",
+      "kind": "interface",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-database/src/migration/cli.ts#L41",
+      "imports": [
+        {
+          "path": "@omnitron-dev/omnitron/migration",
+          "guide": "/docs/omnitron/migrations"
+        }
+      ]
+    },
+    {
+      "name": "MigrationConfig",
+      "package": "@omnitron-dev/omnitron",
+      "kind": "interface",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/migration/index.ts#L60",
+      "imports": [
+        {
+          "path": "@omnitron-dev/omnitron/migration",
+          "guide": "/docs/omnitron/migrations"
+        }
+      ]
+    },
+    {
+      "name": "MigrationConnection",
+      "package": "@omnitron-dev/omnitron",
+      "kind": "interface",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/migration/index.ts#L56",
+      "imports": [
+        {
+          "path": "@omnitron-dev/omnitron/migration",
+          "guide": "/docs/omnitron/migrations"
+        }
+      ]
+    },
+    {
+      "name": "MigrationError",
+      "package": "@omnitron-dev/omnitron",
+      "kind": "value",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/migration/index.ts#L17",
+      "imports": [
+        {
+          "path": "@omnitron-dev/omnitron/migration",
+          "guide": "/docs/omnitron/migrations"
+        }
+      ]
+    },
+    {
+      "name": "MigrationHistory",
+      "package": "@omnitron-dev/omnitron",
+      "kind": "type",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/migration/index.ts#L24",
+      "imports": [
+        {
+          "path": "@omnitron-dev/omnitron/migration",
+          "guide": "/docs/omnitron/migrations"
+        }
+      ]
+    },
+    {
+      "name": "MigrationHistoryOptions",
+      "package": "@omnitron-dev/omnitron",
+      "kind": "type",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/migration/index.ts#L24",
+      "imports": [
+        {
+          "path": "@omnitron-dev/omnitron/migration",
+          "guide": "/docs/omnitron/migrations"
+        }
+      ]
+    },
+    {
+      "name": "MigrationHookError",
+      "package": "@omnitron-dev/omnitron",
+      "kind": "value",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/migration/index.ts#L17",
+      "imports": [
+        {
+          "path": "@omnitron-dev/omnitron/migration",
+          "guide": "/docs/omnitron/migrations"
+        }
+      ]
+    },
+    {
+      "name": "MigrationInspection",
+      "package": "@omnitron-dev/omnitron",
+      "kind": "type",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/migration/index.ts#L23",
+      "imports": [
+        {
+          "path": "@omnitron-dev/omnitron/migration",
+          "guide": "/docs/omnitron/migrations"
+        }
+      ]
+    },
+    {
+      "name": "migrationIntegrity",
+      "package": "@omnitron-dev/omnitron",
+      "kind": "function",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/migration/operation.ts#L14",
+      "imports": [
+        {
+          "path": "@omnitron-dev/omnitron/migration",
+          "guide": "/docs/omnitron/migrations"
+        }
+      ]
+    },
+    {
+      "name": "MigrationLockError",
+      "package": "@omnitron-dev/omnitron",
+      "kind": "value",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/migration/index.ts#L18",
+      "imports": [
+        {
+          "path": "@omnitron-dev/omnitron/migration",
+          "guide": "/docs/omnitron/migrations"
+        }
+      ]
+    },
+    {
+      "name": "migrationLockKey",
+      "package": "@omnitron-dev/omnitron",
+      "kind": "function",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-database/src/migration/cli.ts#L256",
+      "imports": [
+        {
+          "path": "@omnitron-dev/omnitron/migration",
+          "guide": "/docs/omnitron/migrations"
+        }
+      ]
+    },
+    {
+      "name": "MigrationLockProvider",
+      "package": "@omnitron-dev/omnitron",
+      "kind": "type",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/migration/index.ts#L26",
+      "imports": [
+        {
+          "path": "@omnitron-dev/omnitron/migration",
+          "guide": "/docs/omnitron/migrations"
+        }
+      ]
+    },
+    {
+      "name": "MigrationOperationOptions",
+      "package": "@omnitron-dev/omnitron",
+      "kind": "interface",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/migration/operation.ts#L5",
+      "imports": [
+        {
+          "path": "@omnitron-dev/omnitron/migration",
+          "guide": "/docs/omnitron/migrations"
+        }
+      ]
+    },
+    {
+      "name": "MigrationPlugin",
+      "package": "@omnitron-dev/omnitron",
+      "kind": "type",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/migration/index.ts#L26",
+      "imports": [
+        {
+          "path": "@omnitron-dev/omnitron/migration",
+          "guide": "/docs/omnitron/migrations"
+        }
+      ]
+    },
+    {
+      "name": "MigrationRecord",
+      "package": "@omnitron-dev/omnitron",
+      "kind": "type",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/migration/index.ts#L24",
+      "imports": [
+        {
+          "path": "@omnitron-dev/omnitron/migration",
+          "guide": "/docs/omnitron/migrations"
+        }
+      ]
+    },
+    {
+      "name": "MigrationResult",
+      "package": "@omnitron-dev/omnitron",
+      "kind": "type",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/migration/index.ts#L23",
+      "imports": [
+        {
+          "path": "@omnitron-dev/omnitron/migration",
+          "guide": "/docs/omnitron/migrations"
+        }
+      ]
+    },
+    {
+      "name": "MigrationRunner",
+      "package": "@omnitron-dev/omnitron",
+      "kind": "type",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/migration/index.ts#L26",
+      "imports": [
+        {
+          "path": "@omnitron-dev/omnitron/migration",
+          "guide": "/docs/omnitron/migrations"
+        }
+      ]
+    },
+    {
+      "name": "MigrationRunnerOptions",
+      "package": "@omnitron-dev/omnitron",
+      "kind": "type",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/migration/index.ts#L25",
+      "imports": [
+        {
+          "path": "@omnitron-dev/omnitron/migration",
+          "guide": "/docs/omnitron/migrations"
+        }
+      ]
+    },
+    {
+      "name": "MigrationRunnerWithPluginsOptions",
+      "package": "@omnitron-dev/omnitron",
+      "kind": "type",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/migration/index.ts#L26",
+      "imports": [
+        {
+          "path": "@omnitron-dev/omnitron/migration",
+          "guide": "/docs/omnitron/migrations"
+        }
+      ]
+    },
+    {
+      "name": "migrationSqlClient",
+      "package": "@omnitron-dev/omnitron",
+      "kind": "function",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-database/src/migration/postgres.ts#L22",
+      "imports": [
+        {
+          "path": "@omnitron-dev/omnitron/migration",
+          "guide": "/docs/omnitron/migrations"
+        }
+      ]
+    },
+    {
+      "name": "MigrationSqlClient",
+      "package": "@omnitron-dev/omnitron",
+      "kind": "interface",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-database/src/migration/postgres.ts#L6",
+      "imports": [
+        {
+          "path": "@omnitron-dev/omnitron/migration",
+          "guide": "/docs/omnitron/migrations"
+        }
+      ]
+    },
+    {
+      "name": "MigrationStatus",
+      "package": "@omnitron-dev/omnitron",
+      "kind": "type",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/migration/index.ts#L23",
+      "imports": [
+        {
+          "path": "@omnitron-dev/omnitron/migration",
+          "guide": "/docs/omnitron/migrations"
+        }
+      ]
+    },
+    {
+      "name": "MigrationWithMeta",
+      "package": "@omnitron-dev/omnitron",
+      "kind": "type",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/migration/index.ts#L23",
+      "imports": [
+        {
+          "path": "@omnitron-dev/omnitron/migration",
+          "guide": "/docs/omnitron/migrations"
         }
       ]
     },
@@ -13618,7 +14294,7 @@
       "name": "OmnitronAppConfig",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/config/types.ts#L118",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/config/types.ts#L119",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/config",
@@ -13858,7 +14534,7 @@
       "name": "PoolDiagnosticsDto",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/config/types.ts#L1163",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/config/types.ts#L1165",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/config",
@@ -13870,7 +14546,7 @@
       "name": "ProcessInfoDto",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/config/types.ts#L961",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/config/types.ts#L962",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron",
@@ -13995,6 +14671,18 @@
       ]
     },
     {
+      "name": "redactDiagnosticText",
+      "package": "@omnitron-dev/omnitron",
+      "kind": "function",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan/src/diagnostics/index.ts#L30",
+      "imports": [
+        {
+          "path": "@omnitron-dev/omnitron/diagnostics",
+          "guide": "/docs/omnitron/diagnostics"
+        }
+      ]
+    },
+    {
       "name": "ReleaseArtifact",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
@@ -14103,6 +14791,42 @@
       ]
     },
     {
+      "name": "runMigrationCli",
+      "package": "@omnitron-dev/omnitron",
+      "kind": "function",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-database/src/migration/cli.ts#L67",
+      "imports": [
+        {
+          "path": "@omnitron-dev/omnitron/migration",
+          "guide": "/docs/omnitron/migrations"
+        }
+      ]
+    },
+    {
+      "name": "runMigrations",
+      "package": "@omnitron-dev/omnitron",
+      "kind": "function",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/migration/index.ts#L51",
+      "imports": [
+        {
+          "path": "@omnitron-dev/omnitron/migration",
+          "guide": "/docs/omnitron/migrations"
+        }
+      ]
+    },
+    {
+      "name": "sanitizeDiagnostic",
+      "package": "@omnitron-dev/omnitron",
+      "kind": "function",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan/src/diagnostics/index.ts#L68",
+      "imports": [
+        {
+          "path": "@omnitron-dev/omnitron/diagnostics",
+          "guide": "/docs/omnitron/diagnostics"
+        }
+      ]
+    },
+    {
       "name": "ServerInfoDto",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
@@ -14135,6 +14859,18 @@
         {
           "path": "@omnitron-dev/omnitron/alerts",
           "guide": "/docs/omnitron/observability"
+        }
+      ]
+    },
+    {
+      "name": "sql",
+      "package": "@omnitron-dev/omnitron",
+      "kind": "value",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/migration/index.ts#L28",
+      "imports": [
+        {
+          "path": "@omnitron-dev/omnitron/migration",
+          "guide": "/docs/omnitron/migrations"
         }
       ]
     },
@@ -14190,7 +14926,7 @@
       "name": "StackEnvValue",
       "package": "@omnitron-dev/omnitron",
       "kind": "type",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/config/types.ts#L311",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/config/types.ts#L312",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/config",
@@ -14226,7 +14962,7 @@
       "name": "StackName",
       "package": "@omnitron-dev/omnitron",
       "kind": "type",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/config/types.ts#L221",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/config/types.ts#L222",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/config",
@@ -14430,7 +15166,7 @@
       "name": "SubProcessInfoDto",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/config/types.ts#L980",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/config/types.ts#L981",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron",
@@ -43159,6 +43895,18 @@
       ]
     },
     {
+      "name": "describeError",
+      "package": "@omnitron-dev/titan",
+      "kind": "function",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan/src/diagnostics/index.ts#L41",
+      "imports": [
+        {
+          "path": "@omnitron-dev/titan/diagnostics",
+          "guide": "/docs/omnitron/diagnostics"
+        }
+      ]
+    },
+    {
       "name": "describeRequestShape",
       "package": "@omnitron-dev/titan",
       "kind": "function",
@@ -43191,6 +43939,66 @@
         {
           "path": "@omnitron-dev/titan/nexus",
           "guide": "/docs/titan/di/overview"
+        }
+      ]
+    },
+    {
+      "name": "DiagnosticEvent",
+      "package": "@omnitron-dev/titan",
+      "kind": "interface",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan/src/diagnostics/index.ts#L11",
+      "imports": [
+        {
+          "path": "@omnitron-dev/titan/diagnostics",
+          "guide": "/docs/omnitron/diagnostics"
+        }
+      ]
+    },
+    {
+      "name": "DiagnosticFinding",
+      "package": "@omnitron-dev/titan",
+      "kind": "interface",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan/src/diagnostics/index.ts#L3",
+      "imports": [
+        {
+          "path": "@omnitron-dev/titan/diagnostics",
+          "guide": "/docs/omnitron/diagnostics"
+        }
+      ]
+    },
+    {
+      "name": "DiagnosticReceipt",
+      "package": "@omnitron-dev/titan",
+      "kind": "interface",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan/src/diagnostics/index.ts#L20",
+      "imports": [
+        {
+          "path": "@omnitron-dev/titan/diagnostics",
+          "guide": "/docs/omnitron/diagnostics"
+        }
+      ]
+    },
+    {
+      "name": "DiagnosticSeverity",
+      "package": "@omnitron-dev/titan",
+      "kind": "type",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan/src/diagnostics/index.ts#L2",
+      "imports": [
+        {
+          "path": "@omnitron-dev/titan/diagnostics",
+          "guide": "/docs/omnitron/diagnostics"
+        }
+      ]
+    },
+    {
+      "name": "DiagnosticSink",
+      "package": "@omnitron-dev/titan",
+      "kind": "interface",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan/src/diagnostics/index.ts#L25",
+      "imports": [
+        {
+          "path": "@omnitron-dev/titan/diagnostics",
+          "guide": "/docs/omnitron/diagnostics"
         }
       ]
     },
@@ -48787,6 +49595,18 @@
       ]
     },
     {
+      "name": "redactDiagnosticText",
+      "package": "@omnitron-dev/titan",
+      "kind": "function",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan/src/diagnostics/index.ts#L30",
+      "imports": [
+        {
+          "path": "@omnitron-dev/titan/diagnostics",
+          "guide": "/docs/omnitron/diagnostics"
+        }
+      ]
+    },
+    {
       "name": "RedactionProcessor",
       "package": "@omnitron-dev/titan",
       "kind": "class",
@@ -49423,6 +50243,18 @@
         {
           "path": "@omnitron-dev/titan/utils",
           "guide": "/docs/titan/resilience/overview"
+        }
+      ]
+    },
+    {
+      "name": "sanitizeDiagnostic",
+      "package": "@omnitron-dev/titan",
+      "kind": "function",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan/src/diagnostics/index.ts#L68",
+      "imports": [
+        {
+          "path": "@omnitron-dev/titan/diagnostics",
+          "guide": "/docs/omnitron/diagnostics"
         }
       ]
     },
@@ -53786,7 +54618,7 @@
       "name": "AutoTransactional",
       "package": "@omnitron-dev/titan-database",
       "kind": "function",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-database/src/transaction/transaction.context.ts#L188",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-database/src/transaction/transaction.context.ts#L196",
       "imports": [
         {
           "path": "@omnitron-dev/titan-database",
@@ -54154,7 +54986,7 @@
       "name": "createHardenedRunner",
       "package": "@omnitron-dev/titan-database",
       "kind": "function",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-database/src/migration/hardened-runner.ts#L511",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-database/src/migration/hardened-runner.ts#L135",
       "imports": [
         {
           "path": "@omnitron-dev/titan-database",
@@ -54203,6 +55035,22 @@
       "package": "@omnitron-dev/titan-database",
       "kind": "value",
       "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-database/src/exports/migration.ts#L18",
+      "imports": [
+        {
+          "path": "@omnitron-dev/titan-database",
+          "guide": "/docs/titan/modules/database"
+        },
+        {
+          "path": "@omnitron-dev/titan-database/migration",
+          "guide": "/docs/titan/modules/database"
+        }
+      ]
+    },
+    {
+      "name": "createMigrationHistory",
+      "package": "@omnitron-dev/titan-database",
+      "kind": "value",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-database/src/exports/migration.ts#L26",
       "imports": [
         {
           "path": "@omnitron-dev/titan-database",
@@ -54270,6 +55118,22 @@
       "imports": [
         {
           "path": "@omnitron-dev/titan-database/kysera",
+          "guide": "/docs/titan/modules/database"
+        }
+      ]
+    },
+    {
+      "name": "createPostgresMigrationDatabase",
+      "package": "@omnitron-dev/titan-database",
+      "kind": "function",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-database/src/migration/postgres.ts#L13",
+      "imports": [
+        {
+          "path": "@omnitron-dev/titan-database",
+          "guide": "/docs/titan/modules/database"
+        },
+        {
+          "path": "@omnitron-dev/titan-database/migration",
           "guide": "/docs/titan/modules/database"
         }
       ]
@@ -54630,6 +55494,22 @@
       "imports": [
         {
           "path": "@omnitron-dev/titan-database/rls",
+          "guide": "/docs/titan/modules/database"
+        }
+      ]
+    },
+    {
+      "name": "defineSqlMigration",
+      "package": "@omnitron-dev/titan-database",
+      "kind": "function",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-database/src/migration/postgres.ts#L32",
+      "imports": [
+        {
+          "path": "@omnitron-dev/titan-database",
+          "guide": "/docs/titan/modules/database"
+        },
+        {
+          "path": "@omnitron-dev/titan-database/migration",
           "guide": "/docs/titan/modules/database"
         }
       ]
@@ -55130,7 +56010,7 @@
       "name": "getCurrentTransaction",
       "package": "@omnitron-dev/titan-database",
       "kind": "function",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-database/src/transaction/transaction.context.ts#L50",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-database/src/transaction/transaction.context.ts#L51",
       "imports": [
         {
           "path": "@omnitron-dev/titan-database",
@@ -55206,7 +56086,7 @@
       "name": "getExecutor",
       "package": "@omnitron-dev/titan-database",
       "kind": "function",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-database/src/transaction/transaction.context.ts#L66",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-database/src/transaction/transaction.context.ts#L83",
       "imports": [
         {
           "path": "@omnitron-dev/titan-database",
@@ -55510,7 +56390,7 @@
       "name": "getTransactionContext",
       "package": "@omnitron-dev/titan-database",
       "kind": "function",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-database/src/transaction/transaction.context.ts#L42",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-database/src/transaction/transaction.context.ts#L43",
       "imports": [
         {
           "path": "@omnitron-dev/titan-database",
@@ -55526,7 +56406,7 @@
       "name": "HardenedDownResult",
       "package": "@omnitron-dev/titan-database",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-database/src/migration/hardened-runner.ts#L105",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-database/src/migration/hardened-runner.ts#L41",
       "imports": [
         {
           "path": "@omnitron-dev/titan-database",
@@ -55542,7 +56422,7 @@
       "name": "HardenedLogger",
       "package": "@omnitron-dev/titan-database",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-database/src/migration/hardened-runner.ts#L50",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-database/src/migration/hardened-runner.ts#L17",
       "imports": [
         {
           "path": "@omnitron-dev/titan-database",
@@ -55558,7 +56438,7 @@
       "name": "HardenedMigration",
       "package": "@omnitron-dev/titan-database",
       "kind": "type",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-database/src/migration/hardened-runner.ts#L48",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-database/src/migration/hardened-runner.ts#L16",
       "imports": [
         {
           "path": "@omnitron-dev/titan-database",
@@ -55574,7 +56454,7 @@
       "name": "HardenedMigrationRunner",
       "package": "@omnitron-dev/titan-database",
       "kind": "class",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-database/src/migration/hardened-runner.ts#L156",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-database/src/migration/hardened-runner.ts#L64",
       "imports": [
         {
           "path": "@omnitron-dev/titan-database",
@@ -55590,7 +56470,7 @@
       "name": "HardenedRunnerOptions",
       "package": "@omnitron-dev/titan-database",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-database/src/migration/hardened-runner.ts#L56",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-database/src/migration/hardened-runner.ts#L26",
       "imports": [
         {
           "path": "@omnitron-dev/titan-database",
@@ -55606,7 +56486,7 @@
       "name": "HardenedStatus",
       "package": "@omnitron-dev/titan-database",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-database/src/migration/hardened-runner.ts#L110",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-database/src/migration/hardened-runner.ts#L42",
       "imports": [
         {
           "path": "@omnitron-dev/titan-database",
@@ -55622,7 +56502,7 @@
       "name": "HardenedUpResult",
       "package": "@omnitron-dev/titan-database",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-database/src/migration/hardened-runner.ts#L99",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-database/src/migration/hardened-runner.ts#L40",
       "imports": [
         {
           "path": "@omnitron-dev/titan-database",
@@ -55770,7 +56650,7 @@
       "name": "IMigration",
       "package": "@omnitron-dev/titan-database",
       "kind": "type",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-database/src/exports/migration.ts#L42",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-database/src/exports/migration.ts#L49",
       "imports": [
         {
           "path": "@omnitron-dev/titan-database",
@@ -55858,7 +56738,7 @@
       "name": "isInTransactionContext",
       "package": "@omnitron-dev/titan-database",
       "kind": "function",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-database/src/transaction/transaction.context.ts#L46",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-database/src/transaction/transaction.context.ts#L47",
       "imports": [
         {
           "path": "@omnitron-dev/titan-database",
@@ -56283,6 +57163,22 @@
       ]
     },
     {
+      "name": "loadMigrationFiles",
+      "package": "@omnitron-dev/titan-database",
+      "kind": "function",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-database/src/migration/cli.ts#L228",
+      "imports": [
+        {
+          "path": "@omnitron-dev/titan-database",
+          "guide": "/docs/titan/modules/database"
+        },
+        {
+          "path": "@omnitron-dev/titan-database/migration",
+          "guide": "/docs/titan/modules/database"
+        }
+      ]
+    },
+    {
       "name": "mapAuthToRLSAuthContext",
       "package": "@omnitron-dev/titan-database",
       "kind": "function",
@@ -56322,7 +57218,7 @@
       "name": "Migration",
       "package": "@omnitron-dev/titan-database",
       "kind": "type",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-database/src/exports/migration.ts#L28",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-database/src/exports/migration.ts#L30",
       "imports": [
         {
           "path": "@omnitron-dev/titan-database/migration",
@@ -56334,7 +57230,7 @@
       "name": "MigrationChecksumError",
       "package": "@omnitron-dev/titan-database",
       "kind": "class",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-database/src/migration/hardened-runner.ts#L124",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-database/src/migration/hardened-runner.ts#L53",
       "imports": [
         {
           "path": "@omnitron-dev/titan-database",
@@ -56350,7 +57246,7 @@
       "name": "MigrationCliOptions",
       "package": "@omnitron-dev/titan-database",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-database/src/migration/cli.ts#L40",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-database/src/migration/cli.ts#L41",
       "imports": [
         {
           "path": "@omnitron-dev/titan-database",
@@ -56366,7 +57262,7 @@
       "name": "MigrationDefinition",
       "package": "@omnitron-dev/titan-database",
       "kind": "type",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-database/src/exports/migration.ts#L33",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-database/src/exports/migration.ts#L35",
       "imports": [
         {
           "path": "@omnitron-dev/titan-database",
@@ -56382,7 +57278,39 @@
       "name": "MigrationDefinitions",
       "package": "@omnitron-dev/titan-database",
       "kind": "type",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-database/src/exports/migration.ts#L34",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-database/src/exports/migration.ts#L36",
+      "imports": [
+        {
+          "path": "@omnitron-dev/titan-database",
+          "guide": "/docs/titan/modules/database"
+        },
+        {
+          "path": "@omnitron-dev/titan-database/migration",
+          "guide": "/docs/titan/modules/database"
+        }
+      ]
+    },
+    {
+      "name": "MigrationEngineChecksumError",
+      "package": "@omnitron-dev/titan-database",
+      "kind": "value",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-database/src/exports/migration.ts#L63",
+      "imports": [
+        {
+          "path": "@omnitron-dev/titan-database",
+          "guide": "/docs/titan/modules/database"
+        },
+        {
+          "path": "@omnitron-dev/titan-database/migration",
+          "guide": "/docs/titan/modules/database"
+        }
+      ]
+    },
+    {
+      "name": "MigrationEngineLockError",
+      "package": "@omnitron-dev/titan-database",
+      "kind": "value",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-database/src/exports/migration.ts#L63",
       "imports": [
         {
           "path": "@omnitron-dev/titan-database",
@@ -56423,10 +57351,106 @@
       ]
     },
     {
+      "name": "MigrationHistory",
+      "package": "@omnitron-dev/titan-database",
+      "kind": "type",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-database/src/exports/migration.ts#L39",
+      "imports": [
+        {
+          "path": "@omnitron-dev/titan-database",
+          "guide": "/docs/titan/modules/database"
+        },
+        {
+          "path": "@omnitron-dev/titan-database/migration",
+          "guide": "/docs/titan/modules/database"
+        }
+      ]
+    },
+    {
+      "name": "MigrationHistoryOptions",
+      "package": "@omnitron-dev/titan-database",
+      "kind": "type",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-database/src/exports/migration.ts#L40",
+      "imports": [
+        {
+          "path": "@omnitron-dev/titan-database",
+          "guide": "/docs/titan/modules/database"
+        },
+        {
+          "path": "@omnitron-dev/titan-database/migration",
+          "guide": "/docs/titan/modules/database"
+        }
+      ]
+    },
+    {
+      "name": "MigrationHookError",
+      "package": "@omnitron-dev/titan-database",
+      "kind": "value",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-database/src/exports/migration.ts#L25",
+      "imports": [
+        {
+          "path": "@omnitron-dev/titan-database",
+          "guide": "/docs/titan/modules/database"
+        },
+        {
+          "path": "@omnitron-dev/titan-database/migration",
+          "guide": "/docs/titan/modules/database"
+        }
+      ]
+    },
+    {
+      "name": "MigrationInspection",
+      "package": "@omnitron-dev/titan-database",
+      "kind": "type",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-database/src/exports/migration.ts#L42",
+      "imports": [
+        {
+          "path": "@omnitron-dev/titan-database",
+          "guide": "/docs/titan/modules/database"
+        },
+        {
+          "path": "@omnitron-dev/titan-database/migration",
+          "guide": "/docs/titan/modules/database"
+        }
+      ]
+    },
+    {
       "name": "MigrationLockError",
       "package": "@omnitron-dev/titan-database",
       "kind": "class",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-database/src/migration/hardened-runner.ts#L117",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-database/src/migration/hardened-runner.ts#L49",
+      "imports": [
+        {
+          "path": "@omnitron-dev/titan-database",
+          "guide": "/docs/titan/modules/database"
+        },
+        {
+          "path": "@omnitron-dev/titan-database/migration",
+          "guide": "/docs/titan/modules/database"
+        }
+      ]
+    },
+    {
+      "name": "migrationLockKey",
+      "package": "@omnitron-dev/titan-database",
+      "kind": "function",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-database/src/migration/cli.ts#L256",
+      "imports": [
+        {
+          "path": "@omnitron-dev/titan-database",
+          "guide": "/docs/titan/modules/database"
+        },
+        {
+          "path": "@omnitron-dev/titan-database/migration",
+          "guide": "/docs/titan/modules/database"
+        }
+      ]
+    },
+    {
+      "name": "MigrationLockProvider",
+      "package": "@omnitron-dev/titan-database",
+      "kind": "type",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-database/src/exports/migration.ts#L43",
       "imports": [
         {
           "path": "@omnitron-dev/titan-database",
@@ -56454,7 +57478,23 @@
       "name": "MigrationPlugin",
       "package": "@omnitron-dev/titan-database",
       "kind": "type",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-database/src/exports/migration.ts#L35",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-database/src/exports/migration.ts#L37",
+      "imports": [
+        {
+          "path": "@omnitron-dev/titan-database",
+          "guide": "/docs/titan/modules/database"
+        },
+        {
+          "path": "@omnitron-dev/titan-database/migration",
+          "guide": "/docs/titan/modules/database"
+        }
+      ]
+    },
+    {
+      "name": "MigrationRecord",
+      "package": "@omnitron-dev/titan-database",
+      "kind": "type",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-database/src/exports/migration.ts#L41",
       "imports": [
         {
           "path": "@omnitron-dev/titan-database",
@@ -56470,7 +57510,7 @@
       "name": "MigrationResult",
       "package": "@omnitron-dev/titan-database",
       "kind": "type",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-database/src/exports/migration.ts#L31",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-database/src/exports/migration.ts#L33",
       "imports": [
         {
           "path": "@omnitron-dev/titan-database",
@@ -56502,7 +57542,7 @@
       "name": "MigrationRunnerOptions",
       "package": "@omnitron-dev/titan-database",
       "kind": "type",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-database/src/exports/migration.ts#L32",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-database/src/exports/migration.ts#L34",
       "imports": [
         {
           "path": "@omnitron-dev/titan-database",
@@ -56534,7 +57574,39 @@
       "name": "MigrationRunnerWithPluginsOptions",
       "package": "@omnitron-dev/titan-database",
       "kind": "type",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-database/src/exports/migration.ts#L36",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-database/src/exports/migration.ts#L38",
+      "imports": [
+        {
+          "path": "@omnitron-dev/titan-database",
+          "guide": "/docs/titan/modules/database"
+        },
+        {
+          "path": "@omnitron-dev/titan-database/migration",
+          "guide": "/docs/titan/modules/database"
+        }
+      ]
+    },
+    {
+      "name": "migrationSqlClient",
+      "package": "@omnitron-dev/titan-database",
+      "kind": "function",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-database/src/migration/postgres.ts#L22",
+      "imports": [
+        {
+          "path": "@omnitron-dev/titan-database",
+          "guide": "/docs/titan/modules/database"
+        },
+        {
+          "path": "@omnitron-dev/titan-database/migration",
+          "guide": "/docs/titan/modules/database"
+        }
+      ]
+    },
+    {
+      "name": "MigrationSqlClient",
+      "package": "@omnitron-dev/titan-database",
+      "kind": "interface",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-database/src/migration/postgres.ts#L6",
       "imports": [
         {
           "path": "@omnitron-dev/titan-database",
@@ -56562,7 +57634,7 @@
       "name": "MigrationStatus",
       "package": "@omnitron-dev/titan-database",
       "kind": "type",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-database/src/exports/migration.ts#L30",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-database/src/exports/migration.ts#L32",
       "imports": [
         {
           "path": "@omnitron-dev/titan-database/migration",
@@ -56574,7 +57646,7 @@
       "name": "MigrationWithMeta",
       "package": "@omnitron-dev/titan-database",
       "kind": "type",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-database/src/exports/migration.ts#L29",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-database/src/exports/migration.ts#L31",
       "imports": [
         {
           "path": "@omnitron-dev/titan-database",
@@ -57438,7 +58510,7 @@
       "name": "runInTransaction",
       "package": "@omnitron-dev/titan-database",
       "kind": "function",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-database/src/transaction/transaction.context.ts#L100",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-database/src/transaction/transaction.context.ts#L114",
       "imports": [
         {
           "path": "@omnitron-dev/titan-database",
@@ -57454,7 +58526,7 @@
       "name": "runMigrationCli",
       "package": "@omnitron-dev/titan-database",
       "kind": "function",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-database/src/migration/cli.ts#L65",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-database/src/migration/cli.ts#L67",
       "imports": [
         {
           "path": "@omnitron-dev/titan-database",
@@ -57486,7 +58558,7 @@
       "name": "runWithTransaction",
       "package": "@omnitron-dev/titan-database",
       "kind": "function",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-database/src/transaction/transaction.context.ts#L161",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-database/src/transaction/transaction.context.ts#L167",
       "imports": [
         {
           "path": "@omnitron-dev/titan-database",
@@ -57954,7 +59026,7 @@
       "name": "TransactionContextData",
       "package": "@omnitron-dev/titan-database",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-database/src/transaction/transaction.context.ts#L18",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-database/src/transaction/transaction.context.ts#L17",
       "imports": [
         {
           "path": "@omnitron-dev/titan-database",
@@ -60658,7 +61730,7 @@
       "name": "BroadcastCompletedEvent",
       "package": "@omnitron-dev/titan-notifications",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-notifications/src/notifications.events.ts#L75",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-notifications/src/notifications.events.ts#L77",
       "imports": [
         {
           "path": "@omnitron-dev/titan-notifications",
@@ -60694,7 +61766,7 @@
       "name": "BroadcastStartingEvent",
       "package": "@omnitron-dev/titan-notifications",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-notifications/src/notifications.events.ts#L68",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-notifications/src/notifications.events.ts#L70",
       "imports": [
         {
           "path": "@omnitron-dev/titan-notifications",
@@ -60730,7 +61802,7 @@
       "name": "ChannelDeliveryEvent",
       "package": "@omnitron-dev/titan-notifications",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-notifications/src/notifications.events.ts#L82",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-notifications/src/notifications.events.ts#L84",
       "imports": [
         {
           "path": "@omnitron-dev/titan-notifications",
@@ -60871,6 +61943,70 @@
         {
           "path": "@omnitron-dev/titan-notifications",
           "guide": "/docs/titan/modules/notifications"
+        }
+      ]
+    },
+    {
+      "name": "DIAGNOSTIC_NOTIFICATION_SINK",
+      "package": "@omnitron-dev/titan-notifications",
+      "kind": "value",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-notifications/src/diagnostics.ts#L7",
+      "imports": [
+        {
+          "path": "@omnitron-dev/titan-notifications",
+          "guide": "/docs/titan/modules/notifications"
+        },
+        {
+          "path": "@omnitron-dev/titan-notifications/diagnostics",
+          "guide": "/docs/omnitron/diagnostics"
+        }
+      ]
+    },
+    {
+      "name": "DiagnosticDeliveryError",
+      "package": "@omnitron-dev/titan-notifications",
+      "kind": "class",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-notifications/src/diagnostics.ts#L9",
+      "imports": [
+        {
+          "path": "@omnitron-dev/titan-notifications",
+          "guide": "/docs/titan/modules/notifications"
+        },
+        {
+          "path": "@omnitron-dev/titan-notifications/diagnostics",
+          "guide": "/docs/omnitron/diagnostics"
+        }
+      ]
+    },
+    {
+      "name": "DiagnosticNotificationSink",
+      "package": "@omnitron-dev/titan-notifications",
+      "kind": "class",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-notifications/src/diagnostics.ts#L18",
+      "imports": [
+        {
+          "path": "@omnitron-dev/titan-notifications",
+          "guide": "/docs/titan/modules/notifications"
+        },
+        {
+          "path": "@omnitron-dev/titan-notifications/diagnostics",
+          "guide": "/docs/omnitron/diagnostics"
+        }
+      ]
+    },
+    {
+      "name": "DiagnosticNotificationsModule",
+      "package": "@omnitron-dev/titan-notifications",
+      "kind": "class",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-notifications/src/diagnostics.ts#L46",
+      "imports": [
+        {
+          "path": "@omnitron-dev/titan-notifications",
+          "guide": "/docs/titan/modules/notifications"
+        },
+        {
+          "path": "@omnitron-dev/titan-notifications/diagnostics",
+          "guide": "/docs/omnitron/diagnostics"
         }
       ]
     },
@@ -61130,7 +62266,7 @@
       "name": "InAppNotificationEvent",
       "package": "@omnitron-dev/titan-notifications",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-notifications/src/notifications.events.ts#L92",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-notifications/src/notifications.events.ts#L94",
       "imports": [
         {
           "path": "@omnitron-dev/titan-notifications",
@@ -61370,7 +62506,7 @@
       "name": "NotificationFailedEvent",
       "package": "@omnitron-dev/titan-notifications",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-notifications/src/notifications.events.ts#L60",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-notifications/src/notifications.events.ts#L62",
       "imports": [
         {
           "path": "@omnitron-dev/titan-notifications",
@@ -61550,7 +62686,7 @@
       "name": "NOTIFICATIONS_EVENTS",
       "package": "@omnitron-dev/titan-notifications",
       "kind": "value",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-notifications/src/notifications.events.ts#L13",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-notifications/src/notifications.events.ts#L15",
       "imports": [
         {
           "path": "@omnitron-dev/titan-notifications",
@@ -61670,7 +62806,7 @@
       "name": "NotificationSendingEvent",
       "package": "@omnitron-dev/titan-notifications",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-notifications/src/notifications.events.ts#L44",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-notifications/src/notifications.events.ts#L46",
       "imports": [
         {
           "path": "@omnitron-dev/titan-notifications",
@@ -61682,7 +62818,7 @@
       "name": "NotificationSentEvent",
       "package": "@omnitron-dev/titan-notifications",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-notifications/src/notifications.events.ts#L51",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-notifications/src/notifications.events.ts#L53",
       "imports": [
         {
           "path": "@omnitron-dev/titan-notifications",
@@ -61694,7 +62830,7 @@
       "name": "NotificationsEventEmitter",
       "package": "@omnitron-dev/titan-notifications",
       "kind": "class",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-notifications/src/notifications.events.ts#L105",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-notifications/src/notifications.events.ts#L107",
       "imports": [
         {
           "path": "@omnitron-dev/titan-notifications",
@@ -61706,7 +62842,7 @@
       "name": "NotificationsEventName",
       "package": "@omnitron-dev/titan-notifications",
       "kind": "type",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-notifications/src/notifications.events.ts#L41",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-notifications/src/notifications.events.ts#L43",
       "imports": [
         {
           "path": "@omnitron-dev/titan-notifications",
@@ -61718,7 +62854,7 @@
       "name": "NotificationsHealthIndicator",
       "package": "@omnitron-dev/titan-notifications",
       "kind": "class",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-notifications/src/notifications.health.ts#L24",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-notifications/src/notifications.health.ts#L27",
       "imports": [
         {
           "path": "@omnitron-dev/titan-notifications",
@@ -61730,7 +62866,7 @@
       "name": "NotificationsHealthStatus",
       "package": "@omnitron-dev/titan-notifications",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-notifications/src/notifications.health.ts#L6",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-notifications/src/notifications.health.ts#L8",
       "imports": [
         {
           "path": "@omnitron-dev/titan-notifications",

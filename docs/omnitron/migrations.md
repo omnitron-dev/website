@@ -92,7 +92,7 @@ const runner = createMigrationRunner(db, migrations, {
   advisoryLockKey: 'application.schema',
   history: createMigrationHistory({
     tableName: 'schema_migrations', keyColumn: 'version', keyType: 'integer',
-    executedAtColumn: 'applied_at',
+    executedAtColumn: 'applied_at', checksumTable: 'schema_migration_checksums',
   }),
 });
 ```
@@ -102,7 +102,9 @@ that previously used `pg_advisory_xact_lock(hashtext(...))`. Keep the identity
 unchanged during a rolling deployment. New applications use an inline checksum
 and a monotonic `execution_order`; existing journals must opt into their actual
 layout. The adapter refuses a requested ordering column that does not exist.
-Custom `MigrationHistory` methods support existing storage constraints without
+PostgreSQL history lookup follows the connection’s `search_path`; an explicit
+`schema` pins the journal to that schema. A configured checksum sidecar is created
+only on writes; inspection never creates it. Custom `MigrationHistory` methods support existing storage constraints without
 reimplementing execution, transactions or locking.
 
 A checksum-less historical row is **unverified**, not proof of unchanged source.
@@ -125,7 +127,10 @@ layer. It owns connection cleanup and returns integrity information. Direct
 runners expose `up`, `upTo`, `down`, `reset`, `inspect`, `baseline` and
 `adoptChecksums`. `createMigrationRunnerWithPlugins` adds lifecycle hooks without
 changing the execution engine. Use `migrationSqlClient(db)` for parameterized SQL
-on the runner's current connection.
+on the runner's current connection. `loadMigrationFiles(directory)` shares the
+Node file loader with the compatibility CLI and preserves explicit exported
+checksums. `migrationLockKey(databaseName)` reproduces that CLI’s historical lock
+identity for startup hooks; keep the same identity across all entry points.
 
 Kysera remains independently installable and owns persistence mechanisms.
 Titan adds DI, connection lifecycle and ambient transaction context. Omnitron
