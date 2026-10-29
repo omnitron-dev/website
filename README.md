@@ -8,6 +8,10 @@ pnpm install --frozen-lockfile
 pnpm start
 ```
 
+Use the pnpm version declared in `package.json` (`packageManager`). CI and Pages
+read the same field through `pnpm/action-setup`; do not add a separate `version`
+input to the workflows.
+
 Before submitting:
 
 ```bash
