@@ -306,36 +306,39 @@ export class CreateUsersTable {
 }
 ```
 
-Migrations discovered via the configured `migrationsPath`; run in
-`version` order. `dependencies` enforces partial ordering. With
-`transactional: true` (the default), each migration runs in its own
-transaction and rolls back on failure.
+`@Migration` records class metadata. The module does not discover or execute
+migrations automatically at DI startup; `migrationsPath` does not schedule them.
+Choose an explicit registry and deployment command. Omnitron applications use
+[`@omnitron-dev/omnitron/migration`](../../omnitron/migrations.md); standalone
+Titan applications use `@omnitron-dev/titan-database/migration`.
 
-### The hardened runner
+### One execution engine
 
-`createHardenedRunner(...)` wraps `@kysera/migrations` to close three gaps that
-each produce a database nobody can safely re-run against. Use it in production;
-the differences are not stylistic.
+Kysera owns execution, connection pinning, locking, history and checksums.
+Titan's narrow migration entry point re-exports that engine and adds driver
+adapters. There is no second transaction or journal implementation.
 
-**One transaction per migration, covering the bookkeeping.** The schema change,
-the `migrations` row and the checksum are written together. Vanilla kysera
-defaults `useTransactions` to false and, separately, writes the bookkeeping
-row OUTSIDE the migration's transaction — so a connection dropped between the
-two leaves a migration applied but unrecorded, and the next run re-applies it.
+`createHardenedRunner` preserves the original Titan journal (`migrations` plus
+`migration_checksums`), advisory lock and function-source checksum format.
+It defaults to per-migration transactions and fails promptly on lock contention;
+set `lockTimeoutMs` to wait. Body, journal and checksum commit together. Legacy
+checksums are backfilled on writes under its compatibility policy; read-only
+inspection reports missing checksums as unverified. An explicit `checksum`
+overrides function-source hashing.
 
-**A Postgres advisory lock** (`pg_try_advisory_lock`) gates every up and down,
-so two concurrent deploys against one database refuse rather than interleave
-their bookkeeping.
+For new applications, Omnitron's `createMigrationRunner` uses explicit defaults
+and an inline checksum journal with execution order. `defineSqlMigration` hashes
+SQL contents; `transactionMode: 'batch'` makes an entire operation atomic where
+the dialect supports it. Preserve existing history and lock identities when
+adopting the engine. See [guarantees and migration examples](../../omnitron/migrations.md).
 
-**Content checksums** in a sidecar table (`migration_checksums`). Every applied
-migration is re-hashed at startup and compared. Editing a migration that has
-already run in production halts the runner and names the file — without this,
-the directory reads as the source of truth while production runs something
-else, and nothing anywhere disagrees.
+### Transaction context
 
-On first run against an existing database the checksums are backfilled
-trust-on-first-use, so legacy environments do not fail immediately. The
-backfill is logged, and `verify` prints what was recorded.
+`runInTransaction` and `getExecutor` propagate only the transaction belonging to
+the requested database. Nested work uses Kysera DAL savepoints; a second database
+gets an independent transaction. Whole-transaction retries use Kysera Infra and
+are opt-in. A failed rollback preserves both causes. Cross-database work is not
+a distributed transaction: callers must design compensation explicitly.
 
 ## What comes through from `@kysera/*`
 

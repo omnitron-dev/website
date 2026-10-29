@@ -142,6 +142,7 @@ export default {
     "./module/logger": "titan/modules/logger.mdx",
     "./module/rls": "titan/modules/rls.md",
     "./errors": "titan/errors/overview.md",
+    "./diagnostics": "omnitron/diagnostics.md",
     "./types": "titan/modules-system/defining-modules.md",
     "./utils": "titan/resilience/overview.md",
     "./tracing": "titan/tracing.md"
@@ -186,7 +187,8 @@ export default {
   },
   "@omnitron-dev/titan-notifications": {
     ".": "titan/modules/notifications.mdx",
-    "./rotif": "titan/modules/notifications.mdx"
+    "./rotif": "titan/modules/notifications.mdx",
+    "./diagnostics": "omnitron/diagnostics.md"
   },
   "@omnitron-dev/titan-pm": {
     ".": "titan/modules/pm.mdx"
@@ -214,6 +216,8 @@ export default {
     "./release-reading": "omnitron/releases.md",
     "./node-check": "omnitron/cli.md",
     "./audit-outcome": "omnitron/observability.md",
-    "./sync-reading": "omnitron/cluster.md"
+    "./sync-reading": "omnitron/cluster.md",
+    "./migration": "omnitron/migrations.md",
+    "./diagnostics": "omnitron/diagnostics.md"
   }
 };

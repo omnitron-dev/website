@@ -119,6 +119,11 @@ const final = await this.events.emitReduce('user.transform', input, initialValue
 | `emitSerial<T>(event, data?, options?)`                 | `Promise<any[]>`                                 |
 | `emitReduce<T, R>(event, data, initialValue, options?)` | `Promise<R>`                                     |
 
+`emitAsync` propagates failures from regular and wildcard handlers, including
+synchronous throws. Multiple failed groups produce `AggregateError`. Handler
+error policies still apply. Await and handle this promise at the operation
+boundary; event delivery does not roll back committed domain effects.
+
 ### Subscribe / unsubscribe
 
 | Method                                                              | Returns                          |

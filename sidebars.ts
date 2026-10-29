@@ -388,6 +388,8 @@ const sidebars: SidebarsConfig = {
     'omnitron/infrastructure',
     'omnitron/cluster',
     'omnitron/observability',
+    'omnitron/diagnostics',
+    'omnitron/migrations',
     'omnitron/console',
     'omnitron/access',
     'omnitron/terminal',

@@ -490,6 +490,16 @@ sequenceDiagram
 Step-down is graceful: `omnitron cluster step-down` releases the
 lock and demotes self before the next election.
 
+## Database and diagnostics boundaries
+
+Kysera implements reusable database mechanisms. Titan supplies module lifecycle,
+connection and transaction context. Omnitron exposes application-facing migration
+commands and operational diagnostics. Applications provide schema definitions
+and domain policies; Console displays the same health data as CLI.
+
+See [migrations](./migrations.md) for adopting existing journals and
+[diagnostics](./diagnostics.md) for error capture and notification adapters.
+
 ## Putting it together
 
 Read these in order for a complete picture:

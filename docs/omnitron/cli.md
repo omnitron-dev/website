@@ -6,9 +6,10 @@ description: Every command, every flag, every command group.
 
 # CLI reference
 
-`omnitron <command>` is the single binary. It is a thin Netron
-client — every command opens a connection to `~/.omnitron/daemon.sock`,
-makes an RPC call, and exits. The daemon does the real work.
+`omnitron <command>` is the single binary. Management commands use Netron RPC
+through `~/.omnitron/daemon.sock`. Local build, configuration and migration
+commands execute in the CLI process; application migrations can run without a
+running daemon.
 
 Verified against `src/cli/omnitron.ts` and `src/commands/*`.
 
@@ -38,6 +39,7 @@ into another process. Check both the JSON result and the exit status.
 | **Monitoring** | `logs`, `monit`, `health`, `metrics`, `health-check`, `discover` |
 | **Scaling** | `scale` |
 | **Diagnostics** | `doctor`, `inspect`, `exec`, `env` |
+| **Database schema** | `migrate status`, `migrate verify`, `migrate up`, `migrate down` |
 | **Remote** | `remote add`, `remote remove`, `remote list`, `remote status` |
 | **Fleet** | `fleet status`, `fleet health`, `fleet metrics` |
 | **Cluster** | `cluster status`, `cluster step-down` |
@@ -53,6 +55,14 @@ into another process. Check both the JSON result and the exit status.
 | **Webapp** | `webapp build`, `webapp start`, `webapp stop`, `webapp status`, `webapp open` |
 | **Tor** | `tor` |
 | **Knowledge base** | `kb mcp`, `kb index`, `kb status`, `kb query` |
+
+## Database migrations
+
+`omnitron migrate [status|verify|up|down]` uses `omnitron.migrations.ts` by
+default. `--config` selects a configuration; `--daemon` explicitly selects the
+daemon database. `up --dry-run` previews, `up --to NAME` selects a prefix, and
+`down --steps N` rolls back a suffix. `verify` exits with 2 when integrity is
+unknown or mismatched. See [migration configuration and recovery](./migrations.md).
 
 ## Daemon lifecycle
 

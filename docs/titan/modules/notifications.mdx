@@ -308,6 +308,20 @@ metrics.
 automatically with [`titan-health`](./health.mdx) if both modules
 are loaded.
 
+Observer failures also appear in the health report. Async lifecycle listeners
+are awaited; failures are logged and retained until the same event succeeds.
+An observer failure does not resend a notification that already reached its
+transport. Without an Events module, lifecycle emission is disabled and reported
+as such in the health details.
+
+## Operational diagnostics
+
+`@omnitron-dev/titan-notifications/diagnostics` provides
+`DiagnosticNotificationSink` and `DiagnosticNotificationsModule`. They use the
+configured transport's queue, deduplication, retry and DLQ mechanisms. A missing
+consumer rejects delivery; broker acceptance is not recipient acknowledgement.
+See the [contract, module wiring and outbox bridge](../../omnitron/diagnostics.md).
+
 ## Tokens (selection)
 
 | Token                                          |

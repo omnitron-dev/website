@@ -333,11 +333,18 @@ services *inside a managed app* (it routes by app name) — so the
 trace API is consumed by the webapp's `/traces` page rather than
 from the CLI.
 
+## Operational failures
+
+The [diagnostics guide](./diagnostics.md) describes failure capture, recovery
+state in CLI and Console, and optional delivery through Titan notifications.
+The runtime indicator reports unresolved daemon failures independently of app
+process and infrastructure health.
+
 ## Health
 
 Two levels: **app/infra health** (on-demand probes via
 `OmnitronHealth`) and **node health** (cross-machine
-availability). On top of those sit two **titan-health
+availability). On top of those sit **titan-health
 indicators** that roll up live state for the daemon's own
 `/health` summary.
 
