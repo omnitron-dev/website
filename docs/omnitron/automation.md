@@ -65,6 +65,8 @@ Shell steps receive parameters as `OMNITRON_PARAMS` JSON. `{{parameter}}` source
 
 Every public pipeline method requires `admin`. Invocation revalidates the human session, including its current account role. Sensitive mutations must write an audit intent before taking effect; a failed audit write denies the operation. The owner-only Unix socket remains an OS-authorized administrative interface.
 
+The run review shows source, target name and ID, working directory, dependencies, retries, condition and environment. Expand each step before admitting it.
+
 The definition carries a SHA-256 `revision`. Console submits the revision displayed for review; the CLI fetches the selected definition immediately before admission. Direct RPC and MCP callers must supply `expectedRevision`. If source, targets, environment or other stored definition fields changed, admission fails before inserting a run. This is optimistic concurrency control, not a separate multi-person approval workflow.
 
 Per-step history records a digest of the admitted definition, target ID, actor, attempts, timing, outcome and bounded stdout/stderr. It does not yet keep a complete immutable source archive. Do not treat the digest alone as recoverable source.
