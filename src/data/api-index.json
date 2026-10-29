@@ -61898,7 +61898,7 @@
       "name": "chunkArray",
       "package": "@omnitron-dev/titan-notifications",
       "kind": "function",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-notifications/src/rotif/utils.ts#L311",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-notifications/src/rotif/utils.ts#L312",
       "imports": [
         {
           "path": "@omnitron-dev/titan-notifications/rotif",
@@ -61910,7 +61910,7 @@
       "name": "clearPatternCache",
       "package": "@omnitron-dev/titan-notifications",
       "kind": "function",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-notifications/src/rotif/utils.ts#L285",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-notifications/src/rotif/utils.ts#L286",
       "imports": [
         {
           "path": "@omnitron-dev/titan-notifications/rotif",
@@ -61950,7 +61950,7 @@
       "name": "DIAGNOSTIC_NOTIFICATION_SINK",
       "package": "@omnitron-dev/titan-notifications",
       "kind": "value",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-notifications/src/diagnostics.ts#L7",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-notifications/src/diagnostics.ts#L10",
       "imports": [
         {
           "path": "@omnitron-dev/titan-notifications",
@@ -61966,7 +61966,7 @@
       "name": "DiagnosticDeliveryError",
       "package": "@omnitron-dev/titan-notifications",
       "kind": "class",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-notifications/src/diagnostics.ts#L9",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-notifications/src/diagnostics.ts#L12",
       "imports": [
         {
           "path": "@omnitron-dev/titan-notifications",
@@ -61982,7 +61982,7 @@
       "name": "DiagnosticNotificationSink",
       "package": "@omnitron-dev/titan-notifications",
       "kind": "class",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-notifications/src/diagnostics.ts#L18",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-notifications/src/diagnostics.ts#L26",
       "imports": [
         {
           "path": "@omnitron-dev/titan-notifications",
@@ -61998,7 +61998,7 @@
       "name": "DiagnosticNotificationsModule",
       "package": "@omnitron-dev/titan-notifications",
       "kind": "class",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-notifications/src/diagnostics.ts#L46",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-notifications/src/diagnostics.ts#L57",
       "imports": [
         {
           "path": "@omnitron-dev/titan-notifications",
@@ -62182,7 +62182,7 @@
       "name": "getCachedMatcher",
       "package": "@omnitron-dev/titan-notifications",
       "kind": "function",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-notifications/src/rotif/utils.ts#L265",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-notifications/src/rotif/utils.ts#L266",
       "imports": [
         {
           "path": "@omnitron-dev/titan-notifications/rotif",
@@ -62542,7 +62542,7 @@
       "name": "NotificationManager",
       "package": "@omnitron-dev/titan-notifications",
       "kind": "class",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-notifications/src/rotif/rotif.ts#L82",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-notifications/src/rotif/rotif.ts#L83",
       "imports": [
         {
           "path": "@omnitron-dev/titan-notifications/rotif",
@@ -63058,7 +63058,7 @@
       "name": "processWithConcurrency",
       "package": "@omnitron-dev/titan-notifications",
       "kind": "function",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-notifications/src/rotif/utils.ts#L328",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-notifications/src/rotif/utils.ts#L329",
       "imports": [
         {
           "path": "@omnitron-dev/titan-notifications/rotif",
@@ -63354,7 +63354,7 @@
       "name": "RotifTransport",
       "package": "@omnitron-dev/titan-notifications",
       "kind": "class",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-notifications/src/transport/rotif.transport.ts#L26",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-notifications/src/transport/rotif.transport.ts#L27",
       "imports": [
         {
           "path": "@omnitron-dev/titan-notifications",

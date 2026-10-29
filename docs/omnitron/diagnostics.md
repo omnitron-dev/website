@@ -94,9 +94,19 @@ duplicate, and receivers must remain idempotent. A queued receipt acknowledges
 the broker only. Consumer acknowledgement, retries and DLQ handling determine
 subsequent delivery; no end-to-end exactly-once guarantee is claimed.
 
-`DiagnosticDeliveryError` means no consumer or no accepted publication. Transport
-exceptions also propagate. This lets an existing durable producer keep its
-pending record instead of silently considering an alert delivered.
+`DiagnosticDeliveryError` means no consumer or an unconfirmed publication. A
+failed stream rejects the entire fan-out, even if other streams accepted it.
+Retry with the same event identity: confirmed streams deduplicate the retry,
+while failed streams can accept it. Redis failures and invalid acknowledgements
+never count as duplicates. Transport causes are retained with credential
+redaction, including an error observer failing alongside publication. This lets
+an existing durable producer keep its pending record until all matching
+streams acknowledge the event.
+
+Explicit deduplication keys preserve punctuation through percent encoding.
+When upgrading, keys previously changed by underscore substitution start a new
+broker deduplication window. Consumer idempotency must cover retries that cross
+that deployment boundary.
 
 ## Connect the existing Omnitron alert outbox
 
