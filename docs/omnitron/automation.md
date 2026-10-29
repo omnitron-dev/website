@@ -73,6 +73,17 @@ The definition carries a SHA-256 `revision`. Console submits the revision displa
 
 Per-step history records a digest of the admitted definition, target ID, actor, attempts, timing, outcome and bounded stdout/stderr. It does not yet keep a complete immutable source archive. Do not treat the digest alone as recoverable source.
 
+## Upgrading existing integrations
+
+Review saved definitions and their callers when upgrading the pipeline contract:
+
+- Step names are stable identifiers of 1–80 letters, digits, underscores, dots or hyphens. Update dependency references when renaming a step.
+- Direct RPC callers fetch the definition and submit its `revision` as `expectedRevision`. A recurring operator should pin the reviewed revision and stop dispatching after a conflict until the operator reviews the change; it must not automatically accept a newer definition.
+- Replace source interpolation with data parameters and remove unsupported trigger descriptors. Existing external schedulers can continue to dispatch manual runs.
+- A registered absolute interpreter path must still exist. Repeat the application's registration procedure after changing its Node installation, preserve the pipeline ID/history, then restart its recurring dispatcher with the accepted revision.
+
+Validate the updated definitions before enabling recurring dispatch. Re-registering a definition is separate from executing its deployment or publication steps.
+
 ## Progress and failure
 
 Console shows individual step states, elapsed time, attempt counts, exit codes and output. Open a run for details; the history table fetches summaries without downloading every run's output. A failed refresh is displayed as stale data. On narrow windows, details use the full viewport and long code/output remains inside its scroll area.
