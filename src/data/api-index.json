@@ -16314,7 +16314,7 @@
       "name": "BooleanLabel",
       "package": "@omnitron-dev/prism",
       "kind": "function",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/label/label.tsx#L260",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/label/label.tsx#L288",
       "imports": [
         {
           "path": "@omnitron-dev/prism",
@@ -25326,7 +25326,7 @@
       "name": "Label",
       "package": "@omnitron-dev/prism",
       "kind": "function",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/label/label.tsx#L192",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/label/label.tsx#L220",
       "imports": [
         {
           "path": "@omnitron-dev/prism",
@@ -25346,7 +25346,7 @@
       "name": "LabelColor",
       "package": "@omnitron-dev/prism",
       "kind": "type",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/label/label.tsx#L20",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/label/label.tsx#L21",
       "imports": [
         {
           "path": "@omnitron-dev/prism",
@@ -25366,7 +25366,7 @@
       "name": "LabelProps",
       "package": "@omnitron-dev/prism",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/label/label.tsx#L24",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/label/label.tsx#L25",
       "imports": [
         {
           "path": "@omnitron-dev/prism",
@@ -25386,7 +25386,7 @@
       "name": "LabelVariant",
       "package": "@omnitron-dev/prism",
       "kind": "type",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/label/label.tsx#L22",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/label/label.tsx#L23",
       "imports": [
         {
           "path": "@omnitron-dev/prism",
@@ -32406,7 +32406,7 @@
       "name": "StatusLabel",
       "package": "@omnitron-dev/prism",
       "kind": "function",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/label/label.tsx#L234",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/label/label.tsx#L262",
       "imports": [
         {
           "path": "@omnitron-dev/prism",

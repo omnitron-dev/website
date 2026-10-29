@@ -904,12 +904,19 @@ import { Label, StatusLabel, BooleanLabel }
 ```
 
 The isolated entry is `@omnitron-dev/prism/components/label`. Variants are
-`soft` (default), `filled`, `outlined` and `inverted`. Soft labels choose a
-contrasting palette tone for each color scheme, including Prism presets with
-inverted dark-mode tonal roles. Colors remain bound to the theme's CSS variables
-and custom prefix. When brand colors can only be resolved by the browser, the
-foreground falls back to the theme's primary text color. Keep a written state
-alongside color and use legible text sizes inside scaled visualizations.
+`soft` (default), `filled`, `outlined` and `inverted`. Colored soft labels
+measure contrast against their translucent fill composited over the theme's
+paper surface, rather than the paper color alone. They select a tone with at
+least 4.5:1 contrast for small text, using Prism's extended tonal scale when
+needed. This also handles presets with inverted dark-mode tonal roles. Inverted
+labels use their white surface for the comparison.
+
+Colors remain bound to the theme's CSS variables and custom prefix. Plain MUI
+palettes without a suitable tone, or brand colors that can only be resolved by
+the browser, fall back to semantic text. `sx` can override the presentation;
+when changing the surface or text color, check the resulting contrast. Keep a
+written state alongside color and use legible text sizes inside scaled
+visualizations.
 
 ### `<SearchInput>`
 
