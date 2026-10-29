@@ -61,6 +61,19 @@ sequenceDiagram
   Init->>Init: exit 0
 ```
 
+## Startup and node diagnostics
+
+`omnitron up` launches a detached daemon and releases both the child-process
+and IPC event-loop references. The CLI exits after its readiness checks while
+the daemon keeps running. Startup stderr is appended to the boot log reported
+by the command, including failures before RPC becomes available.
+
+The Nodes API exposes `getNodeDaemonStatus`, `getNodeDaemonHealth` and
+`getNodeDaemonMetrics` for every registered node. Local requests use the same
+live daemon readers as the CLI; remote requests use the authenticated mesh.
+`reachable: false` includes the failure reason and no answer. It is not a
+health verdict, and a remote failure never falls back to the local node's data.
+
 ## PID manager — `pid-manager.ts`
 
 Owns the daemon lock file `~/.omnitron/daemon.pid`. Responsibilities:
