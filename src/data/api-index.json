@@ -249,6 +249,10 @@
       "guide": "/docs/frontend/prism/components"
     },
     {
+      "path": "@omnitron-dev/prism/components/chart",
+      "guide": "/docs/frontend/prism/components"
+    },
+    {
       "path": "@omnitron-dev/prism/components/command-palette",
       "guide": "/docs/frontend/prism/components"
     },
@@ -17119,6 +17123,10 @@
         {
           "path": "@omnitron-dev/prism/components",
           "guide": "/docs/frontend/prism/components"
+        },
+        {
+          "path": "@omnitron-dev/prism/components/chart",
+          "guide": "/docs/frontend/prism/components"
         }
       ]
     },
@@ -17134,6 +17142,10 @@
         },
         {
           "path": "@omnitron-dev/prism/components",
+          "guide": "/docs/frontend/prism/components"
+        },
+        {
+          "path": "@omnitron-dev/prism/components/chart",
           "guide": "/docs/frontend/prism/components"
         }
       ]
@@ -17151,6 +17163,10 @@
         {
           "path": "@omnitron-dev/prism/components",
           "guide": "/docs/frontend/prism/components"
+        },
+        {
+          "path": "@omnitron-dev/prism/components/chart",
+          "guide": "/docs/frontend/prism/components"
         }
       ]
     },
@@ -17158,7 +17174,7 @@
       "name": "ChartLegendsProps",
       "package": "@omnitron-dev/prism",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/chart/types.ts#L179",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/chart/types.ts#L185",
       "imports": [
         {
           "path": "@omnitron-dev/prism",
@@ -17166,6 +17182,10 @@
         },
         {
           "path": "@omnitron-dev/prism/components",
+          "guide": "/docs/frontend/prism/components"
+        },
+        {
+          "path": "@omnitron-dev/prism/components/chart",
           "guide": "/docs/frontend/prism/components"
         }
       ]
@@ -17183,6 +17203,10 @@
         {
           "path": "@omnitron-dev/prism/components",
           "guide": "/docs/frontend/prism/components"
+        },
+        {
+          "path": "@omnitron-dev/prism/components/chart",
+          "guide": "/docs/frontend/prism/components"
         }
       ]
     },
@@ -17190,7 +17214,7 @@
       "name": "ChartLoadingProps",
       "package": "@omnitron-dev/prism",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/chart/types.ts#L165",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/chart/types.ts#L171",
       "imports": [
         {
           "path": "@omnitron-dev/prism",
@@ -17198,6 +17222,10 @@
         },
         {
           "path": "@omnitron-dev/prism/components",
+          "guide": "/docs/frontend/prism/components"
+        },
+        {
+          "path": "@omnitron-dev/prism/components/chart",
           "guide": "/docs/frontend/prism/components"
         }
       ]
@@ -17214,6 +17242,10 @@
         },
         {
           "path": "@omnitron-dev/prism/components",
+          "guide": "/docs/frontend/prism/components"
+        },
+        {
+          "path": "@omnitron-dev/prism/components/chart",
           "guide": "/docs/frontend/prism/components"
         }
       ]
@@ -17238,7 +17270,7 @@
       "name": "ChartProps",
       "package": "@omnitron-dev/prism",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/chart/types.ts#L138",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/chart/types.ts#L144",
       "imports": [
         {
           "path": "@omnitron-dev/prism",
@@ -17246,6 +17278,10 @@
         },
         {
           "path": "@omnitron-dev/prism/components",
+          "guide": "/docs/frontend/prism/components"
+        },
+        {
+          "path": "@omnitron-dev/prism/components/chart",
           "guide": "/docs/frontend/prism/components"
         }
       ]
@@ -17254,7 +17290,7 @@
       "name": "ChartSeries",
       "package": "@omnitron-dev/prism",
       "kind": "type",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/chart/types.ts#L101",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/chart/types.ts#L107",
       "imports": [
         {
           "path": "@omnitron-dev/prism",
@@ -17263,6 +17299,10 @@
         {
           "path": "@omnitron-dev/prism/components",
           "guide": "/docs/frontend/prism/components"
+        },
+        {
+          "path": "@omnitron-dev/prism/components/chart",
+          "guide": "/docs/frontend/prism/components"
         }
       ]
     },
@@ -17270,7 +17310,7 @@
       "name": "ChartType",
       "package": "@omnitron-dev/prism",
       "kind": "type",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/chart/types.ts#L113",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/chart/types.ts#L119",
       "imports": [
         {
           "path": "@omnitron-dev/prism",
@@ -17278,6 +17318,10 @@
         },
         {
           "path": "@omnitron-dev/prism/components",
+          "guide": "/docs/frontend/prism/components"
+        },
+        {
+          "path": "@omnitron-dev/prism/components/chart",
           "guide": "/docs/frontend/prism/components"
         }
       ]
@@ -34478,7 +34522,7 @@
       "name": "useChart",
       "package": "@omnitron-dev/prism",
       "kind": "function",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/chart/use-chart.ts#L42",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/chart/use-chart.ts#L43",
       "imports": [
         {
           "path": "@omnitron-dev/prism",
@@ -34486,6 +34530,10 @@
         },
         {
           "path": "@omnitron-dev/prism/components",
+          "guide": "/docs/frontend/prism/components"
+        },
+        {
+          "path": "@omnitron-dev/prism/components/chart",
           "guide": "/docs/frontend/prism/components"
         }
       ]

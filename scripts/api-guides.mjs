@@ -60,6 +60,7 @@ export default {
     "./components/animate": "frontend/prism/components.md",
     "./components/breadcrumbs": "frontend/prism/components.md",
     "./components/card": "frontend/prism/components.md",
+    "./components/chart": "frontend/prism/components.md",
     "./components/command-palette": "frontend/prism/components.md",
     "./components/confirm-dialog": "frontend/prism/components.md",
     "./components/empty-content": "frontend/prism/components.md",

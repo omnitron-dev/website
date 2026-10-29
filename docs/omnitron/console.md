@@ -23,7 +23,7 @@ Verified against `apps/omnitron/webapp/src/`.
 | Routing | `react-router-dom` 7 |
 | UI components | `@mui/material` (Emotion), with select components from `@omnitron-dev/prism` |
 | RPC client | `@omnitron-dev/prism/netron` (`createMultiBackendClient`) over HTTP + WebSocket |
-| Charts | `react-apexcharts` |
+| Charts | Prism `Chart` / `useChart` (lazy-loaded ApexCharts) |
 | Graphs | `@xyflow/react` (topology, dependency graphs) |
 | State | `zustand` stores in `src/stores/` |
 | Code splitting | Per-page `React.lazy()`; xterm loads with SSH; Prism components use explicit subpaths |
@@ -76,7 +76,7 @@ sidebar.
 | `/stacks` | `StacksPage` | project | `OmnitronProject.listStacks` |
 | `/stacks/:name` | `StackDetailPage` | project | `OmnitronProject.getStackStatus` |
 | `/metrics` | `MetricsPage` | project | `OmnitronMetrics` (`getSnapshot` / `querySeries`) |
-| `/topology` | `TopologyPage` | project | derived from `OmnitronDiscovery` + services |
+| `/topology` | `TopologyPage` | project | stack deployments, daemon processes and runtime containers |
 | `/containers` | `ContainersPage` | project | `OmnitronInfra` |
 | `/deployments` | `DeploymentsPage` | project | `OmnitronDeploy` |
 | `/alerts` | `AlertsPage` | project | `OmnitronAlerts` |
@@ -89,14 +89,21 @@ sidebar.
 
 ### Dashboard
 
-The landing page after sign-in. Shows:
+The landing page shows the selected project's deployments, including remote stacks,
+or this daemon's applications when no project is selected. It provides:
 
-- Daemon status card (version, uptime, PID).
-- Total apps / online / errored counts.
-- Aggregate CPU / memory.
-- Recent alerts.
-- Recent deployments.
-- Cluster status when cluster mode is enabled.
+- Online/total application and stack counts, summed process CPU and resident memory.
+- A ranked resource snapshot for the six largest applications, switchable between
+  CPU and memory. The graph compares readings; it does not imply a capacity limit.
+- Compact application cards grouped by stack, with status, CPU, memory, uptime,
+  restarts and process counts. Local application names open their detail pages.
+- Links to metrics and topology from the breadcrumb actions.
+
+Refreshes retain the last received data on partial failures and name the source
+that failed. CPU may exceed 100% when processes use several cores; resident memory
+has no warning threshold without a known capacity. Zero is a valid measurement;
+invalid negative or non-finite readings render as unknown. Polling pauses while
+the browser tab is hidden.
 
 Pages fetch through the typed Netron client directly (the
 `daemon` / `metrics` proxies from `src/netron/client.ts`) inside
@@ -162,26 +169,56 @@ included in that base command; CLI `--grep` is a regular expression.
 
 ### Metrics
 
-Time-series view backed by the daemon's metrics aggregator. Per
-app, per metric name, per label combination. Built on
-ApexCharts.
+`/metrics` uses Prism charts for CPU and resident memory, with 5-minute,
+15-minute and 1-hour windows. Buckets are 10-second, 30-second and 1-minute
+averages respectively. Time labels use the browser's local timezone; byte values
+use binary units (KiB, MiB, GiB). CPU is not capped at 100%.
 
-Predefined panels:
-- CPU per app, stacked.
-- RSS per app.
-- Event-loop lag p95.
-- RPC latency p95 per service.
-- Error rate per app.
+The cards count applications in the selected project and stack, from the same
+inventory as the applications page. Histories preserve metric, application and
+reporting-node identity. Remote stack aliases are resolved from stack deployments
+and the node registry; a matching application name on another machine is not
+included. Application totals are the default; child-process lines are opt-in and
+must not be added to the parent totals.
 
-The `/dashboard-builder` page lets operators compose custom
-panels and save them.
+- Select a series chip with the pointer or keyboard to hide/show it.
+- **Data** opens a keyboard-scrollable table of latest value, mean, peak, sample
+  count and last sample time. Mean and peak describe returned buckets, not raw
+  event-level extrema.
+- Missing buckets break the line. An empty window and a failed query have different
+  states; failed refreshes retain the previous graph with a visible warning.
+- **Live** controls the 10-second poll. Manual refresh remains available. Changing
+  scope or window loads that selection once even when Live is paused.
+- Log ingestion is explicitly daemon-wide. The optional **Log store** panel shows
+  cumulative counts for all projects, independently of the selected time window.
+  Its store scan runs only while expanded, at most once per minute automatically.
+
+`/dashboard-builder` composes and saves custom panels. Its CPU/memory graphs also
+use Prism; their history consists of readings collected while the page is open,
+not the persisted history queried by `/metrics`.
 
 ### Topology
 
-`/topology` — XYFlow service graph derived from
-`OmnitronDiscovery` plus the live Netron service mesh. Nodes are
-services; edges are observed calls. Useful to see "who actually
-talks to whom" vs the static declaration.
+`/topology` is a deployment diagram built from `OmnitronProject.listStacks`,
+`OmnitronDaemon.list` / `status` and `OmnitronInfra.listContainers`. It shows the
+machines, applications, provisioned services and gateway of the selected stack.
+Edges represent declared service ownership/dependencies, not observed network
+traffic. An incomplete read is labelled explicitly.
+
+The wrapping toolbar provides node search, graph/list view, zoom, fit, position
+locking, fullscreen and refresh. Positions are locked initially; after unlocking,
+dragged positions survive polling for the current page session. Resizing refits
+the graph (or the selected node) to the available canvas. The minimap appears on
+wide windows. While the canvas has focus, `+` / `-` zoom and `0` fits the graph;
+these shortcuts do not intercept typing or browser shortcuts.
+
+Selecting a node opens an inspector beside the graph on wide windows and a modal
+sheet on narrow windows. Prism tabs offer the available overview, config, metrics
+and logs. CPU/memory history for local apps comes from the metrics service, not
+from samples invented when the drawer opens. Readings update with polling; changing
+scope clears the old selection. Unknown host capacity is not rendered as a gauge.
+Local lifecycle controls follow Console permissions; remote applications remain
+managed through their owning stack.
 
 ### Containers
 

@@ -398,7 +398,7 @@ data, sorting or a second pagination implementation.
 ApexCharts wrapper with theme-aware defaults.
 
 ```tsx
-import { Chart, useChart } from '@omnitron-dev/prism';
+import { Chart, useChart } from '@omnitron-dev/prism/components/chart';
 
 function CpuChart({ series }: { series: TimeSeries[] }) {
   const options = useChart({
@@ -416,6 +416,18 @@ function CpuChart({ series }: { series: TimeSeries[] }) {
 (colours, gridlines, tooltips, fonts). Always go through it
 rather than passing raw ApexCharts options — keeps theming
 consistent.
+
+The standalone `components/chart` entry keeps charts out of an application's main
+component barrel. The plotting library loads lazily. Numeric heights reserve the
+plot's space during loading; the wrapper can shrink inside flex/grid workspaces.
+Tooltips and legends inherit the active theme, including custom CSS-variable
+prefixes. `prefers-reduced-motion` disables animations even if a caller enables them.
+
+For operational time series, use straight lines, explicit units and local/UTC time
+labels. `{ x, y: null }` represents missing samples; do not substitute zero or connect
+long gaps. Provide an accessible name (`role="img"`, `aria-label`) and a tabular
+alternative when exact values matter. Selection controls should be ordinary
+keyboard-operable buttons outside the image. `ChartLegends` wraps long labels.
 
 Supported `type` values: `line`, `area`, `bar`, `pie`, `donut`,
 `radialBar`, `scatter`, `bubble`, `heatmap`, `candlestick`,
@@ -1620,6 +1632,6 @@ import { AdminDataTable } from '@omnitron-dev/prism/components/admin-filters';
 
 The following component groups are independently importable:
 
-`@omnitron-dev/prism/components/admin-filters`, `@omnitron-dev/prism/components/alert`, `@omnitron-dev/prism/components/animate`, `@omnitron-dev/prism/components/breadcrumbs`, `@omnitron-dev/prism/components/card`, `@omnitron-dev/prism/components/command-palette`, `@omnitron-dev/prism/components/confirm-dialog`, `@omnitron-dev/prism/components/empty-content`, `@omnitron-dev/prism/components/error-boundary`, `@omnitron-dev/prism/components/label`, `@omnitron-dev/prism/components/loading-screen`, `@omnitron-dev/prism/components/navigation-progress`, `@omnitron-dev/prism/components/page-content`, `@omnitron-dev/prism/components/popover`, `@omnitron-dev/prism/components/search-input`, `@omnitron-dev/prism/components/scroll-to-top`, `@omnitron-dev/prism/components/skeleton`, `@omnitron-dev/prism/components/snackbar`, `@omnitron-dev/prism/components/stepper`, `@omnitron-dev/prism/components/table`, `@omnitron-dev/prism/components/tabs`.
+`@omnitron-dev/prism/components/admin-filters`, `@omnitron-dev/prism/components/alert`, `@omnitron-dev/prism/components/animate`, `@omnitron-dev/prism/components/breadcrumbs`, `@omnitron-dev/prism/components/card`, `@omnitron-dev/prism/components/chart`, `@omnitron-dev/prism/components/command-palette`, `@omnitron-dev/prism/components/confirm-dialog`, `@omnitron-dev/prism/components/empty-content`, `@omnitron-dev/prism/components/error-boundary`, `@omnitron-dev/prism/components/label`, `@omnitron-dev/prism/components/loading-screen`, `@omnitron-dev/prism/components/navigation-progress`, `@omnitron-dev/prism/components/page-content`, `@omnitron-dev/prism/components/popover`, `@omnitron-dev/prism/components/search-input`, `@omnitron-dev/prism/components/scroll-to-top`, `@omnitron-dev/prism/components/skeleton`, `@omnitron-dev/prism/components/snackbar`, `@omnitron-dev/prism/components/stepper`, `@omnitron-dev/prism/components/table`, `@omnitron-dev/prism/components/tabs`.
 
 Use `@omnitron-dev/prism/core` for `PrismProvider` and its core hooks, `@omnitron-dev/prism/layouts` for layout composition, `@omnitron-dev/prism/state` for stores and `@omnitron-dev/prism/auth` for guards. Maps and editors retain their existing explicit subpaths and can be loaded only on the routes that need them. The root barrel remains compatible, but opt-in imports give a consumer tighter control of its dependency graph.
