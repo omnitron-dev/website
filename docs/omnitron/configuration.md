@@ -649,4 +649,4 @@ my-monorepo/
 
 ## File workspace exports
 
-`daemon.files` configures administrator file access per node. Omission exposes the `/` filesystem within daemon OS permissions. Set `enabled: false` or `roots: []` to disable exports. An explicit `roots` array replaces the default with `{ id, label, path, readOnly? }` entries. See [File workspace](./files.md#configure-access-per-node) for configuration examples and boundaries.
+`files` in `~/.omnitron/config.json` configures administrator file access per node; it is not a project ecosystem setting. Omission exposes the `/` filesystem within daemon OS permissions. Set `enabled: false` or `roots: []` to disable exports. An explicit `roots` array replaces the default with `{ id, label, path, readOnly? }` entries. See [File workspace](./files.md#configure-access-per-node) for configuration examples and boundaries.

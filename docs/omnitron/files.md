@@ -39,20 +39,18 @@ A staged regular file is synchronized before atomic publication. Existing text f
 
 ## Configure access per node
 
-The default `/` export does not elevate the daemon to root. Unreadable directories and files return permission errors. Configure each node independently, restart it through your normal controlled rollout, and inspect **Files → Node → Root**.
+The default `/` export does not elevate the daemon to root. Unreadable directories and files return permission errors. Configure each node independently in `~/.omnitron/config.json`, restart it through your normal controlled rollout, and inspect **Files → Node → Root**. Merge the `files` field into the existing JSON object; preserve its role, authentication and transport settings. This is daemon configuration, not a `daemon` block in a project’s `omnitron.config.ts`.
 
-```typescript
-export default {
-  daemon: {
-    files: {
-      enabled: true,
-      roots: [
-        { id: 'projects', label: 'Projects', path: '/srv/projects' },
-        { id: 'logs', label: 'Logs', path: '/var/log', readOnly: true },
-      ],
-    },
-  },
-};
+```json
+{
+  "files": {
+    "enabled": true,
+    "roots": [
+      { "id": "projects", "label": "Projects", "path": "/srv/projects" },
+      { "id": "logs", "label": "Logs", "path": "/var/log", "readOnly": true }
+    ]
+  }
+}
 ```
 
 | Configuration | Effect |
