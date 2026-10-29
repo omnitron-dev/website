@@ -46,7 +46,7 @@ into another process. Check both the JSON result and the exit status.
 | **Secrets** | `secret set`, `secret get`, `secret list`, `secret delete` |
 | **Deployment** | `deploy app`, `deploy build`, `rollback` |
 | **Infrastructure** | `infra up`, `infra down`, `infra status` (`ps`), `infra logs`, `infra psql`, `infra redis-cli`, `infra migrate`, `infra reset` |
-| **Pipelines** | `pipeline list`, `pipeline run`, `pipeline status` |
+| **Pipelines** | `pipeline list`, `pipeline save`, `pipeline run`, `pipeline status`, `pipeline cancel` |
 | **Backup** | `backup create`, `backup list`, `backup restore` |
 | **Kubernetes** | `k8s pods`, `k8s deploy scale` |
 | **Nodes** | `node list`, `node add`, `node update`, `node remove`, `node check`, `node ssh-keys` |
@@ -463,13 +463,17 @@ custom) provisioned per app's `omnitronConfig.infrastructure`.
 | `omnitron infra migrate [app]` | Run database migrations |
 | `omnitron infra reset [--yes]` | **DESTRUCTIVE** — drop and recreate all data |
 
-## Pipelines (CI/CD)
+## Pipelines (Xec automation)
 
 | Command | Effect |
 | ------- | ------ |
 | `omnitron pipeline list` | List all pipelines |
-| `omnitron pipeline run <id>` | Execute a pipeline by ID |
-| `omnitron pipeline status <runId>` | Check a run's status |
+| `omnitron pipeline save <file> [--id <id>]` | Validate and create a JSON definition, or replace the selected definition |
+| `omnitron pipeline run <id> [--params-file <file>]` | Read the current revision and submit it for execution |
+| `omnitron pipeline status <runId> [--json] [--output]` | Inspect steps, attempts, status and optionally retained output |
+| `omnitron pipeline cancel <runId>` | Request cancellation and await the owned execution |
+
+All pipeline RPC methods require `admin`. Parameters are data, not source substitutions. Failed, cancelled and interrupted runs produce a nonzero status-command exit code. See [Xec automation](./automation.md) for definitions, limits and recovery behavior.
 
 ## Backups
 

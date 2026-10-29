@@ -37,8 +37,8 @@ pattern (used by the production reference) is:
 | Role | Inherits | What they can do |
 | ---- | -------- | ---------------- |
 | `viewer` | — | Read-only: list / inspect / status / metrics / health / logs |
-| `operator` | `viewer` | Viewer + lifecycle: start / stop / restart / reload / scale / exec |
-| `admin` | `operator`, `viewer` | Operator + destructive: shutdown / reloadConfig / secrets / setMetricsEnabled |
+| `operator` | `viewer` | Viewer + lifecycle: start / stop / restart / reload / scale |
+| `admin` | `operator`, `viewer` | Operator + arbitrary execution, SSH, automation, shutdown / reloadConfig / secrets / setMetricsEnabled |
 
 Methods declare explicit role lists through `VIEWER_ROLES`, `OPERATOR_ROLES` and `ADMIN_ROLES`. The shared hierarchy in `@omnitron-dev/access/roles` also supports live principal checks at account and terminal boundaries. Unknown roles receive no implicit grants.
 

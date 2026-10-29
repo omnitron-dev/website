@@ -160,3 +160,15 @@ pipelines remain the interface for running and tracking deployments.
 | `omnitron release prune` | Preview or apply retention |
 
 Use `--help` on a command for its complete option set.
+
+## Prepare without damaging the running release
+
+Remote application installation uses a separate directory identified by package version and artifact digest. Reinstalling a package version does not clear the currently running directory. A failed transfer or dependency install leaves existing application files in place. Dependency installation enforces package engine requirements.
+
+For each node, all selected artifacts must install and migrate successfully before publishing new boot definitions. If one preparation fails, no candidate on that node is activated. Earlier successful migrations may already have committed: this is not a transaction across application databases. Use backward-compatible schema changes and verified database backups.
+
+Publication preserves definitions of applications outside the selected deployment, updates the explicit host-upgrade contract's release paths while retaining its hooks, and writes private boot files through atomic file replacement. A private on-node registration snapshot supports restoring the previous configuration after a publication/registration failure. A multi-file publication can be interrupted; the host-upgrade preflight refuses inconsistent configuration. Configuration restoration does not by itself prove running processes were rolled back; inspect application health and the deployment outcome.
+
+Before a controlled daemon upgrade, Omnitron compares the serving inventory with the configuration that a fresh daemon would load from disk. Missing applications or stale release paths fail preflight before stopping the daemon. A forked daemon's actual Node executable is captured and reused for controlled restart, without changing the host's global Node link. Systemd upgrades preserve the captured unit's runtime binding. Application-specific health checks must pass after restoration.
+
+New nodes without a runtime default to Node 22.23.4. Existing runtimes are not globally replaced by a deployment. Check application engine compatibility and use an explicitly scoped runtime or supervisor configuration when upgrading a host that runs other software.

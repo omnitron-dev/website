@@ -38,7 +38,7 @@ diffs them against the index table below.
 | `kubernetes.rpc-service.ts` | `OmnitronKubernetes` | 9 | admin |
 | `log-collector.rpc-service.ts` | `OmnitronLogs` | 4 | viewer |
 | `node-manager.rpc-service.ts` | `OmnitronNodes` | 31 | viewer (read) + operator (mutate) |
-| `pipeline.rpc-service.ts` | `OmnitronPipelines` | 9 | viewer (read) + operator (mutate) |
+| `pipeline.rpc-service.ts` | `OmnitronPipelines` | 9 | admin + live human session / trusted local CLI |
 | `project.rpc-service.ts` | `OmnitronProject` | 24 | viewer (read) + operator (start/stop) + admin (CRUD) |
 | `release.rpc-service.ts` | `OmnitronRelease` | 12 | viewer (read), operator (build/attest), admin (prune) |
 | `secrets.rpc-service.ts` | `OmnitronSecrets` | 6 | admin |
@@ -322,18 +322,21 @@ green/yellow/red availability bars.
 
 ### `OmnitronPipelines` — `pipeline.rpc-service.ts`
 
-CI/CD pipeline definition and execution.
+Xec and shell automation, shared by Console, CLI and local MCP. All methods require `admin`; a human session is revalidated at the service boundary. Mutations must record an audit intent before taking effect.
 
 | Method | Effect |
 | ------ | ------ |
 | `createPipeline(definition)` | Define a pipeline |
-| `getPipeline({id})` | Read one pipeline |
+| `updatePipeline({id, definition})` | Validate and replace a definition, preserving its ID |
+| `getPipeline({id})` | Read one pipeline and its revision |
 | `listPipelines()` | List all |
 | `deletePipeline({id})` | Drop a pipeline |
-| `executePipeline({id, params?})` | Trigger a run |
-| `cancelRun({runId})` | Cancel a running pipeline |
-| `getRunStatus({runId})` | One run's status |
-| `listRuns({pipelineId?, limit?})` | Run history |
+| `executePipeline({id, expectedRevision, params?})` | Admit a reviewed revision; reject a definition changed since review |
+| `cancelRun({runId})` | Request cancellation and await the owned execution |
+| `getRunStatus({runId})` | One run with bounded per-step output and diagnostics |
+| `listRuns({pipelineId?, limit?})` | Bounded history summaries; excludes step output and parameters |
+
+See [Xec automation](./automation.md) for execution limits, revision review, cancellation and failure recovery. A child process is not a sandbox for untrusted agent code.
 
 ### `OmnitronProject` — `project.rpc-service.ts`
 
@@ -465,8 +468,8 @@ Distributed trace ingestion + query.
 | Role        | Members                            | Typical capability |
 | ----------- | ---------------------------------- | ------------------ |
 | `viewer`    | `viewer`, `operator`, `admin`      | Read-only inspection |
-| `operator`  | `operator`, `admin`                | Lifecycle + scale + exec |
-| `admin`     | `admin` only                       | Destructive: shutdown, secrets, role changes |
+| `operator`  | `operator`, `admin`                | Lifecycle + scale |
+| `admin`     | `admin` only                       | Arbitrary execution, automation, SSH, shutdown, secrets, role changes |
 | anonymous   | anyone with socket access          | `ping`, the `OmnitronAuth` endpoints, `OmnitronFleet.heartbeat`, `OmnitronTelemetry.pushBatch` |
 
 Methods on the same service can vary in role:

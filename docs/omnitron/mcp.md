@@ -14,11 +14,12 @@ code-review agents):
    codebase, plus structured access to API surfaces, modules,
    patterns, and gotchas.
 2. **Management plane** — apps, infra, monitoring, secrets,
-   backups, deploys, pipelines — every operation the CLI offers,
-   exposed as MCP tools.
+   backups, deploys and pipelines through the implemented MCP tool catalog. CLI-only operations remain CLI-only.
 
 Verified against `apps/omnitron/src/mcp/` and
 `apps/omnitron/src/commands/kb.ts`.
+
+The current stdio management server connects through the daemon owner’s administrative Unix socket. It is suitable only for a trusted local agent host. Filtering visible tools in that host is not server-side delegation. See [Agents and delegated operations](./agents.md) before embedding an agent in a multi-user Console.
 
 ## Starting the server
 
@@ -53,15 +54,10 @@ Two surfaces, registered conditionally on what's available:
 | `kb.*` | KB indexed (`omnitron kb index`) | "Run `omnitron kb index` first" |
 | `apps.*` | Daemon running | "Run `omnitron up` to start the daemon" |
 | `infra.*` | Daemon running | (same) |
-| `monitoring.*` (`health.*` / `metrics.*` / `logs.*`) | Daemon running | (same) |
-| `stack.*` / `secret.*` / `backup.*` / `deploy.*` / `cluster.*` / `fleet.*` / `k8s.*` / `project.*` / `webapp.*` / `pipeline.*` | Daemon running | (same) |
+| `monitoring.*` / `health.*` / `metrics.*` / `logs.*` / `alerts.*` | Daemon running | (same) |
+| `stack.*` / `secret.*` / `backup.*` / `deploy.*` / `cluster.*` / `fleet.*` / `k8s.*` / `project.*` / `pipeline.*` | Daemon running | (same) |
 
-"When unavailable" is logged to **stderr** — the tools are
-simply not registered (absent from `tools/list`), not stubbed
-with a fallback response. So partial availability is fine: if
-the daemon is down but the KB is indexed, the agent only sees
-the `kb.*` tools and can still answer "how does X work" — it
-just can't `start app`.
+When a dependency is unavailable, the corresponding tool names remain visible as **UNAVAILABLE** stubs. Calling one returns an error explaining how to start the daemon or index the KB. Missing data is not presented as a successful empty result.
 
 ## KB tools
 
@@ -122,12 +118,15 @@ making changes.
 
 | Tool | Effect |
 | ---- | ------ |
-| `health.check` | One app, or the whole platform when `app` is omitted |
+| `monitoring.snapshot` | Bounded metrics, alert summary and ingestion-loss evidence; partial sources are explicit |
+| `metrics.series` | Explicit apps/metric names and a bounded historical window |
+| `alerts.active` | Read up to 100 firing alerts without acknowledging them |
+| `health.check` | Active probes for one app, or the whole platform when `app` is omitted |
 | `metrics.get` | Aggregate metric snapshot |
 | `metrics.app` | Per-app metrics |
 | `logs.query` | Stored logs. Full-text filter is `search`; page with `limit` / `offset` |
 | `logs.tail` | The most recent entries, oldest-first — poll for near-real-time |
-| `logs.stats` | Per-app log volume and rotation counts |
+| `logs.stats` | Exact stored record counts; may scan a large archive, so avoid frequent polling |
 
 ## Management tools — control plane
 
@@ -140,7 +139,7 @@ making changes.
 | `deploy.app` / `deploy.rollback` / `deploy.history` | Deployment |
 | `fleet.status` / `fleet.summary` | Fleet nodes and counts |
 | `k8s.pods` / `k8s.scale` | Kubernetes pods + scaling |
-| `pipeline.list` / `pipeline.run` / `pipeline.status` | CI/CD |
+| `pipeline.list` / `pipeline.run` / `pipeline.status` | Administrator Xec automation; run requires `expectedRevision` from the reviewed definition |
 
 Not offered, and deliberately: `stack.create` (stack creation is
 `omnitron stack create`, and getting it wrong strands
@@ -149,20 +148,9 @@ infrastructure), `deploy.build`, `cluster.status`,
 managed by a CLI command that runs Docker locally, with no
 service behind it.
 
-That is 54 tools in total — 43 management plus 11 KB. Re-check
-against the source rather than trusting the number:
+Use the registered `tools/list` response as the live catalog. It depends on the daemon and KB services available to this process. The typed handlers call existing RPC methods rather than assuming every CLI command has a service endpoint.
 
-```bash
-# 54 total
-grep -roh "name: '[a-z_.]*'" apps/omnitron/src/mcp/tool-groups/ | sort -u | wc -l
-# 11 of them KB
-grep -roh "name: '[a-z_.]*'" apps/omnitron/src/mcp/tool-groups/kb.tools.ts | sort -u | wc -l
-```
-
-Two thirds of the tools listed on this page used to call methods
-`DaemonClient` does not have — the handler parameter was typed
-`any`, so it compiled, and each failed at call time with a
-`TypeError`. The list above is what the daemon answers today.
+See [bounded monitoring evidence](./observability.md#bounded-queries-and-agent-evidence) and [Xec automation](./automation.md) for limits, authority and cancellation behavior.
 
 ## KB index lifecycle
 

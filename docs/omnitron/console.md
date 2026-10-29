@@ -550,3 +550,9 @@ to review an operation; merely opening a menu or form does not execute it.
 `themeOverrides`. Component geometry and interaction remain in Prism rather than
 being reimplemented in each page. For frontend-only changes, rebuild the Console
 assets and reload the browser; a daemon or application restart is unnecessary.
+
+## Automation workspace
+
+The [Pipelines workspace](./automation.md) uses Prism tabs and data tables with responsive MUI editors and a run-details drawer. Step controls include local/registered-node selection, working directory, dependencies, timeout and advanced retry/environment settings. Execution requires review of the displayed source and targets. Run history loads summaries; step output is fetched only for the opened run, with stale-data and truncation indicators.
+
+This workspace is restricted to administrators because its scripts execute with infrastructure privileges. Embedded provider sessions and delegated agent controls are specified in the [agent architecture](./agents.md); they are not live Console features yet.

@@ -392,6 +392,8 @@ const sidebars: SidebarsConfig = {
     'omnitron/migrations',
     'omnitron/console',
     'omnitron/access',
+    'omnitron/automation',
+    'omnitron/agents',
     'omnitron/terminal',
     'omnitron/auth-rbac',
     'omnitron/mcp',

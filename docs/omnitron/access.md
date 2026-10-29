@@ -15,7 +15,7 @@ The daemon publishes methods with Titan `@Public({ auth: … })` metadata. `Omni
 | --- | --- | --- |
 | `viewer` | Observe infrastructure | Status, logs, metrics, health and deployment history |
 | `operator` | Operate applications | Viewer reads plus lifecycle, deployment and permitted node operations |
-| `admin` | Administer the control plane | Operator actions plus accounts, configuration, secrets and SSH terminals |
+| `admin` | Administer the control plane | Operator actions plus accounts, configuration, secrets, SSH terminals and arbitrary-code automation |
 
 These are the existing daemon roles, defined through `@omnitron-dev/access/roles`. Exact grants come from each RPC method, not this summary. `service_role` is a separate machine identity and cannot be assigned to a human account.
 
@@ -75,3 +75,9 @@ assets without replacing a running frontend.
 The implementation is in `apps/omnitron/src/services/access.rpc-service.ts`, `shared/roles.ts`, `shared/dto/access.ts` and `webapp/src/auth/access.tsx`. New public methods appear automatically in the catalog; new UI actions must use their typed RPC permission.
 
 Integration tests exercise real PostgreSQL transactions and HTTP authorization: role boundaries, stale edits, last-admin protection, audit failure rollback and cached-token revocation. Browser tests cover pending grants, failed refresh, account changes and viewer isolation. See [SSH workspace](./terminal.md) for terminal-specific ownership and limits.
+
+## Automation and future agents
+
+Xec pipeline methods require `admin`, including definition and run-history reads. A run revalidates the human session and requires a durable audit intent and the reviewed definition revision. An operator's application lifecycle rights do not grant arbitrary shell execution. See [Xec automation](./automation.md).
+
+The local MCP server uses the daemon owner's administrative Unix socket. Tool selection in an agent client does not reduce that underlying authority. It is not a delegated identity. Embedded agents require a broker, isolated workers and resource-scoped grants evaluated by this same access layer; the [agent design](./agents.md) describes the boundary and acceptance tests. That delegated path is not enabled yet.
