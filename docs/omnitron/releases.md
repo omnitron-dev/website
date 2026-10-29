@@ -33,6 +33,45 @@ Read the gate results and artifact list before deployment. The manifest
 describes what was built; the daemon's audit trail describes which release
 a stack took.
 
+## Dependency identity
+
+The local bundle carries workspace packages and local `file:` archive overrides.
+It asks pnpm for the effective overrides, validates each archive's package name,
+and records its version and SHA-256 in `BUNDLE.json`. The destination installs
+those same bytes. A missing archive or an archive outside its source workspace
+fails the build instead of silently selecting the published package. The copy is
+verified again before the bundle is completed; changing an archive during packing
+fails the build. Archive contents, resolution configuration and lockfiles also
+participate in the application build cache, including same-version replacements.
+
+Direct dependencies and optional dependencies use the same override as transitive
+consumers. Registry version overrides are retained too. Platform-specific binaries
+are installed on the destination; a macOS `node_modules` tree is never copied to
+Linux. After publishing a dependency to npm, update its version and lockfile,
+remove its local archive override, and verify a clean install before deployment.
+
+## Validate linked source checkouts
+
+Development applications can share a sibling Omnitron checkout. The release
+builder reproduces that relative layout with clean clones of pinned commits.
+Application tooling can use the same validation through the Node-only
+`@omnitron-dev/omnitron/source-layout` entry point:
+
+```typescript
+import { readLinkLayout, planBuildRoot } from '@omnitron-dev/omnitron/source-layout';
+
+const layout = readLinkLayout(lockfileText);
+if ('refusal' in layout) throw new Error(layout.refusal);
+const plan = planBuildRoot(buildRoot, projectRoot, layout);
+if ('refusal' in plan) throw new Error(plan.refusal);
+```
+
+The planner rejects multiple external source roots, non-workspace targets and
+layouts escaping the isolated build directory. Tooling must also check that the
+installed links and package manifests exist. Published dependencies need no
+sibling-checkout layout. Do not replace this validation with an allowed count of
+links: adding a framework module does not change whether a layout is reproducible.
+
 ## Verify the deployed system
 
 An attestation records what probes measured about a release on a named stack.

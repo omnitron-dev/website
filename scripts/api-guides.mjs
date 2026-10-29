@@ -214,6 +214,7 @@ export default {
     "./dto/events": "omnitron/services-reference.md",
     "./alerts": "omnitron/observability.md",
     "./release-reading": "omnitron/releases.md",
+    "./source-layout": "omnitron/releases.md",
     "./node-check": "omnitron/cli.md",
     "./audit-outcome": "omnitron/observability.md",
     "./sync-reading": "omnitron/cluster.md",

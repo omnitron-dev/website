@@ -83,6 +83,10 @@ Counts must be positive integers; the supported upper bounds are 128 daemon-wide
 
 Output travels as base64 bytes with an absolute byte cursor, preserving UTF-8 boundaries and terminal protocols. A slow reader receives an explicit dropped-byte count. `hasMore` allows the client to drain retained output after a shell closes. Input is sequenced and deduplicated; an ambiguous write failure closes the session instead of replaying a command.
 
+Closing a session is idempotent after its retained server state expires, so an
+old tab can still be removed. This operation still requires current administrator
+authority. A live session owned by another sign-in remains inaccessible.
+
 ## Authorization and audit
 
 SSH requires the administrator role and a current human session, or the trusted local Unix-socket identity. A machine `service_role` cannot open an interactive terminal. The daemon rechecks authorization and ownership on every method; its two-second sweep also closes revoked sessions, removed targets and expired shells.

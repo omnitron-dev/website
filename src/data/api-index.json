@@ -209,6 +209,10 @@
       "guide": "/docs/omnitron/releases"
     },
     {
+      "path": "@omnitron-dev/omnitron/source-layout",
+      "guide": "/docs/omnitron/releases"
+    },
+    {
       "path": "@omnitron-dev/omnitron/sync-reading",
       "guide": "/docs/omnitron/cluster"
     },
@@ -11754,7 +11758,7 @@
       "name": "archiveBundle",
       "package": "@omnitron-dev/omnitron",
       "kind": "function",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/services/bundle-builder.ts#L890",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/services/bundle-builder.ts#L900",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/operations",
@@ -11802,7 +11806,7 @@
       "name": "buildBundle",
       "package": "@omnitron-dev/omnitron",
       "kind": "function",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/services/bundle-builder.ts#L576",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/services/bundle-builder.ts#L579",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/operations",
@@ -12358,7 +12362,7 @@
       "name": "diagnoseMigrationFailure",
       "package": "@omnitron-dev/omnitron",
       "kind": "function",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/migration/operation.ts#L52",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/migration/operation.ts#L51",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/migration",
@@ -13623,6 +13627,18 @@
       ]
     },
     {
+      "name": "LinkLayout",
+      "package": "@omnitron-dev/omnitron",
+      "kind": "interface",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/release/layout.ts#L22",
+      "imports": [
+        {
+          "path": "@omnitron-dev/omnitron/source-layout",
+          "guide": "/docs/omnitron/releases"
+        }
+      ]
+    },
+    {
       "name": "loadEcosystemConfig",
       "package": "@omnitron-dev/omnitron",
       "kind": "function",
@@ -14495,6 +14511,18 @@
       ]
     },
     {
+      "name": "planBuildRoot",
+      "package": "@omnitron-dev/omnitron",
+      "kind": "function",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/release/layout.ts#L102",
+      "imports": [
+        {
+          "path": "@omnitron-dev/omnitron/source-layout",
+          "guide": "/docs/omnitron/releases"
+        }
+      ]
+    },
+    {
       "name": "planProvisioning",
       "package": "@omnitron-dev/omnitron",
       "kind": "function",
@@ -14671,6 +14699,18 @@
       ]
     },
     {
+      "name": "readLinkLayout",
+      "package": "@omnitron-dev/omnitron",
+      "kind": "function",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/release/layout.ts#L68",
+      "imports": [
+        {
+          "path": "@omnitron-dev/omnitron/source-layout",
+          "guide": "/docs/omnitron/releases"
+        }
+      ]
+    },
+    {
       "name": "redactDiagnosticText",
       "package": "@omnitron-dev/omnitron",
       "kind": "function",
@@ -14786,6 +14826,18 @@
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/operations",
+          "guide": "/docs/omnitron/releases"
+        }
+      ]
+    },
+    {
+      "name": "resolveCheckouts",
+      "package": "@omnitron-dev/omnitron",
+      "kind": "function",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/release/layout.ts#L129",
+      "imports": [
+        {
+          "path": "@omnitron-dev/omnitron/source-layout",
           "guide": "/docs/omnitron/releases"
         }
       ]
@@ -19654,7 +19706,7 @@
       "name": "createPrismIcon",
       "package": "@omnitron-dev/prism",
       "kind": "function",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/icons/context.tsx#L104",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/icons/context.tsx#L105",
       "imports": [
         {
           "path": "@omnitron-dev/prism/icons",
@@ -30082,7 +30134,7 @@
       "name": "PrismIconComponent",
       "package": "@omnitron-dev/prism",
       "kind": "type",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/icons/context.tsx#L89",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/icons/context.tsx#L90",
       "imports": [
         {
           "path": "@omnitron-dev/prism/icons",
@@ -30098,7 +30150,7 @@
       "name": "PrismIconName",
       "package": "@omnitron-dev/prism",
       "kind": "type",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/icons/context.tsx#L88",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/icons/context.tsx#L89",
       "imports": [
         {
           "path": "@omnitron-dev/prism/icons",
@@ -30114,7 +30166,7 @@
       "name": "prismIconNames",
       "package": "@omnitron-dev/prism",
       "kind": "value",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/icons/context.tsx#L6",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/icons/context.tsx#L7",
       "imports": [
         {
           "path": "@omnitron-dev/prism/icons",
@@ -30130,7 +30182,7 @@
       "name": "PrismIconProvider",
       "package": "@omnitron-dev/prism",
       "kind": "function",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/icons/context.tsx#L97",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/icons/context.tsx#L98",
       "imports": [
         {
           "path": "@omnitron-dev/prism/icons",
@@ -30146,7 +30198,7 @@
       "name": "PrismIconSet",
       "package": "@omnitron-dev/prism",
       "kind": "type",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/icons/context.tsx#L90",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/icons/context.tsx#L91",
       "imports": [
         {
           "path": "@omnitron-dev/prism/icons",
