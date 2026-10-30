@@ -372,6 +372,11 @@ The optional `evidence` object survives daemon replacement and normal retention:
 | `lastCommittedAt`, `lastLossAt` | Persisted timestamps for confirmed commits and known loss |
 | `reconciliation` | Later `verifiedRows`, `restoredRows`, `lastReconciledAt` and proof scope (`master` or `source`) |
 
+A zero `unverifiedRows` count covers this recorded epoch from `firstTrackedId`.
+Older buffered rows can have `syncOutcome = NULL` because their receiver predates
+receipt accounting. That absence does not establish either persistence or loss;
+they are outside this reconciliation frontier and are not silently certified.
+
 These sequence fields are strings, preserving integer precision. The frontier
 before the first tracked entry means no contiguous receipt has been proven yet.
 Counters apply to the stated tracking epoch. Losses remain visible even when the
