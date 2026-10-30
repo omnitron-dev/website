@@ -174,7 +174,9 @@ omnitron node check <node>
 The first command includes `storage.status` and the same summary/detail shown on
 the Console Metrics page. It distinguishes persistent, volatile and unknown
 storage, queued samples/bytes, completed writes, errors, retention failures and
-known losses. Counters are scoped to the current backend process; replication
+known losses. Collection/write counters describe the current MetricsService instance, including
+confirmed retries. Imported history and incoming replication commits have their own
+evidence; replication
 receipt counters retain their tracking epoch on disk. A successful RPC call or
 an empty queue is not substituted for database confirmation.
 
@@ -191,7 +193,10 @@ producer changes to the atomic outbox only after their backend is updated.
 
 Ordinary collection buffers are bounded and volatile before commit. The default
 is 50,000 samples / 16 MiB; overflow is reported, never acknowledged as persisted.
-Chart history defaults to seven days. Pruning chart history and pruning delivered
+Chart history uses `monitoring.metrics.historyMaxAge` (default `7d`), passed to
+Titan's retention policy. For example, `historyMaxAge: '24h'` keeps one day. The
+legacy numeric `monitoring.metrics.retention` field does not control SQL history.
+Pruning chart history and pruning delivered
 replication entries are separate operations. See the [Titan metrics contract](../titan/modules/metrics.mdx)
 for durable calls, database settings, query budgets and optional storage adapters.
 
@@ -499,8 +504,8 @@ per-storage-backend — memory / SQLite / Postgres per config)
 | Signal | Retention default |
 | ------ | ----------------- |
 | Logs | `logging.maxFiles` × `logging.maxSize` (default ~ 500 MB per app) |
-| Metrics (in-memory) | `monitoring.metrics.retention` (default 3 600 s) |
-| Metrics (persistent) | `titan-metrics.retention.maxAge` (default `7d`) |
+| Omnitron metric history | `monitoring.metrics.historyMaxAge` (default `7d`, hourly sweep) |
+| Standalone Titan metric history | `retention.maxAge` (default `7d`) |
 | Traces (write buffer) | flushed to Postgres at 500 spans or every 5 s |
 | Traces (persistent) | Postgres (`OmnitronDatabase`) — trim/retain at the DB layer |
 | Health history | `healthMonitor.retentionDays` (default 90 days) |

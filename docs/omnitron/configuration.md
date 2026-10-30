@@ -206,7 +206,7 @@ exponential backoff `{ initial: 1 000, max: 30 000, factor: 2 }`.
 ```typescript
 monitoring: {
   healthCheck: { interval: 15_000, timeout: 5_000 },
-  metrics:     { interval: 5_000,  retention: 3_600 },
+  metrics:     { interval: 5_000, historyMaxAge: '7d' },
 }
 ```
 
@@ -215,7 +215,8 @@ monitoring: {
 | `healthCheck.interval`    | How often probes run (default 15 s)             |
 | `healthCheck.timeout`     | Per-probe deadline (default 5 s)                |
 | `metrics.interval`        | Sample cadence (default 5 s)                    |
-| `metrics.retention`       | In-memory ring buffer depth in seconds          |
+| `metrics.historyMaxAge`   | Persistent history duration (`7d` by default); Titan validates the duration |
+| `metrics.retention`       | Legacy numeric setting; does not control the persistent store |
 
 ### `logging`
 

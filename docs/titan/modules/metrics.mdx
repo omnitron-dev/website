@@ -239,7 +239,9 @@ a longer `collection.interval`.
 | `sqlite` | A caller-owned Kysely connection; SQLite `synchronous=FULL` or `EXTRA` | Committed rows in the database file |
 | `postgres` | A caller-owned Kysely connection and a registered schema migration | Committed rows in the logged table |
 
-Omnitron selects PostgreSQL on masters and SQLite on updated slave daemons.
+Omnitron selects PostgreSQL on masters and SQLite on updated slave daemons. Its
+`monitoring.metrics.historyMaxAge` setting supplies the retention duration (default
+`7d`); standalone Titan applications use `retention.maxAge` directly.
 Standalone Titan applications opt in by registering `METRICS_STORAGE_TOKEN`
 with the appropriate adapter. Selecting a storage type does not create a database
 connection. `forRootAsync` accepts a `storage: { useFactory, inject }` provider;
