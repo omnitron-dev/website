@@ -17,6 +17,11 @@ The daemon publishes methods with Titan `@Public({ auth: … })` metadata. `Omni
 | `operator` | Operate applications | Viewer reads plus lifecycle, deployment and permitted node operations |
 | `admin` | Administer the control plane | Operator actions plus accounts, configuration, secrets, SSH terminals and arbitrary-code automation |
 
+Trace reads (`getTrace`, `queryTraces`, `getServiceMap`) allow viewers.
+Trace ingestion (`ingestSpan`, `ingestBatch`) writes monitoring data and requires
+`operator` or `admin`; viewer access does not include submitting telemetry.
+These RPC methods do not implicitly grant access to machine identities.
+
 These are the existing daemon roles, defined through `@omnitron-dev/access/roles`. Exact grants come from each RPC method, not this summary. `service_role` is a separate machine identity and cannot be assigned to a human account.
 
 Prism's narrow `@omnitron-dev/prism/auth` entry supplies guards without importing authentication forms or layouts. Console gates navigation, page entry, mutation controls and dialogs using the catalog. It refreshes while visible every 15 seconds; a failed refresh clears effective grants until verification succeeds. A role change is enforced by the server independently of this refresh interval.
@@ -74,7 +79,9 @@ assets without replacing a running frontend.
 
 The implementation is in `apps/omnitron/src/services/access.rpc-service.ts`, `shared/roles.ts`, `shared/dto/access.ts` and `webapp/src/auth/access.tsx`. New public methods appear automatically in the catalog; new UI actions must use their typed RPC permission.
 
-Integration tests exercise real PostgreSQL transactions and HTTP authorization: role boundaries, stale edits, last-admin protection, audit failure rollback and cached-token revocation. Browser tests cover pending grants, failed refresh, account changes and viewer isolation. See [SSH workspace](./terminal.md) for terminal-specific ownership and limits.
+Integration tests exercise real PostgreSQL transactions and HTTP authorization: role boundaries, stale edits, last-admin protection, audit failure rollback and cached-token revocation. A separate HTTP regression test verifies that viewers can read traces but cannot
+ingest spans or batches, and that rejected calls never reach the collector.
+Browser tests cover pending grants, failed refresh, account changes and viewer isolation. See [SSH workspace](./terminal.md) for terminal-specific ownership and limits.
 
 ## Automation and future agents
 
