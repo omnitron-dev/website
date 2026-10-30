@@ -530,6 +530,10 @@ everything as typed Netron services.
 
 Console pages use a single breadcrumb trail for location and navigation. A hidden level-one heading and the browser tab title retain the page name for accessibility. Parent crumbs use client-side routing, so navigating between sections preserves mounted workspaces and their SSH sessions. Page actions remain beside the trail; content headings still identify cards and subsections.
 
+Application cards on the global dashboard open details by their full daemon
+handle, without requiring a project selection. The detail page retains role
+checks and links back to Overview when no project is selected.
+
 The application shell occupies the available viewport. Its header, navigation and status bar stay within the window, while ordinary pages scroll in the main region. SSH panes and the topology canvas own their internal scrolling. The status bar progressively hides secondary details on narrow screens while retaining connection and application health. Prism theme tokens supply terminal background, text, cursor and selection colors.
 
 
@@ -574,3 +578,48 @@ Re-enabling watch uses the daemon’s last accepted boot or reload configuration
 ## File workspace
 
 [Files](./files.md) provides two independent, tabbed node locations, version-checked text editing and durable cross-node copies. Prism tabs and table viewports share the Console shell; CodeMirror loads only when a document is opened. Narrow windows retain both panels behind an A/B switch. The default export is `/`, limited by administrator authorization and the daemon OS account; node configuration can restrict roots, make them read only or disable access.
+
+
+## Publishing Console updates
+
+From a source checkout, `pnpm --filter @omnitron/console build` typechecks and
+builds into a temporary directory before publishing. `omnitron webapp build`
+uses the same path. It never lets Vite empty the directory nginx is serving.
+
+Hashed assets are admitted before the new HTML is replaced atomically, while the
+mounted directory stays in place. Existing URLs cannot change their bytes.
+The publisher retains at least three generations and a seven-day grace period;
+cleanup only removes files recorded in its publication ledger whose bytes are
+unchanged. It never prunes unrelated files. The ledger and an exclusive writer
+lock sit beside `dist`, outside the web root. A killed publisher leaves a lock
+with its PID for inspection; verify the process has stopped before removing it.
+
+Open tabs continue to use their loaded generation. A compact notification offers
+**Reload** when a new build is available; it never automatically discards file
+edits or terminal sessions. Notifications use the Prism header slot inside the
+viewport, preserving space for the status bar and workspaces. The file editor's existing unsaved-change guard also
+applies to an explicit reload. Tabs older than the retention window may need to
+reload before opening a new route.
+
+Prepare a reviewable build or publish one already verified:
+
+```bash
+node apps/omnitron/scripts/build-console.mjs --out-dir /absolute/path/to/candidate
+node apps/omnitron/scripts/build-console.mjs --publish-from /absolute/path/to/candidate
+```
+
+The candidate directory must not already exist. Keep a previous build for rollback
+and publish it with the same command. A Console-only update does not restart the
+daemon, applications or experiment workers. Updating backend code remains a
+separate [daemon maintenance operation](./daemon.md#updating-a-source-runtime).
+
+Console configures the chart engine used by Prism with the line/area and bar
+renderers, legends, keyboard interaction, toolbar, exports and annotations.
+Other Prism consumers keep their default engine. Add further chart imports in
+Console's `src/charts.ts` when introducing another chart type. MUI/Emotion chunks
+preserve source initialization order; test the built app in a browser after
+changing chunking rules, not only with a successful bundler exit code.
+
+The publisher regression suite includes interrupted HTML replacement, existing
+open-tab assets, immutable URL conflicts and bounded retention. Run it with
+`pnpm --filter @omnitron-dev/omnitron test:console-publication`.

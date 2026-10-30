@@ -401,3 +401,35 @@ daemon versions is not implemented.
 Keep immutable experiment manifests intact when their recorded package trees are
 unavailable. Recover the original environment or create a separately registered
 experiment; changing old hashes would invalidate its reproducibility.
+
+
+### Execution handoff: architecture boundary
+
+**Design target, not a current zero-downtime capability.** The control daemon
+currently owns Titan PM supervisors, fork IPC channels, worker threads and app
+routing. Fork workers terminate on parent disconnect; the parent-death watchdog
+and cold-start janitor enforce that ownership. Simply disabling `stopAll` or
+reusing PIDs would either lose in-process workers or create unmanaged processes.
+
+The migration boundary is a separately supervised execution host in Titan PM.
+It must own application processes, threads, restart policy, log capture, metrics
+and the child registry independently of the Omnitron control daemon. Omnitron
+retains project orchestration and RBAC, communicating through authenticated,
+local Netron RPC. A private socket and a persistent host identity must be verified
+before a controller can attach; PID existence alone is not identity evidence.
+
+Ownership transfer requires a monotonic fencing epoch and one active writer.
+Prepare the new controller, reconcile its desired configuration with the host's
+actual registry, then atomically transfer the writer lease. Commands carry epoch
+and operation identity; the host rejects old writers and deduplicates retries.
+A controller outage leaves existing work supervised, while new mutations stop
+until authorization and ownership can be verified. Telemetry has a bounded,
+observable buffer and resumes with acknowledgements rather than silent loss.
+
+Before enabling this mode, test fork and thread workers, pools, classic scripts,
+service routing, rolling configuration, revocation during disconnect, PID reuse,
+crashes at each transfer phase, lost acknowledgements and rollback to the prior
+controller. Migration of existing coupled workers needs one controlled restart;
+only workers already owned by the execution host can survive later control-daemon
+updates. Immutable application runtimes and experiment registrations must remain
+separate from controller upgrades.
