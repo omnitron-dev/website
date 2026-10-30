@@ -245,7 +245,7 @@ The fleet service holds the live registry; `OmnitronNodes` holds
 the **registered inventory** (declared nodes, SSH credentials,
 health history). They overlap but serve different purposes.
 
-14 methods, key categories:
+Key method categories:
 
 - **Inventory**: `listNodes`, `getNode`, `addNode`,
   `updateNode`, `removeNode`.
@@ -383,6 +383,16 @@ that entry pending. Metrics currently pass to a sink outside this transaction;
 their receipts are **unverified**, even when the sink callback succeeds. A durable
 metrics pipeline is a separate guarantee and must not be inferred from an empty
 replication queue.
+
+### Reproducible native node bundles
+
+Prepare native daemon updates beside the running version. A bundle that includes `package-lock.json` is installed with `npm ci --omit=dev`; the installer refuses any change to that lock before publishing the candidate directory. Older bundles without a lock retain their installation path, but their transitive dependency versions are not frozen. Include and validate a lock when preparing a repeatable fleet rollout.
+
+Installation and activation are separate. Installation verifies the archive hash, installs into a fresh sibling, executes its CLI, and records the resulting dependency tree. Reusing that version verifies its complete installation receipt. It does not repair a running release in place. Native dependencies must be built and tested against the target's OS, architecture and Node runtime; a macOS frozen runtime is not a Linux bundle.
+
+A daemon that still owns application processes needs a controlled restart for a full node update. Capture the exact running and stopped application inventory, project boot policy, current framework version, service unit, private state and replication queue first. Each application must declare whether its dependencies are independent or provide a reversible framework-binding contract. Verify both the candidate binding and restoration of the previous binding on isolated copies before maintenance. Preserve application releases, credentials and data during rollback; never restore an old replication database over entries collected after the backup.
+
+Update one node at a time. Verify every previously running application's health, RPC authentication and replication progress before moving to the next node. A running daemon alone does not satisfy this check. The [backend handoff workflow](./backend-handoff.md) becomes available only after a separately prepared resident-owner transition; a normal bundle upgrade does not silently change process ownership or the system account.
 
 ### Rolling upgrades and database replacement
 
