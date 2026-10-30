@@ -395,14 +395,16 @@ cluster mode).
 `getSyncStatus` is `viewer` (webapp monitoring). Not typically
 called directly by operators.
 
-:::caution The slave side has no production caller
-`SyncService.setMasterConnection()` — the injection point that
-gives a slave daemon its channel to the master — is called only
-from tests. Nothing in `src/` wires it, so on a real slave the
-sync service buffers to its local WAL and never delivers. The
-server half documented above is reachable and correct; the client
-half is not connected.
-:::
+Production replication uses the master's authenticated mesh connection to pull
+`drainBuffer` batches from each slave. The master ingests a batch before calling
+`ackDrained`; pending entries remain available for retry until acknowledged.
+Rejected entries remain pending. Permanently discarded entries are logged as
+errors and acknowledged explicitly.
+
+`SyncService.setMasterConnection()` is an unused push-path hook. Its `connected`
+flag does not describe the active pull channel. Inspect pending entries, the last
+acknowledgement, node reachability and mesh logs when diagnosing replication.
+An unavailable reading is unknown, not an empty backlog.
 
 ### `OmnitronSystemInfo` — `system-info.rpc-service.ts`
 
@@ -417,8 +419,9 @@ The webapp uses this for the host-info card.
 ### `OmnitronTelemetry` — `telemetry.rpc-service.ts`
 
 Telemetry ingestion endpoint for `titan-telemetry-relay`
-aggregator role. Apps push batches here; the daemon stores and
-aggregates.
+aggregator role. It is registered only on master daemons. Apps push batches here;
+the daemon stores and aggregates. Slave log/metric replication uses `OmnitronSync`
+above and does not require this separate relay endpoint.
 
 | Method | Effect |
 | ------ | ------ |

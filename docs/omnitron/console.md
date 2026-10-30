@@ -152,6 +152,12 @@ production project is not registered on the local machine. The same diagnostics
 show each application's health verdict and individual checks, separately from its
 process status: an online process can still have an unhealthy mail queue.
 
+Diagnostics separates the replication channel from the optional telemetry relay.
+A slave can replicate normally without exposing the master-only
+`OmnitronTelemetry` service. Console explains that absence as **not exposed**;
+authentication and connectivity failures remain **unavailable** with their actual
+reason. On a master, a missing relay requires checking its startup logs.
+
 Live mode polls `OmnitronLogs.streamLogs`; time ranges and older pages use
 `queryLogs`. Both apply the same node, application, level and label filters.
 Application, node and message search remain visible. **Filters** expands labels,
