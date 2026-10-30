@@ -19,7 +19,7 @@ Verified against `apps/omnitron/src/{observability,monitoring,services}/`.
 | Signal | Owner | Storage | Exposure |
 | ------ | ----- | ------- | -------- |
 | **Logs** | `log-collector` service + `LogManager` | Per-app files and rotated archives; PostgreSQL `logs` for collector queries | RPC: `OmnitronLogs.queryLogs` / `streamLogs` |
-| **Metrics** | `MetricsBridge` + `OmnitronTelemetry` | titan-metrics storage (memory / SQLite / Postgres) | RPC: `OmnitronTelemetry.pushBatch` (ingest), `OmnitronMetrics` (read) |
+| **Metrics** | `MetricsBridge` + `OmnitronTelemetry` | Titan PostgreSQL history on masters; SQLite on updated nodes | RPC: `OmnitronTelemetry.pushBatch` (ingest), `OmnitronMetrics` (read) |
 | **Traces** | `OmnitronTraces` (`TraceCollectorService`) | Postgres (`OmnitronDatabase`), write-buffered | RPC: `ingestSpan`, `ingestBatch`, `getTrace`, `queryTraces`, `getServiceMap` |
 | **Health** | `OmnitronHealth` (app/infra probes) + `OmnitronNodes` health monitor (fleet) | rolling window in state-store / node history | RPC: `OmnitronHealth.checkApp` / `checkAll`; `OmnitronNodes.getCheckHistory` / `getUptimeBar` |
 

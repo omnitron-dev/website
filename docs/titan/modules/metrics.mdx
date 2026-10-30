@@ -32,8 +32,8 @@ pnpm add @omnitron-dev/titan-metrics
 - **Prometheus exposition.** Generate the standard `/metrics`
   text format from the registry.
 - **Operator console without external observability stack.** The
-  in-memory ring buffer + the `OmnitronMetrics` RPC service let the
-  CLI and webapp read the metrics directly.
+  persistent Titan storage and the `OmnitronMetrics` facade let the
+  CLI and webapp read history and database confirmation directly.
 
 ## Quickstart
 
@@ -104,13 +104,14 @@ class UsersService {
 | Method                                                            | Purpose                                          |
 | ----------------------------------------------------------------- | ------------------------------------------------ |
 | `record(sample)`                                                  | Record a fully-formed sample                     |
-| `recordBatch(samples[])`                                          | Record many at once                              |
+| `recordBatch(samples[])`                                          | Queue many samples at once                       |
+| `recordDurable(samples[])`                                        | Await a persistent commit receipt                 |
 | `recordTyped(type, name, labels, value)`                          | **Preferred** — keeps registry + storage in sync |
 | `getRegistry()`                                                   | Direct access to the in-memory Prometheus registry |
 
 The `recordTyped()` method is the canonical entry point — it
-guarantees the Prometheus registry and long-term storage stay
-synchronised. Lower-level `record` is for cases where you've
+updates the Prometheus registry and queues history together. The queue
+is volatile until its write commits; use `recordDurable` to await that boundary. Lower-level `record` is for cases where you've
 already built a sample object.
 
 ### Query API
@@ -128,8 +129,8 @@ already built a sample object.
 | ----------------------------------------------------------------- | ------------------------------------------------ |
 | `start()`                                                         | Start periodic collection + flushing + cleanup   |
 | `stop()`                                                          | Drain buffers, stop collection                   |
-| `flush()`                                                         | Force-flush pending samples; re-enqueues on failure |
-| `getStorageStatus()`          | `MetricsStorageStatus`        | requires auth       |
+| `flush()`                                                         | Await accepted samples; preserve failed batches for retry |
+| `getStorageStatus()`                                              | Inspect queue, commit evidence and errors         |
 | `cleanup()`                                                       | Apply retention policy                           |
 
 ## Why `recordTyped` matters (T#74)
@@ -396,6 +397,7 @@ Expose `MetricsRpcService` explicitly on Netron when needed. The standalone serv
 | `getSnapshot()`                | `MetricsSnapshot`             | `allowAnonymous`    |
 | `querySeries(filter)`          | `MetricsTimeSeries[]`         | `allowAnonymous`    |
 | `getPrometheusText()`          | `string`                      | `allowAnonymous`    |
+| `getStorageStatus()`           | `MetricsStorageStatus`        | requires auth       |
 | `cleanup()`                    | `{ cleaned: true }`           | requires auth       |
 | `flush()`                      | `{ flushed: true }`           | requires auth       |
 | `evictApp({ app })`            | `{ evicted: true }`           | requires auth       |
@@ -424,7 +426,6 @@ flowchart LR
   Reg -- /metrics --> Prom[Prometheus scrape]
   Storage -- querySeries --> Dashboard[Console / dashboards]
   Storage -- retention sweep --> Cleanup[Drop > maxAge]
-  Reg -- getSnapshot --> Storage
   Storage -- ghost-filter --> Snap[MetricsSnapshot]
 ```
 
@@ -499,7 +500,13 @@ it grows faster than your service count.
 - Stops the collector.
 - Clears flush + cleanup timers.
 - Drains the collector buffer.
-- Calls `flush()` one last time to push everything to storage.
+- Calls `flush()` one last time and awaits active `recordDurable` writes.
+
+Titan DI calls `onDestroy()` when it disposes the service, awaiting `stop()` before
+its storage dependencies are disposed. When constructing `MetricsService` yourself,
+call `stop()` before closing your database connection. A failed flush rejects and
+remains visible in diagnostics; forced process termination cannot persist an
+uncommitted in-memory buffer.
 
 Both timers `unref()` so they don't pin the event loop alive.
 
