@@ -215,9 +215,13 @@ handoff; retain its exact rollback runtime and receipt. Do not run a down migrat
 to roll back the backend. Slave updates use the local SQLite schema initializer.
 Applications do not need a direct Kysera dependency.
 
-Old unverified receipts are retained as historical evidence. A master update
-improves confirmation for existing nodes immediately; their previous polling
-producer changes to the atomic outbox only after their backend is updated.
+Old unverified receipts are retained as historical evidence. An upgrade cannot
+certify them. `omnitron --json node reconcile <node>` compares retained metric
+payloads with the database; `--restore` explicitly repairs missing samples and
+records new commit proofs. Original claims remain unchanged. Console and CLI show
+later verification/restoration separately; see [reconciliation limits and recovery](./cluster.md#reconcile-historical-metric-receipts).
+A master update improves confirmation for new deliveries immediately; the source
+polling producer changes to the atomic outbox only after its backend is updated.
 
 Ordinary collection buffers are bounded and volatile before commit. The default
 is 50,000 samples / 16 MiB; overflow is reported, never acknowledged as persisted.

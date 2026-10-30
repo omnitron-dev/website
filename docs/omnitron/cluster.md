@@ -365,11 +365,12 @@ The optional `evidence` object survives daemon replacement and normal retention:
 | `producedThrough` | Highest local sequence generated in this buffer |
 | `releasedThrough` | Contiguous sequence no longer pending; may include discards or evictions |
 | `committedThrough` | Contiguous durable payload receipts from `firstTrackedId`; stops at a pending, unverified or lost entry |
-| `committedRows` | Entries confirmed by a database transaction that also stored their payload |
+| `committedRows` | Entries confirmed by an initial database commit or later payload-bound reconciliation |
 | `discardedRows` | Permanently rejected entries released after recording the refusal |
 | `unverifiedRows` | Released entries without durable payload proof |
 | `evictedRows` | Undelivered entries removed by local buffer limits |
 | `lastCommittedAt`, `lastLossAt` | Persisted timestamps for confirmed commits and known loss |
+| `reconciliation` | Later `verifiedRows`, `restoredRows`, `lastReconciledAt` and proof scope (`master` or `source`) |
 
 These sequence fields are strings, preserving integer precision. The frontier
 before the first tracked entry means no contiguous receipt has been proven yet.
@@ -390,11 +391,56 @@ retries with the same sample IDs do not enqueue duplicates. This replaces the
 polling watermark that could skip delayed samples. Chart retention never removes
 undelivered outbox entries.
 
-Historical `unverifiedRows` remain unverified. Upgrading the master cannot prove
-that an older in-memory destination persisted data. Older nodes can receive the
-new durable receipts immediately, but still need their own backend update to gain
-the atomic local outbox. Buffer limits and known loss counters continue to apply;
-see [metrics persistence diagnostics](./observability.md#metric-persistence-and-confirmation).
+Historical `unverifiedRows` are not automatically promoted by an upgrade. An older
+in-memory destination may have received values without persisting their original
+samples. Older nodes can receive new durable receipts immediately, but need their
+own backend update to gain the atomic local outbox. Buffer limits and known loss
+counters continue to apply; see [metrics persistence diagnostics](./observability.md#metric-persistence-and-confirmation).
+
+### Reconcile historical metric receipts
+
+Use `omnitron --json node reconcile <node>` to inspect retained, released metric
+entries. Add `--restore` when repairing the identified history is intended.
+Pages are bounded by entries and bytes, fix the source epoch/frontier, and return
+a keyset cursor. Normal collection and replication continue independently.
+
+A sample matches only when its metric name, application, source node, labels,
+original timestamp and value match. Resampled charts are not exact source samples.
+Reusing an identity with different content fails the transaction. Missing history
+is restored using the same stable sample identity and Titan PostgreSQL adapter as
+normal ingestion. Restoring an old point does not replace the latest gauge value.
+
+The master's `sync_reconciliations` journal records a new `present` or `restored`
+proof, payload hash, sample identity, source epoch, original ledger outcome,
+receipt ID and verification time. Restored samples, proofs and summary counters
+commit together. The original `sync_ingested` claim is preserved: a repair today
+does not prove that the legacy receiver committed data at its original delivery.
+
+On the source, proof must match the still-retained immutable payload and epoch.
+Its journal, the decrement of `unverifiedRows` and increase of `committedRows`
+commit in one SQLite WAL/FULL transaction. Original `syncOutcome` and `syncedAt`
+are unchanged. Repeated pages and lost responses cannot count or restore an entry
+twice. Retry the same cursor after failure; no queue reset or database restore is
+needed. Other categories, pruned payloads, rejected entries, conflicting content
+and another epoch cannot be certified by this metric recovery path.
+
+The optional journal has its own checksummed `sync_reconciliation_migrations`
+history, using the public Omnitron migration runner through Titan/Kysera. It adds
+two tables and leaves the core registry unchanged. A reviewed worker built with
+the same code can reconcile an older node alongside its running daemon, without
+changing application ownership or service units. Pin and verify the worker, use
+the node's existing native dependencies, and test reopening its database with the
+older runtime first. The normal CLI uses RPC and never installs a worker implicitly.
+
+Restore respects `monitoring.metrics.historyMaxAge`; already committed data missing
+after retention is not silently resurrected. A proof records a past commit, not
+indefinite payload retention or replica/backup availability. Proof journals retain
+hashes and identities independently of chart and queue retention, without full
+payloads. While any unresolved historical gap or recorded loss remains, the
+contiguous frontier is conservative and can stay at its former boundary. It
+advances beyond that uncertainty only when all gaps are settled and no known loss
+remains. CLI and Console distinguish verified/restored counts from unresolved
+history; an unreadable proof journal remains an explicit diagnostic error.
 
 ### Reproducible native node bundles
 

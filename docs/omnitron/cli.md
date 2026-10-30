@@ -50,7 +50,7 @@ into another process. Check both the JSON result and the exit status.
 | **Pipelines** | `pipeline list`, `pipeline save`, `pipeline run`, `pipeline status`, `pipeline cancel` |
 | **Backup** | `backup create`, `backup list`, `backup restore` |
 | **Kubernetes** | `k8s pods`, `k8s deploy scale` |
-| **Nodes** | `node list`, `node add`, `node update`, `node remove`, `node check`, `node ssh-keys` |
+| **Nodes** | `node list`, `node add`, `node update`, `node remove`, `node check`, `node reconcile`, `node ssh-keys` |
 | **Access** | `access show`, `access users`, `access create`, `access role`, `access revoke` |
 | **SSH** | `node ssh-key`, `node ssh`, `terminal list`, `terminal close` |
 | **Webapp** | `webapp build`, `webapp start`, `webapp stop`, `webapp status`, `webapp open` |
@@ -539,6 +539,28 @@ targets that may or may not run a daemon.
 | `omnitron node remove <id>` (alias `rm`) | Remove a node |
 | `omnitron node check [id]` | Connectivity check (all nodes if omitted) |
 | `omnitron node ssh-keys` | List available SSH keys from `~/.ssh/` |
+| `omnitron node reconcile <node>` | Inspect historical unverified metrics; administrator only |
+
+`node reconcile` is read-only unless `--restore` is supplied. It compares retained
+source samples with PostgreSQL using the original timestamp, value and normalized
+labels. Matching samples are reused; missing samples are restored through Titan's
+durable storage transaction. The source accepts proof only after that commit.
+
+```bash
+omnitron --json node reconcile edge-1
+omnitron --json node reconcile edge-1 --restore --pages 20
+```
+
+`--pages` defaults to `1` and accepts `1..2000`; a page contains at most 256 entries
+and 2 MiB. JSON output includes counts, unresolved source rows and a `continuation`
+object. Resume its `after`, `through` and `epoch` using `--after`, `--through` and
+`--epoch`. After a failed acknowledgement, retry the same cursor. Repeating a
+completed repair makes no new samples.
+
+The source must support the reconciliation protocol. An older node with no
+unverified entries answers as a no-op. For an older node with gaps, prepare a
+compatible update or a reviewed maintenance worker; the command does not silently
+execute SSH code. See [historical reconciliation](./cluster.md#reconcile-historical-metric-receipts).
 
 ### `omnitron node add` flags
 

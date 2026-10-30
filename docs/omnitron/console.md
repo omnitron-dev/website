@@ -152,7 +152,7 @@ production project is not registered on the local machine. The same diagnostics
 show each application's health verdict and individual checks, separately from its
 process status: an online process can still have an unhealthy mail queue.
 
-Diagnostics reports RPC transport, authentication, heartbeat freshness and retry timing separately from replication backlog and acknowledgements. Read failures retain their cause instead of appearing as an empty queue or an unexamined node. The same interpretation is available through `omnitron node check <id>`; see [operational diagnostics](./diagnostics.md#rpc-connection-and-replication).
+Diagnostics reports RPC transport, authentication, heartbeat freshness and retry timing separately from replication backlog and acknowledgements. Read failures retain their cause instead of appearing as an empty queue or an unexamined node. Historical repairs show separate verified/restored counts; an unreadable reconciliation journal remains a warning. The same interpretation is available through `omnitron node check <id>`; see [operational diagnostics](./diagnostics.md#rpc-connection-and-replication).
 
 Diagnostics separates the replication channel from the optional telemetry relay.
 A slave can replicate normally without exposing the master-only

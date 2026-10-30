@@ -38,12 +38,12 @@ diffs them against the index table below.
 | `infrastructure.rpc-service.ts` | `OmnitronInfra` | 18 | viewer (read) + operator (start/stop/remove) |
 | `kubernetes.rpc-service.ts` | `OmnitronKubernetes` | 9 | admin |
 | `log-collector.rpc-service.ts` | `OmnitronLogs` | 4 | viewer |
-| `node-manager.rpc-service.ts` | `OmnitronNodes` | 31 | viewer (read) + operator (mutate) |
+| `node-manager.rpc-service.ts` | `OmnitronNodes` | 32 | viewer (read), operator (operations), admin (historical repair) |
 | `pipeline.rpc-service.ts` | `OmnitronPipelines` | 9 | admin + live human session / trusted local CLI |
 | `project.rpc-service.ts` | `OmnitronProject` | 24 | viewer (read) + operator (start/stop) + admin (CRUD) |
 | `release.rpc-service.ts` | `OmnitronRelease` | 12 | viewer (read), operator (build/attest), admin (prune) |
 | `secrets.rpc-service.ts` | `OmnitronSecrets` | 6 | admin |
-| `sync.rpc-service.ts` | `OmnitronSync` | 4 | service-to-service (getSyncStatus is viewer) |
+| `sync.rpc-service.ts` | `OmnitronSync` | 6 | authenticated control plane; historical repair excludes operators |
 | `system-info.rpc-service.ts` | `OmnitronSystemInfo` | 1 | viewer |
 | `telemetry.rpc-service.ts` | `OmnitronTelemetry` | 2 | pushBatch anonymous; getRelayStats viewer |
 | `trace-collector.rpc-service.ts` | `OmnitronTraces` | 5 | viewer (read); operator/admin (ingestion) |
@@ -305,7 +305,7 @@ subscription open.
 
 ### `OmnitronNodes` — `node-manager.rpc-service.ts`
 
-Node inventory, health history, bundle activation and recovery: 31 public methods.
+Node inventory, health history, bundle activation and recovery: 32 public methods.
 
 | Method category | Methods |
 | --------------- | ------- |
@@ -315,6 +315,7 @@ Node inventory, health history, bundle activation and recovery: 31 public method
 | Misc | `listSshKeys`, `getCheckConfig`, `setCheckConfig`, `getHistoryConfig` |
 | Remote daemon | `getNodeDaemonStatus`, `getNodeDaemonHealth`, `getNodeDaemonMetrics`, `getNodeClusterState` |
 | Mesh and telemetry | `getMeshStatus`, `getNodeRelayStats`, `getNodeSyncStatus`, `getNodeIndicators` |
+| Historical repair (admin) | `reconcileNodeMetrics({nodeId, restore?, after?, through?, epoch?})` |
 | Bundle operations | `installBundleOnNode`, `activateBundleOnNode`, `recoverBundleOnNode` |
 | Upgrades | `planUpgrade`, `upgradeNode`, `upgradeNodes`, `getUpgradeProgress`, `cancelUpgrade` |
 
@@ -390,11 +391,16 @@ cluster mode).
 | `drainBuffer({limit?})` | Pull pending sync data |
 | `ackDrained({ids})` | Acknowledge what the caller has durably taken |
 | `getSyncStatus()` | Current sync state |
+| `readUnverifiedMetrics({after?, through?, epoch?, limit?})` | Read a bounded page of retained historical metrics; admin or service identity |
+| `acknowledgeReconciliation({proofs})` | Verify payload-bound database proofs and atomically settle source evidence; admin or service identity |
 
 `receiveBatch`, `drainBuffer` and `ackDrained` gate on `['admin',
 'operator', 'service_role']` (daemon-to-daemon over TCP);
-`getSyncStatus` is `viewer` (webapp monitoring). Not typically
-called directly by operators.
+`getSyncStatus` accepts human read roles and the authenticated control plane.
+Historical repair methods require `admin` or `service_role`; neither `viewer` nor
+`operator` can change proof. The master coordinator
+`OmnitronNodes.reconcileNodeMetrics` requires `admin`. Inspection is its default;
+`restore: true` explicitly enables repair.
 
 Production replication uses the master's authenticated mesh connection to pull
 `drainBuffer` batches from each slave. The master ingests a batch before calling
