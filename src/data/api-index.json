@@ -13034,7 +13034,7 @@
       "name": "InfrastructureState",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/infrastructure/types.ts#L260",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/infrastructure/types.ts#L262",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/dto/services",
@@ -13242,7 +13242,7 @@
       "name": "IOmnitronBackendService",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/shared/dto/backend.ts#L19",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/shared/dto/backend.ts#L20",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/dto/services",
@@ -65082,7 +65082,7 @@
       "name": "ProcessSupervisor",
       "package": "@omnitron-dev/titan-pm",
       "kind": "class",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-pm/src/process-supervisor.ts#L47",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-pm/src/process-supervisor.ts#L48",
       "imports": [
         {
           "path": "@omnitron-dev/titan-pm",

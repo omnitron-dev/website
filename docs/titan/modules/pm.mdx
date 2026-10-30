@@ -143,8 +143,26 @@ returned by `pool()` also lets you call `@Public` methods directly
 const supervisor = this.pm.createSupervisor(ParentProcess);
 ```
 
-Supervisor coordinates child processes and applies restart policies
-from the module config (or per-supervisor overrides).
+Create the supervisor, attach observers, then call `await supervisor.start()`:
+
+```typescript
+const supervisor = pm.createSupervisor({
+  strategy: SupervisionStrategy.ONE_FOR_ONE,
+  maxRestarts: 3,
+  window: 60_000,
+  backoff: { type: 'exponential', initial: 1_000, max: 30_000, factor: 2 },
+  children: [{ name: 'worker', process: '/absolute/worker.js', critical: false }],
+});
+supervisor.on('child:start-failed', (name, error) => logger.error({ name, err: error }, 'Startup failed'));
+supervisor.on('child:recovery-stopped', (name, error) => logger.error({ name, err: error }, 'Recovery stopped'));
+await supervisor.start();
+```
+
+Import `SupervisionStrategy` from `@omnitron-dev/titan-pm`. Both noncritical initial startup failures and failures during a crash restart consume the same configured retry budget and backoff. `maxRestarts: 0` disables automatic retries. A required critical child still fails initial supervisor startup immediately; after the supervisor is running, its recovery follows policy.
+
+Recovery is serialized per supervisor. `ONE_FOR_ONE` preserves unaffected siblings; `ONE_FOR_ALL` and `REST_FOR_ONE` retain declaration order, including children whose previous start failed. `stop()` cancels waiting retries and joins any spawn already in progress before stopping its result. No delayed restart may resurrect a stopped supervisor.
+
+Use `child:start-failed` for the original cause, `child:restart` for attempts, and `child:started` for readiness. `child:recovery-stopped` means policy declined further attempts or failed itself; critical exhaustion emits `escalate`. Explicit `restartChild(name)` can retry a failed declaration. Omnitron preserves the last failure until the whole application is online and reports when the policy stops recovery.
 
 ## Decorators
 
