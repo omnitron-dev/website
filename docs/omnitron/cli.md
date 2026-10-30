@@ -120,7 +120,8 @@ someone runs `omnitron up` by hand.
 
 | Command | Effect |
 | ------- | ------ |
-| `omnitron service install` | Register and start the OS service |
+| `omnitron service install` | Register OS supervision; resident mode requires a stopped backend and owner |
+| `omnitron service install --prepare` | Prepare independent owner/backend service definitions without stopping processes |
 | `omnitron service uninstall` | Stop the supervised daemon and remove the service |
 | `omnitron service status` | Whether the OS is supervising, and what it reports |
 
@@ -136,7 +137,7 @@ crash or a `SIGKILL` exits abnormally and is respawned
 on systemd). Installing the service does not take `down` away from
 you.
 
-The supervisor runs the same `daemon-entry.js` that `omnitron up`
+In coupled mode, the supervisor runs the same `daemon-entry.js` that `omnitron up`
 forks — one daemon codepath with two launchers — and that entry
 point holds a single-instance pid guard, so the two can never both
 bind.
@@ -214,6 +215,8 @@ not the app's. A child that restarted an hour ago under an app that
 has been up for a week reads one hour.
 
 ## Monitoring
+
+Resident mode uses independent owner and backend guardian services. See [backend replacement](./backend-handoff.md#independent-os-supervision) for preparation, crash recovery, system scope and owner-failure boundaries.
 
 ### `omnitron logs [app]`
 
