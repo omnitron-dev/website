@@ -236,7 +236,7 @@ a longer `collection.interval`.
 | Backend | Setup | What survives restart |
 | --- | --- | --- |
 | `memory` | Default; no SQL runtime dependency | Nothing; a bounded ring serves recent readings |
-| `sqlite` | A caller-owned Kysely connection; SQLite `synchronous=FULL` or `EXTRA` | Committed rows in the database file |
+| `sqlite` | A caller-owned Kysely connection; WAL + FULL/EXTRA, or rollback journal + EXTRA | Committed rows in the database file |
 | `postgres` | A caller-owned Kysely connection and a registered schema migration | Committed rows in the logged table |
 
 Omnitron selects PostgreSQL on masters and SQLite on updated slave daemons. Its
@@ -300,8 +300,12 @@ const receipt = await metrics.recordDurable([{
 An ID identifies one immutable sample. Reusing it with different data rejects the
 write. `recordDurable` rejects memory or undeclared durability. PostgreSQL requires
 `fsync=on`, `full_page_writes=on` and a logged table; writes set transaction-local
-`synchronous_commit=on`. SQLite verifies disk durability and reports `:memory:` as
-volatile. Database commit does not certify a backup or availability of replicas.
+`synchronous_commit=on`. SQLite requires WAL with `synchronous=FULL` or `EXTRA`,
+or a disk rollback journal with `synchronous=EXTRA`. OFF/MEMORY journaling is
+rejected. The adapter verifies the settings before initialization and inside every
+write transaction; it never changes the caller's PRAGMAs. This follows
+[SQLite's durability matrix](https://sqlite.org/pragma.html#pragma_synchronous).
+An in-memory SQLite database is reported as volatile. Database commit does not certify a backup or availability of replicas.
 
 ### Buffered collection and diagnostics
 
