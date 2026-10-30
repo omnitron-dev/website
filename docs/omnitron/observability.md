@@ -147,6 +147,54 @@ sequenceDiagram
   Store-->>CLI: time series
 ```
 
+### Metric persistence and confirmation
+
+The daemon's metric history uses Titan's SQL adapters: PostgreSQL on masters and
+SQLite on updated slave daemons. Console history queries, CLI diagnostics and the
+`metrics-storage` health indicator refer to that same store. No second write-only
+metric table is maintained.
+
+- A local collection call queues a measurement. `flush()` confirms that the
+  selected storage completed the queued writes; `recordDurable()` returns a
+  persistent commit receipt or rejects.
+- A slave commits each metric and its replication outbox entry atomically. Its
+  pending queue survives daemon replacement and database reconnection.
+- A master commits the received metric and `sync_ingested` outcome atomically.
+  A missing response leaves the same source entry pending; replay returns the
+  existing outcome without writing the metric twice.
+- Original sample timestamps and source-node labels survive transport. The live
+  Prometheus registry is updated after commit and is not the history database.
+
+```bash
+omnitron metrics --json
+omnitron health --json
+omnitron node check <node>
+```
+
+The first command includes `storage.status` and the same summary/detail shown on
+the Console Metrics page. It distinguishes persistent, volatile and unknown
+storage, queued samples/bytes, completed writes, errors, retention failures and
+known losses. Counters are scoped to the current backend process; replication
+receipt counters retain their tracking epoch on disk. A successful RPC call or
+an empty queue is not substituted for database confirmation.
+
+Migration `015_persistent_metrics` creates Titan's `metrics_samples` table and
+indexes through Omnitron's existing Kysera-backed migration lifecycle. For a
+resident backend, prepare/apply the reviewed additive schema transition before
+handoff; retain its exact rollback runtime and receipt. Do not run a down migration
+to roll back the backend. Slave updates use the local SQLite schema initializer.
+Applications do not need a direct Kysera dependency.
+
+Old unverified receipts are retained as historical evidence. A master update
+improves confirmation for existing nodes immediately; their previous polling
+producer changes to the atomic outbox only after their backend is updated.
+
+Ordinary collection buffers are bounded and volatile before commit. The default
+is 50,000 samples / 16 MiB; overflow is reported, never acknowledged as persisted.
+Chart history defaults to seven days. Pruning chart history and pruning delivered
+replication entries are separate operations. See the [Titan metrics contract](../titan/modules/metrics.mdx)
+for durable calls, database settings, query budgets and optional storage adapters.
+
 ### Producer side — `MetricsBridge`
 
 `apps/omnitron/src/observability/metrics-bridge.ts` is the
@@ -202,12 +250,12 @@ daemons either:
 
 ### Read side — `OmnitronMetrics` (from `titan-metrics`)
 
-The `titan-metrics` module's `MetricsRpcService` is auto-registered
-as `OmnitronMetrics`. The webapp / CLI read through it.
+The daemon registers its role-protected `OmnitronMetricsRpcService` facade
+over Titan's metrics service. The webapp and CLI use the same contracts.
 
 See [titan-metrics docs](../titan/modules/metrics.mdx) for the
-full read API — `getSnapshot`, `querySeries`,
-`getPrometheusText`, `evictApp`.
+full API — `getSnapshot`, `querySeries`, `getPrometheusText`,
+`getStorageStatus` and restricted maintenance operations.
 
 ### Prometheus scrape endpoint — `MetricsServer`
 

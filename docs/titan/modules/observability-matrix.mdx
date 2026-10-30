@@ -247,11 +247,11 @@ the caller if you need to.
 
 <ModuleBadge origin="official" pkg="@omnitron-dev/titan-metrics" />
 
-The `MetricsService` itself is quiet — it neither logs flush activity
-at info level nor records meta-metrics about its own flushing. (The
-`MetricsCollector` keeps an internal `totalDropped` counter for buffer-
-pressure diagnostics, surfaced by the omnitron metrics-bridge rather
-than as a self-instrumented metric.)
+`MetricsService.getStorageStatus()` reports durability, queue samples/bytes,
+completed writes, retry failures, known losses and retention/callback errors.
+Background errors also reach `onError`; explicit write/flush failures reject.
+Omnitron records rate-limited structured failures and exposes the same reading
+through daemon health, CLI and Console. Normal successful flushes stay quiet.
 
 The process collector (`collection: { process: true }`) records, for
 the daemon's own process: `heap_used_bytes`, `heap_total_bytes`,

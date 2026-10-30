@@ -129,6 +129,7 @@ already built a sample object.
 | `start()`                                                         | Start periodic collection + flushing + cleanup   |
 | `stop()`                                                          | Drain buffers, stop collection                   |
 | `flush()`                                                         | Force-flush pending samples; re-enqueues on failure |
+| `getStorageStatus()`          | `MetricsStorageStatus`        | requires auth       |
 | `cleanup()`                                                       | Apply retention policy                           |
 
 ## Why `recordTyped` matters (T#74)
@@ -229,37 +230,117 @@ The staleness multiplier is fixed at 3× (the smallest value that
 survives normal flush jitter). Override the floor by configuring
 a longer `collection.interval`.
 
-## Storage backends
+## Storage and commit boundaries
 
-| Backend                       | Class                       | When                                                    |
-| ----------------------------- | --------------------------- | ------------------------------------------------------- |
-| `'memory'`                    | `MemoryMetricsStorage`      | Default — ring buffer; console reads from it            |
-| `'sqlite'`                    | `SQLiteMetricsStorage`      | Local persistence for single-node deployments           |
-| `'postgres'`                  | `PostgresMetricsStorage`    | Persistent + cross-pod aggregation                      |
+| Backend | Setup | What survives restart |
+| --- | --- | --- |
+| `memory` | Default; no SQL runtime dependency | Nothing; a bounded ring serves recent readings |
+| `sqlite` | A caller-owned Kysely connection; SQLite `synchronous=FULL` or `EXTRA` | Committed rows in the database file |
+| `postgres` | A caller-owned Kysely connection and a registered schema migration | Committed rows in the logged table |
 
-### Backend comparison
+Omnitron selects PostgreSQL on masters and SQLite on updated slave daemons.
+Standalone Titan applications opt in by registering `METRICS_STORAGE_TOKEN`
+with the appropriate adapter. Selecting a storage type does not create a database
+connection. `forRootAsync` accepts a `storage: { useFactory, inject }` provider;
+it refuses a persistent configuration without one instead of silently using memory.
+Kysely is an optional peer dependency; install the driver for your chosen database.
 
-| Concern                          | `memory`            | `sqlite`              | `postgres`               |
-| -------------------------------- | ------------------- | --------------------- | ------------------------ |
-| Persistence across restart       | ✗                   | ✓                     | ✓                        |
-| Multi-pod aggregation            | ✗                   | ✗ (per-node)          | ✓                        |
-| Setup cost                       | none                | one file path         | DB + schema + creds      |
-| Write latency                    | μs                  | ~1 ms                 | ~1–5 ms                  |
-| Query latency at 1M samples      | μs (ring)           | ~10 ms                | ~10–50 ms                |
-| Footprint (RAM)                  | bounded ring        | minimal               | minimal                  |
-| Footprint (disk)                 | none                | per-segment growth    | per-row growth           |
-| Retention enforcement            | natural (ring)      | `cleanup(maxAgeMs)`   | `cleanup(maxAgeMs)`      |
+`PostgresMetricsStorage.write(samples)` and `SQLiteMetricsStorage.write(samples)`
+resolve after the transaction commits. They have no internal queue or flush timer.
+Errors reject the call. All INSERT chunks and an optional `afterWrite(trx, samples)`
+outbox callback share that transaction. The callback receives newly inserted samples,
+so a retry with the same IDs cannot append the outbox twice. `writeInTransaction`
+joins a caller-owned transaction; only the outer commit confirms persistence.
+Initialize the SQLite adapter before joining another transaction.
 
-Rules of thumb:
-- **Single pod, no external observability:** `memory` is fine.
-- **Single pod, want history across restart:** `sqlite`.
-- **Multi-pod with shared dashboards:** `postgres` with shared
-  connection details.
+### Apply the schema once
 
-The buffer-flush pattern preserves data on transient storage
-failures — failed batches are re-enqueued for the next flush
-attempt rather than being dropped. This applies to all backends
-(T#70 fix).
+Titan owns the immutable `METRICS_POSTGRES_SCHEMA_V1` and `METRICS_SQLITE_SCHEMA_V1`
+DDL. PostgreSQL schema changes run through the application's migration framework,
+not opportunistically from a write:
+
+```typescript
+import { METRICS_POSTGRES_SCHEMA_V1 } from '@omnitron-dev/titan-metrics';
+import { defineSqlMigration } from '@omnitron-dev/titan-database/migration';
+
+export const migration = defineSqlMigration(
+  '001_metrics',
+  METRICS_POSTGRES_SCHEMA_V1.join(';\n'),
+  'DROP TABLE metrics_samples',
+);
+```
+
+Omnitron registers this as `015_persistent_metrics` through its public migration
+API. Application developers using Omnitron do not need to import Kysera directly.
+Existing `metrics_raw` tables are not adopted or erased: the new contract uses
+`metrics_samples`, epoch milliseconds, stable sample IDs and indexed series identity.
+SQLite initialization creates that table idempotently; use `initializeSchema: false`
+when your migrations own its creation. Setup errors propagate and remain retryable.
+
+### Await a durable write
+
+```typescript
+import { MetricsService, PostgresMetricsStorage } from '@omnitron-dev/titan-metrics';
+
+// db is your existing, migrated Kysely connection.
+const metrics = new MetricsService(
+  { appName: 'api', collection: { enabled: false }, storage: { type: 'postgres' } },
+  new PostgresMetricsStorage(db),
+);
+const receipt = await metrics.recordDurable([{
+  id: 'measurement-42', // preserve across caller retries after an uncertain response
+  name: 'queue_depth', value: 12, timestamp: Date.now(), labels: { app: 'api' },
+}]);
+// receipt: { durability: 'persistent', samples: 1, committedAt: ISO timestamp }
+```
+
+An ID identifies one immutable sample. Reusing it with different data rejects the
+write. `recordDurable` rejects memory or undeclared durability. PostgreSQL requires
+`fsync=on`, `full_page_writes=on` and a logged table; writes set transaction-local
+`synchronous_commit=on`. SQLite verifies disk durability and reports `:memory:` as
+volatile. Database commit does not certify a backup or availability of replicas.
+
+### Buffered collection and diagnostics
+
+`record`, `recordBatch` and `recordTyped` are synchronous collection calls, **not
+commit acknowledgements**. The service assigns IDs before queuing. `flush()` awaits
+all samples accepted before the call, including an in-flight writer; `stop()` stops
+collection and awaits the final flush. A failed write keeps its batch for retry.
+Until commit, this queue is volatile. Use the awaited API when the caller needs a
+persistence result.
+
+The queue defaults to 50,000 samples and 16 MiB of serialized UTF-8 data, including
+writes in flight (`storage.maxBufferSize`, `storage.maxBufferBytes`). Overflow
+rejects new samples from persistence and increments `droppedSamples`; it cannot be
+mistaken for a committed write. Background errors are caught, exposed by
+`getStorageStatus()` and sent to the optional `onError(error, operation)` callback.
+Explicit writes, flush and cleanup still reject. Counters describe this process;
+the database history survives its replacement.
+
+Status includes pending sample/byte counts, capacity, oldest enqueue time, last
+completed write, failed writes, known losses, write/retention/callback errors and
+storage durability. Omnitron exposes the same interpretation in `omnitron metrics
+--json`, daemon health and the Console Metrics page. A disconnected status poll
+must not leave a green persistence claim on screen.
+
+`sync.onFlush` is a post-write notification, not a transactional outbox. Its failure
+is reported separately and never retries an already committed storage write. Use
+`afterWrite` with the supplied transaction for reliable enqueueing.
+
+### Bounded history queries
+
+Names, apps and labels filter in SQL before per-series limits. Node labels remain
+separate series. `limit` is 1–2000 points per series (default 120); SQL adapters
+default to the last 24 hours when `from` is omitted. Time buckets average gauges
+and keep the last `*_total`/`*_count` value. Bounds cover the whole requested window,
+not just its first rows. Limits apply to the newest points.
+
+Results are capped at 100,000 points and 1,024 series by default. Adapter options
+`maxQueryPoints` and `maxQuerySeries` can lower these budgets; the series cap can be
+raised to 4,096. PostgreSQL queries have a 10-second statement timeout by default.
+An exceeded budget rejects with an instruction to narrow the query; it does not
+silently truncate history. Labels are returned once per series. Samples allow up
+to 64 string labels and 8 KiB of serialized labels. Keep cardinality low.
 
 ## `@Metrics` decorator
 
@@ -307,7 +388,7 @@ Prometheus at it. No `prom-client` needed.
 
 ## RPC surface — `OmnitronMetrics`
 
-Auto-registered when the module loads. Verified from
+Expose `MetricsRpcService` explicitly on Netron when needed. The standalone service is defined in
 [`packages/titan-metrics/src/rpc-service.ts`](https://github.com/omnitron-dev/omni/tree/main/packages/titan-metrics/src/rpc-service.ts).
 
 | Method                         | Returns                       | Auth                |
@@ -319,10 +400,11 @@ Auto-registered when the module loads. Verified from
 | `flush()`                      | `{ flushed: true }`           | requires auth       |
 | `evictApp({ app })`            | `{ evicted: true }`           | requires auth       |
 
-Read methods are anonymous-safe by design (so dashboards can poll
-without per-poll auth). Mutating methods (`cleanup`, `flush`,
-`evictApp`) require authentication — gate them behind admin role
-in the Netron middleware chain.
+The standalone Titan RPC service retains its anonymous snapshot/history/scrape
+methods for existing integrations. The Omnitron facade requires viewer, operator,
+admin or control-plane roles for reads, operator/control-plane authority for flush,
+and administrator authority for cleanup and eviction. The dedicated Prometheus
+HTTP endpoint follows its own configured authentication policy.
 
 ```typescript
 const metricsClient = await peer.queryInterface<MetricsRpcService>('OmnitronMetrics');
@@ -348,26 +430,25 @@ flowchart LR
 
 Key invariants:
 
-- **Buffer is the lifeboat.** A failed `storage.write` `unshifts`
-  the batch back to the head so the next periodic flush retries
-  it (T#70).
-- **One flush at a time.** The `flushing` flag prevents
-  concurrent flushes from interleaving.
+- **One bounded queue.** Failed batches retain their identities until retry;
+  overflow is reported as loss.
+- **One awaited flush.** Concurrent callers wait for writes they depend on;
+  a busy writer is never treated as a completed flush.
 - **Cleanup runs hourly.** `cleanupInterval` default 3 600 000 ms;
   applies `maxAgeMs` to the storage backend.
 
 ## Retention tuning
 
-| `maxAge` | Disk implication (postgres, 1k samples/s) | Use case                              |
-| -------- | ----------------------------------------- | ------------------------------------- |
-| `'1h'`   | tiny — RAM-friendly                       | Debug-time / smoke                   |
-| `'1d'`   | ~100 M rows; trivial Postgres             | Short-term operator dashboard         |
-| `'7d'`   | ~700 M rows; standard                     | Default — week-over-week comparisons  |
-| `'30d'`  | ~3 B rows; needs partitioning             | Long-term trending                    |
+The default retention is 7 days with an hourly sweep. Duration values must be
+positive and use `s`, `m`, `h` or `d`. SQL cleanup deletes at most 10,000 rows per
+transaction, yielding between chunks and stopping a pass after its time budget;
+the next sweep resumes. Errors remain visible in storage diagnostics.
 
-`cleanup()` is non-trivial on Postgres at high cardinality — set
-`cleanupInterval` longer (e.g., `4 × 3_600_000` for 4 h) if the
-sweep itself stalls writes.
+Estimate capacity from measured row/index/WAL growth. At 1,000 samples/s, one day
+is 86.4 million samples and seven days is 604.8 million; this is substantial storage.
+Reduce collection frequency, label cardinality or retention to fit the workload.
+An hourly deletion policy is not partitioning or downsampling. Replication outbox
+retention is independent: pruning chart history cannot delete pending deliveries.
 
 ## Sizing & cardinality control
 
@@ -411,8 +492,8 @@ it grows faster than your service count.
 `MetricsService.start()` is invoked at module init and:
 - Starts the collector (process / system / RPC samples on
   `collection.interval`, default 5 s).
-- Schedules periodic flush every 5 s (`DEFAULT_FLUSH_INTERVAL`).
-- Schedules periodic cleanup every 1 h (`DEFAULT_CLEANUP_INTERVAL`).
+- Schedules flush on `storage.flushInterval` (default 5 s).
+- Schedules cleanup on `retention.cleanupInterval` (default 1 h).
 
 `stop()` does the reverse in order:
 - Stops the collector.
@@ -433,9 +514,8 @@ Both timers `unref()` so they don't pin the event loop alive.
   time series. Five to ten buckets per histogram is usually right.
 - **Forgetting `appName`.** Without it, metrics from different
   services pile together. Always set it per application.
-- **Calling `record()` outside `recordTyped()`.** Skips the
-  registry-storage sync guarantee. Use `recordTyped()` unless you
-  have a specific reason.
+- **Confusing collection with commit.** `record` and `recordTyped` both queue
+  history. Use `recordDurable` when the caller needs database confirmation.
 - **Disabling retention.** Leaving samples to accumulate
   indefinitely fills disk on Postgres / SQLite. Default `'7d'`
   is sensible.

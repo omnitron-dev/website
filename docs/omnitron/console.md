@@ -76,7 +76,7 @@ sidebar.
 | `/apps/:name` | `AppDetailPage` | project | `OmnitronDaemon.getApp` + many |
 | `/stacks` | `StacksPage` | project | `OmnitronProject.listStacks` |
 | `/stacks/:name` | `StackDetailPage` | project | `OmnitronProject.getStackStatus` |
-| `/metrics` | `MetricsPage` | project | `OmnitronMetrics` (`getSnapshot` / `querySeries`) |
+| `/metrics` | `MetricsPage` | project | `OmnitronMetrics` (`querySeries` / `getStorageStatus`) |
 | `/topology` | `TopologyPage` | project | stack deployments, daemon processes and runtime containers |
 | `/containers` | `ContainersPage` | project | `OmnitronInfra` |
 | `/deployments` | `DeploymentsPage` | project | `OmnitronDeploy` |

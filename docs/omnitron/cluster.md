@@ -379,10 +379,22 @@ queue becomes empty; a restart or retention pass must not erase them.
 The master persists each receipt's outcome in the same transaction as its data.
 A lost reply and a repeated batch retain that outcome: a previous discard never
 becomes a committed duplicate. If recording a discard fails, the source keeps
-that entry pending. Metrics currently pass to a sink outside this transaction;
-their receipts are **unverified**, even when the sink callback succeeds. A durable
-metrics pipeline is a separate guarantee and must not be inferred from an empty
-replication queue.
+that entry pending. Starting with migration `015_persistent_metrics`, metrics are
+written through Titan's PostgreSQL adapter in that same transaction. Successful
+receipts therefore prove both the payload and its ledger entry committed. The
+original measurement timestamp and authenticated source node are preserved.
+
+On updated slave daemons, Titan's SQLite adapter writes chart history and the
+replication outbox in one transaction. A failed outbox write rolls both back;
+retries with the same sample IDs do not enqueue duplicates. This replaces the
+polling watermark that could skip delayed samples. Chart retention never removes
+undelivered outbox entries.
+
+Historical `unverifiedRows` remain unverified. Upgrading the master cannot prove
+that an older in-memory destination persisted data. Older nodes can receive the
+new durable receipts immediately, but still need their own backend update to gain
+the atomic local outbox. Buffer limits and known loss counters continue to apply;
+see [metrics persistence diagnostics](./observability.md#metric-persistence-and-confirmation).
 
 ### Reproducible native node bundles
 

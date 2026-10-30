@@ -65,7 +65,7 @@ modules it imports, and are registered by those modules:
 
 | File | Service id | Methods | Role gate |
 | ---- | ---------- | ------- | --------- |
-| `packages/titan-metrics/src/rpc-service.ts` | `OmnitronMetrics` | 6 | **3 anonymous** (`getSnapshot`, `querySeries`, `getPrometheusText`) + authenticated (`cleanup`, `flush`, `evictApp`) |
+| `apps/omnitron/src/services/metrics.rpc-service.ts` | `OmnitronMetrics` | 7 | Viewer/control-plane reads (including `getStorageStatus`); operator/control-plane `flush`; admin `cleanup` and `evictApp` |
 | `packages/titan-health/src/health.rpc-service.ts` | `Health@1.0.0` | 7 | **all 7 anonymous** |
 
 Both are worth knowing about for a reason beyond completeness: they are

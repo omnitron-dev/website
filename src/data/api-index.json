@@ -197,6 +197,10 @@
       "guide": "/docs/omnitron/diagnostics"
     },
     {
+      "path": "@omnitron-dev/omnitron/metrics-storage-reading",
+      "guide": "/docs/omnitron/observability"
+    },
+    {
       "path": "@omnitron-dev/omnitron/migration",
       "guide": "/docs/omnitron/migrations"
     },
@@ -550,6 +554,10 @@
     },
     {
       "path": "@omnitron-dev/titan-metrics",
+      "guide": "/docs/titan/modules/metrics"
+    },
+    {
+      "path": "@omnitron-dev/titan-metrics/types",
       "guide": "/docs/titan/modules/metrics"
     },
     {
@@ -11790,7 +11798,7 @@
       "name": "AttestStored",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/shared/dto/services.ts#L832",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/shared/dto/services.ts#L833",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/dto/services",
@@ -13414,7 +13422,7 @@
       "name": "IOmnitronReleaseService",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/shared/dto/services.ts#L839",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/shared/dto/services.ts#L840",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/dto/services",
@@ -13454,7 +13462,7 @@
       "name": "IOmnitronTerminalService",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/shared/dto/services.ts#L875",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/shared/dto/services.ts#L876",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/dto/services",
@@ -14005,8 +14013,8 @@
     {
       "name": "MetricsAppSnapshot",
       "package": "@omnitron-dev/omnitron",
-      "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/shared/dto/metrics.ts#L41",
+      "kind": "type",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/shared/dto/metrics.ts#L4",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/dto/services",
@@ -14030,7 +14038,7 @@
       "name": "MetricsQueryFilter",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/shared/dto/metrics.ts#L17",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-metrics/src/types.ts#L129",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/dto/services",
@@ -14042,7 +14050,7 @@
       "name": "MetricsSnapshot",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/shared/dto/metrics.ts#L51",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-metrics/src/types.ts#L155",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/dto/services",
@@ -14051,10 +14059,22 @@
       ]
     },
     {
+      "name": "metricsStorageReading",
+      "package": "@omnitron-dev/omnitron",
+      "kind": "function",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/shared/metrics-storage-reading.ts#L4",
+      "imports": [
+        {
+          "path": "@omnitron-dev/omnitron/metrics-storage-reading",
+          "guide": "/docs/omnitron/observability"
+        }
+      ]
+    },
+    {
       "name": "MetricsTimeSeries",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/shared/dto/metrics.ts#L34",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-metrics/src/types.ts#L147",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/dto/services",
@@ -14998,7 +15018,7 @@
       "name": "ReleaseDeploymentDto",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/shared/dto/services.ts#L785",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/shared/dto/services.ts#L786",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/dto/services",
@@ -15046,7 +15066,7 @@
       "name": "ReleasePreflightDto",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/shared/dto/services.ts#L773",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/shared/dto/services.ts#L774",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/dto/services",
@@ -15058,7 +15078,7 @@
       "name": "ReleasePruneAnswer",
       "package": "@omnitron-dev/omnitron",
       "kind": "type",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/shared/dto/services.ts#L811",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/shared/dto/services.ts#L812",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/dto/services",
@@ -61682,10 +61702,14 @@
       "name": "HistogramState",
       "package": "@omnitron-dev/titan-metrics",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-metrics/src/types.ts#L41",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-metrics/src/types.ts#L43",
       "imports": [
         {
           "path": "@omnitron-dev/titan-metrics",
+          "guide": "/docs/titan/modules/metrics"
+        },
+        {
+          "path": "@omnitron-dev/titan-metrics/types",
           "guide": "/docs/titan/modules/metrics"
         }
       ]
@@ -61694,10 +61718,14 @@
       "name": "IMetricsCollectionConfig",
       "package": "@omnitron-dev/titan-metrics",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-metrics/src/types.ts#L53",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-metrics/src/types.ts#L55",
       "imports": [
         {
           "path": "@omnitron-dev/titan-metrics",
+          "guide": "/docs/titan/modules/metrics"
+        },
+        {
+          "path": "@omnitron-dev/titan-metrics/types",
           "guide": "/docs/titan/modules/metrics"
         }
       ]
@@ -61706,10 +61734,14 @@
       "name": "IMetricsLatestOptions",
       "package": "@omnitron-dev/titan-metrics",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-metrics/src/types.ts#L171",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-metrics/src/types.ts#L179",
       "imports": [
         {
           "path": "@omnitron-dev/titan-metrics",
+          "guide": "/docs/titan/modules/metrics"
+        },
+        {
+          "path": "@omnitron-dev/titan-metrics/types",
           "guide": "/docs/titan/modules/metrics"
         }
       ]
@@ -61718,10 +61750,14 @@
       "name": "IMetricsModuleOptions",
       "package": "@omnitron-dev/titan-metrics",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-metrics/src/types.ts#L101",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-metrics/src/types.ts#L107",
       "imports": [
         {
           "path": "@omnitron-dev/titan-metrics",
+          "guide": "/docs/titan/modules/metrics"
+        },
+        {
+          "path": "@omnitron-dev/titan-metrics/types",
           "guide": "/docs/titan/modules/metrics"
         }
       ]
@@ -61730,10 +61766,14 @@
       "name": "IMetricsRegistry",
       "package": "@omnitron-dev/titan-metrics",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-metrics/src/types.ts#L255",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-metrics/src/types.ts#L268",
       "imports": [
         {
           "path": "@omnitron-dev/titan-metrics",
+          "guide": "/docs/titan/modules/metrics"
+        },
+        {
+          "path": "@omnitron-dev/titan-metrics/types",
           "guide": "/docs/titan/modules/metrics"
         }
       ]
@@ -61742,10 +61782,14 @@
       "name": "IMetricsRetentionConfig",
       "package": "@omnitron-dev/titan-metrics",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-metrics/src/types.ts#L85",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-metrics/src/types.ts#L91",
       "imports": [
         {
           "path": "@omnitron-dev/titan-metrics",
+          "guide": "/docs/titan/modules/metrics"
+        },
+        {
+          "path": "@omnitron-dev/titan-metrics/types",
           "guide": "/docs/titan/modules/metrics"
         }
       ]
@@ -61754,10 +61798,14 @@
       "name": "IMetricsService",
       "package": "@omnitron-dev/titan-metrics",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-metrics/src/types.ts#L203",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-metrics/src/types.ts#L213",
       "imports": [
         {
           "path": "@omnitron-dev/titan-metrics",
+          "guide": "/docs/titan/modules/metrics"
+        },
+        {
+          "path": "@omnitron-dev/titan-metrics/types",
           "guide": "/docs/titan/modules/metrics"
         }
       ]
@@ -61766,10 +61814,14 @@
       "name": "IMetricsStorage",
       "package": "@omnitron-dev/titan-metrics",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-metrics/src/types.ts#L185",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-metrics/src/types.ts#L193",
       "imports": [
         {
           "path": "@omnitron-dev/titan-metrics",
+          "guide": "/docs/titan/modules/metrics"
+        },
+        {
+          "path": "@omnitron-dev/titan-metrics/types",
           "guide": "/docs/titan/modules/metrics"
         }
       ]
@@ -61778,10 +61830,14 @@
       "name": "IMetricsStorageConfig",
       "package": "@omnitron-dev/titan-metrics",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-metrics/src/types.ts#L75",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-metrics/src/types.ts#L77",
       "imports": [
         {
           "path": "@omnitron-dev/titan-metrics",
+          "guide": "/docs/titan/modules/metrics"
+        },
+        {
+          "path": "@omnitron-dev/titan-metrics/types",
           "guide": "/docs/titan/modules/metrics"
         }
       ]
@@ -61790,10 +61846,14 @@
       "name": "IMetricsSyncConfig",
       "package": "@omnitron-dev/titan-metrics",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-metrics/src/types.ts#L93",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-metrics/src/types.ts#L99",
       "imports": [
         {
           "path": "@omnitron-dev/titan-metrics",
+          "guide": "/docs/titan/modules/metrics"
+        },
+        {
+          "path": "@omnitron-dev/titan-metrics/types",
           "guide": "/docs/titan/modules/metrics"
         }
       ]
@@ -61814,10 +61874,14 @@
       "name": "MetricDefinition",
       "package": "@omnitron-dev/titan-metrics",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-metrics/src/types.ts#L29",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-metrics/src/types.ts#L31",
       "imports": [
         {
           "path": "@omnitron-dev/titan-metrics",
+          "guide": "/docs/titan/modules/metrics"
+        },
+        {
+          "path": "@omnitron-dev/titan-metrics/types",
           "guide": "/docs/titan/modules/metrics"
         }
       ]
@@ -61847,10 +61911,34 @@
       ]
     },
     {
+      "name": "METRICS_POSTGRES_SCHEMA_V1",
+      "package": "@omnitron-dev/titan-metrics",
+      "kind": "value",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-metrics/src/sql-storage.ts#L10",
+      "imports": [
+        {
+          "path": "@omnitron-dev/titan-metrics",
+          "guide": "/docs/titan/modules/metrics"
+        }
+      ]
+    },
+    {
       "name": "METRICS_SERVICE_TOKEN",
       "package": "@omnitron-dev/titan-metrics",
       "kind": "value",
       "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-metrics/src/tokens.ts#L11",
+      "imports": [
+        {
+          "path": "@omnitron-dev/titan-metrics",
+          "guide": "/docs/titan/modules/metrics"
+        }
+      ]
+    },
+    {
+      "name": "METRICS_SQLITE_SCHEMA_V1",
+      "package": "@omnitron-dev/titan-metrics",
+      "kind": "value",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-metrics/src/sql-storage.ts#L22",
       "imports": [
         {
           "path": "@omnitron-dev/titan-metrics",
@@ -61879,6 +61967,10 @@
         {
           "path": "@omnitron-dev/titan-metrics",
           "guide": "/docs/titan/modules/metrics"
+        },
+        {
+          "path": "@omnitron-dev/titan-metrics/types",
+          "guide": "/docs/titan/modules/metrics"
         }
       ]
     },
@@ -61895,13 +61987,29 @@
       ]
     },
     {
-      "name": "MetricsQueryFilter",
+      "name": "MetricsDatabase",
       "package": "@omnitron-dev/titan-metrics",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-metrics/src/types.ts#L121",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-metrics/src/sql-storage.ts#L32",
       "imports": [
         {
           "path": "@omnitron-dev/titan-metrics",
+          "guide": "/docs/titan/modules/metrics"
+        }
+      ]
+    },
+    {
+      "name": "MetricsQueryFilter",
+      "package": "@omnitron-dev/titan-metrics",
+      "kind": "interface",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-metrics/src/types.ts#L129",
+      "imports": [
+        {
+          "path": "@omnitron-dev/titan-metrics",
+          "guide": "/docs/titan/modules/metrics"
+        },
+        {
+          "path": "@omnitron-dev/titan-metrics/types",
           "guide": "/docs/titan/modules/metrics"
         }
       ]
@@ -61922,7 +62030,7 @@
       "name": "MetricsRpcService",
       "package": "@omnitron-dev/titan-metrics",
       "kind": "class",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-metrics/src/rpc-service.ts#L17",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-metrics/src/rpc-service.ts#L18",
       "imports": [
         {
           "path": "@omnitron-dev/titan-metrics",
@@ -61934,7 +62042,7 @@
       "name": "MetricsService",
       "package": "@omnitron-dev/titan-metrics",
       "kind": "class",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-metrics/src/metrics.service.ts#L60",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-metrics/src/metrics.service.ts#L63",
       "imports": [
         {
           "path": "@omnitron-dev/titan-metrics",
@@ -61946,10 +62054,46 @@
       "name": "MetricsSnapshot",
       "package": "@omnitron-dev/titan-metrics",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-metrics/src/types.ts#L147",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-metrics/src/types.ts#L155",
       "imports": [
         {
           "path": "@omnitron-dev/titan-metrics",
+          "guide": "/docs/titan/modules/metrics"
+        },
+        {
+          "path": "@omnitron-dev/titan-metrics/types",
+          "guide": "/docs/titan/modules/metrics"
+        }
+      ]
+    },
+    {
+      "name": "MetricsStorageCapabilities",
+      "package": "@omnitron-dev/titan-metrics",
+      "kind": "interface",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-metrics/src/types.ts#L275",
+      "imports": [
+        {
+          "path": "@omnitron-dev/titan-metrics",
+          "guide": "/docs/titan/modules/metrics"
+        },
+        {
+          "path": "@omnitron-dev/titan-metrics/types",
+          "guide": "/docs/titan/modules/metrics"
+        }
+      ]
+    },
+    {
+      "name": "MetricsStorageStatus",
+      "package": "@omnitron-dev/titan-metrics",
+      "kind": "interface",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-metrics/src/types.ts#L287",
+      "imports": [
+        {
+          "path": "@omnitron-dev/titan-metrics",
+          "guide": "/docs/titan/modules/metrics"
+        },
+        {
+          "path": "@omnitron-dev/titan-metrics/types",
           "guide": "/docs/titan/modules/metrics"
         }
       ]
@@ -61958,10 +62102,30 @@
       "name": "MetricsTimeSeries",
       "package": "@omnitron-dev/titan-metrics",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-metrics/src/types.ts#L139",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-metrics/src/types.ts#L147",
       "imports": [
         {
           "path": "@omnitron-dev/titan-metrics",
+          "guide": "/docs/titan/modules/metrics"
+        },
+        {
+          "path": "@omnitron-dev/titan-metrics/types",
+          "guide": "/docs/titan/modules/metrics"
+        }
+      ]
+    },
+    {
+      "name": "MetricsWriteReceipt",
+      "package": "@omnitron-dev/titan-metrics",
+      "kind": "interface",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-metrics/src/types.ts#L280",
+      "imports": [
+        {
+          "path": "@omnitron-dev/titan-metrics",
+          "guide": "/docs/titan/modules/metrics"
+        },
+        {
+          "path": "@omnitron-dev/titan-metrics/types",
           "guide": "/docs/titan/modules/metrics"
         }
       ]
@@ -61974,6 +62138,10 @@
       "imports": [
         {
           "path": "@omnitron-dev/titan-metrics",
+          "guide": "/docs/titan/modules/metrics"
+        },
+        {
+          "path": "@omnitron-dev/titan-metrics/types",
           "guide": "/docs/titan/modules/metrics"
         }
       ]
@@ -61994,7 +62162,19 @@
       "name": "PostgresMetricsStorage",
       "package": "@omnitron-dev/titan-metrics",
       "kind": "class",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-metrics/src/storage.ts#L285",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-metrics/src/sql-storage.ts#L303",
+      "imports": [
+        {
+          "path": "@omnitron-dev/titan-metrics",
+          "guide": "/docs/titan/modules/metrics"
+        }
+      ]
+    },
+    {
+      "name": "prepareMetricSample",
+      "package": "@omnitron-dev/titan-metrics",
+      "kind": "function",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-metrics/src/sql-storage.ts#L60",
       "imports": [
         {
           "path": "@omnitron-dev/titan-metrics",
@@ -62006,7 +62186,19 @@
       "name": "SQLiteMetricsStorage",
       "package": "@omnitron-dev/titan-metrics",
       "kind": "class",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-metrics/src/storage.ts#L541",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-metrics/src/sql-storage.ts#L307",
+      "imports": [
+        {
+          "path": "@omnitron-dev/titan-metrics",
+          "guide": "/docs/titan/modules/metrics"
+        }
+      ]
+    },
+    {
+      "name": "SqlMetricsStorageOptions",
+      "package": "@omnitron-dev/titan-metrics",
+      "kind": "interface",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-metrics/src/sql-storage.ts#L44",
       "imports": [
         {
           "path": "@omnitron-dev/titan-metrics",

@@ -183,6 +183,7 @@ export default {
     "./postgres": "titan/modules/mailer.mdx"
   },
   "@omnitron-dev/titan-metrics": {
+    "./types": "titan/modules/metrics.mdx",
     ".": "titan/modules/metrics.mdx"
   },
   "@omnitron-dev/titan-notifications": {
@@ -217,6 +218,7 @@ export default {
     "./source-layout": "omnitron/releases.md",
     "./node-check": "omnitron/cli.md",
     "./audit-outcome": "omnitron/observability.md",
+    "./metrics-storage-reading": "omnitron/observability.md",
     "./sync-reading": "omnitron/cluster.md",
     "./migration": "omnitron/migrations.md",
     "./diagnostics": "omnitron/diagnostics.md",
