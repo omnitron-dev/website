@@ -82,6 +82,34 @@ Defaults from `ecosystem.logging`:
 
 Per-app overrides live in `IAppDefinition.observability.logging`.
 
+### Owner and supervisor journals
+
+The resident execution owner owns worker pools even when the backend is replaced.
+Its structured stdout includes worker replacement reasons (`max_lifetime`,
+`request_count`, `memory_limit`, `memory_warning`) and process exits. Retaining
+only stderr loses these events, including errors emitted by the JSON logger.
+
+Generated launchd jobs retain both stdout and stderr. In resident mode the
+owner writes to `$OMNITRON_HOME/execution/owner-service.log` and the backend
+guardian to `$OMNITRON_HOME/execution/supervisor.log` (under the configured
+execution directory when overridden). Programmatic unit rendering may set a
+separate `stdoutLog`; otherwise both streams share `stderrLog`. Discarded,
+relative and control-character paths are refused. Generated systemd units
+explicitly route both streams to the journal:
+
+```bash
+journalctl -u omnitron-owner.service -u omnitron-daemon.service --since '10 minutes ago'
+# For user services, add --user.
+```
+
+These native supervisor journals are separate from the application log archive
+and its retention policy. Apply host journal retention or file rotation to them.
+Editing an installed unit does not reconnect a running process's file descriptors.
+Review the old and new definitions, preserve the original runtime and private
+configuration, and schedule a controlled owner restart; it restarts the owner's
+applications. A backend-only handoff leaves owner logging unchanged. Records
+already discarded by an older unit cannot be reconstructed.
+
 ### `OmnitronLogs` RPC
 
 | Method | Effect |
