@@ -467,13 +467,19 @@ hooks: {
   afterStart?:   (app: any) => Promise<void>;
   beforeStop?:   (app: any) => Promise<void>;
   afterStop?:    () => Promise<void>;
-  onHealthCheck?: () => Promise<{ status: 'healthy' | 'degraded' | 'unhealthy' }>;
+  onHealthCheck?: (app: any) => Promise<{
+    status: 'healthy' | 'degraded' | 'unhealthy';
+    checks?: Array<{ name: string; status: 'pass' | 'warn' | 'fail'; message?: string }>;
+  }>;
 }
 ```
 
 Process-level hooks override app-level. Use `beforeStart` for
 schema sanity checks, `afterStart` for cache priming,
-`onHealthCheck` to surface custom checks to the health probe.
+`onHealthCheck` to surface custom checks to the health probe. Return named
+`checks` with actionable `message` values: arbitrary fields such as `details`
+are not part of the process health contract. The daemon preserves check names
+and messages for both CLI and Console. See [domain readiness](./diagnostics.md#domain-readiness).
 
 ### Custom routes
 

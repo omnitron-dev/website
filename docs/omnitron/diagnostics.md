@@ -46,6 +46,53 @@ does not prove application correctness: register domain health checks and
 monitor their coverage. Older daemons without the runtime indicator appear as
 unexamined coverage in `doctor`.
 
+## Domain readiness
+
+Process state and readiness answer different questions. `online` means the
+supervised process is running. A worker with a working event loop can still be
+unable to commit data or complete its business operation.
+
+Implement `hooks.onHealthCheck(app)` in the bootstrap and return the public
+`AppHealthAnswer` contract:
+
+```typescript
+import type { AppHealthAnswer } from '@omnitron-dev/omnitron';
+
+const report: AppHealthAnswer = {
+  status: 'unhealthy',
+  checks: [{
+    name: 'ingestion',
+    status: 'fail',
+    message: 'source_stale: no committed observations in the required window. Check collector errors and queue write capacity.',
+  }],
+};
+```
+
+Name the failed dependency or stream. Include the stable error code, the observed
+condition, the effect on service and the next useful check. Return these in
+`checks[].message`; a private `details` object is not forwarded as diagnostic
+checks. The daemon prefixes application/process names and carries the same
+messages to `omnitron health <app>` and the Console's application health view.
+
+- Probe successful work and freshness, not connectivity alone. Redis can answer
+  `PING` while rejecting writes with OOM; a collector can receive events without
+  committing any of them.
+- Account for every required stream. Missing results, stale cycles and unreadable
+  answers must not become healthy through an empty list or a default status.
+- Preserve a worker's failure verdict when adapting an older health shape. Do not
+  promote it because the adapter cannot identify the cause.
+- Log failure and recovery transitions with Titan's structured logger. Include
+  resource identity and evidence, suppress unchanged healthy polls, and avoid
+  secrets and raw request payloads.
+- Restore health only after the required work succeeds. Reconnecting a source
+  may leave a data window incomplete for several minutes; retain that explanation
+  until the window is usable. Do not erase failure evidence or invent missing data.
+
+For registered experiments, place diagnostic adapters outside immutable worker
+artifacts. Verify the pinned artifacts before and after activation, and restart
+only the affected worker. Operational recovery must not silently create a new
+implementation under an existing experiment identity.
+
 ## One transport-independent contract
 
 Import from `@omnitron-dev/omnitron/diagnostics`, or from
