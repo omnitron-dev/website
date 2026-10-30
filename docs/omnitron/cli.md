@@ -74,6 +74,9 @@ rollback artifact. Without `--check` it replaces only a resident-mode backend.
 `backend recover <checkpoint>` refuses to preempt an unrelated live backend; it can reconcile a verified successor when startup-selection publication was interrupted.
 
 `omnitron backend install <sealed-runtime>` copies a verified release into permanent storage without activation. `omnitron backend installation --json` reports its startup selection and unfinished activation. `omnitron backend select <sha256>` selects an installed release only while the backend and execution owner are stopped. Running installations use `backend upgrade`; it commits the selection after readiness and preserves the rollback. The stable launcher is `$OMNITRON_HOME/runtime/bin/omnitron`.
+
+For independent user services, `omnitron backend guardian prepare <sealed-runtime>` records a private transition plan. `omnitron backend guardian apply <plan>` applies or resumes it while retaining the execution owner and application processes. The existing backend release is restored under the updated guardian.
+
 See [requirements, first transition and recovery](./backend-handoff.md).
 
 ## Daemon lifecycle

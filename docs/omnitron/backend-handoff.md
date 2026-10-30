@@ -122,6 +122,23 @@ The owner service deliberately does not restart after a crash on the same host b
 
 For system scope, prepare as the non-root instance owner with `omnitron service install --scope system --prepare`, then have an administrator install the reviewed unit files at their reported paths. System units name that account explicitly. Do not prepare the application runtime as root or copy secrets into unit environment directives. The private supervision record retains required runtime environment values; unit definitions carry only the instance path.
 
+## Updating the guardian
+
+`omnitron backend guardian` manages the guardian independently of the backend selection and execution owner. For **user** services, `omnitron backend guardian prepare` saves a plan and `omnitron backend guardian apply` applies or resumes it:
+
+```bash
+omnitron backend guardian prepare /absolute/releases/omnitron-next --json
+omnitron backend guardian apply /absolute/instance/runtime/supervisor-transition-ID.json --json
+```
+
+If the installed launcher predates these commands, invoke the candidate's `node` executable and `packages/0/dist/cli/omnitron.js` directly. Preparation verifies and installs the sealed management runtime, records the loaded unit file and current owner/application identities, and saves a private plan. It does not stop services. The record contains the original supervision configuration and unit for recovery; do not publish its contents.
+
+Apply drains and checkpoints the backend, records an activation intent, stops only the guardian's native OS job, atomically replaces its unit and private configuration, then starts the new guardian. The existing backend release is restored under that guardian with a fresh controller epoch. The owner and application processes remain in their separate job. CLI and Console requests pause while backend control is restored.
+
+The plan is resumable: run the same `apply` command after a coordinator interruption. It refuses changed units, a different owner, changed application inventory or a conflicting activation. A completed plan returns its original receipt without starting another process; use `omnitron backend status` for current state. To return to a previous guardian, prepare a new plan for its retained sealed runtime. No database migration is performed, and backend candidate compatibility checks remain in effect.
+
+Automatic guardian replacement currently supports user launchd/systemd services. System-scope unit replacement requires a separate administrator-reviewed transition; this command refuses it before stopping anything. Updating the execution owner's runtime still requires an application maintenance window.
+
 ## Long-lived RPC clients
 
 The backend also reconnects to the resident execution owner after a broken private socket. Every connection rechecks socket ownership and permissions, then verifies the owner identity before sending retained event cursors, acknowledgments or mutations. A different owner is never adopted automatically. Observation polling uses its own transport with a four-second request deadline; a slow monitoring request cannot accumulate abandoned polls or interrupt a long-running application operation. An acknowledgment failure raises a separate diagnostic from an observation failure. Both resolve after the corresponding operation succeeds.
