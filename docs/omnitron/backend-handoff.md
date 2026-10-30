@@ -83,7 +83,7 @@ omnitron backend upgrade /absolute/releases/omnitron-next/packages/0/dist --chec
 omnitron backend upgrade /absolute/releases/omnitron-next/packages/0/dist
 ```
 
-`--check` validates both candidate and rollback artifacts without draining requests. Activation repeats validation before retirement. Changed database migration files are refused; a schema transition requires a separate reviewed deployment. A replacement also inspects the existing migration journal through Omnitron’s shared Kysera runner before opening public ingress. Pending, changed or unknown migrations refuse readiness; this check never creates history or applies migrations. Legacy records without checksums remain explicitly unverified by `omnitron migrate verify --daemon`. Applying a migration separately does not bypass the artifact compatibility check.
+`--check` validates both candidate and rollback artifacts without draining requests. Activation repeats validation before retirement. Changed database migration files are refused by default. A compatible master schema expansion requires the separate, exact plan described below. A replacement also inspects the existing migration journal through Omnitron’s shared Kysera runner before opening public ingress. Pending, changed or unapproved unknown migrations refuse readiness; this check never creates history or applies migrations. Legacy records without checksums remain explicitly unverified by `omnitron migrate verify --daemon`. Applying a migration separately does not bypass the artifact compatibility check.
 
 The replacement proceeds through these boundaries:
 
@@ -121,6 +121,33 @@ If a backend dies, the guardian restores it only from a certified checkpoint or 
 The owner service deliberately does not restart after a crash on the same host boot. Some classic applications use separate process groups, so a fresh owner cannot assume all of its predecessor's processes disappeared. A durable receipt distinguishes clean shutdown, a new host boot and uncertain ownership. Reconcile the surviving processes before owner recovery; changing the receipt alone is not reconciliation. Normal `omnitron down` stops both services and applications, and `omnitron up` starts them again. Backend-only OS restarts retain applications when a certified checkpoint is available.
 
 For system scope, prepare as the non-root instance owner with `omnitron service install --scope system --prepare`, then have an administrator install the reviewed unit files at their reported paths. System units name that account explicitly. Do not prepare the application runtime as root or copy secrets into unit environment directives. The private supervision record retains required runtime environment values; unit definitions carry only the instance path.
+
+## Compatible schema expansion
+
+Schema changes and backend replacement are separate operations. `omnitron backend schema prepare` reads the running master’s database and saves a private plan; `omnitron backend schema apply` applies or resumes that plan under the same Kysera advisory lock as normal Omnitron migrations.
+
+Before preparing, activate a compatibility bridge that supports schema expansion protocol 1 while retaining the existing migration registry. For independent services, update the guardian to a release that understands schema plans. Both steps preserve the execution owner and application processes. A legacy backend without the compatibility protocol is refused.
+
+```bash
+omnitron backend schema prepare /absolute/releases/omnitron-next --json
+omnitron backend schema apply /absolute/instance/runtime/schema-transition-ID.json --json
+omnitron backend upgrade /absolute/releases/omnitron-next/packages/0/dist \
+  --schema-plan /absolute/instance/runtime/schema-transition-ID.json --check
+omnitron backend upgrade /absolute/releases/omnitron-next/packages/0/dist \
+  --schema-plan /absolute/instance/runtime/schema-transition-ID.json
+```
+
+Preparation installs the sealed candidate without selecting or running it as the backend. The plan identifies both complete runtime hashes, the instance, the actual PostgreSQL database and schema identity, unchanged migration bodies, the ordered registry, exact new checksums, current history and retained owner. It contains no database password. Only migrations explicitly declared as backward-compatible expansions in the candidate’s reviewed policy qualify. A new filename alone is insufficient. The current policy permits adding replication receipt outcomes with an `unverified` default, preserving old writers and readers.
+
+Apply verifies the live instance and selection again. It durably publishes the exact compatibility receipt **before** executing DDL, then checks the history again on Kysera’s locked connection. Database lock acquisition is bounded to five seconds per lock and individual statements to sixty seconds; a blocked database produces an error, not an unbounded schema wait. A coordinator interruption can leave an approved plan: rerun the same `apply` command. Committed additions are recognized by their recorded checksums and are not replayed. Unrelated history changes, drift, missing definitions or a different database stop the operation.
+
+The daemon journal now stores new content checksums through Kysera’s nullable checksum column. Existing names, timestamps and unknown legacy checksums remain unchanged; this does not attest old source retroactively. Read-only inspection never creates the column. During migration setup, Kysera adds it while holding its existing lock. The deployed journal and lock identity are retained.
+
+A compatibility runtime accepts future migration history only when a private receipt matches its own immutable artifact, original migration bodies, database identity and every observed future checksum. This also supports a cold restart after a migration commits but the coordinator dies before marking the plan complete. Unknown or checksum-less future rows are refused. A compatibility runtime cannot roll back migrations it does not own.
+
+To return to the retained bridge, use `backend upgrade <bridge-dist> --schema-plan <same-plan>`. The schema stays expanded. Both upgrade and rollback revalidate the applied plan and database; `--schema-plan` is not a general compatibility override. Keep its plan, receipt, receipt index and both sealed releases for as long as rollback remains required.
+
+This workflow currently covers master PostgreSQL expansions. Local node SQLite transitions, destructive schema changes, order changes and edits to deployed migration bodies need a separate rollout. No public Console endpoint can execute schema plans or local artifacts.
 
 ## Updating the guardian
 
