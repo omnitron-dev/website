@@ -47,7 +47,33 @@ Use the artifact's Node executable and CLI when starting that release:
   /absolute/releases/omnitron-current/packages/0/dist/cli/omnitron.js up
 ```
 
-The `active-backend.json` file is an activation receipt, not a startup selector. After a successful update, use the activated artifact's CLI for future cold starts. Do not remove any artifact still used by a backend, resident owner or application.
+## Permanent installation and cold start
+
+`backend upgrade` installs both the candidate and rollback into the instance's permanent store before draining the backend. Each directory is addressed by its complete SHA-256 under `$OMNITRON_HOME/runtime/releases/`. Copying never moves or rewrites a running release. The copied Node executable, backend and dependency closure are revalidated before publication and execution; an existing directory with different contents is refused.
+
+The startup selector is stored transactionally in `runtime/state.db`, using the existing daemon state store with full SQLite durability. It records the current release, previous release, selector revision and a separately pinned launcher release. An exclusive installation lease prevents concurrent upgraders or selectors; a dead installer's lease can be recovered. Cold startup shares that lease until the daemon has initialized, closing the version-selection/PID-file race.
+
+After the first successful upgrade, use the stable entry point:
+
+```sh
+~/.omnitron/runtime/bin/omnitron backend installation --json
+~/.omnitron/runtime/bin/omnitron up
+```
+
+For a different `OMNITRON_HOME`, the launcher lives in that instance's `runtime/bin` directory and retains the instance path. It follows the selected release and uses that release's own Node. The normal detached and foreground startup paths also honor the selector. A missing, modified or incompatible selected artifact is an error, never an implicit fallback to a source checkout.
+
+To prepare an installation while the backend and execution owner are stopped:
+
+```sh
+omnitron backend install /absolute/sealed-runtime --json
+omnitron backend select <complete-sha256> --json
+```
+
+`install` only copies and verifies. `select` refuses a running backend or owner, an unfinished activation and an incompatible migration transition. Use `upgrade` for a running resident installation. Selecting a release does not replay an old handoff checkpoint: a normal cold start reads the current project registry and configuration. A living owner with existing applications still requires validated recovery rather than startup reconciliation.
+
+The activation intent is durable before retirement; the selector commits only after public readiness and application identity checks. If the coordinator dies or publication fails, the unfinished activation blocks cold startup. `backend recover` can verify and acknowledge an already-ready successor without launching a second controller; otherwise it restores the verified rollback after proving the backend is absent and the owner inventory is unchanged. Administrative diagnostics and recovery remain accessible through the stable launcher during this state.
+
+`execution/active-backend.json` remains a diagnostic receipt. The installation database is the startup selector. There is no automatic release deletion: retain the selected, rollback and launcher releases, and every artifact still used by an owner or application. In particular, installing a permanent backend does not relocate an already-running owner from its original artifact.
 
 ## Replace the backend
 
@@ -62,7 +88,7 @@ omnitron backend upgrade /absolute/releases/omnitron-next/packages/0/dist
 The replacement proceeds through these boundaries:
 
 1. Reject active SSH sessions, file transfers, pipelines and release builds. Drain admitted requests and infrastructure reconciliation.
-2. Validate native container identity and specifications. Capture project ownership, retry backoff, monitoring configuration and application identities in a private checkpoint.
+2. Verify and install candidate/rollback artifacts; validate native container identity and specifications. Capture project ownership, retry backoff, monitoring configuration and application identities in a private checkpoint.
 3. Fence execution mutations with a new controller epoch. Persist the grant before enabling the new controller; stale controllers cannot write or acknowledge observations.
 4. Retire only backend services. The owner continues running applications and capturing logs.
 5. Start the candidate, adopt existing infrastructure without provisioning it, and keep public RPC unavailable until adoption completes.
@@ -86,7 +112,8 @@ Check the original command's error and the private execution directory before ta
 | --- | --- |
 | Prepared, original backend has not retired | `omnitron backend abort /absolute/private/handoff-ID.json` resumes it |
 | Backend retired or candidate failed; no backend is alive | `omnitron backend recover /absolute/private/handoff-ID.json` restores the previous artifact with a fresh epoch |
-| Backend marker still belongs to a live process | Recovery refuses takeover; inspect that process and its private log |
+| Successor is ready, but selection publication was interrupted | `backend recover` validates its artifact, owner, epoch and inventory, then acknowledges that existing process |
+| Backend marker belongs to an unrelated live process or the original active backend | Recovery refuses takeover; inspect it or abort a preparation that has not retired |
 | Owner died, inventory changed or checkpoint is stale | Automatic recovery is refused; reconcile actual application state before planning maintenance |
 | Journal commit is uncertain | Recovery reads the durable grant before preparing another epoch |
 

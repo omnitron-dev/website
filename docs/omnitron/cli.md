@@ -32,7 +32,7 @@ into another process. Check both the JSON result and the exit status.
 | Group | Commands |
 | ----- | -------- |
 | **Daemon lifecycle** | `up`, `down`, `ping`, `kill` |
-| **Backend replacement** | `backend status`, `backend upgrade`, `backend abort`, `backend recover` |
+| **Backend installation and replacement** | `backend status`, `backend install`, `backend installation`, `backend select`, `backend upgrade`, `backend abort`, `backend recover` |
 | **Project** | `project add`, `project list`, `project remove`, `project scan` |
 | **Stack** | `stack list`, `stack create`, `stack delete`, `stack status`, `stack start`, `stack stop`, `stack runtime` |
 | **App lifecycle** | `start`, `stop`, `restart`, `reload` |
@@ -71,7 +71,9 @@ unknown or mismatched. See [migration configuration and recovery](./migrations.m
 execution. `backend upgrade <sealed-dist> --check` validates a candidate and
 rollback artifact. Without `--check` it replaces only a resident-mode backend.
 `backend abort <checkpoint>` cancels preparation before retirement;
-`backend recover <checkpoint>` refuses to preempt a live backend.
+`backend recover <checkpoint>` refuses to preempt an unrelated live backend; it can reconcile a verified successor when startup-selection publication was interrupted.
+
+`omnitron backend install <sealed-runtime>` copies a verified release into permanent storage without activation. `omnitron backend installation --json` reports its startup selection and unfinished activation. `omnitron backend select <sha256>` selects an installed release only while the backend and execution owner are stopped. Running installations use `backend upgrade`; it commits the selection after readiness and preserves the rollback. The stable launcher is `$OMNITRON_HOME/runtime/bin/omnitron`.
 See [requirements, first transition and recovery](./backend-handoff.md).
 
 ## Daemon lifecycle
