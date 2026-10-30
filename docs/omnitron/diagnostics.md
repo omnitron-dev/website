@@ -60,20 +60,30 @@ working authenticated RPC session are separate observations.
 | Opening / authenticating | Connection establishment is in progress |
 | Disconnected / retrying | Read the transport error, cleanup error, next retry time and attempt number |
 | Stale heartbeat | Current reachability is unknown; an old successful ping is not current health |
+| Catching up | Delivery is active, but the oldest pending entry is at least 60 seconds old |
+| Delivery active, age unavailable | An older node reports acknowledgements but cannot prove queue age; upgrade it to verify lag |
 | Replication behind | Entries are waiting and no acknowledgement has arrived for 60 seconds |
 | Replication failing | Inspect the reported read, ingestion or acknowledgement error; queued entries remain pending |
 | Replication unknown | No recent authenticated connection or fresh replication reading is available |
 
-The master normally pulls every 15 seconds. **In sync** means an empty queue or
-entries waiting after a recent successful acknowledgement; it does not require
-`pendingItems` to be zero between pulls. The slave's legacy `connected` field
+The master normally pulls every 15 seconds. **In sync** means an empty queue.
+**Keeping up** requires both a recent acknowledgement and an oldest pending entry
+under 60 seconds. A fresh acknowledgement alone cannot prove this: a large old
+backlog can still be catching up. Older nodes without queue-age evidence show
+**delivery active, queue age unavailable**, rather than a green sync state.
+The diagnostic detail includes `oldestPendingAgeMs`, node-local `lastSyncAgeMs`
+(to avoid clock skew), and `deliveryRatePerSecond` over a rolling 60-second
+window, including idle time. Only newly acknowledged rows contribute; duplicate
+acknowledgements do not refresh progress. Database read failures propagate as
+unavailable, never as an empty queue. The slave's legacy `connected` field
 represents its optional push channel and is not evidence about master-driven
 replication. A failed status request is shown as **unavailable**, with its reason.
 
 Netron disconnect events and heartbeat failures trigger reconnect with backoff
 from 5 seconds to 2 minutes. Peer and SSH tunnel cleanup run independently and
 have a five-second combined deadline, so a stuck close cannot disable retries.
-A replacement connection authenticates again. Responses from the old peer cannot
+A replacement connection authenticates again. `authenticated` becomes true only
+after that peer accepts the service credential, and resets on disconnect. Responses from the old peer cannot
 overwrite its state or acknowledge new work. RPC operations are not replayed
 implicitly; only explicitly retryable, idempotent operations opt into retry.
 
