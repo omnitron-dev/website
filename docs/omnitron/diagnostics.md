@@ -123,6 +123,29 @@ configuration or launch invalidates that cache. State transitions produce
 `health-check` probes and Console use these same measurements. After adding a
 heartbeat declaration, restart its worker to receive the channel variables.
 
+### Immutable releases
+
+An operator can add HTTP readiness without editing an installed release. In the
+node's `~/.omnitron/config.json`, `applicationReadiness` maps exact qualified app
+names to the same probe contract. For example:
+
+```json
+{
+  "applicationReadiness": {
+    "project/production/service": {
+      "probes": [{ "name": "service HTTP", "type": "http", "url": "http://127.0.0.1:4720/health", "expect": { "status": "ok" } }]
+    }
+  }
+}
+```
+
+Merge this field into the existing daemon configuration; do not replace other
+settings. A controlled daemon restart activates it. Wildcards and heartbeat
+injection are refused. This is a fallback when the application has no readiness
+declaration; an application-owned declaration takes precedence. Native domain
+health is always preserved. A new application release should declare its own
+contract, allowing this operator fallback to be removed during normal rollout.
+
 ## Container state and stack intent
 
 The Docker indicator reads Docker and the local stack registry. Containers of an
@@ -130,7 +153,10 @@ enabled or running local stack are required: missing or stopped containers fail
 health. Unhealthy/starting healthchecks remain visible. A cleanly stopped
 container of a known disabled local stack is reported as intentionally inactive;
 its old failing healthcheck is not treated as a current failure. This never
-starts, deletes or recreates containers.
+starts, deletes or recreates containers. A stopped container omitted from its
+active stack's **current reconciler inventory** is reported as retired. A matching
+stack name alone cannot prove retirement. A retired container still running
+remains a warning, and missing required containers still fail.
 
 Unknown ownership is a warning, not proof that a container is unnecessary.
 Unloaded configuration, unregistered stacks and failed desired-state reads remain

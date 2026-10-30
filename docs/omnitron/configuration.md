@@ -535,6 +535,7 @@ interface IDaemonConfig {
   secrets?:    { provider: 'file'|'env'; path?; passphrase? };
   auth?:       { jwtSecret? };
   healthMonitor?: { intervalMs?, concurrency?, offlineTimeoutMs?, ...retentionDays? };
+  applicationReadiness?: Record<string, AppReadinessConfig>; // qualified app names, HTTP fallback
 }
 ```
 
