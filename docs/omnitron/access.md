@@ -56,6 +56,8 @@ Role changes are serialized in PostgreSQL and revalidate the actor inside the tr
 
 Changing a role deletes that account's sessions and records `account.role.change` in the same transaction. Creating an account records `account.create`; explicit revocation records `account.sessions.revoke`. If the audit insert fails, the transaction rolls back. Read the events in **Audit** or with `omnitron audit --resource account`.
 
+The audit trail distinguishes a human or local CLI caller (`user`), a control-plane peer (`service`) and autonomous daemon work (`system`). A service keeps its authenticated subject ID; having an ID does not turn it into a human. Console and CLI show the service kind beside that ID. Existing audit rows retain their original evidence and are not relabelled retrospectively.
+
 After commit, the daemon invalidates cached tokens and removes authority from admitted persistent peers. A validation already in flight cannot restore a cached grant after revocation. SSH checks the live session on every operation and during its two-second lifecycle sweep. The account signs in again to obtain its new role.
 
 Every authenticated HTTP, WebSocket and TCP invocation also checks its admitted identity. Human JWTs require a live master session (`sid`); a signed role without a session is insufficient. A role change refuses an existing peer rather than changing its permissions after the method gate. An expired JWT must be renewed even if its socket stays connected. A session-store outage returns `503 SESSION_STORE_UNAVAILABLE`, not a false revocation.
