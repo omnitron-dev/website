@@ -48,6 +48,41 @@ does not prove application correctness: register domain health checks and
 monitor their coverage. Older daemons without the runtime indicator appear as
 unexamined coverage in `doctor`.
 
+## RPC connection and replication
+
+Run `omnitron node check <id>` or open **Nodes → Diagnostics**. Both use the
+same connection reading. A running application, an SSH-reachable machine and a
+working authenticated RPC session are separate observations.
+
+| Observation | Meaning and next step |
+| --- | --- |
+| Connected directly / through SSH | Recent RPC heartbeat and a verified service credential; check replication separately |
+| Opening / authenticating | Connection establishment is in progress |
+| Disconnected / retrying | Read the transport error, cleanup error, next retry time and attempt number |
+| Stale heartbeat | Current reachability is unknown; an old successful ping is not current health |
+| Replication behind | Entries are waiting and no acknowledgement has arrived for 60 seconds |
+| Replication failing | Inspect the reported read, ingestion or acknowledgement error; queued entries remain pending |
+| Replication unknown | No recent authenticated connection or fresh replication reading is available |
+
+The master normally pulls every 15 seconds. **In sync** means an empty queue or
+entries waiting after a recent successful acknowledgement; it does not require
+`pendingItems` to be zero between pulls. The slave's legacy `connected` field
+represents its optional push channel and is not evidence about master-driven
+replication. A failed status request is shown as **unavailable**, with its reason.
+
+Netron disconnect events and heartbeat failures trigger reconnect with backoff
+from 5 seconds to 2 minutes. Peer and SSH tunnel cleanup run independently and
+have a five-second combined deadline, so a stuck close cannot disable retries.
+A replacement connection authenticates again. Responses from the old peer cannot
+overwrite its state or acknowledge new work. RPC operations are not replayed
+implicitly; only explicitly retryable, idempotent operations opt into retry.
+
+`OmnitronNodes.getMeshStatus()` includes `lastHeartbeat`, `lastError`,
+`reconnectAt`, `reconnectAttempt`, `cleanupError`, `syncStatus`, `syncStatusAt`,
+`lastSyncStatusError`, `lastPullError` and `lastPullAt`. These timestamps describe
+observations, not guarantees between polls. Console refreshes an open diagnostic
+dialog every five seconds and pauses requests while it is hidden or busy.
+
 ## Classic services and completed work
 
 Applications launched through `script` declare `readiness` in their ecosystem

@@ -277,27 +277,30 @@ default windowing.)
 ## State sync — `OmnitronSync` service
 
 The master-slave replication mechanism. Slaves locally collect
-metrics, logs, traces, alert events; periodically batch them and
-push to master via `pushBatch`.
+metrics, logs, traces and alert events. The master pulls batches over the
+authenticated Netron connection every 15 seconds, ingests them, then acknowledges
+the accepted, duplicate or explicitly discarded IDs. Failed entries remain pending.
 
 | Method | Effect |
 | ------ | ------ |
 | `receiveBatch(batch)` | Master accepts a sync batch from a slave |
 | `drainBuffer({limit?})` | Slave-side: pull pending data without waiting for periodic sync |
-| `getSyncStatus()` | Buffer size, lag, last successful sync timestamp |
+| `ackDrained({ids})` | Release only entries whose ingestion outcome the master has confirmed |
+| `getSyncStatus()` | Buffer size, pending count and last acknowledgement timestamp |
 
 ### Sync config — `ISyncConfig`
 
 ```typescript
 interface ISyncConfig {
-  interval?:  number;     // 30_000 ms — sync attempt cadence
+  interval?:  number;     // 30_000 ms — optional slave push cadence, not the master pull interval
   batchSize?: number;     // 1_000 entries per batch
 }
 ```
 
 Designed for **eventually consistent** replication:
 - Slaves buffer ALL data locally (SQLite WAL or local PG).
-- Periodic sync attempts with exponential backoff on failure.
+- Master pull resumes after authenticated reconnect; failed entries remain buffered.
+- Connection retry uses exponential backoff; application processes continue independently.
 - Idempotent batches — safe to retry.
 - Conflict resolution: master timestamp wins for config; slave
   data is append-only.
@@ -313,15 +316,16 @@ sequenceDiagram
   loop continuously
     Slave->>Buffer: append metric/log/trace/alert
   end
-  loop every interval (30s default)
-    Slave->>Buffer: drain up to batchSize
-    Slave->>Master: OmnitronSync.receiveBatch(batch)
-    alt success
-      Master-->>Slave: { accepted: N }
-      Slave->>Buffer: clear sent entries
+  loop master heartbeat (15s default)
+    Master->>Slave: drainBuffer({limit: 1000})
+    Slave->>Buffer: read pending entries
+    Slave-->>Master: batch (entries remain pending)
+    Master->>Master: ingest with deduplication
+    alt confirmed outcome
+      Master->>Slave: ackDrained({ids})
+      Slave->>Buffer: acknowledge confirmed IDs
     else failure
-      Master--xSlave: error
-      Slave->>Slave: keep batch; retry next interval
+      Master->>Master: retain diagnostic cause; retry later
     end
   end
 ```
@@ -419,7 +423,7 @@ a majority when split.
 - **Cross-region cluster without good ICMP.** Frequent split-brain
   symptoms. Use pattern A (one cluster per region).
 - **Treating `OmnitronSync` as low-latency RPC.** It's batch
-  replication with 30 s default cadence. For real-time
+  replication with a 15 s master pull cadence (optional slave push defaults to 30 s). For real-time
   cross-daemon coordination, use direct RPC to the relevant
   service.
 - **Editing a slave's `state.json` and expecting it to propagate.**
