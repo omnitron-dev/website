@@ -58,6 +58,10 @@ Changing a role deletes that account's sessions and records `account.role.change
 
 After commit, the daemon invalidates cached tokens and removes authority from admitted persistent peers. A validation already in flight cannot restore a cached grant after revocation. SSH checks the live session on every operation and during its two-second lifecycle sweep. The account signs in again to obtain its new role.
 
+Every authenticated HTTP, WebSocket and TCP invocation also checks its admitted identity. Human JWTs require a live master session (`sid`); a signed role without a session is insufficient. A role change refuses an existing peer rather than changing its permissions after the method gate. An expired JWT must be renewed even if its socket stays connected. A session-store outage returns `503 SESSION_STORE_UNAVAILABLE`, not a false revocation.
+
+Event subscriptions recheck authority before each delivery. Each peer has one in-flight send, at most 256 queued events and 1 MiB of queued payload; an individual event is limited to 256 KiB. An authorization failure, delivery timeout or overflow closes the stream so Console resumes polling. This is a live notification stream, not a replayable event journal; reconnecting refreshes authoritative state.
+
 Revocation ends sessions; it does not disable an account or change its password. The owner can sign in again. Changing one's password preserves the caller's session and revokes the others. Sign-out also invalidates cached authority for the affected session.
 
 ## Scope and extension points

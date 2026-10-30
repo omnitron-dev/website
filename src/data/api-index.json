@@ -13058,7 +13058,7 @@
       "name": "INodeClusterState",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/shared/dto/nodes.ts#L276",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/shared/dto/nodes.ts#L280",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/dto/services",
@@ -13070,7 +13070,7 @@
       "name": "INodeDaemonAnswer",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/shared/dto/nodes.ts#L222",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/shared/dto/nodes.ts#L226",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/dto/services",
@@ -13082,7 +13082,7 @@
       "name": "INodeIndicators",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/shared/dto/nodes.ts#L196",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/shared/dto/nodes.ts#L200",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/dto/services",
@@ -13094,7 +13094,7 @@
       "name": "INodeRelayStats",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/shared/dto/nodes.ts#L260",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/shared/dto/nodes.ts#L264",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/dto/services",
@@ -13106,7 +13106,7 @@
       "name": "INodeRolloutStart",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/shared/dto/nodes.ts#L357",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/shared/dto/nodes.ts#L361",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/dto/services",
@@ -13130,7 +13130,7 @@
       "name": "INodeSyncStatus",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/shared/dto/nodes.ts#L243",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/shared/dto/nodes.ts#L247",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/dto/services",
@@ -13142,7 +13142,7 @@
       "name": "INodeUpgradePlan",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/shared/dto/nodes.ts#L332",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/shared/dto/nodes.ts#L336",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/dto/services",
@@ -13154,7 +13154,7 @@
       "name": "INodeUpgradePlanRow",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/shared/dto/nodes.ts#L306",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/shared/dto/nodes.ts#L310",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/dto/services",

@@ -288,6 +288,14 @@ the accepted, duplicate or explicitly discarded IDs. Failed entries remain pendi
 | `ackDrained({ids, receipt?})` | Atomically release IDs and record their committed, discarded or unverified outcome |
 | `getSyncStatus()` | Measured queue bytes/age, durable receipt history, contiguous progress and recorded losses |
 
+### Connection credentials
+
+The built-in mesh dialer mints a five-minute `service_role` credential for each node. It renews that credential on the same Netron peer 30 seconds before expiry, coalescing concurrent calls and heartbeat reads. The SSH tunnel and running operations remain in place. The node independently checks the signed identity and its expiry on every invocation.
+
+Credential renewal has a ten-second deadline. Failure prevents dispatch of the waiting operation and reconnects with a fresh credential; it does not replay an application mutation. A rejected signature clears the cached node signing secret, while a transport timeout does not claim the secret is wrong. Mesh status exposes `credentialExpiresAt`, `credentialRefreshedAt` and `lastCredentialError`, without credential material. CLI and Console distinguish an expired identity from a healthy authenticated connection.
+
+Update the master before nodes when introducing per-call token expiry: older masters cannot renew an admitted peer's identity. A custom dialer can provide `refreshCredential` and `expiresAt`; non-renewable credentials require a new connection after expiry. A plain unauthenticated connection can probe liveness but cannot replicate.
+
 ### Sync config — `ISyncConfig`
 
 ```typescript
