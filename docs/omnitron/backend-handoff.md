@@ -126,6 +126,8 @@ For system scope, prepare as the non-root instance owner with `omnitron service 
 
 Schema changes and backend replacement are separate operations. `omnitron backend schema prepare` reads the running master’s database and saves a private plan; `omnitron backend schema apply` applies or resumes that plan under the same Kysera advisory lock as normal Omnitron migrations.
 
+If the active launcher predates these commands, invoke the verified candidate directly: `<candidate>/node <candidate>/packages/0/dist/cli/omnitron.js backend ...`. Installing an artifact alone does not select it or update the running launcher. After successful backend activation, the stable launcher uses the selected release.
+
 Before preparing, activate a compatibility bridge that supports schema expansion protocol 1 while retaining the existing migration registry. For independent services, update the guardian to a release that understands schema plans. Both steps preserve the execution owner and application processes. A legacy backend without the compatibility protocol is refused.
 
 ```bash
