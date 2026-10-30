@@ -285,8 +285,8 @@ the accepted, duplicate or explicitly discarded IDs. Failed entries remain pendi
 | ------ | ------ |
 | `receiveBatch(batch)` | Master accepts a sync batch from a slave |
 | `drainBuffer({limit?})` | Slave-side: pull pending data without waiting for periodic sync |
-| `ackDrained({ids})` | Release only entries whose ingestion outcome the master has confirmed |
-| `getSyncStatus()` | Buffer size, pending count and last acknowledgement timestamp |
+| `ackDrained({ids, receipt?})` | Atomically release IDs and record their committed, discarded or unverified outcome |
+| `getSyncStatus()` | Measured queue bytes/age, durable receipt history, contiguous progress and recorded losses |
 
 ### Sync config — `ISyncConfig`
 
@@ -298,7 +298,7 @@ interface ISyncConfig {
 ```
 
 Designed for **eventually consistent** replication:
-- Slaves buffer ALL data locally (SQLite WAL or local PG).
+- Slaves buffer enabled data categories in local SQLite WAL with `synchronous=FULL`. The configured byte budget can evict the oldest undelivered entries; these losses are recorded.
 - Master pull resumes after authenticated reconnect; failed entries remain buffered.
 - Connection retry uses exponential backoff; application processes continue independently.
 - Idempotent batches — safe to retry.
@@ -330,9 +330,78 @@ sequenceDiagram
   end
 ```
 
-If the master is offline, slaves keep functioning fully — local
-apps supervised, metrics collected, logs captured. When the
-master returns, accumulated data sync drains on the next cycle.
+If the master is offline, slave applications continue independently. Replication
+retains data up to the configured buffer budget. When the master returns, pending
+data drains on subsequent sweeps; the status also preserves evidence of any loss.
+
+### Reading connection, backlog and delivery separately
+
+`omnitron node check <id>` and the Console node details use the same interpretation.
+A connected RPC channel proves reachability, not replication. A fresh status is
+required before the master reports progress. An empty queue is drained; a recent
+acknowledgement with a young queue is keeping up. Old pending data is catching up,
+and a queue without a recent acknowledgement is behind. Durations are measured
+on the source node so host clock skew does not invent lag.
+
+New nodes report exact UTF-8 payload bytes. `bufferSize` covers pending payloads;
+`retainedBufferSize` also includes released entries awaiting retention. Neither
+is the filesystem size of SQLite, its indexes or WAL. A singleton maintained by
+transactional triggers plus indexed seeks supplies status without scanning the
+whole queue on each poll. Legacy schemas use a measured fallback.
+
+The optional `evidence` object survives daemon replacement and normal retention:
+
+| Field | Meaning |
+| ----- | ------- |
+| `epoch`, `since`, `firstTrackedId` | Scope of the recorded history; no guarantee is inferred for earlier data |
+| `producedThrough` | Highest local sequence generated in this buffer |
+| `releasedThrough` | Contiguous sequence no longer pending; may include discards or evictions |
+| `committedThrough` | Contiguous durable payload receipts from `firstTrackedId`; stops at a pending, unverified or lost entry |
+| `committedRows` | Entries confirmed by a database transaction that also stored their payload |
+| `discardedRows` | Permanently rejected entries released after recording the refusal |
+| `unverifiedRows` | Released entries without durable payload proof |
+| `evictedRows` | Undelivered entries removed by local buffer limits |
+| `lastCommittedAt`, `lastLossAt` | Persisted timestamps for confirmed commits and known loss |
+
+These sequence fields are strings, preserving integer precision. The frontier
+before the first tracked entry means no contiguous receipt has been proven yet.
+Counters apply to the stated tracking epoch. Losses remain visible even when the
+queue becomes empty; a restart or retention pass must not erase them.
+
+The master persists each receipt's outcome in the same transaction as its data.
+A lost reply and a repeated batch retain that outcome: a previous discard never
+becomes a committed duplicate. If recording a discard fails, the source keeps
+that entry pending. Metrics currently pass to a sink outside this transaction;
+their receipts are **unverified**, even when the sink callback succeeds. A durable
+metrics pipeline is a separate guarantee and must not be inferred from an empty
+replication queue.
+
+### Rolling upgrades and database replacement
+
+Upgrade the master and nodes independently. New masters attach a versioned receipt
+with `committedIds` and `discardedIds`; old nodes ignore the extra field. New nodes
+still accept old acknowledgements, recording them as unverified. A legacy push
+response with only counts releases data only when those counts cover the complete
+batch. Partial or ambiguous responses leave the batch pending.
+
+Existing pending IDs stay unchanged during the SQLite migration. Newly appended
+entries use a persistent random buffer epoch and sequence on the wire. A new local
+database therefore cannot collide with the previous database's IDs in the master
+ledger. A receipt from another epoch is refused. Restoring a database snapshot is
+not equivalent to creating a new database: restore its entire state together and
+coordinate replay with the master. Do not copy tables or reset sequences manually.
+
+SQLite evidence uses the public Omnitron migration runner, backed by Titan and
+Kysera. Schema changes and migration history commit together. The migration is
+additive and has no destructive automatic rollback. Older masters can acknowledge
+new node batches, but their receipts remain unverified. After a node starts emitting
+epoch-qualified IDs, downgrading its binary requires an explicit compatibility
+plan: an older producer would revert to numeric IDs and could resend a pending
+entry under a different ledger key. Backend compatibility checks cover both
+master and local-node migration registries. Master migration `014_replication_receipts`
+marks historical outcomes unverified because previous discards cannot be inferred
+reliably. The deduplication ledger has a retention window; it is not an unlimited
+exactly-once archive.
 
 ## Multi-region patterns
 
