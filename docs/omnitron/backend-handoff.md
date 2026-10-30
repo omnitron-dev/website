@@ -98,6 +98,8 @@ A failed candidate is stopped and the previous artifact is started under a fresh
 
 ## Long-lived RPC clients
 
+The backend also reconnects to the resident execution owner after a broken private socket. Every connection rechecks socket ownership and permissions, then verifies the owner identity before sending retained event cursors, acknowledgments or mutations. A different owner is never adopted automatically. Observation polling uses its own transport with a four-second request deadline; a slow monitoring request cannot accumulate abandoned polls or interrupt a long-running application operation. An acknowledgment failure raises a separate diagnostic from an observation failure. Both resolve after the corresponding operation succeeds.
+
 The clients returned by `createDaemonClient()` and the fleet TCP client reconnect on the next call after a backend disconnect. Service handles obtained with `client.service(name)` remain usable: each call resolves the service against the current connection. Netron still owns discovery, serialization, remote properties and stream transport.
 
 An invocation already sent when the connection fails is rejected with transport loss. **It is never replayed automatically:** a missing response does not prove that a mutation was not committed. Inspect the operation ID or current state before deciding whether to dispatch again. Live streams and references owned by the old connection must be reopened by their consumer.
@@ -121,7 +123,7 @@ Recovery checkpoints describe a particular replacement, not a continuously updat
 
 ## Diagnostics and access
 
-`omnitron status --json` includes `execution`; `omnitron backend status --json` reports the owner PID/identity, controller epoch, phase, observation age and blockers. A missing owner connection makes application state unknown. The backend does not infer that applications stopped from a control-channel failure.
+`omnitron status --json` includes `execution`; `omnitron backend status --json` reports the owner PID/identity, controller epoch, phase, observation age and blockers. A missing owner connection makes application state unknown. The backend does not infer that applications stopped from a control-channel failure. `execution.connection` reports `connected`, `unavailable` or `owner-changed`, the last successful observation timestamp and a concrete error. An observation older than five seconds is unavailable even before a failed request returns. `omnitron backend status` uses the independent control-status endpoint if application inventory cannot be read. Console Settings → General shows the same connection information; its status bar labels retained application counts as stale and checks backend reachability independently.
 
 The owner's bounded live observation buffer retains 10,000 events, with long live log entries truncated to 4,096 characters. Full application lines continue to disk. Unacknowledged observations replay after controller replacement; a crash between processing and acknowledgment can replay an event. Buffer overflow produces a visible diagnostic and can leave historical metrics incomplete. This channel does not promise exactly-once telemetry.
 
