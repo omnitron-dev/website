@@ -93,6 +93,36 @@ artifacts. Verify the pinned artifacts before and after activation, and restart
 only the affected worker. Operational recovery must not silently create a new
 implementation under an existing experiment identity.
 
+## Supervise maintenance with the same health contract
+
+Declare infrastructure maintenance as an ecosystem application when it needs an
+independent lifecycle. Use Titan Scheduler for intervals, overlap prevention and
+shutdown. Return named checks through `onHealthCheck`, so the CLI and Console
+report the same policy, last completed attempt, dependency capacity and recovery
+action. A scheduler tick alone is not proof that its operation succeeded.
+
+For a durable stream pipeline, a safe cleanup policy needs both an age boundary
+and acknowledgement by every consumer group. Inspect group positions and pending
+entries atomically with deletion; a boundary computed by a previous observation
+can already be stale. Refuse cleanup when the required journal consumer is
+missing. Bound work per cycle and retry by recomputing the boundary after a lost
+reply. Default a reusable maintenance component to observation mode; make active
+deletion an explicit deployment policy.
+
+Capacity recovery must remain possible when normal writes are rejected. For
+example, inline stream trimming attached to `XADD` cannot free memory when Redis
+rejects the entire write with OOM. Test the independent cleanup under that actual
+failure, as well as pending entries, unread backlog, multiple consumers and
+consumer creation between observation and execution. A capacity indicator must
+read the write budget and preserve the failure until useful work resumes.
+
+Log state transitions and bounded work summaries, not every successful poll.
+Show observation-only mode and blocked cleanup as degraded readiness, with the
+reason data was retained. Keep maintenance separate from immutable application
+artifacts when changing operational policy must not change an experiment's
+registered implementation. Document the producer's own retention limits too;
+a maintenance guard cannot promise stronger guarantees than the entire pipeline.
+
 ## One transport-independent contract
 
 Import from `@omnitron-dev/omnitron/diagnostics`, or from
