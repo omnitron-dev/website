@@ -6,14 +6,12 @@ description: Components, planes, and data flows inside the Omnitron supervisor.
 
 # Architecture
 
-Omnitron is decomposed into a handful of long-lived objects that
-all live inside a single daemon process. Operators talk to the
-daemon over Netron RPC; the daemon spawns and watches child
-processes; child processes report metrics, logs, and health back
-through structured pipes.
-
-This page describes those pieces in enough detail to debug an
-incident at 2 AM.
+Omnitron exposes one control plane per node through Netron RPC. Its backend
+provides authentication, project ownership, infrastructure management and
+observability. In coupled mode it also owns application processes. In
+[resident execution mode](./backend-handoff.md), a separate process owns forks,
+workers, pools and local topology while the backend uses a fenced private RPC
+contract. The diagram below describes the default coupled deployment.
 
 ## Component map
 

@@ -6,16 +6,20 @@ description: The long-running supervisor — its lifecycle, state, and RPC surfa
 
 # Daemon
 
-The daemon is the one Omnitron component that **stays up**.
-Everything else — CLI invocations, webapp connections, child app
-processes — is transient. The daemon owns the process tree, the
-on-disk state, the lock, and the RPC surface.
+The backend serves the CLI, Console and mesh. In the default coupled mode it
+also owns application processes. Opt-in resident execution keeps those processes
+in a separate owner so the backend can be replaced without restarting them.
+See [backend replacement](./backend-handoff.md) for the initial maintenance
+window, supported environments, artifact validation and recovery.
+
+The lifecycle below describes coupled mode. In resident mode, backend retirement
+preserves the owner; an explicit shutdown still stops applications.
 
 Verified against `src/daemon/`:
 
 ```
 daemon/
-├── daemon.ts            (1591 lines) — main daemon class
+├── daemon.ts                         — main daemon class
 ├── daemon.rpc-service.ts        — Netron-facing service
 ├── daemon.module.ts             — Titan module wiring
 ├── daemon-client.ts             — Typed RPC client (used by CLI)

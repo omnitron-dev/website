@@ -23,6 +23,7 @@ diffs them against the index table below.
 
 | File | Service id (Netron) | Methods | Role gate (typical) |
 | ---- | ------------------- | ------- | ------------------- |
+| `daemon/backend.rpc-service.ts` | `OmnitronBackend` | 2 | control-plane read (status); local Unix admin (control address) |
 | `access.rpc-service.ts` | `OmnitronAccess` | 5 | viewer (effective permissions) + admin (accounts) |
 | `terminal.rpc-service.ts` | `OmnitronTerminal` | 9 | admin + live human session / trusted local CLI |
 | `alert.rpc-service.ts` | `OmnitronAlerts` | 8 | viewer (read) + operator (mutate) |
@@ -45,7 +46,7 @@ diffs them against the index table below.
 | `sync.rpc-service.ts` | `OmnitronSync` | 4 | service-to-service (getSyncStatus is viewer) |
 | `system-info.rpc-service.ts` | `OmnitronSystemInfo` | 1 | viewer |
 | `telemetry.rpc-service.ts` | `OmnitronTelemetry` | 2 | pushBatch anonymous; getRelayStats viewer |
-| `trace-collector.rpc-service.ts` | `OmnitronTraces` | 5 | viewer |
+| `trace-collector.rpc-service.ts` | `OmnitronTraces` | 5 | viewer (read); operator/admin (ingestion) |
 
 And, only when `daemon.cluster.enabled` is set on a master:
 

@@ -32,6 +32,7 @@ into another process. Check both the JSON result and the exit status.
 | Group | Commands |
 | ----- | -------- |
 | **Daemon lifecycle** | `up`, `down`, `ping`, `kill` |
+| **Backend replacement** | `backend status`, `backend upgrade`, `backend abort`, `backend recover` |
 | **Project** | `project add`, `project list`, `project remove`, `project scan` |
 | **Stack** | `stack list`, `stack create`, `stack delete`, `stack status`, `stack start`, `stack stop`, `stack runtime` |
 | **App lifecycle** | `start`, `stop`, `restart`, `reload` |
@@ -63,6 +64,15 @@ default. `--config` selects a configuration; `--daemon` explicitly selects the
 daemon database. `up --dry-run` previews, `up --to NAME` selects a prefix, and
 `down --steps N` rolls back a suffix. `verify` exits with 2 when integrity is
 unknown or mismatched. See [migration configuration and recovery](./migrations.md).
+
+## Backend replacement
+
+`backend status --json` reports whether the running daemon supports resident
+execution. `backend upgrade <sealed-dist> --check` validates a candidate and
+rollback artifact. Without `--check` it replaces only a resident-mode backend.
+`backend abort <checkpoint>` cancels preparation before retirement;
+`backend recover <checkpoint>` refuses to preempt a live backend.
+See [requirements, first transition and recovery](./backend-handoff.md).
 
 ## Daemon lifecycle
 

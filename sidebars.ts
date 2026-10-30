@@ -381,6 +381,7 @@ const sidebars: SidebarsConfig = {
     'omnitron/architecture',
     'omnitron/cli',
     'omnitron/daemon',
+    'omnitron/backend-handoff',
     'omnitron/orchestrator',
     'omnitron/releases',
     'omnitron/services-reference',
