@@ -418,7 +418,9 @@ does not prove that the legacy receiver committed data at its original delivery.
 
 On the source, proof must match the still-retained immutable payload and epoch.
 Its journal, the decrement of `unverifiedRows` and increase of `committedRows`
-commit in one SQLite WAL/FULL transaction. Original `syncOutcome` and `syncedAt`
+commit in one SQLite WAL/FULL transaction. The acknowledgement reserves the
+SQLite writer before reading the source snapshot, so concurrent live ingestion
+cannot invalidate a deferred read-to-write upgrade. Original `syncOutcome` and `syncedAt`
 are unchanged. Repeated pages and lost responses cannot count or restore an entry
 twice. Retry the same cursor after failure; no queue reset or database restore is
 needed. Other categories, pruned payloads, rejected entries, conflicting content
