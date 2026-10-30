@@ -219,6 +219,7 @@ export default {
     "./audit-outcome": "omnitron/observability.md",
     "./sync-reading": "omnitron/cluster.md",
     "./migration": "omnitron/migrations.md",
-    "./diagnostics": "omnitron/diagnostics.md"
+    "./diagnostics": "omnitron/diagnostics.md",
+    "./health": "omnitron/diagnostics.md"
   }
 };

@@ -46,6 +46,98 @@ does not prove application correctness: register domain health checks and
 monitor their coverage. Older daemons without the runtime indicator appear as
 unexamined coverage in `doctor`.
 
+## Classic services and completed work
+
+Applications launched through `script` declare `readiness` in their ecosystem
+entry. Without it they remain `degraded` with `readiness_not_configured`:
+`online` alone does not establish readiness. Native bootstrap applications use
+`hooks.onHealthCheck`; optional HTTP probes can supplement that verdict.
+
+```typescript
+{
+  name: 'service',
+  script: './service.mjs',
+  readiness: {
+    intervalMs: 5_000,
+    timeoutMs: 3_000,
+    probes: [{
+      name: 'service HTTP', type: 'http',
+      url: 'http://127.0.0.1:4720/health',
+      expect: { status: 'ok', revision: expectedRevision },
+    }],
+  },
+}
+```
+
+An HTTP probe requires the expected status (200 by default), refuses redirects
+and optionally matches exact top-level JSON fields. This checks a declared
+contract, not all business operations. Use `/` without `expect` for a frontend;
+use domain fields for a service. Responses are bounded to 64 KiB; diagnostics
+never include response bodies or URL query strings. URL credentials are refused.
+
+For a classic background worker, declare one `heartbeat` probe:
+
+```typescript
+readiness: {
+  probes: [{ name: 'delivery', type: 'heartbeat',
+    file: '.local/health/delivery.json', maxAgeMs: 60_000 }],
+}
+```
+
+Report **after real completed work**, not on a timer independent of that work:
+
+```typescript
+import { writeHealthHeartbeat } from '@omnitron-dev/omnitron/health';
+
+await writeHealthHeartbeat({
+  status: 'healthy',
+  checks: [{ name: 'delivery', status: 'pass', message: 'Batch committed.' }],
+});
+```
+
+Failures should publish `unhealthy` with named failed checks and a recovery hint.
+An initial `degraded` report may explain that the first cycle is still pending.
+Await each write; the helper atomically replaces a mode-0600 file. It is a no-op
+outside the supervisor when no report path is configured. There is no automatic
+healthy heartbeat. Set the freshness limit to cover actual work plus its normal
+idle interval; a missing, stale, malformed or future report fails readiness.
+
+Omnitron passes `OMNITRON_HEALTH_FILE` (resolved against the application's `cwd`)
+and a fresh `OMNITRON_RUN_ID` to each classic launch. Wrappers must inherit these
+variables. A report from an earlier launch is rejected. Other languages can
+atomically publish the same UTF-8 JSON contract:
+
+```json
+{"schemaVersion":1,"timestamp":1793320000000,"runId":"supervisor-provided-id","status":"healthy","checks":[{"name":"delivery","status":"pass","message":"Batch committed."}]}
+```
+
+`timestamp` is the Unix time in milliseconds at completion; use the actual time,
+not this example. Reports accept 1–32 named checks and at most 64 KiB. Symlinks
+and special files are refused. An overall failure cannot be hidden by passing
+checks. Bootstrap workers use Titan's health hook instead of heartbeat files.
+
+Measurements are demand-driven by health readers. Concurrent reads share a
+probe; results are cached for `intervalMs` (default 5 seconds). A changed
+configuration or launch invalidates that cache. State transitions produce
+`application.readiness.changed` daemon log events. CLI `health`, declared
+`health-check` probes and Console use these same measurements. After adding a
+heartbeat declaration, restart its worker to receive the channel variables.
+
+## Container state and stack intent
+
+The Docker indicator reads Docker and the local stack registry. Containers of an
+enabled or running local stack are required: missing or stopped containers fail
+health. Unhealthy/starting healthchecks remain visible. A cleanly stopped
+container of a known disabled local stack is reported as intentionally inactive;
+its old failing healthcheck is not treated as a current failure. This never
+starts, deletes or recreates containers.
+
+Unknown ownership is a warning, not proof that a container is unnecessary.
+Unloaded configuration, unregistered stacks and failed desired-state reads remain
+explicit. Inspect project configuration, stack startup and container logs before
+changing intent. Docker unavailability fails the indicator even when a cached
+reconciler state claimed readiness. All simultaneous failure reasons are retained.
+
 ## Domain readiness
 
 Process state and readiness answer different questions. `online` means the

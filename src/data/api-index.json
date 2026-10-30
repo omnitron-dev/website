@@ -193,6 +193,10 @@
       "guide": "/docs/omnitron/services-reference"
     },
     {
+      "path": "@omnitron-dev/omnitron/health",
+      "guide": "/docs/omnitron/diagnostics"
+    },
+    {
       "path": "@omnitron-dev/omnitron/migration",
       "guide": "/docs/omnitron/migrations"
     },
@@ -11354,7 +11358,7 @@
       "name": "AggregatedHealthDto",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/config/types.ts#L1074",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/config/types.ts#L1076",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron",
@@ -11374,7 +11378,7 @@
       "name": "AggregatedMetricsDto",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/config/types.ts#L1037",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/config/types.ts#L1039",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron",
@@ -11626,7 +11630,7 @@
       "name": "AppDiagnosticsDto",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/config/types.ts#L1193",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/config/types.ts#L1195",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron",
@@ -11655,6 +11659,10 @@
         {
           "path": "@omnitron-dev/omnitron/config",
           "guide": "/docs/omnitron/configuration"
+        },
+        {
+          "path": "@omnitron-dev/omnitron/health",
+          "guide": "/docs/omnitron/diagnostics"
         }
       ]
     },
@@ -11683,6 +11691,18 @@
         {
           "path": "@omnitron-dev/omnitron/config",
           "guide": "/docs/omnitron/configuration"
+        }
+      ]
+    },
+    {
+      "name": "AppReadinessConfig",
+      "package": "@omnitron-dev/omnitron",
+      "kind": "interface",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/health/contracts.ts#L8",
+      "imports": [
+        {
+          "path": "@omnitron-dev/omnitron/health",
+          "guide": "/docs/omnitron/diagnostics"
         }
       ]
     },
@@ -11726,7 +11746,7 @@
       "name": "AppStatus",
       "package": "@omnitron-dev/omnitron",
       "kind": "type",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/config/types.ts#L962",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/config/types.ts#L964",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron",
@@ -11842,7 +11862,7 @@
       "name": "ChildDiagnosticsDto",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/config/types.ts#L1143",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/config/types.ts#L1145",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/config",
@@ -12166,7 +12186,7 @@
       "name": "DaemonStatusDto",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/config/types.ts#L1017",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/config/types.ts#L1019",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron",
@@ -12210,7 +12230,7 @@
       "name": "defineEcosystem",
       "package": "@omnitron-dev/omnitron",
       "kind": "function",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/config/define-ecosystem.ts#L8",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/config/define-ecosystem.ts#L9",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron",
@@ -12755,6 +12775,18 @@
       ]
     },
     {
+      "name": "HealthHeartbeat",
+      "package": "@omnitron-dev/omnitron",
+      "kind": "interface",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/health/contracts.ts#L16",
+      "imports": [
+        {
+          "path": "@omnitron-dev/omnitron/health",
+          "guide": "/docs/omnitron/diagnostics"
+        }
+      ]
+    },
+    {
       "name": "HealthReport",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
@@ -12782,7 +12814,7 @@
       "name": "IAlertSink",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/config/types.ts#L871",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/config/types.ts#L873",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/config",
@@ -12822,7 +12854,7 @@
       "name": "IDaemonConfig",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/config/types.ts#L699",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/config/types.ts#L701",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/config",
@@ -12862,7 +12894,7 @@
       "name": "IEcosystemConfig",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/config/types.ts#L885",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/config/types.ts#L887",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron",
@@ -13670,7 +13702,7 @@
       "name": "IWatchConfig",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/config/types.ts#L675",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/config/types.ts#L677",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron",
@@ -13750,7 +13782,7 @@
       "name": "LastExitDto",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/config/types.ts#L1115",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/config/types.ts#L1117",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/config",
@@ -13846,7 +13878,7 @@
       "name": "LogEntryDto",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/config/types.ts#L1101",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/config/types.ts#L1103",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron",
@@ -13878,7 +13910,7 @@
       "name": "LogPathsDto",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/config/types.ts#L1186",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/config/types.ts#L1188",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/config",
@@ -14742,7 +14774,7 @@
       "name": "PoolDiagnosticsDto",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/config/types.ts#L1167",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/config/types.ts#L1169",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/config",
@@ -14754,7 +14786,7 @@
       "name": "ProcessInfoDto",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/config/types.ts#L964",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/config/types.ts#L966",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron",
@@ -14875,6 +14907,18 @@
         {
           "path": "@omnitron-dev/omnitron/release-reading",
           "guide": "/docs/omnitron/releases"
+        }
+      ]
+    },
+    {
+      "name": "ReadinessProbe",
+      "package": "@omnitron-dev/omnitron",
+      "kind": "type",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/health/contracts.ts#L3",
+      "imports": [
+        {
+          "path": "@omnitron-dev/omnitron/health",
+          "guide": "/docs/omnitron/diagnostics"
         }
       ]
     },
@@ -15398,7 +15442,7 @@
       "name": "SubProcessInfoDto",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/config/types.ts#L983",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/config/types.ts#L985",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron",
@@ -15603,6 +15647,18 @@
         {
           "path": "@omnitron-dev/omnitron/dto/services",
           "guide": "/docs/omnitron/services-reference"
+        }
+      ]
+    },
+    {
+      "name": "writeHealthHeartbeat",
+      "package": "@omnitron-dev/omnitron",
+      "kind": "function",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/health/heartbeat.ts#L11",
+      "imports": [
+        {
+          "path": "@omnitron-dev/omnitron/health",
+          "guide": "/docs/omnitron/diagnostics"
         }
       ]
     },

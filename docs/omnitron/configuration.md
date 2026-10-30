@@ -70,6 +70,7 @@ interface IEcosystemAppEntry {
   restartPolicy?: IRestartPolicy;
   startupTimeout?: number;
   watch?:         string | IWatchConfig | false;
+  readiness?:     AppReadinessConfig;
 }
 ```
 
@@ -87,6 +88,17 @@ interface IEcosystemAppEntry {
 | `restartPolicy` | Per-app override of ecosystem `supervision`                              |
 | `startupTimeout`| Max ms for ready handshake before treated as failed                     |
 | `watch`         | Dev-mode file watching: string=directory; full config; or `false`        |
+
+### `AppReadinessConfig`
+
+`probes` contains 1–16 uniquely named checks. `intervalMs` (1–300 seconds,
+default 5 seconds) bounds result reuse; `timeoutMs` (100 ms–10 seconds, default
+3 seconds) bounds each HTTP check. HTTP probes declare `url`, optional successful
+`expectedStatus`, and optional `expect` with 1–16 exact JSON scalar fields.
+One heartbeat probe per classic application declares `file` relative to `cwd`
+and `maxAgeMs` (1 second–24 hours). Combine multiple domain checks in that report.
+Bootstrap applications report completed work through `hooks.onHealthCheck`.
+See [readiness and heartbeat examples](./diagnostics.md#classic-services-and-completed-work).
 
 ### `IWatchConfig`
 
