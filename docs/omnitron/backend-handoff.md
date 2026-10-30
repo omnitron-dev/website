@@ -70,6 +70,14 @@ The replacement proceeds through these boundaries:
 
 A failed candidate is stopped and the previous artifact is started under a fresh epoch. Rollback does not reuse an old grant. A failure to prove identity or inventory preservation stops automatic recovery rather than guessing which processes to kill or relaunch.
 
+## Long-lived RPC clients
+
+The clients returned by `createDaemonClient()` and the fleet TCP client reconnect on the next call after a backend disconnect. Service handles obtained with `client.service(name)` remain usable: each call resolves the service against the current connection. Netron still owns discovery, serialization, remote properties and stream transport.
+
+An invocation already sent when the connection fails is rejected with transport loss. **It is never replayed automatically:** a missing response does not prove that a mutation was not committed. Inspect the operation ID or current state before deciding whether to dispatch again. Live streams and references owned by the old connection must be reopened by their consumer.
+
+Update long-running consumers to this client before relying on backend replacement. Updating the backend cannot replace client code already loaded in another process; older consumers that retain a raw service proxy need a separate controlled restart with the updated dependency. Pin that dependency independently of the backend, especially for applications with registered runtime integrity checks.
+
 ## Interrupted operation
 
 Check the original command's error and the private execution directory before taking action. Never print or publish checkpoint contents: they include resolved configuration and environment variables.

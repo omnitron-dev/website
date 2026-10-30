@@ -11994,7 +11994,7 @@
       "name": "createDaemonClient",
       "package": "@omnitron-dev/omnitron",
       "kind": "function",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/daemon/daemon-client.ts#L635",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/daemon/daemon-client.ts#L412",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/operations",
@@ -13946,7 +13946,7 @@
       "name": "LONG_REQUEST_TIMEOUT",
       "package": "@omnitron-dev/omnitron",
       "kind": "value",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/daemon/daemon-client.ts#L132",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/daemon/daemon-client.ts#L77",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/operations",

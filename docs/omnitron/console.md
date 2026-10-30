@@ -277,6 +277,7 @@ single-trace waterfall, service-map view. Backed by
 - Status, hostname, last-seen timestamp.
 - Uptime bar (90 days of green/yellow/red segments — backed by
   `getUptimeBar`).
+- Latest recorded health-check time refreshes with node status, independently of the slower historical aggregation. An unavailable history read retains the last evidence and shows a warning.
 - SSH connectivity test.
 - Per-node actions: drain, remove, edit.
 

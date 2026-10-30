@@ -279,29 +279,31 @@ always require JWT.
 
 ## Daemon client — `daemon-client.ts`
 
-The typed Netron client used by every CLI command. It is internal to the
-package — `@omnitron-dev/omnitron` publishes `.`, `./config`,
-`./dto/services` and `./dto/events`, and nothing else — so this is how the
-CLI reaches it from inside, not an import you can write from outside:
+The operator API exposes the typed local client through
+`@omnitron-dev/omnitron/operations`. It connects to the daemon owner's Unix
+socket and has the same authority as the local CLI. Keep it on the operator
+host, not in browser code.
 
 ```typescript
-// apps/omnitron/src/commands/*.ts
-import { createDaemonClient } from '../daemon/daemon-client.js';
+import { createDaemonClient } from '@omnitron-dev/omnitron/operations';
 
-const client = createDaemonClient();      // default socket, default timeout
-await client.ping();                       // probe
-await client.startApp({ name: 'api' });
-await client.getMetrics({ name: 'api' });
-await client.exec({
-  name:    'api',
-  service: 'users',
-  method:  'findById',
-  args:    ['u_42'],
-});
+const client = createDaemonClient();
+try {
+  await client.ping();
+  await client.startApp({ name: 'api' });
+  const metrics = await client.getMetrics({ name: 'api' });
+  console.log(metrics);
+} finally {
+  await client.disconnect();
+}
 ```
 
-The same client opens connections to remote daemons (when
-addressed by alias) over TCP.
+Local and fleet TCP clients share connection lifetime handling. Concurrent
+calls share one connection attempt; retained service handles reconnect after
+backend replacement. Connect, reachability and teardown have separate
+bounds. A lost in-flight reply rejects the call without replaying it. See
+[long-lived RPC clients](./backend-handoff.md#long-lived-rpc-clients) before
+upgrading an application that retains a client across backend replacements.
 
 ## Auto-restart and backoff
 
