@@ -96,6 +96,18 @@ The replacement proceeds through these boundaries:
 
 A failed candidate is stopped and the previous artifact is started under a fresh epoch. Rollback does not reuse an old grant. A failure to prove identity or inventory preservation stops automatic recovery rather than guessing which processes to kill or relaunch.
 
+## Recovery after a backend crash
+
+A sealed resident backend maintains a private recovery journal beside the owner socket, in `execution/recovery.db`. It reuses the daemon SQLite store with `synchronous=FULL`. Before changing ownership bookkeeping, it durably invalidates the previous certificate; a failed write refuses the mutation. The last snapshot remains available privately for diagnosis but is never accepted as a current recovery certificate.
+
+Every five seconds, a quiet backend reads its owner, project registry and infrastructure bookkeeping without draining ingress, provisioning containers or pausing applications. It publishes only a stable generation with no unfinished execution mutation or lifecycle operation. Active SSH sessions, transfers, pipelines and builds prevent certification. Unchanged snapshots are not rewritten. `execution.recovery` reports `pending`, `ready` or `unavailable` with the reason; a pending operation is not an application health failure.
+
+Run `omnitron backend recover` without a checkpoint to restore a crashed backend from its current certificate. It refuses a live controller, an unfinished activation, an unverified or different selected artifact, an externally changed project registry, a changed owner/controller grant or any difference in the recorded application inventory. Infrastructure adoption checks actual container specifications before public readiness. Recovery obtains a fresh fenced grant and uses the same validated replacement path as a planned update; it never replays application startup or migrations.
+
+A crash during a mutation can leave recovery uncertified. A changed process inventory, including an application restart after the certificate, also requires reconciliation rather than automatic adoption. Use the reported reason and private journal to investigate; do not stop a living owner to make the check pass. If recovery itself is interrupted after preparing its grant, the runtime installation records the explicit handoff checkpoint for `omnitron backend recover /absolute/private/handoff-ID.json`.
+
+The journal does not itself install an OS supervisor or promise recovery from owner/host failure. The unmanaged mode still needs an operator or external controller to invoke recovery after proving the backend is dead.
+
 ## Long-lived RPC clients
 
 The backend also reconnects to the resident execution owner after a broken private socket. Every connection rechecks socket ownership and permissions, then verifies the owner identity before sending retained event cursors, acknowledgments or mutations. A different owner is never adopted automatically. Observation polling uses its own transport with a four-second request deadline; a slow monitoring request cannot accumulate abandoned polls or interrupt a long-running application operation. An acknowledgment failure raises a separate diagnostic from an observation failure. Both resolve after the corresponding operation succeeds.

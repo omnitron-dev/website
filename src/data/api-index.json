@@ -11850,7 +11850,7 @@
       "name": "BuildRecord",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/services/release.service.ts#L47",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/services/release.service.ts#L48",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/dto/services",
@@ -11862,7 +11862,7 @@
       "name": "BuildRequest",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/services/release.service.ts#L36",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/services/release.service.ts#L37",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/dto/services",
@@ -13242,7 +13242,7 @@
       "name": "IOmnitronBackendService",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/shared/dto/backend.ts#L18",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/shared/dto/backend.ts#L19",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/dto/services",
@@ -15262,7 +15262,7 @@
       "name": "StackInfrastructureManager",
       "package": "@omnitron-dev/omnitron",
       "kind": "class",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/infrastructure/stack-infra-manager.ts#L47",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/infrastructure/stack-infra-manager.ts#L48",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/operations",
