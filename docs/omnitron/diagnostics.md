@@ -20,7 +20,9 @@ omnitron migrate status --daemon
 The Console's node diagnostics show the same health indicators as the CLI. The
 `runtime-diagnostics` indicator retains unresolved runtime failures. Expand
 **Evidence and recovery** to see causes, occurrence counts and next steps; the
-log link preserves the selected node.
+log link preserves the selected node. Switching nodes clears the previous node’s
+readings immediately. The dialog displays loading state until the selected node
+answers, and an older request cannot overwrite a newer check.
 
 | Failure boundary | Evidence and response |
 | --- | --- |
