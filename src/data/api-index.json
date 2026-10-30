@@ -11850,7 +11850,7 @@
       "name": "BuildRecord",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/services/release.service.ts#L48",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/shared/dto/releases.ts#L26",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/dto/services",
@@ -11862,7 +11862,7 @@
       "name": "BuildRequest",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/services/release.service.ts#L37",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/shared/dto/releases.ts#L15",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/dto/services",
@@ -14474,7 +14474,7 @@
       "name": "NodeUpgradeProgress",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/services/node-upgrade.service.ts#L51",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/shared/dto/nodes.ts#L392",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/dto/services",
@@ -15702,7 +15702,7 @@
       "name": "UpgradePhase",
       "package": "@omnitron-dev/omnitron",
       "kind": "type",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/services/node-upgrade.service.ts#L33",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/shared/dto/nodes.ts#L374",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/dto/services",

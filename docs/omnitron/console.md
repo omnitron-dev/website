@@ -581,6 +581,10 @@ Re-enabling watch uses the daemon’s last accepted boot or reload configuration
 [Files](./files.md) provides two independent, tabbed node locations, version-checked text editing and durable cross-node copies. Prism tabs and table viewports share the Console shell; CodeMirror loads only when a document is opened. Narrow windows retain both panels behind an A/B switch. The default export is `/`, limited by administrator authorization and the daemon OS account; node configuration can restrict roots, make them read only or disable access.
 
 
+## Shared API contracts
+
+Console and CLI share the wire contracts exported by `@omnitron-dev/omnitron/dto/services`. Backup coverage, audit queries, node health, rollout progress and release build progress are declared in the common DTO layer; the daemon implementations consume the same definitions. Existing service type exports remain available for compatibility. Console typechecking does not load daemon, database or service implementations, and a compiler-graph regression test enforces that boundary.
+
 ## Publishing Console updates
 
 From a source checkout, `pnpm --filter @omnitron/console build` typechecks and
