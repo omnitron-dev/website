@@ -40,7 +40,7 @@ diffs them against the index table below.
 | `log-collector.rpc-service.ts` | `OmnitronLogs` | 4 | viewer |
 | `node-manager.rpc-service.ts` | `OmnitronNodes` | 32 | viewer (read), operator (operations), admin (historical repair) |
 | `pipeline.rpc-service.ts` | `OmnitronPipelines` | 9 | admin + live human session / trusted local CLI |
-| `project.rpc-service.ts` | `OmnitronProject` | 30 | viewer (read) + operator (start/stop) + admin (CRUD) |
+| `project.rpc-service.ts` | `OmnitronProject` | 32 | viewer (read) + operator (start/stop) + admin (CRUD) |
 | `release.rpc-service.ts` | `OmnitronRelease` | 12 | viewer (read), operator (build/attest), admin (prune) |
 | `secrets.rpc-service.ts` | `OmnitronSecrets` | 6 | admin |
 | `sync.rpc-service.ts` | `OmnitronSync` | 6 | authenticated control plane; historical repair excludes operators |

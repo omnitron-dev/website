@@ -158,13 +158,16 @@ bind.
 
 ## Project management
 
-A *project* is a named directory containing an
-`omnitron.config.ts`. Register many projects to one daemon;
-operate on them by name.
+A *project* is one repository with many named stacks. Register the repository
+once; subdirectory configurations contribute stacks to that owner. See
+[projects and stacks](./projects.md) for composition and safe consolidation.
 
 | Command | Effect |
 | ------- | ------ |
-| `omnitron project add <name> <path>` | Register a seed project |
+| `omnitron project add <name> <path>` | Register a repository once |
+| `omnitron project configuration list <project>` | List owned configuration sources |
+| `omnitron project configuration import <project> <name> <path> --stack <source=target...>` | Import every source stack; optional `--registration` preserves an older namespace |
+| `omnitron project configuration detach <project> <name>` | Restore an imported source as a standalone registration without restarting applications |
 | `omnitron project topology` (optional project, `--stack <name>`) | Configured dependencies and coverage warnings; supports global `--json` |
 | `omnitron project list` (alias `proj list`) | List registered projects |
 | `omnitron project remove <name>` | Unregister (does not delete files) |

@@ -6,6 +6,10 @@ description: Every field of omnitron.config.ts, defineEcosystem(), defineSystem(
 
 # Configuration
 
+One repository is one [project with many stacks](./projects.md). Use the root
+configuration for shared application definitions; additional configurations can
+contribute named stacks without creating additional projects.
+
 Omnitron is driven by two files:
 
 | File | Purpose | Imports |
