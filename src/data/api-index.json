@@ -13530,7 +13530,7 @@
       "name": "IProjectAppStatus",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/shared/dto/project.ts#L287",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/shared/dto/project.ts#L289",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/dto/services",
@@ -13566,7 +13566,7 @@
       "name": "IProjectRequirements",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/shared/dto/project.ts#L343",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/shared/dto/project.ts#L345",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/dto/services",
@@ -13638,7 +13638,7 @@
       "name": "IStackAppStatus",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/shared/dto/project.ts#L260",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/shared/dto/project.ts#L262",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/dto/services",
@@ -13674,7 +13674,7 @@
       "name": "IStackInfraStatus",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/shared/dto/project.ts#L294",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/shared/dto/project.ts#L296",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/dto/services",
@@ -13734,7 +13734,7 @@
       "name": "ISyncStatus",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/shared/dto/project.ts#L211",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/shared/dto/project.ts#L213",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/dto/services",
@@ -14002,7 +14002,7 @@
       "name": "meshReading",
       "package": "@omnitron-dev/omnitron",
       "kind": "function",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/shared/sync-reading.ts#L87",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/shared/sync-reading.ts#L89",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/sync-reading",
@@ -15354,7 +15354,7 @@
       "name": "StackRuntime",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/shared/dto/project.ts#L309",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/shared/dto/project.ts#L311",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/dto/services",
@@ -15566,7 +15566,7 @@
       "name": "syncProgressWords",
       "package": "@omnitron-dev/omnitron",
       "kind": "function",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/shared/sync-reading.ts#L69",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/shared/sync-reading.ts#L71",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/sync-reading",

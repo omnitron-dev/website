@@ -486,6 +486,22 @@ not permission to add a duplicate or overwrite the old row. Keep undated lines
 and incomplete multi-line records archived; a physical-line count is not a count
 of lost events.
 
+A time/message collision can be resolved only with additional identity evidence.
+For example, two adjacent lifecycle records may name different `workerId` values
+at the same millisecond. Compare the original lines, their hashes and all stored
+fields before treating them as two events. A different metadata value alone does
+not establish whether the event is missing or the same event was transformed.
+
+Record a reviewed recovery as a new `HistoryManifest` with `resolvesGap`:
+`sourceId`, `gapIndex`, `gapDigest` (from `historyGapDigest`), `evidenceDigest` and
+a concise `explanation`. The reference must match an already verified source on
+the same node and category, with a known positive gap count equal to the new
+source's expected count. The original manifest and page proofs remain unchanged.
+Unknown counts, changed fingerprints, competing recoveries and expired records
+cannot close a gap. Only the final transaction with every expected row and the
+correct hash chain exposes the separate recovery proof. These are reviewed
+maintenance operations, not a new RPC that accepts arbitrary resolution flags.
+
 `sync_history_sources` stores immutable manifests and progress;
 `sync_history_pages` stores ordered page hashes and commit results. Their separate
 checksummed migration history uses the Omnitron/Titan/Kysera runner. Pages form a
@@ -498,7 +514,9 @@ are unaffected.
 Inspect coverage with `omnitron node check <node>` or expand **History before
 receipts · coverage and gaps** in the Console node diagnostics. Both read the same
 `history` DTO: source time bounds, checked/expected rows, present/restored counts,
-verification time, retained timestamp precision and explicit gaps. A verified
+verification time, retained timestamp precision and explicit gaps. A recovered
+gap displays its explanation, verification time and separate source ID under
+`resolved`; unresolved gaps remain visible. A verified
 source range does not certify earlier history. An unknown number of missing rows
 stays unknown; an empty queue cannot turn it into zero.
 

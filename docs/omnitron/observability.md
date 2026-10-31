@@ -647,3 +647,10 @@ and Console expose the same source coverage, verification time, restoration
 counts and unresolved gaps. Historical imports do not update current gauges.
 Records intentionally outside retention remain identifiable in their preserved
 source archives; they are not reported as a transport failure.
+
+A later recovery keeps the first audit intact and links a new committed proof to
+its exact gap fingerprint. Diagnostics distinguish the resolved finding from
+still unknown history. Group repeated stack frames into error reports before
+counting events; a plain stack trace or a time-of-day-only header cannot be dated
+from the audit time. Neighboring absolute timestamps can establish context, but
+do not supply an exact event time on their own.

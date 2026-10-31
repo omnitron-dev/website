@@ -637,3 +637,7 @@ for each audited source range, checked/expected rows, existing and restored
 records, verification time, retained precision and unavailable earlier history.
 This uses the same evidence as `omnitron node check`; see the
 [recovery procedure](./cluster.md#history-before-delivery-receipts).
+
+When a reviewed recovery closes a known gap, the disclosure shows its explanation,
+verification time and separate proof source. The original audit remains available;
+no unresolved warning is cleared by a successful current queue reading.
