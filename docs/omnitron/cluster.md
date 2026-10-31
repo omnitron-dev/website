@@ -477,6 +477,15 @@ Use this order when recovering legacy history:
 5. Repeat a read-only content comparison after recovery. Preserve snapshots and
    the audit report, including any unresolved range or precision limitation.
 
+Raw files can supply additional events absent from database snapshots. Preserve
+the original files on their host, including a fixed byte range for active files.
+Import only records with a trustworthy absolute timestamp and unambiguous event
+identity. Check both full structured content and the existing event's time and
+message before inserting: a metadata mismatch is an explicit unresolved case,
+not permission to add a duplicate or overwrite the old row. Keep undated lines
+and incomplete multi-line records archived; a physical-line count is not a count
+of lost events.
+
 `sync_history_sources` stores immutable manifests and progress;
 `sync_history_pages` stores ordered page hashes and commit results. Their separate
 checksummed migration history uses the Omnitron/Titan/Kysera runner. Pages form a
