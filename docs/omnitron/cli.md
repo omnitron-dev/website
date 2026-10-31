@@ -33,7 +33,7 @@ into another process. Check both the JSON result and the exit status.
 | ----- | -------- |
 | **Daemon lifecycle** | `up`, `down`, `ping`, `kill` |
 | **Backend installation and replacement** | `backend status`, `backend install`, `backend installation`, `backend select`, `backend upgrade`, `backend abort`, `backend recover` |
-| **Project** | `project add`, `project list`, `project remove`, `project scan` |
+| **Project** | `project add`, `project list`, `project remove`, `project scan`, `project topology` |
 | **Stack** | `stack list`, `stack create`, `stack delete`, `stack status`, `stack start`, `stack stop`, `stack runtime` |
 | **App lifecycle** | `start`, `stop`, `restart`, `reload` |
 | **Information** | `list` (alias `ls`), `status`, `config`, `init` |
@@ -156,6 +156,7 @@ operate on them by name.
 | Command | Effect |
 | ------- | ------ |
 | `omnitron project add <name> <path>` | Register a seed project |
+| `omnitron project topology` (optional project, `--stack <name>`) | Configured dependencies and coverage warnings; supports global `--json` |
 | `omnitron project list` (alias `proj list`) | List registered projects |
 | `omnitron project remove <name>` | Unregister (does not delete files) |
 | `omnitron project scan` | Scan app bootstraps and report their infrastructure requirements |

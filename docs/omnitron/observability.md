@@ -18,69 +18,58 @@ Verified against `apps/omnitron/src/{observability,monitoring,services}/`.
 
 | Signal | Owner | Storage | Exposure |
 | ------ | ----- | ------- | -------- |
-| **Logs** | `log-collector` service + `LogManager` | Per-app files and rotated archives; PostgreSQL `logs` for collector queries | RPC: `OmnitronLogs.queryLogs` / `streamLogs` |
+| **Logs** | Titan PM capture + `LogManager` + `LogCollectorService` | Private SQLite delivery journals; per-app files; PostgreSQL/SQLite `logs` | RPC: `OmnitronLogs.queryLogs` / `streamLogs` |
 | **Metrics** | `MetricsBridge` + `OmnitronTelemetry` | Titan PostgreSQL history on masters; SQLite on updated nodes | RPC: `OmnitronTelemetry.pushBatch` (ingest), `OmnitronMetrics` (read) |
 | **Traces** | `OmnitronTraces` (`TraceCollectorService`) | Postgres (`OmnitronDatabase`), write-buffered | RPC: `ingestSpan`, `ingestBatch`, `getTrace`, `queryTraces`, `getServiceMap` |
 | **Health** | `OmnitronHealth` (app/infra probes) + `OmnitronNodes` health monitor (fleet) | rolling window in state-store / node history | RPC: `OmnitronHealth.checkApp` / `checkAll`; `OmnitronNodes.getCheckHistory` / `getUptimeBar` |
 
 ## Logs
 
-### Flow
+### Capture, persistence and replay
 
 ```mermaid
 sequenceDiagram
-  participant App as Child app process
-  participant Pipe as stdio pipe
-  participant LM as LogManager
-  participant File as ~/.omnitron/logs/{app}/app.log
-  participant Ring as Orchestrator in-memory ring (last N entries)
-  participant CLI as omnitron logs
-
-  App->>Pipe: pino JSON line
-  Pipe->>LM: ingest entry
-  LM->>File: append (errors also to error.log)
-  LM->>Ring: append (capped)
-  LM->>LM: rotate if file > maxSize
-  alt maxFiles exceeded
-    LM->>LM: drop oldest archive
-  end
-  alt compress: true
-    LM->>LM: gzip rotated file (async)
-  end
-  CLI->>LM: queryLogs({app, lines, level, grep})
-  LM-->>CLI: filter from ring + tail file
+  participant App as Fork or worker thread
+  participant PM as Titan PM capture
+  participant Journal as Private SQLite journal
+  participant Backend as Omnitron backend
+  participant DB as PostgreSQL or node SQLite
+  participant Files as Application files
+  App->>PM: stdout / stderr, including startup failures
+  PM->>Journal: ID + source + capture time + message bytes
+  Note over Journal: WAL + synchronous=FULL; unfinished multiline records persist too
+  Journal->>Files: Append with a durable file offset; fsync
+  Files-->>Journal: File projection confirmed
+  Backend->>Journal: Read a bounded page
+  Backend->>DB: Commit logs and node replication outbox together
+  DB-->>Backend: Transaction committed
+  Backend->>Journal: Confirm exact IDs and payload digests
+  Note over Journal: Release only after both destinations confirm
 ```
 
-### `LogManager`
+Titan PM installs output capture before readiness, including for workers replaced by a pool. One UTF-8 reader handles each pipe from spawn through EOF. A failed initialization does not require a `WorkerHandle` to exist before output reaches storage. Stdout and stderr from different process instances are assembled separately. The same canonical record feeds files, the database and replication.
 
-The orchestrator wires every spawned child's stdout/stderr
-through a `LogManager`. Responsibilities:
+The local delivery files are `data/application-logs.sqlite` and `data/backend-logs.sqlite` under the configured Omnitron storage directory. They use SQLite WAL with `synchronous=FULL` and private permissions. Pending messages and finalized records survive process replacement. No oldest-first eviction is applied to unacknowledged logs. If capture cannot write its journal, the pipe is paused and the same frame is retried. Monitor storage availability: backpressure can eventually block an application that continues writing to a full pipe.
 
-- Append every pino JSON line to a per-app file. The layout is
-  directory-per-app, not a flat file: a standalone app writes
-  `~/.omnitron/logs/{app}/app.log`; the daemon itself writes
-  `~/.omnitron/logs/omnitron.log`; project-mode apps write under
-  `~/.omnitron/projects/{project}/{stack}/logs/{app}/app.log`.
-- Dual-write errors and fatals to a sibling `error.log` so a
-  noisy info stream doesn't bury them.
-- Rotate when file size exceeds the configured threshold.
-- Drop the oldest archive when count exceeds `maxFiles`.
-- Optionally gzip rotated archives (async, doesn't block writers).
+A database response is acknowledged only after the enclosing transaction commits. PostgreSQL confirmation requires `synchronous_commit=on`, `fsync=on`, `full_page_writes=on` and a logged `logs` table. Persistent SQLite requires WAL with `FULL`/`EXTRA`, or a disk rollback journal with `EXTRA`. A slave's local rows and replication outbox share one transaction. Retries keep the original IDs; conflicting content under an existing ID is retained and reported, never overwritten.
 
-The fast-tail in-memory ring of the last N entries lives in the
-`OrchestratorService` (the `LogManager` delegates `getLogs()` to
-it), so `omnitron logs` can tail without disk I/O.
+File projection has its own acknowledgment. Before appending, the journal records the file identity and original offset. After a crash, matching complete bytes are accepted once; a proven partial append is replayed from that offset. Unrelated or replaced bytes cause a diagnostic and remain intact. Rotation and compression are serialized with appends. File retention may remove acknowledged historical archives according to `maxSize`/`maxFiles`; it does not evict pending delivery records.
 
-Defaults from `ecosystem.logging`:
+### Time and multiline messages
 
-| Option | Default |
-| ------ | ------- |
-| `level` | `'info'` |
-| `maxSize` | `'50mb'` |
-| `maxFiles` | `10` |
-| `compress` | `true` |
+- A structured message keeps its supplied timestamp. PostgreSQL stores microseconds; the original timestamp also survives in capture metadata. Ordering never manufactures fractional seconds. Capture sequence and stable IDs are separate from event time.
+- Unstructured messages carry the parent's time of first read from the pipe. That is capture time, not proof of when the child generated the text. The record detail identifies `reported`, `captured`, `inferred` or legacy `observed` time.
+- JSON lines define explicit boundaries. Indented continuations and contiguous unstructured stderr are assembled per process/stream until the next structured boundary or 100 ms of idle time. Arbitrary plain-text output has no universal message-boundary protocol; use newline-delimited structured JSON for exact application-defined boundaries.
+- A pending multiline record is journaled before it is considered accepted. An interrupted owner leaves those bytes recoverable. Physical lines above 256 KiB use linked fragments; oversized multiline records retain a continuation reference. Fragment boundaries are explicit metadata, not discarded text.
+- Time-of-day-only pretty headers require a date inference. Historical undated output remains uncertain; this implementation does not retroactively invent timestamps for old files.
 
-Per-app overrides live in `IAppDefinition.observability.logging`.
+### Files and startup failures
+
+Standalone apps write `logs/{app}/app.log`; project apps write `projects/{project}/{stack}/logs/{app}/app.log`. Error and fatal records also go to `error.log`. JSON files include `_omnitron` capture metadata. The daemon writes `logs/omnitron.log`. Defaults remain `level: info`, `maxSize: 50mb`, `maxFiles: 10`, `compress: true`; per-app overrides use `observability.logging`.
+
+Native entry guards cover imports and initialization before Titan is available. They synchronously report one structured failure with UTC time, ID, component and stack to stderr, and preserve a private source file under `$OMNITRON_HOME/data/startup-failures`. The next working backend imports those files through its durable journal with an atomic import checkpoint. Repeated startup does not duplicate the row. Keep these source files as evidence; a storage failure can still leave stderr as the final available destination.
+
+The in-memory tail is a bounded convenience view. Database history, durable pending delivery and rotated files have distinct retention and availability; a full live window is not evidence that no other records exist.
 
 ### Owner and supervisor journals
 
@@ -117,15 +106,16 @@ already discarded by an older unit cannot be reconstructed.
 | `queryLogs({app?, nodeId?, level?, search?, labels?, traceId?, from?, to?, limit?, offset?})` | Filter & return entries (note: full-text filter is `search`, not `grep`; page with `limit`/`offset`) |
 | `streamLogs({app?, nodeId?, level?, search?, labels?, tail?, since?})` | Return the last `tail` entries (default 100) in chronological order — poll for near-real-time tailing |
 | `getLogStats()` | Exact stored counts and archive range; an analytic query, not a polling health check |
-| `getIngestionStats()` | In-memory ingested/dropped counters and queue size, suitable for frequent collection checks |
+| `getIngestionStats()` | Capture capability, durable pending records/bytes, owner errors, last confirmed DB commit and last write failure; inexpensive to poll |
 
 `streamLogs` is a poll-friendly "recent entries" call rather than
-a push subscription; pass `since` to fetch only entries after a
-timestamp.
+a push subscription. `since` includes its timestamp boundary; deduplicate by row ID. The response is bounded by `tail`, so use `queryLogs` to inspect complete historical windows or bursts larger than the live tail.
 
 ### CLI
 
 ```bash
+omnitron logs --status              # same persistence verdict as Console Logs
+omnitron --json logs --status       # structured queue, capability and commit evidence
 omnitron logs                       # daemon log
 omnitron logs api                   # one app
 omnitron logs api -f -l warn -g err # follow + level filter + regex
@@ -134,22 +124,15 @@ omnitron --json logs api            # JSON envelope with source and entries
 omnitron logs sample/production/mail --node worker-1 -n 100
 ```
 
-### Log entries — `LogEntryDto`
+### Interpreting diagnostics
 
-```typescript
-interface LogEntryDto {
-  timestamp:  number;       // ms epoch
-  level:      'trace'|'debug'|'info'|'warn'|'error'|'fatal';
-  app:        string;
-  pid?:       number;
-  process?:   string;       // sub-process name in bootstrap mode
-  message:    string;
-  // ...arbitrary fields from the structured log
-}
-```
+Console **Logs** and `omnitron logs --status` use the same reading of `OmnitronLogs.getIngestionStats()`. The status describes the connected backend; selecting a remote node in the log table does not turn a local ingestion counter into remote evidence. Inspect node replication diagnostics for the remote delivery path.
 
-The arbitrary fields are whatever the app put into its log
-context (typically a request id, user id, span id, etc.).
+`lastCommitAt` is a successful database commit, not the newest event timestamp. `journal.pending` includes records awaiting delivery, and `journal.assembling` identifies messages still being joined. `ownerPending` is the observed owner backlog. `lastError`, `ownerError` and journal errors explain failure; a zero in an unavailable or older backend is never substituted for evidence. Counters describe this collector's lifetime, not proof that historical data was never lost.
+
+`capture: legacy-owner` explicitly means the running owner lacks the durable protocol. A backend-only update cannot repair its old truncation, volatile event backlog or missing pipe timestamps. Updating the owner requires an approved application restart. Do not use a legacy backend with a new owner as a silent rollback: restore a matching owner/backend pair, preserving all journals.
+
+The compact log rows show event time; expanded metadata includes the capture ID, process, stream, sequence, full timestamp and time basis. CLI JSON includes the same metadata. `LogEntryDto.timestamp` remains epoch milliseconds for compatibility; use metadata to inspect the original fractional precision.
 
 ## Metrics
 
@@ -535,7 +518,9 @@ per-storage-backend — memory / SQLite / Postgres per config)
 
 | Signal | Retention default |
 | ------ | ----------------- |
-| Logs | `logging.maxFiles` × `logging.maxSize` (default ~ 500 MB per app) |
+| Log files | `logging.maxFiles` × `logging.maxSize` per stream |
+| Log database | `logging.databaseRetentionDays` (default 14 days; nonpositive disables pruning) |
+| Unacknowledged logs | Retained in the local journal until both destinations confirm; never evicted by file/database retention |
 | Omnitron metric history | `monitoring.metrics.historyMaxAge` (default `7d`, hourly sweep) |
 | Standalone Titan metric history | `retention.maxAge` (default `7d`) |
 | Traces (write buffer) | flushed to Postgres at 500 spans or every 5 s |
@@ -593,8 +578,7 @@ daemon's transport.
 - **High-cardinality metric labels.** `userId` as a label
   multiplies series count by user count. Use buckets / tiers,
   not per-entity ids.
-- **`omnitron logs --file` in production.** Bypasses the daemon's
-  ring buffer; reads raw files. Slower and unfiltered.
+- **Treating a file tail as a persistence receipt.** `--file` supports filters and offline recovery, but a bounded tail does not prove database delivery or complete historical coverage. Check `logs --status` and the requested history window.
 - **No retention on the persistent metrics store.** Disk fills;
   queries get slow. Default `'7d'` is sensible.
 - **Tracing every span at 100% sampling.** Volume kills the

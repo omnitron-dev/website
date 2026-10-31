@@ -14,6 +14,87 @@ the CLI uses.
 
 Verified against `apps/omnitron/webapp/src/`.
 
+## One keyboard model
+
+Console uses three levels of focus: **Console → workspace region → control**.
+The visible focus ring marks the active control; file selection is independent of
+the cursor. The command palette uses the same authorized navigation as the sidebar.
+Keyboard commands invoke the existing actions and preserve permission checks,
+confirmation dialogs and disabled states.
+
+| Scope | Keys | Action |
+| --- | --- | --- |
+| Console | Ctrl/Cmd+K | Find an available page or command |
+| Console | Ctrl/Cmd+/ | Open the keyboard guide |
+| Regions | F6 / Shift+F6 | Move forward / backward between navigation, tools, tables and workspaces |
+| Current view | `/`, R | Focus the available search; refresh the current view |
+| Controls | Tab / Shift+Tab | Move between controls; arrows operate tabs and menus |
+| Tables | Up/Down, Home/End, Page Up/Down | Browse rows; Enter opens, Space selects, Escape returns to the viewport |
+| File list | Tab / Shift+Tab | Switch between panels A and B, including on narrow screens |
+| File list | Shift+Up/Down, Space, Ctrl/Cmd+A | Extend selection, toggle a file, select loaded entries |
+| Files | Enter, Alt+Up, Alt+Left/Right | Open, parent directory, directory history |
+| Files | Ctrl/Cmd+L | Edit the current path |
+| Files | F2, F4, F5, Delete | Rename, open/edit, copy to the other panel, move to trash |
+| Logs | Home | Jump to the latest displayed logs |
+| Topology | 0, 1 | Fit the graph, restore readable scale |
+
+Tab switches file panels **only while the file list has focus**. Escape returns to
+its tools, where ordinary Tab navigation remains available. F6 also exits an SSH
+terminal or editor. Their other shortcuts and text input stay with that surface;
+Console does not intercept typed commands, composing text or handled key events.
+Dialogs suspend background commands. A retained, hidden Files or SSH workspace
+cannot execute shortcuts for another page.
+
+The command palette uses Prism `CommandPalette`; shared table and search behavior
+comes from Prism `TableViewport` and `SearchInput`. New Console sections should use
+these primitives and `data-keyboard-region` for meaningful regions. Existing
+search/refresh buttons can expose `data-console-command`; specialized workspaces
+register context actions with `useConsoleActions`, enabled only while visible.
+Avoid installing another global keydown listener. Keep each command's callback
+shared with its pointer control, and recheck permissions at the RPC boundary.
+
+## Dependency evidence in topology
+
+Topology combines measured process/container status with configured relationships.
+`OmnitronProject.getTopology` uses the same application definitions, infrastructure
+resolver, environment precedence and stack vault references as the launch builder.
+Read-only diagnostics use captured bootstrap metadata and configuration files;
+they never import application bootstraps or compile application source. Metadata
+is preserved across backend handoffs. When no captured declaration is available,
+file/environment dependencies are still shown and coverage is marked incomplete.
+It extracts database, Redis, S3 and declared service endpoints plus `dependsOn`.
+No separate graph configuration is required. Shared services receive links from
+each consumer; external endpoints are separate nodes with **configured / unknown**
+status until there is independent runtime evidence.
+
+Select a node and open **Connections** to inspect providers, consumers and the
+configuration keys establishing each relationship. Arrows point from consumer to
+provider; ownership links say **Provisioned for**. Dashed dependency links describe
+configuration, not measured traffic. Userinfo, URL paths, query parameters, hashes
+and credentials never enter this topology response. Missing definitions or
+unavailable backend support produce an incomplete-data message rather than an
+apparently complete empty graph.
+
+The system workspace shows this daemon's applications and containers; a project
+workspace shows that project's stacks. This is not a packet trace: arbitrary
+connections created only inside application code are not inferred, and current
+configuration may differ from a process that has not yet been restarted. A green
+container confirms its reported health, not every consumer's connection to it.
+
+The CLI returns the same evidence:
+
+```bash
+omnitron project topology
+omnitron project topology sample --stack dev
+omnitron --json project topology sample
+```
+
+Consumer/provider lanes leave space for links and reflow to one column on narrow
+screens. Selecting a node emphasizes its connections; the inspector also provides
+a textual representation. The control plane appears once as the system workspace,
+not as an empty application project. Package identity distinguishes it from a user
+application that happens to be named `omnitron`.
+
 ## Tech stack
 
 | Layer | Choice |
@@ -209,6 +290,7 @@ not the persisted history queried by `/metrics`.
 ### Topology
 
 `/topology` is a deployment diagram built from `OmnitronProject.listStacks`,
+`OmnitronProject.getTopology`,
 `OmnitronDaemon.list` / `status` and `OmnitronInfra.listContainers`. It shows the
 machines, applications, provisioned services and gateway of the selected stack.
 Edges represent declared service ownership/dependencies, not observed network
@@ -217,9 +299,9 @@ traffic. An incomplete read is labelled explicitly.
 The graph opens at a readable scale (100% when one card fits), rather than
 shrinking every deployment into the window. Compact Prism cards show a name,
 state and key readings; process lists, image identifiers and full configuration
-remain in the inspector. Deployment groups reflow into one to four columns for
-the actual canvas width. A provisioned service stays beside its application;
-on a narrow screen the relationship runs vertically.
+remain in the inspector. Dependency graphs use consumer/provider lanes with a clear routing gutter;
+on narrow screens they become one column. Graphs without dependency evidence
+use a compact grid. The Connections inspector explains the evidence for each link.
 
 The wrapping toolbar provides node search, graph/list view, zoom, fit, position
 locking, fullscreen and refresh. **Fit graph** gives an overview of all nodes;
@@ -236,7 +318,7 @@ Searching or selecting a node brings it into view at readable scale, including
 after closing its inspector. Resizing adapts the column count and available space.
 
 Selecting a node opens an inspector beside the graph on wide windows and a modal
-sheet on narrow windows. Prism tabs offer the available overview, config, metrics
+sheet on narrow windows. Prism tabs offer the available overview, connections, config, metrics
 and logs. CPU/memory history for local apps comes from the metrics service, not
 from samples invented when the drawer opens. Readings update with polling; changing
 scope clears the old selection. Unknown host capacity is not rendered as a gauge.
@@ -641,3 +723,15 @@ This uses the same evidence as `omnitron node check`; see the
 When a reviewed recovery closes a known gap, the disclosure shows its explanation,
 verification time and separate proof source. The original audit remains available;
 no unresolved warning is cleared by a successful current queue reading.
+
+
+### Live log tail and complete history
+
+The live tail polls at two-second intervals with a bounded window of up to 50
+matching events per poll and retains up to 2,000 rows in the browser. A filled
+window is marked explicitly: a burst can exceed what the tail displays. Use a
+historical time range and pagination for the complete retained database record,
+including late-arriving events with earlier source timestamps. The capture/journal
+and database acknowledgement indicators describe durable storage independently of
+this bounded display. A healthy ingestion indicator is not a claim that every
+stored row is currently on screen.
