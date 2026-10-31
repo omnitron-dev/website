@@ -49,6 +49,50 @@ Graph dragging changes the view layout only. Search, graph/list view, the connec
 inspector and [keyboard navigation](./console.md#topology) remain available without
 editing deployment intent.
 
+## Declaration coverage
+
+Open **Declarations** for the selected project to refresh the bootstrap metadata
+used by the map. This administrative action reads each unique bootstrap in a
+separate process and commits its `requires` and `omnitronConfig` declarations to
+the daemon's SQLite store. It does not call application lifecycle hooks or start
+a stack. Imports can execute trusted project code: refresh is an explicit admin
+operation, while ordinary viewer reads never import bootstrap code.
+
+```bash
+# All registered configurations and stacks of one project
+omnitron topology refresh sample
+# One stack, using the same authorization and result as Console
+omnitron --json topology refresh sample prod
+omnitron --json project topology sample --stack prod
+```
+
+The read window is bounded to 30 seconds per bootstrap and 90 seconds across the
+project. A failed or unread declaration keeps its previous snapshot and a visible
+coverage warning; the CLI exits nonzero for partial results. Refresh after rebuilding
+applications or changing their dependencies. An HTTP timeout is not a cancellation:
+reload the map to inspect committed coverage before retrying.
+
+Expand **declarations available** below the toolbar to inspect each application's
+source and capture time. The JSON graph and `topology show` expose the same coverage:
+
+| Source | Meaning |
+| --- | --- |
+| `entry` | No bootstrap; dependencies come from the configured application entry |
+| `launch` | Declaration captured by the execution owner when loading this application |
+| `snapshot` | Persisted declaration from an explicit refresh or stack preparation |
+| `memory` | Compatibility metadata available only in a previous process cache/checkpoint |
+| `missing` | Bootstrap declarations unavailable; explicit configuration alone is insufficient for full coverage |
+
+A new owner carries launch declarations across backend handoffs. Persisted snapshots
+also survive a cold backend restart. The graph reports a changed or missing captured
+bootstrap file without executing it. Its hash covers the selected source/compiled
+bootstrap file, **not the entire imported dependency tree**. A snapshot is not a
+continuous code watcher or proof of live connections. Failure, source and capture
+time remain visible instead of turning an unknown dependency into an absent one.
+Private declaration records stay in the daemon store; viewer responses contain
+sanitized endpoint identities, dependency evidence and coverage, never environment
+values or credentials.
+
 ## Design a target
 
 1. Select a project and stack, then open **Workspace**.
@@ -80,6 +124,7 @@ full-height dialog with content contained inside its scroll region.
 
 | Command | Result |
 | --- | --- |
+| `omnitron topology refresh` | Explicit admin declaration capture without a workload restart |
 | `omnitron topology show` | Configured target, accepted target and observation gaps |
 | `omnitron topology export` | Portable JSON document |
 | `omnitron topology draft` | Revision-protected draft save |

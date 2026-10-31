@@ -132,6 +132,25 @@ Console **Logs** and `omnitron logs --status` use the same reading of `OmnitronL
 
 `capture: legacy-owner` explicitly means the running owner lacks the durable protocol. A backend-only update cannot repair its old truncation, volatile event backlog or missing pipe timestamps. Updating the owner requires an approved application restart. Do not use a legacy backend with a new owner as a silent rollback: restore a matching owner/backend pair, preserving all journals.
 
+Before replacing a legacy owner, save the exact owner/backend release pair,
+supervision configuration, application inventory, restart configuration and online
+SQLite backups. Prepare the candidate and rollback with the same dependency closure.
+Drain applications gracefully, stop both supervisors, replace the owner and backend
+as one reviewed pair, then restore the saved inventory and watch state. An owner
+restart cannot transfer existing pipes and worker threads; it needs a controlled
+application maintenance window even when ordinary backend handoffs are seamless.
+
+Accept the transition only after CLI and Console report durable capture, the database
+has a confirmed commit, owner/journal errors are absent and pending records are
+acknowledged. Verify application health, RPC/replication progress and immutable
+experiment identities as separate checks. A running process alone is insufficient.
+Rollback restores the saved release pair and supervision configuration, retaining
+all current data and delivery journals; do not restore an old database snapshot over
+newer writes. Historical records without original capture evidence retain that
+limitation after the upgrade; their original timestamps cannot be reconstructed by
+relabeling them.
+
+
 The compact log rows show event time; expanded metadata includes the capture ID, process, stream, sequence, full timestamp and time basis. CLI JSON includes the same metadata. `LogEntryDto.timestamp` remains epoch milliseconds for compatibility; use metadata to inspect the original fractional precision.
 
 ## Metrics

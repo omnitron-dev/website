@@ -34,7 +34,7 @@ into another process. Check both the JSON result and the exit status.
 | **Daemon lifecycle** | `up`, `down`, `ping`, `kill` |
 | **Backend installation and replacement** | `backend status`, `backend install`, `backend installation`, `backend select`, `backend upgrade`, `backend abort`, `backend recover` |
 | **Project** | `project add`, `project list`, `project remove`, `project scan`, `project topology` |
-| **Topology** | `topology show`, `topology export`, `topology draft`, `topology plan`, `topology apply` |
+| **Topology** | `topology refresh`, `topology show`, `topology export`, `topology draft`, `topology plan`, `topology apply` |
 | **Stack** | `stack list`, `stack create`, `stack delete`, `stack status`, `stack start`, `stack stop`, `stack runtime` |
 | **App lifecycle** | `start`, `stop`, `restart`, `reload` |
 | **Information** | `list` (alias `ls`), `status`, `config`, `init` |
@@ -59,6 +59,13 @@ into another process. Check both the JSON result and the exit status.
 | **Knowledge base** | `kb mcp`, `kb index`, `kb status`, `kb query` |
 
 ## Topology workspace
+
+`omnitron topology refresh <project> [stack]` explicitly captures bootstrap dependency
+declarations in private SQLite without starting applications. It requires admin,
+uses bounded separate reader processes and returns per-application failures while
+retaining the last successful metadata. Graph reads remain available to viewers.
+Refresh after application or dependency rebuilds; inspect source/capture times and
+coverage warnings with `project topology` or `topology show`.
 
 `omnitron topology show <project> <stack>` reads configured, desired and observed
 placement. `export` writes portable JSON; `draft <project> <stack> <file>` saves a
