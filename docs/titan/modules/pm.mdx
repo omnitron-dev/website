@@ -12,8 +12,7 @@ Process supervision with worker pools, IPC (Unix / TCP / WebSocket),
 supervisor patterns, restart policies with exponential backoff,
 resource limits, metrics + health collection, a transparent service
 proxy that makes every process behave like a local Netron service,
-and a rich decorator set for workflows, actors, sagas, and
-resilience.
+and decorators for in-process workflows and resilience.
 
 ```bash
 pnpm add @omnitron-dev/titan-pm
@@ -27,8 +26,9 @@ pnpm add @omnitron-dev/titan-pm
   down. Supervisors restart with backoff and policy.
 - **Worker pools.** Many parallel workers across CPUs with load
   balancing.
-- **Actor model / sagas.** Long-running stateful processes with
-  compensation logic.
+- **Multi-step work.** Dependency-ordered stages with explicit compensation.
+  Workflow state is in memory; process or host loss requires an external durable
+  operation/recovery contract.
 
 ## Quickstart
 
@@ -168,15 +168,15 @@ Use `child:start-failed` for the original cause, `child:restart` for attempts, a
 
 The rich decorator set is what makes processes feel like local
 services. Annotated processes can declare lifecycle, observability,
-resilience, and saga semantics declaratively.
+resilience and workflow compensation declaratively.
 
 ### Class-level
 
 | Decorator         | Purpose                                                          |
 | ----------------- | ---------------------------------------------------------------- |
 | `@Process(opts?)` | Mark a class as a runnable process                               |
-| `@Workflow(opts?)`| Multi-step workflow (state machine)                              |
-| `@Actor()`        | Actor model (one-process serial mailbox)                         |
+| `@Workflow()`| Dependency-ordered in-process workflow                              |
+| `@Actor()`        | Compatibility metadata only; no actor runtime or serial mailbox                         |
 | `@Supervisor(opts?)`| Supervisor for child processes                                 |
 
 ### Method-level — exposure and lifecycle
@@ -185,7 +185,7 @@ resilience, and saga semantics declaratively.
 | ----------------- | ---------------------------------------------------------------- |
 | `@Public()`       | Expose method over IPC                                           |
 | `@Stage()`        | Workflow stage                                                   |
-| `@Compensate()`   | Saga compensation handler — runs to undo a failed stage          |
+| `@Compensate(stage)` | Compensates a completed stage after a known workflow failure          |
 | `@HealthCheck()`  | Mark method as the health check                                  |
 | `@OnShutdown()`   | Cleanup hook before the process exits                            |
 | `@Child()`        | Supervisor: declare a supervised child                           |
@@ -324,3 +324,33 @@ spawn time. Do not rely on either as a security boundary.
 - [`titan-metrics`](./metrics.mdx) — collects process metrics
   when `monitoring.metrics: true`
 - [`titan-events`](./events.mdx) — inter-process event delivery
+
+
+## Workflow failure and recovery
+
+`@Workflow()`, `@Stage({ dependsOn, timeout, retries })` and `@Compensate(stageName)`
+are executed by Titan PM. Dependency validation uses Titan's shared
+`dependencyBatches` utility, also used by Omnitron application startup. Missing
+prerequisites, duplicate stage names and cycles are refused before effects begin.
+Compensation declaration order does not matter; subclass metadata does not mutate
+its parent workflow.
+
+One instance runs once at a time. Use separate instances for independent concurrent
+runs. Each later run receives a new run ID and fresh stage results. A failed
+parallel stage waits for its active siblings to settle before compensating completed
+stages in reverse dependency order. Compensation outcomes are visible in
+`getContext().stages`; failed compensation returns an `AggregateError` containing
+both the original failure and recovery failures, and blocks reuse of that instance.
+
+A timeout does not cancel an arbitrary JavaScript handler. Titan reports
+`WorkflowStageUncertainError` (exported by `@omnitron-dev/titan-pm`) and stage status
+`unknown`, then blocks automatic retry, compensation and instance reuse. The handler
+may still complete externally. Reconcile its actual effects before starting a new
+workflow. Explicit retries after ordinary failures require idempotent or otherwise
+retry-safe handlers. Invalid timeout/retry settings are rejected before execution.
+
+This is not persistent workflow execution or exactly-once external effects. For
+infrastructure operations, use the journal, effect receipts and reconciliation
+contracts in the [resilient control-plane design](../../omnitron/resilient-control-plane.md).
+The `@Actor()` compatibility decorator records metadata only; it does not create an
+actor mailbox, serialize messages or provide distributed actor supervision.

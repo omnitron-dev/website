@@ -40,7 +40,7 @@ diffs them against the index table below.
 | `log-collector.rpc-service.ts` | `OmnitronLogs` | 4 | viewer |
 | `node-manager.rpc-service.ts` | `OmnitronNodes` | 32 | viewer (read), operator (operations), admin (historical repair) |
 | `pipeline.rpc-service.ts` | `OmnitronPipelines` | 9 | admin + live human session / trusted local CLI |
-| `project.rpc-service.ts` | `OmnitronProject` | 25 | viewer (read) + operator (start/stop) + admin (CRUD) |
+| `project.rpc-service.ts` | `OmnitronProject` | 30 | viewer (read) + operator (start/stop) + admin (CRUD) |
 | `release.rpc-service.ts` | `OmnitronRelease` | 12 | viewer (read), operator (build/attest), admin (prune) |
 | `secrets.rpc-service.ts` | `OmnitronSecrets` | 6 | admin |
 | `sync.rpc-service.ts` | `OmnitronSync` | 6 | authenticated control plane; historical repair excludes operators |
@@ -342,12 +342,13 @@ See [Xec automation](./automation.md) for execution limits, revision review, can
 
 ### `OmnitronProject` — `project.rpc-service.ts`
 
-Project and stack registry: 25 public methods, including release checks, account operations and infrastructure ownership.
+Project and stack registry: 30 public methods, including release checks, account operations and infrastructure ownership.
 
 | Method category | Methods |
 | --------------- | ------- |
 | Projects | `listProjects`, `getProject`, `scanRequirements`, `addProject`, `updateProject`, `removeProject` |
-| Project apps and topology | `getProjectApps`, `getTopology` |
+| Project apps and topology | `getProjectApps`, `getTopology`, `getTopologyInventory` |
+| Target workspace | `getTopologyWorkspace`, `saveTopologyDraft`, `planTopology`, `applyTopologyPlan` |
 | Stacks | `listStacks`, `getStack`, `getStackStatus`, `createStack`, `deleteStack`, `startStack`, `stopStack` |
 | Infrastructure ownership | `refreshInfrastructureOwnership`, `inspectStackHost`, `probeLeftovers`, `stackMaintenance` |
 | Stack accounts | `censusStackAccounts`, `createStackAccount`, `removeStackAccount`, `showStackAccount` |
@@ -362,10 +363,12 @@ Use an immutable release directory for updates; a mutable `current` symlink can
 otherwise make process definitions and installed package identities disagree.
 
 Roles: all reads (`listProjects`, `getProject`, `scanRequirements`,
-`getProjectApps`, `getTopology`, `listStacks`, `getStack`, `getStackStatus`) gate on
+`getProjectApps`, `getTopology`, `getTopologyInventory`, `getTopologyWorkspace`, `listStacks`, `getStack`, `getStackStatus`) gate on
 `viewer`; `startStack` / `stopStack` on `operator`; project CRUD
 (`addProject`, `updateProject`, `removeProject`) and stack CRUD
-(`createStack`, `deleteStack`) on `admin`.
+(`createStack`, `deleteStack`) on `admin`. Target mutations (`saveTopologyDraft`,
+`planTopology`, `applyTopologyPlan`) also require `admin`. They persist target intent,
+not executable deployment configuration. See the [workspace contract](./topology.md).
 
 ### `OmnitronSecrets` — `secrets.rpc-service.ts`
 

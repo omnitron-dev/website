@@ -13,6 +13,10 @@ observability. In coupled mode it also owns application processes. In
 workers, pools and local topology while the backend uses a fenced private RPC
 contract. The diagram below describes the default coupled deployment.
 
+See the [resilient control-plane design](./resilient-control-plane.md) for the target
+contracts for environment promotion, placement, recovery and scaling. Its capability
+gates distinguish implemented behavior from planned autonomous operations.
+
 ## Component map
 
 ```mermaid
@@ -30,7 +34,7 @@ flowchart TB
       Netron[Netron RPC bus]
       Daemon[OmnitronDaemon service]
       Auth[Auth service + JWT]
-      State[(State store<br/>state.json)]
+      State[(SQLite state store<br/>data/daemon-state.db)]
       PIDM[PID manager]
       Sched[Daemon scheduler]
     end

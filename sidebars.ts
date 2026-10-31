@@ -379,6 +379,7 @@ const sidebars: SidebarsConfig = {
   omnitron: [
     'omnitron/overview',
     'omnitron/architecture',
+    'omnitron/resilient-control-plane',
     'omnitron/cli',
     'omnitron/daemon',
     'omnitron/backend-handoff',
@@ -392,6 +393,7 @@ const sidebars: SidebarsConfig = {
     'omnitron/diagnostics',
     'omnitron/migrations',
     'omnitron/console',
+    'omnitron/topology',
     'omnitron/access',
     'omnitron/automation',
     'omnitron/agents',

@@ -13,6 +13,11 @@ infrastructure subsystem provisions whatever's missing, resolves
 connection parameters, and injects the right env vars at app
 startup. The app never hardcodes hosts or ports.
 
+Use the [topology workspace](./topology.md) to inspect placements and bindings.
+Cross-node repair, resource-aware placement and data recovery follow the
+[control-plane design](./resilient-control-plane.md); provisioning a container alone
+does not implement those guarantees.
+
 Verified against `apps/omnitron/src/infrastructure/`:
 
 ```

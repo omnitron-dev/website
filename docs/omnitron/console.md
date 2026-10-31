@@ -68,7 +68,7 @@ each consumer; external endpoints are separate nodes with **configured / unknown
 status until there is independent runtime evidence.
 A local loopback endpoint can match a shared container in another project on the
 same daemon when its service and published port identify exactly one provider.
-Remote loopback addresses stay within their deployment; ambiguous matches remain
+Remote loopback addresses stay on their physical node; ambiguous matches remain
 configured endpoints. The system view limits app-specific coverage warnings to
 the applications it displays, while project views retain their stack coverage.
 
@@ -80,8 +80,8 @@ and credentials never enter this topology response. Missing definitions or
 unavailable backend support produce an incomplete-data message rather than an
 apparently complete empty graph.
 
-The system workspace shows this daemon's applications and containers; a project
-workspace shows that project's stacks. This is not a packet trace: arbitrary
+The system workspace combines this daemon's applications and containers with remote
+stack observations across projects; a project workspace narrows that inventory. This is not a packet trace: arbitrary
 connections created only inside application code are not inferred, and current
 configuration may differ from a process that has not yet been restarted. A green
 container confirms its reported health, not every consumer's connection to it.
@@ -294,8 +294,13 @@ not the persisted history queried by `/metrics`.
 
 ### Topology
 
+The **Workspace** action opens the [target editor](./topology.md): versioned drafts,
+placement validation, connection evidence and reviewed acceptance. Accepted targets
+are separate from deployment and restart configuration; runtime migrations are not
+executed by the editor.
+
 `/topology` is a deployment diagram built from `OmnitronProject.listStacks`,
-`OmnitronProject.getTopology`,
+`OmnitronProject.getTopology`, `OmnitronProject.getTopologyInventory`,
 `OmnitronDaemon.list` / `status` and `OmnitronInfra.listContainers`. It shows the
 machines, applications, provisioned services and gateway of the selected stack.
 Edges represent declared service ownership/dependencies, not observed network

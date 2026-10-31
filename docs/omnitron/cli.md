@@ -34,6 +34,7 @@ into another process. Check both the JSON result and the exit status.
 | **Daemon lifecycle** | `up`, `down`, `ping`, `kill` |
 | **Backend installation and replacement** | `backend status`, `backend install`, `backend installation`, `backend select`, `backend upgrade`, `backend abort`, `backend recover` |
 | **Project** | `project add`, `project list`, `project remove`, `project scan`, `project topology` |
+| **Topology** | `topology show`, `topology export`, `topology draft`, `topology plan`, `topology apply` |
 | **Stack** | `stack list`, `stack create`, `stack delete`, `stack status`, `stack start`, `stack stop`, `stack runtime` |
 | **App lifecycle** | `start`, `stop`, `restart`, `reload` |
 | **Information** | `list` (alias `ls`), `status`, `config`, `init` |
@@ -56,6 +57,14 @@ into another process. Check both the JSON result and the exit status.
 | **Webapp** | `webapp build`, `webapp start`, `webapp stop`, `webapp status`, `webapp open` |
 | **Tor** | `tor` |
 | **Knowledge base** | `kb mcp`, `kb index`, `kb status`, `kb query` |
+
+## Topology workspace
+
+`omnitron topology show <project> <stack>` reads configured, desired and observed
+placement. `export` writes portable JSON; `draft <project> <stack> <file>` saves a
+revision-protected draft; `plan` validates it; `apply <project> <stack> <plan-id>`
+accepts that target. Acceptance does not change executable configuration or run a
+migration. See [topology review, permissions and limits](./topology.md).
 
 ## Database migrations
 
