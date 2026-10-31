@@ -11786,7 +11786,7 @@
       "name": "archiveBundle",
       "package": "@omnitron-dev/omnitron",
       "kind": "function",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/services/bundle-builder.ts#L904",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/services/bundle-builder.ts#L910",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/operations",
@@ -12390,7 +12390,7 @@
       "name": "DeployTarget",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/services/remote-deployer.service.ts#L156",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/services/remote-deployer.service.ts#L157",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/operations",
@@ -15174,7 +15174,7 @@
       "name": "RemoteDeployer",
       "package": "@omnitron-dev/omnitron",
       "kind": "class",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/services/remote-deployer.service.ts#L379",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/services/remote-deployer.service.ts#L380",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/operations",
