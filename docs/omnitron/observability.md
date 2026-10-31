@@ -135,6 +135,12 @@ Console **Logs** and `omnitron logs --status` use the same reading of `OmnitronL
 Before replacing a legacy owner, save the exact owner/backend release pair,
 supervision configuration, application inventory, restart configuration and online
 SQLite backups. Prepare the candidate and rollback with the same dependency closure.
+Before stopping applications, read their bootstrap declarations in isolated processes
+using the candidate, the host’s actual Node executable and preload arguments, and
+the daemon’s working directory. A package import check alone does not exercise
+child-process loading. Framework preloads must resolve from the installed runtime
+even when the daemon changes its working directory; preserve the directory seen
+by application definitions.
 Drain applications gracefully, stop both supervisors, replace the owner and backend
 as one reviewed pair, then restore the saved inventory and watch state. An owner
 restart cannot transfer existing pipes and worker threads; it needs a controlled
