@@ -49,7 +49,7 @@ sequenceDiagram
 
 Titan PM installs output capture before readiness, including for workers replaced by a pool. One UTF-8 reader handles each pipe from spawn through EOF. A failed initialization does not require a `WorkerHandle` to exist before output reaches storage. Stdout and stderr from different process instances are assembled separately. The same canonical record feeds files, the database and replication.
 
-The local delivery files are `data/application-logs.sqlite` and `data/backend-logs.sqlite` under the configured Omnitron storage directory. They use SQLite WAL with `synchronous=FULL` and private permissions. Pending messages and finalized records survive process replacement. No oldest-first eviction is applied to unacknowledged logs. If capture cannot write its journal, the pipe is paused and the same frame is retried. Monitor storage availability: backpressure can eventually block an application that continues writing to a full pipe.
+The local delivery files are `data/application-logs.sqlite` and `data/backend-logs.sqlite` under the configured Omnitron storage directory. They use SQLite WAL with `synchronous=FULL` and private permissions. Pending messages and finalized records survive process replacement. No oldest-first eviction is applied to unacknowledged logs. Recovery checks the writer's host boot and process start identity, not just its PID. It periodically revisits unfinished records, so a previous backend that dies after handoff does not strand them until another restart. If the original writer's lifetime cannot be verified, those bytes remain pending with an explicit diagnostic; they are not finalized while a writer may still be assembling them. If capture cannot write its journal, the pipe is paused and the same frame is retried. Monitor storage availability: backpressure can eventually block an application that continues writing to a full pipe.
 
 A database response is acknowledged only after the enclosing transaction commits. PostgreSQL confirmation requires `synchronous_commit=on`, `fsync=on`, `full_page_writes=on` and a logged `logs` table. Persistent SQLite requires WAL with `FULL`/`EXTRA`, or a disk rollback journal with `EXTRA`. A slave's local rows and replication outbox share one transaction. Retries keep the original IDs; conflicting content under an existing ID is retained and reported, never overwritten.
 
@@ -417,13 +417,23 @@ indicators** that roll up live state for the daemon's own
 ### `OmnitronHealth` — active probing
 
 `HealthCheckService` (`apps/omnitron/src/services/health-check.service.ts`,
-exposed as `OmnitronHealth`) does the actual probing on demand,
-using `@xec-sh/ops` `HealthChecker` with built-in TCP/HTTP
-fallbacks:
+exposed as `OmnitronHealth`) combines the orchestrator's application health with
+active HTTP/TCP probes. CLI, Console and agent tools read this shared service:
 
-- **HTTP** — GET the app's health endpoint, expect a 2xx.
-- **TCP** — connect attempt to a port (used for infra services).
-- Process liveness is folded in from the orchestrator.
+- **Application health** — domain checks returned by the supervised worker.
+  A failed check or failed RPC stays visible even if the process is online.
+- **Declared readiness** — configured readiness measurements replace an assumed
+  HTTP endpoint when supplied by the application.
+- **HTTP** — GET `/health` on the application's published port; expect HTTP 200.
+- **TCP** — connect to the published ports of declared infrastructure services.
+- **Process liveness** — reported separately; it does not override failed checks.
+
+Health hooks should return `{ status, checks: [{ name, status, message }] }`.
+Custom `details` fields are not part of this contract: put the actionable reason
+in a check's `message`. A hook that returns only a degraded or unhealthy verdict
+still causes the aggregate report to fail. `omnitron --json health-check [app]`
+returns the same checks with a nonzero exit code for an unhealthy or degraded
+report.
 
 ```mermaid
 sequenceDiagram

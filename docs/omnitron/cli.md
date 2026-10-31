@@ -264,8 +264,13 @@ Snapshot of current CPU / memory / latency / RPC counters.
 
 ### `omnitron health-check [app]`
 
-Detailed composable health report — runs HTTP/TCP probes against
-declared endpoints.
+Checks application-reported health, declared readiness and HTTP/TCP availability.
+A live process or HTTP 200 cannot override a failed application check. Without an
+app name, includes every local application and declared stack infrastructure.
+
+Use `omnitron --json health-check [app]` for the same structured report. Both
+human and JSON modes exit with status 1 when any check is degraded or unhealthy;
+JSON output retains the individual checks and their reasons.
 
 ### `omnitron discover`
 
