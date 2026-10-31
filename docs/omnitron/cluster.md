@@ -449,6 +449,58 @@ advances beyond that uncertainty only when all gaps are settled and no known los
 remains. CLI and Console distinguish verified/restored counts from unresolved
 history; an unreadable proof journal remains an explicit diagnostic error.
 
+### History before delivery receipts
+
+Data before `firstTrackedId` has no original durable delivery proof. The ordinary
+`node reconcile` command deliberately stays inside the tracked frontier. A
+separate retained-history audit can establish what exists now without rewriting
+the original claims or moving that frontier backwards.
+
+Use this order when recovering legacy history:
+
+1. Preserve consistent SQLite snapshots on their originating nodes before queue
+   retention removes more evidence. Inventory older snapshots and PostgreSQL
+   backups; exclude validation databases and synthetic smoke-test records.
+2. Verify overlapping source identities against their complete content. Union
+   repeated snapshots by the original buffer sequence or log UUID. Record source
+   file hashes, exact time bounds, row counts and any missing sequence ranges.
+3. Inspect bounded pages against the destination. A metric must match its original
+   name, value, timestamp and normalized labels. A resampled gauge is not an
+   original measurement. Old SQLite logs retained milliseconds rather than their
+   transmitted microsecond sequence: compare at the retained precision, including
+   all structured fields and the number of equal records.
+4. Restore only missing eligible records. `reconcileHistoryPage` uses Titan's
+   PostgreSQL transaction adapter; payloads, page proofs and progress counters
+   commit together with durable PostgreSQL settings. Keep the authenticated
+   transport, native runtime and memory/page budgets explicit in the reviewed
+   maintenance worker. The daemon never installs or executes one implicitly.
+5. Repeat a read-only content comparison after recovery. Preserve snapshots and
+   the audit report, including any unresolved range or precision limitation.
+
+`sync_history_sources` stores immutable manifests and progress;
+`sync_history_pages` stores ordered page hashes and commit results. Their separate
+checksummed migration history uses the Omnitron/Titan/Kysera runner. Pages form a
+hash chain whose final digest and total row count must match the source manifest.
+A lost response can replay the same page; changed data, a broken chain or a
+conflicting identity fails the transaction. A partial import remains explicitly
+partial. Normal ingestion, live gauges, source counters and application ownership
+are unaffected.
+
+Inspect coverage with `omnitron node check <node>` or expand **History before
+receipts · coverage and gaps** in the Console node diagnostics. Both read the same
+`history` DTO: source time bounds, checked/expected rows, present/restored counts,
+verification time, retained timestamp precision and explicit gaps. A verified
+source range does not certify earlier history. An unknown number of missing rows
+stays unknown; an empty queue cannot turn it into zero.
+
+Respect the configured retention policy during repair. Metric recovery refuses
+points beyond its history horizon. Missing logs outside the selected log horizon
+are counted as `expiredRows` and remain in the preserved source archives; they
+are not reinserted just to be pruned again. Commit proofs describe an audit at a
+particular time, not permanent retention of every payload. Database backups can
+independently prove existing log UUIDs and their full content without creating a
+second copy in the live table.
+
 ### Reproducible native node bundles
 
 Prepare native daemon updates beside the running version. A bundle that includes `package-lock.json` is installed with `npm ci --omit=dev`; the installer refuses any change to that lock before publishing the candidate directory. Older bundles without a lock retain their installation path, but their transitive dependency versions are not frozen. Include and validate a lock when preparing a repeatable fleet rollout.

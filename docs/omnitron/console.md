@@ -628,3 +628,12 @@ changing chunking rules, not only with a successful bundler exit code.
 The publisher regression suite includes interrupted HTML replacement, existing
 open-tab assets, immutable URL conflicts and bounded retention. Run it with
 `pnpm --filter @omnitron-dev/omnitron test:console-publication`.
+
+### Historical coverage in node diagnostics
+
+The replication reading separates a healthy current queue from coverage before
+durable receipts existed. Expand **History before receipts · coverage and gaps**
+for each audited source range, checked/expected rows, existing and restored
+records, verification time, retained precision and unavailable earlier history.
+This uses the same evidence as `omnitron node check`; see the
+[recovery procedure](./cluster.md#history-before-delivery-receipts).
