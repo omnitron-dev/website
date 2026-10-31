@@ -38,7 +38,7 @@ node apps/omnitron/scripts/freeze-backend.mjs \
   /absolute/releases/omnitron-next
 ```
 
-The freezer copies the installed runtime dependency closure and the current Node executable, rewrites package links inside the artifact, and records file hashes in `RUNTIME.json`. It performs no install scripts, package upgrades or network operations. Optional `package=compiled-package-directory` arguments select explicitly built workspace packages; their versions must match the installed graph. Keep the current sealed artifact for rollback.
+The freezer copies the installed runtime dependency closure and the current Node executable into a new tree owned by the instance account, rewrites package links inside the artifact, and records file hashes in `RUNTIME.json`. It performs no install scripts, package upgrades or network operations. Optional `package=compiled-package-directory` arguments select explicitly built workspace packages; their versions must match the installed graph. Keep the current sealed artifact for rollback.
 
 Use the artifact's Node executable and CLI when starting that release:
 
@@ -121,6 +121,20 @@ If a backend dies, the guardian restores it only from a certified checkpoint or 
 The owner service deliberately does not restart after a crash on the same host boot. Some classic applications use separate process groups, so a fresh owner cannot assume all of its predecessor's processes disappeared. A durable receipt distinguishes clean shutdown, a new host boot and uncertain ownership. Reconcile the surviving processes before owner recovery; changing the receipt alone is not reconciliation. Normal `omnitron down` stops both services and applications, and `omnitron up` starts them again. Backend-only OS restarts retain applications when a certified checkpoint is available.
 
 For system scope, prepare as the non-root instance owner with `omnitron service install --scope system --prepare`, then have an administrator install the reviewed unit files at their reported paths. System units name that account explicitly. Do not prepare the application runtime as root or copy secrets into unit environment directives. The private supervision record retains required runtime environment values; unit definitions carry only the instance path.
+
+### Migrating an existing Linux node
+
+A coupled daemon owns its application processes. Its first transition to independent system services requires a controlled application restart. Subsequent **backend** replacements retain the owner, application PIDs and runtime dependency bindings. Replacing the owner itself still requires a maintenance window.
+
+Prepare a sealed copy using the Node executable and installed dependencies of that node. Before stopping anything, validate its application bootstrap readers, operational health, private socket permissions, native supervisor identity and saved environment. Save the old configuration, unit definitions, project registrations and online SQLite backups; prepare the new owner/backend units and a concrete rollback procedure alongside the running installation.
+
+Preserve the existing instance account, home and application dependency bindings. Changing a root-owned legacy installation to another account is a separate migration: it can affect application files, credentials and container access. The automatic `service install --prepare` flow continues to require a non-root account for new system installations. An administrator-reviewed migration of an existing root-owned instance must explicitly retain that identity and private control paths; it does not authorize a second daemon or shared sockets.
+
+During the approved window, disable file watching, stop applications gracefully, verify their processes have exited, and then retire the old daemon. Enable resident execution, select the sealed runtime and install the two independently supervised services. Start the owner before the backend. Confirm the original application inventory, operational health, ready recovery certificate, separate native cgroups and durable log delivery before proceeding to another node.
+
+Rollback restores service ownership, configuration and the retained runtime. It must first prove that the new owner and its application processes have stopped. Keep newly written logs, replication acknowledgments and application data: do not restore a pre-transition SQLite snapshot over them. Retain the failed transition's runtime and execution journals for diagnosis.
+
+Remote application deployment recognizes a settled, sealed managed backend through its selected runtime, native guardian parent and separate owner/backend cgroups. A stale selection or mismatched process is refused. The coupled `fleet upgrade` workflow refuses an independently supervised node before stopping or rebinding any application. Use the node's `omnitron backend upgrade <sealed-runtime>/packages/0/dist` workflow for backend replacement; keep framework bundles still referenced by applications.
 
 ## Compatible schema expansion
 
