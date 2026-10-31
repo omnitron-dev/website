@@ -15,7 +15,29 @@ The breadcrumb trail identifies the workspace without a duplicate page title. Th
 
 The layout control reads **1 pane** by default: only the selected tab is shown. Selecting **2 panes** explicitly enables split view, showing the selected tab and another open session. Each pane is labeled with its stable tab name. The workspace shares the available space between the two sessions: side by side when the content area is at least 960 px wide, stacked otherwise. Both panes stay inside the window. Closing down to one tab resets the layout to one pane. Scrollback scrolls within each terminal, and resizing the window or sidebar updates the remote PTY dimensions. Tabs remain connected when following Console navigation, including breadcrumbs.
 
-Each pane exposes input mode, search and a **Terminal actions** menu. **READ** disables local keyboard and paste input; it does not change the remote account's permissions. Search opens with the magnifying glass or **Ctrl/⌘ + Shift + F**. Use **Enter** for the next match, **Shift + Enter** for the previous match and **Escape** to return to the shell. The actions menu provides copy selection and text sizes from 10 to 24 px, with a 14 px reset. Every tab has its own close button. **Delete** on a focused tab requests the same action. The confirmation names the target session, including when it is inactive. Closing the active tab selects its neighbor; closing the last tab returns focus to **New SSH tab**. Tab numbers remain stable when another tab is removed.
+Each pane exposes input mode, search and a **Terminal actions** menu. **READ** disables local keyboard and paste input; it does not change the remote account's permissions. Search opens with the magnifying glass or **Ctrl/⌘ + Shift + F**. Use **Enter** for the next match, **Shift + Enter** for the previous match and **Escape** to return to the shell. The actions menu provides copy selection and text sizes from 10 to 24 px, with a 14 px reset. Every tab has its own close button. **Delete** on a focused tab requests the same action. A running session requires confirmation naming its target, including when its tab is inactive. A session already reported as closed is removed locally without another confirmation or RPC call. If the shell exits while confirmation is open, the pending action becomes local tab cleanup. Closing the active tab selects its neighbor; closing the last tab returns focus to **New SSH tab**. Tab numbers remain stable when another tab is removed.
+
+## Connection and closure feedback
+
+**New SSH tab** creates a pending tab immediately. It names the node and SSH
+identity, shows elapsed waiting time and stays responsive while the daemon opens
+the shell. There is no invented percentage or handshake stage. Switching to
+another tab keeps that selection when the new connection completes. Duplicate
+open requests are blocked until the attempt returns.
+
+A rejected connection displays the reason in its tab and offers **Retry
+connection**. A transport deadline instead reads **unconfirmed**: the remote
+operation may still have happened. Unattached shells are subject to the daemon's
+client-disconnection timeout; a failed browser request is not proof of closure.
+Failed node/policy discovery has a separate retry and does not leave a permanent
+loading state.
+
+Closed panes retain their scrollback, exit reason and exit code when available.
+After a read/write failure, input stops immediately and Console requests closure.
+The session is shown as **State unknown** until that closure is acknowledged. A
+failed manual close keeps the tab and the confirmation dialog, with a visible
+reason and retry. Successful closure removes the tab. Read-only input mode does
+not override a closed session or an unavailable connection.
 
 ## Verify the host before connecting
 

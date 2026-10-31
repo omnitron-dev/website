@@ -630,6 +630,41 @@ checks and links back to Overview when no project is selected.
 The application shell occupies the available viewport. Its header, navigation and status bar stay within the window, while ordinary pages scroll in the main region. SSH panes and the topology canvas own their internal scrolling. The status bar progressively hides secondary details on narrow screens while retaining connection and application health. Prism theme tokens supply terminal background, text, cursor and selection colors.
 
 
+### Feedback for operations
+
+User-triggered work responds immediately at its point of action. Console's shared
+`OperationStatus` shows the operation name, relevant context and elapsed waiting
+time; MUI loading buttons prevent repeated submissions. After ten seconds, the
+status explicitly says it is still waiting for confirmation. These are waiting
+indicators, not progress estimates. Screen readers receive the operation status
+without a spoken update every second; reduced-motion preferences are respected.
+
+SSH connection/closure, file opening and saving, transfer controls, account and
+role changes, stack imports, topology reads/plans/changes, automation definition
+saves, release cleanup and manual node refresh use this feedback. Errors remain
+in the dialog or workspace where the operation was requested. Mutations are not
+automatically retried. A request timeout must not be described as proof that the
+remote operation failed or was cancelled.
+
+Background polling retains the last successful data without constantly displaying
+a foreground spinner. An explicit refresh shows its own waiting state. Transfers
+keep byte/file progress from the daemon; an upload waiting for publication does
+not imply completion merely because all bytes have been transmitted.
+
+### Reading an expanded log event
+
+An expanded event continues the selected row on one surface, with a narrow level
+accent and aligned context separated by thin dividers. Multiline messages retain
+line breaks and long tokens wrap inside the viewport. On narrow windows the
+message moves below its time, application and level, and metadata fields stack.
+
+**Enter** or **Space** on the row expands it. **Escape** collapses the event and
+returns focus to the disclosure. Application fields, event and capture times,
+source stream, trace and labels remain readable without opening a JSON card.
+**Raw event** exposes the complete original record, including capture sequence
+and receipt metadata. **Copy JSON** copies that record and reports clipboard
+failure with a selectable-text fallback.
+
 ### Tables, filters and overlays
 
 The shared Prism `Table` and `AdminDataTable` contain horizontal scrolling inside
