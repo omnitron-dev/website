@@ -87,7 +87,7 @@ omnitron backend upgrade /absolute/releases/omnitron-next/packages/0/dist
 
 The replacement proceeds through these boundaries:
 
-1. Reject active SSH sessions, file transfers, pipelines and release builds. Drain admitted requests and infrastructure reconciliation.
+1. Reject active SSH sessions, file transfers, pipelines and release builds. Drain admitted RPC calls, property operations, Netron tasks and infrastructure reconciliation through their replies.
 2. Verify and install candidate/rollback artifacts; validate native container identity and specifications. Capture project ownership, retry backoff, monitoring configuration and application identities in a private checkpoint.
 3. Fence execution mutations with a new controller epoch. Persist the grant before enabling the new controller; stale controllers cannot write or acknowledge observations.
 4. Retire only backend services. The owner continues running applications and capturing logs.
@@ -194,9 +194,19 @@ The backend also reconnects to the resident execution owner after a broken priva
 
 The clients returned by `createDaemonClient()` and the fleet TCP client reconnect on the next call after a backend disconnect. Service handles obtained with `client.service(name)` remain usable: each call resolves the service against the current connection. Netron still owns discovery, serialization, remote properties and stream transport.
 
-An invocation already sent when the connection fails is rejected with transport loss. **It is never replayed automatically:** a missing response does not prove that a mutation was not committed. Inspect the operation ID or current state before deciding whether to dispatch again. Live streams and references owned by the old connection must be reopened by their consumer.
+Binary transport handshakes have a bounded lifetime. Disconnect rejects an unfinished connection immediately; stopping Netron cancels pending handshakes and reconnect timers. A late disconnect from a previous connection cannot remove a replacement peer with the same identity.
+
+An invocation already sent when the connection fails is rejected immediately with `TransportLostError`, including its `pendingPacketId`. This is an unknown outcome, not a request timeout. **It is never replayed automatically:** a missing response does not prove that a mutation was not committed. Inspect the operation ID or current state before deciding whether to dispatch again. Live streams and references owned by the old connection must be reopened by their consumer.
+
+During an orderly handoff, new requests and tasks receive an explicit `SHUTTING_DOWN` refusal while admitted work drains. A forced disconnect can still leave a reply unavailable. Persisted log and metric delivery is a separate protocol: journals/outboxes retain the original IDs until a database commit is confirmed, so lost acknowledgments can be replayed safely. See [capture, persistence and replay](./observability.md#capture-persistence-and-replay). Generic RPC calls, live streams and arbitrary event handlers do not acquire durable delivery from a transport reconnect.
 
 Update long-running consumers to this client before relying on backend replacement. Updating the backend cannot replace client code already loaded in another process; older consumers that retain a raw service proxy need a separate controlled restart with the updated dependency. Pin that dependency independently of the backend, especially for applications with registered runtime integrity checks.
+
+## Short-lived socket probes
+
+Titan PM checks old Unix socket files before considering removal. A live connection remains open until the first server greeting, EOF or a bounded 250 ms deadline; only an explicit `ECONNREFUSED` on an old, unowned path permits removal. This avoids closing immediately before a retained application sends its greeting during backend startup.
+
+Netron also cancels an unsent greeting when the connection closes and observes the write result. An expected pre-handshake close is a debug event; a write failure on an open connection is an error with `connectionId`, transport and `phase: handshake`. Do not suppress all transport write errors: a failed application RPC requires its own delivery assessment.
 
 ## Interrupted operation
 
@@ -217,7 +227,7 @@ Recovery checkpoints describe a particular replacement, not a continuously updat
 
 `omnitron status --json` includes `execution`; `omnitron backend status --json` reports the owner PID/identity, controller epoch, phase, observation age and blockers. A missing owner connection makes application state unknown. The backend does not infer that applications stopped from a control-channel failure. `execution.connection` reports `connected`, `unavailable` or `owner-changed`, the last successful observation timestamp and a concrete error. An observation older than five seconds is unavailable even before a failed request returns. `omnitron backend status` uses the independent control-status endpoint if application inventory cannot be read. Console Settings → General shows the same connection information and independent-supervision guardian PID; its status bar labels retained application counts as stale and checks backend reachability independently.
 
-The owner's bounded live observation buffer retains 10,000 events, with long live log entries truncated to 4,096 characters. Full application lines continue to disk. When a retained local application has no current in-memory log records, `omnitron logs` reads its stored local history; it excludes replicated records from other nodes with the same application name. Unacknowledged observations replay after controller replacement; a crash between processing and acknowledgment can replay an event. Buffer overflow produces a visible diagnostic and can leave historical metrics incomplete. This channel does not promise exactly-once telemetry.
+The owner's bounded live observation buffer retains 10,000 events. It is not the durable log archive. Updated owner/backend pairs capture full application records in a private SQLite journal, then confirm exact IDs and content only after database commit and file projection. `capture: legacy-owner` identifies the older volatile path, whose live log messages can be truncated to 4,096 characters; a backend-only update cannot repair it. Unacknowledged live observations may replay after replacement, and buffer overflow remains a visible diagnostic. Use [ingestion status](./observability.md#interpreting-diagnostics) and replication receipts to assess durable delivery independently of the live buffer.
 
 Human viewer, operator and administrator roles, plus the explicit mesh observer identity, can read backend status. Artifact activation requires the local administrator Unix socket. HTTP administrators cannot obtain that private control address. Browser sessions retain the same RBAC enforcement as CLI RPC calls; no web endpoint accepts executable artifact paths.
 

@@ -66,6 +66,14 @@ variants (`SIGTERM`, `Maintenance`, …) come from the signal/programmatic
 path that calls the internal `shutdown(reason)` entry, not from a
 `reason` field on `stop()`.
 
+## Draining Netron work
+
+Before provider teardown, the inbound gate refuses new calls, property reads/writes and Netron tasks with `SHUTTING_DOWN`. Already admitted work stays counted until its result or error has been written to the transport. The drain has a deadline; it cannot promise completion of an operation that outlives shutdown.
+
+If a connection disappears first, pending callers receive `TransportLostError` with the packet ID instead of waiting for the request timeout. A lost response does not reveal whether a mutation committed. Netron does not replay it automatically. Reconcile by operation ID or state, and retry only under an application-defined idempotency contract.
+
+Stopping Netron also cancels unfinished handshakes and reconnect timers. Long-lived streams and event subscriptions belong to their original connection and must be reopened explicitly; use a durable journal or outbox when messages must survive that connection.
+
 ## Custom shutdown tasks
 
 For tasks that don't belong to any single provider, register them
