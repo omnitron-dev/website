@@ -432,6 +432,12 @@ interface InfrastructureState {
 
 `omnitron infra status` / `omnitron infra ps` print this.
 
+Health is a current Docker probe only while the container is `running`. A stopped,
+paused or restarting container reports its lifecycle status and `health: none`;
+Docker's saved probe from its previous run is not reused as a current verdict.
+Exit failures, OOM kills and their reasons remain available in `error`. The same
+reading feeds CLI, Console and topology.
+
 ## Reconcile loop
 
 A periodic reconciler runs inside the daemon:

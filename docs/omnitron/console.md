@@ -66,6 +66,11 @@ It extracts database, Redis, S3 and declared service endpoints plus `dependsOn`.
 No separate graph configuration is required. Shared services receive links from
 each consumer; external endpoints are separate nodes with **configured / unknown**
 status until there is independent runtime evidence.
+A local loopback endpoint can match a shared container in another project on the
+same daemon when its service and published port identify exactly one provider.
+Remote loopback addresses stay within their deployment; ambiguous matches remain
+configured endpoints. The system view limits app-specific coverage warnings to
+the applications it displays, while project views retain their stack coverage.
 
 Select a node and open **Connections** to inspect providers, consumers and the
 configuration keys establishing each relationship. Arrows point from consumer to
@@ -641,6 +646,17 @@ Forms and menus inherit Prism’s MUI overrides. Dialogs fill small viewports us
 labels wrap, form pairs stack on small windows, and secondary account actions
 return keyboard focus to their trigger when dismissed. Open a confirmation dialog
 to review an operation; merely opening a menu or form does not execute it.
+
+Workspace selection uses the same MUI menu and Prism spacing as row actions,
+Select controls and context menus. Menu groups have symmetric divider spacing,
+and the menu scrolls within the viewport as a single keyboard region. Arrow keys
+move between items; Home/End reach its ends. **Add project** opens the existing
+registration form and is offered only with `OmnitronProject.addProject`; opening
+the form does not register anything.
+
+Run all Console tests with `pnpm --dir apps/omnitron/webapp test`. This command
+includes both `test/webapp` and colocated `webapp/src` tests using the same aliases
+as the package suite, including real topology node connection points.
 
 `src/theme.ts` defines Console’s light and dark surfaces through `PrismProvider`
 `themeOverrides`. Component geometry and interaction remain in Prism rather than
