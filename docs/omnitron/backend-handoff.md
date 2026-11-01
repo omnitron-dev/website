@@ -61,7 +61,7 @@ node apps/omnitron/scripts/freeze-backend.mjs \
   /absolute/releases/omnitron-next
 ```
 
-The freezer copies the installed runtime dependency closure and the current Node executable into a new tree owned by the instance account, rewrites package links inside the artifact, and records file hashes in `RUNTIME.json`. It performs no install scripts, package upgrades or network operations. Optional `package=compiled-package-directory` arguments select explicitly built workspace packages; their versions must match the installed graph. Keep the current sealed artifact for rollback.
+The freezer copies the installed runtime dependency closure and the current Node executable into a new tree owned by the instance account, rewrites package links inside the artifact, and records file hashes in `RUNTIME.json`. It performs no install scripts, package upgrades or network operations. Optional `package=compiled-package-directory` arguments select explicitly built workspace packages; their versions must match the installed graph. Keep the current sealed artifact for rollback. If the package includes Console, its complete output must be present at `webapp/dist/index.html`; a partial `webapp` directory is rejected. Headless packages omit the directory. Include the frontend before sealing rather than modifying an installed artifact.
 
 Use the artifact's Node executable and CLI when starting that release:
 

@@ -790,6 +790,19 @@ unchanged. It never prunes unrelated files. The ledger and an exclusive writer
 lock sit beside `dist`, outside the web root. A killed publisher leaves a lock
 with its PID for inspection; verify the process has stopped before removing it.
 
+The runtime freezer refuses a package that contains a `webapp` directory without
+`webapp/dist/index.html`. Include the complete prebuilt Console before freezing;
+an intentionally headless package omits `webapp` entirely. Never alter a sealed
+runtime to add missing assets: prepare a complete artifact, verify it, then
+activate it through the [backend handoff](./backend-handoff.md) workflow and
+reconcile the Console container with `omnitron webapp start`.
+
+Only successful asset responses are cached: content-hashed URLs are immutable;
+unhashed assets require revalidation after an hour. Failed responses, including
+missing chunks (404), use `Cache-Control: no-store`. This prevents a temporary
+missing file from keeping a browser on a failed route after recovery. Browsers
+that cached such failures from older versions may require a hard reload.
+
 Open tabs continue to use their loaded generation. A compact notification offers
 **Reload** when a new build is available; it never automatically discards file
 edits or terminal sessions. Notifications use the Prism header slot inside the
