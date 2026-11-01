@@ -136,7 +136,7 @@ making changes.
 | `project.list` / `project.scan` / `project.apps` | Project registry |
 | `secret.list` / `secret.get` / `secret.set` | Secret management |
 | `backup.create` / `backup.list` / `backup.restore` / `backup.schedules` | Database backup |
-| `deploy.app` / `deploy.rollback` / `deploy.history` | Deployment |
+| `deploy.history` | Retained legacy app-operation records; deploy through `stack.start` with an explicit `release` |
 | `fleet.status` / `fleet.summary` | Fleet nodes and counts |
 | `k8s.pods` / `k8s.scale` | Kubernetes pods + scaling |
 | `pipeline.list` / `pipeline.run` / `pipeline.status` | Administrator Xec automation; run requires `expectedRevision` from the reviewed definition |

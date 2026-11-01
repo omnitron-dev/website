@@ -307,7 +307,7 @@ clients resolve, e.g. `daemon.OmnitronAuth.signIn(...)`).
 | `OmnitronAuth`        | JWT issue / verify / RBAC                                  |
 | `OmnitronSecrets`     | Encrypted secret CRUD                                      |
 | `OmnitronInfra`       | Docker container management (Postgres / Redis / etc.)      |
-| `OmnitronDeploy`      | Deployment workflows                                       |
+| `OmnitronDeploy`      | Legacy operation history; per-app mutations refuse          |
 | `OmnitronFleet`       | Cross-node fleet operations                                |
 | `OmnitronPipelines`   | CI/CD pipeline runs                                        |
 | `OmnitronBackups`     | Database backup / restore                                  |

@@ -40,7 +40,7 @@ diffs them against the index table below.
 | `log-collector.rpc-service.ts` | `OmnitronLogs` | 4 | viewer |
 | `node-manager.rpc-service.ts` | `OmnitronNodes` | 32 | viewer (read), operator (operations), admin (historical repair) |
 | `pipeline.rpc-service.ts` | `OmnitronPipelines` | 9 | admin + live human session / trusted local CLI |
-| `project.rpc-service.ts` | `OmnitronProject` | 36 | viewer (read) + operator (start/stop) + admin (CRUD) |
+| `project.rpc-service.ts` | `OmnitronProject` | 37 | viewer (read) + operator (start/stop) + admin (CRUD) |
 | `release.rpc-service.ts` | `OmnitronRelease` | 12 | viewer (read), operator (build/attest), admin (prune) |
 | `secrets.rpc-service.ts` | `OmnitronSecrets` | 6 | admin |
 | `sync.rpc-service.ts` | `OmnitronSync` | 6 | authenticated control plane; historical repair excludes operators |
@@ -58,7 +58,7 @@ Plus the core supervisor:
 
 | File | Service id | Methods | Role gate |
 | ---- | ---------- | ------- | --------- |
-| `daemon/daemon.rpc-service.ts` | `OmnitronDaemon` | 26 | mixed — see [Daemon](./daemon.md#rpc-surface--omnitrondaemon-service) |
+| `daemon/daemon.rpc-service.ts` | `OmnitronDaemon` | 27 | mixed — see [Daemon](./daemon.md#rpc-surface--omnitrondaemon-service) |
 
 And two the daemon does not declare at all — they come from Titan
 modules it imports, and are registered by those modules:
@@ -174,16 +174,16 @@ requires `admin`.
 
 ### `OmnitronDeploy` — `deploy.rpc-service.ts`
 
-App deployment workflows.
+Compatibility access to legacy per-app operation records.
 
 | Method | Effect |
 | ------ | ------ |
-| `deployApp({app, version, strategy?, deployedBy?})` | Run a deploy with the chosen strategy |
-| `rollback({app, deployedBy?})` | Roll back to previous version |
-| `getHistory({app?, limit?})` | Deployment history |
-| `listDeployableApps()` | Apps this daemon can deploy |
+| `deployApp({app, version, strategy?, deployedBy?})` | Refuses: use the release/stack deployment workflow |
+| `rollback({app, deployedBy?})` | Refuses before any mutation; select the previous release through the stack workflow |
+| `getHistory({app?, limit?})` | Retained legacy operation records; labels are not artifact evidence |
+| `listDeployableApps()` | Empty list: no per-app artifact executor is installed |
 
-Strategies: `rolling | all-at-once | blue-green | canary`.
+Historical strategy labels are retained as recorded requests, not evidence of an implemented rollout.
 
 ### `OmnitronDiscovery` — `discovery.rpc-service.ts`
 
@@ -349,6 +349,8 @@ on failure. Viewer `getTopology` and `getTopologyWorkspace` report declaration
 source, capture time and coverage warnings without importing bootstrap code. See
 [declaration coverage](./topology.md#declaration-coverage).
 
+`inspectInstalledArtifacts({ project, stack })` is an explicit viewer operation. It compares retained archive hashes and byte counts with the release catalog, reports modified installed entry points and framework build metadata, and never creates launch receipts. Its node counterpart, `OmnitronDaemon.inspectInstalledArtifacts({ names })`, accepts canonical owner inventory keys and admits human readers plus authenticated cluster service identities. Both are read-only, bounded, and absent from status polling. See [release evidence](./releases.md#understand-what-is-built-and-what-is-running).
+
 `diagnoseStack({ project, stack })` is a viewer operation. It returns timestamped
 prerequisite checks, planned changes and explicit unverified coverage without
 provisioning or importing application bootstraps. Imported configuration names
@@ -363,7 +365,7 @@ Project and stack registry: 36 public methods, including release checks, account
 | Projects | `listProjects`, `getProject`, `scanRequirements`, `addProject`, `updateProject`, `removeProject`, `importConfiguration`, `detachConfiguration` |
 | Project apps and topology | `getProjectApps`, `getTopology`, `getTopologyInventory`, `refreshTopologyMetadata` |
 | Target workspace | `getTopologyWorkspace`, `saveTopologyDraft`, `planTopology`, `applyTopologyPlan` |
-| Stacks | `listStacks`, `getStack`, `getStackStatus`, `diagnoseStack`, `createStack`, `deleteStack`, `startStack`, `stopStack` |
+| Stacks | `listStacks`, `getStack`, `getStackStatus`, `diagnoseStack`, `inspectInstalledArtifacts`, `createStack`, `deleteStack`, `startStack`, `stopStack` |
 | Infrastructure ownership | `refreshInfrastructureOwnership`, `inspectStackHost`, `probeLeftovers`, `stackMaintenance` |
 | Stack accounts | `censusStackAccounts`, `createStackAccount`, `removeStackAccount`, `showStackAccount` |
 | Node stop protocol | `prepareNodeStackStop`, `executeNodeStackStop` |
@@ -524,7 +526,7 @@ const projects = await project.listProjects();
 
 // Services without a published interface are queried untyped:
 const deploy = await peer.queryInterface('OmnitronDeploy');
-await deploy.deployApp({ app: 'api', version: 'v1.2.3', strategy: 'rolling' });
+const legacyOperations = await deploy.getHistory({ app: 'sample/test/api', limit: 20 });
 ```
 
 The same code works against a remote daemon by swapping the URL

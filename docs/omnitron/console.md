@@ -378,9 +378,23 @@ restart, logs, exec (when daemon has Docker socket access).
 
 ### Deployments
 
-`/deployments` — deployment history from `OmnitronDeploy`. List
-of past deploys, strategy, version, deployer, duration. Trigger
-new deploys or rollbacks here too.
+`/deployments` follows transfer observations and recorded stack starts in the
+selected workspace. **Releases** selects a build and its target stack;
+**Stacks** shows configuration and observed execution; **Deployments** explains
+what operations were recorded; **Audit** retains the full event trail.
+
+The default table shows the latest recorded start per stack, including its
+source, actor and release when recorded. It does not prove what is running now.
+The separate legacy app table preserves older records, whose requested version
+labels and success statuses did not establish an artifact deployment. Its old
+mutation path is disabled in RPC as well as Console; use the release/stack
+workflow for deployment or returning to a previous release.
+
+Transfer observations currently retain the latest event per node/application;
+they lack operation and project identifiers. Project workspaces show these
+controller-wide observations only when explicitly expanded. Failed polling and
+stale incomplete transfers are reported as unknown, never as successful or
+continuously active. This limited progress feed is not a durable operation ledger.
 
 ### Alerts
 
@@ -873,6 +887,15 @@ do not attest their current release show **Current release not reported**. Faile
 reads and unreachable nodes remain unknown. Inventory refreshes reuse the shared
 workspace store; changing projects discards late answers from the old workspace.
 
-`omnitron release status <project>` uses the same read model. See
+Verified launch receipts appear separately from deployment history, with per-node
+coverage and concrete reasons for missing or conflicting evidence. **Inspect
+installed files** starts an explicit read-only comparison with retained archives.
+The action shows progress and keeps its timestamped result separate from launch
+identity: modified installed files, ambiguous base releases and unsupported node
+backends do not become a verified running release. Matching entry points are
+labelled as partial checks, not full installation integrity.
+
+`omnitron release status <project>` uses the same read model; add
+`--inspect-installed` for the same on-demand disk comparison. See
 [Releases and verification](./releases.md#understand-what-is-built-and-what-is-running)
 for the evidence boundaries, JSON and exit codes.

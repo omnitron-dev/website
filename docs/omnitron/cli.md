@@ -485,28 +485,23 @@ external secret manager when configured.
 
 ## Deployment
 
-### `omnitron deploy app <app>`
+### Stack deployment and rollback
 
-Deploy an app with a strategy.
+Deploy a built release with `omnitron stack start <project> <stack> --release <id>`.
+Returning to a previous release uses that same workflow with the reviewed previous
+ID; admission, transfer and readiness checks still apply.
 
-| Option | Effect |
-| ------ | ------ |
-| `-s, --strategy <strategy>` | `rolling | all-at-once | blue-green | canary` (default `all-at-once`) |
-| `-v, --version <version>` | Version label (git SHA / tag) |
-| `-t, --target <server>` | Target server alias or tag |
+`omnitron deploy app` and `omnitron rollback` are retained refusals: they exit
+nonzero without changing applications. Their former per-app path could restart
+current code but could not install a requested version or restore an earlier
+artifact. The corresponding RPC mutations refuse before database or process
+changes as well. No rolling, blue-green or canary rollout is implied by accepting
+a strategy label in a historical record.
 
 ### `omnitron deploy build <app>`
 
-Build a deployment artifact: a tarball of the app + its
-workspace dependencies, suitable for shipping to remote nodes.
-
-### `omnitron rollback <app>`
-
-Rollback an app to its previous deployed version.
-
-| Option | Effect |
-| ------ | ------ |
-| `-t, --target <server>` | Target server alias or tag |
+Build an application artifact without shipping or starting it. To build a release
+with source commits, manifests and gates, use `omnitron release build`.
 
 ## Tor
 
@@ -705,6 +700,15 @@ including an unreported current release identity; it must not be treated as
 "nothing deployed". `release list` and `show` describe controller artifacts
 and audit history, not a claim that those artifacts are currently running.
 
+`omnitron release status <project> --inspect-installed` adds an explicit read-only
+inspection of each stack's retained archives, bootstrap and reported framework
+build. It does not restart applications or change their launch evidence. Archive
+SHA-256 and byte count identify every matching catalog release; modifications,
+ambiguous matches and unavailable node backends stay visible. JSON keeps these
+results in `installed`, separate from verified launch receipts and audit history.
+A matching bootstrap is a partial check, not proof of all installed or loaded code.
+The operation is available to viewers and bounded by node, archive and time limits.
+
 ## Additional operational commands
 
 | Command | Behaviour and important options |
@@ -767,11 +771,9 @@ See [Console access](./access.md) for password input, account pagination and ato
 | `omnitron terminal list` | List sessions owned by this caller |
 | `omnitron terminal close` | Close an owned terminal |
 
-
 ## File workspace
 
 `omnitron files` shares the audited Console file service. Commands include `roots`, `list`, `stat`, `read`, `save`, `mkdir`, `rename`, `trash`, `trash-list`, `restore`, `copy`, `transfers`, `pause`, `resume`, `cancel`, `upload`, `download`, `upload-status`, `upload-finish` and `upload-abort`. All support `--json`; checked mutations use an observed `--version`. See [File workspace](./files.md) for flags, examples, ownership, limits and recovery.
-
 
 Stack stop/status JSON includes a durable `stopOperation` with per-node confirmation.
 A lost reply is unconfirmed, and CLI exits unsuccessfully until every required node

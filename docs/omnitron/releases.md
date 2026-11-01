@@ -56,14 +56,22 @@ within the selected project filter. It is not a count of active deployments.
 For example, `dev: stopped, Apps 0/6` and `test: running, Apps 6/6` describe two
 configured stacks with only the remote stack running. A historical release beside
 `test` does not prove those processes still use that build after later updates.
-Current process reports do not yet attest a release identity: Console explicitly
-shows **Current release not reported**. Never infer that identity from the last
-audit record, a directory name or a build-cache marker. An unreachable node or a
-failed inventory request remains unknown, not stopped or empty.
+Updated owners report verified launch receipts: the release ID, original manifest
+SHA-256, artifact SHA-256, launch ID and verification time travel with each process
+observation. Console shows **Launch release verified** only when every observed
+running application has complete, consistent launch evidence. Missing peers,
+legacy owners, conflicting manifests and mixed releases remain explicit. A receipt
+identifies the artifact admitted at launch; it does not continuously inspect code
+already loaded into memory. Never infer launch identity from the last audit record,
+a directory name or a build-cache marker. An unreachable node or failed inventory
+request remains unknown, not stopped or empty. Launch receipts trust the node,
+its process owner and local filesystem; they are not signed remote attestations
+against a compromised host or another process with the same OS-user privileges.
 
 ```bash
 omnitron release status sample
 omnitron --json release status sample
+omnitron release status sample --inspect-installed
 ```
 
 This read-only command uses the same model as Console. Exit `0` means the available
@@ -72,6 +80,32 @@ unreported current release or unavailable history/inventory; `1` means command
 failure. JSON separates `inventory`, `history` and per-stack `runningRelease`.
 The older `list` and `show` JSON retain `deployedOn` for compatibility and identify
 its meaning with `deploymentEvidence: "audit-history"`.
+
+When launch evidence is missing or an installation may have changed, use **Inspect
+installed files** on the stack's Deployment state row, or `--inspect-installed` in
+the CLI. This is an explicit, read-only operation available to viewers; it never
+runs during status polling and never restarts applications. The node binds its
+read to fresh owner observations of the process, start time and entry point,
+then hashes retained archives and the current bootstrap. The controller matches
+archive SHA-256 **and byte count** against every matching project manifest.
+
+The result separates a retained base release from installed modifications. A
+changed bootstrap or different reported framework build is **modified**. Reused
+artifacts can match several releases: all candidates remain visible as ambiguous.
+A matching bootstrap is only a partial installation check; other files and loaded
+memory have not been proven. Disk observations never create launch receipts.
+Missing archives, unsupported node backends, unavailable build stamps, catalog
+errors and changes during inspection remain explicit, rather than becoming a
+false match. JSON adds a separate `installed` collection without changing
+`runningRelease`; modifications, ambiguity or incomplete inspection also exit `2`.
+
+Inspection is bounded: one scan per node, at most 32 application handles, eight
+archives per installation, 512 MiB per archive and 2 GiB of archive input per node.
+Archive subprocesses have ten-second deadlines and bounded output; the node's
+disk work has a 45-second deadline. A stack inspects at most 16 nodes with four
+concurrent requests and reports any nodes excluded by the time budget. Larger
+installations or missing sources require a separate integrity investigation. No
+file paths, environment variables or archive contents are accepted from the viewer.
 
 The neutral **History: test** label means a recorded deployment. **Git: no remote
 branch** means no recorded remote-tracking branch contained a source commit at
