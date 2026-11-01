@@ -119,6 +119,17 @@ receive-window overflow, abandoned buffered-write callbacks and a shared ChaCha
 nonce during nested writes. A compatible patch and an offline npm-artifact gate
 now cover these cases. The prepared Xec package carries the patched transport,
 its license and checksums; direct packing of an unprepared workspace is rejected.
+SFTP close acknowledgement, cleanup under backpressure and lost high-level read
+callbacks are also covered by the installed-package gate, including 25 consecutive
+server-initiated closures without leaking channels. Both npm and pnpm installations
+preserve the reviewed patch. High-level SSH targets inherit the same Xec connection
+contract as `NodeSSH`: agents, host pins, algorithms and cancellation are available
+without a parallel transport API. Connection identities include the effective trust
+and authentication policy; rotated key files cannot reuse the previous identity.
+Timeouts retire repeated failures after active users finish, preserving other commands.
+Real OpenSSH authentication tests now exercise agent signatures, encrypted/key-file
+credentials and rejection of a mismatching `known_hosts` entry without password
+fallback; test credentials are restored in `finally`.
 This does not activate the patched dependency in running applications.
 
 
