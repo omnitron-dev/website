@@ -95,6 +95,8 @@ For independent user services, `omnitron backend guardian prepare <sealed-runtim
 
 `omnitron backend schema prepare <sealed-runtime>` reads the master database and saves a plan for explicitly reviewed compatible additions. `omnitron backend schema apply <plan>` applies or resumes it under the shared migration lock. `omnitron backend upgrade <sealed-dist> --schema-plan <plan>` requires that exact applied plan for an upgrade or rollback between its two sealed releases. Legacy bridges, changed definitions, foreign databases and local node schema transitions are refused.
 
+Use the candidate's CLI for `backend upgrade --check`. It checks the owner's declared lifecycle contracts before draining or delegating; an incompatible owner requires a planned owner transition. `backend status --json` includes `execution.ownerCapabilities` when the backend reports them.
+
 See [requirements, first transition and recovery](./backend-handoff.md).
 
 ## Daemon lifecycle

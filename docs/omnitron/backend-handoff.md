@@ -9,6 +9,29 @@ Resident execution separates the backend from the process that owns applications
 
 Resident execution is opt-in on POSIX. It supports unmanaged operation and separate OS services for the execution owner and backend guardian. A legacy single-service layout is refused: detaching a child does not establish independent service ownership. Replacing the owner or its Node runtime still requires an application maintenance window.
 
+## Owner compatibility
+
+A compatible RPC envelope does not imply compatible lifecycle behavior. A sealed
+backend declares the owner contracts it requires; the owner advertises the
+contracts it implements. The current `stackControl@1` contract includes durable
+stack intent, admission fences and confirmed process termination.
+
+Run the **candidate's CLI** with `backend upgrade <sealed-dist> --check` before
+planning activation. It validates the selected instance's owner identity and
+contracts before delegating to a guardian or draining the backend. The check runs
+again before preparing a handoff, and the candidate independently verifies its
+owner before acquiring control. An older owner with no capability declaration
+cannot satisfy a new requirement. A version mismatch is also refused; a larger
+version number is not assumed to be backward compatible.
+
+`backend status --json` exposes `execution.ownerCapabilities`. An absent field
+means the backend does not report these contracts; an empty object means its
+owner advertised none. `handoffSupported: true` describes the transfer mechanism,
+not compatibility with every future backend. If a required contract is absent,
+keep the current backend running and prepare a controlled owner transition with
+application inventory, readiness budgets and rollback. Never bypass the refusal
+by replacing the active files or changing an advertised capability.
+
 ## First transition
 
 Run `omnitron backend status --json` before planning an update. `mode: coupled` means the backend directly owns its workers. Those live forks and threads cannot be transferred to another parent without changing their lifecycle. **The first transition requires one controlled application restart.** The upgrade command refuses a legacy daemon before draining or stopping anything.
