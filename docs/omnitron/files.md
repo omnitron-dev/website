@@ -12,26 +12,32 @@ Open **Files** in Console. Panel **A** and panel **B** are independent locations
 ## Start with a location
 
 1. Choose a node and a root in each panel. The default root is **Filesystem**, `/` on the node, accessible only to administrators and within the daemon process's operating-system permissions.
-2. Open a directory with its name or Enter. Use the path breadcrumbs, Back/Forward, Parent, or the path editor for navigation. Each panel supports eight independently navigable tabs.
-3. Select entries with checkboxes or Space; Shift+click selects a range. **Copy A → B** reviews the exact source and destination before starting a daemon job.
+2. Open a directory with its name, Enter or Right. Each non-root listing includes **..**; Enter on it or Left returns to the parent. The parent row remains available in empty/filtered directories and is never a selection or mutation target. Use path breadcrumbs, Back/Forward, Parent, or the path editor for navigation. Each panel supports eight independently navigable tabs.
+3. Select entries with checkboxes or Space; Shift+click selects a range. The compact navigation toolbar keeps the copy direction visible as **A → B** or **B → A**, with named icon actions for New folder, Upload and panel focus. Copy reviews the exact source and destination before starting a daemon job.
 4. Open **Transfers** for file/byte progress, the current path, failures and Pause/Resume/Cancel. Completed files remain if another file fails or you cancel later.
 
 On narrow windows the A/B switch shows one panel at a time without discarding the other panel. On wider windows drag the separator, or focus it and press Left/Right, to adjust widths. Lists scroll inside the panel. Directory pages contain up to 200 entries; **Load next 200 entries** extends the current list. Filtering and sorting apply to loaded entries; directories sort first. Hidden entries are available from the panel menu.
 
 | Shortcut, while focus is inside a panel | Action |
 | --- | --- |
+| Tab / Shift+Tab | Switch file panels, after entering from either keyboard or pointer |
+| Escape | Switch between list and panel tools; Tab in tools follows normal controls |
+| F6 / Shift+F6 | Leave the panel for the next/previous Console region |
 | Enter / Space | Open / select focused entry |
+| Left / Right | Parent directory / open the focused directory |
 | Up / Down | Move row focus |
 | Alt+Left / Alt+Right / Alt+Up | Back / forward / parent |
 | Ctrl/Command+L | Edit the root-relative path |
 | F2 / F4 / F5 | Rename / edit / review copy to other panel |
 | Delete | Review moving selected entries to trash |
 
+Keyboard entry from the sidebar lands at the same list focus target as pointer entry. Clicking a field or selector keeps native input behavior; dialogs and the editor own their keys. The active cursor is shown only in its owning panel, independently of selected files. Holding navigation keys repeats row movement.
+
 Panel menus also provide New file, New folder, Upload, Download and Restore from trash. Symlinks are displayed but not followed; navigate to the real target path. Special files, sockets and devices are not opened as regular content.
 
 ## Edit without losing another writer's change
 
-The editor loads on demand and supports UTF-8 files up to 1 MiB, eight buffers, search/replace, undo, line numbers and JSON/JavaScript/TypeScript highlighting. Ctrl/Command+S saves. Buffers stay in memory when the editor is minimized or you navigate to another Console section; a page unload warns about unsaved buffers. They are cleared on sign-out and are not stored in browser storage.
+The editor loads on demand and supports UTF-8 files up to 1 MiB, eight buffers, search/replace, undo, line numbers and JSON/JavaScript/TypeScript highlighting. Ctrl/Command+S saves a changed writable buffer. Theme, wrapping, language-label and read-only changes preserve the CodeMirror instance, cursor and undo history. The editor focuses the active document, exposes line/column and selection length, and offers a Wrap control for long lines. F6 cycles tabs, tools and document inside the dialog; Escape can minimize the editor without discarding buffers. Buffers stay in memory when the editor is minimized or you navigate to another Console section; a page unload warns about unsaved buffers. They are cleared on sign-out and are not stored in browser storage.
 
 Saving requires the version returned by the read. A stale version is rejected, leaving the buffer intact. **Save copy** creates a different filename without overwriting. **Reload** requires confirmation before replacing the current buffer. Closing a dirty buffer requires confirmation. Renaming a file or its parent within the workspace updates open buffer locations without losing unsaved text; an already-stale version remains stale. UTF-8 BOM and uniform LF/CRLF/CR line endings are preserved. Mixed line endings are previewed read only. Binary data and larger files use transfers/download instead.
 
@@ -46,7 +52,7 @@ The default `/` export does not elevate the daemon to root. Unreadable directori
   "files": {
     "enabled": true,
     "roots": [
-      { "id": "projects", "label": "Projects", "path": "/srv/projects" },
+      { "id": "projects", "label": "Projects", "path": "/srv/projects", "protectedPaths": ["production/shared-data"] },
       { "id": "logs", "label": "Logs", "path": "/var/log", "readOnly": true }
     ]
   }
@@ -61,6 +67,21 @@ The default `/` export does not elevate the daemon to root. Unreadable directori
 | `files.roots: []` or `files.enabled: false` | Export no directories |
 
 Root IDs are stable API identifiers; labels are presentation. Paths must be absolute. Root-relative request paths reject traversal, reserved staging names, control characters and symlink components. Roots are pinned to their canonical path and filesystem identity for the daemon lifetime. Changing a pinned directory requires configuration review and a restart. These checks constrain API clients; they do not form an OS sandbox against a privileged local process racing directory replacement. Use OS identities/mount isolation for hostile local workloads.
+
+Structural safety is enforced on each node, independently of Console. The exported
+root and fixed critical host directories (including `/etc`, `/usr`, `/var`, macOS
+`/System` and `/Users`, and their structural aliases/subdirectories) cannot be
+renamed or moved to trash. Add `protectedPaths` to a root for application-specific
+entries, using root-relative paths. A protected entry and its ancestors cannot be
+relocated; ordinary children remain browsable, editable and renameable according
+to the existing root permissions. This is structural protection, not a blanket
+filesystem write lock or an OS sandbox. Custom paths add to the fixed safeguards.
+
+Rename changes one name within the same parent directory. Both UI and node reject
+empty/reserved names, slashes, control characters and names exceeding 255 UTF-8
+bytes. The form validates before submission; direct API/CLI requests receive the
+same node checks. `protectedPaths` returned with roots is an advisory UI projection,
+not authorization. Older nodes need a backend update to enforce the new policy.
 
 Temporary writes and recoverable trash live in a private `.omnitron-files` directory in the item's parent directory, on the destination filesystem. The directory must belong to the daemon user and have mode 0700. It is hidden from listings and cannot be addressed through the API. This permits a `/` export without requiring write permission at `/`, and avoids cross-filesystem atomic-renaming problems.
 
@@ -111,7 +132,7 @@ omnitron --json files resume <transfer-id>
 omnitron --json files cancel <transfer-id>
 ```
 
-`files list --after <name> --revision <version>` requests the next directory page. `files save <path> --from <local-file> --version <version>` performs a checked save; `--version new` creates without replacement. `files rename <path> --to <root-relative-path> --version <version>` and `files trash <path> --version <version>` require an explicit observed version. Use `files trash-list --root <id>` and `files restore <trash-id> --node <id>` for recovery. `files mkdir <path> --root <id>` creates a directory.
+`files list --after <name> --revision <version>` requests the next directory page. `files save <path> --from <local-file> --version <version>` performs a checked save; `--version new` creates without replacement. `files rename <path> --to <root-relative-path> --version <version>` and `files trash <path> --version <version>` require an explicit observed version; the rename destination must retain the same parent directory. Use `files trash-list --root <id>` and `files restore <trash-id> --node <id>` for recovery. `files mkdir <path> --root <id>` creates a directory.
 
 `files upload <path> --from <local-file> --root <id>` streams verified chunks. `files download <path> --to <new-local-file> --root <id>` stages locally and refuses overwriting. After an ambiguous upload, `files upload-status <id>`, `files upload-finish <id>` and `files upload-abort <id>` inspect/reconcile its receipt on the selected `--node`. Finish cannot publish incomplete data; abort cannot discard an unresolved committing receipt.
 

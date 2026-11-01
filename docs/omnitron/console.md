@@ -30,17 +30,22 @@ confirmation dialogs and disabled states.
 | Current view | `/`, R | Focus the available search; refresh the current view |
 | Controls | Tab / Shift+Tab | Move between controls; arrows operate tabs and menus |
 | Tables | Up/Down, Home/End, Page Up/Down | Browse rows; Enter opens, Space selects, Escape returns to the viewport |
-| File list | Tab / Shift+Tab | Switch between panels A and B, including on narrow screens |
+| File list | Tab / Shift+Tab | Enter a panel at its file list; switch A/B, including on narrow screens |
+| Files | Escape | Switch between the file list and its controls |
 | File list | Shift+Up/Down, Space, Ctrl/Cmd+A | Extend selection, toggle a file, select loaded entries |
-| Files | Enter, Alt+Up, Alt+Left/Right | Open, parent directory, directory history |
+| Files | Enter, Left/Right, Alt+Left/Right | Open, parent/selected directory, directory history |
 | Files | Ctrl/Cmd+L | Edit the current path |
 | Files | F2, F4, F5, Delete | Rename, open/edit, copy to the other panel, move to trash |
 | Logs | Home | Jump to the latest displayed logs |
 | Topology | 0, 1 | Fit the graph, restore readable scale |
 
-Tab switches file panels **only while the file list has focus**. Escape returns to
-its tools, where ordinary Tab navigation remains available. F6 also exits an SSH
-terminal or editor. Their other shortcuts and text input stay with that surface;
+Entering a file panel by Tab from the sidebar, F6 or programmatic focus lands on
+its file list, just like selecting a row with the pointer. Tab then switches A/B.
+Escape enters the panel tools, where ordinary Tab navigation is available; Escape
+returns to the list. Clicking an input or selector intentionally preserves its
+native behavior. F6 moves between workspace regions, excluding nested breadcrumbs.
+It also exits SSH input; in an editor dialog it cycles that dialog's tabs, tools
+and document, never background controls. Their other shortcuts and text input stay with that surface;
 Console does not intercept typed commands, composing text or handled key events.
 Dialogs suspend background commands. A retained, hidden Files or SSH workspace
 cannot execute shortcuts for another page.
