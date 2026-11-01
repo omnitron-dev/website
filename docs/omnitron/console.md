@@ -844,3 +844,22 @@ including late-arriving events with earlier source timestamps. The capture/journ
 and database acknowledgement indicators describe durable storage independently of
 this bounded display. A healthy ingestion indicator is not a claim that every
 stored row is currently on screen.
+
+
+### Releases and current deployments
+
+The **Deployment state** view on Releases and stack details combines the existing
+project inventory with deployment history. It shows each stack's actual
+running/configured application count and node reachability. The last recorded
+deployment is dated and linked separately. The controller's stored artifact count
+uses the selected project filter. Building an artifact does not start a stack.
+
+**History: test** is a neutral historical label. **Git: no remote branch** describes
+a build-time source-control observation, not a local deployment. Processes that
+do not attest their current release show **Current release not reported**. Failed
+reads and unreachable nodes remain unknown. Inventory refreshes reuse the shared
+workspace store; changing projects discards late answers from the old workspace.
+
+`omnitron release status <project>` uses the same read model. See
+[Releases and verification](./releases.md#understand-what-is-built-and-what-is-running)
+for the evidence boundaries, JSON and exit codes.

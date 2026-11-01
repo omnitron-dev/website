@@ -33,6 +33,63 @@ Read the gate results and artifact list before deployment. The manifest
 describes what was built; the daemon's audit trail describes which release
 a stack took.
 
+## Understand what is built and what is running
+
+A project owns multiple stacks. A release is a stored build that can be deployed
+to several stacks; building or downloading it does not start any applications.
+Keep these observations separate:
+
+| Evidence | What it establishes |
+| --- | --- |
+| Release manifest | Source commits, build gates and packaged artifacts |
+| Current stack inventory | Observed process state, application counts and node reachability |
+| Last recorded deployment | The latest `stack.start` audit record for that stack |
+| Attestation | What probes measured, on which stack and at what time |
+| Git publication snapshot | Whether remote-tracking branches contained the commits when the build ran |
+
+In Console, select the project and open **Releases**. **Deployment state** lists
+its stacks, placement, running/configured application counts and last recorded
+deployment. The same view appears on release and stack details. Stack and release
+links connect these views. The artifact list counts storage on the controller,
+within the selected project filter. It is not a count of active deployments.
+
+For example, `dev: stopped, Apps 0/6` and `test: running, Apps 6/6` describe two
+configured stacks with only the remote stack running. A historical release beside
+`test` does not prove those processes still use that build after later updates.
+Current process reports do not yet attest a release identity: Console explicitly
+shows **Current release not reported**. Never infer that identity from the last
+audit record, a directory name or a build-cache marker. An unreachable node or a
+failed inventory request remains unknown, not stopped or empty.
+
+```bash
+omnitron release status sample
+omnitron --json release status sample
+```
+
+This read-only command uses the same model as Console. Exit `0` means the available
+observations resolve the report; `2` means incomplete evidence, including an
+unreported current release or unavailable history/inventory; `1` means command
+failure. JSON separates `inventory`, `history` and per-stack `runningRelease`.
+The older `list` and `show` JSON retain `deployedOn` for compatibility and identify
+its meaning with `deploymentEvidence: "audit-history"`.
+
+The neutral **History: test** label means a recorded deployment. **Git: no remote
+branch** means no recorded remote-tracking branch contained a source commit at
+build time. **Git: not checked** means that evidence was unavailable. Neither
+label indicates execution on localhost, artifact-store upload status, or the
+current state of a Git server. Rechecking the project today does not rewrite the
+historical manifest.
+
+Imported configurations retain their runtime namespace. Deployment status joins
+that namespace to the canonical project/stack and chooses the newest record.
+Conflicting records or invalid timestamps remain explicit uncertainty; no extra
+project registration is needed.
+
+The browser-safe `@omnitron-dev/omnitron/release-reading` entry point exports
+`readReleaseDeploymentState`, `stackDeploymentHistory` and
+`readSourcePublication` for other clients. It composes the existing stack and
+audit APIs without provisioning, starting, stopping or deploying anything.
+
 ## Dependency identity
 
 The local bundle carries workspace packages and local `file:` archive overrides.
@@ -116,9 +173,10 @@ omnitron release prune --keep 5
 ```
 
 Without `--yes`, prune reports what it would remove. Applied pruning protects
-releases reported as running by the audit trail. If the daemon cannot
-establish which releases are in use, normal applied pruning refuses; repair
-the evidence before deleting artifacts.
+releases named by the latest deployment records. If that history is unavailable
+or a recorded release has no identity, normal applied pruning refuses. This
+protection does not attest current process identity; explicitly retain recovery
+artifacts and investigate out-of-band deployments before deletion.
 
 Retaining an artifact is only one part of recovery. A previous application
 must still be compatible with the current schema. See
@@ -152,7 +210,8 @@ pipelines remain the interface for running and tracking deployments.
 | Command | Purpose |
 | --- | --- |
 | `omnitron release build <project>` | Build pinned project and runtime commits |
-| `omnitron release list` | List local releases and deployment information |
+| `omnitron release list` | List controller artifacts and recorded deployment history |
+| `omnitron release status <project>` | Observe stack placement, process state and separate deployment history |
 | `omnitron release show <id>` | Inspect commits, gates and artifacts |
 | `omnitron release attest <id>` | Record probe results for a stack |
 | `omnitron release push <id>` | Upload to the configured artifact store |

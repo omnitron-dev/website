@@ -698,6 +698,13 @@ agent pipeline.
 commits. See [Releases and verification](./releases.md) for build, attestation,
 artifact-store transfer and retention commands.
 
+Use `omnitron release status <project>` to see current stack states, node
+reachability and application counts beside their last recorded deployments.
+`--json` carries the same evidence. Exit `2` signals an incomplete answer,
+including an unreported current release identity; it must not be treated as
+"nothing deployed". `release list` and `show` describe controller artifacts
+and audit history, not a claim that those artifacts are currently running.
+
 ## Additional operational commands
 
 | Command | Behaviour and important options |
