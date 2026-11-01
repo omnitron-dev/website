@@ -109,6 +109,11 @@ pending requests, binary/UTF-8 preservation, explicit unknown command/write outc
 and complete high-level upload/download directory operations. Incomplete transfers
 reject, and a lost reply never authorizes command replay. A clean consumer check
 compiles without the underlying transport or its type package and runs in Xec CI.
+Reverse-listener allocation now has a deadline and cancellation, and invalidates
+its dedicated connection when acknowledgement is lost. Shared commands remain
+isolated. The connection budget includes in-progress handshakes, busy connections
+cannot be evicted, and unpooled connections close when their last operation ends.
+Protocol keepalives replace remote keepalive commands; adapter disposal is terminal.
 
 These are source-candidate guarantees, not evidence of fleet activation. Transport
 security review, adversarial peer tests, the remaining SSH acceptance matrix and
