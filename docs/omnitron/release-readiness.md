@@ -114,6 +114,13 @@ its dedicated connection when acknowledgement is lost. Shared commands remain
 isolated. The connection budget includes in-progress handshakes, busy connections
 cannot be evicted, and unpooled connections close when their last operation ends.
 Protocol keepalives replace remote keepalive commands; adapter disposal is terminal.
+Four upstream transport defects were reproduced in isolation: zero-size packets,
+receive-window overflow, abandoned buffered-write callbacks and a shared ChaCha
+nonce during nested writes. A compatible patch and an offline npm-artifact gate
+now cover these cases. The prepared Xec package carries the patched transport,
+its license and checksums; direct packing of an unprepared workspace is rejected.
+This does not activate the patched dependency in running applications.
+
 
 These are source-candidate guarantees, not evidence of fleet activation. Transport
 security review, adversarial peer tests, the remaining SSH acceptance matrix and
