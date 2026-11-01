@@ -68,6 +68,28 @@ When using the supervisor, follow its
 [operational practices](../omnitron/best-practices.md). When running Titan
 directly, your process manager owns restart and rollout policy.
 
+## Coordinate independently supervised processes
+
+Record the backend, guardian and execution-owner artifacts separately, together
+with the application inventory, enabled stacks, watch state and native service
+definitions. A controller handoff should preserve the owner identity and
+application processes; verify RPC reconnection and durable log/outbox delivery
+afterward. A changed controller PID is expected, while an application restart
+requires an explanation.
+
+If the owner needs replacement, prepare a bounded maintenance window and the
+previous artifacts before stopping it. Require a clean owner shutdown receipt
+and confirm that its children exited before starting a replacement. Do not erase
+an ownership checkpoint to bypass an uncertain shutdown. Restore enabled stacks
+and watching from declared intent, and check domain readiness as well as process
+presence before moving to the next host.
+
+Keep private backup and configuration contents on their owning host where
+possible; a review plan can contain paths, checksums and verification results.
+Validate online SQLite backups through SQLite's backup API and integrity checks.
+Reading a database dump successfully proves archive readability, not a successful
+database restore; record which verification actually ran.
+
 ## Keep rollback and restore separate
 
 Rolling back code does not undo a schema or data change. Prefer additive

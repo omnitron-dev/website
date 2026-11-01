@@ -21,7 +21,7 @@ Omnitron authenticates human operators and machine identities on the control pla
 | Surface | Trust source | Auth flow |
 | ------- | ------------ | --------- |
 | Local CLI | OS-level file permission (Unix socket `0o600`) | Implicit admin — no JWT needed |
-| Webapp / remote CLI | JWT issued by `OmnitronAuth.signIn` | Bearer token on every HTTP/TCP call |
+| Webapp / remote CLI | JWT issued by `OmnitronAuth.signIn` | Token-backed peer; current authority checked on each invocation |
 | Service-to-service (cluster, fleet, sync) | Node-specific signing secret reached over the registered SSH connection | Short-lived `service_role` JWT on an authenticated peer |
 
 Apps in your ecosystem add a **fourth** surface — end users
@@ -134,6 +134,35 @@ commit, and keep them out of authorization decisions.
 
 These are application integration requirements. The shared-session preset does
 not create an application's role-assignment schema, refresh-token store or editor.
+
+## Activate an authorization update
+
+Treat the controller, resident execution owner and application runtimes as
+separate artifacts. A successful backend handoff updates the controller; it does
+not replace code already loaded by the owner or by an application. Inspect each
+artifact before declaring a security rollout complete. Restarting the owner
+requires an application maintenance window; do not infer a pause-free owner
+upgrade from `handoffSupported`.
+
+For a shared session authority, apply compatible additive schema changes first,
+then update the authority, its consumers and the account-management UI. Configure
+the authority endpoint explicitly. Give simultaneous Netron clients unique
+routing identities; a shared diagnostic label is not an identity. Before starting
+an artifact, verify that its bootstrap adapter and application resolve the same
+Titan runtime.
+
+Compare `omnitron access show --json` with Console **Access**, but account for
+their identities: the owner-only local socket grants local administrative
+authority, whereas the browser has the signed-in account's role. Verify a viewer
+and an operator through the real token transport, including direct calls to
+denied methods. Hiding a navigation item alone is not a permission check. Change
+the test account's role while connected and verify session revocation; remove
+the temporary account and its sessions after the check.
+
+Retain additive columns during code rollback. Once new permission assignments or
+session restrictions are used, an older artifact that ignores them is not a safe
+rollback target even if it can read the schema. Check both data compatibility and
+authorization semantics before restoring it.
 
 ## Token cache
 
