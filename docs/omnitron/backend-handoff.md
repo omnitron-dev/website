@@ -182,6 +182,12 @@ The plan is resumable: run the same `apply` command after a coordinator interrup
 
 Automatic guardian replacement currently supports user launchd/systemd services. System-scope unit replacement requires a separate administrator-reviewed transition; this command refuses it before stopping anything. Updating the execution owner's runtime still requires an application maintenance window.
 
+The recovery checkpoint monitor retries a busy snapshot once after 250 ms. This
+avoids repeatedly sampling a short metrics drain at the same phase of a shared
+five-second period. A busy owner is never certified: controller generation,
+in-flight operations and ownership revision must still agree. Persistently busy
+state remains `pending`, and stopping the monitor cancels the scheduled retry.
+
 ## Owner shutdown boundaries
 
 An owner update is a separate maintenance operation from a backend handoff.
