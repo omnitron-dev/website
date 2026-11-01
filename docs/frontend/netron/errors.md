@@ -6,10 +6,9 @@ description: Typed errors across the wire, retry classification, recovery patter
 
 # Error handling
 
-Server-side `TitanError` subclasses arrive on the client as the
-**same class** — the wire format preserves constructor name +
-`code`. This lets you `instanceof`-check exactly as you would
-server-side.
+Remote failures use `TitanError` and a stable numeric `code`. Binary RPC can
+restore a registered constructor; HTTP clients do not promise the original
+server-side subclass. Branch on `code`, not a constructor name or message.
 
 ## TitanError
 
@@ -44,6 +43,22 @@ try {
 The full `ErrorCode` enum mirrors HTTP status codes — see
 [Titan / Errors catalog](../../titan/modules/errors-catalog.mdx)
 for the complete reference.
+
+## HTTP error contract
+
+Node and browser HTTP clients share the decoder in `netron-protocol`. Peer,
+connection and per-request-hint paths preserve numeric codes, decimal code strings
+and shared symbolic codes such as `FORBIDDEN`. Application-specific symbols stay
+in `details.errorCode`; their numeric category comes from the HTTP status.
+Malformed codes fall back to a failure category, never `NaN` or a success status.
+`X-Request-Id`, `X-Correlation-Id`, `X-Trace-Id` and `X-Span-Id` remain available on
+the error for diagnostics, including authentication and rate-limit failures.
+
+A permission refusal remains 403; an authority outage remains 503. This distinction
+controls both the message shown to an operator and the decision an agent can make.
+Do not repeat a denied mutation or interpret a timeout as proof of cancellation.
+The request deadline includes reading the body, not only receiving its headers;
+one expired request does not cancel another request on the same connection.
 
 ## Transport-level errors
 

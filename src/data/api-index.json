@@ -5274,7 +5274,7 @@
       "name": "deserializeError",
       "package": "@omnitron-dev/netron-browser",
       "kind": "function",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/netron-browser/src/errors/serialization.ts#L70",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/netron-browser/src/errors/serialization.ts#L71",
       "imports": [
         {
           "path": "@omnitron-dev/netron-browser/errors",
@@ -5710,7 +5710,7 @@
       "name": "HttpRemotePeer",
       "package": "@omnitron-dev/netron-browser",
       "kind": "class",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/netron-browser/src/transport/http/peer.ts#L91",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/netron-browser/src/transport/http/peer.ts#L92",
       "imports": [
         {
           "path": "@omnitron-dev/netron-browser",
@@ -6234,7 +6234,7 @@
       "name": "isSerializedError",
       "package": "@omnitron-dev/netron-browser",
       "kind": "function",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/netron-browser/src/errors/serialization.ts#L214",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/netron-browser/src/errors/serialization.ts#L182",
       "imports": [
         {
           "path": "@omnitron-dev/netron-browser/errors",
@@ -7190,7 +7190,7 @@
       "name": "parseHttpError",
       "package": "@omnitron-dev/netron-browser",
       "kind": "function",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/netron-browser/src/errors/serialization.ts#L126",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/netron-browser/src/errors/serialization.ts#L127",
       "imports": [
         {
           "path": "@omnitron-dev/netron-browser/errors",
@@ -7218,7 +7218,7 @@
       "name": "parseWebSocketError",
       "package": "@omnitron-dev/netron-browser",
       "kind": "function",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/netron-browser/src/errors/serialization.ts#L196",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/netron-browser/src/errors/serialization.ts#L164",
       "imports": [
         {
           "path": "@omnitron-dev/netron-browser/errors",
@@ -7518,7 +7518,7 @@
       "name": "safeSerializeError",
       "package": "@omnitron-dev/netron-browser",
       "kind": "function",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/netron-browser/src/errors/serialization.ts#L227",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/netron-browser/src/errors/serialization.ts#L195",
       "imports": [
         {
           "path": "@omnitron-dev/netron-browser/errors",
@@ -7558,7 +7558,7 @@
       "name": "serializeError",
       "package": "@omnitron-dev/netron-browser",
       "kind": "function",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/netron-browser/src/errors/serialization.ts#L56",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/netron-browser/src/errors/serialization.ts#L57",
       "imports": [
         {
           "path": "@omnitron-dev/netron-browser/errors",
@@ -7594,7 +7594,7 @@
       "name": "serializeWebSocketError",
       "package": "@omnitron-dev/netron-browser",
       "kind": "function",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/netron-browser/src/errors/serialization.ts#L180",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/netron-browser/src/errors/serialization.ts#L148",
       "imports": [
         {
           "path": "@omnitron-dev/netron-browser/errors",
@@ -8438,7 +8438,7 @@
       "name": "WebSocketErrorMessage",
       "package": "@omnitron-dev/netron-browser",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/netron-browser/src/errors/serialization.ts#L166",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/netron-browser/src/errors/serialization.ts#L134",
       "imports": [
         {
           "path": "@omnitron-dev/netron-browser/errors",
@@ -8703,6 +8703,18 @@
       "package": "@omnitron-dev/netron-protocol",
       "kind": "value",
       "source": "https://github.com/omnitron-dev/omni/blob/main/packages/netron-protocol/src/packet.ts#L242",
+      "imports": [
+        {
+          "path": "@omnitron-dev/netron-protocol",
+          "guide": "/docs/reference/protocol"
+        }
+      ]
+    },
+    {
+      "name": "decodeHttpError",
+      "package": "@omnitron-dev/netron-protocol",
+      "kind": "function",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/netron-protocol/src/http-error.ts#L23",
       "imports": [
         {
           "path": "@omnitron-dev/netron-protocol",
@@ -41882,7 +41894,7 @@
       "name": "AuthError",
       "package": "@omnitron-dev/titan",
       "kind": "class",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan/src/errors/http.ts#L104",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan/src/errors/http.ts#L107",
       "imports": [
         {
           "path": "@omnitron-dev/titan/errors",
@@ -44122,7 +44134,7 @@
       "name": "createTransportAdapter",
       "package": "@omnitron-dev/titan",
       "kind": "function",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan/src/errors/transport.ts#L572",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan/src/errors/transport.ts#L516",
       "imports": [
         {
           "path": "@omnitron-dev/titan/errors",
@@ -45774,7 +45786,7 @@
       "name": "GraphQLError",
       "package": "@omnitron-dev/titan",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan/src/errors/transport.ts#L65",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan/src/errors/transport.ts#L66",
       "imports": [
         {
           "path": "@omnitron-dev/titan/errors",
@@ -45786,7 +45798,7 @@
       "name": "GrpcError",
       "package": "@omnitron-dev/titan",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan/src/errors/transport.ts#L56",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan/src/errors/transport.ts#L57",
       "imports": [
         {
           "path": "@omnitron-dev/titan/errors",
@@ -45970,7 +45982,7 @@
       "name": "HttpConnection",
       "package": "@omnitron-dev/titan",
       "kind": "class",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan/src/netron/transport/http/connection.ts#L24",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan/src/netron/transport/http/connection.ts#L25",
       "imports": [
         {
           "path": "@omnitron-dev/titan/netron/transport/http",
@@ -45994,7 +46006,7 @@
       "name": "HttpError",
       "package": "@omnitron-dev/titan",
       "kind": "class",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan/src/errors/http.ts#L11",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan/src/errors/http.ts#L13",
       "imports": [
         {
           "path": "@omnitron-dev/titan/errors",
@@ -46006,7 +46018,7 @@
       "name": "HttpErrorResponse",
       "package": "@omnitron-dev/titan",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan/src/errors/transport.ts#L27",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan/src/errors/transport.ts#L28",
       "imports": [
         {
           "path": "@omnitron-dev/titan/errors",
@@ -46074,7 +46086,7 @@
       "name": "HttpRemotePeer",
       "package": "@omnitron-dev/titan",
       "kind": "class",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan/src/netron/transport/http/peer.ts#L39",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan/src/netron/transport/http/peer.ts#L40",
       "imports": [
         {
           "path": "@omnitron-dev/titan/netron/transport/http",
@@ -46206,7 +46218,7 @@
       "name": "HttpTransportAdapter",
       "package": "@omnitron-dev/titan",
       "kind": "class",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan/src/errors/transport.ts#L510",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan/src/errors/transport.ts#L454",
       "imports": [
         {
           "path": "@omnitron-dev/titan/errors",
@@ -47822,7 +47834,7 @@
       "name": "JsonRpcError",
       "package": "@omnitron-dev/titan",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan/src/errors/transport.ts#L77",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan/src/errors/transport.ts#L78",
       "imports": [
         {
           "path": "@omnitron-dev/titan/errors",
@@ -48318,7 +48330,7 @@
       "name": "mapToHttp",
       "package": "@omnitron-dev/titan",
       "kind": "function",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan/src/errors/transport.ts#L314",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan/src/errors/transport.ts#L258",
       "imports": [
         {
           "path": "@omnitron-dev/titan/errors",
@@ -48330,7 +48342,7 @@
       "name": "mapToTransport",
       "package": "@omnitron-dev/titan",
       "kind": "function",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan/src/errors/transport.ts#L180",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan/src/errors/transport.ts#L181",
       "imports": [
         {
           "path": "@omnitron-dev/titan/errors",
@@ -49598,7 +49610,7 @@
       "name": "parseHttpError",
       "package": "@omnitron-dev/titan",
       "kind": "function",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan/src/errors/transport.ts#L246",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan/src/errors/transport.ts#L215",
       "imports": [
         {
           "path": "@omnitron-dev/titan/errors",
@@ -49738,7 +49750,7 @@
       "name": "PermissionError",
       "package": "@omnitron-dev/titan",
       "kind": "class",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan/src/errors/http.ts#L161",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan/src/errors/http.ts#L164",
       "imports": [
         {
           "path": "@omnitron-dev/titan/errors",
@@ -50066,7 +50078,7 @@
       "name": "RateLimitError",
       "package": "@omnitron-dev/titan",
       "kind": "class",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan/src/errors/http.ts#L209",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan/src/errors/http.ts#L212",
       "imports": [
         {
           "path": "@omnitron-dev/titan/errors",
@@ -51886,7 +51898,7 @@
       "name": "TransportAdapter",
       "package": "@omnitron-dev/titan",
       "kind": "class",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan/src/errors/transport.ts#L488",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan/src/errors/transport.ts#L432",
       "imports": [
         {
           "path": "@omnitron-dev/titan/errors",
@@ -51974,7 +51986,7 @@
       "name": "TransportMappingOptions",
       "package": "@omnitron-dev/titan",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan/src/errors/transport.ts#L90",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan/src/errors/transport.ts#L91",
       "imports": [
         {
           "path": "@omnitron-dev/titan/errors",
@@ -52014,7 +52026,7 @@
       "name": "TransportType",
       "package": "@omnitron-dev/titan",
       "kind": "type",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan/src/errors/transport.ts#L14",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan/src/errors/transport.ts#L15",
       "imports": [
         {
           "path": "@omnitron-dev/titan/errors",
@@ -52526,7 +52538,7 @@
       "name": "WebSocketErrorMessage",
       "package": "@omnitron-dev/titan",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan/src/errors/transport.ts#L42",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan/src/errors/transport.ts#L43",
       "imports": [
         {
           "path": "@omnitron-dev/titan/errors",
@@ -52574,7 +52586,7 @@
       "name": "WebSocketTransportAdapter",
       "package": "@omnitron-dev/titan",
       "kind": "class",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan/src/errors/transport.ts#L544",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan/src/errors/transport.ts#L488",
       "imports": [
         {
           "path": "@omnitron-dev/titan/errors",

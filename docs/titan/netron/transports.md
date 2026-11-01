@@ -284,6 +284,21 @@ netron.registerTransportServer('http', { name: 'http', options: { port: 8081 } }
 ``` The browser RPC client lives in the
 separate `@omnitron-dev/netron-browser` package.
 
+## HTTP failures and deadlines
+
+Titan and the browser client decode HTTP errors through the same
+`netron-protocol` contract. Numeric, decimal-string and shared symbolic codes
+retain their category on peer, direct connection and per-request-hint paths.
+Unknown application symbols remain in `details.errorCode`, with the HTTP failure
+status as the category. Request, correlation and trace headers survive decoding.
+A 401/403 refusal must not turn into an internal error or a retryable outage.
+
+A request deadline covers both response headers and body consumption. Each
+concurrent request has its own cancellation controller; closing the connection
+cancels every pending request. A valid request sent through `connection.send()`
+propagates transport failures and remote refusals to its caller. A timeout means
+that confirmation was not received, not that a remote mutation was undone.
+
 ## Anti-patterns
 
 - **Binding all four transports by default.** Each open transport

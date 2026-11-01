@@ -651,6 +651,18 @@ a foreground spinner. An explicit refresh shows its own waiting state. Transfers
 keep byte/file progress from the daemon; an upload waiting for publication does
 not imply completion merely because all bytes have been transmitted.
 
+The design contract for every new action is the same: immediate acknowledgement,
+a truthful waiting state, a confirmed result or an actionable failure, and details
+on demand. Keep primary feedback beside the initiating control; avoid duplicate
+banners and dialogs. Unknown completion is a distinct state, never success or a
+fabricated percentage. Keyboard focus and accessible status announcements are
+part of the action, not an additional interaction mode.
+
+CLI and agents must receive the same outcome categories and diagnostic IDs as the
+Console. In HTTP RPC, stable numeric errors distinguish denied access (403), lost
+identity (401), conflicts (409) and unavailable authority (503). Neither a spinner
+nor an English error string is an automation contract.
+
 ### Reading an expanded log event
 
 An expanded event continues the selected row on one surface, with a narrow level
