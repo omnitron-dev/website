@@ -120,6 +120,45 @@ trust-on-first-use and rollback-drift behavior remain compatibility policies;
 new applications should use `createMigrationRunner`. Legacy error constructors
 are exported as `LegacyMigrationLockError` and `LegacyMigrationChecksumError`.
 
+## Migrations during local stack startup
+
+Declaring that an application needs PostgreSQL provisions its dependency; it does
+not authorize a migration. Local `stack start` runs the conventional
+`apps/<app>/src/database/migrate.ts` script only for a matching database with
+`migrate: true` in the effective PostgreSQL preset configuration:
+
+```typescript
+infrastructure: {
+  services: {
+    postgres: {
+      preset: 'postgres',
+      config: { databases: { api: { migrate: true } } },
+    },
+  },
+}
+```
+
+The legacy `infrastructure.postgres.databases` spelling goes through the same
+normalizer. An explicit service with the same name takes precedence, exactly as
+it does for provisioning. Without an opt-in, startup makes no migration database
+connection and does not look for migration scripts.
+
+For an opted-in application, Omnitron resolves its configuration once for both
+migration and startup. The migration receives the same `DATABASE_URL`, allocated
+host port, database, credentials, TLS parameters and application environment.
+A missing script, absent application, invalid connection or wrong database name
+refuses the start before any requested migration runs. Authentication failures,
+access denial and a missing database fail immediately with the PostgreSQL cause;
+a starting database is polled with `SELECT 1` within a bounded readiness budget.
+An open TCP port alone is not evidence that PostgreSQL is ready.
+
+A failed migration prevents the stack's applications from starting. Previously
+committed migrations in other application databases are not rolled back as a
+group: use compatible schema changes and database backups. The script owns its
+migration runner and coordination key; use the public Omnitron migration facade
+above to share execution, locking and integrity checks. The Console's read-only
+stack diagnosis never runs this hook and does not certify schema readiness.
+
 ## Programmatic use and responsibility boundaries
 
 `executeMigrationOperation(config, options)` is the CLI's reusable operation
