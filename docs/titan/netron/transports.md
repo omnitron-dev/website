@@ -159,6 +159,18 @@ Netron owns reconnect together with the peer handshake. Raw transport reconnect
 is disabled for sockets it owns, preventing competing recovery loops. Stopping
 Netron cancels pending handshakes and reconnects; late results are closed.
 
+Startup succeeds only when every configured server transport is available and has
+started. If any listener fails, Netron waits for the other factories to settle,
+then closes all created listeners and connections through the same cleanup path
+as `stop()`. A late factory cannot leave a socket behind a failed startup.
+Concurrent `stop()` joins that lifecycle; a new `start()` or `connect()` is refused
+while cleanup is running. The configuration remains available for a retry.
+
+A close failure is reported rather than treated as a clean stop. Other resources
+are still released; failed listeners remain registered so `stop()` can retry.
+`start()` cannot claim readiness over a listener left by an incomplete cleanup.
+Inspect the original startup error and any cleanup errors before retrying.
+
 Persistent RPC connections stay leased until disconnect. Pool size, idle cleanup
 and pool heartbeat options apply to unleased spare connections managed directly
 through `connectionManager`; they neither create additional RPC sockets nor evict
