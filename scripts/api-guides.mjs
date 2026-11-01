@@ -4,7 +4,8 @@ export default {
     ".": "auth/access-policy.md",
     "./roles": "auth/access-policy.md",
     "./permissions": "auth/access-policy.md",
-    "./platform": "auth/access-policy.md"
+    "./platform": "auth/access-policy.md",
+    "./session-policy": "titan/modules/shared-session.md"
   },
   "@omnitron-dev/titan-storage": { ".": "titan/modules/storage.md" },
   "@omnitron-dev/common": {
@@ -150,6 +151,7 @@ export default {
   "@omnitron-dev/titan-auth": {
     ".": "titan/modules/auth.mdx",
     "./preset/shared-session": "titan/modules/shared-session.md",
+    "./preset/session-authority": "titan/modules/shared-session.md",
     "./access": "auth/access-policy.md"
   },
   "@omnitron-dev/titan-cache": {

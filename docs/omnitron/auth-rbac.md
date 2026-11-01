@@ -40,6 +40,10 @@ pattern (used by the production reference) is:
 | `operator` | `viewer` | Viewer + lifecycle: start / stop / restart / reload / scale |
 | `admin` | `operator`, `viewer` | Operator + arbitrary execution, SSH, automation, shutdown / reloadConfig / secrets / setMetricsEnabled |
 
+Replication ingestion and outbox acknowledgements require administrator or
+service authority. Operators can inspect diagnostics but cannot forge persistence
+evidence or release queued records.
+
 Methods declare explicit role lists through `VIEWER_ROLES`, `OPERATOR_ROLES` and `ADMIN_ROLES`. The shared hierarchy in `@omnitron-dev/access/roles` also supports live principal checks at account and terminal boundaries. Unknown roles receive no implicit grants.
 
 Human token validation on the master reads the current account role from PostgreSQL. An old JWT role claim cannot preserve a demoted role. `OmnitronAccess.describe()` derives the UI catalog from the running services' decorators and Titan authorization rules. See [revocation behavior](./access.md#change-roles-and-revoke-sessions).
@@ -64,107 +68,51 @@ for the full method-by-method role map.
 
 ## Shared JWT across fan-out apps
 
-The most powerful pattern: **one identity app issues; N apps
-verify** using the same signing key. End users carry one bearer
-token; it works against every app.
+One identity owner issues user tokens; each backend verifies their signature
+and asks the owner for the current session and grants. Signature validity alone
+does not establish current authority. Keep human and service credentials under
+explicit issuer control, and isolate signing credentials by trust boundary.
 
 ```mermaid
 sequenceDiagram
   participant U as User
-  participant Auth as App: identity
-  participant Other as App: media / ledger / realtime / ...
-  participant Redis as Redis (DB 0)
-
-  U->>Auth: POST /sign-in (credentials)
-  Auth->>Auth: verify password / TOTP / WebAuthn
-  Auth->>Redis: SET omni:session:{sid} {userId, exp}
-  Auth->>U: { jwt, sessionId }
-  Note over U: JWT carries `sid` claim
-
-  U->>Other: GET /endpoint (Authorization: Bearer JWT)
-  Other->>Other: verify JWT signature (HS256 shared secret)
-  Other->>Redis: GET omni:session:{sid}
-  alt session present
-    Redis-->>Other: { userId, exp }
-    Other->>Other: serve request
-  else session revoked / expired
-    Redis-->>Other: nil
-    Other->>U: 401
-  end
+  participant App as Application backend
+  participant Auth as Session authority
+  participant DB as Canonical database
+  U->>App: Request with access token
+  App->>App: Verify signature, issuer and expiry
+  App->>Auth: Authenticated session and subject lookup
+  Auth->>DB: One consistent session, account and grants snapshot
+  DB-->>Auth: Current authority
+  Auth-->>App: Live session and permissions
+  App->>App: Enforce role, permission and resource policy
+  App-->>U: Response
 ```
-
-### Why Redis-backed sessions?
-
-- **Instant revocation.** Delete `omni:session:{sid}` → next call
-  on any app rejects. No "wait for token expiry".
-- **O(1) check.** Redis lookup vs database hit on every call.
-- **Cross-app coherence.** All apps see the same revocation
-  immediately.
-
-The JWT alone has a short TTL (15 minutes is typical); the
-session in Redis carries the long-lived state.
 
 ## Shared auth factory pattern
 
-Extract auth setup into a workspace package so every app boots
-the same way:
+Use the shipped [shared-session preset](../titan/modules/shared-session.md)
+and provide an application-owned `sessionAuthority(sessionId, userId)` adapter.
+The owner reads its database directly; other backends call the protected
+`SessionAuthority` service. Share bootstrap wiring in one workspace package,
+while keeping policy definitions in the browser-safe Access layer.
 
-```typescript
-// packages/auth-utils/src/create-auth-manager.ts
-export interface CreateJwtAuthManagerOptions {
-  logger:        ILogger;
-  jwtService:    IJWTService;
-  sessionRedis:  Redis;
-  cnfHmacSecret?: string;
-  /** Postgres fallback for cold-cache session re-warm. */
-  sessionLookup?: (sessionId: string) => Promise<SessionRecord | undefined>;
-}
-
-export function createJwtAuthManager(opts: CreateJwtAuthManagerOptions): AuthenticationManager {
-  // 1. Verify JWT signature with shared key (HS256)
-  // 2. Extract sid claim
-  // 3. GET omni:session:{sid} from Redis
-  // 4. If miss and sessionLookup provided → consult Postgres, re-warm Redis
-  // 5. If cnfHmacSecret provided and JWT has cnf.fp → verify token-binding
-  // 6. Return AuthContext or throw
-  return /* ... */;
-}
-```
-
-Each app's `bootstrap.ts`:
-
-```typescript
-hooks: {
-  afterCreate: async (app) => {
-    const jwt    = await app.container.resolveAsync(JWT_SERVICE_TOKEN);
-    const logger = (await app.container.resolveAsync(LOGGER_SERVICE_TOKEN)).logger;
-    const redis  = (await app.container.resolveAsync(REDIS_MANAGER)).getClient('sessions');
-
-    if (app.netron) {
-      app.netron.configureAuth(createJwtAuthManager({
-        logger, jwtService: jwt, sessionRedis: redis,
-        cnfHmacSecret: process.env.JWT_SECRET,
-        // sessionLookup is provided ONLY by the identity app
-      }));
-    }
-  },
-}
-```
-
-**Only the identity app** sets `sessionLookup`. Other apps trust
-the identity app to repopulate Redis on a cold session.
+Registry compatibility mode supports `sessionRedis` and `sessionLookup`, but
+never restores cache entries automatically. Cache restoration and revocation
+must share a serialization protocol. A Redis hit does not prove that a newer
+database revocation or permission edit was propagated.
 
 ## Token cache
 
-`titan-auth.jwt.tokenCacheTtl` controls per-app LRU caching of
-verified tokens:
+The shared-session preset and Omnitron daemon disable authentication-result
+caching. Signature verification can be cached independently. Netron revalidates
+persistent token-backed peers before each invocation, so a live role change
+reaches the method gate without reconnecting. Expiry also bounds cached results
+when a different application explicitly enables caching.
 
-| TTL | Trade-off |
-| --- | --------- |
-| `10_000` (10 s) | Auth app — short, to honour revocations fast |
-| `60_000` (1 min) | Other apps — fewer Redis calls per JWT |
-
-Caches are local per process. Application token caches and Netron's transport cache are separate layers: applications must invalidate their own caches or wait for their TTL. The Omnitron master bounds Netron caching to 10 seconds and explicitly invalidates it after role changes, revocation, password changes and sign-out. Account and SSH operations additionally validate live sessions. Titan rejects an in-flight validation that races a cache invalidation, so it cannot restore obsolete authority.
+Authority-store failures remain 503. They do not permit stale authorization.
+In-flight operations retain the context they were admitted with; critical
+mutations must additionally use transaction-level ownership and authority checks.
 
 ## Token binding via `cnf.fp`
 
@@ -180,7 +128,7 @@ How it works:
    `cnf.fp = HMAC(secret, rtid)` into the JWT claims.
 3. Every backend, after verifying signature + session, also:
    a. Looks up the session's **currently active** refresh-token id
-      from Redis (re-warmed from Postgres by the identity app).
+      from the canonical authority snapshot.
    b. Computes `HMAC(secret, currentRtid)`.
    c. If `cnf.fp` doesn't match → reject as 401.
 
@@ -435,13 +383,15 @@ ws.on('upgrade', async (req) => {
 });
 ```
 
-After upgrade, the socket holds the AuthContext for its
-lifetime. **Don't try to re-auth a live socket** — close it and
-reopen.
+After upgrade, Netron retains the credential privately and revalidates its
+authority before each invocation. Changed roles reach the method gate; revoked
+or expired credentials are refused. Authentication credentials are never exposed
+in the serialized context.
 
 For token rotation while a socket is open: the client receives
 a `token.expiring-soon` push, refreshes the token via HTTP, and
-reconnects WS. No in-band protocol mess.
+reconnects WS. The application may also use an explicitly enabled authentication task;
+HTTP cookie-only applications should retain their established refresh flow.
 
 ## Audit logging
 

@@ -1,111 +1,119 @@
 ---
 title: Shared-session authentication
-description: Configure the shipped JWT and session-registry preset for multiple backends.
+description: Live session authority, revocation and consistent grants across backends.
 ---
 
 # Shared-session authentication
 
-`@omnitron-dev/titan-auth/preset/shared-session` exports
-`createSharedSessionAuthManager`. It verifies JWTs through the supplied
-`IJWTService`, validates claims and checks a shared session registry.
-The resulting `AuthenticationManager` can be passed to
-`app.netron.configureAuth(...)` before the application starts.
+`createSharedSessionAuthManager` verifies JWTs through `IJWTService` and binds
+human credentials to a live session. The application owns sign-in, persistence,
+role vocabulary and session creation. Titan owns claim validation and transport
+enforcement. [Access](../../auth/access-policy.md) supplies the pure policy rules.
 
-The preset does not implement sign-in, account storage or session creation.
-The authentication owner creates those records and issues tokens.
-See [token issuance](../../auth/token-issuance.md) for HTTP token transport.
+## Canonical authority
 
-## Required integration
-
-```typescript
-import {
-  createSharedSessionAuthManager,
-  type SharedSessionAuthManagerOptions,
-} from '@omnitron-dev/titan-auth/preset/shared-session';
-
-export function sessionAuth(dependencies: SharedSessionAuthManagerOptions) {
-  return createSharedSessionAuthManager({
-    ...dependencies,
-    expectedIssuer: 'omnitron',
-    sessionKeyPrefix: 'omni:session:',
-    cacheTtl: 60_000,
-  });
-}
-```
-
-Supply `logger`, `jwtService` and `sessionRedis`. Resolve these dependencies
-from the application after creation and before opening its transports.
-`sessionRedis` implements `get`; its optional `set` supports rewarming
-with an expiry. Use a separate registry namespace for each environment.
-
-## Verification path
-
-1. `jwtService.verify` checks the token.
-2. `sub` must be a nonempty string. `iss` must match `expectedIssuer`
-   unless the issuer check was explicitly disabled.
-3. User tokens must carry `sid`. A session-bearing token is always a
-   human session even if a role claim names `service_role`.
-4. The preset reads the session from Redis. A miss or Redis failure can
-   fall back to the supplied `sessionLookup`.
-5. A live canonical record can rewarm Redis for its remaining lifetime.
-   Missing, revoked or expired sessions are refused.
-
-A service-tier token without `sid` follows the separate service-principal
-path. Control which trusted issuer may mint that claim; do not derive it
-from a user-editable account property.
-
-## Canonical-store fallback
-
-`SessionLookup` receives a session ID and returns either `undefined` or a
-record with `userId`, `expiresAt` and `isRevoked`. It can also return
-`activeRefreshTokenId` for confirmation-claim verification.
-
-Wire this adapter on the backend that owns the authoritative session
-store. A sibling without it relies on Redis and refuses a session that
-the registry cannot confirm. Test Redis restart, missing entries,
-canonical-store failure, expiry and revocation.
-
-## Options that affect security
-
-| Option | Behaviour |
-| --- | --- |
-| `expectedIssuer` | Defaults to `omnitron`; `null` disables issuer checking |
-| `sessionKeyPrefix` | Defaults to `omni:session:` |
-| `cacheTtl` | Authentication cache lifetime in milliseconds; defaults to `60_000` |
-| `cnfHmacSecret` | Enables confirmation-claim verification when the token and session record supply the required fields |
-| `roleExpander` | Unset preserves claims verbatim; pass an application hierarchy’s `expandRoleSet` or the optional platform expander |
-
-Redis accepts the legacy user-ID string and the structured session value
-with user and refresh-token IDs. A legacy record without a refresh-token
-ID does not enforce `cnf.fp`. Likewise, leaving `cnfHmacSecret` unset
-disables that check. The issuer and verifier must agree on the confirmation
-secret and refresh-token identity before relying on rotation to invalidate
-earlier access tokens.
-
-Account for the authentication cache when defining revocation latency.
-Verify the actual behaviour of already-cached tokens in your deployment.
-
-## Failures
-
-`InvalidTokenClaimError` exposes code `INVALID_TOKEN_CLAIM`;
-`SessionRevokedAuthError` exposes `SESSION_REVOKED`. Both carry HTTP status
-401. Keep failure logs free of token contents and signing material.
-
-Use the [module auth reference](./auth.mdx) for JWT configuration and
-[RPC authentication](../netron/authentication.md) for authentication,
-authorization and HTTP token transport as distinct responsibilities.
-
-## A shared application hierarchy
+Use this mode when the next request must reflect committed changes to sessions,
+accounts or role permissions. Return the session and grants from one consistent
+snapshot; do not reconstruct authority from a cached JWT permission array.
 
 ```ts
-import { createRoleHierarchy } from '@omnitron-dev/access/roles';
-const roles = createRoleHierarchy({
-  reader: { level: 0 },
-  editor: { level: 1, inherits: ['reader'] },
+import { createSharedSessionAuthManager, type SessionAuthorityLookup }
+  from '@omnitron-dev/titan-auth/preset/shared-session';
+
+// Application adapter: one database snapshot, including account status,
+// current role grants and any session-specific conditions.
+declare const lookup: SessionAuthorityLookup;
+
+const auth = createSharedSessionAuthManager({
+  logger,
+  jwtService,
+  expectedIssuer: 'my-platform',
+  sessionAuthority: lookup,
+  roleExpander: applicationRoles.expandRoleSet,
 });
-// Pass roleExpander: roles.expandRoleSet to createSharedSessionAuthManager.
-// Use roles.expandRoleSet during token issuance as well.
+app.netron.configureAuth(auth);
 ```
 
-[Shared access policy](../../auth/access-policy.md) describes unknown claims,
-service identity, rank boundaries and the optional platform preset.
+`sessionAuthority(sessionId, userId)` returns `undefined` for an absent or
+revoked principal, or a record with `userId`, `expiresAt`, `isRevoked`, `roles`
+and `permissions`. It may include `activeRefreshTokenId`. Account suspension,
+MFA proof and role conditions belong in this application-owned lookup. The
+preset validates the response and refuses a mismatch between subject and owner.
+Current roles and permissions replace the corresponding JWT claims.
+
+A database or RPC failure returns 503; it never becomes an authenticated request
+or a false assertion that the user signed out. Missing, expired or revoked
+sessions are rejected as 401. Keep tokens and signing material out of logs.
+
+## Cooperating backends
+
+`SessionAuthorityService` from
+`@omnitron-dev/titan-auth/preset/session-authority` adapts the lookup to Netron:
+
+```ts
+await app.netron.peer.exposeService(new SessionAuthorityService(lookup));
+```
+
+`SessionAuthority.resolve({ sessionId, userId })` requires **both**
+`service_role` and `sessions.resolve`. It returns a minimal authority snapshot,
+without bearer credentials. A consumer supplies a `sessionAuthority` callback
+which invokes this service through its authenticated Netron client. Configure
+bounded deadlines and dispose that client with the application. Do not fall
+back to stale grants when the owner is unavailable.
+
+Deploy the owner endpoint before consumers. For high availability, provide
+redundant owner instances and an appropriate database failover policy. The
+lookup is read-only; retries must remain bounded. This contract avoids a
+second copy of the account schema or permission engine in every backend.
+
+## Registry compatibility mode
+
+Alternatively supply `sessionRedis`, with `get(key)` and an optional
+`sessionLookup(sessionId)` for a registry miss or outage. The lookup returns
+`userId`, `expiresAt`, `isRevoked` and optionally `activeRefreshTokenId`.
+A healthy registry hit does not consult the fallback.
+
+The preset **never writes Redis**. An unconditional cache write after a lookup
+can resurrect a concurrently revoked session. Restore entries only through an
+adapter serialized with revocation. Registry mode is only as current as that
+update protocol; use canonical mode for immediate committed-state enforcement.
+
+## Credentials and expiry
+
+Human tokens require bounded string `sub` and `sid` claims and a finite,
+unexpired integer `exp`. A human session claiming `service_role` is rejected.
+Service tokens omit `sid` and must be issued through a separately controlled
+service-credential flow. Role inheritance cannot promote a human to that tier.
+
+Netron revalidates token-backed persistent peers before calls, property access
+and core tasks. The checked context is bound to the invocation, including
+property getters and setters. Token expiry bounds authentication cache entries.
+An already admitted invocation retains its snapshot; sensitive writes should
+also enforce ownership and current authority under their transaction's locks.
+
+| Option | Meaning |
+| --- | --- |
+| `expectedIssuer` | Defaults to `omnitron`; `null` explicitly disables issuer checking |
+| `sessionAuthority` | Live session and grants on every validation; bypasses registry mode |
+| `sessionKeyPrefix` | Registry namespace; defaults to `omni:session:` |
+| `cacheTtl` | Deprecated; this preset never caches authentication results |
+| `cnfHmacSecret` | Checks an access token's confirmation against the active refresh-token ID |
+| `roleExpander` | Optional application role hierarchy |
+
+Signature verification may be cached by `IJWTService`; live authority is a
+separate decision. When `cnf.fp` is present in canonical mode with a configured
+secret, a missing or changed active refresh-token ID rejects the credential.
+Legacy registry values without refresh-token IDs cannot provide that guarantee.
+Issuer and verifier must agree on the binding secret and rotation protocol.
+
+## Session conditions
+
+`evaluateSessionPolicy` from `@omnitron-dev/access/session-policy` provides a
+pure evaluator for `requireMfa`, absolute `maxSessionDuration` in minutes, and
+`timeWindows` with IANA timezones. Supply the original session creation time and
+persisted proof of completed MFA. Enrollment alone is insufficient. Evaluate on
+every protected request and renewal; renewing a token must not reset session age.
+Unknown or malformed conditions fail closed.
+
+See [JWT configuration](./auth.mdx), [RPC authentication](../netron/authentication.md)
+and [token issuance](../../auth/token-issuance.md) for the surrounding lifecycle.

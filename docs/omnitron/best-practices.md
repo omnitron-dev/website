@@ -105,107 +105,47 @@ export default defineEcosystem({
 
 ## Shared authentication across apps
 
-Extract the auth wiring into a shared package — every app's
-`bootstrap.ts` then calls one factory.
+Use the [shared-session preset](../titan/modules/shared-session.md) rather than
+implementing token, session and role validation in each bootstrap. A shared
+workspace adapter wires the application's issuer, role hierarchy and canonical
+session authority. The authority owns the account schema and reads current grants
+in a single consistent database snapshot. Other backends call it through Netron
+with a service credential restricted to `sessions.resolve`.
 
-```typescript
-// packages/auth-utils/src/create-auth-manager.ts
-import { mapAuthToRLSContext } from '@omnitron-dev/titan/netron/auth';
-import { rlsContext }          from '@omnitron-dev/titan-database/rls';
+```ts
+import { createSharedSessionAuthManager }
+  from '@omnitron-dev/titan-auth/preset/shared-session';
+import { withAuthRLSContext, type AuthContext }
+  from '@omnitron-dev/titan/netron/auth';
 
-interface CreateJwtAuthManagerOptions {
-  logger:        ILogger;
-  jwtService:    IJWTService;
-  sessionRedis:  Redis;
-  cnfHmacSecret?: string;
-  /** Optional Postgres lookup for cold-cache session re-warm — only the auth app provides this */
-  sessionLookup?: (sessionId: string) => Promise<SessionRecord | undefined>;
-}
+app.netron.configureAuth(createSharedSessionAuthManager({
+  logger, jwtService,
+  expectedIssuer: 'my-platform',
+  sessionAuthority: lookupCurrentSessionAndGrants,
+  roleExpander: applicationRoles.expandRoleSet,
+}));
 
-export function createJwtAuthManager(opts: CreateJwtAuthManagerOptions): AuthenticationManager {
-  // verify JWT signature → extract sessionId claim →
-  // O(1) Redis lookup → re-warm from Postgres if cold and lookup provided →
-  // optional cnf.fp (token-binding) verification
-  return /* configured AuthenticationManager */;
-}
-
-export function createRlsInvocationWrapper() {
-  return async (metadata: Map<string, unknown>, fn: () => Promise<unknown>) => {
-    const authCtx = metadata.get('authContext') as AuthContext | undefined;
-    if (authCtx) {
-      const rlsCtx = mapAuthToRLSContext(authCtx, {
-        defaultTenantId: (authCtx.metadata as any)?.tenantId ?? 'default',
-      });
-      return rlsContext.runAsync(rlsCtx, fn);
-    }
-    return fn();
-  };
-}
+// Pass to the application's invocationWrapper option.
+const invocationWrapper = (metadata: Map<string, unknown>, fn: () => Promise<unknown>) => {
+  const auth = metadata.get('authContext') as AuthContext | undefined;
+  // Anonymous calls receive an empty frame instead of inheriting outer authority.
+  return withAuthRLSContext(auth ?? { userId: '', roles: [], permissions: [] }, fn);
+};
 ```
 
-Each app's `bootstrap.ts` then:
-
-```typescript
-// apps/media/src/bootstrap.ts
-import { defineSystem } from '@omnitron-dev/omnitron';
-import { createJwtAuthManager, createRlsInvocationWrapper } from '@platform/auth-utils';
-import { JWT_SERVICE_TOKEN } from '@omnitron-dev/titan-auth';
-import { REDIS_MANAGER }     from '@omnitron-dev/titan-redis';
-import { LOGGER_SERVICE_TOKEN } from '@omnitron-dev/titan/module/logger';
-
-export default defineSystem({
-  name: 'media',
-  version: '1.0.0',
-  processes: [{
-    name: 'http',
-    module: './app.module.js',
-    critical: true,
-    transports: {
-      http: { port: 3002, host: '0.0.0.0', cors: true,
-              requestTimeout: 300_000, maxRequestSize: '10gb' },
-    },
-    hooks: {
-      afterCreate: async (app) => {
-        const jwt           = await app.container.resolveAsync(JWT_SERVICE_TOKEN);
-        const loggerModule  = await app.container.resolveAsync(LOGGER_SERVICE_TOKEN);
-        const redisManager  = await app.container.resolveAsync(REDIS_MANAGER);
-        const sessionRedis  = redisManager.getClient('sessions');
-
-        if (app.netron) {
-          app.netron.configureAuth(createJwtAuthManager({
-            logger: loggerModule.logger,
-            jwtService: jwt,
-            sessionRedis,
-            cnfHmacSecret: process.env.JWT_SECRET,
-            // No sessionLookup — media trusts the auth app to re-warm
-          }));
-        }
-      },
-    },
-  }],
-  auth: {
-    jwt: { enabled: true, tokenCacheTtl: 60_000 },
-    invocationWrapper: createRlsInvocationWrapper(),
-  },
-});
-```
-
-Only the auth app provides `sessionLookup` — it owns the session
-table. Other apps rely on Redis hits; on a cold session, the
-first user request hitting the auth app re-warms the cache for
-everyone.
+Configure deadlines and lifecycle cleanup for the authority client. Deploy its
+endpoint before consumers and provide redundant owners for high availability.
+A failed authority lookup refuses protected traffic with 503; cached grants
+must not turn an outage into a permission bypass. Signature caches remain
+independent of live session checks.
 
 ### Token binding (`cnf.fp`)
 
-Pass `cnfHmacSecret` to `createJwtAuthManager` and have the auth
-app stamp `cnf.fp = HMAC(activeRefreshTokenId)` into issued JWTs.
-On each call, every backend verifies the JWT's `cnf.fp` against
-the session's currently-active refresh token id from Redis. If
-the refresh chain has rotated (or been revoked), the token's
-`cnf.fp` no longer matches — 401, instantly.
-
-This guards against stolen short-lived JWTs even before they
-expire.
+With `cnfHmacSecret`, an access token can bind to the active refresh-token ID.
+The canonical adapter returns that ID from the same snapshot as the session.
+When it disappears or changes, the previous confirmation is refused. Registry
+compatibility mode cannot provide this guarantee for legacy entries without a
+refresh-token ID, and the preset never rewrites registry entries itself.
 
 ## Ordered startup with `dependsOn`
 

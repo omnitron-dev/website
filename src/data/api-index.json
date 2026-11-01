@@ -49,6 +49,10 @@
       "guide": "/docs/auth/access-policy"
     },
     {
+      "path": "@omnitron-dev/access/session-policy",
+      "guide": "/docs/titan/modules/shared-session"
+    },
+    {
       "path": "@omnitron-dev/common",
       "guide": "/docs/utilities/common"
     },
@@ -485,6 +489,10 @@
       "guide": "/docs/auth/access-policy"
     },
     {
+      "path": "@omnitron-dev/titan-auth/preset/session-authority",
+      "guide": "/docs/titan/modules/shared-session"
+    },
+    {
       "path": "@omnitron-dev/titan-auth/preset/shared-session",
       "guide": "/docs/titan/modules/shared-session"
     },
@@ -787,6 +795,18 @@
       ]
     },
     {
+      "name": "evaluateSessionPolicy",
+      "package": "@omnitron-dev/access",
+      "kind": "function",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/access/src/session-policy.ts#L18",
+      "imports": [
+        {
+          "path": "@omnitron-dev/access/session-policy",
+          "guide": "/docs/titan/modules/shared-session"
+        }
+      ]
+    },
+    {
       "name": "expandRoles",
       "package": "@omnitron-dev/access",
       "kind": "function",
@@ -1063,6 +1083,42 @@
         {
           "path": "@omnitron-dev/access/platform",
           "guide": "/docs/auth/access-policy"
+        }
+      ]
+    },
+    {
+      "name": "SessionFacts",
+      "package": "@omnitron-dev/access",
+      "kind": "interface",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/access/src/session-policy.ts#L8",
+      "imports": [
+        {
+          "path": "@omnitron-dev/access/session-policy",
+          "guide": "/docs/titan/modules/shared-session"
+        }
+      ]
+    },
+    {
+      "name": "SessionPolicy",
+      "package": "@omnitron-dev/access",
+      "kind": "interface",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/access/src/session-policy.ts#L2",
+      "imports": [
+        {
+          "path": "@omnitron-dev/access/session-policy",
+          "guide": "/docs/titan/modules/shared-session"
+        }
+      ]
+    },
+    {
+      "name": "SessionPolicyDecision",
+      "package": "@omnitron-dev/access",
+      "kind": "type",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/access/src/session-policy.ts#L13",
+      "imports": [
+        {
+          "path": "@omnitron-dev/access/session-policy",
+          "guide": "/docs/titan/modules/shared-session"
         }
       ]
     },
@@ -41418,7 +41474,7 @@
       "name": "AccessValidationResult",
       "package": "@omnitron-dev/titan",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan/src/netron/auth/types.ts#L310",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan/src/netron/auth/types.ts#L312",
       "imports": [
         {
           "path": "@omnitron-dev/titan/netron/auth",
@@ -41662,7 +41718,7 @@
       "name": "AuditEvent",
       "package": "@omnitron-dev/titan",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan/src/netron/auth/types.ts#L275",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan/src/netron/auth/types.ts#L277",
       "imports": [
         {
           "path": "@omnitron-dev/titan/decorators",
@@ -41878,7 +41934,7 @@
       "name": "AuthResult",
       "package": "@omnitron-dev/titan",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan/src/netron/auth/types.ts#L55",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan/src/netron/auth/types.ts#L57",
       "imports": [
         {
           "path": "@omnitron-dev/titan/netron/auth",
@@ -44774,7 +44830,7 @@
       "name": "EnhancedPolicyDecision",
       "package": "@omnitron-dev/titan",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan/src/netron/auth/types.ts#L129",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan/src/netron/auth/types.ts#L131",
       "imports": [
         {
           "path": "@omnitron-dev/titan/netron/auth",
@@ -45050,7 +45106,7 @@
       "name": "ExecutionContext",
       "package": "@omnitron-dev/titan",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan/src/netron/auth/types.ts#L73",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan/src/netron/auth/types.ts#L75",
       "imports": [
         {
           "path": "@omnitron-dev/titan/netron/auth",
@@ -45850,7 +45906,7 @@
       "name": "HttpAuthSecurity",
       "package": "@omnitron-dev/titan",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan/src/netron/auth/types.ts#L326",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan/src/netron/auth/types.ts#L328",
       "imports": [
         {
           "path": "@omnitron-dev/titan/netron/auth",
@@ -49122,7 +49178,7 @@
       "name": "NetronAuthConfig",
       "package": "@omnitron-dev/titan",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan/src/netron/auth/types.ts#L255",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan/src/netron/auth/types.ts#L257",
       "imports": [
         {
           "path": "@omnitron-dev/titan/netron/auth",
@@ -49706,7 +49762,7 @@
       "name": "Policy",
       "package": "@omnitron-dev/titan",
       "kind": "type",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan/src/netron/auth/types.ts#L148",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan/src/netron/auth/types.ts#L150",
       "imports": [
         {
           "path": "@omnitron-dev/titan/netron/auth",
@@ -49718,7 +49774,7 @@
       "name": "PolicyDecision",
       "package": "@omnitron-dev/titan",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan/src/netron/auth/types.ts#L115",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan/src/netron/auth/types.ts#L117",
       "imports": [
         {
           "path": "@omnitron-dev/titan/netron/auth",
@@ -49730,7 +49786,7 @@
       "name": "PolicyDefinition",
       "package": "@omnitron-dev/titan",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan/src/netron/auth/types.ts#L153",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan/src/netron/auth/types.ts#L155",
       "imports": [
         {
           "path": "@omnitron-dev/titan/netron/auth",
@@ -49754,7 +49810,7 @@
       "name": "PolicyEngineConfig",
       "package": "@omnitron-dev/titan",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan/src/netron/auth/types.ts#L199",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan/src/netron/auth/types.ts#L201",
       "imports": [
         {
           "path": "@omnitron-dev/titan/netron/auth",
@@ -49766,7 +49822,7 @@
       "name": "PolicyEvaluationOptions",
       "package": "@omnitron-dev/titan",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan/src/netron/auth/types.ts#L182",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan/src/netron/auth/types.ts#L184",
       "imports": [
         {
           "path": "@omnitron-dev/titan/netron/auth",
@@ -49778,7 +49834,7 @@
       "name": "PolicyExpression",
       "package": "@omnitron-dev/titan",
       "kind": "type",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan/src/netron/auth/types.ts#L173",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan/src/netron/auth/types.ts#L175",
       "imports": [
         {
           "path": "@omnitron-dev/titan/netron/auth",
@@ -50242,7 +50298,7 @@
       "name": "RemotePeer",
       "package": "@omnitron-dev/titan",
       "kind": "class",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan/src/netron/remote-peer.ts#L176",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan/src/netron/remote-peer.ts#L180",
       "imports": [
         {
           "path": "@omnitron-dev/titan/netron",
@@ -51006,7 +51062,7 @@
       "name": "ServiceACL",
       "package": "@omnitron-dev/titan",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan/src/netron/auth/types.ts#L213",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan/src/netron/auth/types.ts#L215",
       "imports": [
         {
           "path": "@omnitron-dev/titan/netron/auth",
@@ -51202,7 +51258,7 @@
       "name": "ServiceStub",
       "package": "@omnitron-dev/titan",
       "kind": "class",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan/src/netron/service-stub.ts#L39",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan/src/netron/service-stub.ts#L40",
       "imports": [
         {
           "path": "@omnitron-dev/titan/netron",
@@ -51646,7 +51702,7 @@
       "name": "TokenCacheConfig",
       "package": "@omnitron-dev/titan",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan/src/netron/auth/types.ts#L241",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan/src/netron/auth/types.ts#L243",
       "imports": [
         {
           "path": "@omnitron-dev/titan/netron/auth",
@@ -52942,7 +52998,7 @@
       "name": "createSharedSessionAuthManager",
       "package": "@omnitron-dev/titan-auth",
       "kind": "function",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-auth/src/preset/shared-session.ts#L298",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-auth/src/preset/shared-session.ts#L108",
       "imports": [
         {
           "path": "@omnitron-dev/titan-auth/preset/shared-session",
@@ -53266,7 +53322,7 @@
       "name": "InvalidTokenClaimError",
       "package": "@omnitron-dev/titan-auth",
       "kind": "class",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-auth/src/preset/shared-session.ts#L281",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-auth/src/preset/shared-session.ts#L70",
       "imports": [
         {
           "path": "@omnitron-dev/titan-auth/preset/shared-session",
@@ -53695,10 +53751,46 @@
       ]
     },
     {
+      "name": "SessionAuthority",
+      "package": "@omnitron-dev/titan-auth",
+      "kind": "interface",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-auth/src/preset/shared-session.ts#L33",
+      "imports": [
+        {
+          "path": "@omnitron-dev/titan-auth/preset/shared-session",
+          "guide": "/docs/titan/modules/shared-session"
+        }
+      ]
+    },
+    {
+      "name": "SessionAuthorityLookup",
+      "package": "@omnitron-dev/titan-auth",
+      "kind": "type",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-auth/src/preset/shared-session.ts#L41",
+      "imports": [
+        {
+          "path": "@omnitron-dev/titan-auth/preset/shared-session",
+          "guide": "/docs/titan/modules/shared-session"
+        }
+      ]
+    },
+    {
+      "name": "SessionAuthorityService",
+      "package": "@omnitron-dev/titan-auth",
+      "kind": "class",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-auth/src/preset/session-authority.ts#L6",
+      "imports": [
+        {
+          "path": "@omnitron-dev/titan-auth/preset/session-authority",
+          "guide": "/docs/titan/modules/shared-session"
+        }
+      ]
+    },
+    {
       "name": "SessionLookup",
       "package": "@omnitron-dev/titan-auth",
       "kind": "type",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-auth/src/preset/shared-session.ts#L120",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-auth/src/preset/shared-session.ts#L25",
       "imports": [
         {
           "path": "@omnitron-dev/titan-auth/preset/shared-session",
@@ -53710,7 +53802,7 @@
       "name": "SessionRedisClient",
       "package": "@omnitron-dev/titan-auth",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-auth/src/preset/shared-session.ts#L98",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-auth/src/preset/shared-session.ts#L18",
       "imports": [
         {
           "path": "@omnitron-dev/titan-auth/preset/shared-session",
@@ -53722,7 +53814,7 @@
       "name": "SessionRevokedAuthError",
       "package": "@omnitron-dev/titan-auth",
       "kind": "class",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-auth/src/preset/shared-session.ts#L266",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-auth/src/preset/shared-session.ts#L61",
       "imports": [
         {
           "path": "@omnitron-dev/titan-auth/preset/shared-session",
@@ -53734,7 +53826,7 @@
       "name": "SharedSessionAuthManagerOptions",
       "package": "@omnitron-dev/titan-auth",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-auth/src/preset/shared-session.ts#L184",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-auth/src/preset/shared-session.ts#L43",
       "imports": [
         {
           "path": "@omnitron-dev/titan-auth/preset/shared-session",
@@ -65502,7 +65594,7 @@
       "name": "ProcessSpawner",
       "package": "@omnitron-dev/titan-pm",
       "kind": "class",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-pm/src/process-spawner.ts#L806",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-pm/src/process-spawner.ts#L812",
       "imports": [
         {
           "path": "@omnitron-dev/titan-pm",
@@ -65514,7 +65606,7 @@
       "name": "ProcessSpawnerFactory",
       "package": "@omnitron-dev/titan-pm",
       "kind": "class",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-pm/src/process-spawner.ts#L1645",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-pm/src/process-spawner.ts#L1651",
       "imports": [
         {
           "path": "@omnitron-dev/titan-pm",
