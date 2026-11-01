@@ -132,6 +132,24 @@ Preserve the existing instance account, home and application dependency bindings
 
 During the approved window, disable file watching, stop applications gracefully, verify their processes have exited, and then retire the old daemon. Enable resident execution, select the sealed runtime and install the two independently supervised services. Start the owner before the backend. Confirm the original application inventory, operational health, ready recovery certificate, separate native cgroups and durable log delivery before proceeding to another node.
 
+Plan process startup and domain readiness separately. A stream processor can be
+online while it reconstructs a complete observation window; a healthy connection
+or running PID is not evidence that its outputs are usable. Set the acceptance
+budget from the workload's real data requirements, startup latency and sampling
+cadence. For example, a five-minute input window can require a further full minute
+at the boundary. A generic four-minute health timeout would force a needless
+rollback and create a second gap in that input.
+
+Record the latest pending check, its reason and elapsed waiting time. A later
+successful connection replaces an earlier socket error in the diagnosis; do not
+report that stale error when domain health is the actual blocker. Preserve the
+original health result and withhold dependent outputs until it passes. Never
+fabricate completeness, replay a missed forecast, or repeatedly restart a healthy
+collector to clear a data-window warning. Include the same readiness requirements
+in rollback verification. If runtime restoration has succeeded but data readiness
+is pending, report those states separately and verify recovery before closing the
+maintenance record.
+
 Rollback restores service ownership, configuration and the retained runtime. It must first prove that the new owner and its application processes have stopped. Keep newly written logs, replication acknowledgments and application data: do not restore a pre-transition SQLite snapshot over them. Retain the failed transition's runtime and execution journals for diagnosis.
 
 Remote application deployment recognizes a settled, sealed managed backend through its selected runtime, native guardian parent and separate owner/backend cgroups. A stale selection or mismatched process is refused. The coupled `fleet upgrade` workflow refuses an independently supervised node before stopping or rebinding any application. Use the node's `omnitron backend upgrade <sealed-runtime>/packages/0/dist` workflow for backend replacement; keep framework bundles still referenced by applications.
