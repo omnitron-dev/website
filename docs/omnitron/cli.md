@@ -35,7 +35,7 @@ into another process. Check both the JSON result and the exit status.
 | **Backend installation and replacement** | `backend status`, `backend install`, `backend installation`, `backend select`, `backend upgrade`, `backend abort`, `backend recover` |
 | **Project** | `project add`, `project list`, `project remove`, `project scan`, `project topology` |
 | **Topology** | `topology refresh`, `topology show`, `topology export`, `topology draft`, `topology plan`, `topology apply` |
-| **Stack** | `stack list`, `stack create`, `stack delete`, `stack status`, `stack start`, `stack stop`, `stack runtime` |
+| **Stack** | `stack list`, `stack create`, `stack delete`, `stack status`, `stack diagnose`, `stack start`, `stack stop`, `stack runtime` |
 | **App lifecycle** | `start`, `stop`, `restart`, `reload` |
 | **Information** | `list` (alias `ls`), `status`, `config`, `init` |
 | **Monitoring** | `logs`, `monit`, `health`, `metrics`, `health-check`, `discover` |
@@ -194,9 +194,30 @@ infrastructure to a subset of the project's apps.
 | `omnitron stack create <project> <stack> [-t type] [-a apps]` | Create a new stack (`-t, --type local\|remote\|cluster`, default `local`; `-a, --apps` comma-separated names or `all`, default `all`) |
 | `omnitron stack delete <project> <stack>` | Drop a stack |
 | `omnitron stack status <project> <stack>` | Per-app status within the stack |
+| `omnitron stack diagnose <project> <stack>` | Read-only prerequisite checks and planned changes before start |
 | `omnitron stack start <project> <stack>` | Start everything in the stack |
 | `omnitron stack stop <project> <stack>` | Prepare every node, stop owned applications and containers, require confirmed receipts; retain volumes |
 | `omnitron stack runtime <project> <stack>` | Show runtime details (containers, ports) |
+
+Before a first start or after changing an environment:
+
+```bash
+omnitron stack diagnose sample dev
+omnitron --json stack diagnose sample dev
+```
+
+The same report appears under **Stacks → Diagnose** in Console. JSON includes
+`checkedAt`, `durationMs`, `status`, structured `checks` and explicit `deferred`
+coverage. Exit code `0` means prerequisite checks passed, possibly with planned
+creation/downloads; `1` means blockers were found; `2` means evidence is incomplete
+or the request failed. A successful prerequisite check does not certify database
+migrations or application startup. No provisioning or migration is performed.
+
+Local Docker checks include declared container ownership, specification changes,
+health, image and named-volume availability, bind mounts and host port conflicts.
+Remote target-host checks remain explicitly incomplete; `infra inspect` and
+`node check` provide complementary evidence. Project configuration is the daemon's
+loaded configuration; reload it after editing project configuration files.
 
 ## App lifecycle
 

@@ -226,6 +226,41 @@ runtime (Docker container count).
 `/stacks/:name` — per-stack view: which apps run here, which
 infrastructure, runtime status. Start / stop the whole stack.
 
+**Diagnose**, on a stack card or its detail page, opens an on-demand readiness
+report. It is separate from Start: it never provisions services, starts apps,
+executes container health commands or applies migrations. The progress indicator
+appears immediately; results carry an observation time, individual reasons and
+next actions. **Needs attention** hides verified checks. A failed refresh retains
+the previous report and marks it stale.
+
+The report distinguishes **Verified**, **Planned change**, **Blocked** and
+**Not verified**. An absent PostgreSQL container can be a planned creation;
+a name owned by another stack or an occupied port is a blocker. Missing images
+require a pull; missing named volumes will start empty. Missing bind mounts block
+startup instead of being treated as a usable empty configuration directory.
+
+Read-only diagnosis uses saved bootstrap declarations and current static app
+configuration. Missing or changed declarations remain unverified. Administrators
+can use **Refresh declarations…**, which explicitly imports trusted project code
+in isolated processes, and then repeat the diagnosis. This is an independent
+permission from viewing the report.
+
+The first implementation checks local Docker prerequisites. For remote stacks,
+it validates configuration and placement but explicitly leaves target-host
+prerequisites unverified; it never uses this workstation's Docker as evidence for
+a remote node. Use Nodes diagnostics and `omnitron infra inspect project/stack`
+for the complementary RPC and host-service evidence. Database credentials,
+schema, migrations and successful application startup remain outside this check.
+
+Stack and application ratios mean **running / configured** and **online /
+configured deployments**, respectively. A project with one running remote stack
+and one stopped local stack shows `1/2 stacks`, and six apps declared in both
+stacks show `6/12 apps`. Selecting only the local stack gives `0/1` and `0/6`.
+The footer and dashboard read stacks and apps from the same inventory response;
+late answers cannot replace another workspace's counters. Failed observations
+retain their counts with a stale marker. The workspace menu shows configured
+stack totals for inactive projects rather than presenting unobserved status as live.
+
 ### Logs
 
 The global viewer includes local and replicated application logs. Select one exact

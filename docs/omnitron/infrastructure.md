@@ -632,3 +632,17 @@ always points at the current location.
 - [CLI](./cli.md#infrastructure) — `omnitron infra ...`
 - [Services reference](./services-reference.md) — `OmnitronInfra` methods
 - [Architecture](./architecture.md#infrastructure-subsystem) — where this fits
+
+## Readiness before provisioning
+
+Use `omnitron stack diagnose <project> <stack>` or **Stacks → Diagnose** before
+starting an environment. This is an observation, not a dry-run execution of
+application hooks. It resolves the local infrastructure plan using the same
+resolver as provisioning, without reserving ports or registering a new owner.
+
+Automatically inferred database and bucket requirements survive explicit port
+or credential overrides. Conflicting declarations for the same container refuse
+the plan instead of silently choosing the first application's specification.
+An invalid service preset fails resolution rather than falling back to a different
+legacy plan. See [Console readiness reports](./console.md#stacks) for coverage and
+[CLI exit codes](./cli.md#stack-management) for automation.

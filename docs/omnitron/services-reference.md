@@ -40,7 +40,7 @@ diffs them against the index table below.
 | `log-collector.rpc-service.ts` | `OmnitronLogs` | 4 | viewer |
 | `node-manager.rpc-service.ts` | `OmnitronNodes` | 32 | viewer (read), operator (operations), admin (historical repair) |
 | `pipeline.rpc-service.ts` | `OmnitronPipelines` | 9 | admin + live human session / trusted local CLI |
-| `project.rpc-service.ts` | `OmnitronProject` | 35 | viewer (read) + operator (start/stop) + admin (CRUD) |
+| `project.rpc-service.ts` | `OmnitronProject` | 36 | viewer (read) + operator (start/stop) + admin (CRUD) |
 | `release.rpc-service.ts` | `OmnitronRelease` | 12 | viewer (read), operator (build/attest), admin (prune) |
 | `secrets.rpc-service.ts` | `OmnitronSecrets` | 6 | admin |
 | `sync.rpc-service.ts` | `OmnitronSync` | 6 | authenticated control plane; historical repair excludes operators |
@@ -349,16 +349,24 @@ on failure. Viewer `getTopology` and `getTopologyWorkspace` report declaration
 source, capture time and coverage warnings without importing bootstrap code. See
 [declaration coverage](./topology.md#declaration-coverage).
 
-Project and stack registry: 33 public methods, including release checks, account operations and infrastructure ownership.
+`diagnoseStack({ project, stack })` is a viewer operation. It returns timestamped
+prerequisite checks, planned changes and explicit unverified coverage without
+provisioning or importing application bootstraps. Imported configuration names
+resolve to the same runtime scope as Start; the report retains the public project
+and stack names. Concurrent readers share an in-flight inspection. See
+[readiness before start](./console.md#stacks).
+
+Project and stack registry: 36 public methods, including release checks, account operations and infrastructure ownership.
 
 | Method category | Methods |
 | --------------- | ------- |
 | Projects | `listProjects`, `getProject`, `scanRequirements`, `addProject`, `updateProject`, `removeProject`, `importConfiguration`, `detachConfiguration` |
 | Project apps and topology | `getProjectApps`, `getTopology`, `getTopologyInventory`, `refreshTopologyMetadata` |
 | Target workspace | `getTopologyWorkspace`, `saveTopologyDraft`, `planTopology`, `applyTopologyPlan` |
-| Stacks | `listStacks`, `getStack`, `getStackStatus`, `createStack`, `deleteStack`, `startStack`, `stopStack` |
+| Stacks | `listStacks`, `getStack`, `getStackStatus`, `diagnoseStack`, `createStack`, `deleteStack`, `startStack`, `stopStack` |
 | Infrastructure ownership | `refreshInfrastructureOwnership`, `inspectStackHost`, `probeLeftovers`, `stackMaintenance` |
 | Stack accounts | `censusStackAccounts`, `createStackAccount`, `removeStackAccount`, `showStackAccount` |
+| Node stop protocol | `prepareNodeStackStop`, `executeNodeStackStop` |
 | Release inspection | `checkRelease`, `getDeployProgress` |
 
 `updateProject({ name, path })` changes the registered location while preserving the
@@ -370,7 +378,7 @@ Use an immutable release directory for updates; a mutable `current` symlink can
 otherwise make process definitions and installed package identities disagree.
 
 Roles: all reads (`listProjects`, `getProject`, `scanRequirements`,
-`getProjectApps`, `getTopology`, `getTopologyInventory`, `getTopologyWorkspace`, `listStacks`, `getStack`, `getStackStatus`) gate on
+`getProjectApps`, `getTopology`, `getTopologyInventory`, `getTopologyWorkspace`, `listStacks`, `getStack`, `getStackStatus`, `diagnoseStack`) gate on
 `viewer`; `startStack` / `stopStack` on `operator`; project CRUD
 (`addProject`, `updateProject`, `removeProject`) and stack CRUD
 (`createStack`, `deleteStack`) on `admin`. Target mutations (`saveTopologyDraft`,
