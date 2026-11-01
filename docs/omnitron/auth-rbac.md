@@ -102,6 +102,39 @@ never restores cache entries automatically. Cache restoration and revocation
 must share a serialization protocol. A Redis hit does not prove that a newer
 database revocation or permission edit was propagated.
 
+## Application authority without duplicate policy engines
+
+Keep three responsibilities separate:
+
+- **Access** evaluates permission keys, system-role hierarchy and session policies.
+- **Titan / Titan Auth** validate credentials, resolve current authority, isolate
+  invocation context and enforce transport/method admission.
+- **The application** owns its account, assignment and resource records. Its
+  canonical adapter reads a consistent database snapshot and uses the shared
+  predicates; CLI and browser controls consume this authority.
+
+A reusable application permission role should reference a definition, not copy
+its grants into every account. Keep system rank separate from such definitions:
+renaming a custom role must not create a service identity or administrative tier.
+Union applicable grants, but require **all** applicable session policies. Missing
+assigned definitions must deny access rather than silently removing restrictions.
+
+Serialize sensitive assignment changes with the current actor, target and role
+definitions. Verify the delegation ceiling and commit the audit record in the
+same [Titan database transaction](../titan/modules/database.mdx). A form should
+carry the version or assignments it edited, so concurrent changes return a
+conflict rather than overwriting another administrator's work.
+
+Refresh-token rotation, session extension and access-token issuance also belong
+in one transaction. A signing or authority-store failure must preserve the
+presented refresh credential. Repositories join Titan's transaction context,
+which delegates transaction/savepoint behavior to Kysera; they must not start an
+independent transaction inside the operation. Update compatibility caches after
+commit, and keep them out of authorization decisions.
+
+These are application integration requirements. The shared-session preset does
+not create an application's role-assignment schema, refresh-token store or editor.
+
 ## Token cache
 
 The shared-session preset and Omnitron daemon disable authentication-result
