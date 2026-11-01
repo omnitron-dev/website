@@ -71,6 +71,16 @@ Native entry guards cover imports and initialization before Titan is available. 
 
 The in-memory tail is a bounded convenience view. Database history, durable pending delivery and rotated files have distinct retention and availability; a full live window is not evidence that no other records exist.
 
+File projection during `LogManager.dispose()` has a default five-second budget,
+configurable through `LogManagerConfig.shutdownProjectionTimeoutMs`. An in-flight
+record finishes before the journal closes; the next record is deferred when the
+budget expires. This bounds backlog draining, not a stuck operating-system I/O
+call. Deferred records and append intents remain in SQLite and replay after the
+next start with the same IDs and offsets. Concurrent disposal callers await the
+same completion. This prevents a large derived-file backlog from indefinitely
+holding the owner shutdown receipt; it does not discard or acknowledge unwritten
+records. An explicit `flush()` outside disposal still waits for the file projection.
+
 ### Owner and supervisor journals
 
 The resident execution owner owns worker pools even when the backend is replaced.
