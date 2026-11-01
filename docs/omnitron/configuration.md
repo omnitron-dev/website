@@ -536,7 +536,7 @@ interface IDaemonConfig {
   role:        'master' | 'slave';
   master?:     { host: string; port: number };
   sync?:       ISyncConfig;
-  cluster?:    { enabled, discovery, peers?, electionTimeout?, heartbeatInterval? };
+  cluster?:    { enabled, discovery?: 'postgres', clusterId?, leaseTtlMs?, heartbeatInterval? };
   secrets?:    { provider: 'file'|'env'; path?; passphrase? };
   auth?:       { jwtSecret? };
   healthMonitor?: { intervalMs?, concurrency?, offlineTimeoutMs?, ...retentionDays? };

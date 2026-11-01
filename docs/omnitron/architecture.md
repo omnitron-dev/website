@@ -360,30 +360,24 @@ the [Infra CLI section](./cli.md#infrastructure) covers commands.
 
 ## Cluster subsystem
 
-When `cluster.enabled: true` in daemon config, multiple daemons
-form a cluster:
+Optional programmatic `cluster.enabled: true` uses the same writable PostgreSQL
+as the fleet registry to arbitrate controller leases. The store commits owner,
+incarnation and epoch before acknowledging authority. There is no peer gossip
+protocol, anonymous voting or independent consensus log.
 
 ```mermaid
 flowchart LR
-  D1[Daemon node-1<br/>role: master] -- gossip --> D2[Daemon node-2<br/>role: follower]
-  D1 -- gossip --> D3[Daemon node-3<br/>role: follower]
-  D2 -. heartbeat .-> D1
-  D3 -. heartbeat .-> D1
-  D1 -- replicate state --> D2
-  D1 -- replicate state --> D3
-  Note[On master failure:<br/>raft-style election among followers]
+  D1[Controller A] --> Lease[(PostgreSQL lease and durable epoch)]
+  D2[Controller B] --> Lease
+  Lease --> Status[Authenticated authority observations]
+  Status --> Admission[Recipient fencing required for effects]
 ```
 
-Election parameters:
-
-| Parameter            | Default        |
-| -------------------- | -------------- |
-| `discovery`          | `'redis'` (or `'consul'` / `'static'`) |
-| `electionTimeout`    | `5–15 s` (jittered) |
-| `heartbeatInterval`  | `2 s`          |
-
-Cluster operations are exposed via the `cluster` CLI command
-group — see [CLI Cluster section](./cli.md#cluster-leader-election).
+The lease lasts 15 seconds by default and is renewed every 2 seconds. Loss of
+confirmation demotes the controller. Database mutations can be fenced in the same
+transaction; remote effects need durable recipient-side fencing. Normal master/slave
+fleet operation is independent of this optional mode. See [cluster coordination](./cluster.md)
+and the [release delivery gates](./release-readiness.md) for implemented boundaries.
 
 ## Webapp host
 

@@ -486,7 +486,7 @@ could not start while the daemon it exists to talk to was running,
 and its own `/ws` proxy pointed back at itself. Sign in with the same account you use against the
 production build — the `001_initial_schema` migration seeds a single
 `admin` user with password `admin` on first daemon start, and the
-password must be changed through Settings → Security before external exposure. The existing Console startup falls back to loopback while this seed remains in use; fleet TCP publication only warns, so it still requires operator control.
+password must be changed through Settings → Security before external exposure. Console startup falls back to loopback while this seed remains in use. A master refuses public TCP/HTTP/WebSocket registration until the credential check confirms the seed is no longer accepted; an unavailable check also refuses publication.
 
 ### Production build
 

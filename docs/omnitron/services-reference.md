@@ -52,7 +52,7 @@ And, only when `daemon.cluster.enabled` is set on a master:
 
 | File | Service id (Netron) | Methods | Role gate |
 | ---- | ------------------- | ------- | --------- |
-| `cluster/cluster.rpc-service.ts` | `OmnitronCluster` | 5 | viewer (state) + **unauthenticated** (`requestVote`, `leaderHeartbeat`) |
+| `cluster/cluster.rpc-service.ts` | `OmnitronCluster` | 3 | authenticated reads; operator/control-plane step-down |
 
 Plus the core supervisor:
 
@@ -451,25 +451,19 @@ monitoring).
 
 ### `OmnitronCluster` — `cluster/cluster.rpc-service.ts`
 
-Leader election (Raft-shaped) across master daemons. Registered
-only when `daemon.cluster.enabled` is set, and only on a master.
+PostgreSQL-authoritative coordination across master controllers. Registered only
+when programmatic `daemon.cluster.enabled` is set on a master.
 
 | Method | Effect |
-| ------ | ------ |
-| `requestVote({candidateId, term})` | Vote in an election |
-| `leaderHeartbeat({leaderId, term})` | Leader liveness, resets the follower's election timer |
-| `getClusterState()` | This node's term, state, leader and peer count |
-| `stepDown()` | Relinquish leadership |
-| `isLeader()` | Whether this node currently leads |
+| --- | --- |
+| `getClusterState()` | Authority, reason, durable epoch, lease freshness, observed leader and peer count |
+| `stepDown()` | Demote locally and release this controller's epoch |
+| `isLeader()` | Whether this node holds a confirmed fresh lease |
 
-Peers call the first two over plain HTTP at the daemon's RPC port
-with no credential, so both are `allowAnonymous`; `getClusterState`
-gates on `viewer`. `LeaderElection` rejects a vote or a heartbeat
-whose `candidateId` / `leaderId` is not in the fleet registry,
-which stops an arbitrary outsider — but a node id is discoverable
-and forgeable, so this is membership, not authentication. Keep
-`daemon.host` at its loopback default unless the fleet plane is on
-a trusted network.
+All reads require viewer/operator/admin or a control-plane service identity.
+Step-down requires operator/admin or a control-plane service identity. The former
+anonymous vote and heartbeat methods have been removed. A lease observation is
+not a fence for remote effects; see [cluster coordination](./cluster.md).
 
 ### `OmnitronTraces` — `trace-collector.rpc-service.ts`
 

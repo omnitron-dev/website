@@ -154,15 +154,15 @@ it. Values:
 | ------------------------------------ | ----------------------------------------------- |
 | `socketPath`                         | `~/.omnitron/daemon.sock`                       |
 | `port` (TCP)                         | `9700`                                          |
-| `host` (TCP)                         | `0.0.0.0`                                       |
+| `host` (TCP)                         | `127.0.0.1`                                       |
 | `httpPort`                           | `9800`                                          |
 | `pidFile`                            | `~/.omnitron/daemon.pid`                        |
 | `stateFile`                          | `~/.omnitron/state.json`                        |
 | `logDir`                             | `~/.omnitron/logs`                              |
 | `role`                               | `master`                                        |
 | `cluster.enabled`                    | `false`                                         |
-| `cluster.discovery`                  | `redis`                                         |
-| `cluster.electionTimeout`            | `5 000–15 000 ms` (jittered)                    |
+| `cluster.discovery`                  | `postgres`                                         |
+| `cluster.leaseTtlMs`                 | `15 000 ms`                                     |
 | `cluster.heartbeatInterval`          | `2 000 ms`                                      |
 | `secrets.provider`                   | `file`                                          |
 | `secrets.path`                       | `~/.omnitron/secrets.enc`                       |

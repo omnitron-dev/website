@@ -465,3 +465,45 @@ the module options as above.
 
 - [`titan-health`](./health.mdx) — `DatabaseHealthIndicator` exported by this module
 - [Best Practices / Performance](../best-practices/performance.md) — N+1, projection, indexing
+
+
+## PostgreSQL coordination leases
+
+The optional `@omnitron-dev/titan-database/coordination` entry point exports
+`PostgresLeaseStore`, `LeaseLostError`, `POSTGRES_LEASE_SCHEMA_V1`, `LeaseIdentity`,
+`LeaseGrant` and `LeaseStore`. It imports Kysely without starting Titan DI, Redis or
+an election service. Apply its schema through the migration facade owned by your
+application; constructing a store never mutates schema.
+
+```typescript
+import { randomUUID } from 'node:crypto';
+import { PostgresLeaseStore } from '@omnitron-dev/titan-database/coordination';
+
+const leases = new PostgresLeaseStore(db);
+const grant = await leases.acquire({
+  key: 'billing/reconcile', owner: instanceId, incarnation: randomUUID(),
+}, 15_000);
+if (grant) {
+  try {
+    await leases.withLease(grant, async trx => {
+      // All protected database effects must use this transaction.
+      await trx.updateTable('jobs').set({ status: 'claimed' }).where('id', '=', jobId).execute();
+    });
+  } finally {
+    await leases.release(grant);
+  }
+}
+```
+
+Use one incarnation for a controller lifetime. Repeating an acquisition with the
+same identity reconciles a lost reply while the epoch is valid. `renew` returns
+`null` after expiry or replacement; it never grants a new epoch. `read` reports only
+an unexpired database observation. Release retains the row and epoch.
+
+All contenders need the same writable PostgreSQL authority; its failover must
+preserve committed epochs. Mutations request synchronous commit. Lock waits are
+bounded to two seconds and SQL statements to five seconds; configure a finite
+connection-acquisition timeout on the pool too. Fenced callbacks must be bounded
+and perform database work through the supplied transaction. External I/O is not
+rolled back or fenced by a SQL transaction: its recipient needs an epoch-aware
+admission contract. Never delete lease rows to reset ownership.

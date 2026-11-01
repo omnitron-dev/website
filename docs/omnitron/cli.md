@@ -442,7 +442,7 @@ Aggregate across all remotes (and the local daemon).
 
 | Command | Effect |
 | ------- | ------ |
-| `omnitron cluster status` | Current leader, follower list, election term |
+| `omnitron cluster status` | Confirmed authority, reason, lease freshness and durable epoch |
 | `omnitron cluster step-down` | Force the current leader to step down |
 
 Cluster operations require `cluster.enabled: true` in the

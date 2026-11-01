@@ -505,6 +505,10 @@
       "guide": "/docs/titan/modules/database"
     },
     {
+      "path": "@omnitron-dev/titan-database/coordination",
+      "guide": "/docs/titan/modules/database"
+    },
+    {
       "path": "@omnitron-dev/titan-database/dialects",
       "guide": "/docs/titan/modules/database"
     },
@@ -11434,7 +11438,7 @@
       "name": "AggregatedHealthDto",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/config/types.ts#L1093",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/config/types.ts#L1083",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron",
@@ -11454,7 +11458,7 @@
       "name": "AggregatedMetricsDto",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/config/types.ts#L1056",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/config/types.ts#L1046",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron",
@@ -11706,7 +11710,7 @@
       "name": "AppDiagnosticsDto",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/config/types.ts#L1212",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/config/types.ts#L1202",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron",
@@ -11822,7 +11826,7 @@
       "name": "AppStatus",
       "package": "@omnitron-dev/omnitron",
       "kind": "type",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/config/types.ts#L980",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/config/types.ts#L970",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron",
@@ -11950,7 +11954,7 @@
       "name": "ChildDiagnosticsDto",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/config/types.ts#L1162",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/config/types.ts#L1152",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/config",
@@ -12286,7 +12290,7 @@
       "name": "DaemonStatusDto",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/config/types.ts#L1035",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/config/types.ts#L1025",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron",
@@ -12306,7 +12310,7 @@
       "name": "DEFAULT_ECOSYSTEM",
       "package": "@omnitron-dev/omnitron",
       "kind": "value",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/config/defaults.ts#L101",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/config/defaults.ts#L102",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/config",
@@ -12926,7 +12930,7 @@
       "name": "IAlertSink",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/config/types.ts#L883",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/config/types.ts#L873",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/config",
@@ -13006,7 +13010,7 @@
       "name": "IEcosystemConfig",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/config/types.ts#L897",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/config/types.ts#L887",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron",
@@ -13906,7 +13910,7 @@
       "name": "LastExitDto",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/config/types.ts#L1134",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/config/types.ts#L1124",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/config",
@@ -14002,7 +14006,7 @@
       "name": "LogEntryDto",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/config/types.ts#L1120",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/config/types.ts#L1110",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron",
@@ -14046,7 +14050,7 @@
       "name": "LogPathsDto",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/config/types.ts#L1205",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/config/types.ts#L1195",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/config",
@@ -14934,7 +14938,7 @@
       "name": "PoolDiagnosticsDto",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/config/types.ts#L1186",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/config/types.ts#L1176",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/config",
@@ -14946,7 +14950,7 @@
       "name": "ProcessInfoDto",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/config/types.ts#L982",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/config/types.ts#L972",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron",
@@ -15650,7 +15654,7 @@
       "name": "SubProcessInfoDto",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/config/types.ts#L1001",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/config/types.ts#L991",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron",
@@ -57839,6 +57843,54 @@
       ]
     },
     {
+      "name": "LeaseGrant",
+      "package": "@omnitron-dev/titan-database",
+      "kind": "interface",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-database/src/coordination/postgres-lease.ts#L19",
+      "imports": [
+        {
+          "path": "@omnitron-dev/titan-database/coordination",
+          "guide": "/docs/titan/modules/database"
+        }
+      ]
+    },
+    {
+      "name": "LeaseIdentity",
+      "package": "@omnitron-dev/titan-database",
+      "kind": "interface",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-database/src/coordination/postgres-lease.ts#L12",
+      "imports": [
+        {
+          "path": "@omnitron-dev/titan-database/coordination",
+          "guide": "/docs/titan/modules/database"
+        }
+      ]
+    },
+    {
+      "name": "LeaseLostError",
+      "package": "@omnitron-dev/titan-database",
+      "kind": "class",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-database/src/coordination/postgres-lease.ts#L34",
+      "imports": [
+        {
+          "path": "@omnitron-dev/titan-database/coordination",
+          "guide": "/docs/titan/modules/database"
+        }
+      ]
+    },
+    {
+      "name": "LeaseStore",
+      "package": "@omnitron-dev/titan-database",
+      "kind": "interface",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-database/src/coordination/postgres-lease.ts#L27",
+      "imports": [
+        {
+          "path": "@omnitron-dev/titan-database/coordination",
+          "guide": "/docs/titan/modules/database"
+        }
+      ]
+    },
+    {
       "name": "ListOptions",
       "package": "@omnitron-dev/titan-database",
       "kind": "interface",
@@ -58699,6 +58751,18 @@
       ]
     },
     {
+      "name": "POSTGRES_LEASE_SCHEMA_V1",
+      "package": "@omnitron-dev/titan-database",
+      "kind": "value",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-database/src/coordination/postgres-lease.ts#L4",
+      "imports": [
+        {
+          "path": "@omnitron-dev/titan-database/coordination",
+          "guide": "/docs/titan/modules/database"
+        }
+      ]
+    },
+    {
       "name": "postgresAdapter",
       "package": "@omnitron-dev/titan-database",
       "kind": "value",
@@ -58742,6 +58806,18 @@
       "imports": [
         {
           "path": "@omnitron-dev/titan-database/dialects",
+          "guide": "/docs/titan/modules/database"
+        }
+      ]
+    },
+    {
+      "name": "PostgresLeaseStore",
+      "package": "@omnitron-dev/titan-database",
+      "kind": "class",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-database/src/coordination/postgres-lease.ts#L88",
+      "imports": [
+        {
+          "path": "@omnitron-dev/titan-database/coordination",
           "guide": "/docs/titan/modules/database"
         }
       ]

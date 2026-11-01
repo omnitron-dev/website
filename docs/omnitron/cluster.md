@@ -27,8 +27,8 @@ Verified against `apps/omnitron/src/cluster/` and
 
 A daemon in `role: master` is the control plane. A daemon in
 `role: slave` runs autonomously and syncs back to master via
-`OmnitronSync`. Within a cluster, a single master is elected at
-any moment via `OmnitronCluster`.
+`OmnitronSync`. Optional cluster coordination observes the current database lease holder via
+`OmnitronCluster`; it does not automatically transfer application ownership.
 
 ## When to use what
 
@@ -36,145 +36,100 @@ any moment via `OmnitronCluster`.
 | ----- | --- |
 | Single machine, no HA needed | Neither — default `role: master`, no cluster |
 | Multiple machines, no leader concept (each daemon independent) | Fleet — register nodes, query across them |
-| Multiple machines, one needs to be the canonical master with auto-failover | Cluster — leader election, state replication |
+| Multiple controllers requiring a shared authority observation | Optional PostgreSQL lease coordination; external effects still require recipient fencing |
 | Multi-region with autonomous edges syncing to a central master | Fleet + master-slave role pattern (no cluster needed) |
 
-## Leader election — `LeaderElection`
+## PostgreSQL-authoritative coordination
 
-A simplified Raft variant designed for small clusters (2–5
-daemons), with longer timeouts than classic Raft because the
-infrastructure-control workload doesn't need millisecond
-consensus.
+`LeaderElection` now uses the optional
+`@omnitron-dev/titan-database/coordination` provider. A row in
+`titan_database_leases` records the controller identity, a fresh incarnation for
+each process lifetime, a durable decimal epoch and the expiry measured by PostgreSQL.
+Migration `016_cluster_lease` creates this table through Omnitron's migration facade.
+The provider does not create tables during startup.
 
-### State machine
+This replaces the former peer-election implementation. `requestVote` and
+`leaderHeartbeat` are no longer RPC methods. A remote caller cannot announce itself
+as leader, change a term or suppress elections. All remaining cluster RPC methods
+require authenticated authority.
 
-```mermaid
-stateDiagram-v2
-  [*] --> follower
-  follower --> candidate: election timeout
-  candidate --> leader: majority votes
-  candidate --> follower: higher term seen
-  leader --> follower: higher term seen
-  follower --> follower: heartbeat received
-```
+Acquisition and renewal commit synchronously. Contenders serialize through the
+same database row; releasing a lease preserves the epoch rather than deleting it.
+A new owner receives a higher epoch. An expired grant cannot be renewed, and an old
+owner cannot release its successor's lease. Decimal strings preserve epochs above
+JavaScript's safe integer range.
 
-### Election parameters
+PostgreSQL supplies [conflict-aware insertion](https://www.postgresql.org/docs/current/sql-insert.html),
+[row locking](https://www.postgresql.org/docs/current/explicit-locking.html) and
+[the database clock](https://www.postgresql.org/docs/current/functions-datetime.html).
+All contenders must use the same writable database. Its recovery/failover policy
+must preserve committed epochs. This is database-backed coordination, not an
+independent Raft quorum or a replicated Omnitron command log.
 
-| Parameter | Default |
-| --------- | ------- |
-| `electionTimeout` | `5 000 – 15 000 ms` (jittered) |
-| `heartbeatInterval` | `2 000 ms` |
-| Election majority | `floor(N/2) + 1` |
+### Authority and effect fencing
 
-Defaults from
-`apps/omnitron/src/cluster/leader-election.ts`:
+A leadership reading is an observation. It is not permission for an external
+side effect that may happen later. `PostgresLeaseStore.withLease(grant, effect)`
+checks the current epoch under a row lock, executes database work in the same
+transaction, and rolls back if the lease has expired before the final check.
+Remote process, route and storage operations need their own durable recipient-side
+fencing and operation journal. Automatic workload failover remains unavailable
+until that admission path is implemented; see the [delivery gates](./release-readiness.md).
 
-```typescript
-const DEFAULT_CONFIG: ElectionConfig = {
-  electionTimeout:    { min: 5_000, max: 15_000 },
-  heartbeatInterval:  2_000,
-};
-```
+The controller bounds local freshness from **before** its database request, using
+monotonic time and a wall-clock expiry guard for host suspension. A delayed reply
+cannot start a new full lifetime. Database failure, lost renewal or expired
+confirmation makes the controller a follower. Pending requests cannot revive it
+after shutdown or an operator-requested step-down.
 
-### Election sequence
+### Parameters and current configuration boundary
 
-```mermaid
-sequenceDiagram
-  participant F as Follower
-  participant Peers as Peer daemons
-  participant Fleet as Fleet registry
+| Parameter | Default | Meaning |
+| --- | --- | --- |
+| `clusterId` | `default` | Coordination namespace within the database |
+| `leaseTtlMs` | `15 000 ms` | Database lease duration; at least three renewal intervals |
+| `heartbeatInterval` | `2 000 ms` | Reconciliation/renewal interval |
+| `discovery` | `postgres` | The only supported coordination provider |
 
-  Note over F: heartbeat absent for electionTimeout
-  F->>F: state := candidate; term++
-  F->>Peers: VoteRequest{candidateId, term}
-  Peers-->>F: VoteResponse{granted, term}
-  alt majority granted
-    F->>F: state := leader
-    F->>Fleet: write role := master
-    loop heartbeatInterval (2s)
-      F->>Peers: LeaderHeartbeat{leaderId, term, configHash}
-    end
-    F->>F: emit 'leader:elected'
-  else higher term seen
-    F->>F: state := follower; term := higherTerm
-  end
-```
-
-### Configuration
-
-```typescript
-// IDaemonConfig.cluster
-cluster: {
-  enabled:           true,
-  discovery:         'redis' | 'static',
-  peers?:            ['10.0.1.10:9700', '10.0.1.11:9700'],
-  electionTimeout?:  { min: 5_000, max: 15_000 },
-  heartbeatInterval?: 2_000,
-}
-```
-
-Discovery providers:
-- **`'redis'`** — peers register in a shared Redis key; auto-discovery.
-- **`'static'`** — explicit `peers` array.
-
-### Events emitted by `LeaderElection`
-
-```typescript
-'state:changed':  (state, previousState) => void;
-'leader:elected': (leaderId, term)       => void;
-'leader:lost':    (previousLeaderId)     => void;
-'term:changed':   (term)                 => void;
-```
-
-Subscribe via `daemon.cluster.on(...)` for cluster-aware app
-behaviour.
+The programmatic daemon configuration accepts these fields under `cluster`.
+Legacy `discovery: 'redis'`, `discovery: 'static'`, `peers` and `electionTimeout`
+are rejected when coordination is enabled. They cannot silently select a protocol
+that is not implemented. Normal saved-config CLI startup still leaves cluster
+coordination disabled; do not add an ecosystem setting expecting it to enable HA.
+The ordinary master/slave fleet and telemetry replication work independently.
 
 ## `OmnitronCluster` RPC service
 
-Five methods, all related to election + state:
-
 | Method | Auth | Effect |
-| ------ | ---- | ------ |
-| `getClusterState()` | anonymous | Current election state — `{nodeId, state, term, leaderId, votedFor, peers, uptime}` |
-| `requestVote({candidateId, term})` | anonymous | Inter-daemon vote request |
-| `leaderHeartbeat({leaderId, term, configHash?})` | anonymous | Leader-to-follower heartbeat |
-| `stepDown()` | operator | Force the local leader to step down → triggers new election |
-| `isLeader()` | operator | `{leader, nodeId, term}` — quick leadership check |
-
-All five carry `@Public({ auth: { allowAnonymous: true } })` except
-the operator-facing methods. Anonymous methods are for
-daemon-to-daemon comm; operator methods are for human / CLI use.
-
-### CLI
+| --- | --- | --- |
+| `getClusterState()` | viewer/operator/admin or control-plane service | Coordination, authority reason, epoch, observed leader and lease freshness |
+| `stepDown()` | operator/admin or control-plane service | Demote locally, release this epoch, and wait one lease interval before competing again |
+| `isLeader()` | viewer/operator/admin or control-plane service | Whether this controller currently has a confirmed fresh grant |
 
 ```bash
-omnitron cluster status        # → getClusterState()
-omnitron cluster step-down     # → stepDown()
+omnitron cluster status
+omnitron cluster step-down
 ```
 
-Sample `getClusterState()` output:
+The status includes `coordination: 'postgres-lease'`, `authority`, `reason`,
+`leaseExpiresAt`, `leaseRemainingMs` and `effectFencing: 'recipient-required'`.
+`term` is a decimal epoch string, or `null` when no authority has been observed.
+An expired observation has no `leaderId`. The former `votedFor` field is removed.
+CLI reports the same authority and reasons returned to Console's node diagnostics.
 
-```json
-{
-  "nodeId":   "node-1",
-  "state":    "leader",
-  "term":     7,
-  "leaderId": "node-1",
-  "votedFor": "node-1",
-  "peers":    3,
-  "uptime":   1843200
-}
-```
+If a lease release cannot be confirmed, step-down reports failure; the local
+controller remains demoted and the database lease expires normally. It never
+claims that another controller has already taken over. Process shutdown also
+invalidates pending acquisition/renewal results before releasing authority.
 
-### Step-down semantics
+### Upgrade boundary
 
-`stepDown()` is graceful:
-1. Stop sending heartbeats.
-2. Transition local state to `follower`.
-3. Followers detect missing heartbeats, elect a new leader.
-
-Total downtime: typically ≤ one `electionTimeout` window
-(5–15 s).
+Prepare the additive schema expansion and retain a verified rollback artifact
+before replacing a backend. Existing master/slave processes do not need cluster
+coordination enabled. Do not mix legacy peer-election controllers and lease
+controllers in an enabled control plane: disable the legacy election on all of
+its participants before admitting the new coordination mode. This change alone
+neither transfers running workloads nor proves a stateful failover safe.
 
 ## Config sync — `ConfigSyncService`
 
@@ -647,16 +602,16 @@ a majority when split.
 
 ## Anti-patterns
 
-- **`cluster.enabled: true` with two daemons.** No majority on
-  partition. Use three or skip cluster mode.
-- **Mixed roles inside a cluster.** Cluster expects symmetric
-  peers. Master / slave roles are for the `OmnitronSync` pattern,
-  not cluster election.
-- **Heartbeat interval > election timeout.** Followers always
-  detect timeout before a heartbeat arrives — perpetual elections.
-  Keep `heartbeatInterval` ≤ `electionTimeout.min / 2`.
-- **Cross-region cluster without good ICMP.** Frequent split-brain
-  symptoms. Use pattern A (one cluster per region).
+- **Treating an observed leader as authorization for a later effect.** Require
+  a current epoch at the database transaction or remote recipient.
+- **Independent databases for controllers in one coordination namespace.** All
+  contenders must use one writable authority whose recovery preserves epochs.
+- **Mixing legacy peer voting with PostgreSQL leases.** Transition all enabled
+  participants through a reviewed plan before admitting coordinated work.
+- **Deleting expired lease rows.** This resets fencing epochs; release ownership
+  without deleting its history.
+- **Unbounded pool/lock waits.** Configure finite pool acquisition deadlines;
+  lease operations already bound SQL statements and lock waits.
 - **Treating `OmnitronSync` as low-latency RPC.** It's batch
   replication with a 15 s master pull cadence (optional slave push defaults to 30 s). For real-time
   cross-daemon coordination, use direct RPC to the relevant
