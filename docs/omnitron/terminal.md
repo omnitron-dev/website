@@ -9,6 +9,16 @@ Open **SSH workspace** from the sidebar, or **SSH** on a registered node. Each t
 
 The service runs on a master with PostgreSQL-backed authentication and audit. The daemon owns the SSH connection. Credentials stay on the server. The browser renders the terminal through lazily loaded xterm.js; the CLI uses the same `OmnitronTerminal` RPC service. SSH runs through Xec's existing `NodeSSH` implementation, exposed by `@xec-sh/core/ssh`.
 
+## Integration boundary
+
+The terminal service uses Xec's shell, host-key and connection-lifecycle APIs.
+It must not construct a separate SSH client or duplicate authentication and
+connection policies. The Xec source candidate makes its connection reference a
+lifecycle-event facade; raw transport execution stays private. SSH channel and
+SFTP types are exported by Xec itself. Existing terminal event subscriptions fit
+this boundary; new capabilities belong in Xec before Console or another application
+uses them. See the [release checklist](./release-readiness.md) for activation status.
+
 ## Working with tabs
 
 The breadcrumb trail identifies the workspace without a duplicate page title. The node selector and **New SSH tab** stay visible; **Workspace actions** contains host-key verification, the equivalent CLI command and the audit trail.

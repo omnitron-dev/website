@@ -102,6 +102,15 @@ owner/adapter activation remain explicit acceptance prerequisites.
 
 G03 keeps `ssh2` inside Xec. Direct use outside Xec and protocol implementation
 dependencies are different architectural concerns. Tunnel target isolation, pooled
-connection ownership and acknowledged closure are now implemented and verified in
-Xec; transport/dependency security and the remaining SSH acceptance matrix are still
-under audit. No replacement SSH implementation is being introduced.
+connection ownership and acknowledged closure are implemented and verified in Xec.
+The source candidate now also has Xec-owned public SSH/SFTP contracts, custom-agent
+bridging, finite request deadlines, shared connection-failure observation, bounded
+pending requests, binary/UTF-8 preservation, explicit unknown command/write outcomes,
+and complete high-level upload/download directory operations. Incomplete transfers
+reject, and a lost reply never authorizes command replay. A clean consumer check
+compiles without the underlying transport or its type package and runs in Xec CI.
+
+These are source-candidate guarantees, not evidence of fleet activation. Transport
+security review, adversarial peer tests, the remaining SSH acceptance matrix and
+coordinated registry/artifact integration are still release prerequisites. No
+replacement SSH protocol implementation is being introduced.

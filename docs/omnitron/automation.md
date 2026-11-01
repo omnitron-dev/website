@@ -92,6 +92,27 @@ Console shows individual step states, elapsed time, attempt counts, exit codes a
 
 Local process groups and Xec SSH channels participate in cancellation. A command that deliberately detaches a remote process can outlive its SSH channel; channel closure is not proof that every remote side effect stopped. Use managed Omnitron jobs or an explicitly reversible playbook for long-lived services.
 
+## SSH ownership and uncertain effects
+
+Omnitron owns authorization, trusted node identities, durable operation state,
+audit and presentation. Xec owns SSH authentication, host verification, connection
+reuse, channels, SFTP, forwarding and cancellation. Applications must use the Xec
+API and public types rather than importing its transport library or adding a
+parallel connection pool.
+
+The next Xec integration distinguishes `outcome-unknown` from a known command
+failure: losing a reply after dispatch does not prove whether an operation ran.
+The candidate refuses automatic replay and exposes `recoverable: false`. Inspect
+the remote effect or reconcile an operation receipt before an explicit retry.
+SFTP interruption can leave a partial destination; upload/download helpers are not
+atomic deployment transactions. Omnitron's durable operation model must preserve
+that distinction through both CLI and Console.
+
+The [release checklist](./release-readiness.md) distinguishes this verified source
+candidate from installed fleet behavior. Dependency publication and coordinated
+activation remain separate steps. Existing applications do not need a direct SSH
+transport dependency.
+
 ## Resource bounds
 
 | Resource | Bound |
