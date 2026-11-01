@@ -204,6 +204,23 @@ A compatibility runtime accepts future migration history only when a private rec
 
 To return to the retained bridge, use `backend upgrade <bridge-dist> --schema-plan <same-plan>`. The schema stays expanded. Both upgrade and rollback revalidate the applied plan and database; `--schema-plan` is not a general compatibility override. Keep its plan, receipt, receipt index and both sealed releases for as long as rollback remains required.
 
+After an application-level rollback, the additive schema may already be committed.
+For a corrected candidate with **identical migration definitions**, prepare a new
+binding from the retained, applied plan:
+
+```bash
+omnitron backend schema prepare /sealed/corrected-runtime --from-plan /private/applied-plan.json
+omnitron backend schema apply /private/new-plan.json
+```
+
+Preparation verifies the original sealed runtimes, database identity, registry
+order, migration bodies, checksums and complete execution history. It retains the
+original baseline; legacy unknown checksums remain unknown. Applying the new
+binding takes the same migration lock and performs no DDL when the reviewed
+expansion is already complete. An unfinished plan must be resumed first; a new
+migration, changed history or foreign rollback runtime is refused. The original
+plan and receipt remain available for audit and rollback.
+
 This workflow currently covers master PostgreSQL expansions. Local node SQLite transitions, destructive schema changes, order changes and edits to deployed migration bodies need a separate rollout. No public Console endpoint can execute schema plans or local artifacts.
 
 ## Updating the guardian
