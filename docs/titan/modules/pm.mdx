@@ -116,7 +116,7 @@ class MediaService {
 | `discover<T>(serviceName)`                                              | `Promise<ServiceProxy<T> \| null>`            |
 | `getProcess(id)`                                                        | `IProcessInfo \| undefined`                   |
 | `listProcesses()`                                                       | `IProcessInfo[]`                              |
-| `kill(id, signal?)`                                                     | `Promise<boolean>`                            |
+| `kill(id, signal?, { shutdownTimeout? })`                                                     | `Promise<boolean>`                            |
 | `shutdown({ timeout?, force? })`                                        | `Promise<void>`                               |
 | `getMetrics(processId)`                                                 | `Promise<IProcessMetrics \| null>`            |
 | `getHealth(processId)`                                                  | `Promise<IHealthStatus \| null>`              |
@@ -354,3 +354,18 @@ infrastructure operations, use the journal, effect receipts and reconciliation
 contracts in the [resilient control-plane design](../../omnitron/resilient-control-plane.md).
 The `@Actor()` compatibility decorator records metadata only; it does not create an
 actor mailbox, serialize messages or provide distributed actor supervision.
+
+## Confirmed process termination
+
+`kill()` resolves `true` after termination and cleanup, and `false` only when the
+process is not registered. An unconfirmed exit rejects and retains the worker
+handle for a retry. Sending a signal, a closed IPC channel, or an elapsed deadline
+is not proof of exit. `SIGKILL` selects an immediate forced shutdown; an optional
+`shutdownTimeout` reaches the same manager cleanup path for supervisor children.
+
+Supervisor stop and pool destruction attempt every owned child and report aggregate
+failures. Successfully stopped children are removed from ownership; survivors stay
+registered, with automatic recovery disabled during teardown. Pool destruction
+also joins already admitted spawns, preventing late workers from escaping a stop.
+Retry the operation after resolving the reported cause; do not interpret a timeout
+as permission to launch a replacement over an unconfirmed process.

@@ -392,3 +392,19 @@ loading `titan-health` / `titan-metrics` modules.
 - [Services reference](./services-reference.md) — `OmnitronDaemon.exec`
   routes through the service router
 - [CLI](./cli.md) — `start`, `stop`, `reload`, `restart`, `scale`
+
+## Stop acknowledgements
+
+An application is marked `stopped` only after its supervisor, classic process group
+and topology pools confirm termination. Failed pools retain their handles for
+recovery. The classic launcher uses Titan's process termination helper; a sent
+signal or expired wait cannot become a successful stop.
+
+Infrastructure teardown reports failed containers and retains stack ownership and
+port reservations until removal succeeds. The Xec Docker adapter resolves a name
+to an immutable container ID and verifies absence after removal. A replaced name,
+unavailable daemon, or denied request is an explicit failure.
+
+These component guarantees are part of the [release lifecycle gate](./release-readiness.md).
+They do not by themselves establish a remotely confirmed stack stop: node ownership,
+durable stop intent and per-node acknowledgements must also pass that gate.
