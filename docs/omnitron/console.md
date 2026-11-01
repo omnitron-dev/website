@@ -449,15 +449,21 @@ sequenceDiagram
     E-->>W: push to socket
     W->>W: update the zustand realtime store
   end
-  Note over W: page unmount or sign-out
+  Note over W: last consumer unmounts or sign-out
   W->>E: unsubscribe(subscriberId)
 ```
 
 The webapp subscribes through a single `DaemonWsClient`
-(`src/netron/ws-client.ts`) that feeds the shared realtime store,
-so the dashboard reflects state changes essentially instantly —
-without per-component polling for the events that the daemon
-already pushes.
+(`src/netron/ws-client.ts`) that feeds the shared realtime store.
+The status bar holds a subscription throughout the authenticated Console,
+including direct entry into Access, Files or Terminal. Page subscriptions share
+the same connection; leaving a page does not disconnect the status bar.
+
+**Live** means authentication and event subscription have both succeeded.
+**Polling** means push is unavailable and bounded polling supplies updates.
+Releasing the last consumer resets connection state immediately; a previously
+connected page cannot leave a stale Live indicator behind. Sign-out and revoked
+sessions close their subscriptions. These rules apply to every authorized role.
 
 ## Build / run modes
 
