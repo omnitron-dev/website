@@ -128,6 +128,29 @@ crash, restart). A crash of the daemon itself leaves the row in a
 consistent state — on next boot, the daemon rehydrates and
 relaunches whatever was running.
 
+### File permissions and SQLite locks
+
+State, recovery certificates and the log journal use owner-only directories
+(`0700`) and files (`0600`) on POSIX systems. Permission checks on an open
+SQLite database inspect metadata without opening or closing another descriptor.
+Closing any descriptor for the same inode can cancel the process's SQLite
+locks, including when the descriptor was opened only to tighten permissions
+([SQLite locking guidance](https://www.sqlite.org/howtocorrupt.html#_posix_advisory_locks_canceled_by_a_separate_thread_doing_close_)).
+
+If existing permissions need repair, Omnitron performs the no-follow,
+owner-checked operation in a separate short-lived Node process and verifies the
+result. Already-private databases need no subprocess. Symbolic links and
+additional hard links are rejected. Equivalent Windows protection depends on
+OS ACLs; POSIX modes do not establish Windows access control.
+
+Use SQLite's online backup API for live databases. Do not copy, replace or
+remove a live database's WAL/SHM files. A recovery status held in memory is not
+sufficient evidence for activation: schema transitions require a current,
+durably readable certificate identifying the running backend and owner.
+`pnpm --filter @omnitron-dev/omnitron test:private-storage` checks cross-process
+writer exclusion, repeated readers, committed visibility and file permissions
+against the compiled runtime; the CI build runs it before accepting changes.
+
 ## Daemon scheduler — `daemon-scheduler.ts`
 
 A small set of periodic jobs registered against `titan-scheduler`
