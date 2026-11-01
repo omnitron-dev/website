@@ -48,11 +48,30 @@ does not prove application correctness: register domain health checks and
 monitor their coverage. Older daemons without the runtime indicator appear as
 unexamined coverage in `doctor`.
 
+## Stack infrastructure ownership
+
+`omnitron stack diagnose <project> <stack>` and Console's stack diagnosis inspect
+provisioning authority before checking inferred services. For `controller` and
+`external` infrastructure ownership, **Infrastructure ownership** explains who
+owns provisioning/migrations and **Application connections** remains **unknown**
+until endpoint reachability, credentials and schema have actually been checked.
+The node does not create substitute databases or containers to make that reading
+green. Conflicting infrastructure declarations or a missing controller source
+binding block diagnosis with a configuration reason. See
+[infrastructure ownership](./infrastructure.md#infrastructure-ownership).
+
 ## RPC connection and replication
 
 Run `omnitron node check <id>` or open **Nodes → Diagnostics**. Both use the
 same connection reading. A running application, an SSH-reachable machine and a
 working authenticated RPC session are separate observations.
+
+Stack and release views report **Inventory observed** or **Inventory unavailable**.
+The latter means the controller could not read application ownership; it does not
+prove the host or transport is offline. The topology preserves that node as
+**unknown**, and `stack status` reports its inventory as **unobserved**. Use the
+node diagnostics to distinguish connection failure from an unavailable process
+owner; replication can remain active while application inventory is unavailable.
 
 | Observation | Meaning and next step |
 | --- | --- |

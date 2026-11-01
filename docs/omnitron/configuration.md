@@ -124,6 +124,8 @@ A stack scopes an environment within a project:
 
 ```typescript
 interface IStackConfig {
+  infrastructureOwnership?: 'stack' | 'controller' | 'external';
+  managedOrigin?:      { project: string; stack: string };
   type:               'local' | 'remote' | 'cluster';
   watch?:             boolean;
   nodes?:             IStackNode[];
@@ -138,6 +140,8 @@ interface IStackConfig {
 | Field             | Effect                                                                              |
 | ----------------- | ----------------------------------------------------------------------------------- |
 | `type`            | `local` — single host; `remote` — single remote host; `cluster` — multi-node       |
+| `infrastructureOwnership` | `stack` (default) owns provisioning/migrations; `controller` is a generated non-owning node allocation; `external` uses explicitly configured existing services |
+| `managedOrigin`   | Required source project/stack binding for `controller` allocations; never inferred from a project basename |
 | `watch`           | Default `true` for `dev`, `false` otherwise                                        |
 | `nodes`           | For `remote`/`cluster`: list of `IStackNode` participants                          |
 | `infrastructure`  | Per-stack override of ecosystem `infrastructure`                                   |
@@ -145,6 +149,8 @@ interface IStackConfig {
 | `apps`            | `'all'` or explicit list — which ecosystem apps run in this stack                  |
 | `portRange`       | Auto-allocate ports for stack services within this window                          |
 | `serviceOverrides`| Per-service override of declared infrastructure (point at external host, etc.)     |
+
+Non-owning modes apply only to local application allocations. They retain explicit application connection settings, reject stack-level infrastructure declarations and `serviceOverrides`, and ignore ecosystem infrastructure defaults that may belong to other stacks. Requirement discovery does not authorize a node to create replacement services or run their migrations. See [infrastructure ownership](./infrastructure.md#infrastructure-ownership).
 
 ### `IStackNode`
 

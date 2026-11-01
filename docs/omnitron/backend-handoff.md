@@ -119,6 +119,8 @@ The replacement proceeds through these boundaries:
 
 A failed candidate is stopped and the previous artifact is started under a fresh epoch. Rollback does not reuse an old grant. A failure to prove identity or inventory preservation stops automatic recovery rather than guessing which processes to kill or relaunch.
 
+A service that failed before creating a container can transfer its failed state when native Docker inspection confirms that the container is absent. The checkpoint binds that absence separately from the desired service and its error; the candidate verifies it again and preserves the failure. An unavailable Docker daemon is not evidence of absence. A missing previously observed container, changed container identity/specification or legacy checkpoint without this evidence still refuses transfer. Handoff does not repair infrastructure or turn a failed service healthy.
+
 ## Recovery after a backend crash
 
 A sealed resident backend maintains a private recovery journal beside the owner socket, in `execution/recovery.db`. It reuses the daemon SQLite store with `synchronous=FULL`. Before changing ownership bookkeeping, it durably invalidates the previous certificate; a failed write refuses the mutation. The last snapshot remains available privately for diagnosis but is never accepted as a current recovery certificate.

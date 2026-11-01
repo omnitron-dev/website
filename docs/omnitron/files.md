@@ -14,7 +14,7 @@ Open **Files** in Console. Panel **A** and panel **B** are independent locations
 1. Choose a node and a root in each panel. The default root is **Filesystem**, `/` on the node, accessible only to administrators and within the daemon process's operating-system permissions.
 2. Open a directory with its name, Enter or Right. Each non-root listing includes **..**; Enter on it or Left returns to the parent. The parent row remains available in empty/filtered directories and is never a selection or mutation target. Use path breadcrumbs, Back/Forward, Parent, or the path editor for navigation. Each panel supports eight independently navigable tabs.
 3. Select entries with checkboxes or Space; Shift+click selects a range. The compact navigation toolbar keeps the copy direction visible as **A → B** or **B → A**, with named icon actions for New folder, Upload and panel focus. Copy reviews the exact source and destination before starting a daemon job.
-4. Open **Transfers** for file/byte progress, the current path, failures and Pause/Resume/Cancel. Completed files remain if another file fails or you cancel later.
+4. Open **Transfers** for phase, file/byte progress, the current path, failures and Pause/Resume/Cancel. For a selected directory, the copy dialog also offers Archive and Pack & restore. The queue distinguishes source snapshot, encoding, encoded-byte transfer, restoration and publication; transferred bytes alone do not mean the destination is ready.
 
 On narrow windows the A/B switch shows one panel at a time without discarding the other panel. On wider windows drag the separator, or focus it and press Left/Right, to adjust widths. Lists scroll inside the panel. Directory pages contain up to 200 entries; **Load next 200 entries** extends the current list. Filtering and sorting apply to loaded entries; directories sort first. Hidden entries are available from the panel menu.
 
@@ -87,33 +87,79 @@ Temporary writes and recoverable trash live in a private `.omnitron-files` direc
 
 ## Transfer protocol and recovery
 
-`OmnitronFiles` is the human-facing service shared by Console and CLI. Every public method requires `admin`; sensitive calls revalidate the current human session independently of cached transport authorization. Reads and write intents are audited. Required intent persistence fails closed. File contents and chunk payloads are not written to audit details.
+`OmnitronFiles` is the human-facing service shared by Console and CLI. Every public method requires `admin`; sensitive calls revalidate the current human session independently of cached transport authorization. Content reads and write intents are audited. Required intent persistence fails closed. File contents and chunk payloads are not written to audit details.
 
 `OmnitronFileNode` is the authenticated mesh endpoint. It requires a signed `service_role` identity with a `mesh:` subject and accepts the typed v1 file request union, never arbitrary RPC names or shell commands. The control-plane peer namespaces the actor identity; upload receipts and trash are owned by that actor. The master resolves registered node IDs through the existing `SlaveConnector`. Human browser credentials cannot call this internal endpoint. The fleet TCP transport carries the verified peer identity into the same invocation context used by service guards and audit; missing identity fails closed.
 
-Upload admission has a caller-generated idempotency key, persisted before the remote begin request so a lost response does not allocate another session. A copy first creates a bounded manifest, then transfers one verified block at a time. The receiving node synchronizes bytes before advancing its durable acknowledgement. Duplicate frames are accepted only when their already-acknowledged contents match. SHA-256 protects each block; commit records the complete destination hash. Publication uses a no-overwrite link from private staging, so partial files are not visible under their final name. A lost commit response is reconciled against the recorded destination inode and receipt, not blindly repeated as a new copy.
+Upload admission has a caller-generated idempotency key, persisted before the remote begin request so a lost response does not allocate another session. A copy first creates a bounded manifest, then transfers one verified block at a time. The receiving node synchronizes bytes before advancing its durable acknowledgement. Duplicate frames are accepted only when their already-acknowledged contents match. SHA-256 protects each block; commit records the complete destination hash. Regular-file publication uses a no-overwrite link from private staging, so partial files are not visible under their final name. A lost commit response is reconciled against the recorded destination inode and receipt, not blindly repeated as a new copy.
 
 The current transport uses 256 KiB base64 frames over existing Netron RPC. It provides bounded memory and explicit backpressure with roughly one-third encoding overhead. Cross-node bytes currently pass through the coordinating daemon, not the browser. Direct peer binary streams and parallel adaptive transfer lanes are future protocol optimizations, not present guarantees.
 
-The coordinator persists manifests and progress in the existing daemon state store. Restarted jobs become **interrupted** and require explicit Resume. Planning interrupted before a manifest is saved requires a new copy. Pause takes effect at the next checkpoint; the in-flight block can finish. Current authority is rechecked during planning and between transfer blocks. Cancel removes unfinished staging when its outcome is known; it never rolls back already-published files. An ambiguous commit must be reconciled before cancellation.
+The coordinator persists manifests and progress in the existing daemon state store. Restarted jobs become **interrupted** and require explicit Resume. New jobs persist their original request, so explicit Resume can retry interrupted planning. Legacy jobs without that request require a new copy. An archive plan already saved always reuses its admitted immutable snapshot, rather than silently recapturing changed source files. Pause takes effect at the next checkpoint; the in-flight block can finish. Current authority is rechecked during planning and between transfer blocks. Cancel removes unfinished staging when its outcome is known; it never rolls back already-published files. An ambiguous commit must be reconciled before cancellation.
 
-Existing destination files are never overwritten. Existing directories can receive additional copied entries. Copy is a per-file operation, not a transactional tree snapshot: source changes fail their file's version check, and earlier completed files remain. A source directory changing after manifest creation does not turn the manifest into a live mirror.
+In ordinary **Files** mode, existing destination files are never overwritten and existing directories can receive additional copied entries. Copy is a per-file operation, not a transactional tree snapshot: source changes fail their file's version check, and earlier completed files remain. A source directory changing after manifest creation does not turn the manifest into a live mirror.
 
 | Bound | Current value |
 | --- | --- |
 | Text editor | 1 MiB UTF-8, 8 browser buffers |
 | Directory | 10,000 entries; 200 per page |
-| Copy manifest | 200 selected sources, 10,000 entries, 32 directory levels |
+| Copy manifest | 200 selected sources, 10,000 entries, 32 path components |
 | File / copy payload | 100 GiB |
 | Concurrent coordinator jobs | 4 |
+| Per-node archive preparation / restoration | 2 / 2 |
 | Concurrent node requests / unfinished writes | 32 / 32 |
-| Retained jobs | 100; oldest completed/cancelled jobs make room |
+| Retained jobs | 100; completed/cancelled jobs with confirmed cleanup make room |
 | Node upload/trash receipts | 1,000 each; unfinished writes and unrestored trash never expire automatically |
 | Portable browser download | 32 MiB; use CLI for larger files |
 
 The coordinator acknowledges final receipts only after persisting its next cursor; this frees receipt capacity without deleting published files. Browser and CLI uploads acknowledge after receiving a successful commit. Unacknowledged completed/aborted receipts can be reclaimed after 30 days when the journal is full. Restored trash receipts can be reclaimed when full. Reaching the limit without reclaimable records fails explicitly; files are not silently purged. Restore reconciles a move that succeeded before its journal acknowledgement failed, using the original filesystem identity; an unrelated destination remains a conflict. Trash consumes disk until restored or handled by an administrator outside the workspace. Permanent purge and configurable disk quotas are not implemented yet. Do not use the workspace as a backup system.
 
 Browser upload/download progress belongs to that page; leaving or closing it can interrupt these operations. Node-to-node transfers are daemon-owned. After a browser upload loses its publication response, inspect its displayed receipt before retrying. Do not assume a network error means no file was published.
+
+## Copy a directory through an archive
+
+Select exactly one directory, choose the other panel's destination, and open Copy.
+The output mode is explicit:
+
+| Mode | Result |
+| --- | --- |
+| **Files** | Ordinary recursive copy; each file is published separately |
+| **Archive** | A new archive file at the destination, without extraction |
+| **Pack & restore** | A source archive transferred and verified, then restored into a new destination folder |
+
+The format selector appears after a capability probe on the chosen nodes. Supported
+adapters cover TAR, gzip/bzip2/xz/Zstandard TAR, ZIP and 7-Zip when the required
+codecs pass their probe. Archive availability is checked on the source;
+restoration requires the destination decoder too. The current destination probe requires a working local encoder/decoder pair; decoder-only installations are not advertised. 7-Zip currently produces archive files only. Formats are never inferred from
+file extensions or displayed as available merely because an executable exists.
+The chosen archive filename must end in the format's extension; a restored folder
+uses a plain validated name. Capabilities show their observation time and can be
+retried after an unavailable node; ordinary copy remains available.
+
+The source creates a private snapshot with a bounded manifest, verifies each file
+and rechecks the tree before encoding. Only regular files and directories are
+accepted: no symlinks, devices, exported roots or protected structural trees. Limits
+are 10,000 entries, 32 path components and 100 GiB each for source and encoded
+bytes. Source snapshot storage and encoded data consume disk until completion or
+cancellation. Pause stops coordinator work at checkpoints; already admitted
+snapshot/restore work on a node can finish. Active native archive tasks also block backend handoff; shutdown cancels and drains them before releasing their journal. Cancel requests cleanup and preserves
+an unresolved publication for explicit recovery.
+
+Archive files use the regular atomic file-publication receipt. Restored directories
+use an exclusive destination reservation and recorded filesystem identities:
+existing entries are never replaced, and the folder can become visible while its
+verified contents are published. This is **not** an atomic tree rename. The queue
+marks incomplete publication; Resume reconciles the same receipt rather than
+starting another copy. Consumers must wait for **completed** before using that
+folder. Archive utilities emit bytes only; they do not choose filesystem paths or
+extract archive entries into public directories. The admitted manifest determines
+paths, lengths and hashes. Restored files retain the manifest's basic permission bits. Portable archive encoding preserves executable/group/world bits while ensuring owner-read for files and owner-read/write/search for directories; ownership, ACLs and extended attributes are not transported.
+
+If copying or cancellation has completed but source snapshot removal or destination
+receipt cleanup cannot be confirmed, the result remains completed/cancelled with
+**cleanup pending**. **Retry cleanup** (CLI `files resume`) retries only that cleanup. It does not repeat
+the transfer or overwrite the destination. Such jobs are retained until cleanup
+is confirmed.
 
 ## CLI
 
@@ -126,6 +172,13 @@ omnitron --json files stat srv/project/config.json --root system
 omnitron --json files read srv/project/config.json --root system
 omnitron --json files copy srv/project --root system \
   --to-node <registered-node-id> --to-root system --to-path srv/staging
+omnitron --json files archive-formats --node <source-node> --to-node <destination-node>
+omnitron --json files copy srv/project --node <source-node> --root system \
+  --to-node <destination-node> --to-root system --to-path srv/staging \
+  --archive-format tar.gz --archive-output archive --archive-name project.tar.gz
+omnitron --json files copy srv/project --node <source-node> --root system \
+  --to-node <destination-node> --to-root system --to-path srv/staging \
+  --archive-format tar.gz --archive-output directory --archive-name restored-project
 omnitron --json files transfers
 omnitron --json files pause <transfer-id>
 omnitron --json files resume <transfer-id>
@@ -135,6 +188,64 @@ omnitron --json files cancel <transfer-id>
 `files list --after <name> --revision <version>` requests the next directory page. `files save <path> --from <local-file> --version <version>` performs a checked save; `--version new` creates without replacement. `files rename <path> --to <root-relative-path> --version <version>` and `files trash <path> --version <version>` require an explicit observed version; the rename destination must retain the same parent directory. Use `files trash-list --root <id>` and `files restore <trash-id> --node <id>` for recovery. `files mkdir <path> --root <id>` creates a directory.
 
 `files upload <path> --from <local-file> --root <id>` streams verified chunks. `files download <path> --to <new-local-file> --root <id>` stages locally and refuses overwriting. After an ambiguous upload, `files upload-status <id>`, `files upload-finish <id>` and `files upload-abort <id>` inspect/reconcile its receipt on the selected `--node`. Finish cannot publish incomplete data; abort cannot discard an unresolved committing receipt.
+
+## Typed API clients
+
+The same authenticated service is available through `IOmnitronFilesService` from
+`@omnitron-dev/omnitron/dto/services`. Obtain its `OmnitronFiles` proxy through your
+existing authenticated Netron connection; human calls require the same live admin
+session as Console. Do not call the internal mesh endpoint directly.
+
+```typescript
+import type {
+  IOmnitronFilesService,
+  FileLocation,
+  FileArchiveFormat,
+  FileArchiveOptions,
+  FileTransfer,
+} from '@omnitron-dev/omnitron/dto/services';
+
+async function copyFolder(
+  files: IOmnitronFilesService,
+  source: FileLocation,
+  destination: FileLocation,
+  format: FileArchiveFormat,
+  name: string,
+  output: FileArchiveOptions['output'],
+): Promise<FileTransfer> {
+  const entry = await files.stat(source);
+  if (entry.kind !== 'directory') throw new Error('Select one directory');
+  const capabilities = await files.archiveFormats({
+    nodeId: source.nodeId, destinationNodeId: destination.nodeId,
+  });
+  if (!capabilities.formats.some(item => item.format === format && item.outputs.includes(output))) {
+    throw new Error('The selected node pair does not support this format and output');
+  }
+  return files.copy({
+    sources: [{ ...source, version: entry.version }],
+    destination,
+    archive: { format, name, output },
+  });
+}
+```
+
+The returned job is an admission result, not a completion receipt. Read `transfers`
+and use `controlTransfer` to pause, resume or cancel. Wait for **completed** and
+inspect `cleanupPending` separately; `bytes === totalBytes` does not confirm
+restoration or publication. Capabilities can change after observation, so admission
+and execution validate the selected format again.
+
+| Contract | Meaning |
+| --- | --- |
+| `FileLocation` | Registered node, exported root and root-relative path |
+| `FileRoot`, `FileEntry` | Root policy and observed metadata/version; metadata does not grant authority |
+| `FileDocument` | Bounded UTF-8 content, BOM and version used for checked saves |
+| `FileArchiveCapabilities` | Observed node formats, supported output modes and limitations |
+| `FileTransfer` | Durable phase, progress, publication evidence, errors and cleanup state |
+
+`FILE_ARCHIVE_FORMATS` lists protocol formats; it does not claim they are installed
+on a node. `fileNameError` and `fileStructureError` support advisory UI validation;
+the node independently enforces name, structural and authorization checks.
 
 ## Design references and extension points
 
@@ -153,3 +264,5 @@ The interaction model compares representative managers across desktop, terminal 
 Prism supplies tabs with individual close controls, table viewports, confirmation dialogs, theme and application layout. MUI supplies tables, menus, breadcrumbs, responsive dialogs and accessible controls. CodeMirror supplies the lazily loaded code-editing engine rather than a second rich-text editor. No shared Titan/Prism package is rebuilt to add the workspace.
 
 Future work is deliberately separated from the v1 contract: direct authenticated binary transfer, persistent browser-upload reconciliation, directory comparison/synchronization, recursive indexed search, configurable trash retention/quotas, richer preview codecs and optional per-root delegated agent grants. Agent access must be an explicit attenuation of human authority, not an admin token handed to a provider SDK. See [agent architecture](./agents.md) and [access](./access.md).
+
+Active archive snapshots and restoration tasks block backend handoff until they settle. Daemon shutdown cancels and drains their subprocesses before closing the private staging store.

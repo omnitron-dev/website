@@ -577,10 +577,10 @@ changes and their outcomes.
 
 | File | Service id | Methods | Role gate |
 | --- | --- | --- | --- |
-| `files/files.rpc-service.ts` | `OmnitronFiles` | 20 | admin + live human session / trusted local CLI |
+| `files/files.rpc-service.ts` | `OmnitronFiles` | 21 | admin + live human session / trusted local CLI |
 | `files/file-node.rpc-service.ts` | `OmnitronFileNode` | 1 | authenticated mesh service identity |
 
-`OmnitronFiles` is the master-only administrator API: `roots`, `list`, `stat`, `readText`, `readChunk`, `saveText`, `mkdir`, `rename`, `trash`, `trashList`, `restore`, `beginUpload`, `uploadChunk`, `uploadStatus`, `finishUpload`, `acknowledgeUpload`, `abortUpload`, `copy`, `transfers`, `controlTransfer`. Each call revalidates human authority; mutations and content reads require audit intent.
+`OmnitronFiles` is the master-only administrator API: `roots`, `archiveFormats`, `list`, `stat`, `readText`, `readChunk`, `saveText`, `mkdir`, `rename`, `trash`, `trashList`, `restore`, `beginUpload`, `uploadChunk`, `uploadStatus`, `finishUpload`, `acknowledgeUpload`, `abortUpload`, `copy`, `transfers`, `controlTransfer`. Each call revalidates human authority; mutations and content reads require audit intent.
 
 `OmnitronFileNode.invoke` runs on each node and accepts the v1 typed file protocol only for authenticated control-plane service peers. It implements OS access, private staging and durable write receipts. It is not a browser or application RPC proxy. See [File workspace](./files.md).
 

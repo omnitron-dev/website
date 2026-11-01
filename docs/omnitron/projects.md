@@ -152,7 +152,11 @@ records success or failure in the audit trail.
 
 ### Existing allocations and rollout
 
-Generated node configurations carry `managedOrigin: { project, stack }`. Both
+Generated node configurations carry `managedOrigin: { project, stack }` and
+`infrastructureOwnership: 'controller'`. The source stack owns provisioning and
+migrations; the generated local allocation uses explicit resolved connections and
+starts applications without inventing another infrastructure stack. See
+[infrastructure ownership](./infrastructure.md#infrastructure-ownership). Both
 remote controller stop and a direct stop of that generated local stack use the
 same source-bound protocol, including its infrastructure. Publication preserves
 the binding and refuses to overwrite an allocation owned by another stack.

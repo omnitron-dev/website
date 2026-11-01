@@ -477,17 +477,29 @@ application; constructing a store never mutates schema.
 
 ```typescript
 import { randomUUID } from 'node:crypto';
+import type { Kysely } from '@omnitron-dev/titan-database';
 import { PostgresLeaseStore } from '@omnitron-dev/titan-database/coordination';
 
-const leases = new PostgresLeaseStore(db);
-const grant = await leases.acquire({
-  key: 'billing/reconcile', owner: instanceId, incarnation: randomUUID(),
-}, 15_000);
-if (grant) {
+interface BillingDatabase {
+  jobs: { id: string; status: 'pending' | 'claimed' };
+}
+
+// Retain one incarnation for this controller's lifetime.
+const incarnation = randomUUID();
+
+async function claimJob(db: Kysely<BillingDatabase>, instanceId: string, jobId: string) {
+  const leases = new PostgresLeaseStore(db);
+  const grant = await leases.acquire({ key: 'billing/reconcile', owner: instanceId, incarnation }, 15_000);
+  if (!grant) return false;
   try {
-    await leases.withLease(grant, async trx => {
+    return await leases.withLease(grant, async trx => {
       // All protected database effects must use this transaction.
-      await trx.updateTable('jobs').set({ status: 'claimed' }).where('id', '=', jobId).execute();
+      const result = await trx.updateTable('jobs')
+        .set({ status: 'claimed' })
+        .where('id', '=', jobId)
+        .where('status', '=', 'pending')
+        .executeTakeFirst();
+      return result.numUpdatedRows === 1n;
     });
   } finally {
     await leases.release(grant);

@@ -32,7 +32,7 @@ into another process. Check both the JSON result and the exit status.
 | Group | Commands |
 | ----- | -------- |
 | **Daemon lifecycle** | `up`, `down`, `ping`, `kill` |
-| **Backend installation and replacement** | `backend status`, `backend install`, `backend installation`, `backend select`, `backend upgrade`, `backend abort`, `backend recover` |
+| **Backend installation and replacement** | `backend status`, `backend install`, `backend installation`, `backend select`, `backend upgrade`, `backend abort`, `backend recover`, `backend owner-reconcile prepare`, `backend owner-reconcile acknowledge` |
 | **Project** | `project add`, `project list`, `project remove`, `project scan`, `project topology` |
 | **Topology** | `topology refresh`, `topology show`, `topology export`, `topology draft`, `topology plan`, `topology apply` |
 | **Stack** | `stack list`, `stack create`, `stack delete`, `stack status`, `stack diagnose`, `stack start`, `stack stop`, `stack runtime` |
@@ -96,6 +96,36 @@ For independent user services, `omnitron backend guardian prepare <sealed-runtim
 `omnitron backend schema prepare <sealed-runtime>` reads the master database and saves a plan for explicitly reviewed compatible additions. `omnitron backend schema apply <plan>` applies or resumes it under the shared migration lock. After rollback, `prepare <sealed-runtime> --from-plan <applied-plan>` binds the same already-applied expansion to a corrected candidate, checking the original runtimes and exact database history. `omnitron backend upgrade <sealed-dist> --schema-plan <plan>` requires that exact applied plan for an upgrade or rollback between its two sealed releases. Legacy bridges, changed definitions, foreign databases and local node schema transitions are refused.
 
 Use the candidate's CLI for `backend upgrade --check`. It checks the owner's declared lifecycle contracts before draining or delegating; an incompatible owner requires a planned owner transition. `backend status --json` includes `execution.ownerCapabilities` when the backend reports them.
+
+### Recover after an execution-owner crash
+
+An unclean owner exit can leave application processes alive. A new owner cannot
+adopt their native process handles, and ordinary startup refuses a same-boot
+unclean receipt. Preserve the crash evidence and prepare a node-specific drain
+and rollback before stopping surviving applications.
+
+On Linux with systemd system services, `omnitron backend owner-reconcile prepare
+<worker-pids>` records a private recovery plan. Supply every recorded pre-crash
+worker PID as a comma-separated list. The plan also captures current members of
+the configured owner/backend cgroups, their process lifetimes, the host boot,
+controller journal and unclean owner receipt. This command does not open SQLite,
+stop services or signal applications.
+
+After the separately approved drain, `omnitron backend owner-reconcile acknowledge
+<absolute-plan>` requires the old owner identities to be dead, both configured
+services stopped, their complete cgroups empty, every recorded process lifetime
+gone and the owner socket absent from the kernel. Unknown evidence, changed
+configuration or a changed controller journal refuses recovery. Only a proven
+stale socket may be removed. The original unclean receipt is archived; it is never
+changed to claim a clean shutdown.
+
+A compatible replacement owner consumes this acknowledgment once under a kernel
+lock before starting applications. A failed startup requires a fresh plan and
+fresh native evidence; a previous acknowledgment is not a blanket restart permit.
+An older runtime without this recovery contract can be restored only after a
+replacement has completed a genuinely clean shutdown. Do not promise an
+unconditional old-binary rollback after another owner crash. macOS owner-crash
+reconciliation and automatic adoption of orphan processes are not implemented.
 
 See [requirements, first transition and recovery](./backend-handoff.md).
 
@@ -773,7 +803,7 @@ See [Console access](./access.md) for password input, account pagination and ato
 
 ## File workspace
 
-`omnitron files` shares the audited Console file service. Commands include `roots`, `list`, `stat`, `read`, `save`, `mkdir`, `rename`, `trash`, `trash-list`, `restore`, `copy`, `transfers`, `pause`, `resume`, `cancel`, `upload`, `download`, `upload-status`, `upload-finish` and `upload-abort`. All support `--json`; checked mutations use an observed `--version`. See [File workspace](./files.md) for flags, examples, ownership, limits and recovery.
+`omnitron files` shares the audited Console file service. Commands include `roots`, `archive-formats`, `list`, `stat`, `read`, `save`, `mkdir`, `rename`, `trash`, `trash-list`, `restore`, `copy`, `transfers`, `pause`, `resume`, `cancel`, `upload`, `download`, `upload-status`, `upload-finish` and `upload-abort`. All support `--json`; checked mutations use an observed `--version`. For one directory, `copy --archive-format <format> --archive-output archive|directory --archive-name <name>` chooses an archive file or restored folder explicitly; `archive-formats --node <source> --to-node <destination>` probes the node pair. See [File workspace](./files.md) for flags, examples, ownership, limits and recovery.
 
 Stack stop/status JSON includes a durable `stopOperation` with per-node confirmation.
 A lost reply is unconfirmed, and CLI exits unsuccessfully until every required node

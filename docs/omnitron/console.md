@@ -788,7 +788,7 @@ Re-enabling watch uses the daemon’s last accepted boot or reload configuration
 
 ## File workspace
 
-[Files](./files.md) provides two independent, tabbed node locations, version-checked text editing and durable cross-node copies. Prism tabs and table viewports share the Console shell; CodeMirror loads only when a document is opened. Narrow windows retain both panels behind an A/B switch. The default export is `/`, limited by administrator authorization and the daemon OS account; node configuration can restrict roots, make them read only or disable access.
+[Files](./files.md) provides two independent, tabbed node locations, version-checked text editing and durable cross-node copies. Prism tabs and table viewports share the Console shell; CodeMirror loads only when a document is opened. Narrow windows retain both panels behind an A/B switch. The default export is `/`, limited by administrator authorization and the daemon OS account; node configuration can restrict roots, make them read only or disable access. Selecting one directory exposes explicit archive-file and pack-and-restore modes, with formats probed on the chosen nodes. Transfer progress distinguishes snapshots, encoding, network bytes, restoration and incomplete publication; cleanup failures retain a dedicated retry action.
 
 
 ## Shared API contracts

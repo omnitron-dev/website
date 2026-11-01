@@ -9,9 +9,9 @@ description: Declarative provisioning of Postgres / Redis / S3 / custom containe
 Omnitron treats infrastructure as **declarative dependencies of
 your apps**. An app declares what it needs (a Postgres database,
 a Redis instance, a custom blockchain daemon, anything). The
-infrastructure subsystem provisions whatever's missing, resolves
-connection parameters, and injects the right env vars at app
-startup. The app never hardcodes hosts or ports.
+owning stack provisions missing services, resolves connection parameters and
+injects them at app startup. A node allocation or externally managed stack uses
+explicit connection settings without provisioning another copy of those services.
 
 Use the [topology workspace](./topology.md) to inspect placements and bindings.
 Cross-node repair, resource-aware placement and data recovery follow the
@@ -47,6 +47,56 @@ The ecosystem layer says "we run Postgres at port 5432 with these
 databases"; the app layer says "I need access to the `main`
 database with these env vars". The resolver wires the two
 together.
+
+## Infrastructure ownership
+
+Dependency discovery answers what an application needs. It does not grant every
+node permission to provision that dependency or run its migrations. A stack's
+`infrastructureOwnership` declares that responsibility:
+
+| Mode | Responsibility |
+| --- | --- |
+| `stack` (default) | The stack merges discovered requirements with infrastructure declarations, provisions services and owns their migrations |
+| `controller` | A generated local node allocation starts applications using controller-supplied connection settings; its `managedOrigin` identifies the source project/stack |
+| `external` | The stack starts applications against explicitly configured existing services; an external operator owns provisioning and migrations |
+
+Generated allocations include both fields together:
+
+```typescript
+stacks: {
+  deployed: {
+    type: 'local',
+    apps: ['api'],
+    infrastructureOwnership: 'controller',
+    managedOrigin: { project: 'sample', stack: 'test' },
+  },
+}
+```
+
+The controller remains responsible for the source stack's infrastructure. Restarting
+its node allocation must not reinterpret application requirements as new
+`sample/deployed` containers, substitute default database/Redis endpoints or rerun
+migrations. The generated allocation retains resolved application configuration
+and its explicit source binding. This governs Omnitron's provisioning and migration
+stages; application-owned startup hooks still follow the application's own
+configuration and must respect the same ownership policy.
+
+Non-owning modes apply only to local application allocations, not the controller's
+remote/cluster stack. They reject stack-level infrastructure declarations and
+`serviceOverrides`, and ignore ecosystem defaults belonging to other stacks;
+supply application connections explicitly. An owning
+stack can still use per-service external overrides when only some dependencies
+are external. Ownership diagnostics distinguish these cases from an unavailable
+Docker daemon. External readiness remains **unknown** until endpoint reachability,
+credentials and schema are verified by appropriate checks; skipping provisioning
+is not proof that a database is ready.
+
+An ownership refresh can release obsolete in-process monitors when a stack becomes
+non-owning. It does not stop or remove containers, alter volumes or run migrations.
+A legacy allocation with `managedOrigin` but no explicit ownership mode fails
+closed until migrated. An older unbound generated configuration cannot be identified
+from its name; it needs an audited source binding and compatible runtime. The new
+generator does not retroactively fix running nodes.
 
 ## Ecosystem layer — `InfrastructureConfig`
 
