@@ -84,8 +84,8 @@ Choose TCP when:
 - You don't need a reverse proxy (TCP doesn't traverse most HTTP-only
   proxies).
 
-Cost: one TCP connection per (peer pair). Connection pooling
-required.
+Cost: one persistent TCP connection per peer pair. RPC calls are multiplexed on
+that connection; an additional connection pool is not required.
 
 ### Unix sockets
 
@@ -109,7 +109,7 @@ All transports extend a shared `TransportOptions` base
 | `port` / `path`     | —                      | Where to listen (set via the server `options`)  |
 | `host`              | `'0.0.0.0'` (TCP/WS), `'localhost'` (HTTP) | Interface to bind             |
 | `maxPacketSize`     | `16 * 1024 * 1024` (16 MiB) | Hard ceiling on an inbound packet, checked before decode |
-| `connectTimeout`    | `10_000`               | Connection establishment timeout                |
+| `connectTimeout`    | `10_000`               | Transport establishment and peer greeting deadline, on client and server |
 | `requestTimeout`    | `5_000`                | Per-request timeout                             |
 | `streamTimeout`     | `30_000`               | Idle-stream timeout                             |
 | `keepAlive`         | `{ enabled?, interval?, timeout? }` | Keepalive config object            |
@@ -127,6 +127,42 @@ Transport-specific options layer on top:
 There is **no** unified `maxPayloadBytes` / `keepAliveMs` /
 `connectionTimeoutMs` option — those names do not exist; use the real
 ones above.
+
+## Connection limits and lifecycle
+
+`Netron` enforces `maxTotalConnections` (default **100**) and
+`maxConnectionsPerPeer` (default **10**) through one connection manager. Pending
+incoming greetings occupy capacity. Outbound HTTP peer handles count too;
+inbound HTTP requests use their transport middleware limits. Configure limits
+from measured peak concurrency before upgrading an older build in which these
+settings only emitted a warning.
+
+```typescript
+const netron = new Netron(logger, {
+  maxTotalConnections: 500,
+  maxConnectionsPerPeer: 10,
+});
+```
+
+`netron.connectionManager.getStats()` reports actual connections, per-peer counts
+and transport byte totals. Slots are released on disconnect, rejected handshake
+and shutdown, including clients that never start a listening server.
+
+A peer ID is a routing identity, **not authentication**. Incoming greetings cannot
+replace an already-connected identity. Use a separate `Netron` instance for each
+concurrent authenticated principal; disconnect the old connection before reusing
+its identity on the same server. IDs are limited to 256 characters without
+whitespace/control characters. A greeting must fit in 4096 bytes and finish within
+`connectTimeout`.
+
+Netron owns reconnect together with the peer handshake. Raw transport reconnect
+is disabled for sockets it owns, preventing competing recovery loops. Stopping
+Netron cancels pending handshakes and reconnects; late results are closed.
+
+Persistent RPC connections stay leased until disconnect. Pool size, idle cleanup
+and pool heartbeat options apply to unleased spare connections managed directly
+through `connectionManager`; they neither create additional RPC sockets nor evict
+an otherwise idle persistent peer. Transport keepalive owns its liveness.
 
 ## TLS
 
@@ -149,8 +185,9 @@ A few client-side differences:
 - **Browser** can only use HTTP and WebSocket.
 - **Streaming methods** (returning `AsyncIterable<T>`) require WS, TCP,
   or Unix — HTTP cannot stream.
-- **WS connection state** persists across calls; auth happens once
-  per connection. HTTP authenticates per request.
+- **WS connection state** persists across calls. The initial credential is
+  revalidated before each invocation; revocation and role changes are not frozen
+  at connection time. HTTP authenticates per request.
 
 ## The transport registry
 

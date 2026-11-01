@@ -47686,7 +47686,7 @@
       "name": "IStreamPeer",
       "package": "@omnitron-dev/titan",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan/src/netron/interfaces/core-types.ts#L767",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan/src/netron/interfaces/core-types.ts#L765",
       "imports": [
         {
           "path": "@omnitron-dev/titan/netron",
@@ -47798,7 +47798,7 @@
       "name": "ITransportServerWithServices",
       "package": "@omnitron-dev/titan",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan/src/netron/interfaces/core-types.ts#L724",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan/src/netron/interfaces/core-types.ts#L722",
       "imports": [
         {
           "path": "@omnitron-dev/titan/netron",
@@ -49274,7 +49274,7 @@
       "name": "NetronOptionsExtended",
       "package": "@omnitron-dev/titan",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan/src/netron/interfaces/core-types.ts#L750",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan/src/netron/interfaces/core-types.ts#L748",
       "imports": [
         {
           "path": "@omnitron-dev/titan/netron",
@@ -49638,7 +49638,7 @@
       "name": "PeerConnectEvent",
       "package": "@omnitron-dev/titan",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan/src/netron/interfaces/core-types.ts#L671",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan/src/netron/interfaces/core-types.ts#L669",
       "imports": [
         {
           "path": "@omnitron-dev/titan/netron",
@@ -49650,7 +49650,7 @@
       "name": "PeerDisconnectEvent",
       "package": "@omnitron-dev/titan",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan/src/netron/interfaces/core-types.ts#L679",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan/src/netron/interfaces/core-types.ts#L677",
       "imports": [
         {
           "path": "@omnitron-dev/titan/netron",
@@ -50310,7 +50310,7 @@
       "name": "RemotePeerSocket",
       "package": "@omnitron-dev/titan",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan/src/netron/interfaces/core-types.ts#L693",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan/src/netron/interfaces/core-types.ts#L691",
       "imports": [
         {
           "path": "@omnitron-dev/titan/netron",
@@ -51126,7 +51126,7 @@
       "name": "ServiceExposeEvent",
       "package": "@omnitron-dev/titan",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan/src/netron/interfaces/core-types.ts#L634",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan/src/netron/interfaces/core-types.ts#L632",
       "imports": [
         {
           "path": "@omnitron-dev/titan/netron",
@@ -51270,7 +51270,7 @@
       "name": "ServiceUnexposeEvent",
       "package": "@omnitron-dev/titan",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan/src/netron/interfaces/core-types.ts#L653",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan/src/netron/interfaces/core-types.ts#L651",
       "imports": [
         {
           "path": "@omnitron-dev/titan/netron",

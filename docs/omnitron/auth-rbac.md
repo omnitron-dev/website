@@ -393,6 +393,20 @@ a `token.expiring-soon` push, refreshes the token via HTTP, and
 reconnects WS. The application may also use an explicitly enabled authentication task;
 HTTP cookie-only applications should retain their established refresh flow.
 
+## Private runtime storage
+
+On POSIX systems, runtime directories are sealed to `0700` and state, backup and
+journal files to `0600`. Sealing opens the target without following a leaf symlink,
+checks its type and owner, changes permissions on that open file and verifies the
+result. Shared hard-linked files and incompatible owners are refused. A failed
+permission change is an operation failure, not a successful insecure backup.
+
+The main file must exist. Missing optional SQLite `-wal`/`-shm` companions are
+allowed; other access errors propagate. Do not use symlinks as substitutes for
+private runtime files. These checks are POSIX-specific; Windows deployments need
+an equivalent owner-only ACL policy. They do not turn a writable parent directory
+into a sandbox against a privileged local process.
+
 ## Audit logging
 
 The daemon stores control-plane events through `AuditService`. The current wire fields are `action`, `resourceType`, `resourceId` and `details`; actor identity comes from the request context. Read events through Console's **Audit** page or `omnitron audit`.
