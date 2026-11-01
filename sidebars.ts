@@ -380,6 +380,7 @@ const sidebars: SidebarsConfig = {
     'omnitron/overview',
     'omnitron/architecture',
     'omnitron/resilient-control-plane',
+    'omnitron/release-readiness',
     'omnitron/cli',
     'omnitron/daemon',
     'omnitron/backend-handoff',
