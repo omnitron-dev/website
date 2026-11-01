@@ -405,6 +405,11 @@ port reservations until removal succeeds. The Xec Docker adapter resolves a name
 to an immutable container ID and verifies absence after removal. A replaced name,
 unavailable daemon, or denied request is an explicit failure.
 
-These component guarantees are part of the [release lifecycle gate](./release-readiness.md).
-They do not by themselves establish a remotely confirmed stack stop: node ownership,
-durable stop intent and per-node acknowledgements must also pass that gate.
+RPC service withdrawal is part of the acknowledgement. Failed withdrawal retains
+its router for retry while process termination still runs. Destroyed pools reject
+late background spawns; destruction is terminal.
+
+The owner stores a FULL-durability SQLite fence per project/stack. It binds the stop
+to exact handle generations and an operation identity. Automatic resume cannot
+clear a deliberate stop. See [confirmed stack stops](./projects.md#confirmed-stack-stops)
+for controller/node receipts, rollout prerequisites and remaining allocation limits.

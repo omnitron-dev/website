@@ -112,3 +112,64 @@ permissions implied by an endpoint or a shared display name.
 See the [topology workspace](./topology.md) and the
 [resilient control-plane contract](./resilient-control-plane.md) for the distinction
 between desired placement, observed state and admitted execution.
+
+
+## Confirmed stack stops
+
+`omnitron stack stop <project> <stack>` prepares an ownership-checked plan on
+**every participating node before sending any stop**. Each node records an operation
+identity in its private SQLite journal, the current application generations, and
+immutable Docker container IDs. Plans expire after ten minutes before execution.
+Preparation does not stop applications or remove containers.
+
+Once admitted, the controller durably disables automatic stack resume. The process
+owner persists a separate execution fence before terminating anything. That fence
+also rejects watcher restarts, scaling and automatic recovery starts. An explicit
+new stack start may clear it only after the preceding stop is confirmed.
+
+Applications terminate before their infrastructure. Infrastructure reconciliation and
+already admitted provisioning are drained before graceful container removal. Docker
+volumes are retained. Other projects/stacks and node RPC connections remain available.
+A failed process exit prevents infrastructure removal on that node.
+
+The node returns a durable receipt only after process termination, withdrawn RPC
+services and container absence are confirmed. Retrying an operation identity
+reconciles its receipt; an old receipt cannot acknowledge a later application
+generation. A timeout or lost connection remains **unconfirmed**. It does not mean
+that the applications stopped, and it does not trigger a fallback that kills by
+bare app name, port or directory.
+
+```bash
+omnitron stack stop example production --json
+omnitron stack status example production --json
+```
+
+The response includes `stopOperation`: its identity, phase, committed intent,
+per-node outcomes and diagnostic reasons. Console uses the same persisted state,
+including after a page/backend reload. A failed stop retains the resources needed
+for reconciliation; complete it before starting a new deployment. Every user stop
+records success or failure in the audit trail.
+
+### Existing allocations and rollout
+
+Generated node configurations carry `managedOrigin: { project, stack }`. Both
+remote controller stop and a direct stop of that generated local stack use the
+same source-bound protocol, including its infrastructure. Publication preserves
+the binding and refuses to overwrite an allocation owned by another stack.
+An existing unbound allocation requires an explicit, evidence-checked migration;
+a new controller never guesses ownership from the project's name. Old owners and
+nodes lacking this protocol must be upgraded before confirmed remote stop is
+available. This is an activation prerequisite, not an automatic compatibility mode.
+
+The legacy `project/deployed/app` namespace still supports one source stack per
+project on a node. Concurrent source stacks on the same node need the canonical
+allocation model in [G09](./release-readiness.md); collision is refused meanwhile.
+Deployment destinations are durably recorded before remote work begins. Stop merges
+that journal with the current declaration and retains removed destinations across
+controller restarts; obligations are cleared only after every receipt and a matching
+journal revision. Even a change from a remote to a local declaration does not erase
+remote obligations. Deployments made before this journal existed require an audited
+initial inventory; unavailable historical sources remain explicit gaps.
+Docker inventory must be readable on every participating node; an unavailable
+Docker daemon is not interpreted as an empty inventory. These boundaries keep the
+full lifecycle gate open until allocation migration and fleet acceptance pass.

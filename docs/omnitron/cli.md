@@ -195,7 +195,7 @@ infrastructure to a subset of the project's apps.
 | `omnitron stack delete <project> <stack>` | Drop a stack |
 | `omnitron stack status <project> <stack>` | Per-app status within the stack |
 | `omnitron stack start <project> <stack>` | Start everything in the stack |
-| `omnitron stack stop <project> <stack>` | Stop everything in the stack |
+| `omnitron stack stop <project> <stack>` | Prepare every node, stop owned applications and containers, require confirmed receipts; retain volumes |
 | `omnitron stack runtime <project> <stack>` | Show runtime details (containers, ports) |
 
 ## App lifecycle
@@ -741,3 +741,9 @@ See [Console access](./access.md) for password input, account pagination and ato
 ## File workspace
 
 `omnitron files` shares the audited Console file service. Commands include `roots`, `list`, `stat`, `read`, `save`, `mkdir`, `rename`, `trash`, `trash-list`, `restore`, `copy`, `transfers`, `pause`, `resume`, `cancel`, `upload`, `download`, `upload-status`, `upload-finish` and `upload-abort`. All support `--json`; checked mutations use an observed `--version`. See [File workspace](./files.md) for flags, examples, ownership, limits and recovery.
+
+
+Stack stop/status JSON includes a durable `stopOperation` with per-node confirmation.
+A lost reply is unconfirmed, and CLI exits unsuccessfully until every required node
+acknowledges the stop. See [confirmed stack stops](./projects.md#confirmed-stack-stops)
+for retries, existing allocation bindings and upgrade prerequisites.

@@ -89,3 +89,13 @@ projects; private deployment details belong in operator evidence outside the pac
 
 The detailed architecture remains in [Resilient control plane](./resilient-control-plane.md).
 This plan supplies delivery order and acceptance gates, not a competing architecture.
+
+
+## Current implementation evidence
+
+G01 now has PostgreSQL-backed authority leases, monotonic epochs and guarded network
+publication in source. Recipient-side effect fencing remains part of G10. G02 has
+confirmed component termination, durable owner fences, node stop plans/receipts and
+shared CLI/Console progress in source. The existing fleet has not yet received these
+changes. Legacy allocation bindings, initial inventory of earlier deployments and coordinated
+owner/adapter activation remain explicit acceptance prerequisites.

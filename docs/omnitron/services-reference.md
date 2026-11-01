@@ -40,7 +40,7 @@ diffs them against the index table below.
 | `log-collector.rpc-service.ts` | `OmnitronLogs` | 4 | viewer |
 | `node-manager.rpc-service.ts` | `OmnitronNodes` | 32 | viewer (read), operator (operations), admin (historical repair) |
 | `pipeline.rpc-service.ts` | `OmnitronPipelines` | 9 | admin + live human session / trusted local CLI |
-| `project.rpc-service.ts` | `OmnitronProject` | 33 | viewer (read) + operator (start/stop) + admin (CRUD) |
+| `project.rpc-service.ts` | `OmnitronProject` | 35 | viewer (read) + operator (start/stop) + admin (CRUD) |
 | `release.rpc-service.ts` | `OmnitronRelease` | 12 | viewer (read), operator (build/attest), admin (prune) |
 | `secrets.rpc-service.ts` | `OmnitronSecrets` | 6 | admin |
 | `sync.rpc-service.ts` | `OmnitronSync` | 6 | authenticated control plane; historical repair excludes operators |
@@ -573,3 +573,10 @@ changes and their outcomes.
 `OmnitronFiles` is the master-only administrator API: `roots`, `list`, `stat`, `readText`, `readChunk`, `saveText`, `mkdir`, `rename`, `trash`, `trashList`, `restore`, `beginUpload`, `uploadChunk`, `uploadStatus`, `finishUpload`, `acknowledgeUpload`, `abortUpload`, `copy`, `transfers`, `controlTransfer`. Each call revalidates human authority; mutations and content reads require audit intent.
 
 `OmnitronFileNode.invoke` runs on each node and accepts the v1 typed file protocol only for authenticated control-plane service peers. It implements OS access, private staging and durable write receipts. It is not a browser or application RPC proxy. See [File workspace](./files.md).
+
+
+`OmnitronProject.prepareNodeStackStop` and `executeNodeStackStop` are authenticated
+control-plane operations (administrator, operator or service role). The first records
+a bounded node-side plan; the second executes its exact operation identity and
+returns a verified durable receipt. Ownership is checked on the server. User-facing
+`stopStack` coordinates these calls and keeps observation RPC connected.
