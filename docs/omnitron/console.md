@@ -375,19 +375,26 @@ remain in the inspector. Dependency graphs use consumer/provider lanes with a cl
 on narrow screens they become one column. Graphs without dependency evidence
 use a compact grid. The Connections inspector explains the evidence for each link.
 
-The wrapping toolbar provides node search, graph/list view, zoom, fit, position
-locking, fullscreen and refresh. **Fit graph** gives an overview of all nodes;
-click the percentage to return to a readable view. Scroll or drag to pan, pinch
-to zoom, or hold Ctrl/Command while scrolling to zoom. The minimap appears on
-wide windows. While the canvas has focus, arrow keys pan, `+` / `-` zoom, `0`
-fits the graph and `1` restores a readable view. These shortcuts do not intercept
-typing or browser shortcuts.
+The toolbar provides node search, graph and list views, zoom, placement lock,
+fullscreen and refresh. **Fit graph** shows every node. Click the percentage to
+return to a readable scale. Drag the canvas to pan, pinch to zoom, or hold
+Ctrl/Command while scrolling to zoom. When the canvas has focus, arrow keys pan,
+`+` and `-` zoom, `0` fits the graph and `1` restores a readable view.
+The minimap has an inset around its viewport and appears when the canvas has
+enough space, including when an inspector is open.
 
-Positions are locked initially. After unlocking and dragging a node, the manual
-layout survives polling and resizing for this page session; **Arrange nodes**
-restores responsive placement. Polling never resets a manual pan or zoom.
-Searching or selecting a node brings it into view at readable scale, including
-after closing its inspector. Resizing adapts the column count and available space.
+Drag a card to reposition it. A focused card moves with the arrow keys. Hold
+Shift to move it farther. **Lock node positions** prevents accidental movement.
+Placements persist across polling and reloads in this browser for the selected
+project and stack. **Arrange nodes** clears those placements and restores
+responsive layout. Searching or selecting a node brings it into view at a
+readable scale. Moving a card changes only its position on the map.
+
+Declared links use distinct ports and bend around intervening cards. Shared
+dependencies use separate tracks, including beside a single column on narrow
+screens. Select a node to highlight its immediate links or choose **Focus links**
+to isolate them. Open **Connections** for the recorded evidence. If a card
+blocks a route, its relationship remains available in this list.
 
 Selecting a node opens an inspector beside the graph on wide windows and a modal
 sheet on narrow windows. Prism tabs offer the available overview, connections, config, metrics
@@ -470,13 +477,9 @@ Open `/dashboard-builder`, select a dashboard, then choose **Edit layout**. **Ad
 
 Use a panel’s options to edit it, move it earlier or later, or remove it. These actions work from the keyboard. Cards reflow to a single column on narrow screens. A chart’s **Data** action opens the exact observations behind it. Historical charts use retained samples with their original timestamps. Missing samples leave gaps. An unavailable source or missing permission appears on the affected panel. A failed alert request cannot turn into a zero count.
 
+With **Live** paused, selecting another data source or history window reads it once. **Refresh** requests another observation.
+
 **Dashboard options → Settings** changes the name, refresh interval and history window. **New dashboard** starts an empty board. **Duplicate** creates an independent layout. **Export layout** and **Import layout** transfer versioned JSON between browsers. Imports validate the layout and create a separate dashboard. Layout edits are saved in this browser. If storage refuses a write, export the session layout before closing. The document contains panel definitions and filters. Measurements and permissions come from the receiving Console.
-
-### Reading dense topology maps
-
-In `/topology` drag a card to reposition it, or focus it and use the arrow keys. **Lock node positions** protects the layout from movement. **Arrange nodes** clears the saved placement for the current project and stack. Manual placements persist across polling and page reloads in this browser. These presentation changes do not modify a deployment.
-
-Declared links leave distinct ports. The map reserves space for shared dependencies and routes around cards in a background worker. Selecting a node highlights its immediate links. **Focus links** isolates them. The minimap includes an inset around the graph and appears when the canvas has room. Open **Connections** in its inspector to follow a dependency, inspect its direction and read the configuration evidence. If overlapping cards leave no clear path, the map reports the affected links and the inspector keeps them accessible. A declared dependency describes configuration. Connection health requires runtime observations.
 
 ### Settings
 
