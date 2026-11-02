@@ -28,7 +28,7 @@ the `@omnitron-dev/` scope. Install only the layers you need.
 
 | Tool | Version | Why |
 | ---- | ------- | --- |
-| **Node.js** | 22+ (24 also tested) | Titan + Omnitron daemon target Node ESM |
+| **Node.js for Omnitron** | 22.14+ on 22.x, 23.6+ on 23.x, or 24+ | The daemon and CLI use SQLite through a native Node-API 10 binding. |
 | **pnpm** | 12.16.1 | Use the exact `packageManager` version for source builds; npm/yarn work for published-package consumers |
 | **TypeScript** | 7.x native compiler | Source builds use native `tsc`. Libraries that consume the Compiler API use the pinned TypeScript 6 compatibility package. |
 | **Bun** (optional) | 1.x | Titan apps may run on Bun; Omnitron daemon needs Node |

@@ -158,6 +158,7 @@ export default {
     ".": "titan/modules/cache.mdx"
   },
   "@omnitron-dev/titan-database": {
+    "./sqlite": "titan/modules/database.mdx",
     "./coordination": "titan/modules/database.mdx",
     ".": "titan/modules/database.mdx",
     "./plugins": "titan/modules/database.mdx",

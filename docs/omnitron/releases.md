@@ -72,8 +72,29 @@ when two builders finish at the same time.
 
 ## Build and inspect
 
-The project must be registered with Omnitron. Use explicit revisions when
-reproducing a build:
+Register the project and commit its `pnpm-lock.yaml`. The selected project
+commit determines how the controller obtains the framework.
+
+- **npm registry.** Declare `@omnitron-dev/omnitron` in a workspace importer.
+  The controller checks the public npm tarballs against the lockfile's SHA-512
+  digests, verifies their common source commit and checks installed package
+  files. A sibling Omnitron checkout is unnecessary. This mode requires access
+  to the public npm registry and archives containing a full `gitHead`. Older
+  packages without that evidence require a linked source build.
+- **Linked checkout.** For framework development, point workspace links at a
+  single Omnitron checkout. The controller builds the linked packages from its
+  clean clone. Mixing linked and registry framework packages fails the build.
+
+In Console, **Releases → Built with** and the CLI command `omnitron release show`
+identify the framework source and package count. Use `--json` on the CLI to
+inspect the recorded npm versions and integrity digests. A registry release
+requires the destination process owner's full, clean framework commit as well
+as a compatible runtime graph. A backend upgrade alone can leave an older owner
+in charge of the applications.
+
+Pin `--project-commit` to reproduce a build. For linked sources,
+`--omni-commit` selects a revision. For registry packages it checks the exact
+commit already pinned by their archives.
 
 ```bash
 omnitron release build sample \

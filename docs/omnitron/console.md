@@ -441,6 +441,12 @@ Alerts** at `/alerts#firing`. This also works from a project workspace. The
 status bar link requires permission to read the alert summary, active alerts
 and rules.
 
+Desktop and sound notifications use the active-alert read permission. The first
+successful read records what is already firing. Subsequent alerts at or above
+the severity selected in **Settings** can notify you from any page, including a
+background tab. Revoking access or signing out discards pending reads. A newly
+authorized session starts with its own list of active alerts.
+
 The active list shows up to the 100 most recent firing alerts, with their
 severity, message and firing time. An acknowledged alert remains in the list
 until it resolves. If the alerts clear before you open the link, the section
@@ -468,6 +474,14 @@ single-trace waterfall, service-map view. Backed by
 - SSH connectivity test.
 - Per-node actions: drain, remove, edit.
 - **Diagnose** reports cluster participation and the recipient operations advertised by that backend. Missing participation evidence from an older daemon is shown as unknown.
+
+In **Nodes → Managed backend updates**, an administrator chooses the build and
+server order. **Stage from controller catalog** distributes a matching sealed runtime
+to each server. Preparation returns a link immediately and shows qualification
+progress. Review each server's candidate, owner and rollback target before choosing
+**Apply reviewed plan**. Viewers can reopen the receipt to see what completed and
+where execution stopped. See [fleet handoff](./backend-handoff.md#upgrade-a-fleet-of-managed-backends)
+for artifact staging, CLI commands and recovery.
 
 ### Projects
 

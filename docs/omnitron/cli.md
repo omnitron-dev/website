@@ -107,7 +107,7 @@ omnitron --json backend select <installed-sha256> --check
 
 The result identifies the current and proposed releases and the migration scope. You can run this check while applications are online. Selection repeats the checks under the installation lock after the backend and owner have stopped. An independently supervised worker with cluster coordination disabled compares its complete SQLite migration registry in both releases. Controllers, enrolled workers and installations without a proven managed role compare both registries. Changed worker migrations require a separate data transition. A successful cold-selection check does not establish live owner compatibility. Use `backend upgrade --check` for that decision.
 
-For independent user services, `omnitron backend guardian prepare <sealed-runtime>` records a private transition plan. `omnitron backend guardian apply <plan>` applies or resumes it while retaining the execution owner and application processes. The existing backend release is restored under the updated guardian.
+For supported independent services, `omnitron backend guardian prepare <sealed-runtime>` records a private transition plan. `omnitron backend guardian apply <plan>` applies or resumes it while retaining the execution owner and application processes. The existing backend release is restored under the updated guardian.
 
 `omnitron backend schema prepare <sealed-runtime>` reads the master database and saves a plan for explicitly reviewed compatible additions. `omnitron backend schema apply <plan>` applies or resumes it under the shared migration lock. After rollback, `prepare <sealed-runtime> --from-plan <applied-plan>` binds the same already-applied expansion to a corrected candidate, checking the original runtimes and exact database history. `omnitron backend upgrade <sealed-dist> --schema-plan <plan>` requires that exact applied plan for an upgrade or rollback between its two sealed releases. Legacy bridges, changed definitions, foreign databases and local node schema transitions are refused.
 
@@ -818,6 +818,12 @@ The operation is available to viewers and bounded by node, archive and time limi
 | `omnitron stack account <project> <stack>` | Runs the project's account tool on a remote stack. `--username` creates an account and stores its generated password in the vault; `--show` and `--census` inspect it. `--remove` requires the account id. The project supplies its role model and tool implementation. |
 | `omnitron stack maintenance <project> <stack> [action]` | Reads the gateway maintenance lock by default. `on --minutes 15` sets a bounded lock; `off` releases it. |
 | `omnitron remote restart <alias> <app>` | Restarts the named application on a registered remote daemon. |
+| `omnitron fleet rollout import <runtimes...>` | Admits sealed Linux builds under the controller account. Identical imports reuse the immutable catalog entry. |
+| `omnitron fleet rollout builds` | Lists catalog commits, architectures, Node versions and digests. Supports `--json`. |
+| `omnitron fleet rollout plan <commit> [nodes...]` | Saves a batch and starts qualification. `--stage` distributes matching catalog builds. `--apply` submits the plan after every node qualifies. `--wait` follows qualification or activation. Use `--request-id <uuid>` for idempotent submission. |
+| `omnitron fleet rollout apply <id>` | Starts the reviewed managed backend update in the planned order. |
+| `omnitron fleet rollout status [id]` | Reads the saved plan and each server's result. Use `--wait` to follow it. |
+| `omnitron fleet rollout reconcile <id>` | Checks an uncertain result against current node evidence. |
 | `omnitron fleet upgrade [nodes...]` | Builds and installs Omnitron on registered nodes. Start with `--dry-run`; `--keep` controls retained versions. A dirty working tree requires `--allow-dirty`. |
 | `omnitron secret generate <key>` | Generates a vault secret without printing its value. `--bytes` accepts 16–1024, default 32; `--encoding` accepts base64, base64url or hex. |
 | `omnitron secret copy <from> <to>` | Copies a value between vault keys without printing it. |

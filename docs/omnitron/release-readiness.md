@@ -78,6 +78,22 @@ unavailable evidence. It must not declare success from a green process indicator
 hide a warning by weakening its threshold, or infer that an unreachable process has
 stopped. Existing experiment identities and historical gaps remain intact.
 
+### Roll out a group of changes
+
+Select one clean source commit for the batch and wait for its CI run. Build for
+each target OS, architecture and Node runtime. Record the current backend,
+process owner and Console revision separately, along with application identity
+and health. A backend handoff can advance the controller while the existing
+owner continues running the applications.
+
+Update one test node first. Before moving to the next node, check authenticated
+RPC, advancing replication acknowledgements, delivery of a fresh log record and
+application health against the baseline. On a controller that serves Console,
+also verify the published asset version and exercise the affected UI. If a new
+feature requires a different owner or a Console restart, document its affected
+processes, stop criteria, rollback artifact and recovery budget before opening
+that window. Record the last accepted revision for each component and node.
+
 ## Documentation contract
 
 Update the owning layer's documentation together with code: Xec for execution,

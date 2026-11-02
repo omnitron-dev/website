@@ -229,7 +229,7 @@ This workflow currently covers master PostgreSQL expansions. Local node SQLite t
 
 ## Updating the guardian
 
-`omnitron backend guardian` manages the guardian independently of the backend selection and execution owner. For **user** services, `omnitron backend guardian prepare` saves a plan and `omnitron backend guardian apply` applies or resumes it:
+`omnitron backend guardian` manages the guardian independently of the backend selection and execution owner. For supported user services and qualified root-owned Linux system services, `omnitron backend guardian prepare` saves a plan and `omnitron backend guardian apply` applies or resumes it:
 
 ```bash
 omnitron backend guardian prepare /absolute/releases/omnitron-next --json
@@ -242,7 +242,12 @@ Apply drains and checkpoints the backend, records an activation intent, stops on
 
 The plan is resumable: run the same `apply` command after a coordinator interruption. It refuses changed units, a different owner, changed application inventory or a conflicting activation. A completed plan returns its original receipt without starting another process; use `omnitron backend status` for current state. To return to a previous guardian, prepare a new plan for its retained sealed runtime. No database migration is performed, and backend candidate compatibility checks remain in effect.
 
-Automatic guardian replacement currently supports user launchd/systemd services. System-scope unit replacement requires a separate administrator-reviewed transition; this command refuses it before stopping anything. Updating the execution owner's runtime still requires an application maintenance window.
+Guardian replacement supports user launchd/systemd services and root-owned Linux
+system services with a loaded, independently stoppable unit. For system scope,
+preparation checks the installed unit, its executable, stop propagation, hooks
+and drop-ins. Apply rechecks these properties and preserves the unit's account,
+environment and working directory. Prepare and review a separate guardian plan
+for installations that predate the fenced fleet handoff. Updating the execution owner's runtime still requires an application maintenance window.
 
 The recovery checkpoint monitor retries a busy snapshot once after 250 ms. This
 avoids repeatedly sampling a short metrics drain at the same phase of a shared
@@ -366,3 +371,93 @@ Human viewer, operator and administrator roles, plus the explicit mesh observer 
 Local application topology stays in the owner. Public backend transports reconnect across an update. Direct external consumers of application services exposed on the daemon's former Netron transport are not automatically forwarded to the owner; validate those integrations before enabling resident execution.
 
 `OMNITRON_HOME=/absolute/instance` selects an isolated daemon state directory for tests or a separately configured instance. Console containers have an instance-specific name and ownership label; the default instance retains `omnitron-nginx`. A legacy container must prove ownership through its configuration mount before it can be replaced or stopped. Shutdown of an instance without Console enabled never removes a Console container. Application paths and stack infrastructure are not remapped; distinct listeners and infrastructure configuration are still required. Do not change the shell's `HOME` to isolate a daemon.
+
+## Upgrade a fleet of managed backends
+
+A standalone controller can distribute and activate an Omnitron backend on up to
+128 registered remote Linux servers with independent systemd supervision. All
+targets must have a pinned SSH host key, a healthy execution owner and a guardian
+advertising `kernelHandoff@1`. The controller updates servers in the requested
+order and verifies each handoff before contacting the next server for activation.
+Application processes stay with their existing owner.
+
+### Publish the batch to the controller
+
+Build and qualify the same clean Git commit for each distinct Linux architecture
+and exact Node version in the fleet. Import the sealed directories under the
+controller's daemon account. A release pipeline can perform this step once per
+variant. Several servers can reuse one build.
+
+```sh
+omnitron fleet rollout import /builds/linux-x64-node22/runtime /builds/linux-x64-node24/runtime
+omnitron fleet rollout builds --json
+```
+
+The private catalog records the source commit, target platform and Node version,
+runtime SHA-256, compressed archive SHA-256 and byte count. A repeated import of
+the same build is safe. A different runtime for the same commit and target
+requires resolving the build discrepancy. The publisher can admit foreign
+architectures without executing the contained Node binary. Only the local
+publisher can supply filesystem paths.
+
+### Distribute, review and activate
+
+For a canary followed by production, substitute the actual 40-character commit
+and registered node names. With no node arguments the controller selects all
+registered remote nodes in name order. The local controller has its own handoff
+procedure.
+
+```sh
+omnitron fleet rollout plan <commit> test-node production-node --stage --wait
+omnitron fleet rollout apply <plan-id> --wait
+```
+
+For a qualified batch in a scheduled window, distribution, qualification and
+activation can be requested from one command.
+
+```sh
+omnitron fleet rollout plan <commit> test-node production-node --stage --apply --wait
+```
+
+With `--stage`, the controller matches each serving runtime to an exact catalog
+variant, transfers it over the enrolled SSH connection and asks the receiving
+installation to verify and store it. Staging preserves the active selection.
+Omit `--stage` to inspect builds already installed through
+`omnitron backend install <runtime>`. A single blocked target prevents activation
+of the entire plan. A successful plan records the exact rollback artifact,
+candidate, current selection revision, backend PID, owner and application inventory.
+
+In Console, open **Nodes → Managed backend updates → Plan update**. Choose a catalog
+commit, select the servers in canary order and enable **Stage from controller catalog**
+if distribution is required. Review the per-server results and choose **Apply
+reviewed plan**. The detail URL and the CLI refer to the same persisted operation.
+Administrative sessions can prepare, start and reconcile a rollout. Read access
+lets operators and viewers follow progress. Each server operation rechecks the
+initiating administrator's authority.
+
+### Follow a batch or recover an interrupted handoff
+
+```sh
+omnitron fleet rollout status <plan-id> --wait
+omnitron fleet rollout reconcile <plan-id>
+```
+
+Planning returns an ID while qualification continues. With `--apply` the CLI
+waits for qualification before submitting the reviewed identity. Use `--json`
+for automation and `--request-id <uuid>` when a caller needs idempotent planning.
+The same ID binds the requested commit, node selection and staging choice.
+Closing a client after submission leaves accepted work on the controller.
+
+On activation failure the controller stops dispatching later nodes and records
+the observed outcome. A confirmed candidate with failed readiness can be handed
+back to the pinned rollback runtime when the guardian can still verify ownership.
+Previously successful nodes retain their accepted versions. An uncertain receipt
+blocks a new rollout until reconciliation checks live evidence. Reconciliation
+observes the node without replaying the handoff. After reviewing the outcome,
+create a new plan for any remaining nodes.
+
+Elected multi-controller clusters require recipient-side fencing across leaders;
+this workflow refuses dispatch in that configuration. Upgrading the execution
+owner, changing Node versions or applying schema changes each requires a
+separately qualified transition. The local Console container follows its
+controller's publication procedure.

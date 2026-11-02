@@ -38,7 +38,7 @@ diffs them against the index table below.
 | `infrastructure.rpc-service.ts` | `OmnitronInfra` | 18 | viewer (read) + operator (start/stop/remove) |
 | `kubernetes.rpc-service.ts` | `OmnitronKubernetes` | 9 | admin |
 | `log-collector.rpc-service.ts` | `OmnitronLogs` | 4 | viewer |
-| `node-manager.rpc-service.ts` | `OmnitronNodes` | 33 | viewer (read), operator (operations), admin (historical repair) |
+| `node-manager.rpc-service.ts` | `OmnitronNodes` | 38 | viewer (read), operator (operations), admin (historical repair and managed kernel rollout) |
 | `pipeline.rpc-service.ts` | `OmnitronPipelines` | 9 | admin + live human session / trusted local CLI |
 | `project.rpc-service.ts` | `OmnitronProject` | 43 | Viewer reads and reviews, operator starts/stops, administrator manages registrations, machine credentials run the recipient protocol |
 | `release.rpc-service.ts` | `OmnitronRelease` | 12 | viewer (read), operator (build/attest), admin (prune) |
@@ -295,7 +295,7 @@ subscription open.
 
 ### `OmnitronNodes` — `node-manager.rpc-service.ts`
 
-Node inventory, health history, bundle activation and recovery include 33 public methods.
+Node inventory, health history, bundle activation, managed rollout and recovery include 38 public methods.
 
 | Method category | Methods |
 | --------------- | ------- |
@@ -308,6 +308,7 @@ Node inventory, health history, bundle activation and recovery include 33 public
 | Historical repair (admin) | `reconcileNodeMetrics({nodeId, restore?, after?, through?, epoch?})` |
 | Bundle operations | `installBundleOnNode`, `activateBundleOnNode`, `recoverBundleOnNode` |
 | Upgrades | `planUpgrade`, `upgradeNode`, `upgradeNodes`, `getUpgradeProgress`, `cancelUpgrade` |
+| Managed backend rollout | `listKernelBuilds`, `planKernelRollout`, `startKernelRollout`, `getKernelRollout`, `reconcileKernelRollout` |
 
 Includes the uptime-bar machinery the webapp uses to draw
 green/yellow/red availability bars.

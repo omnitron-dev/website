@@ -42,6 +42,30 @@ import { TitanDatabaseModule } from '@omnitron-dev/titan-database';
 class AppModule {}
 ```
 
+### SQLite
+
+Install the optional `better-sqlite3` peer when using the SQLite dialect.
+`DatabaseModule` opens SQLite on the first connection. For a dedicated local
+journal, the `@omnitron-dev/titan-database/sqlite` entry point exposes the same
+checked driver directly.
+
+```ts
+import { openSqliteDatabase } from '@omnitron-dev/titan-database/sqlite';
+
+const database = openSqliteDatabase(':memory:');
+try {
+  const rows = database.prepare('select 1 as ready').all();
+  console.log(rows);
+} finally {
+  database.close();
+}
+```
+
+The native binding requires Node-API 10. Omnitron needs this capability for its
+durable state and logs. On an incompatible Node runtime, opening SQLite raises
+a JavaScript error before loading the binding. PostgreSQL and MySQL users can
+use their own drivers independently.
+
 ### Multiple named connections
 
 ```typescript
