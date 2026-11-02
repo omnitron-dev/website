@@ -94,11 +94,17 @@ This plan supplies delivery order and acceptance gates, not a competing architec
 ## Current implementation evidence
 
 Clean release packaging now has a two-checkout byte comparison in CI. The
-workspace installs the locked registry releases of the database libraries and
-verifies the integrity of the Xec archives; dependency advisories are checked for
-the full workspace, including development tools. Run `pnpm audit --audit-level
+workspace installs Xec and Kysera from the public npm registry. The registry
+transition verifies their tarballs against the published SHA-512 digests and
+prepared archives. Dependency audits cover runtime and development tools. Run `pnpm audit --audit-level
 low` and `pnpm check:packages` at the root. Target-native dependency identity,
 launch evidence and activation are separate gates.
+
+G05 uses Xec's release operations for workspace discovery, immutable archive
+preparation, tag verification and registry reconciliation. CI rehearses an
+interrupted publish, a resume, a conflicting digest, an RC channel and an
+unrelated tag against isolated Git and npm endpoints. See the
+[maintainer release procedure](../community/contributing.md#release-process).
 
 G01 now has PostgreSQL-backed authority leases, monotonic epochs and guarded network
 publication in source. Recipient-side effect fencing remains part of G10. G02 has

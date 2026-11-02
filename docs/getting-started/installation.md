@@ -30,7 +30,7 @@ the `@omnitron-dev/` scope. Install only the layers you need.
 | ---- | ------- | --- |
 | **Node.js** | 22+ (24 also tested) | Titan + Omnitron daemon target Node ESM |
 | **pnpm** | 12.16.1 | Use the exact `packageManager` version for source builds; npm/yarn work for published-package consumers |
-| **TypeScript** | 7.x | Decorator metadata + ESM resolution. 5.x compiles Titan apps, but this workspace and every package in it are on 7 — and 7 removed `baseUrl`, which is a hard config error rather than a warning |
+| **TypeScript** | 7.x native compiler | Source builds use native `tsc`. Libraries that consume the Compiler API use the pinned TypeScript 6 compatibility package. |
 | **Bun** (optional) | 1.x | Titan apps may run on Bun; Omnitron daemon needs Node |
 | **Deno** (optional) | 2.x | Titan apps may run on Deno; Omnitron daemon needs Node |
 | **Docker** (optional) | latest | Required for `omnitron infra` provisioning |
