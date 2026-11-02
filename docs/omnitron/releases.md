@@ -203,6 +203,30 @@ are installed on the destination; a macOS `node_modules` tree is never copied to
 Linux. After publishing a dependency to npm, update its version and lockfile,
 remove its local archive override, and verify a clean install before deployment.
 
+### Promoting a dependency from npm
+
+For a coordinated Xec or Kysera release, compare each exact version with the
+publisher's saved SHA-512. An accepted upload, a distribution tag and a
+downloadable tarball can become visible at different times. Use a fresh cache
+when downloading the archive so the check exercises the public registry.
+
+```sh
+package='@xec-sh/core@0.11.2'
+scratch=$(mktemp -d)
+npm view "$package" dist.integrity --prefer-online
+npm pack "$package" --ignore-scripts --cache "$scratch/cache" --pack-destination "$scratch"
+printf 'sha512-%s\n' "$(openssl dgst -sha512 -binary "$scratch"/*.tgz | openssl base64 -A)"
+```
+
+Compare the SHA-512 of the downloaded bytes with both the registry integrity
+and the preparation receipt. Once the whole batch matches, update the
+manifests and lockfile together. Keep any minimum-release-age exception
+scoped to an exact, verified package version. Run two builds from separate
+clean checkouts with the same Node executable, pnpm version and target.
+Compare the runtime, application archives and static assets, then test
+admission of the resulting archives against the target runtime. Live release
+registrations continue to refer to their original digests.
+
 ## Validate linked source checkouts
 
 Development applications can share a sibling Omnitron checkout. The release
