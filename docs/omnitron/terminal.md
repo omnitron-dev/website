@@ -63,6 +63,10 @@ not override a closed session or an unavailable connection.
 
 An observed fingerprint is not proof of host identity. Verification must not consist of copying a key from the same untrusted network connection. Pin replacement uses the previous pin as a compare-and-swap condition and closes sessions for that node. A pin applies to the registered host, port and username; changing that target requires verification again.
 
+The same registered fingerprint protects automated commands, file uploads and mesh tunnelling. For an unpinned automation target, Xec can use an existing trusted `known_hosts` entry on the controller. Interactive sessions require a verified registration pin. A stack that selects a different SSH account or port must provide its own credentials.
+
+When replacing a registered host, SSH port or account, provide or explicitly clear its credentials in the same update. If saving the new credentials fails, the replacement registration remains without active credentials. Retry the update on that registration and verify its host fingerprint before use. An already dispatched remote command can still finish after a trust change.
+
 Pins are stored in the daemon's SQLite state store. Opening a terminal requires an exact pin match before authentication. Host-key probing and terminal opening use Xec's bounded connection and shell-request lifecycle. SSH adapter pools keep distinct host-key policies separate and preserve them during reconnect.
 
 ## Equivalent CLI workflow

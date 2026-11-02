@@ -114,19 +114,21 @@ node, then compare its hostname and daemon PID with the same target selected thr
 the controller in CLI and Console. CI checks that a machine identity can report its
 own host and cannot use the user-facing method to relay a request to a third node.
 
+The daemon's HTTP acceptance tests exercise public liveness and readiness, authentication errors for the five detailed Health RPCs, and human and machine read access. The replication tests use a real TCP peer exposing an unprotected outbox and verify that the controller rejects it. Machine-only acknowledgement and administrative reconciliation have separate tests. WAL recovery tests include lost acknowledgements, partial replies, disk errors and capacity eviction.
+
 G05 uses Xec's release operations for workspace discovery, immutable archive
 preparation, tag verification and registry reconciliation. CI rehearses an
 interrupted publish, a resume, a conflicting digest, an RC channel and an
 unrelated tag against isolated Git and npm endpoints. See the
 [maintainer release procedure](../community/contributing.md#release-process).
 
-G01 and G02 implement signed recipient admission for managed stack stops. PostgreSQL
+G01 and G02 implement signed recipient admission for managed stack stops and recovery of retained application releases. PostgreSQL
 identifies the current leader and SQLite retains each recipient's highest epoch.
 The takeover test transfers leadership after the application step and verifies that
 the former controller cannot retire infrastructure, even after recreating the
 recipient. Node protocol methods require a machine identity. Leadership transfer
 requires an administrator. CLI and Console show the node, epoch and receipt outcome.
-Fleet activation and live end-to-end acceptance are separate gates. Earlier allocations
+Recovery acceptance transfers a real PostgreSQL lease between consecutive application launches and checks that the old controller cannot dispatch the next one. Owner tests exercise real processes and release evidence. Fleet activation and live end-to-end acceptance are separate gates. Earlier allocations
 require explicit ownership evidence. Provisioning, routing and stateful recovery
 still need operation-specific fencing.
 

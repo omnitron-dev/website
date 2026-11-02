@@ -79,8 +79,13 @@ plan from the current leader before continuing. Work admitted before a transfer 
 finish. An unreachable node stays unconfirmed.
 
 Use `PostgresLeaseStore.withLease` for effects inside the same PostgreSQL transaction.
-The implemented external operation is `stack.stop`. Clustered remote start and
-provisioning require their own recipient adapters. Stateful failover additionally
+The recipient protocol supports `stack.stop` and `stack.resume-installed`.
+Recovery binds the last node stop, application generations, retained release, launch
+configuration and placement to a new signed operation. Each node checks the live
+lease before opening its owner and before dispatching each launch. A launch already
+admitted may finish across a leadership transfer. Later launches require current
+authority. A recovery plan has a five-minute admission window. New deployments and infrastructure provisioning need separate recipient
+adapters. See [Resume installed applications](./projects.md#resume-installed-applications). Stateful failover additionally
 needs a fence enforced by the data service. See the [delivery gates](./release-readiness.md).
 
 The controller bounds local freshness from **before** its database request, using
@@ -135,7 +140,12 @@ omnitron cluster step-down
 
 The status includes `coordination: 'postgres-lease'`, `authority`, `reason`,
 `leaseExpiresAt`, `leaseRemainingMs`, `effectFencing: 'recipient-required'` and
-`fencedOperations: ['stack.stop']`. Use `omnitron --json cluster status` in automation.
+the recipient operations supported by this backend in `fencedOperations`.
+Use `omnitron --json cluster status` in automation. `participant` distinguishes a
+controller, enrolled worker and standalone daemon. Workers report their enrolled
+identity. A legacy peer without the diagnostics service yields unknown participation
+and a nonzero CLI exit status. The recovery preflight checks the process owner's
+capabilities and retained evidence separately.
 `term` is a decimal epoch string, or `null` when no authority has been observed.
 An expired observation has no `leaderId`. The former `votedFor` field is removed.
 CLI reports the same authority and reasons returned to Console's node diagnostics.
@@ -175,7 +185,6 @@ they don't need leader election.
 | `removeNode({nodeId})` | operator | Remove |
 | `setRole({nodeId, role})` | operator | Promote / demote |
 | `drainNode({nodeId})` | operator | Drain workloads off this node |
-| `heartbeat({nodeId})` | anonymous | Daemon-to-daemon liveness ping |
 
 ### `FleetNode`
 
@@ -191,19 +200,9 @@ interface FleetNode {
 }
 ```
 
-### Heartbeat flow
+### Fleet liveness
 
-```mermaid
-sequenceDiagram
-  participant Slave
-  participant Master
-
-  loop every heartbeatInterval (2s)
-    Slave->>Master: OmnitronFleet.heartbeat({nodeId})
-    Master-->>Slave: { ok: true }
-  end
-  Note over Master: missed N heartbeats → mark offline
-```
+The master scheduler updates its own registered row at the configured health-check interval. Remote health and connectivity come from checks against registered nodes and authenticated mesh observations. A caller cannot update an arbitrary node’s liveness by supplying its ID.
 
 The fleet's offline-detection threshold is driven by
 `DEFAULT_DAEMON_CONFIG.healthMonitor.offlineTimeoutMs`
@@ -253,25 +252,30 @@ the accepted, duplicate or explicitly discarded IDs. Failed entries remain pendi
 
 | Method | Effect |
 | ------ | ------ |
-| `receiveBatch(batch)` | Master accepts a sync batch from a slave |
 | `drainBuffer({limit?})` | Slave-side: pull pending data without waiting for periodic sync |
 | `ackDrained({ids, receipt?})` | Atomically release IDs and record their committed, discarded or unverified outcome |
 | `getSyncStatus()` | Measured queue bytes/age, durable receipt history, contiguous progress and recorded losses |
 
 ### Connection credentials
 
-The built-in mesh dialer mints a five-minute `service_role` credential for each node. It renews that credential on the same Netron peer 30 seconds before expiry, coalescing concurrent calls and heartbeat reads. The SSH tunnel and running operations remain in place. The node independently checks the signed identity and its expiry on every invocation.
+For registered nodes, the controller always opens an Xec SSH tunnel to the daemon and presents its bearer token only to the numeric loopback listener. A reachable public TCP port alone permits a liveness probe. The built-in mesh dialer mints a five-minute `service_role` credential for each node. It renews that credential on the same Netron peer 30 seconds before expiry, coalescing concurrent calls and heartbeat reads. The SSH tunnel and running operations remain in place. The node independently checks the signed identity and its expiry on every invocation.
 
 Credential renewal has a ten-second deadline. Failure prevents dispatch of the waiting operation and reconnects with a fresh credential; it does not replay an application mutation. A rejected signature clears the cached node signing secret, while a transport timeout does not claim the secret is wrong. Mesh status exposes `credentialExpiresAt`, `credentialRefreshedAt` and `lastCredentialError`, without credential material. CLI and Console distinguish an expired identity from a healthy authenticated connection.
 
 Update the master before nodes when introducing per-call token expiry: older masters cannot renew an admitted peer's identity. A custom dialer can provide `refreshCredential` and `expiresAt`; non-renewable credentials require a new connection after expiry. A plain unauthenticated connection can probe liveness but cannot replicate.
 
+Mesh authentication requires the remote daemon to confirm a `service_role` principal with a finite expiry. A ping proves reachability. Reading a release version for admission, polling an outbox and issuing commands all require the authenticated peer. Multiple registered node IDs pointing to the same daemon address leave that address unavailable for control until the registration is unambiguous.
+
+Stack deployments use the same registered daemon host, port and optional node ID as the mesh. A registry or trust-store failure stops deployment before SSH dispatch.
+
+For SSH bootstrap, compare the observed host fingerprint with an independently trusted copy before approving it. Automation uses the registered pin for the exact host, SSH port and user. Without a pin, Xec requires an existing matching entry in the controller account's `known_hosts`. A new machine needs an explicit trust decision before it can receive credentials. [Inspect and approve a host key.](./terminal.md#verify-the-host-before-connecting)
+
 ### Sync config — `ISyncConfig`
 
 ```typescript
 interface ISyncConfig {
-  interval?:  number;     // 30_000 ms — optional slave push cadence, not the master pull interval
-  batchSize?: number;     // 1_000 entries per batch
+  interval?:  number;     // 30_000 ms between worker outbox maintenance runs
+  batchSize?: number;     // 1_000 entries when a drain request omits its limit
 }
 ```
 
@@ -300,7 +304,7 @@ sequenceDiagram
     Slave-->>Master: batch (entries remain pending)
     Master->>Master: ingest with deduplication
     alt confirmed outcome
-      Master->>Slave: ackDrained({ids})
+      Master->>Slave: ackDrained({ids, receipt})
       Slave->>Buffer: acknowledge confirmed IDs
     else failure
       Master->>Master: retain diagnostic cause; retry later
@@ -516,9 +520,7 @@ Update one node at a time. Verify every previously running application's health,
 
 Upgrade the master and nodes independently. New masters attach a versioned receipt
 with `committedIds` and `discardedIds`; old nodes ignore the extra field. New nodes
-still accept old acknowledgements, recording them as unverified. A legacy push
-response with only counts releases data only when those counts cover the complete
-batch. Partial or ambiguous responses leave the batch pending.
+still accept old acknowledgements, recording them as unverified. A worker that only pushes to a custom receiver needs to support authenticated pull before upgrading its controller. Check for a fresh mesh status and a new receipt before advancing the rollout.
 
 Existing pending IDs stay unchanged during the SQLite migration. Newly appended
 entries use a persistent random buffer epoch and sequence on the wire. A new local
@@ -583,7 +585,7 @@ the node receipts before retrying a partial operation.
 - **Unbounded pool/lock waits.** Configure finite pool acquisition deadlines;
   lease operations already bound SQL statements and lock waits.
 - **Treating `OmnitronSync` as low-latency RPC.** It's batch
-  replication with a 15 s master pull cadence (optional slave push defaults to 30 s). For real-time
+  replication with a nominal 15 s master pull cadence. For real-time
   cross-daemon coordination, use direct RPC to the relevant
   service.
 - **Editing a slave's `state.json` and expecting it to propagate.**

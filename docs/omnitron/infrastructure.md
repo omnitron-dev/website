@@ -659,13 +659,13 @@ always points at the current location.
 | Command | Effect |
 | ------- | ------ |
 | `omnitron infra up` | Provision all infrastructure |
-| `omnitron infra down [--volumes]` | Stop + remove containers. (`--volumes` is accepted but volume deletion is not yet implemented — it prints a hint to run `docker volume prune` manually.) |
+| `omnitron infra down` | Stop and remove owned standalone containers by their observed Docker IDs. Their volumes are retained. The legacy `--volumes` flag returns an error. |
 | `omnitron infra status` (`ps`) | Container inventory |
 | `omnitron infra logs [service] [-f] [-n N]` | Tail container logs |
 | `omnitron infra psql [database]` | Open psql against the managed Postgres |
 | `omnitron infra redis-cli` | Open redis-cli against the managed Redis |
-| `omnitron infra migrate [app]` | Run database migrations |
-| `omnitron infra reset [--yes]` | **DESTRUCTIVE** — drop and recreate all data |
+| `omnitron infra migrate [app] [--dry-run]` | Resolve and run workspace package migration scripts in dependency order. Use `--dry-run` to inspect the packages. |
+| `omnitron infra reset --yes` | Recreate owned standalone containers and reuse their existing volumes. |
 
 → Full reference: [CLI / Infrastructure](./cli.md#infrastructure).
 
@@ -689,8 +689,7 @@ always points at the current location.
 - **Sharing a `redis` instance between dev and staging without DB
   offsets.** Keyspaces collide. Use `portOffsets` and
   `redisDbOffset`.
-- **`omnitron infra reset` without backup.** Destroys data
-  irreversibly. Run `omnitron backup create` first.
+- **Using container reset to clear a database.** Reset retains named volumes. Use the database’s own reviewed maintenance procedure to change its contents.
 - **Embedding secrets in env templates as literals.** Use the
   `${secret:X}` template; the daemon decrypts at injection time.
 - **Bypassing the resolver to write Docker compose by hand.**

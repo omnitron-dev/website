@@ -346,7 +346,7 @@ on `omnitron up` — at runtime, you can toggle without restart.
 Each launched app reports:
 
 - **stdio logs** → ingested by the daemon's log-collector service.
-- **Metrics samples** → pushed via the netron-telemetry-transport.
+- **Process metrics** are sampled by the daemon. Worker samples reach the controller through the authenticated replication outbox.
 - **Health probes** → pulled by the daemon's health scheduler.
 - **Ready / shutdown** → IPC handshake on the fork channel.
 

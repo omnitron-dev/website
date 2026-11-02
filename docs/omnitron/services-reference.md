@@ -33,26 +33,26 @@ diffs them against the index table below.
 | `deploy.rpc-service.ts` | `OmnitronDeploy` | 4 | viewer (history) + operator (deploy/rollback) |
 | `discovery.rpc-service.ts` | `OmnitronDiscovery` | 3 | viewer |
 | `event-broadcaster.rpc-service.ts` | `OmnitronEvents` | 3 | viewer (subscribe, unsubscribe, stats) |
-| `fleet.rpc-service.ts` | `OmnitronFleet` | 8 | viewer (read) + operator (mutate); heartbeat anonymous |
+| `fleet.rpc-service.ts` | `OmnitronFleet` | 7 | Viewer reads and operator inventory changes |
 | `health-check.rpc-service.ts` | `OmnitronHealth` | 4 | viewer |
 | `infrastructure.rpc-service.ts` | `OmnitronInfra` | 18 | viewer (read) + operator (start/stop/remove) |
 | `kubernetes.rpc-service.ts` | `OmnitronKubernetes` | 9 | admin |
 | `log-collector.rpc-service.ts` | `OmnitronLogs` | 4 | viewer |
 | `node-manager.rpc-service.ts` | `OmnitronNodes` | 33 | viewer (read), operator (operations), admin (historical repair) |
 | `pipeline.rpc-service.ts` | `OmnitronPipelines` | 9 | admin + live human session / trusted local CLI |
-| `project.rpc-service.ts` | `OmnitronProject` | 39 | Viewer reads and reviews, operator starts/stops, administrator manages registrations, machine credentials run the recipient protocol |
+| `project.rpc-service.ts` | `OmnitronProject` | 43 | Viewer reads and reviews, operator starts/stops, administrator manages registrations, machine credentials run the recipient protocol |
 | `release.rpc-service.ts` | `OmnitronRelease` | 12 | viewer (read), operator (build/attest), admin (prune) |
 | `secrets.rpc-service.ts` | `OmnitronSecrets` | 6 | admin |
-| `sync.rpc-service.ts` | `OmnitronSync` | 6 | authenticated control plane; historical repair excludes operators |
+| `sync.rpc-service.ts` | `OmnitronSync` | 5 | authenticated control plane; historical repair excludes operators |
 | `system-info.rpc-service.ts` | `OmnitronSystemInfo` | 1 | viewer |
-| `telemetry.rpc-service.ts` | `OmnitronTelemetry` | 2 | pushBatch anonymous; getRelayStats viewer |
+| `telemetry.rpc-service.ts` | `OmnitronTelemetry` | 1 | Authenticated relay statistics |
 | `trace-collector.rpc-service.ts` | `OmnitronTraces` | 5 | viewer (read); operator/admin (ingestion) |
 
-And, only when `daemon.cluster.enabled` is set on a master:
+Cluster participation is exposed on controllers, workers and standalone daemons:
 
 | File | Service id (Netron) | Methods | Role gate |
 | ---- | ------------------- | ------- | --------- |
-| `cluster/cluster.rpc-service.ts` | `OmnitronCluster` | 3 | authenticated reads; operator/control-plane step-down |
+| `cluster/cluster.rpc-service.ts` | `OmnitronCluster` | 3 | authenticated reads and administrator step-down |
 
 Plus the core supervisor:
 
@@ -60,20 +60,14 @@ Plus the core supervisor:
 | ---- | ---------- | ------- | --------- |
 | `daemon/daemon.rpc-service.ts` | `OmnitronDaemon` | 27 | mixed — see [Daemon](./daemon.md#rpc-surface--omnitrondaemon-service) |
 
-And two the daemon does not declare at all — they come from Titan
-modules it imports, and are registered by those modules:
+The daemon exposes its role-protected metrics facade and imports the Titan health service:
 
 | File | Service id | Methods | Role gate |
 | ---- | ---------- | ------- | --------- |
 | `apps/omnitron/src/services/metrics.rpc-service.ts` | `OmnitronMetrics` | 7 | Viewer/control-plane reads (including `getStorageStatus`); operator/control-plane `flush`; admin `cleanup` and `evictApp` |
-| `packages/titan-health/src/health.rpc-service.ts` | `Health@1.0.0` | 7 | **all 7 anonymous** |
+| `packages/titan-health/src/health.rpc-service.ts` | `Health@1.0.0` | 7 | public `live` and `ready`, 5 detailed methods require control-plane read access |
 
-Both are worth knowing about for a reason beyond completeness: they are
-the daemon's anonymous surface. Ten of their thirteen methods answer
-without credentials, because `allowAnonymous` is declared in the
-packages and the daemon cannot override it. That is harmless while
-`daemon.host` is `127.0.0.1` and an exposure the moment it is not —
-`omnitron doctor` reports it as `auth.anonymous-surface`.
+`OmnitronMetrics` requires authorization for every method. Use `omnitron doctor` to check which diagnostic methods a particular daemon exposes to an unauthenticated connection. It reports observed exposure as `auth.anonymous-surface`.
 
 ## Naming convention
 
@@ -205,12 +199,10 @@ live UI updates.
 | Method | Effect |
 | ------ | ------ |
 | `subscribe({channels, ...})` | Register a subscriber; returns `subscriberId` |
-| `unsubscribe({subscriberId})` | Drop subscription |
-| `pushEvent({channel, payload})` | Publish an event (admin-only; test/admin path) |
-| `getStats()` | Subscriber count + per-channel stats |
+| `unsubscribe()` | Drop the subscription owned by the calling connection |
+| `getStats()` | Subscriber count |
 
-`subscribe` / `unsubscribe` / `getStats` gate on `viewer`;
-`pushEvent` requires `admin`.
+All three methods admit viewers. Publication is internal to the daemon.
 
 ### `OmnitronFleet` — `fleet.rpc-service.ts`
 
@@ -225,12 +217,10 @@ Cross-node fleet operations: register nodes, drain, set roles.
 | `removeNode({nodeId})` | Remove |
 | `setRole({nodeId, role})` | Promote / demote a node |
 | `drainNode({nodeId})` | Drain workloads off a node |
-| `heartbeat({nodeId})` | Node liveness ping (called by remote daemons) |
 
 Reads (`listNodes`, `getNode`, `getSummary`) gate on `viewer`;
 mutations (`registerNode`, `removeNode`, `setRole`, `drainNode`)
-on `operator`. `heartbeat` is `allowAnonymous` — follower daemons
-call it before they hold a token.
+on `operator`. The scheduler records local liveness against its own registration.
 
 ### `OmnitronHealth` — `health-check.rpc-service.ts`
 
@@ -358,17 +348,17 @@ resolve to the same runtime scope as Start; the report retains the public projec
 and stack names. Concurrent readers share an in-flight inspection. See
 [readiness before start](./console.md#stacks).
 
-Project and stack registry: 36 public methods, including release checks, account operations and infrastructure ownership.
+The project and stack registry exposes release checks, account operations, infrastructure ownership and per-node lifecycle receipts.
 
 | Method category | Methods |
 | --------------- | ------- |
 | Projects | `listProjects`, `getProject`, `scanRequirements`, `addProject`, `updateProject`, `removeProject`, `importConfiguration`, `detachConfiguration` |
 | Project apps and topology | `getProjectApps`, `getTopology`, `getTopologyInventory`, `refreshTopologyMetadata` |
 | Target workspace | `getTopologyWorkspace`, `saveTopologyDraft`, `planTopology`, `applyTopologyPlan` |
-| Stacks | `listStacks`, `getStack`, `getStackStatus`, `diagnoseStack`, `inspectInstalledArtifacts`, `createStack`, `deleteStack`, `startStack`, `stopStack` |
+| Stacks | `listStacks`, `getStack`, `getStackStatus`, `diagnoseStack`, `inspectInstalledArtifacts`, `createStack`, `deleteStack`, `startStack`, `reviewStackStop`, `stopStack`, `resumeInstalledStack` |
 | Infrastructure ownership | `refreshInfrastructureOwnership`, `inspectStackHost`, `probeLeftovers`, `stackMaintenance` |
 | Stack accounts | `censusStackAccounts`, `createStackAccount`, `removeStackAccount`, `showStackAccount` |
-| Node stop protocol | `prepareNodeStackStop`, `executeNodeStackStop` |
+| Recipient lifecycle protocol | `inspectNodeStackStop`, `prepareNodeStackStop`, `executeNodeStackStop`, `prepareNodeInstalledResume`, `executeNodeInstalledResume`, `getNodeInstalledResumeReceipt` |
 | Release inspection | `checkRelease`, `getDeployProgress` |
 
 `updateProject({ name, path })` changes the registered location while preserving the
@@ -381,7 +371,7 @@ otherwise make process definitions and installed package identities disagree.
 
 Roles: all reads (`listProjects`, `getProject`, `scanRequirements`,
 `getProjectApps`, `getTopology`, `getTopologyInventory`, `getTopologyWorkspace`, `listStacks`, `getStack`, `getStackStatus`, `diagnoseStack`) gate on
-`viewer`; `startStack` / `stopStack` on `operator`; project CRUD
+`viewer`; `startStack`, `stopStack` and `resumeInstalledStack` on `operator`; project CRUD
 (`addProject`, `updateProject`, `removeProject`) and stack CRUD
 (`createStack`, `deleteStack`) on `admin`. Target mutations (`saveTopologyDraft`,
 `planTopology`, `applyTopologyPlan`) also require `admin`. They persist target intent,
@@ -407,20 +397,13 @@ cluster mode).
 
 | Method | Effect |
 | ------ | ------ |
-| `receiveBatch(batch)` | Accept a sync batch from another daemon |
 | `drainBuffer({limit?})` | Pull pending sync data |
 | `ackDrained({ids})` | Acknowledge what the caller has durably taken |
 | `getSyncStatus()` | Current sync state |
 | `readUnverifiedMetrics({after?, through?, epoch?, limit?})` | Read a bounded page of retained historical metrics; admin or service identity |
-| `acknowledgeReconciliation({proofs})` | Verify payload-bound database proofs and atomically settle source evidence; admin or service identity |
+| `acknowledgeReconciliation({proofs})` | Settle retained evidence against payload-bound database proofs (service identity only) |
 
-`receiveBatch`, `drainBuffer` and `ackDrained` gate on `['admin',
-'operator', 'service_role']` (daemon-to-daemon over TCP);
-`getSyncStatus` accepts human read roles and the authenticated control plane.
-Historical repair methods require `admin` or `service_role`; neither `viewer` nor
-`operator` can change proof. The master coordinator
-`OmnitronNodes.reconcileNodeMetrics` requires `admin`. Inspection is its default;
-`restore: true` explicitly enables repair.
+`drainBuffer` and `readUnverifiedMetrics` accept administrators and authenticated machines. Only `service_role` can acknowledge a drained batch or settle historical evidence. Administrators inspect and repair records through `OmnitronNodes.reconcileNodeMetrics` on the controller. Inspection is the default. Pass `restore: true` for repair. The controller binds each batch to its authenticated node connection. All Console read roles and the authenticated machine can call `getSyncStatus`.
 
 Production replication uses the master's authenticated mesh connection to pull
 `drainBuffer` batches from each slave. The master ingests a batch before calling
@@ -428,8 +411,7 @@ Production replication uses the master's authenticated mesh connection to pull
 Rejected entries remain pending. Permanently discarded entries are logged as
 errors and acknowledged explicitly.
 
-`SyncService.setMasterConnection()` is an unused push-path hook. Its `connected`
-flag does not describe the active pull channel. Inspect pending entries, the last
+Inspect pending entries, the last
 acknowledgement, node reachability and mesh logs when diagnosing replication.
 An unavailable reading is unknown, not an empty backlog.
 
@@ -445,24 +427,11 @@ The webapp uses this for the host-info card.
 
 ### `OmnitronTelemetry` — `telemetry.rpc-service.ts`
 
-Telemetry ingestion endpoint for `titan-telemetry-relay`
-aggregator role. It is registered only on master daemons. Apps push batches here;
-the daemon stores and aggregates. Slave log/metric replication uses `OmnitronSync`
-above and does not require this separate relay endpoint.
-
-| Method | Effect |
-| ------ | ------ |
-| `pushBatch({nodeId, entries})` | Follower daemon pushes batch; returns `{ ackd }` count |
-| `getRelayStats()` | Internal relay stats |
-
-`pushBatch` is `allowAnonymous` (follower daemons call it over TCP
-before holding a token); `getRelayStats` gates on `viewer` (webapp
-monitoring).
+`getRelayStats()` returns relay statistics to authorized readers and machine peers on the master. Workers use the authenticated `OmnitronSync` protocol for log and metric replication. A controller acknowledges committed data. See [replication evidence](./cluster.md).
 
 ### `OmnitronCluster` — `cluster/cluster.rpc-service.ts`
 
-PostgreSQL-authoritative coordination across master controllers. Registered only
-when programmatic `daemon.cluster.enabled` is set on a master.
+Controllers, workers and standalone daemons report their participation. An enrolled controller additionally reports its PostgreSQL lease.
 
 | Method | Effect |
 | --- | --- |
@@ -471,7 +440,7 @@ when programmatic `daemon.cluster.enabled` is set on a master.
 | `isLeader()` | Whether this node holds a confirmed fresh lease |
 
 All reads require viewer/operator/admin or a control-plane service identity.
-Step-down requires operator/admin or a control-plane service identity. The former
+Step-down requires an administrator. The former
 anonymous vote and heartbeat methods have been removed. A lease observation is
 not a fence for remote effects; see [cluster coordination](./cluster.md).
 
@@ -494,7 +463,7 @@ Distributed trace ingestion + query.
 | `viewer`    | `viewer`, `operator`, `admin`      | Read-only inspection |
 | `operator`  | `operator`, `admin`                | Lifecycle + scale |
 | `admin`     | `admin` only                       | Arbitrary execution, automation, SSH, shutdown, secrets, role changes |
-| anonymous   | anyone with socket access          | `ping`, the `OmnitronAuth` endpoints, `OmnitronFleet.heartbeat`, `OmnitronTelemetry.pushBatch` |
+| anonymous   | anyone with socket access          | `ping` and public sign-in/session endpoints |
 
 Methods on the same service can vary in role:
 - `OmnitronAuth.signIn` is anonymous;
@@ -540,9 +509,7 @@ The same code works against a remote daemon by swapping the URL
 - **Long-running calls on RPC.** Some methods (deploy, backup
   restore) can run for minutes — prefer fire-and-forget patterns
   (start the run; poll status) over a long-held RPC.
-- **Hand-rolling JSON for `pushBatch` / `ingestBatch`.** The
-  contract types are exported — use them; the wire format may
-  evolve.
+- **Sending unauthenticated telemetry to the daemon.** Managed workers retain replication entries in their outbox. Monitor delivery through the registered node and its persistence receipts.
 - **Treating `OmnitronSync` as a public API.** It's daemon-to-
   daemon plumbing. The shape may change between releases without
   notice.
@@ -585,8 +552,7 @@ changes and their outcomes.
 `OmnitronFileNode.invoke` runs on each node and accepts the v1 typed file protocol only for authenticated control-plane service peers. It implements OS access, private staging and durable write receipts. It is not a browser or application RPC proxy. See [File workspace](./files.md).
 
 
-`OmnitronProject.prepareNodeStackStop` and `executeNodeStackStop` are authenticated
-control-plane operations (administrator, operator or service role). The first records
-a bounded node-side plan; the second executes its exact operation identity and
-returns a verified durable receipt. Ownership is checked on the server. User-facing
-`stopStack` coordinates these calls and keeps observation RPC connected.
+The six recipient lifecycle operations accept only an authenticated machine credential.
+`stopStack` and `resumeInstalledStack` coordinate them on behalf of an operator.
+Nodes verify ownership and admission before applying an effect. Their durable
+receipts are available to the controller after a transport interruption.

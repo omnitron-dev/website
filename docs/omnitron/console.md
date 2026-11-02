@@ -236,7 +236,7 @@ complete inventory. Wide tables scroll inside their own keyboard-focusable regio
 `/apps/:name` — single-app deep dive:
 - Live status with restart history timeline.
 - Per-process breakdown (sub-processes for bootstrap mode).
-- Resource graphs (CPU / RSS / event-loop lag).
+- The Metrics tab loads interactive history on demand. The application overview and categorical resource rankings load independently of the chart engine.
 - Health probes summary.
 - DI dependency graph (renders Mermaid via daemon's
   `getDependencyGraph`).
@@ -252,6 +252,8 @@ runtime (Docker container count).
 
 `/stacks/:name` — per-stack view: which apps run here, which
 infrastructure, runtime status. Start / stop the whole stack.
+
+A stack with a confirmed signed stop offers **Resume installed apps** to operators. The detail page shows each target's receipt, confirmed applications and failure reason. After a partial recovery or a legacy receipt, **Review new stop…** opens the inventory for a fresh review. See [Resume installed applications](./projects.md#resume-installed-applications).
 
 **Diagnose**, on a stack card or its detail page, opens an on-demand readiness
 report. It is separate from Start: it never provisions services, starts apps,
@@ -407,8 +409,7 @@ managed through their owning stack.
 ### Containers
 
 `/containers` — Docker container inventory from `OmnitronInfra`.
-Shows status, image, ports, resource use. Per-container actions:
-restart, logs, exec (when daemon has Docker socket access).
+The inventory shows status, image, ports and resource use. Inspect a container's logs from its row. Start, stop and remove are available according to role and ownership. A **Read only** indicator explains cluster or platform restrictions on that container. Select or focus the indicator to inspect the reason.
 
 ### Deployments
 
@@ -457,6 +458,7 @@ single-trace waterfall, service-map view. Backed by
 - Latest recorded health-check time refreshes with node status, independently of the slower historical aggregation. An unavailable history read retains the last evidence and shows a warning.
 - SSH connectivity test.
 - Per-node actions: drain, remove, edit.
+- **Diagnose** reports cluster participation and the recipient operations advertised by that backend. Missing participation evidence from an older daemon is shown as unknown.
 
 ### Projects
 

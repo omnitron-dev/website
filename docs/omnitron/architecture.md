@@ -290,8 +290,7 @@ Two launch modes:
 
 ## Built-in RPC services
 
-A master daemon registers 21 Netron services at boot (22 when
-`cluster.enabled`). A slave daemon registers a reduced core set —
+A daemon exposes services according to its configured role. A worker registers a reduced core set —
 the PostgreSQL-backed services (`OmnitronAuth`, `OmnitronAlerts`,
 `OmnitronTelemetry`, `OmnitronFleet`, `OmnitronDiscovery`,
 `OmnitronPipelines`, `OmnitronTraces`, `OmnitronDeploy`,
@@ -324,7 +323,7 @@ clients resolve, e.g. `daemon.OmnitronAuth.signIn(...)`).
 | `OmnitronAlerts`      | Alert rules + delivery                                     |
 | `OmnitronSync`        | Cross-daemon state synchronisation                         |
 | `OmnitronSystemInfo`  | Host CPU / RAM / disk inventory                            |
-| `OmnitronCluster`     | Leader election (only when `cluster.enabled`)              |
+| `OmnitronCluster`     | Daemon participation and enrolled controller election              |
 
 → Full reference: [Services reference](./services-reference.md).
 
@@ -440,51 +439,38 @@ immediately even if the file has been rotated.
 
 ```mermaid
 sequenceDiagram
-  participant Child as Child process
-  participant TM as titan-metrics
-  participant Trans as netron-telemetry-transport
-  participant Tel as telemetry service
-  participant CLI as omnitron metrics
-
-  loop every 5s
-    TM->>TM: collect process/system/RPC samples
-  end
-  TM->>Trans: send batch
-  Trans->>Tel: RPC: ingest(nodeId, entries)
-  Tel->>Tel: persist (memory ring / Postgres)
-  CLI->>Tel: getMetrics({name})
-  Tel-->>CLI: aggregated time-series
+  participant W as Worker daemon
+  participant S as Worker SQLite
+  participant C as Controller
+  participant DB as PostgreSQL
+  W->>S: Commit samples and outbox rows together
+  C->>W: Read pending batch over authenticated mesh
+  W-->>C: Entries with source and sequence
+  C->>DB: Commit accepted entries and persistence evidence
+  C->>W: Acknowledge committed delivery
+  C->>DB: Read history for CLI and Console
 ```
 
-Apps push metrics to the daemon via Netron — the daemon stores
-and aggregates centrally. The webapp reads the same store.
+The controller stores its own samples directly through Titan's PostgreSQL adapter. Each source retains unacknowledged worker entries. See [replication and receipts](./cluster.md).
 
 ## Data flow — leader election (cluster mode)
 
 ```mermaid
 sequenceDiagram
-  participant D1 as Daemon-1
-  participant D2 as Daemon-2
-  participant D3 as Daemon-3
-  participant R as Redis (or Consul)
-
-  Note over D1,D3: All boot as follower
-  D1->>R: acquire leader lock (key: cluster:leader)
-  R-->>D1: ok
-  D1->>D1: role := master
-  loop heartbeatInterval (2s)
-    D1->>R: refresh lock TTL
-    D2->>R: read leader; observe D1
-    D3->>R: read leader; observe D1
-  end
-  Note over D1: D1 crashes
-  R-->>R: lock TTL expires
-  D2->>R: try acquire — wins
-  D2->>D2: role := master
+  participant A as Controller A
+  participant B as Controller B
+  participant DB as PostgreSQL primary
+  participant W as Enrolled worker
+  A->>DB: Acquire leased epoch
+  A->>DB: Renew while the grant is fresh
+  A->>W: Signed operation for this node
+  W->>DB: Verify current grant before admitting the effect
+  Note over A,DB: A releases its lease or the lease expires
+  B->>DB: Acquire a higher epoch
+  W->>DB: Reject later effects signed by A
 ```
 
-Step-down is graceful: `omnitron cluster step-down` releases the
-lock and demotes self before the next election.
+An administrator can request a transfer with `omnitron cluster step-down`. The current controller demotes and releases its epoch. A successor reports leadership after PostgreSQL confirms its grant.
 
 ## Database and diagnostics boundaries
 

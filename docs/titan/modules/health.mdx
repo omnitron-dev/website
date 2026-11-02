@@ -72,6 +72,7 @@ Async configuration via `forRootAsync({ useFactory, inject?, imports?, isGlobal?
 | `enableCaching`              | `boolean`                                                                             | `false`       |
 | `cacheTtl`                   | `number` (ms)                                                                         | `1_000`       |
 | `enableRpcService`           | `boolean` — expose Netron RPC                                                         | `true`        |
+| `detailRpcRoles` | Nonempty roles for detailed Netron calls, declared at module registration | unset |
 | `version`                    | `string`                                                                              | —             |
 | `isGlobal`                   | `boolean`                                                                             | `false`       |
 | `indicators`                 | `Array<new (...args) => IHealthIndicator>` — custom indicator classes                 | —             |
@@ -212,8 +213,7 @@ await healthSvc.live();    // LivenessResponse
 await healthSvc.ready();   // ReadinessResponse
 ```
 
-This is what the Omnitron CLI and web console call for remote
-inspection — no need to expose extra HTTP routes.
+Pass `detailRpcRoles: ['viewer', 'operator', 'admin']` to `forRoot` or return it from the `forRootAsync` factory to protect `check`, `checkIndicator`, `listIndicators`, `uptime` and `isHealthy`. With this policy the anonymous `live` and `ready` probes contain only status and timestamp. Each module registration has its own policy. When the option is omitted, the module keeps its existing public diagnostics. Omnitron sets its control-plane read roles explicitly, including its authenticated service identity.
 
 ## TTL caching
 

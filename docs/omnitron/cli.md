@@ -43,7 +43,7 @@ when piped into another process. Check both the JSON result and the exit status.
 | **Backend installation and replacement** | `backend status`, `backend install`, `backend installation`, `backend select`, `backend upgrade`, `backend abort`, `backend recover`, `backend owner-reconcile prepare`, `backend owner-reconcile acknowledge` |
 | **Project** | `project add`, `project list`, `project remove`, `project scan`, `project topology` |
 | **Topology** | `topology refresh`, `topology show`, `topology export`, `topology draft`, `topology plan`, `topology apply` |
-| **Stack** | `stack list`, `stack create`, `stack delete`, `stack status`, `stack progress`, `stack diagnose`, `stack start`, `stack stop`, `stack runtime` |
+| **Stack** | `stack list`, `stack create`, `stack delete`, `stack status`, `stack progress`, `stack diagnose`, `stack start`, `stack stop`, `stack resume`, `stack runtime` |
 | **App lifecycle** | `start`, `stop`, `restart`, `reload` |
 | **Information** | `list` (alias `ls`), `status`, `config`, `init` |
 | **Monitoring** | `logs`, `monit`, `health`, `metrics`, `health-check`, `discover` |
@@ -87,7 +87,7 @@ migration. See [topology review, permissions and limits](./topology.md).
 default. `--config` selects a configuration; `--daemon` explicitly selects the
 daemon database. `up --dry-run` previews, `up --to NAME` selects a prefix, and
 `down --steps N` rolls back a suffix. `verify` exits with 2 when integrity is
-unknown or mismatched. See [migration configuration and recovery](./migrations.md).
+unknown or mismatched. Direct `up` and `down` require a standalone installation. For a clustered controller schema change, use the reviewed backend schema workflow. See [migration configuration and recovery](./migrations.md).
 
 ## Backend replacement
 
@@ -272,6 +272,7 @@ infrastructure to a subset of the project's apps.
 | `omnitron stack progress <project> [stack]` | Latest remote transfer observation per stack, node and app, including its operation ID and any release ID |
 | `omnitron stack diagnose <project> <stack>` | Read-only prerequisite checks and planned changes before start |
 | `omnitron stack start <project> <stack>` | Start everything in the stack |
+| `omnitron stack resume <project> <stack>` | Resume the retained release on the nodes in a confirmed cluster stop. Partial and unconfirmed results exit nonzero. Inspect each node in `--json` output. |
 | `omnitron stack stop <project> <stack> [--dry-run] [--review <digest>]` | Inspect every target with `--dry-run`. Pass its digest to stop the reviewed applications and containers. Volumes are retained. |
 | `omnitron stack runtime <project> <stack>` | Show runtime details (containers, ports) |
 
@@ -603,13 +604,15 @@ custom) provisioned per app's `omnitronConfig.infrastructure`.
 | Command | Effect |
 | ------- | ------ |
 | `omnitron infra up` | Provision and start all infra services |
-| `omnitron infra down [--volumes]` | Stop containers; `--volumes` also removes data |
+| `omnitron infra down` | Remove containers owned by the current standalone configuration and preserve their volumes. The legacy `--volumes` option is rejected. |
 | `omnitron infra status` (alias `infra ps`) | Container status |
 | `omnitron infra logs [service] [-f] [-n N]` | View logs for one or all infra services |
 | `omnitron infra psql [database]` | Open `psql` shell |
 | `omnitron infra redis-cli` | Open `redis-cli` shell |
-| `omnitron infra migrate [app]` | Run database migrations |
-| `omnitron infra reset [--yes]` | **DESTRUCTIVE** — drop and recreate all data |
+| `omnitron infra migrate [app] [--dry-run]` | In a standalone ecosystem, resolve the selected applications to package migration scripts and run each package once in dependency order. Preview the packages with `--dry-run`. A failing script stops the sequence and identifies its application. |
+| `omnitron infra reset --yes` | Recreate owned containers using their existing volumes. |
+
+Direct infrastructure mutations require a standalone installation. For projects declaring named stacks, use the project and stack lifecycle to provision or remove containers. An enrolled node requires admission through the cluster lifecycle protocol. Direct container operations verify ownership and use the observed Docker ID before removal.
 
 ## Pipelines (Xec automation)
 

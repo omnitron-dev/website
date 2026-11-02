@@ -19,7 +19,7 @@ Verified against `apps/omnitron/src/{observability,monitoring,services}/`.
 | Signal | Owner | Storage | Exposure |
 | ------ | ----- | ------- | -------- |
 | **Logs** | Titan PM capture + `LogManager` + `LogCollectorService` | Private SQLite delivery journals; per-app files; PostgreSQL/SQLite `logs` | RPC: `OmnitronLogs.queryLogs` / `streamLogs` |
-| **Metrics** | `MetricsBridge` + `OmnitronTelemetry` | Titan PostgreSQL history on masters; SQLite on updated nodes | RPC: `OmnitronTelemetry.pushBatch` (ingest), `OmnitronMetrics` (read) |
+| **Metrics** | `MetricsBridge`, Titan storage and `OmnitronSync` | PostgreSQL on controllers, SQLite history and outbox on workers | CLI and Console query `OmnitronMetrics` |
 | **Traces** | `OmnitronTraces` (`TraceCollectorService`) | Postgres (`OmnitronDatabase`), write-buffered | RPC: `ingestSpan`, `ingestBatch`, `getTrace`, `queryTraces`, `getServiceMap` |
 | **Health** | `OmnitronHealth` (app/infra probes) + `OmnitronNodes` health monitor (fleet) | rolling window in state-store / node history | RPC: `OmnitronHealth.checkApp` / `checkAll`; `OmnitronNodes.getCheckHistory` / `getUptimeBar` |
 
@@ -173,25 +173,7 @@ The compact log rows show event time; expanded metadata includes the capture ID,
 
 ### Flow
 
-```mermaid
-sequenceDiagram
-  participant App as App process
-  participant TM as titan-metrics
-  participant Trans as netron-telemetry-transport
-  participant Tel as OmnitronTelemetry service
-  participant Store as titan-metrics storage
-  participant CLI as omnitron metrics / webapp
-
-  loop every collection.interval (5s default)
-    TM->>TM: sample process + system + RPC
-  end
-  TM->>Trans: send batch
-  Trans->>Tel: pushBatch({nodeId, entries})
-  Tel->>Store: write samples
-  Store->>Store: aggregate to ring / persist
-  CLI->>Store: querySeries(filter)
-  Store-->>CLI: time series
-```
+The daemon collects process observations through Titan. Worker samples enter local history and the replication outbox in one SQLite transaction. The controller pulls pending entries and writes the resulting history to PostgreSQL. CLI and Console read the same storage diagnostics. See the [metrics data flow](./architecture.md#data-flow--metrics-aggregation).
 
 ### Metric persistence and confirmation
 
@@ -262,46 +244,11 @@ in-daemon bridge that:
 - Generates daemon-level `omnitron_*` series alongside per-app
   series.
 
-### Producer side — apps
+### Application metrics and worker replication
 
-App processes load `titan-metrics` (auto-loaded when present in
-their `@Module` imports) and configure the netron-telemetry
-transport:
+Import `TitanMetricsModule` for application-specific instruments. An in-memory application registry retains samples in that process. Configure a persistent storage adapter when the application needs its own retained history. The [Titan metrics guide](../titan/modules/metrics.mdx) covers recording, querying and flushing samples.
 
-```typescript
-@Module({
-  imports: [
-    TitanMetricsModule.forRoot({
-      appName: 'api',
-      collection: { enabled: true, interval: 5_000, process: true, system: true, rpc: true },
-      storage:    { type: 'memory' },
-    }),
-    NetronTelemetryTransportModule.forRoot({
-      targetUrl: 'unix://~/.omnitron/daemon.sock',
-      service:   'OmnitronTelemetry',
-    }),
-  ],
-})
-class AppModule {}
-```
-
-Inside the app, `metrics.recordTyped(...)` calls write to the
-local `titan-metrics` registry; the transport batches them and
-pushes via `OmnitronTelemetry.pushBatch`.
-
-### Aggregator side — daemon
-
-`OmnitronTelemetry.pushBatch({nodeId, entries})`:
-1. Accepts a batch from any app.
-2. Hands it to the configured storage backend
-   (`memory` / `sqlite` / `postgres`).
-3. Returns the count of entries accepted (used for ack).
-
-The aggregator role typically runs on the master daemon; slave
-daemons either:
-- Run their own local aggregator + sync metrics via
-  `OmnitronSync`, or
-- Push directly across the network to master via TCP transport.
+The daemon samples the processes it supervises. A worker writes samples and replication entries in one SQLite transaction. The controller pulls entries over the authenticated mesh, commits delivery evidence and acknowledges the source. Use `omnitron --json metrics` and node diagnostics to inspect persistence and the replication backlog. Older sources may have different evidence coverage.
 
 ### Read side — `OmnitronMetrics` (from `titan-metrics`)
 
@@ -379,15 +326,13 @@ running inside a managed app).
 ```mermaid
 sequenceDiagram
   participant App as App process
-  participant OTel as titan-tracing
-  participant Trans as netron-telemetry-transport
+  participant Producer as Authorized trace producer
   participant TC as OmnitronTraces service
   participant Store as Postgres (OmnitronDatabase)
   participant UI as Webapp / CLI
 
-  App->>OTel: start span / end span
-  OTel->>Trans: export OTLP-shaped span
-  Trans->>TC: ingestSpan(span) | ingestBatch({spans})
+  App->>Producer: Finished application span
+  Producer->>TC: ingestSpan or ingestBatch
   TC->>TC: buffer span (flush at 500 or every 5s)
   TC->>Store: flush batch (INSERT)
   UI->>TC: getTrace({traceId}) | queryTraces(filter) | getServiceMap()
@@ -578,45 +523,25 @@ for small-to-medium fleets.
 
 ## Wiring telemetry from your apps
 
-The minimum to get an app into the pipeline:
+A supervised application's stdout and stderr already reach the owner log capture. To add application-specific metrics, register the metrics module and choose storage based on the required retention. This example uses a process-local registry.
 
 ```typescript
+import { Module } from '@omnitron-dev/titan/decorators';
+import { TitanMetricsModule } from '@omnitron-dev/titan-metrics';
+
 @Module({
   imports: [
-    // Logs: pino is auto-routed via stdout to LogManager — no module needed
-    // Just use the standard logger
-
-    // Metrics:
     TitanMetricsModule.forRoot({
       appName: 'api',
       collection: { enabled: true },
-      storage:    { type: 'memory' },
-    }),
-    NetronTelemetryTransportModule.forRoot({
-      targetUrl: 'unix://~/.omnitron/daemon.sock',
-      service:   'OmnitronTelemetry',
-    }),
-
-    // Health:
-    TitanHealthModule.forRoot({
-      enableMemoryIndicator:    true,
-      enableEventLoopIndicator: true,
-      enableRpcService:         true,    // exposes Health@1.0.0
-    }),
-
-    // Tracing (optional):
-    TitanTracingModule.forRoot({
-      serviceName: 'api',
-      exporter: { type: 'netron', service: 'OmnitronTraces' },
+      storage: { type: 'memory' },
     }),
   ],
 })
 class AppModule {}
 ```
 
-Logs flow automatically via stdio. Metrics, health, and traces
-each need their respective module imported and wired to the
-daemon's transport.
+Daemon process metrics and replication work independently of that registry. For app-specific readiness checks, configure [Titan health](../titan/modules/health.mdx).
 
 ## Anti-patterns
 

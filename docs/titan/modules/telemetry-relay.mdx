@@ -11,8 +11,7 @@ import ModuleBadge from '@site/src/components/ModuleBadge';
 Store-and-forward telemetry pipeline for distributed Titan
 applications. Producers buffer telemetry locally, persist to an
 on-disk **WAL** (write-ahead log) for crash safety, and ship to a
-remote aggregator over a pluggable transport. On transport failure,
-data survives in the WAL and replays on reconnect.
+remote aggregator over an application-supplied transport. Unconfirmed batches in the WAL replay on recovery. Omnitron uses its own SQLite outbox and database receipts for fleet replication. [Follow a measurement from node to controller.](../../omnitron/observability.md)
 
 ```bash
 pnpm add @omnitron-dev/titan-telemetry-relay
@@ -29,8 +28,7 @@ pnpm add @omnitron-dev/titan-telemetry-relay
 - **Services that emit telemetry but shouldn't ship it directly.**
   Producer pods buffer locally; an aggregator pod takes the hit of
   shipping to long-term storage.
-- **Network outages without data loss.** Buffer → WAL → retry
-  keeps telemetry alive across collector outages, even pod restarts.
+- **Collector outages.** A producer with persistent WAL storage can retry retained batches after restart.
 - **Sidecar pattern.** Producer in your app pod; aggregator in a
   sidecar; both forward to a canonical sink.
 - **Edge / offline-tolerant deployments.** Branch / IoT nodes that
@@ -44,7 +42,7 @@ flowchart LR
   subgraph Producer pod
     A1[App] -- record/emit --> Buf1[Buffer<br/>1000 entries / 10s]
     Buf1 -- onDrain --> Wal1[WAL<br/>~/.omnitron/wal]
-    Buf1 -- transport --> Net((Netron TCP))
+    Wal1 -- confirmed write --> Net((Authenticated transport))
   end
   Net --> AggPod[Aggregator pod]
   subgraph Aggregator pod
@@ -56,7 +54,7 @@ flowchart LR
 | Role         | Receives                                              | Forwards to                          |
 | ------------ | ----------------------------------------------------- | ------------------------------------ |
 | `producer`   | Local app via `record` / `emitLog` / `emitMetric` / `emitHealth` | Aggregator (via transport) |
-| `aggregator` | Producers via `receive(nodeId, entries)` Netron RPC   | Persistent sink (via `TelemetryAggregator`) |
+| `aggregator` | Authenticated transport handler calling `receive(nodeId, entries)`   | Persistent sink (via `TelemetryAggregator`) |
 | `both`       | Local app + remote producers                          | Persistent sink directly             |
 
 ## Quickstart — producer
@@ -71,7 +69,7 @@ const relay = new TelemetryRelayService({
   wal:    { directory: '/var/lib/omnitron/wal', maxSizeBytes: 50 * 1024 * 1024, maxSegments: 10 },
 });
 
-relay.setTransport(myNetronTransport);
+relay.setTransport(myAuthenticatedTransport);
 await relay.start();
 
 // In your services:
@@ -90,7 +88,7 @@ const relay = new TelemetryRelayService({
 relay.setAggregator(myPersistenceAggregator);   // writes to long-term sink
 await relay.start();
 
-// The Netron RPC handler at this node calls:
+// Your transport handler authenticates the peer, then calls:
 //   relay.receive(nodeId, entries)
 // which delegates to aggregator.ingest(nodeId, entries).
 ```
@@ -143,12 +141,13 @@ network — useful for single-node leader daemons.
 | `maxSizeBytes`  | `number`| `50 * 1024 * 1024` (50 MB per segment)         |
 | `maxSegments`   | `number`| `10` (max ~500 MB total)                       |
 
-Total WAL footprint cap = `maxSizeBytes × maxSegments`.
+Use a separate persistent directory for each producer. Rotation limits the number of segments. A single encoded batch can exceed the target segment size.
 
 ## `TelemetryEntry` — the universal unit
 
 ```typescript
 interface TelemetryEntry {
+  id?:        string;          // stable on retry, optional on older WAL entries
   type:       'log' | 'metric' | 'event' | 'health' | 'alert';
   timestamp:  string;          // ISO 8601
   nodeId:     string;          // injected from relay.nodeId
@@ -192,23 +191,9 @@ interface TelemetryTransport {
 }
 ```
 
-A transport implementation:
-1. Returns an `ack` count from `send()` so the relay knows whether
-   to clear the WAL.
-2. Reports `isConnected()` honestly — the relay short-circuits
-   sends when the transport is offline.
-3. Survives `connect()` being called multiple times (idempotent
-   semantics expected).
+Implement `connect` and `disconnect` for your transport. Bind the source identity to an authenticated connection before passing a batch to `receive`. Return the committed count from the sink. An empty response, a fraction or a count outside the range of the batch is an invalid acknowledgement. A partial count leaves the entire retained snapshot eligible for replay. If a response is lost after commit, earlier records can arrive again.
 
-Common transports:
-
-- **Netron TCP** — default for cluster-internal hops. Type-safe,
-  multiplexed, automatically reconnects.
-- **HTTP POST** — for cross-cluster shipping to a managed
-  collector. Implement `send()` as an HTTP call returning ack
-  count.
-- **Direct local call** (`role: 'both'` with no transport) — the
-  relay skips transport and feeds the local aggregator directly.
+Use `entry.id` scoped to the authenticated producer for idempotency. New records receive an ID at admission. Records from a WAL created by older releases can lack one. The receiver decides how to handle their duplicate risk. Where you need durable per-entry evidence or historical reconciliation across Omnitron nodes, use the fleet replication service.
 
 ## Aggregator contract
 
@@ -234,67 +219,15 @@ The aggregator owns persistence — write to Postgres, ClickHouse,
 S3, OTLP collector, or whatever backend fits. `ingest` returns the
 count of entries successfully persisted (used for ack accounting).
 
-## Data flow — happy path
+## Delivery and recovery
 
-```mermaid
-sequenceDiagram
-  participant App
-  participant Buf as TelemetryBuffer
-  participant WAL
-  participant T as Transport
-  participant Agg as Aggregator pod
+1. `record` places an entry in memory. A process crash before the next flush can lose it. Watch `buffer.totalDropped` for memory pressure.
+2. With a WAL, the producer appends the batch and syncs it to disk before sending. Replay and normal sends run in sequence. New arrivals cannot be cleared by a previous send.
+3. The sender reads retained entries in batches of at most `maxBatchSize`. It clears the snapshot after the sink confirms every batch in full. Use a transaction and durable IDs at the sink so replay after a lost acknowledgement is safe.
+4. Incomplete responses or transport failures leave the snapshot available for retry. Use `stats().lastError` for the reason. `start()` can replay a persisted backlog before any new events arrive. `setTransport` can trigger recovery when the relay is running.
+5. WAL retention rotates by segment. Long outages can exceed capacity. Provision persistent space for the expected offline interval and alert on disk usage, `stats().wal?.evictedSegments`, `evictedBytes`, memory drops and delivery failures. Eviction counters cover the current process lifetime.
 
-  App->>Buf: record(entry)
-  Note over Buf: in-memory ring,<br/>up to maxBufferSize
-  loop every flushIntervalMs (10s default)
-    Buf->>Buf: drain → batch of maxBatchSize
-    Buf->>WAL: append(batch)
-    Note over WAL: NDJSON, async fs.write,<br/>serialized via promise chain
-    Buf->>T: send(batch)
-    T->>Agg: TCP send
-    Agg-->>T: ack count
-    T-->>Buf: ackd
-  end
-```
-
-## Data flow — degraded path
-
-```mermaid
-sequenceDiagram
-  participant App
-  participant Buf
-  participant WAL
-  participant T as Transport
-  participant Agg
-
-  App->>Buf: record(entry)
-  loop every flushIntervalMs
-    Buf->>WAL: append(batch)
-    Buf->>T: send(batch)
-    T-->>Buf: throw / not connected
-    Note over Buf: totalFailed += batch.size
-    Buf->>Buf: scheduleRetry()<br/>(30s later, single timer)
-  end
-  Note over T: transport recovers
-  Note over Buf: retry timer fires
-  Buf->>WAL: readAll() — every entry since last successful ack
-  Buf->>T: connect() then send(all WAL entries)
-  T->>Agg: TCP send
-  Agg-->>T: ack count
-  alt ack count == entries.length
-    Buf->>WAL: clear()
-  else partial / no ack
-    Note over WAL: keep entries — next flush retries
-  end
-```
-
-Key invariants:
-- **WAL is the source of truth.** Buffer can lose entries on
-  overflow; WAL keeps them until acked.
-- **Retry uses one timer.** `scheduleRetry()` is no-op while a
-  retry timer is already scheduled — no thundering retries.
-- **Retry interval is 30 s.** Hard-coded; aligns with typical
-  cluster reconnect windows.
+With `wal: false`, pending entries exist in memory only. A failed sink call can return them to that bounded buffer. An application requiring durable replication should use a persistent WAL directory or the Omnitron outbox.
 
 ## WAL on-disk format
 
@@ -310,39 +243,7 @@ highest-numbered one being the current write target. When it
 exceeds `maxSizeBytes`, a new segment opens; segments past
 `maxSegments` are deleted (oldest first).
 
-### Why async writes (and a promise chain)?
-
-The original implementation used `fs.writeSync` on the hot path.
-Telemetry at moderate rate produced multi-millisecond event-loop
-pauses per batch — bursty writes on a slow disk could push a daemon
-past its supervisor liveness deadline.
-
-The current implementation:
-- Queues writes via `fs.write` (async).
-- Serialises through `private writeChain: Promise<void>` so
-  near-simultaneous `append()` calls cannot interleave bytes from
-  different batches.
-- Returns synchronously to the caller; for caller-side durability
-  use `wal.flush()`.
-
-This trade gives smooth ~constant latency at the cost of a tiny
-window after a crash where in-flight bytes may not be on disk.
-
-## Crash recovery
-
-On `start()`, if a WAL and transport are both configured:
-
-1. `wal.readAll()` returns every entry written since the last
-   successful `clear()`.
-2. If the transport is connected, `transport.send(walEntries)` is
-   called.
-3. If the ack count matches, `wal.clear()` truncates segments.
-4. If not, the entries stay in the WAL and the next periodic
-   buffer flush will pick them up.
-
-No data loss within WAL capacity. Beyond capacity (sustained
-outage longer than `maxSegments × maxSizeBytes / write rate`), the
-oldest segment is dropped first.
+An invalid NDJSON record or unreadable segment is a recovery error. Inspect the journal and the sink's committed IDs before repairing it. Keep a copy of the original segments.
 
 ## Statistics
 
@@ -353,10 +254,11 @@ oldest segment is dropped first.
   nodeId:               string;
   role:                 'producer' | 'aggregator' | 'both';
   buffer:               { size, totalPushed, totalDropped, totalFlushed };
-  wal:                  { segments, totalSize, totalWritten, currentSegment } | null;
+  wal:                  { segments, totalSize, totalWritten, currentSegment, evictedSegments, evictedBytes, listError? } | null;
   totalEmitted:         number;
   totalSent:            number;
   totalFailed:          number;
+  lastError:            string | null;
   totalReceived:        number;   // aggregator-side
   transportConnected:   boolean;
 }
@@ -367,17 +269,9 @@ primary signal for "is the pipeline healthy?".
 
 ## Sizing guidance
 
-Pick based on your producer rate and tolerable outage window.
+Each timer tick drains up to `maxBatchSize` entries from the memory buffer. With a ten-second interval and a batch of 500, the upper bound is 50 entries per second before disk and sink latency. At 100 entries per second the backlog will grow with those defaults. Measure under load, then select a batch size and interval that leave room for bursts and slow writes. Size the memory buffer for arrivals between completed flushes.
 
-| Producer rate          | Buffer flush  | WAL segment  | Max outage absorbed                    |
-| ---------------------- | ------------- | ------------ | -------------------------------------- |
-| 100 entries/s           | default (10s) | default (50 MB × 10) | ~5 min (1 KB/entry) to 50 min |
-| 1 000 entries/s         | 2s            | 100 MB × 10  | ~10 min (1 KB/entry)                   |
-| 10 000 entries/s        | 1s            | 500 MB × 20  | ~30 min (1 KB/entry)                   |
-| Bursty (long quiet, fast burst) | longer (30s) flush; large `maxBatchSize` | larger segments | Survives whole-day outage with enough disk |
-
-Rough WAL math: `outage_seconds × producer_rate × avg_entry_bytes
-≤ maxSizeBytes × maxSegments`.
+For a four-hour outage at 100 entries per second and 1,000 encoded bytes per entry, plan for at least 1.44 GB of journal data plus operational headroom. Monitor actual encoded bytes and segment evictions to validate that estimate.
 
 ## Lifecycle
 
@@ -397,25 +291,13 @@ class TelemetryRelayAdapter implements OnStart, OnStop {
 }
 ```
 
-`start()` replays the WAL if a transport is connected; `stop()`
+`start()` attempts to deliver a retained WAL through the configured destination; `stop()`
 flushes the buffer to WAL, disconnects the transport, and disposes
 the WAL (awaits pending writes, closes fds).
 
-## Aggregator-leader election
+## Choosing a destination
 
-The package itself does not implement leader election — that's a
-deployment concern. Common patterns:
-
-| Pattern                                | How                                                    |
-| -------------------------------------- | ------------------------------------------------------ |
-| **Static leader by hostname / pod**    | Aggregator pod is named; producers know its address    |
-| **Kubernetes service**                 | One headless service points at the aggregator deployment |
-| **Discovery-based**                    | Use `titan-discovery` + lock — leader holds a Redis lock; followers query discovery for who has it |
-| **HA aggregator**                      | Multiple aggregators, producers fan out to all; aggregators dedupe at the sink |
-
-For HA, prefer pattern (4) — the relay's `transport.send` returns
-ack count, so a "fan out to N, succeed if ≥ K" wrapper at the
-transport layer is straightforward.
+The application supplies a destination or changes it with `setTransport`. If several collectors share a store, deduplicate against the same durable identity on every collector. Confirm a record only when the configured durability requirement has been met.
 
 ## When to use this vs the built-in logger
 
@@ -428,27 +310,12 @@ transport layer is straightforward.
 | OTel-compatible sink                              | Build a `TelemetryAggregator` wrapping the OTLP exporter |
 | Edge node that may be offline for hours           | This module with large `maxSegments`             |
 
-## Anti-patterns
+## Operational checks
 
-- **`wal: false` in production.** A crash loses everything in the
-  buffer. Always keep WAL on unless you can tolerate gaps.
-- **Tiny `flushIntervalMs`.** Flushing every 100 ms with N producers
-  saturates the aggregator. Defaults (10 s) are tuned for typical
-  loads.
-- **Tiny `maxBufferSize` with high produce rate.** Buffer keeps
-  overflowing to WAL, defeating the in-memory batching.
-- **Producer with no transport.** Without `setTransport`, every
-  flush fails and accumulates in WAL until disk fills. Set a
-  transport before `start()` (or use `role: 'both'` with a local
-  aggregator).
-- **Aggregator without aggregator.** Symmetric — without
-  `setAggregator`, received entries pile in the buffer and are
-  never persisted.
-- **WAL directory on tmpfs.** Defeats the durability guarantee
-  across restarts. Use a real disk volume; verify on PV in k8s.
-- **Per-entry `app` strings with high cardinality.** `app` ends up
-  in indexes at the aggregator — keep it to bounded service names,
-  not per-request identifiers.
+- If `buffer.totalDropped` grows, the producer has exceeded the memory buffer. Oldest in-memory entries are evicted before they reach disk.
+- If WAL eviction counters grow, the outage or input rate has exceeded configured retention. Restore the destination and check for gaps.
+- Before accepting remote traffic, configure the receiving aggregator. A receiver with no sink returns zero acknowledgements.
+- Place each WAL on persistent storage and recover it under its original producer identity.
 
 ## See also
 

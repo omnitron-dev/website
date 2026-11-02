@@ -162,6 +162,23 @@ including after a page/backend reload. A failed stop retains the resources neede
 for reconciliation; complete it before starting a new deployment. Every user stop
 records success or failure in the audit trail.
 
+### Resume installed applications
+
+After an operator confirms a signed stop, the elected controller can resume the same installed applications on their original nodes. Use **Resume installed apps** in Console or run:
+
+```bash
+omnitron --json stack resume example production
+omnitron --json stack status example production
+```
+
+Each node must still be bound to the source stack and retain the stopped process generations and verified release artifacts. The stop must identify each node's exact operation and must have removed no containers. A changed placement, missing owner capability, older receipt without a node operation ID or missing installation prevents recovery. Review a new stop to replace an older receipt. Use deployment when an application needs a different release or configuration.
+
+The process owner binds the application generation, launch configuration, manifest, archive and installed tree at verified launch. A backend upgrade alone cannot reconstruct this evidence for an old owner. Classic Node applications must acknowledge readiness over IPC within 30 seconds (for example, `process.send?.("ready")`).
+
+Preparation checks every node before the first launch. Each owner resumes its applications in dependency order. A node confirms success only after observing all of them online. The result identifies the operation, individual nodes, observed applications, time and failure reason. A lost acknowledgement triggers a read of the node's durable receipt. The controller stops dispatching on the first uncertain target. CLI returns a nonzero exit code for a partial or unconfirmed result.
+
+Use stack status to inspect the persisted `resumeOperation` after a disconnect. An observation describes the applications at that instant. For current health, inspect the stack's live placements and application diagnostics. After a partial start, inspect the affected nodes, then review and complete a fresh stop before another recovery attempt. Recovery leaves the previously disabled automatic startup policy in place.
+
 ### Existing allocations and rollout
 
 Generated node configurations carry `managedOrigin: { project, stack }` and

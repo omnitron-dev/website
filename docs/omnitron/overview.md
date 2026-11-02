@@ -37,7 +37,7 @@ omnitron webapp open                 # open the web console
 | **Daemon** | Long-running supervisor that owns the process tree, exposes a typed Netron RPC surface, and persists state under `~/.omnitron/` |
 | **Orchestrator** | Per-app launch pipeline: TS compile / module load / fork process / wire DI / start lifecycle / watch files in dev |
 | **Process tree** | One OS process per `IProcessEntry` you declare; ≥ 1 instances per process; auto-restart with exponential backoff |
-| **Services** | 21 built-in RPC services on a master daemon — 22 with cluster (auth, deploy, fleet, secrets, k8s, …) exposed from the daemon |
+| **Services** | Role-protected daemon RPC for authentication, deployment, fleet inventory, secrets, infrastructure and diagnostics. Availability depends on daemon role. |
 | **Webapp** | React + Vite single-page console — same RPC surface; lives at `apps/omnitron/webapp/` |
 | **Infrastructure** | Provisions Postgres / Redis / S3-compatible / custom containers via Docker (dev) or bare-metal hooks (prod) |
 | **MCP** | Built-in Model Context Protocol surface — let agents (IDE assistants, CI bots) read state and trigger operations |
@@ -78,7 +78,7 @@ flowchart TB
 
   subgraph Daemon["Omnitron daemon &#40;one per node&#41;"]
     direction TB
-    RPC[Netron RPC<br/>21 services]
+    RPC[Netron RPC services]
     State[(state.json<br/>PID + status)]
     Sched[Daemon scheduler]
   end

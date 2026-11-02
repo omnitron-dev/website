@@ -361,9 +361,9 @@ async ping() { /* ... */ }
 @Public({ auth: { roles: ['user', 'admin'] } })
 async getProfile() { /* ... */ }
 
-// 3. Service-to-service — for inter-app calls
-@Public({ auth: { roles: ['admin', 'operator', 'service_role'] } })
-async receiveBatch(data: SyncBatch) { /* ... */ }
+// 3. Recipient protocol — authenticated machine only
+@Public({ auth: { roles: ['service_role'] } })
+async prepareNodeStackStop(data: NodeStackStopRequest) { /* ... */ }
 ```
 
 The master-to-node path is implemented in `cluster/mesh-link.ts` and `cluster/slave-connector.ts`. It uses the node's registered SSH connection to obtain that node's signing secret, mints an HS256 JWT with issuer `omnitron` and role `service_role` (five-minute default lifetime), then authenticates the persistent peer. Each RPC must explicitly permit that identity. `CONTROL_PLANE_ROLES` and `CONTROL_PLANE_READ_ROLES` make the distinction reusable.

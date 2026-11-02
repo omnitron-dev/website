@@ -55,6 +55,8 @@ checksums**. A successful operation exits with 0; other failures use a nonzero
 exit code and include the cause and recovery guidance. JSON output uses the
 normal Omnitron `{ ok, data }` / `{ ok: false, error, diagnostic }` contract.
 
+Direct CLI migration writes require standalone lifecycle authority. On an enrolled controller, use the [backend schema plan](./cli.md#backend-replacement) for daemon schema changes. For a standalone ecosystem that provides package migration scripts, `omnitron infra migrate --dry-run` lists the resolved packages in dependency order.
+
 ## Guarantees and limits
 
 | Mechanism | Behavior |
