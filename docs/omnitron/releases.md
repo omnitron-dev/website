@@ -24,6 +24,49 @@ Equal archive hashes identify delivered bytes. They do not by themselves identif
 a running process, or prove that native dependencies built for macOS will run on
 Linux. Use the launch receipt and the destination's runtime when checking a stack.
 
+### Match the execution target
+
+A checked application archive contains its compiled code, production dependencies,
+installed optional packages and resolved peers. Build it with the target operating
+system, architecture, Node binary and libc. `omnitron release show <release>` and
+**Releases → Built with** display the target. Older manifests display *Target not
+recorded*. The JSON output also includes the Node executable digest.
+
+The receiving node checks the delivered bytes and compares the shared Titan packages
+against the independent process owner's dependency graph. It validates the settings
+from the destination stack before running migrations or replacing registrations.
+A mismatch identifies the failing check in the deployment detail. Build on a matching
+machine or align the execution owner and build source. A checked delivery makes no
+npm requests on the node.
+
+The optional `NODE_OPTIONS=--max-old-space-size=<MiB>` setting must match the
+value recorded in the archive. Additional module paths, loaders and preloads cannot
+be attested. After start, the owner verifies the application entry point, runtime and
+installed file tree. The launch receipt lets CLI and Console distinguish delivery
+history from the release a process is actually running.
+
+### Package a project-specific release
+
+Use the headless `@omnitron-dev/omnitron/release-archive` entry point when a
+project adds its own signed manifest or native artifacts. Populate a fresh staging
+directory with approved files, then generate the hashes before adding your manifest.
+
+```ts
+import { writeFile } from 'node:fs/promises';
+import { join } from 'node:path';
+import { releaseFileHashes, sha256File, writePortableArchive } from '@omnitron-dev/omnitron/release-archive';
+
+const files = await releaseFileHashes(stagingDirectory);
+await writeFile(join(stagingDirectory, 'release.json'), JSON.stringify({ revision, files }));
+await writePortableArchive(stagingDirectory, destination, { exclusive: true });
+const checksum = await sha256File(destination);
+```
+
+`releaseFileHashes` rejects symlinks. The archive writer also supports internal
+relative links for dependency graphs, sorts entries, preserves executable bits
+and removes filesystem timestamps. Exclusive creation protects an existing release
+when two builders finish at the same time.
+
 ## Build and inspect
 
 The project must be registered with Omnitron. Use explicit revisions when
