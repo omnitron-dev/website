@@ -92,6 +92,14 @@ requires the destination process owner's full, clean framework commit as well
 as a compatible runtime graph. A backend upgrade alone can leave an older owner
 in charge of the applications.
 
+If a resident owner predates build reporting, release admission asks the node to
+verify the running owner on demand. The node checks the registered systemd or
+launchd service, process identity and executable, and the contents of its sealed
+runtime. A change of owner or controller during verification invalidates the
+result. If the node cannot prove the owner build, the deployment detail reports
+the reason before any migration or application restart. Inspect the owner service
+on that node and retry the release check once its identity can be verified.
+
 Pin `--project-commit` to reproduce a build. For linked sources,
 `--omni-commit` selects a revision. For registry packages it checks the exact
 commit already pinned by their archives.

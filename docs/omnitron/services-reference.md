@@ -58,7 +58,7 @@ Plus the core supervisor:
 
 | File | Service id | Methods | Role gate |
 | ---- | ---------- | ------- | --------- |
-| `daemon/daemon.rpc-service.ts` | `OmnitronDaemon` | 27 | mixed — see [Daemon](./daemon.md#rpc-surface--omnitrondaemon-service) |
+| `daemon/daemon.rpc-service.ts` | `OmnitronDaemon` | 28 | mixed — see [Daemon](./daemon.md#rpc-surface--omnitrondaemon-service) |
 
 The daemon exposes its role-protected metrics facade and imports the Titan health service:
 

@@ -205,13 +205,14 @@ The daemon registers `@Service({ name: 'OmnitronDaemon' })` on
 the Netron bus. Verified from
 [`src/daemon/daemon.rpc-service.ts`](https://github.com/omnitron-dev/omni/tree/main/apps/omnitron/src/daemon/daemon.rpc-service.ts).
 
-Every method is gated by role:
+The daemon checks these roles for each request.
 
 | Role         | Members                              | Methods                                                                 |
 | ------------ | ------------------------------------ | ----------------------------------------------------------------------- |
-| `viewer`     | `viewer`, `operator`, `admin`        | `list`, `getApp`, `status`, `getMetrics`, `getHealth`, `getLogs`, `inspect`, `getEnv`, `getDependencyGraph`, `getWatchStatus` |
+| Control-plane read | `viewer`, `operator`, `admin`, authenticated `service_role` | `list`, `getApp`, `status`, `getMetrics`, `getHealth`, `getLogs`, `inspect`, `inspectInstalledArtifacts`, `getDependencyGraph`, `getWatchStatus` |
+| Control-plane operation | `operator`, `admin`, authenticated `service_role` | `getEnv` (redacted values), `attestApplicationOwner` |
 | `operator`   | `operator`, `admin`                  | `startApp`, `startAll`, `stopApp`, `stopAll`, `restartApp`, `restartAll`, `reloadApp`, `scale`, `enableWatch`, `disableWatch` |
-| `admin`      | `admin` only                         | `shutdown`, `reloadConfig`, `setMetricsEnabled`, `exec` |
+| `admin`      | `admin` only                         | `shutdown`, `reloadConfig`, `setMetricsEnabled`, `exec`, `revealEnv` |
 | anonymous    | anyone with socket access            | `ping` (allowAnonymous) |
 
 ### Methods, by intent
@@ -240,9 +241,21 @@ Every method is gated by role:
 | `getHealth({ name? })`                                          | `AggregatedHealthDto`            |
 | `getLogs({ name?, lines? })`                                    | `LogEntryDto[]`                  |
 | `inspect({ name })`                                             | `AppDiagnosticsDto`              |
-| `getEnv({ name })`                                              | `Record<string, string>`         |
+| `inspectInstalledArtifacts({ names })`                          | Installed artifact evidence per application |
 | `getDependencyGraph({ name })`                                  | Graph object                     |
 | `getWatchStatus()`                                              | `{ enabled, apps: [...] }`       |
+
+#### Owner and environment inspection
+
+`attestApplicationOwner({ owner: { id, pid, startedAt }, epoch })` returns the
+clean build stamp of the observed owner. The node checks its active controller
+lease. For a legacy owner, it verifies the supervised process and sealed runtime
+before checking the lease again. Normal status polling performs no disk scan.
+See [application release admission](./releases.md#build-and-inspect).
+
+`getEnv({ name })` returns redacted environment values. `revealEnv({ name })`
+requires an administrator and releases the clear values only after the audit database
+confirms the write. A node without audit storage can still return redacted values.
 
 #### Watch control (`operator`)
 

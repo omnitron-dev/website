@@ -16,6 +16,10 @@ Next / Remix** out of the box.
 pnpm add @omnitron-dev/prism
 ```
 
+For React Server Components, put providers and interactive Prism components at
+the client boundary. The published UI entry points declare `"use client"`.
+Import `@omnitron-dev/prism/http` directly for server-side HTTP calls.
+
 :::tip React 19 + MUI v9 idioms
 Prism uses the latest patterns from both upstreams:
 

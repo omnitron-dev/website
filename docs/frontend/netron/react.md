@@ -23,6 +23,11 @@ devtools scaffolding.
 > framework. This package consumes the server through
 > `netron-browser`.
 
+In a React Server Component application, create the Netron client inside the
+client component that renders the provider. The root, hooks, authentication and
+React test entries preserve the client directive in the published package.
+Server-side code can import `@omnitron-dev/netron-react/cache` directly.
+
 Verified against `packages/netron-react/src/` (data layer at
 parity across all three query hooks; no external data-fetching
 dependency).
