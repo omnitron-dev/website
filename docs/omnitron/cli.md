@@ -21,11 +21,19 @@ Verified against `src/cli/omnitron.ts` and `src/commands/*`.
 | `--version`                               | Print CLI version                                      |
 | `--help`                                  | Per-command help                                       |
 
-Commands that support `--json` return a structured result. A command without
-machine-readable output rejects the flag with a structured error and a nonzero
-exit code; do not parse its human-readable table. Finite commands drain stdout
-and stderr before exiting, so large log exports remain complete when piped
-into another process. Check both the JSON result and the exit status.
+Commands that support `--json` return one `{ "ok": true, "data": ... }` result
+on stdout; errors use `{ "ok": false, "error": ... }` on stderr. Machine output
+is an explicit action contract. Unsupported commands reject the flag **before
+loading or executing their action**, with exit `2`, code
+`JSON_OUTPUT_UNSUPPORTED` and `outcome: "not-started"`; they do not perform the
+operation and then complain about its output. This also applies to
+`OMNITRON_OUTPUT=json`, nested commands and aliases.
+
+A declared JSON command that returns without a result reports
+`JSON_OUTPUT_CONTRACT_VIOLATION` and `outcome: "unknown"`. Its operation may have
+completed: inspect state before retrying. Finite commands validate their output
+and drain stdout and stderr before exiting, so large log exports remain complete
+when piped into another process. Check both the JSON result and the exit status.
 
 ## Command index
 
@@ -674,6 +682,20 @@ passphrase without needing to repeat `--ssh-auth key`.
 | `omnitron webapp stop` | Stop the webapp nginx container |
 | `omnitron webapp status` | Show webapp status |
 | `omnitron webapp open` | Open the webapp in the system browser |
+
+All five commands support global `--json`. Build output includes `distPath` and
+`durationMs`; the builder's subprocess output is captured. Start reports observed
+`running`, `healthy`, `port`, `url` and `autoStart`; stop reports `stopped` and
+`autoStart`. A null `autoStart` means no saved daemon configuration existed to
+update. Open waits for the system browser launcher and reports `browserOpened`
+and whether it started the Console first.
+
+Lifecycle errors distinguish `outcome: "not-started"` (for example, the daemon
+is absent), `"unknown"` (the container operation failed and may have made partial
+changes), and `"applied"` (the Console action completed, but a subsequent step,
+such as saving autostart preference or opening a browser, failed). An applied
+outcome is not a rollback. Inspect `omnitron --json webapp status` before retrying.
+
 
 ## Knowledge base (MCP)
 

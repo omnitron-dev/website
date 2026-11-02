@@ -280,6 +280,20 @@ application shutdown, `shutdown({ timeout?, force? })` runs to
 gracefully terminate every spawned process and pool (respects
 `gracefulShutdownTimeout`).
 
+Manager shutdown is terminal: it closes new process/pool admission immediately and
+owns initialization already in progress. Concurrent and repeated calls share the
+same promise and outcome; a later `force` argument does not replace the first
+call's policy. Every pool and worker cleanup is attempted within the timeout, with
+errors collected rather than hidden. A deadline or failed drain/termination rejects
+and remains rejected even if a worker exits later. Inspect retained ownership and
+native process evidence before recovery; another `shutdown()` call is not proof
+of a clean exit.
+
+Omnitron's application `stopAll` is a separate, reversible operation: it stops
+application handles and reports aggregate failures while keeping the manager
+available for a later explicit start. Terminal manager shutdown belongs to the
+resident execution owner or Titan's application lifecycle.
+
 ## Isolation modes
 
 | Isolation | Backed by            | Best for                                                     |

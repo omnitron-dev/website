@@ -600,6 +600,13 @@ test accounts and close test shells after verification.
 | `omnitron webapp status` | Report whether the console container is running / healthy |
 | `omnitron webapp open` | Open the running webapp in the system browser (starts it first if stopped) |
 
+All Console lifecycle commands support `--json` with one structured result and
+no progress prose. A failed follow-up after successful startup is reported as
+`outcome: "applied"`, rather than implying the Console was stopped again.
+Use `omnitron --json webapp status` to inspect the observed container state;
+see [CLI output and lifecycle outcomes](./cli.md#webapp-console-ui).
+
+
 ## Project switcher
 
 The sidebar carries a project dropdown — switching projects

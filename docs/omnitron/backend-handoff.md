@@ -263,8 +263,13 @@ settings until a reviewed unit update. launchd retains its finite OS timeout:
 complete the private graceful shutdown before unloading its job, rather than
 setting an infinite system shutdown timeout.
 
-The owner logs shutdown stages (`applications`, `state`, `logs`, `rpc`, `storage`,
-`complete`). Preserve an unclean receipt and the native journal. Recovery requires
+The owner logs shutdown stages (`watchers`, `applications`, `processes`, `state`,
+`logs`, `rpc`, `storage`, `complete`). Application-stop errors do not skip the final
+process-manager termination attempt. Any failed application stop, manager drain,
+termination or persistence step prevents a clean receipt; repeated shutdown calls
+retain that failed result. Native PID lifetimes and empty process groups must still
+be verified independently. Public application `stopAll` leaves the manager usable;
+only the owner/lifecycle performs its terminal shutdown. Preserve an unclean receipt and the native journal. Recovery requires
 proof about the recorded owner lifetime, stopped application inventory and empty
 OS process groups; changing a receipt alone is never proof. Retain that evidence
 and the original receipt when recording an explicit reconciliation.

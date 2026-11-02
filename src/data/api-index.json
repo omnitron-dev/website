@@ -65346,7 +65346,7 @@
       "name": "IProcessManagerConfig",
       "package": "@omnitron-dev/titan-pm",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-pm/src/types.ts#L1227",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-pm/src/types.ts#L1229",
       "imports": [
         {
           "path": "@omnitron-dev/titan-pm",
@@ -65358,7 +65358,7 @@
       "name": "IProcessManagerModule",
       "package": "@omnitron-dev/titan-pm",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-pm/src/types.ts#L1328",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-pm/src/types.ts#L1330",
       "imports": [
         {
           "path": "@omnitron-dev/titan-pm",
@@ -65442,7 +65442,7 @@
       "name": "IProcessSpawner",
       "package": "@omnitron-dev/titan-pm",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-pm/src/types.ts#L1099",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-pm/src/types.ts#L1101",
       "imports": [
         {
           "path": "@omnitron-dev/titan-pm",
@@ -65478,7 +65478,7 @@
       "name": "IRestartPolicy",
       "package": "@omnitron-dev/titan-pm",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-pm/src/types.ts#L1317",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-pm/src/types.ts#L1319",
       "imports": [
         {
           "path": "@omnitron-dev/titan-pm",
@@ -65538,7 +65538,7 @@
       "name": "ISpawnOptions",
       "package": "@omnitron-dev/titan-pm",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-pm/src/types.ts#L1166",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-pm/src/types.ts#L1168",
       "imports": [
         {
           "path": "@omnitron-dev/titan-pm",
@@ -65598,7 +65598,7 @@
       "name": "IWorkerHandle",
       "package": "@omnitron-dev/titan-pm",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-pm/src/types.ts#L1137",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-pm/src/types.ts#L1139",
       "imports": [
         {
           "path": "@omnitron-dev/titan-pm",
