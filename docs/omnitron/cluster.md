@@ -68,13 +68,20 @@ independent Raft quorum or a replicated Omnitron command log.
 
 ### Authority and effect fencing
 
-A leadership reading is an observation. It is not permission for an external
-side effect that may happen later. `PostgresLeaseStore.withLease(grant, effect)`
-checks the current epoch under a row lock, executes database work in the same
-transaction, and rolls back if the lease has expired before the final check.
-Remote process, route and storage operations need their own durable recipient-side
-fencing and operation journal. Automatic workload failover remains unavailable
-until that admission path is implemented; see the [delivery gates](./release-readiness.md).
+A worker admits a managed stack stop only after verifying the controller's Ed25519
+signature and reading the current lease on the writable PostgreSQL primary. The
+signed plan binds the enrolled cluster and node, source project and stack, owner
+revision, application generations, immutable container IDs and expiry. The worker
+remembers the highest accepted epoch in its durable state. It checks authority
+again between application shutdown, infrastructure retirement and container removal.
+A lost lease can leave a partial stop. Inspect the per-node outcome and obtain a fresh
+plan from the current leader before continuing. Work admitted before a transfer can
+finish. An unreachable node stays unconfirmed.
+
+Use `PostgresLeaseStore.withLease` for effects inside the same PostgreSQL transaction.
+The implemented external operation is `stack.stop`. Clustered remote start and
+provisioning require their own recipient adapters. Stateful failover additionally
+needs a fence enforced by the data service. See the [delivery gates](./release-readiness.md).
 
 The controller bounds local freshness from **before** its database request, using
 monotonic time and a wall-clock expiry guard for host suspension. A delayed reply
@@ -82,28 +89,43 @@ cannot start a new full lifetime. Database failure, lost renewal or expired
 confirmation makes the controller a follower. Pending requests cannot revive it
 after shutdown or an operator-requested step-down.
 
-### Parameters and current configuration boundary
+### Enroll a controller or worker
 
-| Parameter | Default | Meaning |
-| --- | --- | --- |
-| `clusterId` | `default` | Coordination namespace within the database |
-| `leaseTtlMs` | `15 000 ms` | Database lease duration; at least three renewal intervals |
-| `heartbeatInterval` | `2 000 ms` | Reconciliation/renewal interval |
-| `discovery` | `postgres` | The only supported coordination provider |
+Apply Omnitron migration `016_cluster_lease` to the shared authority database.
+Configure the daemon service environment with `OMNITRON_CLUSTER_DATABASE_URL`.
+Give controllers `SELECT`, `INSERT` and `UPDATE` on `titan_database_leases`.
+Workers require only `SELECT`. Remote connections require `sslmode=verify-full`.
+Use a database failover policy that preserves acknowledged lease writes.
 
-The programmatic daemon configuration accepts these fields under `cluster`.
-Legacy `discovery: 'redis'`, `discovery: 'static'`, `peers` and `electionTimeout`
-are rejected when coordination is enabled. They cannot silently select a protocol
-that is not implemented. Normal saved-config CLI startup still leaves cluster
-coordination disabled; do not add an ecosystem setting expecting it to enable HA.
-The ordinary master/slave fleet and telemetry replication work independently.
+Set the following fields in the instance's private `$OMNITRON_HOME/config.json`.
+Use the same cluster ID across participants and a unique, stable recipient ID per
+installation. Pin each target's matching `nodeId` in its stack topology. A node's
+address can change independently of the identity that accepted an allocation.
+
+```json
+{
+  "cluster": {
+    "enabled": true,
+    "clusterId": "west",
+    "recipientId": "edge-01",
+    "discovery": "postgres",
+    "leaseTtlMs": 15000,
+    "heartbeatInterval": 2000
+  }
+}
+```
+
+The two timing fields are optional. Each lease must cover at least three heartbeat
+intervals. Controllers also need a local fleet identity for election. A worker's
+durable enrollment rejects a missing configuration or a different identity on restart.
+Ordinary single-controller fleets can use the default disabled mode.
 
 ## `OmnitronCluster` RPC service
 
 | Method | Auth | Effect |
 | --- | --- | --- |
 | `getClusterState()` | viewer/operator/admin or control-plane service | Coordination, authority reason, epoch, observed leader and lease freshness |
-| `stepDown()` | operator/admin or control-plane service | Demote locally, release this epoch, and wait one lease interval before competing again |
+| `stepDown()` | administrator | Demote locally, release this epoch, and wait one lease interval before competing again |
 | `isLeader()` | viewer/operator/admin or control-plane service | Whether this controller currently has a confirmed fresh grant |
 
 ```bash
@@ -112,7 +134,8 @@ omnitron cluster step-down
 ```
 
 The status includes `coordination: 'postgres-lease'`, `authority`, `reason`,
-`leaseExpiresAt`, `leaseRemainingMs` and `effectFencing: 'recipient-required'`.
+`leaseExpiresAt`, `leaseRemainingMs`, `effectFencing: 'recipient-required'` and
+`fencedOperations: ['stack.stop']`. Use `omnitron --json cluster status` in automation.
 `term` is a decimal epoch string, or `null` when no authority has been observed.
 An expired observation has no `leaderId`. The former `votedFor` field is removed.
 CLI reports the same authority and reasons returned to Console's node diagnostics.
@@ -133,18 +156,10 @@ neither transfers running workloads nor proves a stateful failover safe.
 
 ## Config sync — `ConfigSyncService`
 
-The leader replicates ecosystem config to followers so they hold
-a consistent view. On every config change:
-
-1. Leader computes a content hash.
-2. Heartbeats carry the hash.
-3. Followers compare; if mismatched, pull the fresh config from
-   the leader.
-4. Followers apply locally (replacing their own).
-
-Conflict resolution: **leader always wins** for config. Follower
-local changes are overwritten — followers are not expected to be
-the source of truth.
+The daemon creates a configuration hash tracker when cluster startup succeeds on a controller.
+The tracker exposes comparison and synchronization helpers. Automatic distribution
+of ecosystem files between controllers is not wired into daemon startup. Provision
+reviewed declarations on every controller independently.
 
 ## `OmnitronFleet` RPC service — node inventory
 
@@ -526,72 +541,27 @@ exactly-once archive.
 
 ## Multi-region patterns
 
-### Pattern A — one cluster per region
+Use a distinct cluster ID and authority database per independent region. A
+single cross-region control plane requires every participant to reach the same
+writable primary within its lease budget. Independently administered nodes can
+use fleet inventory and replication without enrolling in a cluster.
 
-```mermaid
-flowchart TB
-  subgraph EU
-    EU1[Daemon EU-1<br/>master]
-    EU2[Daemon EU-2<br/>follower]
-    EU3[Daemon EU-3<br/>follower]
-    EU1 -.- EU2 -.- EU3
-  end
-  subgraph US
-    US1[Daemon US-1<br/>master]
-    US2[Daemon US-2<br/>follower]
-    US1 -.- US2
-  end
-```
+## Connectivity loss and database failover
 
-Each region elects its own leader. No cross-region election —
-keeps quorum local. Cross-region calls go through ingress; each
-region's webapp shows its own state.
-
-### Pattern B — single global cluster
-
-```mermaid
-flowchart LR
-  EU1[Daemon EU-1] -.- US1[Daemon US-1]
-  EU1 -.- AP1[Daemon AP-1]
-  US1 -.- AP1
-```
-
-One global cluster with all daemons as peers. Pros: single source
-of truth. Cons: cross-region election latency, more sensitive to
-partitions.
-
-Pattern A is almost always the right answer above 2 regions.
-
-### Pattern C — fleet without cluster
-
-Each daemon runs as `role: master` independently. Use the
-`OmnitronFleet` service to query across them via aliased
-addresses. No leader, no global state. Suitable when each
-daemon's domain is independent (per-tenant deployments).
-
-## Split-brain handling
-
-Cluster mode's main failure mode: a network partition where both
-sides think the other is dead and both elect leaders.
-
-Mitigations:
-- **Majority required.** Election requires `floor(N/2) + 1`
-  votes — a minority partition cannot elect.
-- **Term monotonicity.** Higher-term leader wins; the lower-term
-  one steps down on first higher-term message.
-- **Operator `step-down`.** If both sides somehow elected, the
-  operator can force one side to step down.
-
-For 2-node clusters, prefer manual leader assignment (one
-permanent master) rather than auto-election — 2 nodes can't form
-a majority when split.
+A partitioned controller loses its usable authority when renewal fails or the
+local deadline passes. A worker that cannot read the authoritative primary
+refuses a new stop effect. A readable standby cannot authorize a stop.
+After a database recovery, compare the restored lease history with the epochs
+accepted by recipients. An older epoch or a conflicting incarnation at the same
+epoch requires reconciliation. Keep the existing application owners and inspect
+the node receipts before retrying a partial operation.
 
 ## Operations
 
 | Goal | Command |
 | ---- | ------- |
 | Check cluster state | `omnitron cluster status` |
-| Force re-election | `omnitron cluster step-down` |
+| Release current leadership (administrator) | `omnitron cluster step-down` |
 | Register a node | `omnitron node add --name N --host H ...` |
 | Check all nodes | `omnitron node check` |
 | Drain a node | `omnitron --json` then `OmnitronFleet.drainNode` (no CLI shortcut yet) |

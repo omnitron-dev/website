@@ -116,6 +116,18 @@ between desired placement, observed state and admitted execution.
 
 ## Confirmed stack stops
 
+In Console, choose **Review stop…** on a stack card or its detail page. The same
+read-only inventory is available to viewers with
+`omnitron --json stack stop <project> <stack> --dry-run`. Each row identifies the node, runtime registration,
+applications and containers. An unavailable owner or a missing source binding
+appears with its reason and prevents confirmation. Opening or closing the review
+does not change automatic resume or create a stop operation.
+
+Operators can confirm the reviewed inventory in Console. For automation, pass
+the returned `data.digest` to the same command with `--review <digest>`.
+A changed process generation, allocation or resource list requires a fresh review.
+A nonzero exit status and a null digest mean the full impact could not be verified.
+
 `omnitron stack stop <project> <stack>` prepares an ownership-checked plan on
 **every participating node before sending any stop**. Each node records an operation
 identity in its private SQLite journal, the current application generations, and

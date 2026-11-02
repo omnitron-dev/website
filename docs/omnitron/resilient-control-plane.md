@@ -76,7 +76,7 @@ These findings determine the implementation sequence rather than a parallel repl
 | Titan PM workflows | Stages, dependency ordering and compensation | Execution state is in memory; it is not a durable recovery journal |
 | Pipeline execution | Reviewed revisions, bounded output, cancellation and interrupted-run reporting | Interrupted external effects are not automatically replayable |
 | SQLite state store and telemetry outboxes | Local durability and independently acknowledged delivery | A telemetry receipt is neither a control-plane quorum nor proof of a workload's database recovery |
-| Cluster lease and configuration sync | Durable PostgreSQL epochs and authenticated status/step-down | Configuration sync is not a replicated command log; remote effects still require recipient fencing and durable operation admission |
+| Cluster lease and configuration sync | PostgreSQL epochs, administrator leadership transfer and recipient-verified managed stack stops | Each additional effect requires admission by its resource owner. Distribution of configuration and command history has separate requirements. |
 | Existing roles and `@omnitron-dev/access` | Shared role hierarchy and permission matching | Resource-scoped delegation, live budgets and per-step grants need enforcement; role names alone do not provide them |
 
 Relevant source boundaries are `project/topology-control.ts`, `project/topology-state.ts`,

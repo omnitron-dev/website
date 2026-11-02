@@ -264,7 +264,7 @@ infrastructure to a subset of the project's apps.
 | `omnitron stack progress <project> [stack]` | Latest remote transfer observation per stack, node and app, including its operation ID and any release ID |
 | `omnitron stack diagnose <project> <stack>` | Read-only prerequisite checks and planned changes before start |
 | `omnitron stack start <project> <stack>` | Start everything in the stack |
-| `omnitron stack stop <project> <stack>` | Prepare every node, stop owned applications and containers, require confirmed receipts; retain volumes |
+| `omnitron stack stop <project> <stack> [--dry-run] [--review <digest>]` | Inspect every target with `--dry-run`. Pass its digest to stop the reviewed applications and containers. Volumes are retained. |
 | `omnitron stack runtime <project> <stack>` | Show runtime details (containers, ports) |
 
 Before a first start or after changing an environment:
@@ -531,8 +531,8 @@ Aggregate across all remotes (and the local daemon).
 
 | Command | Effect |
 | ------- | ------ |
-| `omnitron cluster status` | Confirmed authority, reason, lease freshness and durable epoch |
-| `omnitron cluster step-down` | Force the current leader to step down |
+| `omnitron cluster status` | Confirmed authority, reason, lease freshness, epoch and recipient-fenced operations. Supports `--json` |
+| `omnitron cluster step-down` | Release the current lease as an administrator |
 
 Cluster operations require `cluster.enabled: true` in the
 daemon config.

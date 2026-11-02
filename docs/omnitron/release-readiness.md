@@ -107,12 +107,15 @@ interrupted publish, a resume, a conflicting digest, an RC channel and an
 unrelated tag against isolated Git and npm endpoints. See the
 [maintainer release procedure](../community/contributing.md#release-process).
 
-G01 now has PostgreSQL-backed authority leases, monotonic epochs and guarded network
-publication in source. Recipient-side effect fencing remains part of G10. G02 has
-confirmed component termination, durable owner fences, node stop plans/receipts and
-shared CLI/Console progress in source. The existing fleet has not yet received these
-changes. Legacy allocation bindings, initial inventory of earlier deployments and coordinated
-owner/adapter activation remain explicit acceptance prerequisites.
+G01 and G02 implement signed recipient admission for managed stack stops. PostgreSQL
+identifies the current leader and SQLite retains each recipient's highest epoch.
+The takeover test transfers leadership after the application step and verifies that
+the former controller cannot retire infrastructure, even after recreating the
+recipient. Node protocol methods require a machine identity. Leadership transfer
+requires an administrator. CLI and Console show the node, epoch and receipt outcome.
+Fleet activation and live end-to-end acceptance are separate gates. Earlier allocations
+require explicit ownership evidence. Provisioning, routing and stateful recovery
+still need operation-specific fencing.
 
 G03 keeps `ssh2` inside Xec. Direct use outside Xec and protocol implementation
 dependencies are different architectural concerns. Tunnel target isolation, pooled
