@@ -399,3 +399,29 @@ consumer, a rejected event handler and recovery after each transient failure.
 Check the original cause, health state and exit code, then verify that retries do
 not repeat committed effects. [Migration guarantees](migrations.md) describe the
 transaction and checksum boundaries used by all framework layers.
+
+
+## Storage exhaustion and execution ownership
+
+A failed background state write is observed immediately and retained by the
+resident owner. It does not become an unhandled promise rejection. Owner snapshots
+report pending writes, failed-write count and the current persistence error;
+`execution.state-persistence` makes the same finding available in CLI and Console
+health. A later successful **full** snapshot or clear can recover current state
+durability. Until then, the owner's state flush rejects and clean shutdown cannot
+be certified.
+
+The `log-sinks` health indicator reports backend destination failures and byte
+gaps. `execution.log-sinks` reports the resident owner's equivalent evidence.
+Healthy journals continue receiving records when another destination is full.
+Successful later writes do not erase earlier unconfirmed or dropped bytes, and
+custom transport error text is excluded from the health response. Inspect sink
+capacity and retained journals before making a historical completeness claim.
+
+A zero backend exit code alone does not prove an intentional platform shutdown.
+When the owner is gone, the supervisor requires a `clean:true` receipt matching
+its observed owner PID and current host boot before exiting as stopped. A dirty,
+missing or stale receipt keeps the guardian blocked with a reconciliation reason;
+it never launches another owner over surviving application processes. If the
+supervisor's own state file cannot be written, its private status retains that
+persistence failure in memory.

@@ -308,6 +308,36 @@ hot-path isolation, or a `flush()` lifecycle. There is **no
 
 → See [Logging / Transports](../logging/transports.md).
 
+## Delivery failures and bounded output
+
+Every raw destination, including stdout, has an independent failure boundary.
+An `ENOSPC`, synchronous write exception, callback error or emitted stream error
+cannot abort delivery to healthy destinations or escape the logging call. JSON
+stdout uses Pino's asynchronous destination even when a durable journal is also
+configured. Each forwarding queue is bounded to 1 MiB; stdout's native buffer is
+separately bounded to 1 MiB. Capacity overflow is counted, rather than allowing an
+unavailable output to consume unlimited process memory.
+
+`LoggerService.getSinkHealth()` returns per-sink pending bytes, failed writes,
+unconfirmed bytes, dropped bytes and the current error. Retry attempts for future
+records back off from one to thirty seconds. A write that does not acknowledge
+within thirty seconds remains uncertain; no further writes are admitted to that
+underlying sink until the original operation settles. A closed destination must
+be replaced by its owner. `ITransport` calls have a five-second observation budget;
+a timed-out call remains in flight and is not duplicated. Other transports still
+receive the record independently.
+
+The guard does not replay records whose partial delivery is unknown. A recovered
+sink can accept future records while retaining its historical gap counters.
+`flush()` waits for healthy destinations and aggregates delivery failures; it
+rejects when any sink has an unresolved or historical unconfirmed/drop gap. This
+is delivery evidence, not a claim that every writable stream performs `fsync`.
+A synchronous durable journal destination is invoked before the logging call
+returns; failure isolation still lets the application continue when that sink
+fails. Inspect delivery evidence and await `flush()` where confirmation is
+required. Shutdown code must not interpret a rejected flush as successful
+durability.
+
 ## Redaction and enrichment
 
 Redaction has two working paths. For **plain path redaction**, prefer
