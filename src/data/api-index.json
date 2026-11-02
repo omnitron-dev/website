@@ -11926,7 +11926,7 @@
       "name": "BackendRuntimeStatus",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/shared/dto/backend.ts#L3",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/shared/dto/backend.ts#L6",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/dto/services",
@@ -13570,7 +13570,7 @@
       "name": "IOmnitronBackendService",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/shared/dto/backend.ts#L32",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/shared/dto/backend.ts#L35",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/dto/services",
@@ -66318,7 +66318,7 @@
       "name": "ProcessSupervisor",
       "package": "@omnitron-dev/titan-pm",
       "kind": "class",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-pm/src/process-supervisor.ts#L48",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-pm/src/process-supervisor.ts#L49",
       "imports": [
         {
           "path": "@omnitron-dev/titan-pm",
@@ -66355,6 +66355,18 @@
       "package": "@omnitron-dev/titan-pm",
       "kind": "type",
       "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-pm/src/types.ts#L572",
+      "imports": [
+        {
+          "path": "@omnitron-dev/titan-pm",
+          "guide": "/docs/titan/modules/pm"
+        }
+      ]
+    },
+    {
+      "name": "RestartWindow",
+      "package": "@omnitron-dev/titan-pm",
+      "kind": "class",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-pm/src/restart-window.ts#L2",
       "imports": [
         {
           "path": "@omnitron-dev/titan-pm",

@@ -343,27 +343,30 @@ upgrading an application that retains a client across backend replacements.
 
 ## Auto-restart and backoff
 
-When an app crashes, the daemon consults its `IRestartPolicy`
-(per `IProcessEntry.restartPolicy` or default
-`supervision.backoff`). The default exponential backoff:
+Applications inherit the ecosystem's `supervision` settings. Override them for
+one app with `apps[].restartPolicy`. By default, up to five automatic restarts
+may begin in a rolling 60-second window. The first retry waits 1 s. Later
+retries in the same window use exponential backoff up to 30 s.
+Set `maxRestarts: 0` or `enabled: false` on the app's restart policy to
+disable automatic retries.
 
-| Attempt | Delay before relaunch |
-| ------- | --------------------- |
-| 1       | `initial × 1` (1 s)   |
-| 2       | `initial × 2` (2 s)   |
-| 3       | `initial × 4` (4 s)   |
-| ...     | capped at `max` (30 s default) |
+If a classic script uses its retries and fails again, the owner marks it
+`crashed`, emits `app:escalated` and waits ten minutes before trying again
+with a fresh budget. For Titan-supervised children, an exhausted budget
+ends automatic recovery of that child. A critical child failure escalates
+to its supervisor.
 
-After `maxRestarts` within `window` (default 5 in 60 s), the
-supervisor stops trying and marks the app `crashed`. State is
-persisted so an operator can inspect and intervene.
+Use `omnitron stop <app>` during backoff or cool-down to cancel the pending
+launch. The app stays stopped until a new start is requested. When ready, run
+`omnitron start <app>`. For a stopped stack, use
+`omnitron stack start <project> <stack>` to restore its applications together.
 
 ## Failure scenarios
 
 | Scenario                                  | What the daemon does                                              |
 | ----------------------------------------- | ----------------------------------------------------------------- |
-| Child process exits 0                     | Treat as graceful; don't restart unless `autoRestart: always`     |
-| Child process exits non-zero              | Apply restart policy; backoff; persist                            |
+| Classic app exits during a requested stop | Mark the app stopped                                            |
+| Classic app exits unexpectedly            | Record the exit and apply the configured restart policy           |
 | Child process hangs (no heartbeat)        | Health probe fails; restart after grace period                    |
 | Daemon itself crashes                     | systemd / launchd respawns; persisted SQLite state rehydrates     |
 | Lock-file PID is alive but daemon hung    | `omnitron kill` force-removes the lock                            |
