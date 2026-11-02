@@ -112,10 +112,12 @@ The replacement proceeds through these boundaries:
 
 1. Reject active SSH sessions, file transfers, pipelines and release builds. Drain admitted RPC calls, property operations, Netron tasks and infrastructure reconciliation through their replies.
 2. Verify and install candidate/rollback artifacts; validate native container identity and specifications. Capture project ownership, retry backoff, monitoring configuration and application identities in a private checkpoint.
-3. Fence execution mutations with a new controller epoch. Persist the grant before enabling the new controller; stale controllers cannot write or acknowledge observations.
+3. Pause metric polling, wait for any child batch already in flight, and flush accepted samples to the configured storage. A failed or timed-out flush refuses the transfer and the incumbent resumes polling. Fence execution mutations with a new controller epoch. Persist the grant before enabling the new controller; stale controllers cannot write or acknowledge observations.
 4. Retire only backend services. The owner continues running applications and capturing logs.
-5. Start the candidate, adopt existing infrastructure without provisioning it, and keep public RPC unavailable until adoption completes.
+5. Start the candidate and adopt existing infrastructure. Open public RPC and resume metric polling once the candidate is ready.
 6. Verify public readiness, owner identity, epoch, application PIDs, start times and restart counts. Only then complete retirement.
+
+A pool can replace a worker after the handoff under its normal recycling policy. Compare the inventory captured at transfer time first. For a later PID change, match the worker ID in the owner log to its recycling reason (for example, `max_lifetime`) and its exit code.
 
 A failed candidate is stopped and the previous artifact is started under a fresh epoch. Rollback does not reuse an old grant. A failure to prove identity or inventory preservation stops automatic recovery rather than guessing which processes to kill or relaunch.
 
