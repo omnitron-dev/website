@@ -114,6 +114,32 @@ See the [topology workspace](./topology.md) and the
 between desired placement, observed state and admitted execution.
 
 
+## Verify a standalone stack start
+
+Before starting a local stack, open **Stacks → Diagnose** or run
+`omnitron stack diagnose sample local`. This read-only check shows who manages
+each service and which prerequisites can be verified while the applications are stopped.
+
+When you intend to start the stack, run `omnitron --json stack start sample local`.
+Check the exit code, `data.outcome`, and the `data.online` and `data.total` counts.
+A partial start returns exit code 1. If the connection drops, read the current
+state before submitting another start.
+
+```bash
+omnitron stack status sample local
+omnitron logs sample/local/api --lines 50
+```
+
+Open the stack’s **Applications** section in Console or read the **Apps** rows
+in CLI status. Check each expected application's status and inspect the logs for
+the first one that failed. A local stack can report `running` even when its
+application exited during startup. For service readiness, check the application's
+[configured health probes](./diagnostics.md) as well.
+
+Standalone deployments use the ordinary start workflow. On an enrolled HA
+cluster, an operator recovering a previously stopped installation can
+[resume its verified release](#resume-installed-applications).
+
 ## Confirmed stack stops
 
 In Console, choose **Review stop…** on a stack card or its detail page. The same
