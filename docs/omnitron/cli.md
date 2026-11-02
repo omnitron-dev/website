@@ -99,6 +99,14 @@ rollback artifact. Without `--check` it replaces only a resident-mode backend.
 
 `omnitron backend install <sealed-runtime>` copies a verified release into permanent storage without activation. `omnitron backend installation --json` reports its startup selection and unfinished activation. `omnitron backend select <sha256>` selects an installed release only while the backend and execution owner are stopped. Running installations use `backend upgrade`; it commits the selection after readiness and preserves the rollback. The stable launcher is `$OMNITRON_HOME/runtime/bin/omnitron`.
 
+Before scheduling an owner restart, install the candidate, then run its CLI against the instance.
+
+```sh
+omnitron --json backend select <installed-sha256> --check
+```
+
+The result identifies the current and proposed releases and the migration scope. You can run this check while applications are online. Selection repeats the checks under the installation lock after the backend and owner have stopped. An independently supervised worker with cluster coordination disabled compares its complete SQLite migration registry in both releases. Controllers, enrolled workers and installations without a proven managed role compare both registries. Changed worker migrations require a separate data transition. A successful cold-selection check does not establish live owner compatibility. Use `backend upgrade --check` for that decision.
+
 For independent user services, `omnitron backend guardian prepare <sealed-runtime>` records a private transition plan. `omnitron backend guardian apply <plan>` applies or resumes it while retaining the execution owner and application processes. The existing backend release is restored under the updated guardian.
 
 `omnitron backend schema prepare <sealed-runtime>` reads the master database and saves a plan for explicitly reviewed compatible additions. `omnitron backend schema apply <plan>` applies or resumes it under the shared migration lock. After rollback, `prepare <sealed-runtime> --from-plan <applied-plan>` binds the same already-applied expansion to a corrected candidate, checking the original runtimes and exact database history. `omnitron backend upgrade <sealed-dist> --schema-plan <plan>` requires that exact applied plan for an upgrade or rollback between its two sealed releases. Legacy bridges, changed definitions, foreign databases and local node schema transitions are refused.
