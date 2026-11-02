@@ -467,6 +467,8 @@ projects. Project switcher in sidebar mirrors this.
 
 Open `/system` to inspect the host that runs a daemon. **Host** selects the connected daemon or a registered mesh node when your role permits remote reads. The selected node and detail tab are in the URL. Each reading identifies the reporting host, collection time and duration. **Live** polls every five seconds while the tab is visible. Pause it to compare numbers or use **Refresh system snapshot** for one observation.
 
+The controller asks the selected node for its own snapshot over the authenticated mesh. Both ends must support this read. If an older node refuses the mesh credential, the page names the node and permission to check. A viewer can select a node. The node credential can answer for its own host only.
+
 CPU load, committed memory, the fullest mount and network throughput share a compact summary. **Overview** includes host and daemon uptime, process memory, the reported build and expandable per-core load. **Storage** lists all reported mounts by utilization with their available bytes. **Network** lists the reported external interfaces with both IP families and link speed. On updated peers the rate aggregates active external interfaces once samples are available. Older peers report their original network sampling scope.
 
 A partial snapshot names each missing collector and its reason. An unavailable peer keeps its own last observation with a warning. Switching hosts clears the previous reading. A snapshot over 15 seconds old is marked stale. A remote clock more than 15 seconds ahead is reported separately. CLI and agents can obtain the same snapshot with `omnitron --json system --node <id>`.
