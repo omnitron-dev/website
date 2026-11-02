@@ -38,7 +38,7 @@ diffs them against the index table below.
 | `infrastructure.rpc-service.ts` | `OmnitronInfra` | 18 | viewer (read) + operator (start/stop/remove) |
 | `kubernetes.rpc-service.ts` | `OmnitronKubernetes` | 9 | admin |
 | `log-collector.rpc-service.ts` | `OmnitronLogs` | 4 | viewer |
-| `node-manager.rpc-service.ts` | `OmnitronNodes` | 32 | viewer (read), operator (operations), admin (historical repair) |
+| `node-manager.rpc-service.ts` | `OmnitronNodes` | 33 | viewer (read), operator (operations), admin (historical repair) |
 | `pipeline.rpc-service.ts` | `OmnitronPipelines` | 9 | admin + live human session / trusted local CLI |
 | `project.rpc-service.ts` | `OmnitronProject` | 39 | Viewer reads and reviews, operator starts/stops, administrator manages registrations, machine credentials run the recipient protocol |
 | `release.rpc-service.ts` | `OmnitronRelease` | 12 | viewer (read), operator (build/attest), admin (prune) |
@@ -305,7 +305,7 @@ subscription open.
 
 ### `OmnitronNodes` — `node-manager.rpc-service.ts`
 
-Node inventory, health history, bundle activation and recovery: 32 public methods.
+Node inventory, health history, bundle activation and recovery include 33 public methods.
 
 | Method category | Methods |
 | --------------- | ------- |
@@ -313,7 +313,7 @@ Node inventory, health history, bundle activation and recovery: 32 public method
 | Checks | `checkNodeStatus`, `checkAllNodes`, `triggerNodeCheck` |
 | History | `getCheckHistory`, `getUptimeBar`, `getNodeHealthSummaries` |
 | Misc | `listSshKeys`, `getCheckConfig`, `setCheckConfig`, `getHistoryConfig` |
-| Remote daemon | `getNodeDaemonStatus`, `getNodeDaemonHealth`, `getNodeDaemonMetrics`, `getNodeClusterState` |
+| Remote daemon | `getNodeDaemonStatus`, `getNodeDaemonHealth`, `getNodeDaemonMetrics`, `getNodeSystemSnapshot`, `getNodeClusterState` |
 | Mesh and telemetry | `getMeshStatus`, `getNodeRelayStats`, `getNodeSyncStatus`, `getNodeIndicators` |
 | Historical repair (admin) | `reconcileNodeMetrics({nodeId, restore?, after?, through?, epoch?})` |
 | Bundle operations | `installBundleOnNode`, `activateBundleOnNode`, `recoverBundleOnNode` |
@@ -439,7 +439,7 @@ Host inventory.
 
 | Method | Effect |
 | ------ | ------ |
-| `getSnapshot()` | CPU / RAM / disk / OS info |
+| `getSnapshot({ fresh? }?)` | Host CPU, memory, mounts, external interfaces, containers and running daemon. A fresh read waits for one shared collection when the cached snapshot has aged. |
 
 The webapp uses this for the host-info card.
 

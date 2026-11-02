@@ -182,7 +182,7 @@ sidebar.
 | `/` | `DashboardPage` | global | aggregate from many services |
 | `/nodes` | `NodesPage` | global | `OmnitronNodes` |
 | `/projects` | `ProjectsPage` | global | `OmnitronProject` |
-| `/system` | `SystemInfoPage` | global | `OmnitronSystemInfo` |
+| `/system` | `SystemInfoPage` | global | `OmnitronSystemInfo`, `OmnitronNodes.getNodeSystemSnapshot` |
 | `/settings` | `SettingsPage` | global | `OmnitronAuth` + config |
 | `/logs` | `LogsPage` | global | `OmnitronLogs` |
 | `/apps` | `AppsListPage` | project | `OmnitronDaemon.list` |
@@ -196,7 +196,7 @@ sidebar.
 | `/alerts` | `AlertsPage` | project | `OmnitronAlerts` |
 | `/pipelines` | `PipelinesPage` | project | `OmnitronPipelines` |
 | `/traces` | `TracesPage` | project | `OmnitronTraces` |
-| `/dashboard-builder` | `DashboardBuilderPage` | project | custom dashboard composer |
+| `/dashboard-builder` | `DashboardBuilderPage` | project | scoped application inventory, retained metric series and controller alerts |
 | `*` | redirect to `/` | — | — |
 
 ## Page-by-page
@@ -456,10 +456,27 @@ single-trace waterfall, service-map view. Backed by
 `/projects` — registered project list. Add / scan / remove
 projects. Project switcher in sidebar mirrors this.
 
-### System info
+### System
 
-`/system` — host inventory: OS, CPU, RAM, disk, network
-interfaces. Refreshes on demand.
+Open `/system` to inspect the host that runs a daemon. **Host** selects the connected daemon or a registered mesh node when your role permits remote reads. The selected node and detail tab are in the URL. Each reading identifies the reporting host, collection time and duration. **Live** polls every five seconds while the tab is visible. Pause it to compare numbers or use **Refresh system snapshot** for one observation.
+
+CPU load, committed memory, the fullest mount and network throughput share a compact summary. **Overview** includes host and daemon uptime, process memory, the reported build and expandable per-core load. **Storage** lists all reported mounts by utilization with their available bytes. **Network** lists the reported external interfaces with both IP families and link speed. On updated peers the rate aggregates active external interfaces once samples are available. Older peers report their original network sampling scope.
+
+A partial snapshot names each missing collector and its reason. An unavailable peer keeps its own last observation with a warning. Switching hosts clears the previous reading. A snapshot over 15 seconds old is marked stale. A remote clock more than 15 seconds ahead is reported separately. CLI and agents can obtain the same snapshot with `omnitron --json system --node <id>`.
+
+### Dashboard Builder
+
+Open `/dashboard-builder`, select a dashboard, then choose **Edit layout**. **Add panel** lets you choose application counts and resource totals, retained CPU or memory history, failures and restarts, controller runtime, or firing alerts. Set the title, width and optional exact application name. An application panel follows the selected project and stack. Controller panels identify their scope explicitly.
+
+Use a panel’s options to edit it, move it earlier or later, or remove it. These actions work from the keyboard. Cards reflow to a single column on narrow screens. A chart’s **Data** action opens the exact observations behind it. Historical charts use retained samples with their original timestamps. Missing samples leave gaps. An unavailable source or missing permission appears on the affected panel. A failed alert request cannot turn into a zero count.
+
+**Dashboard options → Settings** changes the name, refresh interval and history window. **New dashboard** starts an empty board. **Duplicate** creates an independent layout. **Export layout** and **Import layout** transfer versioned JSON between browsers. Imports validate the layout and create a separate dashboard. Layout edits are saved in this browser. If storage refuses a write, export the session layout before closing. The document contains panel definitions and filters. Measurements and permissions come from the receiving Console.
+
+### Reading dense topology maps
+
+In `/topology` drag a card to reposition it, or focus it and use the arrow keys. **Lock node positions** protects the layout from movement. **Arrange nodes** clears the saved placement for the current project and stack. Manual placements persist across polling and page reloads in this browser. These presentation changes do not modify a deployment.
+
+Declared links leave distinct ports. The map reserves space for shared dependencies and routes around cards in a background worker. Selecting a node highlights its immediate links. **Focus links** isolates them. The minimap includes an inset around the graph and appears when the canvas has room. Open **Connections** in its inspector to follow a dependency, inspect its direction and read the configuration evidence. If overlapping cards leave no clear path, the map reports the affected links and the inspector keeps them accessible. A declared dependency describes configuration. Connection health requires runtime observations.
 
 ### Settings
 

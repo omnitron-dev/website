@@ -336,6 +336,17 @@ looking identical.
 not the app's. A child that restarted an hour ago under an app that
 has been up for a week reads one hour.
 
+### `omnitron system`
+
+```sh
+omnitron system
+omnitron --json system --node <registered-id>
+```
+
+The command uses the same bounded collectors as Console **System**. A named node is queried over the authenticated mesh. JSON includes the target, collection timing, completeness and the complete snapshot. Inspect `snapshot.unanswered` for per-collector failures. Exit code 1 indicates an unavailable, stale or partial reading, or a host clock too far ahead. The JSON still contains every successful measurement.
+
+A stack start also exposes its outcome in JSON. `outcome: "confirmed"` requires a running stack, every reported application online and no missing infrastructure or nodes. A partial reply includes the affected resources and sets exit code 1. A transport timeout leaves the result unconfirmed. Inspect the stack and deployment history before repeating the request.
+
 ## Monitoring
 
 Resident mode uses independent owner and backend guardian services. See [backend replacement](./backend-handoff.md#independent-os-supervision) for preparation, crash recovery, system scope and owner-failure boundaries.
