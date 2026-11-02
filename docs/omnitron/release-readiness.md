@@ -93,12 +93,13 @@ This plan supplies delivery order and acceptance gates, not a competing architec
 
 ## Current implementation evidence
 
-Clean release packaging now has a two-checkout byte comparison in CI. The
-workspace installs Xec and Kysera from the public npm registry. The registry
-transition verifies their tarballs against the published SHA-512 digests and
-prepared archives. Dependency audits cover runtime and development tools. Run `pnpm audit --audit-level
-low` and `pnpm check:packages` at the root. Target-native dependency identity,
-launch evidence and activation are separate gates.
+CI compares release artifacts from two independent checkouts. For the registry
+transition, all six Xec 0.11.2 and fourteen Kysera 0.10.2 tarballs were downloaded
+from npm. Their SHA-512 digests matched the preparation receipts and the public
+registry metadata. Frozen installs resolve the packages used by each workspace.
+Run `pnpm audit --audit-level low` to check runtime and development dependencies,
+and `pnpm check:packages` to verify every public export inside the packed archives.
+Each target still needs its own runtime identity, launch evidence and rollout record.
 
 G05 uses Xec's release operations for workspace discovery, immutable archive
 preparation, tag verification and registry reconciliation. CI rehearses an
@@ -140,13 +141,10 @@ contract as `NodeSSH`: agents, host pins, algorithms and cancellation are availa
 without a parallel transport API. Connection identities include the effective trust
 and authentication policy; rotated key files cannot reuse the previous identity.
 Timeouts retire repeated failures after active users finish, preserving other commands.
-Real OpenSSH authentication tests now exercise agent signatures, encrypted/key-file
-credentials and rejection of a mismatching `known_hosts` entry without password
-fallback; test credentials are restored in `finally`.
-This does not activate the patched dependency in running applications.
-
-
-These are source-candidate guarantees, not evidence of fleet activation. Transport
-security review, adversarial peer tests, the remaining SSH acceptance matrix and
-coordinated registry/artifact integration are still release prerequisites. No
-replacement SSH protocol implementation is being introduced.
+OpenSSH authentication tests exercise agent signatures, encrypted key files and
+rejection of a mismatching `known_hosts` entry without password fallback.
+Installed-package tests also exercise malformed packets, channel cleanup under
+backpressure and simultaneous writes in the published transport. Before promotion,
+complete the remaining adversarial SSH cases and transport security review. After
+activation, record the running version and repeat the role, host-key and session
+checks through the CLI and Console on the target nodes.
