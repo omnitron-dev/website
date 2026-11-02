@@ -14,6 +14,28 @@ the CLI uses.
 
 Verified against `apps/omnitron/webapp/src/`.
 
+## Workspace and stack scope
+
+The header selects a project and an explicit **All stacks** or **Stack: name**
+filter. The compact menu supports keyboard selection and stays bounded when a
+project has many stacks. This choice filters stack-aware views such as Dashboard,
+Applications, Metrics, Containers and Topology, and the application/stack counts
+in the bottom status bar. The workspace badge always counts all configured stacks
+in the project; the footer names its narrower scope when a stack is selected.
+
+Opening `/stacks/test` is navigation to that stack's details, not a change to the
+workspace filter. Direct links, stack cards and links from Releases preserve the
+same selected scope. Returning to another section therefore keeps your explicit
+filter. Choose **All stacks** to return to the whole project; even a project with
+one stack keeps that choice. Stack lists and release/deployment targets remain
+project inventories, and detail pages show the resource named in their route.
+
+The selection is saved for the current workspace across reloads. Switching
+projects clears the stack filter. A successful inventory refresh also clears a
+selection whose stack was removed or renamed. Failed reads keep the last choice
+and mark cached menu state as stale; they never invent an empty inventory or
+silently switch to another stack.
+
 ## One keyboard model
 
 Console uses three levels of focus: **Console → workspace region → control**.
