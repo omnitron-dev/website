@@ -52,6 +52,8 @@ its stacks, placement, running/configured application counts and last recorded
 deployment. The same view appears on release and stack details. Stack and release
 links connect these views. The artifact list counts storage on the controller,
 within the selected project filter. It is not a count of active deployments.
+**High host load** records a build host's five-minute load average above its CPU
+core count when checks finished; gate results remain separate.
 
 For example, `dev: stopped, Apps 0/6` and `test: running, Apps 6/6` describe two
 configured stacks with only the remote stack running. A historical release beside
