@@ -313,6 +313,14 @@ function UsersPage() {
 }
 ```
 
+The toolbar applies space-separated search terms to
+`filterModel.quickFilterValues`. Client grids filter their rows immediately
+after the debounce window. Server grids pass the same terms to the fetcher,
+with `quickFilterValue` available as joined text. Forward the request's
+`signal` to your HTTP client to cancel superseded work. The grid displays
+only the latest response, even when the server completes an older request
+later. Escape clears search. Pass `toolbar={{ show: false }}` to omit it.
+
 The hook also returns `refresh()` and `reset()`. For client-side
 data, just pass the full `rows` array and use the default
 (`'client'`) pagination mode.

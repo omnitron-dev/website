@@ -113,6 +113,13 @@ see [Distributed coordination](#distributed-coordination) below.
 | `lockProvider`      | `ISchedulerLockProvider` — required when `distributed.enabled` (SC-1)         | —             |
 | `executor` / `persistenceProvider` / `metricsProvider` | `InjectionToken` — override the built-in providers      | —             |
 
+During shutdown the scheduler stops issuing ticks and signals in-flight jobs.
+Queued jobs and pending retries settle without starting a new handler.
+Handlers that need to unwind receive the remainder of `shutdownTimeout`.
+Choose zero for immediate return. A handler that ignores cancellation may
+still be executing when that deadline expires. Both `maxConcurrent` and
+`queueSize` bound admission; a full queue rejects new work.
+
 ## Decorators
 
 ### `@Cron(expression, options?)`

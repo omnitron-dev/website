@@ -132,6 +132,11 @@ const {
 const shareUrl = generateUrl({ preset: 'luxury', mode: 'dark' });
 ```
 
+Browser Back and Forward update `configFromUrl`. To mirror edits made by a
+settings panel, pass `{ syncToUrl: true, values: currentSettings }`. An
+incoming shared link takes precedence on mount. Changes preserve other
+query parameters, the URL fragment and the router's history state.
+
 Recognised params: `preset`, `mode`, `primary` (hex), `dir`, `density`,
 `contrast` (rename via the `paramNames` option). For arbitrary typed
 query-state, parse `URLSearchParams` yourself or use a router loader.

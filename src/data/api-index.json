@@ -3150,7 +3150,7 @@
       "name": "DecoratorExtractor",
       "package": "@omnitron-dev/kb",
       "kind": "class",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/kb/src/extractors/ts-morph/decorator.extractor.ts#L14",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/kb/src/extractors/ts-morph/decorator.extractor.ts#L8",
       "imports": [
         {
           "path": "@omnitron-dev/kb/extractors",
@@ -9418,7 +9418,7 @@
       "name": "BackendStatus",
       "package": "@omnitron-dev/netron-react",
       "kind": "function",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/netron-react/src/multi-backend/components.tsx#L293",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/netron-react/src/multi-backend/components.tsx#L299",
       "imports": [
         {
           "path": "@omnitron-dev/netron-react",
@@ -10350,7 +10350,7 @@
       "name": "QueriesOptions",
       "package": "@omnitron-dev/netron-react",
       "kind": "type",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/netron-react/src/hooks/useQueries.ts#L29",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/netron-react/src/hooks/useQueries.ts#L30",
       "imports": [
         {
           "path": "@omnitron-dev/netron-react",
@@ -10450,7 +10450,7 @@
       "name": "QueryObserverResult",
       "package": "@omnitron-dev/netron-react",
       "kind": "type",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/netron-react/src/hooks/useQueries.ts#L24",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/netron-react/src/hooks/useQueries.ts#L25",
       "imports": [
         {
           "path": "@omnitron-dev/netron-react",
@@ -10514,7 +10514,7 @@
       "name": "RequireAllBackends",
       "package": "@omnitron-dev/netron-react",
       "kind": "function",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/netron-react/src/multi-backend/components.tsx#L226",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/netron-react/src/multi-backend/components.tsx#L232",
       "imports": [
         {
           "path": "@omnitron-dev/netron-react",
@@ -10526,7 +10526,7 @@
       "name": "RequireAnyBackend",
       "package": "@omnitron-dev/netron-react",
       "kind": "function",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/netron-react/src/multi-backend/components.tsx#L259",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/netron-react/src/multi-backend/components.tsx#L265",
       "imports": [
         {
           "path": "@omnitron-dev/netron-react",
@@ -11054,7 +11054,7 @@
       "name": "useInfiniteQuery",
       "package": "@omnitron-dev/netron-react",
       "kind": "function",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/netron-react/src/hooks/useInfiniteQuery.ts#L64",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/netron-react/src/hooks/useInfiniteQuery.ts#L65",
       "imports": [
         {
           "path": "@omnitron-dev/netron-react",
@@ -11070,7 +11070,7 @@
       "name": "useInfiniteQueryDefault",
       "package": "@omnitron-dev/netron-react",
       "kind": "function",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/netron-react/src/hooks/useInfiniteQuery.ts#L64",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/netron-react/src/hooks/useInfiniteQuery.ts#L65",
       "imports": [
         {
           "path": "@omnitron-dev/netron-react/hooks",
@@ -11254,7 +11254,7 @@
       "name": "useQueries",
       "package": "@omnitron-dev/netron-react",
       "kind": "function",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/netron-react/src/hooks/useQueries.ts#L129",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/netron-react/src/hooks/useQueries.ts#L130",
       "imports": [
         {
           "path": "@omnitron-dev/netron-react",
@@ -11270,7 +11270,7 @@
       "name": "useQueriesDefault",
       "package": "@omnitron-dev/netron-react",
       "kind": "function",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/netron-react/src/hooks/useQueries.ts#L129",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/netron-react/src/hooks/useQueries.ts#L130",
       "imports": [
         {
           "path": "@omnitron-dev/netron-react/hooks",
@@ -11282,7 +11282,7 @@
       "name": "UseQueriesOptions",
       "package": "@omnitron-dev/netron-react",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/netron-react/src/hooks/useQueries.ts#L34",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/netron-react/src/hooks/useQueries.ts#L35",
       "imports": [
         {
           "path": "@omnitron-dev/netron-react",
@@ -11298,7 +11298,7 @@
       "name": "useQuery",
       "package": "@omnitron-dev/netron-react",
       "kind": "function",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/netron-react/src/hooks/useQuery.ts#L35",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/netron-react/src/hooks/useQuery.ts#L36",
       "imports": [
         {
           "path": "@omnitron-dev/netron-react",
@@ -11314,7 +11314,7 @@
       "name": "useQueryDefault",
       "package": "@omnitron-dev/netron-react",
       "kind": "function",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/netron-react/src/hooks/useQuery.ts#L35",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/netron-react/src/hooks/useQuery.ts#L36",
       "imports": [
         {
           "path": "@omnitron-dev/netron-react/hooks",
@@ -17746,7 +17746,7 @@
       "name": "BackendStatus",
       "package": "@omnitron-dev/prism",
       "kind": "function",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/netron-react/src/multi-backend/components.tsx#L293",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/netron-react/src/multi-backend/components.tsx#L299",
       "imports": [
         {
           "path": "@omnitron-dev/prism",
@@ -19122,7 +19122,7 @@
       "name": "checkSettingsVersion",
       "package": "@omnitron-dev/prism",
       "kind": "function",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/state/settings-version.ts#L301",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/state/settings-version.ts#L299",
       "imports": [
         {
           "path": "@omnitron-dev/prism",
@@ -19302,7 +19302,7 @@
       "name": "clearSettings",
       "package": "@omnitron-dev/prism",
       "kind": "function",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/state/settings-version.ts#L341",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/state/settings-version.ts#L339",
       "imports": [
         {
           "path": "@omnitron-dev/prism",
@@ -20282,7 +20282,7 @@
       "name": "createAddFieldMigration",
       "package": "@omnitron-dev/prism",
       "kind": "function",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/state/settings-version.ts#L497",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/state/settings-version.ts#L495",
       "imports": [
         {
           "path": "@omnitron-dev/prism",
@@ -20542,7 +20542,7 @@
       "name": "createMigration",
       "package": "@omnitron-dev/prism",
       "kind": "function",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/state/settings-version.ts#L450",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/state/settings-version.ts#L448",
       "imports": [
         {
           "path": "@omnitron-dev/prism",
@@ -20634,7 +20634,7 @@
       "name": "createPersistedStore",
       "package": "@omnitron-dev/prism",
       "kind": "function",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/state/create-store.ts#L172",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/state/create-store.ts#L170",
       "imports": [
         {
           "path": "@omnitron-dev/prism",
@@ -20662,7 +20662,7 @@
       "name": "createPrismStore",
       "package": "@omnitron-dev/prism",
       "kind": "function",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/state/create-store.ts#L74",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/state/create-store.ts#L72",
       "imports": [
         {
           "path": "@omnitron-dev/prism",
@@ -20738,7 +20738,7 @@
       "name": "createRemoveFieldMigration",
       "package": "@omnitron-dev/prism",
       "kind": "function",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/state/settings-version.ts#L516",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/state/settings-version.ts#L514",
       "imports": [
         {
           "path": "@omnitron-dev/prism",
@@ -20754,7 +20754,7 @@
       "name": "createRenameMigration",
       "package": "@omnitron-dev/prism",
       "kind": "function",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/state/settings-version.ts#L465",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/state/settings-version.ts#L463",
       "imports": [
         {
           "path": "@omnitron-dev/prism",
@@ -20782,7 +20782,7 @@
       "name": "createSelectors",
       "package": "@omnitron-dev/prism",
       "kind": "function",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/state/create-store.ts#L239",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/state/create-store.ts#L237",
       "imports": [
         {
           "path": "@omnitron-dev/prism",
@@ -20798,7 +20798,7 @@
       "name": "createSettingsValidator",
       "package": "@omnitron-dev/prism",
       "kind": "function",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/state/settings-version.ts#L402",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/state/settings-version.ts#L400",
       "imports": [
         {
           "path": "@omnitron-dev/prism",
@@ -20886,7 +20886,7 @@
       "name": "createTransformMigration",
       "package": "@omnitron-dev/prism",
       "kind": "function",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/state/settings-version.ts#L540",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/state/settings-version.ts#L538",
       "imports": [
         {
           "path": "@omnitron-dev/prism",
@@ -20918,7 +20918,7 @@
       "name": "createUIStore",
       "package": "@omnitron-dev/prism",
       "kind": "function",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/state/create-store.ts#L113",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/state/create-store.ts#L111",
       "imports": [
         {
           "path": "@omnitron-dev/prism",
@@ -20934,7 +20934,7 @@
       "name": "createVersionedPersistOptions",
       "package": "@omnitron-dev/prism",
       "kind": "function",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/state/settings-version.ts#L280",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/state/settings-version.ts#L278",
       "imports": [
         {
           "path": "@omnitron-dev/prism",
@@ -21406,7 +21406,7 @@
       "name": "DataGridBlock",
       "package": "@omnitron-dev/prism",
       "kind": "function",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/blocks/data-grid-block/data-grid-block.tsx#L462",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/blocks/data-grid-block/data-grid-block.tsx#L424",
       "imports": [
         {
           "path": "@omnitron-dev/prism/blocks",
@@ -21454,7 +21454,7 @@
       "name": "DataGridFetchParams",
       "package": "@omnitron-dev/prism",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/blocks/data-grid-block/types.ts#L312",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/blocks/data-grid-block/types.ts#L313",
       "imports": [
         {
           "path": "@omnitron-dev/prism/blocks",
@@ -21466,7 +21466,7 @@
       "name": "DataGridFetchResult",
       "package": "@omnitron-dev/prism",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/blocks/data-grid-block/types.ts#L328",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/blocks/data-grid-block/types.ts#L331",
       "imports": [
         {
           "path": "@omnitron-dev/prism/blocks",
@@ -22822,7 +22822,7 @@
       "name": "EmptyContent",
       "package": "@omnitron-dev/prism",
       "kind": "function",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/empty-content/empty-content.tsx#L169",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/empty-content/empty-content.tsx#L128",
       "imports": [
         {
           "path": "@omnitron-dev/prism",
@@ -23070,7 +23070,7 @@
       "name": "exportSettings",
       "package": "@omnitron-dev/prism",
       "kind": "function",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/state/settings-version.ts#L353",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/state/settings-version.ts#L351",
       "imports": [
         {
           "path": "@omnitron-dev/prism",
@@ -25090,7 +25090,7 @@
       "name": "getMigrationInfo",
       "package": "@omnitron-dev/prism",
       "kind": "function",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/state/settings-version.ts#L586",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/state/settings-version.ts#L584",
       "imports": [
         {
           "path": "@omnitron-dev/prism",
@@ -26262,7 +26262,7 @@
       "name": "importSettings",
       "package": "@omnitron-dev/prism",
       "kind": "function",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/state/settings-version.ts#L374",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/state/settings-version.ts#L372",
       "imports": [
         {
           "path": "@omnitron-dev/prism",
@@ -27694,7 +27694,7 @@
       "name": "LoadingEmptyContent",
       "package": "@omnitron-dev/prism",
       "kind": "function",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/empty-content/empty-content.tsx#L311",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/empty-content/empty-content.tsx#L270",
       "imports": [
         {
           "path": "@omnitron-dev/prism",
@@ -31966,7 +31966,7 @@
       "name": "RequireAllBackends",
       "package": "@omnitron-dev/prism",
       "kind": "function",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/netron-react/src/multi-backend/components.tsx#L226",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/netron-react/src/multi-backend/components.tsx#L232",
       "imports": [
         {
           "path": "@omnitron-dev/prism",
@@ -31982,7 +31982,7 @@
       "name": "RequireAnyBackend",
       "package": "@omnitron-dev/prism",
       "kind": "function",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/netron-react/src/multi-backend/components.tsx#L259",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/netron-react/src/multi-backend/components.tsx#L265",
       "imports": [
         {
           "path": "@omnitron-dev/prism",
@@ -32786,7 +32786,7 @@
       "name": "SearchEmptyContent",
       "package": "@omnitron-dev/prism",
       "kind": "function",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/empty-content/empty-content.tsx#L293",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/empty-content/empty-content.tsx#L252",
       "imports": [
         {
           "path": "@omnitron-dev/prism",
@@ -34282,7 +34282,7 @@
       "name": "StoreSelector",
       "package": "@omnitron-dev/prism",
       "kind": "type",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/state/create-store.ts#L228",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/state/create-store.ts#L226",
       "imports": [
         {
           "path": "@omnitron-dev/prism",
@@ -34714,7 +34714,7 @@
       "name": "TableViewport",
       "package": "@omnitron-dev/prism",
       "kind": "function",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/table/table-viewport.tsx#L58",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/table/table-viewport.tsx#L61",
       "imports": [
         {
           "path": "@omnitron-dev/prism",
@@ -35750,7 +35750,7 @@
       "name": "UrlConfigValues",
       "package": "@omnitron-dev/prism",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/hooks/use-config-from-query.ts#L25",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/hooks/use-config-from-query.ts#L26",
       "imports": [
         {
           "path": "@omnitron-dev/prism",
@@ -36170,7 +36170,7 @@
       "name": "useBreakpointChecks",
       "package": "@omnitron-dev/prism",
       "kind": "function",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/hooks/use-window-size.ts#L265",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/hooks/use-window-size.ts#L273",
       "imports": [
         {
           "path": "@omnitron-dev/prism",
@@ -36326,7 +36326,7 @@
       "name": "useConfigFromQuery",
       "package": "@omnitron-dev/prism",
       "kind": "function",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/hooks/use-config-from-query.ts#L171",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/hooks/use-config-from-query.ts#L195",
       "imports": [
         {
           "path": "@omnitron-dev/prism",
@@ -36342,7 +36342,7 @@
       "name": "UseConfigFromQueryOptions",
       "package": "@omnitron-dev/prism",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/hooks/use-config-from-query.ts#L43",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/hooks/use-config-from-query.ts#L44",
       "imports": [
         {
           "path": "@omnitron-dev/prism",
@@ -36358,7 +36358,7 @@
       "name": "UseConfigFromQueryReturn",
       "package": "@omnitron-dev/prism",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/hooks/use-config-from-query.ts#L62",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/hooks/use-config-from-query.ts#L65",
       "imports": [
         {
           "path": "@omnitron-dev/prism",
@@ -36654,7 +36654,7 @@
       "name": "useDataGridBlock",
       "package": "@omnitron-dev/prism",
       "kind": "function",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/blocks/data-grid-block/data-grid-block.tsx#L746",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/blocks/data-grid-block/data-grid-block.tsx#L688",
       "imports": [
         {
           "path": "@omnitron-dev/prism/blocks",
@@ -36666,7 +36666,7 @@
       "name": "useDataGridBlockContext",
       "package": "@omnitron-dev/prism",
       "kind": "function",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/blocks/data-grid-block/data-grid-block.tsx#L70",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/blocks/data-grid-block/data-grid-block.tsx#L74",
       "imports": [
         {
           "path": "@omnitron-dev/prism/blocks",
@@ -36678,7 +36678,7 @@
       "name": "UseDataGridBlockOptions",
       "package": "@omnitron-dev/prism",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/blocks/data-grid-block/types.ts#L294",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/blocks/data-grid-block/types.ts#L295",
       "imports": [
         {
           "path": "@omnitron-dev/prism/blocks",
@@ -36690,7 +36690,7 @@
       "name": "UseDataGridBlockReturn",
       "package": "@omnitron-dev/prism",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/blocks/data-grid-block/types.ts#L338",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/blocks/data-grid-block/types.ts#L341",
       "imports": [
         {
           "path": "@omnitron-dev/prism/blocks",
@@ -37698,7 +37698,7 @@
       "name": "useNetronInfiniteQuery",
       "package": "@omnitron-dev/prism",
       "kind": "function",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/netron-react/src/hooks/useInfiniteQuery.ts#L64",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/netron-react/src/hooks/useInfiniteQuery.ts#L65",
       "imports": [
         {
           "path": "@omnitron-dev/prism",
@@ -37730,7 +37730,7 @@
       "name": "useNetronQuery",
       "package": "@omnitron-dev/prism",
       "kind": "function",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/netron-react/src/hooks/useQuery.ts#L35",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/netron-react/src/hooks/useQuery.ts#L36",
       "imports": [
         {
           "path": "@omnitron-dev/prism",
@@ -38110,7 +38110,7 @@
       "name": "useScrollLock",
       "package": "@omnitron-dev/prism",
       "kind": "function",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/hooks/use-scroll-position.ts#L201",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/hooks/use-scroll-position.ts#L200",
       "imports": [
         {
           "path": "@omnitron-dev/prism",
@@ -38206,7 +38206,7 @@
       "name": "useScrollToTop",
       "package": "@omnitron-dev/prism",
       "kind": "function",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/hooks/use-scroll-position.ts#L170",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/hooks/use-scroll-position.ts#L169",
       "imports": [
         {
           "path": "@omnitron-dev/prism",
@@ -38454,7 +38454,7 @@
       "name": "useTable",
       "package": "@omnitron-dev/prism",
       "kind": "function",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/table/table.tsx#L507",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/table/table.tsx#L502",
       "imports": [
         {
           "path": "@omnitron-dev/prism",
@@ -38474,7 +38474,7 @@
       "name": "UseTableOptions",
       "package": "@omnitron-dev/prism",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/table/table.tsx#L430",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/table/table.tsx#L425",
       "imports": [
         {
           "path": "@omnitron-dev/prism",
@@ -38494,7 +38494,7 @@
       "name": "UseTableReturn",
       "package": "@omnitron-dev/prism",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/table/table.tsx#L445",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/table/table.tsx#L440",
       "imports": [
         {
           "path": "@omnitron-dev/prism",
@@ -38850,7 +38850,7 @@
       "name": "validateMigrations",
       "package": "@omnitron-dev/prism",
       "kind": "function",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/state/settings-version.ts#L566",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/state/settings-version.ts#L564",
       "imports": [
         {
           "path": "@omnitron-dev/prism",
@@ -53126,7 +53126,7 @@
       "name": "AUTH_METADATA_KEY",
       "package": "@omnitron-dev/titan-auth",
       "kind": "value",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-auth/src/auth.decorators.ts#L28",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-auth/src/auth.decorators.ts#L27",
       "imports": [
         {
           "path": "@omnitron-dev/titan-auth",
@@ -53510,7 +53510,7 @@
       "name": "getAuthRequirements",
       "package": "@omnitron-dev/titan-auth",
       "kind": "function",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-auth/src/auth.decorators.ts#L181",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-auth/src/auth.decorators.ts#L180",
       "imports": [
         {
           "path": "@omnitron-dev/titan-auth",
@@ -53606,7 +53606,7 @@
       "name": "IAuthDecoratorContext",
       "package": "@omnitron-dev/titan-auth",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-auth/src/auth.decorators.ts#L38",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-auth/src/auth.decorators.ts#L37",
       "imports": [
         {
           "path": "@omnitron-dev/titan-auth",
@@ -53798,7 +53798,7 @@
       "name": "isPublic",
       "package": "@omnitron-dev/titan-auth",
       "kind": "function",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-auth/src/auth.decorators.ts#L244",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-auth/src/auth.decorators.ts#L243",
       "imports": [
         {
           "path": "@omnitron-dev/titan-auth",
@@ -54002,7 +54002,7 @@
       "name": "Public",
       "package": "@omnitron-dev/titan-auth",
       "kind": "function",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-auth/src/auth.decorators.ts#L219",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-auth/src/auth.decorators.ts#L218",
       "imports": [
         {
           "path": "@omnitron-dev/titan-auth",
@@ -54014,7 +54014,7 @@
       "name": "PUBLIC_METADATA_KEY",
       "package": "@omnitron-dev/titan-auth",
       "kind": "value",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-auth/src/auth.decorators.ts#L33",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-auth/src/auth.decorators.ts#L32",
       "imports": [
         {
           "path": "@omnitron-dev/titan-auth",
@@ -54026,7 +54026,7 @@
       "name": "RequireAdminAuth",
       "package": "@omnitron-dev/titan-auth",
       "kind": "function",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-auth/src/auth.decorators.ts#L167",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-auth/src/auth.decorators.ts#L166",
       "imports": [
         {
           "path": "@omnitron-dev/titan-auth",
@@ -54038,7 +54038,7 @@
       "name": "RequireAuth",
       "package": "@omnitron-dev/titan-auth",
       "kind": "function",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-auth/src/auth.decorators.ts#L79",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-auth/src/auth.decorators.ts#L78",
       "imports": [
         {
           "path": "@omnitron-dev/titan-auth",
@@ -54050,7 +54050,7 @@
       "name": "RequireRole",
       "package": "@omnitron-dev/titan-auth",
       "kind": "function",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-auth/src/auth.decorators.ts#L286",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-auth/src/auth.decorators.ts#L285",
       "imports": [
         {
           "path": "@omnitron-dev/titan-auth",
@@ -54062,7 +54062,7 @@
       "name": "RequireServiceAuth",
       "package": "@omnitron-dev/titan-auth",
       "kind": "function",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-auth/src/auth.decorators.ts#L147",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-auth/src/auth.decorators.ts#L146",
       "imports": [
         {
           "path": "@omnitron-dev/titan-auth",

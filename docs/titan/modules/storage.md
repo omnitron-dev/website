@@ -54,6 +54,17 @@ stream with content metadata and supports byte ranges and conditional reads.
 carry an ETag and may carry a backend version ID. Do not infer versioning from
 an optional result field.
 
+For local storage, give the service exclusive write access to its root.
+Object operations reject paths that escape the root and symbolic links below
+it. The `.uploads` directory and `.meta.json` sidecars belong to the adapter.
+A listing cursor belongs to the prefix and delimiter that issued it.
+A page counts both objects and grouped prefixes towards `maxKeys`.
+
+A multipart upload ID is bound to its original object key. Finalization
+validates the supplied part numbers and ETags and assembles the object on
+the same filesystem before replacing its contents. A bad part receipt leaves
+the previous contents available and the uploaded parts ready for retry.
+
 Use `listParts` to obtain the backend's authoritative part numbers and ETags
 before completing a multipart upload. Local multipart bookkeeping is in memory
 and is lost on process restart; use a durable backend when that constraint is
