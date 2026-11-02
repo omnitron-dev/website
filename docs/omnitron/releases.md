@@ -32,12 +32,15 @@ system, architecture, Node binary and libc. `omnitron release show <release>` an
 **Releases → Built with** display the target. Older manifests display *Target not
 recorded*. The JSON output also includes the Node executable digest.
 
-The receiving node checks the delivered bytes and compares the shared Titan packages
-against the independent process owner's dependency graph. It validates the settings
-from the destination stack before running migrations or replacing registrations.
-A mismatch identifies the failing check in the deployment detail. Build on a matching
-machine or align the execution owner and build source. A checked delivery makes no
-npm requests on the node.
+The receiving node compares the shared Titan packages and their transitive
+dependencies with the independent process owner's installed graph. Package bytes,
+versions, resolved peers, optional dependencies and shared module identities must
+match. The owner, the application and its extensions then resolve shared modules
+to the same installed package. Application-specific packages stay in the release.
+
+The deployment detail identifies a mismatched package or dependency. Check the
+owner build and target before retrying. The node verifies the stack settings and
+the installed graph before migrations or registration changes. Delivery runs offline.
 
 The optional `NODE_OPTIONS=--max-old-space-size=<MiB>` setting must match the
 value recorded in the archive. Additional module paths, loaders and preloads cannot
