@@ -40106,7 +40106,7 @@
       "name": "DockerTestManager",
       "package": "@omnitron-dev/testing",
       "kind": "class",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/testing/src/docker/docker-test-manager.ts#L94",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/testing/src/docker/docker-test-manager.ts#L103",
       "imports": [
         {
           "path": "@omnitron-dev/testing/docker",

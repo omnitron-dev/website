@@ -306,12 +306,10 @@ shapes — see `packages/testing/src/titan/test-fixtures.ts`.
 
 ## Docker helpers — `@omnitron-dev/testing/docker`
 
-For integration tests that need a real Postgres or Redis. The API is
-three manager classes with static factory methods, each returning a
-`DockerContainer` you clean up yourself:
+Use the database and Redis helpers when an integration test needs a real service. Each factory returns a `DockerContainer` with its assigned ports and a `cleanup()` method.
 
 ```typescript
-import { RedisTestManager, DatabaseTestManager } from '@omnitron-dev/testing/docker';
+import { RedisTestManager, DatabaseTestManager, type DockerContainer } from '@omnitron-dev/testing/docker';
 
 let redis: DockerContainer;
 let postgres: DockerContainer;
@@ -327,9 +325,11 @@ afterAll(async () => {
 });
 ```
 
-`port: 'auto'` asks the OS for a free port, which is what lets several
-suites run in parallel; read the assigned port from
-`container.ports.get(6379)`.
+With `port: 'auto'`, read the assigned loopback port from `container.ports.get(6379)`. PostgreSQL and MySQL readiness probes use TCP so a temporary initialization socket cannot mark the database ready. A custom `waitFor` that specifies both `port` and `healthcheck` waits for both conditions.
+
+Choose distinct names for parallel tests. A name collision fails before the helper can touch the existing container. Cleanup addresses the Docker ID that the manager created. You can attach tests to an existing network by name. The network stays with its owner.
+
+In the Omnitron repository, `pnpm test:ci` starts a dedicated Compose project, runs the workspace suite, and removes that project's test resources. A failed startup, suite or teardown returns a nonzero exit status. When running two suites on the same host, assign different test ports as described in the root Compose file.
 
 `RedisTestManager` also builds multi-node topologies —
 `createRedisCluster()` and `createRedisSentinel()` — and
