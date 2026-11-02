@@ -43,7 +43,7 @@ when piped into another process. Check both the JSON result and the exit status.
 | **Backend installation and replacement** | `backend status`, `backend install`, `backend installation`, `backend select`, `backend upgrade`, `backend abort`, `backend recover`, `backend owner-reconcile prepare`, `backend owner-reconcile acknowledge` |
 | **Project** | `project add`, `project list`, `project remove`, `project scan`, `project topology` |
 | **Topology** | `topology refresh`, `topology show`, `topology export`, `topology draft`, `topology plan`, `topology apply` |
-| **Stack** | `stack list`, `stack create`, `stack delete`, `stack status`, `stack diagnose`, `stack start`, `stack stop`, `stack runtime` |
+| **Stack** | `stack list`, `stack create`, `stack delete`, `stack status`, `stack progress`, `stack diagnose`, `stack start`, `stack stop`, `stack runtime` |
 | **App lifecycle** | `start`, `stop`, `restart`, `reload` |
 | **Information** | `list` (alias `ls`), `status`, `config`, `init` |
 | **Monitoring** | `logs`, `monit`, `health`, `metrics`, `health-check`, `discover` |
@@ -261,6 +261,7 @@ infrastructure to a subset of the project's apps.
 | `omnitron stack create <project> <stack> [-t type] [-a apps]` | Create a new stack (`-t, --type local\|remote\|cluster`, default `local`; `-a, --apps` comma-separated names or `all`, default `all`) |
 | `omnitron stack delete <project> <stack>` | Drop a stack |
 | `omnitron stack status <project> <stack>` | Per-app status within the stack |
+| `omnitron stack progress <project> [stack]` | Latest remote transfer observation per stack, node and app, including its operation ID and any release ID |
 | `omnitron stack diagnose <project> <stack>` | Read-only prerequisite checks and planned changes before start |
 | `omnitron stack start <project> <stack>` | Start everything in the stack |
 | `omnitron stack stop <project> <stack>` | Prepare every node, stop owned applications and containers, require confirmed receipts; retain volumes |

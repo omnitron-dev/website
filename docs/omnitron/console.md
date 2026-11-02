@@ -417,11 +417,13 @@ labels and success statuses did not establish an artifact deployment. Its old
 mutation path is disabled in RPC as well as Console; use the release/stack
 workflow for deployment or returning to a previous release.
 
-Transfer observations currently retain the latest event per node/application;
-they lack operation and project identifiers. Project workspaces show these
-controller-wide observations only when explicitly expanded. Failed polling and
-stale incomplete transfers are reported as unknown, never as successful or
-continuously active. This limited progress feed is not a durable operation ledger.
+Transfer observations follow the selected project and stack, including imported
+configurations. Each row shows the node, app, last phase and diagnostic message.
+**Transfer details** exposes the operation ID, observation time and any release
+ID. A stale or interrupted observation shows that completion is unknown.
+Earlier controllers can return unattributed observations, which have a separate
+expandable list. The page requests only the views permitted for the current user.
+The CLI exposes the same observations through `omnitron stack progress`.
 
 ### Alerts
 

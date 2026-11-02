@@ -207,8 +207,10 @@ remove its local archive override, and verify a clean install before deployment.
 
 For a coordinated Xec or Kysera release, compare each exact version with the
 publisher's saved SHA-512. An accepted upload, a distribution tag and a
-downloadable tarball can become visible at different times. Use a fresh cache
-when downloading the archive so the check exercises the public registry.
+downloadable tarball can become visible at different times. Download by package
+name and exact version from a fresh cache to exercise the same index as an
+install. If this read returns `ETARGET` after npm accepted the upload, keep the
+original receipt and retry the read as the registry index updates.
 
 ```sh
 package='@xec-sh/core@0.11.2'
@@ -226,6 +228,18 @@ clean checkouts with the same Node executable, pnpm version and target.
 Compare the runtime, application archives and static assets, then test
 admission of the resulting archives against the target runtime. Live release
 registrations continue to refer to their original digests.
+
+### Following a remote transfer
+
+Open **Deployments** in the project workspace or run
+`omnitron --json stack progress <project> [stack]`. Each remote stack start
+assigns one operation ID to provisioning and delivery across its nodes.
+Expand **Transfer details** to copy that ID, the timestamp or the selected release.
+Two stacks sharing a host and an application name have separate observations.
+The latest report for each stack, node and application is kept in controller
+memory. An earlier controller may supply reports without workspace identity.
+Console keeps those behind an explicit control. Use **Audit** for recorded
+starts and **Releases** for evidence of which artifact a process loaded.
 
 ## Validate linked source checkouts
 
