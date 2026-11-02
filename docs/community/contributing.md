@@ -165,9 +165,9 @@ From a clean `main`, list the public workspaces and preview an exact semantic
 version. The plan reports the source revision, package count and npm channel.
 
 ```sh
-pnpm release --list
-pnpm release <version> --dry-run
-pnpm release <version> --prepare
+node scripts/release.mjs --list
+node scripts/release.mjs <version> --dry-run
+node scripts/release.mjs <version> --prepare
 ```
 
 Preparation commits public package versions, builds an isolated copy of the
@@ -176,14 +176,14 @@ and `NOTES.md` in `.release-artifacts/<version>/<commit>/`. The public npm
 channel for `1.0.0-rc.1`, for example, is `rc`.
 
 ```sh
-pnpm release <version> --push
-pnpm release <version> --publish
-pnpm release <version> --github
+node scripts/release.mjs <version> --push
+node scripts/release.mjs <version> --publish
+node scripts/release.mjs <version> --github
 ```
 
 The first command atomically pushes the selected commit and its annotated tag.
 The second checks the remote tag and compares archive integrity against npm.
-After an interruption, keep the artifacts and use `pnpm release <version>
+After an interruption, keep the artifacts and use `node scripts/release.mjs <version>
 --resume` at the same clean commit. GitHub publication checks all packages
 before creating the release. An internal registry can be selected explicitly
 using `--registry <url>` for publication, resumption and confirmation.
