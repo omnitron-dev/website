@@ -446,7 +446,8 @@ that disables provisioning and just wires up the connection.
 
 ```typescript
 interface IBareMetalServiceConfig {
-  installCommand?:  string;   // package install command
+  apt?:             { latest: string[]; repository?: string };
+  installCommand?:  string;   // install the service executable
   systemdUnit?:     string;   // systemd service name
   configFile?:      string;   // config path on the target machine
   configTemplate?:  string;   // template (uses ${...} syntax)
@@ -461,6 +462,25 @@ interface IBareMetalServiceConfig {
 There is no service-discovery layer here (no `consul` / `k8s`
 provider) — bare-metal config describes install + on-disk layout.
 Live external endpoints are wired via `serviceOverrides.external`.
+
+### Tracking host packages
+
+Declare host dependencies under the bare-metal variant that consumes them. For example, a service that uses a system Tor proxy can track the stable release for the host distribution.
+
+```json
+{
+  "apt": {
+    "latest": ["tor", "tor-geoipdb"],
+    "repository": "https://deb.torproject.org/torproject.org"
+  }
+}
+```
+
+The optional HTTPS repository selects its `<VERSION_CODENAME>/main` binary channel. Configure it on the node with a scoped `Signed-By` key. Without a repository, the host's APT policy selects the candidate. A systemd dependency such as `Requires=tor@default.service` orders services and carries no package version constraint.
+
+`omnitron infra inspect <project>/<stack>` reads local indices and reports installed and candidate versions, package holds and source mismatches. Administrators can read the same evidence under **Stacks → Diagnose → Inspect hosts** in Console. Stack provisioning refreshes the indices before resolving versions. The preview lists any new transitive dependencies. Provisioning checks the selection again and refuses removals, downgrades, changes to other installed packages or a changed dependency set. Package maintainer scripts can restart services, so review a live upgrade in a maintenance window. Package checks run on inspection and provisioning. Configure scheduled patch maintenance on the host when you need updates between deployments.
+
+The Docker `tor` preset has a separate package lifecycle. Its Alpine 3.24 entrypoint resolves Tor from the stable branch at startup, including when the container already has a package installed. Running processes keep their current binaries until restarted. Inspect the system proxy and the onion gateway independently.
 
 ## Container state
 
