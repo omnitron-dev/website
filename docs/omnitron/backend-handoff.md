@@ -9,6 +9,19 @@ Resident execution separates the backend from the process that owns applications
 
 Resident execution is opt-in on POSIX. It supports unmanaged operation and separate OS services for the execution owner and backend guardian. A legacy single-service layout is refused: detaching a child does not establish independent service ownership. Replacing the owner or its Node runtime still requires an application maintenance window.
 
+## Choose the update mechanism
+
+| Purpose | Entry point | Boundary |
+| --- | --- | --- |
+| Replace the local resident backend | `backend upgrade <sealed-dist>` through its local supervisor | Keeps the owner and application processes. The fleet cannot update its initiating controller. |
+| Replace remote managed backends | `fleet rollout` or Console **Nodes → Managed backend updates** | Uses sealed builds and one shared, durable receipt across CLI and Console. |
+| Bootstrap an older independent guardian | Native `backend guardian prepare` and reviewed `apply` | A separate, qualified window before using `kernelHandoff@1`. Retains the selected backend and owner. |
+| Replace a coupled host's workspace bundle | `fleet upgrade` or Console **Advanced · workspace source bundle upgrades** | Uses the legacy host/app contract and can restart applications. Independently supervised hosts require the managed backend path. |
+
+The first transition from a coupled daemon to an independent owner still requires
+an application maintenance window. Neither a fleet plan nor a guardian update
+transfers application ownership to a new owner process.
+
 ## Owner compatibility
 
 A compatible RPC envelope does not imply compatible lifecycle behavior. A sealed
@@ -179,7 +192,7 @@ maintenance record.
 
 Rollback restores service ownership, configuration and the retained runtime. It must first prove that the new owner and its application processes have stopped. Keep newly written logs, replication acknowledgments and application data: do not restore a pre-transition SQLite snapshot over them. Retain the failed transition's runtime and execution journals for diagnosis.
 
-Remote application deployment recognizes a settled, sealed managed backend through its selected runtime, native guardian parent and separate owner/backend cgroups. A stale selection or mismatched process is refused. The coupled `fleet upgrade` workflow refuses an independently supervised node before stopping or rebinding any application. Use the node's `omnitron backend upgrade <sealed-runtime>/packages/0/dist` workflow for backend replacement; keep framework bundles still referenced by applications.
+Remote application deployment recognizes a settled, sealed managed backend through its selected runtime, native guardian parent and separate owner/backend cgroups. A stale selection or mismatched process is refused. The coupled `fleet upgrade` workflow refuses an independently supervised node before stopping or rebinding any application. Use `fleet rollout` for registered remote managed backends and `backend upgrade <sealed-runtime>/packages/0/dist` for the local supervisor. Keep framework bundles still referenced by applications.
 
 ## Compatible schema expansion
 
@@ -231,14 +244,32 @@ This workflow currently covers master PostgreSQL expansions. Local node SQLite t
 
 `omnitron backend guardian` manages the guardian independently of the backend selection and execution owner. For supported user services and qualified root-owned Linux system services, `omnitron backend guardian prepare` saves a plan and `omnitron backend guardian apply` applies or resumes it:
 
-```bash
-omnitron backend guardian prepare /absolute/releases/omnitron-next --json
-omnitron backend guardian apply /absolute/instance/runtime/supervisor-transition-ID.json --json
+```sh
+omnitron --json backend guardian prepare /absolute/releases/omnitron-next
+omnitron --json backend guardian apply /absolute/instance/runtime/supervisor-transition-ID.json --check
+```
+
+Use a management runtime that provides `--check`. It reads the prepared plan and
+rechecks the selected backend, owner, inventory, pending operations, native unit
+and Linux stop boundary without starting the transition. Review `phase: prepared`
+and `checked: true` before approval. A completed plan returns its earlier receipt
+with `checked: false`, which is not a fresh readiness check. Apply performs the
+checks again under the installation lease.
+
+After reviewing the current evidence, apply the same plan separately.
+
+```sh
+omnitron --json backend guardian apply /absolute/instance/runtime/supervisor-transition-ID.json
 ```
 
 If the installed launcher predates these commands, invoke the candidate's `node` executable and `packages/0/dist/cli/omnitron.js` directly. Preparation verifies and installs the sealed management runtime, records the loaded unit file and current owner/application identities, and saves a private plan. It does not stop services. The record contains the original supervision configuration and unit for recovery; do not publish its contents.
 
 Apply drains and checkpoints the backend, records an activation intent, stops only the guardian's native OS job, atomically replaces its unit and private configuration, then starts the new guardian. The existing backend release is restored under that guardian with a fresh controller epoch. The owner and application processes remain in their separate job. CLI and Console requests pause while backend control is restored.
+
+A pool can recycle a worker while a plan awaits review. If the read-only check
+refuses a changed inventory before retirement, prepare a fresh plan and review its
+new PID and inventory evidence. Preserve the old receipt. A change after the
+transition started requires inspection of its original phase and checkpoint.
 
 The plan is resumable: run the same `apply` command after a coordinator interruption. It refuses changed units, a different owner, changed application inventory or a conflicting activation. A completed plan returns its original receipt without starting another process; use `omnitron backend status` for current state. To return to a previous guardian, prepare a new plan for its retained sealed runtime. No database migration is performed, and backend candidate compatibility checks remain in effect.
 
@@ -387,7 +418,10 @@ with the full serving and candidate commits and the exact target Node version.
 The test starts an application, replaces the guardian, verifies owner identity and
 exercises a backend update and rollback while checking application requests and logs.
 Use the [guardian transition procedure](#updating-the-guardian) for the
-one-time installation.
+one-time installation. Fleet handoff starts only after the guardian supports the
+protocol. The first management runtime must be installed through a separately
+qualified native path, rather than asking an older guardian to perform an
+unsupported fleet handoff.
 
 ### Publish the batch to the controller
 
@@ -398,7 +432,7 @@ variant. Several servers can reuse one build.
 
 ```sh
 omnitron fleet rollout import /builds/linux-x64-node22/runtime /builds/linux-x64-node24/runtime
-omnitron fleet rollout builds --json
+omnitron --json fleet rollout builds
 ```
 
 The private catalog records the source commit, target platform and Node version,
@@ -416,15 +450,15 @@ registered remote nodes in name order. The local controller has its own handoff
 procedure.
 
 ```sh
-omnitron fleet rollout plan <commit> test-node production-node --stage --wait
-omnitron fleet rollout apply <plan-id> --wait
+omnitron --json fleet rollout plan <commit> test-node production-node --stage --wait
+omnitron --json fleet rollout apply <plan-id> --wait
 ```
 
 For a qualified batch in a scheduled window, distribution, qualification and
 activation can be requested from one command.
 
 ```sh
-omnitron fleet rollout plan <commit> test-node production-node --stage --apply --wait
+omnitron --json fleet rollout plan <commit> test-node production-node --stage --apply --wait
 ```
 
 With `--stage`, the controller matches each serving runtime to an exact catalog
@@ -436,9 +470,13 @@ of the entire plan. A successful plan records the exact rollback artifact,
 candidate, current selection revision, backend PID, owner and application inventory.
 
 In Console, open **Nodes → Managed backend updates → Plan update**. Choose a catalog
-commit, select the servers in canary order and enable **Stage from controller catalog**
-if distribution is required. Review the per-server results and choose **Apply
-reviewed plan**. The detail URL and the CLI refer to the same persisted operation.
+commit and select the servers in canary order, or explicitly choose **All
+registered remote nodes**. An empty selection does not authorize the whole fleet.
+Enable **Stage from controller catalog** if distribution is required. Review the
+per-server results and choose **Apply reviewed plan**. The Nodes URL's `?rollout=<plan-id>` and `fleet rollout status
+<plan-id>` refer to the same persisted operation. CLI and Console show the overall
+batch state and each target's outcome. The advanced workspace source bundle panel
+reports a separate legacy operation.
 After each successful handoff, the controller checks application readiness and
 owner identity and continues to the next server. If your acceptance procedure
 also requires a replication watermark to advance, a public transaction to
@@ -447,6 +485,13 @@ Complete that check before submitting a second plan for the remaining servers.
 Administrative sessions can prepare, start and reconcile a rollout. Read access
 lets operators and viewers follow progress. Each server operation rechecks the
 initiating administrator's authority.
+
+A healthy pool rotation can change a PID or inventory digest after qualification.
+If dispatch has not started, create a new plan and review its fresh identities.
+Keep the original receipt for audit. A stale refusal is not evidence that an
+activation happened or that rollback ran. After dispatch, inspect the original
+ID. Follow an operation that is still running and reconcile an uncertain outcome
+before creating another plan.
 
 ### Reverse an accepted node
 
@@ -475,8 +520,8 @@ reviewed fenced recovery procedure.
 ### Follow a batch or recover an interrupted handoff
 
 ```sh
-omnitron fleet rollout status <plan-id> --wait
-omnitron fleet rollout reconcile <plan-id>
+omnitron --json fleet rollout status <plan-id> --wait
+omnitron --json fleet rollout reconcile <plan-id>
 ```
 
 Planning returns an ID while qualification continues. With `--apply` the CLI
@@ -486,12 +531,24 @@ The same ID binds the requested commit, node selection and staging choice.
 Closing a client after submission leaves accepted work on the controller.
 
 On activation failure the controller stops dispatching later nodes and records
-the observed outcome. A confirmed candidate with failed readiness can be handed
-back to the pinned rollback runtime when the guardian can still verify ownership.
-Previously successful nodes retain their accepted versions. An uncertain receipt
-blocks a new rollout until reconciliation checks live evidence. Reconciliation
-observes the node without replaying the handoff. After reviewing the outcome,
-create a new plan for any remaining nodes.
+the observed outcome. Before dispatch, a refusal leaves the incumbent in place.
+A `failed` target can describe an unchanged original runtime, PID and selection
+revision. A `rolled-back` target requires evidence of activation followed by return
+to the pinned previous runtime. Merely seeing the previous artifact does not
+prove a rollback.
+
+A confirmed candidate with failed readiness can be handed back when the guardian
+still verifies ownership. Previously successful nodes retain their accepted
+versions. A batch can therefore be `failed` while an earlier target is
+`succeeded` and later targets were never dispatched. CLI and Console retain these
+per-target outcomes, including the authoritative reconciliation result while a
+follow-up read is unavailable.
+
+A post-dispatch `uncertain` receipt blocks a new rollout until reconciliation
+checks live evidence. Reconciliation observes the node without replaying the
+handoff or repairing an unhealthy application. If identity cannot be proven, the
+operation stays uncertain. After reviewing a terminal result, create a new plan
+for any remaining nodes.
 
 Elected multi-controller clusters require recipient-side fencing across leaders;
 this workflow refuses dispatch in that configuration. Upgrading the execution
