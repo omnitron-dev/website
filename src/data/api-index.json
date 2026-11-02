@@ -11858,7 +11858,7 @@
       "name": "archiveBundle",
       "package": "@omnitron-dev/omnitron",
       "kind": "function",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/services/bundle-builder.ts#L910",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/services/bundle-builder.ts#L900",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/operations",
@@ -11930,7 +11930,7 @@
       "name": "buildBundle",
       "package": "@omnitron-dev/omnitron",
       "kind": "function",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/services/bundle-builder.ts#L579",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/services/bundle-builder.ts#L574",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/operations",

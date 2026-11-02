@@ -1,6 +1,8 @@
 import {themes as prismThemes} from 'prism-react-renderer';
 import type {Config} from '@docusaurus/types';
-import type * as Preset from '@docusaurus/preset-classic';
+import type {} from '@docusaurus/theme-classic';
+import type {UserThemeConfig} from '@docusaurus/theme-common';
+import type {UserThemeConfig as MermaidThemeConfig} from '@docusaurus/theme-mermaid';
 
 const siteUrl = process.env.SITE_URL || 'https://omnitron.dev';
 const siteBaseUrl = process.env.SITE_BASE_URL || '/';
@@ -33,32 +35,7 @@ const config: Config = {
     },
   },
 
-  presets: [
-    [
-      'classic',
-      {
-        docs: {
-          sidebarPath: './sidebars.ts',
-          showLastUpdateTime: false,
-          showLastUpdateAuthor: false,
-          editUrl: undefined,
-        },
-        blog: {
-          showReadingTime: true,
-          blogTitle: 'Omnitron Blog',
-          blogDescription: 'Release notes and engineering articles from the Omnitron project',
-          postsPerPage: 10,
-          blogSidebarTitle: 'Posts',
-          blogSidebarCount: 'ALL',
-        },
-        theme: {
-          customCss: './src/css/custom.css',
-        },
-      } satisfies Preset.Options,
-    ],
-  ],
-
-  themes: ['@docusaurus/theme-mermaid'],
+  themes: [['@docusaurus/theme-classic', {customCss: './src/css/custom.css'}], '@docusaurus/theme-mermaid'],
 
   // Client-side modules that run on every page. Currently only the
   // chunk-error handler — it auto-reloads the page when an old cached
@@ -76,6 +53,23 @@ const config: Config = {
   },
 
   plugins: [
+    '@docusaurus/plugin-css-cascade-layers',
+    ['@docusaurus/plugin-content-docs', {
+      sidebarPath: './sidebars.ts',
+      showLastUpdateTime: false,
+      showLastUpdateAuthor: false,
+      editUrl: undefined,
+    }],
+    '@docusaurus/plugin-content-pages',
+    ['@docusaurus/plugin-content-blog', {
+      showReadingTime: true,
+      blogTitle: 'Omnitron Blog',
+      blogDescription: 'Release notes and engineering articles from the Omnitron project',
+      postsPerPage: 10,
+      blogSidebarTitle: 'Posts',
+      blogSidebarCount: 'ALL',
+    }],
+    process.env.NODE_ENV === 'production' ? '@docusaurus/plugin-sitemap' : '@docusaurus/plugin-debug',
     function silenceVscodeWarning() {
       return {
         name: 'silence-vscode-warning',
@@ -202,7 +196,7 @@ const config: Config = {
     mermaid: {
       theme: {light: 'neutral', dark: 'dark'},
     },
-  } satisfies Preset.ThemeConfig,
+  } satisfies UserThemeConfig & MermaidThemeConfig,
 };
 
 export default config;

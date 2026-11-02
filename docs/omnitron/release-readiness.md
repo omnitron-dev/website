@@ -93,6 +93,13 @@ This plan supplies delivery order and acceptance gates, not a competing architec
 
 ## Current implementation evidence
 
+Clean release packaging now has a two-checkout byte comparison in CI. The
+workspace installs the locked registry releases of the database libraries and
+verifies the integrity of the Xec archives; dependency advisories are checked for
+the full workspace, including development tools. Run `pnpm audit --audit-level
+low` and `pnpm check:packages` at the root. Target-native dependency identity,
+launch evidence and activation are separate gates.
+
 G01 now has PostgreSQL-backed authority leases, monotonic epochs and guarded network
 publication in source. Recipient-side effect fencing remains part of G10. G02 has
 confirmed component termination, durable owner fences, node stop plans/receipts and

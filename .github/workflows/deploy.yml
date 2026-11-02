@@ -54,6 +54,9 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      - name: Audit locked dependencies
+        run: pnpm audit --audit-level low
+
       - name: Public content boundary
         run: pnpm check:content
 

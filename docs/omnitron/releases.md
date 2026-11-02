@@ -10,6 +10,20 @@ records the **project commit** and the **Omnitron commit** used to build its
 applications. The build runs in clean clones and stores its gates, artifacts
 and manifest.
 
+## Rebuilding an artifact
+
+Build from clean project and framework commits with the checked-in lockfiles and
+their pinned package manager. The build timestamp in a clean framework package is
+the commit time; the release record records when the build actually ran. A source
+export without Git metadata can supply `SOURCE_DATE_EPOCH` in whole Unix seconds
+for the build stamp. CI compares the SHA-256 of two independently compiled and
+packed archives and verifies that changing file contents or executable permission
+changes the hash.
+
+Equal archive hashes identify delivered bytes. They do not by themselves identify
+a running process, or prove that native dependencies built for macOS will run on
+Linux. Use the launch receipt and the destination's runtime when checking a stack.
+
 ## Build and inspect
 
 The project must be registered with Omnitron. Use explicit revisions when
