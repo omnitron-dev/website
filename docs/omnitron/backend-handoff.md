@@ -381,6 +381,14 @@ advertising `kernelHandoff@1`. The controller updates servers in the requested
 order and verifies each handoff before contacting the next server for activation.
 Application processes stay with their existing owner.
 
+For an older guardian, qualify its transition on native Linux before the maintenance
+window. In the repository’s GitHub Actions, run **Qualify a managed backend handoff**
+with the full serving and candidate commits and the exact target Node version.
+The test starts an application, replaces the guardian, verifies owner identity and
+exercises a backend update and rollback while checking application requests and logs.
+Use the [guardian transition procedure](#updating-the-guardian) for the
+one-time installation.
+
 ### Publish the batch to the controller
 
 Build and qualify the same clean Git commit for each distinct Linux architecture
@@ -431,6 +439,11 @@ In Console, open **Nodes → Managed backend updates → Plan update**. Choose a
 commit, select the servers in canary order and enable **Stage from controller catalog**
 if distribution is required. Review the per-server results and choose **Apply
 reviewed plan**. The detail URL and the CLI refer to the same persisted operation.
+After each successful handoff, the controller checks application readiness and
+owner identity and continues to the next server. If your acceptance procedure
+also requires a replication watermark to advance, a public transaction to
+succeed or an operator to inspect the result, use one plan for the canary.
+Complete that check before submitting a second plan for the remaining servers.
 Administrative sessions can prepare, start and reconcile a rollout. Read access
 lets operators and viewers follow progress. Each server operation rechecks the
 initiating administrator's authority.
