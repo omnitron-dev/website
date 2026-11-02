@@ -101,6 +101,19 @@ Run `pnpm audit --audit-level low` to check runtime and development dependencies
 and `pnpm check:packages` to verify every public export inside the packed archives.
 Each target still needs its own runtime identity, launch evidence and rollout record.
 
+G09 and G14 include a Chromium check of the production topology component and its
+routing worker. Run `pnpm --filter @omnitron/console test:browser` after installing
+Playwright Chromium. The fixture exercises shared services at 320, 768 and 1440 CSS
+pixels. All declared links must render, panel and inspector bounds must fit, and
+positions changed with the pointer or keyboard must survive reload. On a running
+installation, also compare the number of rendered links with the inventory and open
+a connection to inspect its evidence. See the [topology controls](./console.md#topology).
+
+For the [System view](./console.md#system), read a fresh snapshot on each reporting
+node, then compare its hostname and daemon PID with the same target selected through
+the controller in CLI and Console. CI checks that a machine identity can report its
+own host and cannot use the user-facing method to relay a request to a third node.
+
 G05 uses Xec's release operations for workspace discovery, immutable archive
 preparation, tag verification and registry reconciliation. CI rehearses an
 interrupted publish, a resume, a conflicting digest, an RC channel and an
