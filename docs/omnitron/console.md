@@ -196,7 +196,7 @@ sidebar.
 | `/alerts` | `AlertsPage` | project | `OmnitronAlerts` |
 | `/pipelines` | `PipelinesPage` | project | `OmnitronPipelines` |
 | `/traces` | `TracesPage` | project | `OmnitronTraces` |
-| `/dashboard-builder` | `DashboardBuilderPage` | project | scoped application inventory, retained metric series and controller alerts |
+| `/dashboard-builder` | `DashboardBuilderPage` | both | scoped application inventory, retained metric series and controller alerts |
 | `*` | redirect to `/` | — | — |
 
 ## Page-by-page
@@ -350,9 +350,8 @@ must not be added to the parent totals.
   cumulative counts for all projects, independently of the selected time window.
   Its store scan runs only while expanded, at most once per minute automatically.
 
-`/dashboard-builder` composes and saves custom panels. Its CPU/memory graphs also
-use Prism; their history consists of readings collected while the page is open,
-not the persisted history queried by `/metrics`.
+Use [Dashboard Builder](#dashboard-builder) in either workspace to compose panels.
+Its CPU and memory charts use the same retained observations as `/metrics`.
 
 ### Topology
 
@@ -391,8 +390,9 @@ responsive layout. Searching or selecting a node brings it into view at a
 readable scale. Moving a card changes only its position on the map.
 
 Declared links use distinct ports and bend around intervening cards. Shared
-dependencies use separate tracks, including beside a single column on narrow
-screens. Select a node to highlight its immediate links or choose **Focus links**
+dependencies use separate tracks. Connections between cards in the same column
+use the free space beside them. Wide canvases place deployment groups side by
+side. Narrow screens present one column. Select a node to highlight its immediate links or choose **Focus links**
 to isolate them. Open **Connections** for the recorded evidence. If a card
 blocks a route, its relationship remains available in this list.
 
