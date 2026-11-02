@@ -448,6 +448,30 @@ Administrative sessions can prepare, start and reconcile a rollout. Read access
 lets operators and viewers follow progress. Each server operation rechecks the
 initiating administrator's authority.
 
+### Reverse an accepted node
+
+Reverse a successfully accepted, healthy target with a new plan ID. Name exactly
+one node and use its previous full source commit. Its retained runtime is already
+installed, so omit `--stage`.
+
+```sh
+omnitron --json fleet rollout plan <previous-full-commit> production-node --wait
+```
+
+Inspect the JSON before applying. Confirm exactly one ready target and unchanged
+owner identity and PID. Its `previous` must match the accepted runtime. Its
+`candidate` must match the full SHA-256 saved for that node in the forward receipt.
+JSON exposes complete hashes.
+
+```sh
+omnitron --json fleet rollout apply <new-plan-id> --wait
+```
+
+If readiness has degraded, stop further updates and inspect selection, owner and
+inventory. Reconcile an uncertain receipt first. Reconciliation observes the
+outcome without reversing it. A refused reverse plan requires a separately
+reviewed fenced recovery procedure.
+
 ### Follow a batch or recover an interrupted handoff
 
 ```sh
