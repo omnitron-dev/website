@@ -138,6 +138,16 @@ cohort cannot be discovered reliably. Include independently recorded descendants
 and audit the drain; do not treat an empty process-name search as evidence.
 Native `ps`, `launchctl`, `sysctl` and `lsof` observations must all succeed.
 
+The macOS boot fence uses `kern.bootsessionuuid`, shared with process-lifetime
+inspection. Historical `kern.boottime` text can drift while the same kernel keeps
+running; a changed timestamp never proves a reboot. A dirty legacy receipt needs
+explicit reconciliation even when its text differs. A fresh plan binds the current
+UUID while preserving the complete original receipt and its hash. Old plans based
+on boot-time text must be prepared again. Genuinely clean legacy receipts remain
+eligible for normal startup. Legacy or malformed log-writer identities stay
+unconfirmed while their PID is alive; diagnostics explain the uncertainty and
+recovery proceeds only after native death is established.
+
 A compatible replacement owner consumes the acknowledgment once under a kernel
 lock before starting applications. Linux uses `flock`; macOS uses its native
 `lockf`. Node retains the locked file descriptor after the helper exits; process

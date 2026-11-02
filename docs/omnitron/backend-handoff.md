@@ -285,7 +285,12 @@ across interrupted acknowledgment publication.
 
 macOS evidence binds the launchd domain and boot-session UUID, PID birth identities,
 observed descendants, retained process groups and execution-directory Unix sockets.
-It includes non-Node workers. Unlike Linux cgroups, process groups cannot reveal
+It includes non-Node workers. The host and process-lifetime fences share the stable
+`kern.bootsessionuuid`; changing legacy `kern.boottime` text is never evidence of a
+reboot. A dirty legacy receipt is preserved and can be bound to the current UUID
+only by explicit sealed reconciliation. Clean legacy shutdown receipts remain
+valid for ordinary startup; log assembly retains incomparable live legacy writers.
+Unlike Linux cgroups, process groups cannot reveal
 an unrecorded process that detached and reparented before observation. Supply the
 complete recorded cohort and independently audit the drain; incomplete native
 observations refuse recovery. Recovery never signals processes or adopts their
