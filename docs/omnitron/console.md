@@ -193,7 +193,7 @@ sidebar.
 | `/topology` | `TopologyPage` | project | stack deployments, daemon processes and runtime containers |
 | `/containers` | `ContainersPage` | project | `OmnitronInfra` |
 | `/deployments` | `DeploymentsPage` | project | `OmnitronDeploy` |
-| `/alerts` | `AlertsPage` | project | `OmnitronAlerts` |
+| `/alerts` | `AlertsPage` | global | `OmnitronAlerts` |
 | `/pipelines` | `PipelinesPage` | project | `OmnitronPipelines` |
 | `/traces` | `TracesPage` | project | `OmnitronTraces` |
 | `/dashboard-builder` | `DashboardBuilderPage` | both | scoped application inventory, retained metric series and controller alerts |
@@ -435,8 +435,17 @@ The CLI exposes the same observations through `omnitron stack progress`.
 
 ### Alerts
 
-`/alerts` — alert rule manager + event log. Rules tab: list,
-edit, create. Events tab: fired alerts, ack / resolve actions.
+Open **Alerts** in the global navigation to view alerts across all workspaces.
+When the status bar shows a firing count, select it to go directly to **Active
+Alerts** at `/alerts#firing`. This also works from a project workspace. The
+status bar link requires permission to read the alert summary, active alerts
+and rules.
+
+The active list shows up to the 100 most recent firing alerts, with their
+severity, message and firing time. An acknowledged alert remains in the list
+until it resolves. If the alerts clear before you open the link, the section
+shows that there are no active alerts. Acknowledging an alert and editing its
+rule each require the corresponding permission.
 
 ### Pipelines
 
