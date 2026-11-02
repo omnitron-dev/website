@@ -20,6 +20,7 @@
  */
 import fs from 'node:fs';
 import path from 'node:path';
+import { tmpdir } from 'node:os';
 
 const OMNI = process.argv[2];
 if (!OMNI || !fs.existsSync(path.join(OMNI, 'packages'))) {
@@ -95,7 +96,7 @@ const norm = (v) =>
  * Returns milliseconds for anything that looks like a duration, else null.
  */
 const asMillis = (v) => {
-  const m = norm(v).match(/^(\d+(?:\.\d+)?)\s*(ms|millis(?:econds?)?|s|secs?|seconds?|m|mins?|minutes?|h|hours?|d|days?)?$/);
+  const m = norm(v).match(/^([+-]?(?:\d+(?:\.\d*)?|\.\d+)(?:e[+-]?\d+)?)\s*(ms|millis(?:econds?)?|s|secs?|seconds?|m|mins?|minutes?|h|hours?|d|days?)?$/);
   if (!m) return null;
   const n = Number(m[1]);
   if (!Number.isFinite(n)) return null;
@@ -147,10 +148,11 @@ function scan(docRoot, src) {
         const actual = entries.map((e) => norm(e.value));
         const agrees = candidates.some((c) =>
           actual.some((a) => {
-            if (a === c || a.includes(c) || c.includes(a)) return true;
+            if (a === c) return true;
             const am = asMillis(a);
             const cm = asMillis(c);
-            return am !== null && cm !== null && am === cm;
+            if (am !== null && cm !== null) return am === cm;
+            return a.includes(c) || c.includes(a);
           }),
         );
         if (!agrees) {
@@ -160,6 +162,8 @@ function scan(docRoot, src) {
             name: n,
             claimed: (paired ? vals[idx] : vals.join(' / ')).trim(),
             entries,
+            confirmed: Boolean(scope && paired && candidates.length === 1
+              && asMillis(candidates[0]) !== null && actual.every(value => asMillis(value) !== null)),
           });
         }
       });
@@ -168,6 +172,7 @@ function scan(docRoot, src) {
   return findings;
 }
 
+const controlPrefix = path.join(tmpdir(), 'omnitron-doc-defaults-');
 const src = sourceDefaults();
 if (src.size === 0) {
   console.error('SOURCE MAP EMPTY — the probe read no defaults at all. Aborting.');
@@ -184,9 +189,9 @@ if (src.size === 0) {
     process.exit(2);
   }
   // `process.exit` inside the try would skip the `finally`, so a control
-  // that fails leaves its temp directory in the working tree — a path that
+  // that fails would leave its temporary directory behind — a path that
   // only runs when the control fails, which is to say almost never.
-  const tmp = fs.mkdtempSync(path.join(process.cwd(), '.doc-defaults-control-'));
+  const tmp = fs.mkdtempSync(controlPrefix);
   let failure = null;
   try {
     fs.writeFileSync(path.join(tmp, `${entries[0].pkg.replace('titan-', '')}.mdx`),
@@ -216,7 +221,7 @@ if (src.size === 0) {
   // right — and it has to be its own page rather than the real docs, or the
   // property would hold only for as long as the real docs happen to agree.
   {
-    const agreeing = fs.mkdtempSync(path.join(process.cwd(), '.doc-defaults-control-'));
+    const agreeing = fs.mkdtempSync(controlPrefix);
     let why = null;
     try {
       fs.writeFileSync(
@@ -247,6 +252,10 @@ if (src.size === 0) {
   // silent exemption.
   const controls = [
     {
+      what: 'a different number containing the declared digits',
+      page: (n, v) => `- \`${n}\` — bounds (default: \`${v}424242\`).\n`,
+    },
+    {
       what: 'a swapped pair on one line',
       page: (n, v) => `- \`${n}\` / \`someOtherKnob\` — bounds. Defaults \`424242\` / \`${v}\`.\n`,
     },
@@ -260,7 +269,7 @@ if (src.size === 0) {
     },
   ];
   for (const c of controls) {
-    const dir = fs.mkdtempSync(path.join(process.cwd(), '.doc-defaults-control-'));
+    const dir = fs.mkdtempSync(controlPrefix);
     let why = null;
     try {
       fs.writeFileSync(
@@ -291,8 +300,11 @@ for (const f of findings) {
   console.log(`    \`${f.name}\` doc says ${JSON.stringify(f.claimed)}`);
   console.log(`    source says ${f.entries.map((e) => `${e.pkg}:${e.value}`).join(', ')}`);
 }
-console.log(
-  findings.length
-    ? '\nEach needs a look: option names repeat across packages, and a line naming two options with two values reads as one claim.'
-    : '',
-);
+const confirmed = findings.filter(finding => finding.confirmed);
+if (confirmed.length) {
+  console.error(`${confirmed.length} numeric default(s) contradict the source in their documented module.`);
+  process.exitCode = 1;
+}
+if (confirmed.length < findings.length) {
+  console.log('Review the remaining claims in context. An option name can occur in several packages.');
+}

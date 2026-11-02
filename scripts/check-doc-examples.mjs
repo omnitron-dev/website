@@ -14,6 +14,7 @@
  */
 import fs from 'node:fs';
 import path from 'node:path';
+import { tmpdir } from 'node:os';
 import { execFileSync } from 'node:child_process';
 import { createRequire } from 'node:module';
 
@@ -50,9 +51,8 @@ if (DOCS.length === 0) {
   process.exit(2);
 }
 
-const OUT = fs.mkdtempSync('/tmp/omnitron-doc-typecheck-');
+const OUT = fs.mkdtempSync(path.join(tmpdir(), 'omnitron-doc-typecheck-'));
 process.on('exit', () => fs.rmSync(OUT, { recursive: true, force: true }));
-fs.mkdirSync(OUT, { recursive: true });
 
 const files = [];
 for (const root of DOCS) {
@@ -230,9 +230,16 @@ fs.writeFileSync(path.join(OUT, CONTROL), [
   '',
 ].join('\n'));
 
+// Use the compiler installed by the source checkout's lockfile, including aliases.
+const sourceRequire = createRequire(path.join(ROOT, 'package.json'));
+const { devDependencies } = sourceRequire('./package.json');
+const compiler = devDependencies?.['@typescript/native'] ? '@typescript/native' : 'typescript';
+const manifest = sourceRequire.resolve(`${compiler}/package.json`);
+const { bin } = sourceRequire(manifest);
+const tsc = path.resolve(path.dirname(manifest), bin.tsc ?? bin.tsc6);
 let raw = '';
 try {
-  raw = execFileSync('npx', ['tsc', '-p', path.join(OUT, 'tsconfig.json')], {
+  raw = execFileSync(process.execPath, [tsc, '--pretty', 'false', '-p', path.join(OUT, 'tsconfig.json')], {
     cwd: ROOT, encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'],
   });
 } catch (e) {

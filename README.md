@@ -27,6 +27,9 @@ pnpm check:source ../omni
 node scripts/check-doc-examples.mjs ../omni docs
 ```
 
+The source check rejects a numeric default that contradicts the declarations in its
+module guide. It also reports ambiguous prose for review.
+
 The example checker reports possible API mismatches in fragments for review;
 it is not an end-to-end test. Run the complete examples you edit. The public
 content check rejects private project references and local-only paths.
