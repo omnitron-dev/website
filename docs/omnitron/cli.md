@@ -112,28 +112,45 @@ adopt their native process handles, and ordinary startup refuses a same-boot
 unclean receipt. Preserve the crash evidence and prepare a node-specific drain
 and rollback before stopping surviving applications.
 
-On Linux with systemd system services, `omnitron backend owner-reconcile prepare
-<worker-pids>` records a private recovery plan. Supply every recorded pre-crash
-worker PID as a comma-separated list. The plan also captures current members of
-the configured owner/backend cgroups, their process lifetimes, the host boot,
-controller journal and unclean owner receipt. This command does not open SQLite,
-stop services or signal applications.
+On macOS with launchd, or Linux with systemd system services,
+`omnitron backend owner-reconcile prepare <worker-pids>` seals a private recovery
+plan. Supply every
+recorded pre-crash application, worker and descendant PID as a comma-separated
+list, including non-Node processes. The plan binds process lifetimes, the host
+boot, configured services, controller journal and unclean owner receipt. Linux
+also records the configured cgroups; macOS records the launchd domain, native boot
+session, observed descendants and their retained process groups. The command
+writes only private plan/seal records; it does not open SQLite, stop services or
+signal applications. Changed or legacy unsealed plans require a fresh preparation.
 
 After the separately approved drain, `omnitron backend owner-reconcile acknowledge
 <absolute-plan>` requires the old owner identities to be dead, both configured
-services stopped, their complete cgroups empty, every recorded process lifetime
-gone and the owner socket absent from the kernel. Unknown evidence, changed
-configuration or a changed controller journal refuses recovery. Only a proven
-stale socket may be removed. The original unclean receipt is archived; it is never
-changed to claim a clean shutdown.
+services stopped, observed ownership groups empty, every recorded lifetime gone
+and execution sockets absent from the kernel. Unknown or incomplete observations,
+changed configuration, journal, boot session or plan refuse recovery. Only a proven
+stale owner socket may be removed. The original unclean receipt is archived; it is
+never changed to claim a clean shutdown.
 
-A compatible replacement owner consumes this acknowledgment once under a kernel
-lock before starting applications. A failed startup requires a fresh plan and
-fresh native evidence; a previous acknowledgment is not a blanket restart permit.
-An older runtime without this recovery contract can be restored only after a
-replacement has completed a genuinely clean shutdown. Do not promise an
-unconditional old-binary rollback after another owner crash. macOS owner-crash
-reconciliation and automatic adoption of orphan processes are not implemented.
+On macOS, this proof covers the supplied identities, observed descendants and
+retained process groups. Ordinary launchd users have no cgroup-equivalent
+containment: an already detached and reparented process never recorded in that
+cohort cannot be discovered reliably. Include independently recorded descendants
+and audit the drain; do not treat an empty process-name search as evidence.
+Native `ps`, `launchctl`, `sysctl` and `lsof` observations must all succeed.
+
+A compatible replacement owner consumes the acknowledgment once under a kernel
+lock before starting applications. Linux uses `flock`; macOS uses its native
+`lockf`. Node retains the locked file descriptor after the helper exits; process
+death releases it without deleting a lock file or trusting a stale PID. A durable
+consume record also prevents replay when final acknowledgment publication fails.
+These private records protect against accidental races and interrupted recovery;
+they are not attestations against another process with the same filesystem UID.
+
+A failed startup requires a fresh plan and fresh native evidence. An older runtime
+without this recovery contract can be restored only after a replacement has
+completed a genuinely clean shutdown. Do not promise an unconditional old-binary
+rollback after another owner crash. Automatic adoption of orphan processes is not
+implemented.
 
 See [requirements, first transition and recovery](./backend-handoff.md).
 

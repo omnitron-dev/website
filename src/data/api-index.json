@@ -48486,7 +48486,7 @@
       "name": "LoggerService",
       "package": "@omnitron-dev/titan",
       "kind": "class",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan/src/modules/logger/logger.service.ts#L199",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan/src/modules/logger/logger.service.ts#L167",
       "imports": [
         {
           "path": "@omnitron-dev/titan/module/logger",
@@ -48519,6 +48519,18 @@
         {
           "path": "@omnitron-dev/titan/types",
           "guide": "/docs/titan/modules-system/defining-modules"
+        }
+      ]
+    },
+    {
+      "name": "LogSinkHealth",
+      "package": "@omnitron-dev/titan",
+      "kind": "interface",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan/src/modules/logger/sink-guard.ts#L3",
+      "imports": [
+        {
+          "path": "@omnitron-dev/titan/module/logger",
+          "guide": "/docs/titan/modules/logger"
         }
       ]
     },
