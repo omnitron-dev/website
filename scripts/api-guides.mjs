@@ -220,6 +220,7 @@ export default {
     "./alerts": "omnitron/observability.md",
     "./release-archive": "omnitron/releases.md",
     "./release-reading": "omnitron/releases.md",
+    "./release-source": "omnitron/releases.md",
     "./source-layout": "omnitron/releases.md",
     "./runtime": "omnitron/releases.md",
     "./runtime/identity": "omnitron/releases.md",

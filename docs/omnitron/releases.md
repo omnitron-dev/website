@@ -267,21 +267,107 @@ when two builders finish at the same time.
 Register the project and commit its `pnpm-lock.yaml`. The selected project
 commit determines how the controller obtains the framework.
 
-- **npm registry.** Declare `@omnitron-dev/omnitron` in a workspace importer.
-  The controller checks the public npm tarballs against the lockfile's SHA-512
-  digests, verifies their common source commit and checks installed package
-  files. A sibling Omnitron checkout is unnecessary. This mode requires access
-  to the public npm registry and archives containing a full `gitHead`. Older
-  npm packages without that evidence cannot establish their framework commit.
+- **Package registry.** Declare `@omnitron-dev/omnitron` in a workspace importer.
+  The controller resolves the project's registry configuration, checks the original
+  archives against the lockfile's SHA-512 digests, verifies their common source
+  commit and checks installed package files. A sibling Omnitron checkout is
+  unnecessary. Archives must contain a full `gitHead`; older packages without
+  that evidence cannot establish their framework commit. Registry credentials
+  belong to the package manager configuration, not the release manifest.
 - **Committed framework archives.** A workspace may pin local framework tarballs
-  in Git. Supply the full commit from upstream `main` with `--omni-commit <sha>`.
-  The release builder independently builds that commit, compares package contents
-  with the archives, checks their lockfile SHA-512 digests and verifies the installed
-  package files. A manifest written by the consuming project cannot establish
+  in Git. Supply the exact source commit with `--omni-commit <sha>`.
+  The release builder independently builds that commit from the selected source,
+  compares package contents with the archives, checks their lockfile SHA-512
+  digests and verifies the installed package files. No hosting provider or branch
+  name is mandatory. A manifest written by the consuming project cannot establish
   package origin by itself.
 - **Linked checkout.** For framework development, point workspace links at a
   single Omnitron checkout. The controller builds the linked packages from its
   clean clone. Mixing linked and registry framework packages fails the build.
+
+### Choose an SDK source
+
+Repository location and trust are separate concerns. Omnitron uses Git rather
+than a hosting provider's API to inspect source history. GitHub, GitLab, private
+servers, mirrors and local repositories use the same contract. The official
+package's repository is a default supplied by its metadata, not a platform
+requirement.
+
+Keep project defaults beside its existing release gates in the workspace
+`package.json`:
+
+```json
+{
+  "omnitron": {
+    "framework": {
+      "repository": "ssh://git@forge.example/platform/omni.git",
+      "ref": "refs/heads/stable"
+    },
+    "release": {
+      "gates": ["typecheck", "test"]
+    }
+  }
+}
+```
+
+`repository` selects the actual SDK source. `ref` is optional: a full
+`refs/heads/...` requires the exact commit to belong to that branch; a full
+`refs/tags/...` requires it to match that tag. Omitting it does not imply `main`.
+Configuration is read from the selected project commit. Selection follows one
+order: a build override, committed `omnitron.framework`, then the locked
+framework package's repository metadata. Legacy packages without repository
+metadata use the builder package's declared repository. Linked development uses
+its linked checkout unless an explicit source is selected. Invalid explicit
+configuration fails instead of silently selecting another source.
+
+A deliberate per-build override replaces that selection:
+
+```bash
+omnitron release build sample \
+  --framework-repository https://mirror.example/platform/omni.git \
+  --framework-ref refs/tags/v1.0.0 \
+  --omni-commit <full-commit>
+```
+
+Integrations and browser forms can validate the same request with the pure
+`parseFrameworkSource` function from `@omnitron-dev/omnitron/release-source`.
+It returns the `FrameworkSource` contract and rejects unknown fields, ambiguous
+refs and credentials; it does not fetch code or grant permission to build.
+
+The Console build dialog exposes the same options under **SDK source**. Ordinary
+builds need no extra fields. CLI and Console report the selected repository, ref
+and exact commit in build progress. Overrides are recorded with the build request, and
+the resulting manifest retains the resolved repository, exact commit and any
+required ref. Console disables overrides when an older controller does not report
+support; those controllers retain their previous source-selection behavior.
+Credentials must stay in Git's SSH agent or credential helper; URLs containing
+passwords or HTTP tokens are rejected before logging the request.
+
+Registry downloads use pnpm's own configuration, authentication and HTTP client.
+The clean selected workspace supplies `pnpm-workspace.yaml` and `.npmrc`; user
+configuration supplies credentials, including user-only `tokenHelper` commands.
+Scope registries, TLS and proxy options follow the same precedence as the frozen
+install. Download verification never executes package lifecycle or `.pnpmfile`
+hooks. Original compressed bytes must match the committed SHA-512 before their
+contents can establish package identity.
+
+Run the controller in an ordinary environment without Git repository/object
+redirects such as `GIT_DIR` or `GIT_OBJECT_DIRECTORY`. Source verification refuses
+these overrides because they can change which repository is inspected. The
+current Xec 0.11.2 process API inherits ambient environment keys; an internal
+registry request that requires removing a key is refused before starting a
+worker rather than claiming isolation that the transport cannot provide. Git
+credential helpers and SSH configuration remain available.
+
+Source publication is a separate, build-time observation. A local repository
+can be a valid build input without being remotely published. A network failure
+or unavailable ancestry is **unverified**, not evidence that a commit is
+unpublished. Cached remote-tracking branches alone do not establish publication.
+The stack's `release.requireOnRemote` policy decides whether confirmed remote
+publication is required for deployment; source overrides do not skip gates,
+checksum checks or that policy. These states never indicate where an application
+is running. Offline use also requires that the selected sources, dependencies
+and declared gates are available in that environment.
 
 In Console, **Releases → Built with** and the CLI command `omnitron release show`
 identify the framework source and package count. Use `--json` on the CLI to
@@ -339,7 +425,7 @@ Keep these observations separate:
 | Current stack inventory | Observed process state, application counts and node reachability |
 | Last recorded deployment | The latest `stack.start` audit record for that stack |
 | Attestation | What probes measured, on which stack and at what time |
-| Git publication snapshot | Whether remote-tracking branches contained the commits when the build ran |
+| Git publication snapshot | The recorded source-publication result at build time; new builds query the declared origin |
 
 In Console, select the project and open **Releases**. **Deployment state** lists
 its stacks, placement, running/configured application counts and last recorded
@@ -403,12 +489,19 @@ concurrent requests and reports any nodes excluded by the time budget. Larger
 installations or missing sources require a separate integrity investigation. No
 file paths, environment variables or archive contents are accepted from the viewer.
 
-The neutral **History: test** label means a recorded deployment. **Git: no remote
-branch** means no recorded remote-tracking branch contained a source commit at
-build time. **Git: not checked** means that evidence was unavailable. Neither
-label indicates execution on localhost, artifact-store upload status, or the
-current state of a Git server. Rechecking the project today does not rewrite the
-historical manifest.
+The neutral **History: test** label means a recorded deployment. **Git:
+publication recorded** means the manifest recorded a positive source-publication
+result. **Git: unpublished source** means it recorded a negative result, including
+an explicitly local source. **Git: unverified** means the builder could not
+establish publication. These labels describe source evidence, not execution on
+localhost, artifact-store upload status or the current availability of a Git server.
+
+New builds query the declared origin's current branches and tags. Cached remote
+refs alone cannot establish publication. Older manifests retain the weaker
+remote-tracking observation made by their builder; upgrading Console does not
+strengthen or rewrite those receipts. Rebuild to obtain the new observation.
+The existing `requireOnRemote` stack policy continues to evaluate the recorded
+result so that an upgrade does not silently invalidate pinned releases or rollback.
 
 Imported configurations retain their runtime namespace. Deployment status joins
 that namespace to the canonical project/stack and chooses the newest record.
