@@ -15,10 +15,10 @@ Middleware is **an HTTP-transport feature**. The pipeline lives in
 `MiddlewarePipeline` class (`MiddlewarePipeline` in `netron/transport/http/middleware/pipeline.ts`) — there is no
 `INetronMiddleware` interface and no `netron.use()` method. The
 persistent transports (WebSocket / TCP / Unix) do **not** instantiate
-this pipeline; they enforce auth and access control inline at dispatch
-(via the `invocationWrapper` that receives the resolved `authContext`,
-and `IAuthorizationManager` checks in `service-stub.ts` /
-`remote-peer.ts`). So the patterns on this page apply when you serve
+this pipeline. They call the same invocation authorization function at packet
+dispatch that the HTTP authentication middleware uses: registered ACLs, declared
+method requirements and optional default-deny. The invocation wrapper receives
+the resulting authority context. So the patterns on this page apply when you serve
 over HTTP. (The transport-agnostic *context* type used below,
 `NetronMiddlewareContext`, is defined once in
 `NetronMiddlewareContext` in `netron/transport/http/middleware/types.ts` and reused by the HTTP-specific extension.)

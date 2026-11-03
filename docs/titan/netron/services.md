@@ -107,6 +107,17 @@ const names = peer?.getServiceNames();      // qualified names of exposed servic
 The Omnitron console exposes the same metadata via the operator
 service.
 
+## Selecting a service version
+
+HTTP and persistent Netron transports resolve names identically. An exact
+unversioned publication such as `orders` takes precedence over `orders@2.0.0`
+when the caller requests `orders`. If no unversioned publication exists, an
+unqualified request selects the highest valid semantic version. An explicit
+request for `orders@1.0.0` requires that exact publication; it never falls back
+to another version. Registration order does not change this decision.
+Removing one publication leaves the other versions available. Use explicit
+versions when an application depends on a specific wire contract.
+
 ## Peers
 
 Netron's runtime model has two peer types:

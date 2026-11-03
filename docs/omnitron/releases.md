@@ -214,6 +214,12 @@ The verified context contains `producer` (`ArtifactIdentity`), `consumer`, `entr
 original producer's release, manifest, archive, project commit and SDK commit.
 The consumer records the selected release and application alias separately.
 Local preparation and remote receipt generation use the same origin mapping.
+When a compatible owner verifies a consumer binding, CLI and Console group its
+applications under that selected release and retain each original producer in the
+expanded evidence. Different producers within one consumer release are therefore
+not mistaken for conflicting deployments. Missing or malformed consumer evidence
+never becomes a confirmed selection; legacy launch receipts retain their original
+meaning.
 Remote imports remain subject to the deployment restrictions described above.
 
 `ownerAttestation` is explicitly `null`: startup payload verification is not a

@@ -53,6 +53,25 @@ flowchart LR
 These are wired by the `titan-auth` ecosystem module (or by your own
 integration). You rarely construct them directly.
 
+## One invocation decision across transports
+
+HTTP and the persistent Netron transports use the same authorization decision:
+registered service ACLs, then declared method requirements, then optional
+`authDefaultDeny`. A missing authentication or authorization manager never disables
+an explicitly protected method. Configure the required identity and policy providers;
+requests without sufficient authority are refused before the method executes.
+
+With `authDefaultDeny: true`, a published method needs an ACL or an explicit
+authorization declaration. A bare `@Public()` is exposure, not permission. Declare
+intentional anonymous access explicitly. An unavailable service instance or missing
+authorization metadata produces a service-unavailable error rather than bypassing
+checks. The HTTP pipeline requires the peer logger during configuration so failed
+checks have the normal diagnostic path.
+
+Service selection happens before authorization. The exact published service identity
+is used for ACL and policy evaluation, including batch HTTP calls. Selecting a version
+never evaluates another version's permissions.
+
 ## Auth context
 
 Every authenticated call carries an auth context with:
