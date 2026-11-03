@@ -475,7 +475,9 @@ registered remote nodes**. An empty selection does not authorize the whole fleet
 Enable **Stage from controller catalog** if distribution is required. Review the
 per-server results and choose **Apply reviewed plan**. The Nodes URL's `?rollout=<plan-id>` and `fleet rollout status
 <plan-id>` refer to the same persisted operation. CLI and Console show the overall
-batch state and each target's outcome. The advanced workspace source bundle panel
+batch state and each target's outcome. If preparation is blocked, inspect the affected target in Console or its `data.targets[].reason` in `omnitron --json fleet rollout status <plan-id>`. The reason describes the failing check. For example, if the guardian reports an operation in progress, inspect that operation before preparing a fresh plan. The original receipt remains available under its ID.
+
+The advanced workspace source bundle panel
 reports a separate legacy operation.
 After each successful handoff, the controller checks application readiness and
 owner identity and continues to the next server. If your acceptance procedure

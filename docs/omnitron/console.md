@@ -318,9 +318,7 @@ filter groups even while collapsed. Collapsing this panel does not reset the que
 Messages occupy a separate line on narrow screens and expand with Enter, Space or
 a pointer, including entries without structured metadata. Text and severity colors
 follow the active light or dark theme.
-Search matches literal message text in stored records. Level chips select exact
-levels; CLI `--level` selects that level and higher. Neither mode infers success
-from an empty result. Expanding a row reveals its source node and structured metadata.
+Search matches literal message text in stored records. The level filter matches each selected level exactly in live and historical views. Choose `unknown` to find messages whose source supplied no recognizable severity. For the same selection on a remote node, use `omnitron logs <app> --node <node> --level unknown`. A ranked CLI filter such as `--level warn` also includes higher severities. Expand a row to inspect its source node and structured metadata.
 
 The copy control provides `omnitron logs '<project>/<stack>/<app>' --node '<id>' -n 100`
 for the selected application/node scope. Search, level and time filters are not
@@ -577,6 +575,8 @@ sequenceDiagram
   Note over W: last consumer unmounts or sign-out
   W->>E: unsubscribe(subscriberId)
 ```
+
+The Console uses two transports for one Netron API. Typed calls such as `OmnitronLogs.queryLogs` and `OmnitronNodes.getKernelRollout` use the HTTP transport under `/netron/`. Push events use the WebSocket transport at `/ws`. The browser authenticates its Netron peer and subscribes through `OmnitronEvents`.
 
 The webapp subscribes through a single `DaemonWsClient`
 (`src/netron/ws-client.ts`) that feeds the shared realtime store.

@@ -4226,7 +4226,7 @@
       "name": "BackendConfig",
       "package": "@omnitron-dev/netron-browser",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/netron-browser/src/types/multi-backend.ts#L99",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/netron-browser/src/types/multi-backend.ts#L102",
       "imports": [
         {
           "path": "@omnitron-dev/netron-browser",
@@ -4258,7 +4258,7 @@
       "name": "BackendPoolEntry",
       "package": "@omnitron-dev/netron-browser",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/netron-browser/src/types/multi-backend.ts#L510",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/netron-browser/src/types/multi-backend.ts#L513",
       "imports": [
         {
           "path": "@omnitron-dev/netron-browser",
@@ -4290,7 +4290,7 @@
       "name": "BackendSchema",
       "package": "@omnitron-dev/netron-browser",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/netron-browser/src/types/multi-backend.ts#L248",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/netron-browser/src/types/multi-backend.ts#L251",
       "imports": [
         {
           "path": "@omnitron-dev/netron-browser",
@@ -4526,7 +4526,7 @@
       "name": "ConnectionMetrics",
       "package": "@omnitron-dev/netron-browser",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/netron-browser/src/types/index.ts#L294",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/netron-browser/src/types/index.ts#L296",
       "imports": [
         {
           "path": "@omnitron-dev/netron-browser",
@@ -4554,7 +4554,7 @@
       "name": "ConnectionState",
       "package": "@omnitron-dev/netron-browser",
       "kind": "type",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/netron-browser/src/types/index.ts#L282",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/netron-browser/src/types/index.ts#L284",
       "imports": [
         {
           "path": "@omnitron-dev/netron-browser",
@@ -4782,7 +4782,7 @@
       "name": "createClient",
       "package": "@omnitron-dev/netron-browser",
       "kind": "function",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/netron-browser/src/client/index.ts#L166",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/netron-browser/src/client/index.ts#L167",
       "imports": [
         {
           "path": "@omnitron-dev/netron-browser",
@@ -5682,7 +5682,7 @@
       "name": "HttpClient",
       "package": "@omnitron-dev/netron-browser",
       "kind": "class",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/netron-browser/src/client/http-client.ts#L149",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/netron-browser/src/client/http-client.ts#L152",
       "imports": [
         {
           "path": "@omnitron-dev/netron-browser",
@@ -5734,7 +5734,7 @@
       "name": "HttpRequestMessage",
       "package": "@omnitron-dev/netron-browser",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/netron-browser/src/types/index.ts#L168",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/netron-browser/src/types/index.ts#L170",
       "imports": [
         {
           "path": "@omnitron-dev/netron-browser",
@@ -5750,7 +5750,7 @@
       "name": "HttpResponseMessage",
       "package": "@omnitron-dev/netron-browser",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/netron-browser/src/types/index.ts#L203",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/netron-browser/src/types/index.ts#L205",
       "imports": [
         {
           "path": "@omnitron-dev/netron-browser",
@@ -5806,7 +5806,7 @@
       "name": "IBackendClient",
       "package": "@omnitron-dev/netron-browser",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/netron-browser/src/types/multi-backend.ts#L334",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/netron-browser/src/types/multi-backend.ts#L337",
       "imports": [
         {
           "path": "@omnitron-dev/netron-browser",
@@ -5874,7 +5874,7 @@
       "name": "IMultiBackendClient",
       "package": "@omnitron-dev/netron-browser",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/netron-browser/src/types/multi-backend.ts#L390",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/netron-browser/src/types/multi-backend.ts#L393",
       "imports": [
         {
           "path": "@omnitron-dev/netron-browser",
@@ -5970,7 +5970,7 @@
       "name": "InvocationOptions",
       "package": "@omnitron-dev/netron-browser",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/netron-browser/src/types/index.ts#L146",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/netron-browser/src/types/index.ts#L148",
       "imports": [
         {
           "path": "@omnitron-dev/netron-browser",
@@ -5986,7 +5986,7 @@
       "name": "InvokeOptions",
       "package": "@omnitron-dev/netron-browser",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/netron-browser/src/types/multi-backend.ts#L288",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/netron-browser/src/types/multi-backend.ts#L291",
       "imports": [
         {
           "path": "@omnitron-dev/netron-browser",
@@ -6666,7 +6666,7 @@
       "name": "MethodDescriptor",
       "package": "@omnitron-dev/netron-browser",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/netron-browser/src/types/index.ts#L349",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/netron-browser/src/types/index.ts#L351",
       "imports": [
         {
           "path": "@omnitron-dev/netron-browser",
@@ -6862,7 +6862,7 @@
       "name": "MultiBackendClientOptions",
       "package": "@omnitron-dev/netron-browser",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/netron-browser/src/types/multi-backend.ts#L257",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/netron-browser/src/types/multi-backend.ts#L260",
       "imports": [
         {
           "path": "@omnitron-dev/netron-browser",
@@ -6878,7 +6878,7 @@
       "name": "MultiBackendMetrics",
       "package": "@omnitron-dev/netron-browser",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/netron-browser/src/types/multi-backend.ts#L293",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/netron-browser/src/types/multi-backend.ts#L296",
       "imports": [
         {
           "path": "@omnitron-dev/netron-browser",
@@ -7090,7 +7090,7 @@
       "name": "Packet",
       "package": "@omnitron-dev/netron-browser",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/netron-browser/src/types/index.ts#L262",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/netron-browser/src/types/index.ts#L264",
       "imports": [
         {
           "path": "@omnitron-dev/netron-browser",
@@ -7130,7 +7130,7 @@
       "name": "PacketType",
       "package": "@omnitron-dev/netron-browser",
       "kind": "enum",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/netron-browser/src/types/index.ts#L248",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/netron-browser/src/types/index.ts#L250",
       "imports": [
         {
           "path": "@omnitron-dev/netron-browser",
@@ -7158,7 +7158,7 @@
       "name": "ParameterDescriptor",
       "package": "@omnitron-dev/netron-browser",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/netron-browser/src/types/index.ts#L379",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/netron-browser/src/types/index.ts#L381",
       "imports": [
         {
           "path": "@omnitron-dev/netron-browser",
@@ -7186,7 +7186,7 @@
       "name": "ParsedServiceName",
       "package": "@omnitron-dev/netron-browser",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/netron-browser/src/types/multi-backend.ts#L495",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/netron-browser/src/types/multi-backend.ts#L498",
       "imports": [
         {
           "path": "@omnitron-dev/netron-browser",
@@ -7382,7 +7382,7 @@
       "name": "RequestContext",
       "package": "@omnitron-dev/netron-browser",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/netron-browser/src/types/index.ts#L93",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/netron-browser/src/types/index.ts#L95",
       "imports": [
         {
           "path": "@omnitron-dev/netron-browser",
@@ -7398,7 +7398,7 @@
       "name": "RequestHints",
       "package": "@omnitron-dev/netron-browser",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/netron-browser/src/types/index.ts#L123",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/netron-browser/src/types/index.ts#L125",
       "imports": [
         {
           "path": "@omnitron-dev/netron-browser",
@@ -7474,7 +7474,7 @@
       "name": "RoutingConfig",
       "package": "@omnitron-dev/netron-browser",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/netron-browser/src/types/multi-backend.ts#L169",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/netron-browser/src/types/multi-backend.ts#L172",
       "imports": [
         {
           "path": "@omnitron-dev/netron-browser",
@@ -7490,7 +7490,7 @@
       "name": "RoutingPattern",
       "package": "@omnitron-dev/netron-browser",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/netron-browser/src/types/multi-backend.ts#L154",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/netron-browser/src/types/multi-backend.ts#L157",
       "imports": [
         {
           "path": "@omnitron-dev/netron-browser",
@@ -7618,7 +7618,7 @@
       "name": "ServiceDescriptor",
       "package": "@omnitron-dev/netron-browser",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/netron-browser/src/types/index.ts#L399",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/netron-browser/src/types/index.ts#L401",
       "imports": [
         {
           "path": "@omnitron-dev/netron-browser",
@@ -7734,7 +7734,7 @@
       "name": "SharedOptions",
       "package": "@omnitron-dev/netron-browser",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/netron-browser/src/types/multi-backend.ts#L186",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/netron-browser/src/types/multi-backend.ts#L189",
       "imports": [
         {
           "path": "@omnitron-dev/netron-browser",
@@ -8214,7 +8214,7 @@
       "name": "TypedServiceProxy",
       "package": "@omnitron-dev/netron-browser",
       "kind": "type",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/netron-browser/src/types/multi-backend.ts#L324",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/netron-browser/src/types/multi-backend.ts#L327",
       "imports": [
         {
           "path": "@omnitron-dev/netron-browser",
@@ -9338,7 +9338,7 @@
       "name": "BackendConfig",
       "package": "@omnitron-dev/netron-react",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/netron-browser/src/types/multi-backend.ts#L99",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/netron-browser/src/types/multi-backend.ts#L102",
       "imports": [
         {
           "path": "@omnitron-dev/netron-react",
@@ -9410,7 +9410,7 @@
       "name": "BackendSchema",
       "package": "@omnitron-dev/netron-react",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/netron-browser/src/types/multi-backend.ts#L248",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/netron-browser/src/types/multi-backend.ts#L251",
       "imports": [
         {
           "path": "@omnitron-dev/netron-react",
@@ -9826,7 +9826,7 @@
       "name": "IBackendClient",
       "package": "@omnitron-dev/netron-react",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/netron-browser/src/types/multi-backend.ts#L334",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/netron-browser/src/types/multi-backend.ts#L337",
       "imports": [
         {
           "path": "@omnitron-dev/netron-react",
@@ -9838,7 +9838,7 @@
       "name": "IMultiBackendClient",
       "package": "@omnitron-dev/netron-react",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/netron-browser/src/types/multi-backend.ts#L390",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/netron-browser/src/types/multi-backend.ts#L393",
       "imports": [
         {
           "path": "@omnitron-dev/netron-react",
@@ -10014,7 +10014,7 @@
       "name": "MultiBackendClientOptions",
       "package": "@omnitron-dev/netron-react",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/netron-browser/src/types/multi-backend.ts#L257",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/netron-browser/src/types/multi-backend.ts#L260",
       "imports": [
         {
           "path": "@omnitron-dev/netron-react",
@@ -10270,7 +10270,7 @@
       "name": "NetronTypedServiceProxy",
       "package": "@omnitron-dev/netron-react",
       "kind": "type",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/netron-browser/src/types/multi-backend.ts#L324",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/netron-browser/src/types/multi-backend.ts#L327",
       "imports": [
         {
           "path": "@omnitron-dev/netron-react",
@@ -12506,7 +12506,7 @@
       "name": "DeployTarget",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/services/remote-deployer.service.ts#L123",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/services/remote-deployer.service.ts#L124",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/operations",
@@ -15690,7 +15690,7 @@
       "name": "RemoteDeployer",
       "package": "@omnitron-dev/omnitron",
       "kind": "class",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/services/remote-deployer.service.ts#L340",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/services/remote-deployer.service.ts#L341",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/operations",
@@ -17898,7 +17898,7 @@
       "name": "BackendConfig",
       "package": "@omnitron-dev/prism",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/netron-browser/src/types/multi-backend.ts#L99",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/netron-browser/src/types/multi-backend.ts#L102",
       "imports": [
         {
           "path": "@omnitron-dev/prism",
@@ -17930,7 +17930,7 @@
       "name": "BackendSchema",
       "package": "@omnitron-dev/prism",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/netron-browser/src/types/multi-backend.ts#L248",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/netron-browser/src/types/multi-backend.ts#L251",
       "imports": [
         {
           "path": "@omnitron-dev/prism",
@@ -20066,7 +20066,7 @@
       "name": "ConnectionState",
       "package": "@omnitron-dev/prism",
       "kind": "type",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/netron-browser/src/types/index.ts#L282",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/netron-browser/src/types/index.ts#L284",
       "imports": [
         {
           "path": "@omnitron-dev/prism",
@@ -26314,7 +26314,7 @@
       "name": "IBackendClient",
       "package": "@omnitron-dev/prism",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/netron-browser/src/types/multi-backend.ts#L334",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/netron-browser/src/types/multi-backend.ts#L337",
       "imports": [
         {
           "path": "@omnitron-dev/prism",
@@ -26478,7 +26478,7 @@
       "name": "IMultiBackendClient",
       "package": "@omnitron-dev/prism",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/netron-browser/src/types/multi-backend.ts#L390",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/netron-browser/src/types/multi-backend.ts#L393",
       "imports": [
         {
           "path": "@omnitron-dev/prism",
@@ -29470,7 +29470,7 @@
       "name": "MultiBackendClientOptions",
       "package": "@omnitron-dev/prism",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/netron-browser/src/types/multi-backend.ts#L257",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/netron-browser/src/types/multi-backend.ts#L260",
       "imports": [
         {
           "path": "@omnitron-dev/prism",

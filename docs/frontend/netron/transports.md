@@ -64,6 +64,12 @@ write merely because a failed connection returned no answer. Use a domain
 operation ID with server-side replay semantics when a write must be retried.
 The direct HTTP client does not infer this property from a method name.
 
+For a fixed RPC endpoint, pass `redirect: 'error'` to the direct `HttpClient`.
+Fetch then rejects a redirect before replaying the request at another address.
+This protects publication bodies and custom credential headers. With multiple
+backends, set `http.redirect` on the backend that needs this policy. Omitting
+the option preserves the default Fetch redirect behavior.
+
 Query hooks forward TanStack Query's cancellation signal. A component unmount does
 not automatically cancel a mutation: its server-side outcome may already be committed.
 

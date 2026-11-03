@@ -360,7 +360,7 @@ Tail logs. Omit `[app]` to read the daemon's own log.
 | ------ | ------ |
 | `-f, --follow` | Stream new entries |
 | `-n, --lines <N>` | Show last N entries (default `50`) |
-| `-l, --level <lvl>` | Min level: `trace|debug|info|warn|error|fatal` |
+| `-l, --level <lvl>` | A minimum severity for `trace`, `debug`, `info`, `warn`, `error` or `fatal`. Use `unknown` or an application-defined level for an exact match. |
 | `-g, --grep <pattern>` | Filter by message regex |
 | `--file` | Read from log files (auto-fallback when daemon offline) |
 | `--node <name-or-id>` | Read replicated records from one registered remote node; never falls back to local files |
@@ -369,6 +369,7 @@ Use the full application handle for production diagnostics:
 
 ```bash
 omnitron logs sample/production/mail --node worker-1 -n 100
+omnitron logs sample/production/mail --node worker-1 --level unknown
 omnitron --json logs sample/production/api --node worker-1 --grep 'auth\.login'
 ```
 
