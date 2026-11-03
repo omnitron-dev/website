@@ -322,6 +322,12 @@ configuration fails instead of silently selecting another source.
 
 A deliberate per-build override replaces that selection:
 
+Through Console or RPC, selecting another SDK repository requires a current
+administrator session and a durable audit intent before the build starts: that
+repository's installation and build scripts run as the controller's OS user.
+Operators can still build registered projects using their committed source
+settings. The local CLI operates with the invoking OS user's existing access.
+
 ```bash
 omnitron release build sample \
   --framework-repository https://mirror.example/platform/omni.git \
@@ -338,8 +344,9 @@ The Console build dialog exposes the same options under **SDK source**. Ordinary
 builds need no extra fields. CLI and Console report the selected repository, ref
 and exact commit in build progress. Overrides are recorded with the build request, and
 the resulting manifest retains the resolved repository, exact commit and any
-required ref. Console disables overrides when an older controller does not report
-support; those controllers retain their previous source-selection behavior.
+required ref. Console disables overrides without current administrator access or
+when an older controller does not report support; those controllers retain their
+previous source-selection behavior.
 Credentials must stay in Git's SSH agent or credential helper; URLs containing
 passwords or HTTP tokens are rejected before logging the request.
 
