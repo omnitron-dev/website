@@ -653,26 +653,49 @@ the other.
 
 ## 12. Dev hot-reload with shared workspace deps
 
-**When to use:** monorepo where apps import shared packages and
-you want HMR to cascade.
+**When to use:** a monorepo whose applications and shared libraries are developed
+from source together.
+
+Use source entry points, with paths relative to the project configuration:
 
 ```typescript
 // omnitron.config.ts
-{
-  name: 'media',
-  bootstrap: './apps/media/dist/bootstrap.js',
-  cwd: './apps/media',
-  watch: { directory: './apps/media' },         // ← only watch the app dir
-}
+export default {
+  project: 'media-platform',
+  apps: [{ name: 'media', bootstrap: './apps/media/src/bootstrap.ts' }],
+};
 ```
 
-Workspace packages (`packages/*`) symlinked into
-`apps/*/node_modules/` are picked up automatically by esbuild's
-import-graph watcher — **do not** add `packages/*` to the
-`watch.include` array. Those paths don't exist relative to the
-app's cwd; the watcher logs errors trying to stat them.
+In `omnitron.stacks.json`:
 
-Trust the build chain to follow symlinks.
+```json
+{ "dev": { "type": "local", "apps": "all", "watch": true } }
+```
+
+```bash
+omnitron stack diagnose media-platform dev
+omnitron stack start media-platform dev --working-tree
+```
+
+The bootstrap compiler and application bundler must use the same package
+resolution policy. TypeScript workspace entry points belong in the compiled
+import graph, including their relative imports and decorators. Compiled packages
+and Node built-ins remain external. Esbuild then observes changes to the imported
+workspace sources and rebuilds the affected application; no second library
+watcher is necessary for source-exporting packages.
+
+Bootstrap applications use this import graph. `watch.directory`, `watch.include`
+and `watch.ignore` configure the filesystem watcher for command-based
+applications; adding directories there does not extend a bootstrap application's
+import graph. A package exporting only `dist` is a compiled dependency: editing
+its unimported `src` cannot automatically rebuild a consumer.
+
+Before accepting a development setup, change a shared library in an isolated
+fixture and verify both a fresh definition read and an application rebuild. A
+successful release build alone does not verify this source path. An older
+resident owner can still use an incompatible definition compiler after a backend
+upgrade. Inspect `omnitron backend status` and qualify that owner's source path;
+replace it only through a reviewed transition that preserves the other workloads.
 
 ## 13. Two-database deploy per stack
 

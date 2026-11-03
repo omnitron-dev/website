@@ -168,19 +168,39 @@ See [Best practices / Eager-loading heavy services](./omnitron/best-practices.md
 
 ### Watcher fires constantly in dev
 
-The file watcher is detecting writes to `dist/` or `node_modules`.
+First identify the watcher. Bootstrap applications use esbuild's import graph;
+command-based applications use the filesystem watcher. Test files, dependencies
+and generated output directories are ignored by the filesystem watcher by
+default, including `node_modules`, `dist`, `.turbo`, `coverage` and `.next`.
 
-Fix: exclude them in `watch.ignore`:
+Additional ignores are **path segments**, not glob expressions:
 
 ```typescript
 watch: {
   directory: './apps/api',
-  ignore:    ['**/dist/**', '**/node_modules/**', '**/.turbo/**'],
+  ignore: ['generated-assets'],
 }
 ```
 
-Default ignores cover most cases but not project-specific paths
-(`.turbo`, `coverage`, `.next`).
+Do not use `**/dist/**`: it is not a matching segment. Inspect the changed path in
+the log and remove a redundant watcher rather than watching generated output
+from a bootstrap application's external packages. See
+[shared workspace development](./omnitron/recipes.md#12-dev-hot-reload-with-shared-workspace-deps).
+
+### Source workspace package fails while reading a bootstrap definition
+
+If a source-exporting package imports a sibling `.js` module that exists only as
+TypeScript, plain Node loading is insufficient. The definition reader must
+compile that workspace graph with the same policy as the application bundler.
+Decorators and parameter properties also require compilation; merely changing
+an import extension does not resolve that contract.
+
+Check the active owner as well as the backend with `omnitron backend status`.
+A backend handoff preserves the owner's loaded code. Verify the development
+source path against the exact owner runtime before starting workloads; keep any
+required owner replacement behind a concrete pause and rollback plan. Do not
+copy JavaScript files into source directories or substitute a fixed release while
+claiming that backend source watching is enabled.
 
 ### "Daemon already running"
 
