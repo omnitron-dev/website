@@ -275,16 +275,13 @@ A key invariant: the child imports the **single module file**
 declared in `IProcessEntry.module` — not the entire bootstrap —
 so an app with 10 processes loads 10 disjoint subsets of code.
 
-## Container identity check (worker mode)
+## Titan identity and installed application paths
 
-`bootstrap-process.ts` and `module-worker-process.ts` verify that
-the `Container` class imported by the app's Titan modules is the
-**same physical class** as the daemon's `Container`. If they
-differ — typically because the app pinned a different
-`@omnitron-dev/titan` version, or the workspace has parallel
-`node_modules` — `Inject(Container)` cannot resolve and the app
-fails to boot. The check produces a clear error message pointing
-at the version mismatch.
+In worker mode, the application and the bootstrap adapter that launches it must resolve the same physical Titan installation. Two copies can report the same package version and export different `Container` classes. Dependency injection then fails. The startup diagnostic reports both paths. The adapter can belong to the application when the owner supports application runtimes.
+
+A running Node owner can retain package resolutions across application restarts. Replacing `node_modules` under the same absolute bootstrap path can therefore launch the previous adapter against the new application. A successful import from a fresh shell only checks that shell's module resolution.
+
+For an installed application, keep each code revision and its dependencies in a distinct physical directory. Preserve the project's registration and state paths. Verify the new launch through the existing owner, repeat the ordinary application start, and test the return to the previous installation. Check job commands separately when a scheduled job launches its own interpreter. An ordinary local development stack runs its working tree.
 
 ## Process janitor — `process-janitor.ts`
 
