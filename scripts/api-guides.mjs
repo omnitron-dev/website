@@ -221,6 +221,8 @@ export default {
     "./release-archive": "omnitron/releases.md",
     "./release-reading": "omnitron/releases.md",
     "./source-layout": "omnitron/releases.md",
+    "./runtime": "omnitron/releases.md",
+    "./runtime/identity": "omnitron/releases.md",
     "./node-check": "omnitron/cli.md",
     "./audit-outcome": "omnitron/observability.md",
     "./metrics-storage-reading": "omnitron/observability.md",

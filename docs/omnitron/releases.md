@@ -189,6 +189,51 @@ Older local owners may run the verified package while reporting no launch
 receipt. The selected release and inspected files remain useful evidence, but
 neither is presented as a confirmed current process identity.
 
+### Read the executing application's origin
+
+A packaged application can use the public `@omnitron-dev/omnitron/runtime` entry
+point to associate its durable output with the bytes admitted for its launch.
+The normal Omnitron bootstrap supplies `RUNTIME_CONTEXT` through Titan dependency
+injection before eager providers initialize. This does not add a dependency on
+Omnitron to Titan itself.
+
+`InstalledRuntimeContext` has two explicit states:
+
+| State | Meaning | Application behavior |
+| --- | --- | --- |
+| `verified` | The compiled entry, installed payload, SDK binding, Node executable and allowed options match the private installation receipt. | Record the producer and consumer identity with new output. |
+| `unavailable` | Development or a legacy installation has no compatible origin contract. | Report unknown provenance or refuse an operation that requires it. |
+
+Malformed metadata, a changed payload or a mismatched runtime throws
+`RuntimeOriginVerificationError`. These failures never become an unavailable
+context. Verified bootstrap children must load compiled modules from the same
+checked installation. Working-tree development retains its ordinary loading path.
+
+The verified context contains `producer` (`ArtifactIdentity`), `consumer`, `entry`,
+`payloadSha256`, `executableSha256` and `observedAt`. Imported artifacts retain the
+original producer's release, manifest, archive, project commit and SDK commit.
+The consumer records the selected release and application alias separately.
+Local preparation and remote receipt generation use the same origin mapping.
+Remote imports remain subject to the deployment restrictions described above.
+
+`ownerAttestation` is explicitly `null`: startup payload verification is not a
+process-owner launch receipt or continuous verification of running memory. An
+older owner may execute the application while its launch identity remains
+unreported. The application SDK cannot add unsupported owner capabilities.
+
+For a standalone compiled script, call `verifyInstalledRuntime(new URL(import.meta.url))`
+before starting work. This verifies the actual script entry; environment variables,
+a source checkout's Git HEAD and a package version are not substitutes.
+Browser DTOs can use `ArtifactIdentity`, `assertArtifactIdentity` and
+`parseArtifactIdentity` from `@omnitron-dev/omnitron/runtime/identity` without
+importing filesystem or process APIs. Parsing validates the six identity fields;
+it does not admit an artifact or prove that a caller supplied truthful metadata.
+
+For a data collector, commit an ingestion session with this context before opening
+an external stream, and preserve that session identity through downstream processing.
+Do not relabel historical rows or another producer's messages with the current
+aggregator's runtime. Keep absent historical evidence explicit.
+
 ### Package a project-specific release
 
 Use the headless `@omnitron-dev/omnitron/release-archive` entry point when a

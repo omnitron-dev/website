@@ -225,6 +225,14 @@
       "guide": "/docs/omnitron/releases"
     },
     {
+      "path": "@omnitron-dev/omnitron/runtime",
+      "guide": "/docs/omnitron/releases"
+    },
+    {
+      "path": "@omnitron-dev/omnitron/runtime/identity",
+      "guide": "/docs/omnitron/releases"
+    },
+    {
       "path": "@omnitron-dev/omnitron/source-layout",
       "guide": "/docs/omnitron/releases"
     },
@@ -11899,6 +11907,22 @@
       ]
     },
     {
+      "name": "ArtifactIdentity",
+      "package": "@omnitron-dev/omnitron",
+      "kind": "type",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/runtime/identity.ts#L1",
+      "imports": [
+        {
+          "path": "@omnitron-dev/omnitron/runtime",
+          "guide": "/docs/omnitron/releases"
+        },
+        {
+          "path": "@omnitron-dev/omnitron/runtime/identity",
+          "guide": "/docs/omnitron/releases"
+        }
+      ]
+    },
+    {
       "name": "ArtifactSourceReading",
       "package": "@omnitron-dev/omnitron",
       "kind": "type",
@@ -11907,6 +11931,22 @@
         {
           "path": "@omnitron-dev/omnitron/dto/services",
           "guide": "/docs/omnitron/services-reference"
+        }
+      ]
+    },
+    {
+      "name": "assertArtifactIdentity",
+      "package": "@omnitron-dev/omnitron",
+      "kind": "function",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/runtime/identity.ts#L16",
+      "imports": [
+        {
+          "path": "@omnitron-dev/omnitron/runtime",
+          "guide": "/docs/omnitron/releases"
+        },
+        {
+          "path": "@omnitron-dev/omnitron/runtime/identity",
+          "guide": "/docs/omnitron/releases"
         }
       ]
     },
@@ -13507,6 +13547,18 @@
       ]
     },
     {
+      "name": "InstalledRuntimeContext",
+      "package": "@omnitron-dev/omnitron",
+      "kind": "type",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/runtime/context.ts#L11",
+      "imports": [
+        {
+          "path": "@omnitron-dev/omnitron/runtime",
+          "guide": "/docs/omnitron/releases"
+        }
+      ]
+    },
+    {
       "name": "InstalledStackResumeResult",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
@@ -15103,6 +15155,22 @@
       ]
     },
     {
+      "name": "parseArtifactIdentity",
+      "package": "@omnitron-dev/omnitron",
+      "kind": "function",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/runtime/identity.ts#L33",
+      "imports": [
+        {
+          "path": "@omnitron-dev/omnitron/runtime",
+          "guide": "/docs/omnitron/releases"
+        },
+        {
+          "path": "@omnitron-dev/omnitron/runtime/identity",
+          "guide": "/docs/omnitron/releases"
+        }
+      ]
+    },
+    {
       "name": "parsePlatformProbe",
       "package": "@omnitron-dev/omnitron",
       "kind": "function",
@@ -15754,6 +15822,34 @@
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/release-reading",
+          "guide": "/docs/omnitron/releases"
+        }
+      ]
+    },
+    {
+      "name": "RUNTIME_CONTEXT",
+      "package": "@omnitron-dev/omnitron",
+      "kind": "value",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/runtime/context.ts#L24",
+      "imports": [
+        {
+          "path": "@omnitron-dev/omnitron/runtime",
+          "guide": "/docs/omnitron/releases"
+        }
+      ]
+    },
+    {
+      "name": "RuntimeOriginVerificationError",
+      "package": "@omnitron-dev/omnitron",
+      "kind": "class",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/runtime/identity.ts#L9",
+      "imports": [
+        {
+          "path": "@omnitron-dev/omnitron/runtime",
+          "guide": "/docs/omnitron/releases"
+        },
+        {
+          "path": "@omnitron-dev/omnitron/runtime/identity",
           "guide": "/docs/omnitron/releases"
         }
       ]
@@ -16566,6 +16662,18 @@
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/source-layout",
+          "guide": "/docs/omnitron/releases"
+        }
+      ]
+    },
+    {
+      "name": "verifyInstalledRuntime",
+      "package": "@omnitron-dev/omnitron",
+      "kind": "function",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/runtime/context.ts#L28",
+      "imports": [
+        {
+          "path": "@omnitron-dev/omnitron/runtime",
           "guide": "/docs/omnitron/releases"
         }
       ]
