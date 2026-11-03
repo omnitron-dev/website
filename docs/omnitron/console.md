@@ -36,6 +36,19 @@ selection whose stack was removed or renamed. Failed reads keep the last choice
 and mark cached menu state as stale; they never invent an empty inventory or
 silently switch to another stack.
 
+## Consistent action placement
+
+Horizontal card and row controls put removal at the leading edge, with extra
+spacing before ordinary commands. Card footers keep those ordinary commands
+together at the trailing edge, and groups wrap on narrow screens. Icon-only
+controls identify their action and resource for assistive technology.
+
+Overflow menus use the shared `RowActions` component: ordinary commands first,
+destructive commands last behind a separator. Keyboard navigation follows that
+order and Escape returns to its trigger. Confirmation dialogs keep Cancel
+before the explicit destructive confirmation. Reordering controls never removes
+role checks, ownership restrictions, disabled states or confirmation steps.
+
 ## One keyboard model
 
 Console uses three levels of focus: **Console → workspace region → control**.
@@ -419,8 +432,25 @@ managed through their owning stack.
 
 ### Containers
 
-`/containers` — Docker container inventory from `OmnitronInfra`.
-The inventory shows status, image, ports and resource use. Inspect a container's logs from its row. Start, stop and remove are available according to role and ownership. A **Read only** indicator explains cluster or platform restrictions on that container. Select or focus the indicator to inspect the reason.
+`/containers` reads the Docker engine attached to this controller through
+`OmnitronInfra`. **Local node** and **Local total** explicitly describe that scope;
+these counts are not fleet totals. The workspace filter selects labelled project
+containers, while the Scope column distinguishes shared control-plane and
+unassigned containers that remain visible. Remote infrastructure belongs to each
+stack's page, where its node reports it.
+
+Direct entry loads missing stack locations through the shared project store.
+Unknown locations show a loading state; failed reads explain the failure and offer
+Retry. The page never treats unavailable stack metadata as proof that no remote
+stacks exist. The status bar owns continued refresh, and concurrent readers share
+one request.
+
+The inventory shows observed status, image, health, published ports and scope.
+**Not reported** does not establish health. Inspect logs from a row. Start, stop,
+remove and log loading show progress on the affected container and prevent
+concurrent duplicate actions; failures keep a readable reason and allow an explicit
+retry. Lifecycle actions still obey roles and ownership. A **Read only** indicator
+explains cluster or platform restrictions; focus it to inspect the reason.
 
 ### Deployments
 
