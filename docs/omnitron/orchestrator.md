@@ -371,7 +371,7 @@ loading `titan-health` / `titan-metrics` modules.
   Loads everything in one process. Prefer module-worker mode with
   one process per concern.
 - **Poking the daemon state DB to remove a crashed app.** Use
-  `omnitron stop` first; the orchestrator owns lifecycle.
+  `omnitron stop project/stack/app` to address the affected application.
 - **File watcher in production.** Wastes CPU and risks
   accidentally hot-reloading prod on a config push. Production
   ecosystems should set `watch.enabled: false`.

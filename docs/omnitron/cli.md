@@ -304,9 +304,11 @@ operate on **all** managed apps.
 | Command | Effect |
 | ------- | ------ |
 | `omnitron start [app]` | Start app(s); auto-starts the daemon if needed |
-| `omnitron stop [app] [-f]` | Graceful stop; `-f`/`--force` to SIGKILL |
+| `omnitron stop [app] [-f]` | Stop the selected applications. Pass `--force` to request a forced stop. |
 | `omnitron restart [app]` | Stop + start |
 | `omnitron reload [app]` | Zero-downtime reload — workers cycle one at a time |
+
+Use a full application name such as `omnitron stop project/test/api` to limit the request to one process group. Use `omnitron stop all` to address every managed application. Both require a responsive daemon. When the connection fails or the daemon refuses the operation, the command reports the reason and exits with a failure. If the connection drops after sending the request, inspect `omnitron list` before retrying. Use `omnitron down` for an explicit daemon shutdown.
 
 ## Information
 
