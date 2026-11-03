@@ -434,10 +434,11 @@ managed through their owning stack.
 
 `/containers` reads the Docker engine attached to this controller through
 `OmnitronInfra`. **Local node** and **Local total** explicitly describe that scope;
-these counts are not fleet totals. The workspace filter selects labelled project
+these counts are not fleet totals. On narrow screens the summary uses a compact
+two-column grid so the inventory stays in view. The workspace filter selects labelled project
 containers, while the Scope column distinguishes shared control-plane and
 unassigned containers that remain visible. Remote infrastructure belongs to each
-stack's page, where its node reports it.
+stack's page, where its node reports it; inline links lead to those stacks.
 
 Direct entry loads missing stack locations through the shared project store.
 Unknown locations show a loading state; failed reads explain the failure and offer
@@ -868,11 +869,31 @@ container is narrow. `maxHeight` constrains the rows, not pagination. Console gi
 wide operational tables a minimum readable width instead of squeezing their
 columns into the window.
 
-Audit is a reading surface: at narrow widths, time, actor and origin move into the
-event cell. Details and resource identifiers wrap without overlapping other
-records. Access uses a compact account-action menu, a collapsible role reference
-and a clearable permission search with an explicit no-match state. Permissions
-continue to come from the daemon; visual rearrangement does not change policy.
+Audit is an administrator-only history of control-plane actions across projects;
+the workspace selector does not narrow it. Resource, action and actor filters
+are explicit. Each row shows a compact timestamp, action, outcome and actor.
+Expand it with a click, Enter or Space to read exact time, resource, origin and
+structured details through the same field renderer as application logs. Escape
+collapses the details. Long identifiers wrap within the row.
+
+Actor badges retain the distinction between **Local client** (`omnitron-local`,
+CLI or MCP admitted through the private Unix socket), **System** (the daemon's
+own action), **Service** (another control-plane principal) and **User** (a Console
+account). The full stored identity stays available in details; a badge does not
+invent a username or merge distinct principals.
+
+**Load older** freezes the visible page and follows the last entry's ID. The
+server orders timestamp ties by ID and compares timestamps inside PostgreSQL,
+so JavaScript's lower timestamp precision cannot skip records. **Resume** or
+**Refresh** returns to the newest page. A deleted cursor requires refreshing;
+an unavailable history is not represented as an empty healthy trail. Structured
+details are bounded and credentials are redacted on both write and read,
+including nested arrays from older records. Historical `[object]` placeholders
+cannot recover information that was never stored.
+
+Access uses a compact account-action menu, a collapsible role reference and a
+clearable permission search with an explicit no-match state. Permissions continue
+to come from the daemon; visual rearrangement does not change policy.
 
 Forms and menus inherit Prism’s MUI overrides. Dialogs fill small viewports using
 `100dvh`; their content scrolls while action buttons remain reachable. Long menu

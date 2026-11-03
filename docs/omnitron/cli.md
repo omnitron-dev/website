@@ -858,7 +858,7 @@ The operation is available to viewers and bounded by node, archive and time limi
 | `omnitron secret copy <from> <to>` | Copies a value between vault keys without printing it. |
 | `omnitron secret rotate-rpcauth <passwordKey>` | Generates a paired RPC password and bitcoind authentication value. Requires `--user-key` and `--auth-key`. |
 | `omnitron infra inspect <project/stack>` | Inspects remote host services without changing them. Optional repeatable selectors: `--unit`, `--path`, `--snap`, `--config`. Credential configuration keys are refused. |
-| `omnitron audit` | Lists control-plane changes, newest first. Filter with `--action`, `--resource`, `--actor` and `--before`; `--limit` accepts 1–500, default 50. |
+| `omnitron audit` | Lists control-plane changes, newest first. Filter with `--action`, `--resource`, `--actor` and `--before`. Continue a page with `--before-id <entry-id>`; do not combine the two cursor options. `--limit` accepts 1–500, default 50. |
 
 Account cleanup modes belong to the project's tool: `--leftovers` performs a
 census, `--leftovers rehearse` previews removal in rolled-back transactions,
