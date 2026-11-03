@@ -97,9 +97,11 @@ Browser tests cover pending grants, failed refresh, account changes and viewer i
 
 Xec pipeline methods require `admin`, including definition and run-history reads. A run revalidates the human session and requires a durable audit intent and the reviewed definition revision. An operator's application lifecycle rights do not grant arbitrary shell execution. See [Xec automation](./automation.md).
 
-Release builds follow the same boundary: operators build registered project code;
-an explicit SDK source override requires a revalidated administrator and a durable
-audit intent before execution. The source repository can run installation and build
-scripts, so changing it is administrative code admission.
+Release builds follow the same boundary: operators build registered project code
+using its declared settings. An explicit SDK source or nonempty environment
+override requires a revalidated administrator and a durable audit intent before
+execution. Both can change which code tools execute. Audit records include only
+environment variable names, not their values; revocation during the audit write
+prevents the build from starting.
 
 The local MCP server uses the daemon owner's administrative Unix socket. Tool selection in an agent client does not reduce that underlying authority. It is not a delegated identity. Embedded agents require a broker, isolated workers and resource-scoped grants evaluated by this same access layer; the [agent design](./agents.md) describes the boundary and acceptance tests. That delegated path is not enabled yet.

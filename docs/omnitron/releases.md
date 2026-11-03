@@ -322,11 +322,15 @@ configuration fails instead of silently selecting another source.
 
 A deliberate per-build override replaces that selection:
 
-Through Console or RPC, selecting another SDK repository requires a current
-administrator session and a durable audit intent before the build starts: that
-repository's installation and build scripts run as the controller's OS user.
-Operators can still build registered projects using their committed source
-settings. The local CLI operates with the invoking OS user's existing access.
+Through Console or RPC, selecting another SDK repository or supplying any
+nonempty environment override requires a current administrator session and a
+durable audit intent before the build starts. Source scripts and environment
+settings for Git, package managers or interpreters can execute code as the
+controller's OS user. The audit records environment variable names, never their
+values. An empty environment object does not constitute an override.
+Operators can still build registered projects using committed source settings
+and the existing controller environment. The local CLI operates with the invoking
+OS user's existing access; environment validation still applies.
 
 ```bash
 omnitron release build sample \
