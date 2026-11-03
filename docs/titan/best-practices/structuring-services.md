@@ -31,7 +31,7 @@ splitting.
 
 ## Calls across applications
 
-Within one process, inject the service. Across Titan applications, expose a versioned Netron service and call its typed interface through the Netron client. Give the service method its authorization policy once. A browser, CLI and another Titan service can then call that method and receive the same result or denial.
+Within one process, inject the service. Across Titan applications, expose a versioned Netron service and call its typed interface through the Netron client. Give the service method its authorization policy once. The service evaluates the same policy for browser, CLI and service callers. Grant access according to each caller’s authenticated identity.
 
 Use a Netron transport suited to the connection. For example, a browser can use HTTP for a request and WebSocket for a subscription. Netron owns the handshake, method invocation and event framing on those connections. When integrating a provider with its own wire protocol, keep that client in the provider adapter and expose the application operation through Netron. [Netron transports](../netron/transports.md)
 
