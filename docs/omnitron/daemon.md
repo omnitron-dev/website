@@ -199,6 +199,12 @@ Override via CLI flags on `omnitron up` or via the daemon
 configuration file (advanced — not part of the project ecosystem
 config).
 
+### Console request limits
+
+The daemon shares one Netron limiter across HTTP and WebSocket. Configure `requestRateLimit` in the daemon settings. Its defaults are 3,000 requests per client and 6,000 total per 60-second window. Switching transport or opening another tab consumes the same allowance. The legacy `httpRateLimit` setting covers both listeners. If both settings exist, `requestRateLimit` takes precedence.
+
+The Console gateway overwrites `X-Forwarded-For` and `X-Real-IP` on HTTP and WebSocket. With the default `trustProxy: false`, clients behind the same proxy share its socket-address allowance. Set `trustProxy: true` only when access to the upstream listeners is restricted to that trusted proxy. The local administrative Unix socket has its own OS access boundary. [Netron request budgets](../titan/netron/transports.md#share-a-request-budget-across-http-and-websocket)
+
 ## RPC surface — `OmnitronDaemon` service
 
 The daemon registers `@Service({ name: 'OmnitronDaemon' })` on

@@ -43,6 +43,10 @@ On a terminal, `--password-stdin` opens a hidden prompt. A pipe is read until EO
 
 Account lists contain at most 100 entries and a continuation cursor. Use `omnitron access users --after <id>` for the next page. Global `--json` is supported.
 
+### Concurrent sign-ins
+
+Failed password checks for the same account accumulate in PostgreSQL even when several requests arrive together. Once locked, the account rejects new sign-ins until the recorded deadline. A successful sign-in rechecks the current password record, lockout and role, then creates the session and resets the counter in a single transaction. A database failure rolls back both writes. The same policy applies when a Console request reaches the service through HTTP or WebSocket.
+
 ## Change roles and revoke sessions
 
 Review the current role first, then submit it as the expected previous value:

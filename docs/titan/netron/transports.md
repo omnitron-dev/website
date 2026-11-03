@@ -128,6 +128,28 @@ There is **no** unified `maxPayloadBytes` / `keepAliveMs` /
 `connectionTimeoutMs` option — those names do not exist; use the real
 ones above.
 
+## Share a request budget across HTTP and WebSocket
+
+Create one limiter per process and pass the same object to the listeners that serve the same clients. A client key has one fixed window across both transports. The limiter also has a fixed window for all clients. Each window starts on its first accepted request and resets after `windowMs`.
+
+```typescript
+import { TransportRequestLimiter } from '@omnitron-dev/titan/netron';
+
+const requestLimiter = new TransportRequestLimiter({
+  enabled: true, windowMs: 60_000, maxRequests: 300, globalMaxRequests: 2_000,
+});
+netron.registerTransportServer('http', {
+  name: 'api', options: { host: '127.0.0.1', port: 8010, requestLimiter },
+});
+netron.registerTransportServer('websocket', {
+  name: 'events', options: { host: '127.0.0.1', port: 8011, requestLimiter },
+});
+```
+
+HTTP reserves one unit before reading the body. A batch of N calls requires another N−1 units before the first handler runs. If the batch exceeds the remaining allowance, the ingress request still counts and no handler runs. Opening a WebSocket and initiating a call or task each consume one unit. Responses to requests already in flight can complete when the window is full.
+
+The default key is the remote socket address. Enable `trustProxy` only on a listener reachable exclusively through a trusted proxy that overwrites the forwarding headers on ordinary requests and upgrades. An exhausted HTTP request or upgrade receives `429` and `Retry-After` in seconds. On an established WebSocket the caller receives a Netron rate-limit error. A stream that cannot deliver its next frame, or a peer that keeps sending while its refusal is still pending, closes with WebSocket code 1013. Handle that close with bounded reconnect backoff. A key on the optional `whitelist` bypasses both ceilings. Separate daemon processes maintain independent windows. Method authorization still applies after transport admission.
+
 ## Connection limits and lifecycle
 
 `Netron` enforces `maxTotalConnections` (default **100**) and

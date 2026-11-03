@@ -11446,7 +11446,7 @@
       "name": "AggregatedHealthDto",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/config/types.ts#L1107",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/config/types.ts#L1093",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron",
@@ -11466,7 +11466,7 @@
       "name": "AggregatedMetricsDto",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/config/types.ts#L1070",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/config/types.ts#L1056",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron",
@@ -11718,7 +11718,7 @@
       "name": "AppDiagnosticsDto",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/config/types.ts#L1226",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/config/types.ts#L1212",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron",
@@ -11846,7 +11846,7 @@
       "name": "AppStatus",
       "package": "@omnitron-dev/omnitron",
       "kind": "type",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/config/types.ts#L979",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/config/types.ts#L965",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron",
@@ -11986,7 +11986,7 @@
       "name": "ChildDiagnosticsDto",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/config/types.ts#L1176",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/config/types.ts#L1162",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/config",
@@ -12322,7 +12322,7 @@
       "name": "DaemonStatusDto",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/config/types.ts#L1049",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/config/types.ts#L1035",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron",
@@ -13094,7 +13094,7 @@
       "name": "IAlertSink",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/config/types.ts#L882",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/config/types.ts#L868",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/config",
@@ -13174,7 +13174,7 @@
       "name": "IEcosystemConfig",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/config/types.ts#L896",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/config/types.ts#L882",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron",
@@ -14182,7 +14182,7 @@
       "name": "LastExitDto",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/config/types.ts#L1148",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/config/types.ts#L1134",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/config",
@@ -14278,7 +14278,7 @@
       "name": "LogEntryDto",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/config/types.ts#L1134",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/config/types.ts#L1120",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron",
@@ -14322,7 +14322,7 @@
       "name": "LogPathsDto",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/config/types.ts#L1219",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/config/types.ts#L1205",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/config",
@@ -15226,7 +15226,7 @@
       "name": "PoolDiagnosticsDto",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/config/types.ts#L1200",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/config/types.ts#L1186",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/config",
@@ -15238,7 +15238,7 @@
       "name": "ProcessInfoDto",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/config/types.ts#L995",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/config/types.ts#L981",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron",
@@ -15750,7 +15750,7 @@
       "name": "RuntimeReleaseEvidence",
       "package": "@omnitron-dev/omnitron",
       "kind": "type",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/config/types.ts#L982",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/config/types.ts#L968",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/config",
@@ -16206,7 +16206,7 @@
       "name": "SubProcessInfoDto",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/config/types.ts#L1015",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/config/types.ts#L1001",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron",
@@ -43606,7 +43606,7 @@
       "name": "ConnectionState",
       "package": "@omnitron-dev/titan",
       "kind": "type",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan/src/netron/transport/types.ts#L202",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan/src/netron/transport/types.ts#L207",
       "imports": [
         {
           "path": "@omnitron-dev/titan/netron/transport/http",
@@ -44510,7 +44510,7 @@
       "name": "createRateLimitHeaders",
       "package": "@omnitron-dev/titan",
       "kind": "function",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan/src/netron/transport/http/rate-limiter.ts#L391",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan/src/netron/transport/http/rate-limiter.ts#L9",
       "imports": [
         {
           "path": "@omnitron-dev/titan/netron/transport/http",
@@ -44814,7 +44814,7 @@
       "name": "decodePacket",
       "package": "@omnitron-dev/titan",
       "kind": "value",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan/src/netron/packet/index.ts#L211",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan/src/netron/packet/index.ts#L219",
       "imports": [
         {
           "path": "@omnitron-dev/titan/netron",
@@ -46642,7 +46642,7 @@
       "name": "HttpNativeServer",
       "package": "@omnitron-dev/titan",
       "kind": "class",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan/src/netron/transport/http/server.ts#L290",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan/src/netron/transport/http/server.ts#L291",
       "imports": [
         {
           "path": "@omnitron-dev/titan/netron/transport/http",
@@ -46762,7 +46762,7 @@
       "name": "HttpTrafficSnapshot",
       "package": "@omnitron-dev/titan",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan/src/netron/transport/http/server.ts#L53",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan/src/netron/transport/http/server.ts#L54",
       "imports": [
         {
           "path": "@omnitron-dev/titan/netron/transport/http",
@@ -48290,7 +48290,7 @@
       "name": "ITransport",
       "package": "@omnitron-dev/titan",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan/src/netron/transport/types.ts#L338",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan/src/netron/transport/types.ts#L346",
       "imports": [
         {
           "path": "@omnitron-dev/titan/netron/transport/http",
@@ -48326,7 +48326,7 @@
       "name": "ITransportConnection",
       "package": "@omnitron-dev/titan",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan/src/netron/transport/types.ts#L234",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan/src/netron/transport/types.ts#L239",
       "imports": [
         {
           "path": "@omnitron-dev/titan/netron/transport/http",
@@ -48366,7 +48366,7 @@
       "name": "ITransportServer",
       "package": "@omnitron-dev/titan",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan/src/netron/transport/types.ts#L276",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan/src/netron/transport/types.ts#L284",
       "imports": [
         {
           "path": "@omnitron-dev/titan/netron/transport/http",
@@ -50606,7 +50606,7 @@
       "name": "RateLimitConfig",
       "package": "@omnitron-dev/titan",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan/src/netron/transport/types.ts#L405",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan/src/netron/transport/types.ts#L413",
       "imports": [
         {
           "path": "@omnitron-dev/titan/netron/transport/http",
@@ -50682,8 +50682,12 @@
       "name": "RateLimitResult",
       "package": "@omnitron-dev/titan",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan/src/netron/transport/http/rate-limiter.ts#L47",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan/src/netron/transport/request-limiter.ts#L4",
       "imports": [
+        {
+          "path": "@omnitron-dev/titan/netron",
+          "guide": "/docs/titan/netron"
+        },
         {
           "path": "@omnitron-dev/titan/netron/transport/http",
           "guide": "/docs/titan/netron/transports"
@@ -50763,6 +50767,18 @@
         {
           "path": "@omnitron-dev/titan/netron/transport/http/middleware",
           "guide": "/docs/titan/netron/middleware"
+        }
+      ]
+    },
+    {
+      "name": "readPacketHeader",
+      "package": "@omnitron-dev/titan",
+      "kind": "function",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan/src/netron/packet/index.ts#L212",
+      "imports": [
+        {
+          "path": "@omnitron-dev/titan/netron",
+          "guide": "/docs/titan/netron"
         }
       ]
     },
@@ -51598,7 +51614,7 @@
       "name": "ServerMetrics",
       "package": "@omnitron-dev/titan",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan/src/netron/transport/types.ts#L322",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan/src/netron/transport/types.ts#L330",
       "imports": [
         {
           "path": "@omnitron-dev/titan/netron/transport/http",
@@ -51998,7 +52014,7 @@
       "name": "SlidingWindowRateLimiter",
       "package": "@omnitron-dev/titan",
       "kind": "class",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan/src/netron/transport/http/rate-limiter.ts#L91",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan/src/netron/transport/request-limiter.ts#L47",
       "imports": [
         {
           "path": "@omnitron-dev/titan/netron/transport/http",
@@ -52490,7 +52506,7 @@
       "name": "TransportAddress",
       "package": "@omnitron-dev/titan",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan/src/netron/transport/types.ts#L361",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan/src/netron/transport/types.ts#L369",
       "imports": [
         {
           "path": "@omnitron-dev/titan/netron/transport/http",
@@ -52502,7 +52518,7 @@
       "name": "TransportCapabilities",
       "package": "@omnitron-dev/titan",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan/src/netron/transport/types.ts#L18",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan/src/netron/transport/types.ts#L19",
       "imports": [
         {
           "path": "@omnitron-dev/titan/netron/transport/http",
@@ -52578,11 +52594,35 @@
       "name": "TransportOptions",
       "package": "@omnitron-dev/titan",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan/src/netron/transport/types.ts#L50",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan/src/netron/transport/types.ts#L51",
       "imports": [
         {
           "path": "@omnitron-dev/titan/netron/transport/http",
           "guide": "/docs/titan/netron/transports"
+        }
+      ]
+    },
+    {
+      "name": "TransportRateLimitConfig",
+      "package": "@omnitron-dev/titan",
+      "kind": "interface",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan/src/netron/transport/types.ts#L413",
+      "imports": [
+        {
+          "path": "@omnitron-dev/titan/netron",
+          "guide": "/docs/titan/netron"
+        }
+      ]
+    },
+    {
+      "name": "TransportRequestLimiter",
+      "package": "@omnitron-dev/titan",
+      "kind": "class",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan/src/netron/transport/request-limiter.ts#L47",
+      "imports": [
+        {
+          "path": "@omnitron-dev/titan/netron",
+          "guide": "/docs/titan/netron"
         }
       ]
     },
@@ -53106,7 +53146,7 @@
       "name": "WebSocketConnection",
       "package": "@omnitron-dev/titan",
       "kind": "class",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan/src/netron/transport/websocket/connection.ts#L17",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan/src/netron/transport/websocket/connection.ts#L20",
       "imports": [
         {
           "path": "@omnitron-dev/titan/netron/transport/websocket",
@@ -53142,7 +53182,7 @@
       "name": "WebSocketServerAdapter",
       "package": "@omnitron-dev/titan",
       "kind": "class",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan/src/netron/transport/websocket/server.ts#L17",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan/src/netron/transport/websocket/server.ts#L18",
       "imports": [
         {
           "path": "@omnitron-dev/titan/netron/transport/websocket",

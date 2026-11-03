@@ -76,7 +76,7 @@ not automatically cancel a mutation: its server-side outcome may already be comm
 The direct browser transport posts JSON to `/netron/invoke`:
 
 ```json
-{"id":"request-id","service":"Catalog","method":"list","args":[]}
+{"id":"request-id","service":"Catalog","method":"list","input":[]}
 ```
 
 A successful reply contains the same `id`, `success: true`, and `data`.
