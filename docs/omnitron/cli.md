@@ -589,6 +589,15 @@ which application receives the value. Do not put credentials in source files,
 frontend bundles or command arguments. Encryption at rest does not remove the
 need to protect the vault passphrase, state backups and the host account.
 
+Remote deployment sends resolved configuration and migration environment through
+Xec's SSH stdin channel, rather than embedding credentials in command arguments.
+The existing deployment lease still fences those operations. Node configuration
+is materialized in private files (0600) so applications can restart independently
+of the controller; an administrator of that host can read it. Migration output
+uses the common diagnostic redactor, but applications must still avoid printing
+secret values themselves. Failed or interrupted migrations are not automatically
+retried: inspect their ledger before deciding whether to run them again.
+
 ## Deployment
 
 ### Stack deployment and rollback
