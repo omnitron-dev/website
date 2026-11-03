@@ -116,6 +116,11 @@ between desired placement, observed state and admitted execution.
 
 ## Verify a standalone stack start
 
+To keep a local stack on reviewed code while the developer checkout changes,
+[prepare and select a local release](./releases.md#pin-a-local-stack). Record the
+selection for each stack. Its working directories and persistent data remain
+attached to the registered project.
+
 Before starting a local stack, open **Stacks → Diagnose** or run
 `omnitron stack diagnose sample local`. This read-only check shows who manages
 each service and which prerequisites can be verified while the applications are stopped.

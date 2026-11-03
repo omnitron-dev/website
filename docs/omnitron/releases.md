@@ -12,10 +12,13 @@ and manifest.
 
 ## Rebuilding an artifact
 
-Register the project directory that contains its lockfile and ecosystem config.
-In a monorepo, the builder clones the whole repository at the selected commit
-and runs the build from that directory. The manifest records the relative path
-in `project.directory` when the project lives below the Git root.
+Register the directory containing the ecosystem configuration. The builder
+clones the whole repository at the selected commit and reads this configuration
+from its registered path. Starting there, it finds the nearest committed
+`pnpm-lock.yaml` up to the repository root. That lockfile's directory owns
+dependency installation, workspace builds and gates. A nested configuration can
+share the monorepo lockfile. The manifest records its relative path in
+`project.directory`.
 
 Declare `@omnitron-dev/titan` as a runtime dependency of every bootstrap
 application. During packaging, the builder resolves its public entry point
@@ -42,7 +45,7 @@ system, architecture, Node binary and libc. `omnitron release show <release>` an
 **Releases → Built with** display the target. Older manifests display *Target not
 recorded*. The JSON output also includes the Node executable digest.
 
-The receiving node compares the shared Titan packages and their transitive
+On a remote deployment, the receiving node compares the shared Titan packages and their transitive
 dependencies with the independent process owner's installed graph. Package bytes,
 versions, resolved peers, optional dependencies and shared module identities must
 match. The owner, the application and its extensions then resolve shared modules
@@ -57,6 +60,54 @@ value recorded in the archive. Additional module paths, loaders and preloads can
 be attested. After start, the owner verifies the application entry point, runtime and
 installed file tree. The launch receipt lets CLI and Console distinguish delivery
 history from the release a process is actually running.
+
+### Pin a local stack
+
+A local stack can keep its application code separate from the developer checkout.
+Its selected release identifies the archive and manifest used for future starts.
+The registered project's configuration still supplies its working directories,
+environment, data locations and infrastructure. A stack that has never selected
+a release continues to start from its working tree.
+
+1. Build the project release for the local execution target. Each application
+   needs a packaged entry and a complete production dependency graph. Bootstrap
+   apps must resolve their own compatible Titan and Omnitron adapter. By default
+   the packed bootstrap is `dist/bootstrap.js`. Set the app's `releaseEntry`
+   to select a different compiled JavaScript file inside its package.
+2. Run `omnitron --json stack prepare-release <project> <stack> <release>`.
+   Preparation verifies the archives and stages them in a private directory.
+   It can run while the stack serves traffic. A successful preparation can
+   report `prepared: true`, `ok: false`, `state: "requires-stop"`. The files
+   are ready, but active applications still use the previous code.
+3. Record the current selection from `omnitron --json stack status <project> <stack>`
+   and agree on an application maintenance window. For a stop involving
+   infrastructure, inspect `omnitron stack stop <project> <stack> --dry-run`
+   and review the listed containers before proceeding. If only applications
+   should stop, stop their exact `project/stack/app` identities and confirm
+   each exit. Keep the previous release or working tree available for recovery.
+4. Run `omnitron stack start <project> <stack> --release <release>`. Verify
+   application readiness and source-specific health checks. A plain subsequent
+   start, including controller recovery, selects the same manifest. Project
+   reloads preserve the physical release entry.
+
+The controller stores the selected ID and manifest SHA-256 in SQLite. The owner
+keeps the applications fenced while their definitions change. If the owner loses
+an acknowledgement during the switch, inspect the stack before issuing an explicit
+start to finish the operation. Changed or missing release contents block launch.
+
+To roll back, confirm the affected applications have stopped and run the same
+start command with the previous release ID. If the original source was the
+working tree, use `omnitron stack start <project> <stack> --working-tree`.
+The choice affects later restarts. Database migrations, external writes and
+events that arrived during downtime need their own compatibility and recovery
+plan. A code rollback does not restore that data.
+
+A local pin requires a connected independent execution owner on macOS or Linux
+and the Node executable digest recorded at build time. An allocation owned by another controller
+takes its release from that controller. A local gateway serving a mutable
+working-tree static directory cannot use this release selection. An application
+relying on a script or symlink outside the archive must package that dependency
+before it can be pinned.
 
 ### Package a project-specific release
 
@@ -90,14 +141,20 @@ commit determines how the controller obtains the framework.
   digests, verifies their common source commit and checks installed package
   files. A sibling Omnitron checkout is unnecessary. This mode requires access
   to the public npm registry and archives containing a full `gitHead`. Older
-  packages without that evidence require a linked source build.
+  npm packages without that evidence cannot establish their framework commit.
+- **Committed framework archives.** A workspace may pin local framework tarballs
+  in Git. Supply the full commit from upstream `main` with `--omni-commit <sha>`.
+  The release builder independently builds that commit, compares package contents
+  with the archives, checks their lockfile SHA-512 digests and verifies the installed
+  package files. A manifest written by the consuming project cannot establish
+  package origin by itself.
 - **Linked checkout.** For framework development, point workspace links at a
   single Omnitron checkout. The controller builds the linked packages from its
   clean clone. Mixing linked and registry framework packages fails the build.
 
 In Console, **Releases → Built with** and the CLI command `omnitron release show`
 identify the framework source and package count. Use `--json` on the CLI to
-inspect the recorded npm versions and integrity digests. A registry release
+inspect the recorded npm versions and integrity digests. On a remote stack, a registry release
 requires the destination process owner's full, clean framework commit as well
 as a compatible runtime graph. A backend upgrade alone can leave an older owner
 in charge of the applications.
@@ -127,6 +184,13 @@ omnitron release show <release-id>
 `--keep-source` retains the build clones after success. `--skip-gates` records
 the gates as not run; it does not produce a verified release suitable for a
 stack that requires those gates.
+
+To run the workspace's existing checks as release gates, declare their script
+names in the workspace `package.json`. For example, set
+`"omnitron": {"release": {"gates": ["typecheck", "test"]}}` when both scripts
+exist. Each runs through `pnpm run` in order. A failed or interrupted script
+leaves each later gate marked `not-run`. Use one gate definition per workspace.
+A project that supplies both this list and `scripts/gates.mjs` fails validation.
 
 Read the gate results and artifact list before deployment. The manifest
 describes what was built; the daemon's audit trail describes which release

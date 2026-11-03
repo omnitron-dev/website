@@ -290,6 +290,19 @@ late answers cannot replace another workspace's counters. Failed observations
 retain their counts with a stale marker. The workspace menu shows configured
 stack totals for inactive projects rather than presenting unobserved status as live.
 
+A local stack's release card labels its durable choice **Selected**. Open **Deploy
+release…** to check a release. **Prepare release** verifies its files before a
+maintenance window. The dialog reports when the application processes must stop.
+After a confirmed stop, **Deploy** starts the selected code. **Use working tree…**
+appears on stopped local stacks that permit source launches. It starts the stack
+from its registered directory and changes the choice for future restarts.
+
+The selected ID is launch intent. Current application health and any release
+evidence from the owner describe actual execution. A transfer record or a
+selected ID alone cannot establish that every running process loaded that release.
+See [Pin a local stack](./releases.md#pin-a-local-stack) for the CLI and data
+recovery boundaries.
+
 ### Logs
 
 The global viewer includes local and replicated application logs. Select one exact

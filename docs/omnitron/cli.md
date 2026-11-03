@@ -43,7 +43,7 @@ when piped into another process. Check both the JSON result and the exit status.
 | **Backend installation and replacement** | `backend status`, `backend install`, `backend installation`, `backend select`, `backend upgrade`, `backend abort`, `backend recover`, `backend owner-reconcile prepare`, `backend owner-reconcile acknowledge` |
 | **Project** | `project add`, `project list`, `project remove`, `project scan`, `project topology` |
 | **Topology** | `topology refresh`, `topology show`, `topology export`, `topology draft`, `topology plan`, `topology apply` |
-| **Stack** | `stack list`, `stack create`, `stack delete`, `stack status`, `stack progress`, `stack diagnose`, `stack start`, `stack stop`, `stack resume`, `stack runtime` |
+| **Stack** | `stack list`, `stack create`, `stack delete`, `stack status`, `stack progress`, `stack diagnose`, `stack prepare-release`, `stack start`, `stack stop`, `stack resume`, `stack runtime` |
 | **App lifecycle** | `start`, `stop`, `restart`, `reload` |
 | **Information** | `list` (alias `ls`), `status`, `config`, `init` |
 | **Monitoring** | `logs`, `monit`, `health`, `metrics`, `health-check`, `discover` |
@@ -271,7 +271,9 @@ infrastructure to a subset of the project's apps.
 | `omnitron stack status <project> <stack>` | Per-app status within the stack |
 | `omnitron stack progress <project> [stack]` | Latest remote transfer observation per stack, node and app, including its operation ID and any release ID |
 | `omnitron stack diagnose <project> <stack>` | Read-only prerequisite checks and planned changes before start |
-| `omnitron stack start <project> <stack>` | Start everything in the stack |
+| `omnitron stack prepare-release <project> <stack> <release>` | Verify and stage an immutable release for an independent local stack while its applications are running |
+| `omnitron stack start <project> <stack> [--release <id>]` | Start the stack. An explicit release becomes the durable local selection. Later starts reuse it. |
+| `omnitron stack start <project> <stack> --working-tree` | Start a stopped local stack from its registered source and clear its release selection. Release-only stacks refuse this option. |
 | `omnitron stack resume <project> <stack>` | Resume the retained release on the nodes in a confirmed cluster stop. Partial and unconfirmed results exit nonzero. Inspect each node in `--json` output. |
 | `omnitron stack stop <project> <stack> [--dry-run] [--review <digest>]` | Inspect every target with `--dry-run`. Pass its digest to stop the reviewed applications and containers. Volumes are retained. |
 | `omnitron stack runtime <project> <stack>` | Show runtime details (containers, ports) |
@@ -578,7 +580,7 @@ external secret manager when configured.
 
 Deploy a built release with `omnitron stack start <project> <stack> --release <id>`.
 Returning to a previous release uses that same workflow with the reviewed previous
-ID; admission, transfer and readiness checks still apply.
+ID. Admission, applicable transfer checks and readiness still apply. For a local stack, see [Pin a local stack](./releases.md#pin-a-local-stack) for preparation, controlled switching and rollback.
 
 `omnitron deploy app` and `omnitron rollback` are retained refusals: they exit
 nonzero without changing applications. Their former per-app path could restart
