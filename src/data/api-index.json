@@ -7282,7 +7282,7 @@
       "name": "PropertyInfo",
       "package": "@omnitron-dev/netron-browser",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/netron-protocol/src/definition-types.ts#L35",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/netron-protocol/src/definition-types.ts#L37",
       "imports": [
         {
           "path": "@omnitron-dev/netron-browser",
@@ -7674,7 +7674,7 @@
       "name": "ServiceMetadata",
       "package": "@omnitron-dev/netron-browser",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/netron-protocol/src/definition-types.ts#L46",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/netron-protocol/src/definition-types.ts#L50",
       "imports": [
         {
           "path": "@omnitron-dev/netron-browser",
@@ -9014,7 +9014,7 @@
       "name": "PropertyInfo",
       "package": "@omnitron-dev/netron-protocol",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/netron-protocol/src/definition-types.ts#L35",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/netron-protocol/src/definition-types.ts#L37",
       "imports": [
         {
           "path": "@omnitron-dev/netron-protocol",
@@ -9062,7 +9062,7 @@
       "name": "ServiceContract",
       "package": "@omnitron-dev/netron-protocol",
       "kind": "type",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/netron-protocol/src/definition-types.ts#L60",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/netron-protocol/src/definition-types.ts#L66",
       "imports": [
         {
           "path": "@omnitron-dev/netron-protocol",
@@ -9074,7 +9074,7 @@
       "name": "ServiceMetadata",
       "package": "@omnitron-dev/netron-protocol",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/netron-protocol/src/definition-types.ts#L46",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/netron-protocol/src/definition-types.ts#L50",
       "imports": [
         {
           "path": "@omnitron-dev/netron-protocol",
@@ -9086,7 +9086,7 @@
       "name": "ServiceMetadataWithContract",
       "package": "@omnitron-dev/netron-protocol",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/netron-protocol/src/definition-types.ts#L66",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/netron-protocol/src/definition-types.ts#L72",
       "imports": [
         {
           "path": "@omnitron-dev/netron-protocol",
@@ -12562,7 +12562,7 @@
       "name": "DeployTarget",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/services/remote-deployer.service.ts#L124",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/services/remote-deployer.service.ts#L126",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/operations",
@@ -15810,7 +15810,7 @@
       "name": "RemoteDeployer",
       "package": "@omnitron-dev/omnitron",
       "kind": "class",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/services/remote-deployer.service.ts#L341",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/services/remote-deployer.service.ts#L318",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/operations",
@@ -42546,7 +42546,7 @@
       "name": "Auth",
       "package": "@omnitron-dev/titan",
       "kind": "value",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan/src/decorators/core.ts#L812",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan/src/decorators/core.ts#L819",
       "imports": [
         {
           "path": "@omnitron-dev/titan/decorators",
@@ -42658,7 +42658,7 @@
       "name": "AuthMiddlewareOptions",
       "package": "@omnitron-dev/titan",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan/src/netron/transport/http/middleware/auth.ts#L20",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan/src/netron/transport/http/middleware/auth.ts#L18",
       "imports": [
         {
           "path": "@omnitron-dev/titan/netron/transport/http",
@@ -42922,7 +42922,7 @@
       "name": "buildExecutionContext",
       "package": "@omnitron-dev/titan",
       "kind": "function",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan/src/netron/transport/http/middleware/auth.ts#L55",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan/src/netron/transport/http/middleware/auth.ts#L53",
       "imports": [
         {
           "path": "@omnitron-dev/titan/netron/transport/http",
@@ -42962,7 +42962,7 @@
       "name": "Cache",
       "package": "@omnitron-dev/titan",
       "kind": "value",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan/src/decorators/core.ts#L846",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan/src/decorators/core.ts#L853",
       "imports": [
         {
           "path": "@omnitron-dev/titan/decorators",
@@ -43314,7 +43314,7 @@
       "name": "CompressionOptions",
       "package": "@omnitron-dev/titan",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan/src/netron/transport/http/middleware/types.ts#L230",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan/src/netron/transport/http/middleware/types.ts#L235",
       "imports": [
         {
           "path": "@omnitron-dev/titan/netron/transport/http",
@@ -44150,7 +44150,7 @@
       "name": "CorsOptions",
       "package": "@omnitron-dev/titan",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan/src/netron/transport/http/middleware/types.ts#L209",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan/src/netron/transport/http/middleware/types.ts#L214",
       "imports": [
         {
           "path": "@omnitron-dev/titan/netron",
@@ -44234,7 +44234,7 @@
       "name": "createAuthMiddleware",
       "package": "@omnitron-dev/titan",
       "kind": "function",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan/src/netron/transport/http/middleware/auth.ts#L164",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan/src/netron/transport/http/middleware/auth.ts#L124",
       "imports": [
         {
           "path": "@omnitron-dev/titan/netron/transport/http",
@@ -46498,7 +46498,7 @@
       "name": "Global",
       "package": "@omnitron-dev/titan",
       "kind": "function",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan/src/decorators/core.ts#L646",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan/src/decorators/core.ts#L653",
       "imports": [
         {
           "path": "@omnitron-dev/titan/decorators",
@@ -46798,7 +46798,7 @@
       "name": "HttpMiddlewareContext",
       "package": "@omnitron-dev/titan",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan/src/netron/transport/http/middleware/types.ts#L179",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan/src/netron/transport/http/middleware/types.ts#L184",
       "imports": [
         {
           "path": "@omnitron-dev/titan/netron/transport/http",
@@ -46814,7 +46814,7 @@
       "name": "HttpNativeServer",
       "package": "@omnitron-dev/titan",
       "kind": "class",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan/src/netron/transport/http/server.ts#L292",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan/src/netron/transport/http/server.ts#L295",
       "imports": [
         {
           "path": "@omnitron-dev/titan/netron/transport/http",
@@ -46934,7 +46934,7 @@
       "name": "HttpTrafficSnapshot",
       "package": "@omnitron-dev/titan",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan/src/netron/transport/http/server.ts#L55",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan/src/netron/transport/http/server.ts#L56",
       "imports": [
         {
           "path": "@omnitron-dev/titan/netron/transport/http",
@@ -46982,7 +46982,7 @@
       "name": "HttpTransportContext",
       "package": "@omnitron-dev/titan",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan/src/netron/transport/http/middleware/types.ts#L192",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan/src/netron/transport/http/middleware/types.ts#L197",
       "imports": [
         {
           "path": "@omnitron-dev/titan/netron/transport/http",
@@ -47486,7 +47486,7 @@
       "name": "IMiddlewareManager",
       "package": "@omnitron-dev/titan",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan/src/netron/transport/http/middleware/types.ts#L122",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan/src/netron/transport/http/middleware/types.ts#L127",
       "imports": [
         {
           "path": "@omnitron-dev/titan/netron/transport/http",
@@ -48510,7 +48510,7 @@
       "name": "ITransportMiddlewareAdapter",
       "package": "@omnitron-dev/titan",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan/src/netron/transport/http/middleware/types.ts#L105",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan/src/netron/transport/http/middleware/types.ts#L110",
       "imports": [
         {
           "path": "@omnitron-dev/titan/netron/transport/http",
@@ -49342,7 +49342,7 @@
       "name": "MiddlewareConfig",
       "package": "@omnitron-dev/titan",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan/src/netron/transport/http/middleware/types.ts#L55",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan/src/netron/transport/http/middleware/types.ts#L60",
       "imports": [
         {
           "path": "@omnitron-dev/titan/netron/transport/http",
@@ -49370,7 +49370,7 @@
       "name": "MiddlewareFunction",
       "package": "@omnitron-dev/titan",
       "kind": "type",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan/src/netron/transport/http/middleware/types.ts#L47",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan/src/netron/transport/http/middleware/types.ts#L52",
       "imports": [
         {
           "path": "@omnitron-dev/titan/netron/transport/http",
@@ -49398,7 +49398,7 @@
       "name": "MiddlewareMetrics",
       "package": "@omnitron-dev/titan",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan/src/netron/transport/http/middleware/types.ts#L159",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan/src/netron/transport/http/middleware/types.ts#L164",
       "imports": [
         {
           "path": "@omnitron-dev/titan/netron/transport/http",
@@ -49454,7 +49454,7 @@
       "name": "MiddlewareRegistration",
       "package": "@omnitron-dev/titan",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan/src/netron/transport/http/middleware/types.ts#L90",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan/src/netron/transport/http/middleware/types.ts#L95",
       "imports": [
         {
           "path": "@omnitron-dev/titan/netron/transport/http",
@@ -49482,7 +49482,7 @@
       "name": "MiddlewareStage",
       "package": "@omnitron-dev/titan",
       "kind": "type",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan/src/netron/transport/http/middleware/types.ts#L73",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan/src/netron/transport/http/middleware/types.ts#L78",
       "imports": [
         {
           "path": "@omnitron-dev/titan/netron/transport/http",
@@ -49954,7 +49954,7 @@
       "name": "NetronAuthMiddleware",
       "package": "@omnitron-dev/titan",
       "kind": "class",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan/src/netron/transport/http/middleware/auth.ts#L228",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan/src/netron/transport/http/middleware/auth.ts#L196",
       "imports": [
         {
           "path": "@omnitron-dev/titan/netron/transport/http",
@@ -50486,7 +50486,7 @@
       "name": "PerMiddlewareMetrics",
       "package": "@omnitron-dev/titan",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan/src/netron/transport/http/middleware/types.ts#L150",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan/src/netron/transport/http/middleware/types.ts#L155",
       "imports": [
         {
           "path": "@omnitron-dev/titan/netron/transport/http",
@@ -50666,7 +50666,7 @@
       "name": "PropertyInfo",
       "package": "@omnitron-dev/titan",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/netron-protocol/src/definition-types.ts#L35",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/netron-protocol/src/definition-types.ts#L37",
       "imports": [
         {
           "path": "@omnitron-dev/titan/netron",
@@ -50714,7 +50714,7 @@
       "name": "Public",
       "package": "@omnitron-dev/titan",
       "kind": "value",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan/src/decorators/core.ts#L748",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan/src/decorators/core.ts#L753",
       "imports": [
         {
           "path": "@omnitron-dev/titan/decorators",
@@ -50766,7 +50766,7 @@
       "name": "RateLimit",
       "package": "@omnitron-dev/titan",
       "kind": "value",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan/src/decorators/core.ts#L829",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan/src/decorators/core.ts#L836",
       "imports": [
         {
           "path": "@omnitron-dev/titan/decorators",
@@ -50930,7 +50930,7 @@
       "name": "readMethodMetadata",
       "package": "@omnitron-dev/titan",
       "kind": "function",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan/src/netron/transport/http/middleware/auth.ts#L109",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan/src/netron/auth/method-authorization.ts#L41",
       "imports": [
         {
           "path": "@omnitron-dev/titan/netron/transport/http",
@@ -51078,7 +51078,7 @@
       "name": "RemotePeer",
       "package": "@omnitron-dev/titan",
       "kind": "class",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan/src/netron/remote-peer.ts#L180",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan/src/netron/remote-peer.ts#L182",
       "imports": [
         {
           "path": "@omnitron-dev/titan/netron",
@@ -51734,7 +51734,7 @@
       "name": "SecurityHeadersOptions",
       "package": "@omnitron-dev/titan",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan/src/netron/transport/http/middleware/types.ts#L238",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan/src/netron/transport/http/middleware/types.ts#L243",
       "imports": [
         {
           "path": "@omnitron-dev/titan/netron/transport/http",
@@ -51774,7 +51774,7 @@
       "name": "serializer",
       "package": "@omnitron-dev/titan",
       "kind": "value",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan/src/netron/packet/serializer.ts#L16",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan/src/netron/packet/serializer.ts#L17",
       "imports": [
         {
           "path": "@omnitron-dev/titan/netron",
@@ -51854,7 +51854,7 @@
       "name": "ServiceContract",
       "package": "@omnitron-dev/titan",
       "kind": "type",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/netron-protocol/src/definition-types.ts#L60",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/netron-protocol/src/definition-types.ts#L66",
       "imports": [
         {
           "path": "@omnitron-dev/titan/netron",
@@ -51942,7 +51942,7 @@
       "name": "ServiceMetadata",
       "package": "@omnitron-dev/titan",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/netron-protocol/src/definition-types.ts#L46",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/netron-protocol/src/definition-types.ts#L50",
       "imports": [
         {
           "path": "@omnitron-dev/titan/netron",
@@ -51966,7 +51966,7 @@
       "name": "ServiceMetadataWithContract",
       "package": "@omnitron-dev/titan",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/netron-protocol/src/definition-types.ts#L66",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/netron-protocol/src/definition-types.ts#L72",
       "imports": [
         {
           "path": "@omnitron-dev/titan/netron",
@@ -52038,7 +52038,7 @@
       "name": "ServiceStub",
       "package": "@omnitron-dev/titan",
       "kind": "class",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan/src/netron/service-stub.ts#L40",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan/src/netron/service-stub.ts#L44",
       "imports": [
         {
           "path": "@omnitron-dev/titan/netron",
@@ -52714,7 +52714,7 @@
       "name": "TransportContext",
       "package": "@omnitron-dev/titan",
       "kind": "type",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan/src/netron/transport/http/middleware/types.ts#L100",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan/src/netron/transport/http/middleware/types.ts#L105",
       "imports": [
         {
           "path": "@omnitron-dev/titan/netron/transport/http",
@@ -66470,7 +66470,7 @@
       "name": "ProcessPool",
       "package": "@omnitron-dev/titan-pm",
       "kind": "class",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-pm/src/process-pool.ts#L90",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-pm/src/process-pool.ts#L97",
       "imports": [
         {
           "path": "@omnitron-dev/titan-pm",
