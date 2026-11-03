@@ -37,6 +37,21 @@ Equal archive hashes identify delivered bytes. They do not by themselves identif
 a running process, or prove that native dependencies built for macOS will run on
 Linux. Use the launch receipt and the destination's runtime when checking a stack.
 
+### Keep repository identity separate from credentials
+
+Repository addresses become public build provenance in CLI, Console and exported
+manifests. Use a Git credential helper or SSH agent for authentication. Release
+builds reject remote URLs containing HTTP user information, passwords, query
+parameters or fragments before cloning or recording those addresses. Ordinary
+SSH usernames and local repository paths remain supported.
+
+An existing unsafe or malformed manifest is reported as **invalid manifest**,
+with a safe refusal reason; it is not presented as an unfinished build. The
+catalog withholds its raw metadata, including embedded producer manifests.
+Admission checks the same identities without changing their pinned bytes. Restore
+a verified original manifest or create a new release with a credential-free
+remote; editing a selected manifest invalidates its digest.
+
 ### Match the execution target
 
 A checked application archive contains its compiled code, production dependencies,
