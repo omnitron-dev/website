@@ -37,6 +37,32 @@ Equal archive hashes identify delivered bytes. They do not by themselves identif
 a running process, or prove that native dependencies built for macOS will run on
 Linux. Use the launch receipt and the destination's runtime when checking a stack.
 
+### Keep package-manager resolution semantics
+
+A checked release preserves the production dependency graph installed from its
+frozen lockfile. Build reuse hashes the effective pnpm override rules, their
+ordering and local override archive contents. Version-qualified files, aliases,
+parent-specific selectors and dependency removals therefore participate in the
+same build identity without being converted to another package manager's rules.
+Changing archive bytes at the same path invalidates reuse; an identical checkout
+at another temporary path does not. Local override archives must stay inside the
+selected workspace and retain their verified bytes.
+
+An npm-installable source bundle is a different output. Its supported override
+forms are narrower. In particular, pnpm's `parent>child` targets an immediate
+child, while an npm nested override also affects deeper descendants. Omnitron
+refuses an unsupported conversion rather than broadening its effect.
+Version-qualified local archives also require the checked release path:
+
+```bash
+omnitron release build <project>
+```
+
+This packages the verified installed graph for the selected target. It does not
+relax source, lockfile, archive or runtime admission checks. See the native
+[pnpm override semantics](https://pnpm.io/settings/dependency-resolution#overrides)
+and [npm bundle override semantics](https://docs.npmjs.com/cli/v11/configuring-npm/package-json#overrides).
+
 ### Keep repository identity separate from credentials
 
 Repository addresses become public build provenance in CLI, Console and exported
