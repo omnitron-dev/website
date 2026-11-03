@@ -95,6 +95,13 @@ keeps the applications fenced while their definitions change. If the owner loses
 an acknowledgement during the switch, inspect the stack before issuing an explicit
 start to finish the operation. Changed or missing release contents block launch.
 
+Before testing controller crash recovery, check that
+`execution.recovery.status` is `ready` for the new generation. Stopping or
+starting an application invalidates the previous certificate. A crash before
+the next certificate leaves the resident owner serving its applications and
+the supervisor waiting for reconciliation. See [Recovery after a backend
+crash](./backend-handoff.md#recovery-after-a-backend-crash).
+
 To roll back, confirm the affected applications have stopped and run the same
 start command with the previous release ID. If the original source was the
 working tree, use `omnitron stack start <project> <stack> --working-tree`.
