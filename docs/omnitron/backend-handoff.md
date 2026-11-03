@@ -358,6 +358,8 @@ shutdown requires reconciliation, not an automatic second owner.
 
 The backend also reconnects to the resident execution owner after a broken private socket. Every connection rechecks socket ownership and permissions, then verifies the owner identity before sending retained event cursors, acknowledgments or mutations. A different owner is never adopted automatically. Observation polling uses its own transport with a four-second request deadline; a slow monitoring request cannot accumulate abandoned polls or interrupt a long-running application operation. An acknowledgment failure raises a separate diagnostic from an observation failure. Both resolve after the corresponding operation succeeds.
 
+Concurrent observation requests share the same pending operation. Activating replay waits for that operation, including persistence and acknowledgment, instead of returning early because a periodic poll is already running. A failed write or acknowledgment still leaves records in the owner journal and raises the delivery diagnostic; completion of an observation alone is not proof of durable delivery.
+
 The clients returned by `createDaemonClient()` and the fleet TCP client reconnect on the next call after a backend disconnect. Service handles obtained with `client.service(name)` remain usable: each call resolves the service against the current connection. Netron still owns discovery, serialization, remote properties and stream transport.
 
 Repeated or concurrent `Netron.connect(address)` calls share one persistent peer on that instance. An explicit replacement cancels an obsolete scheduled reconnect. Separate principals or independently owned connections require separate Netron instances with unique IDs.
