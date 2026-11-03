@@ -194,7 +194,7 @@ sidebar.
 | `/containers` | `ContainersPage` | project | `OmnitronInfra` |
 | `/deployments` | `DeploymentsPage` | project | `OmnitronDeploy` |
 | `/alerts` | `AlertsPage` | global | `OmnitronAlerts` |
-| `/pipelines` | `PipelinesPage` | project | `OmnitronPipelines` |
+| `/pipelines` | `PipelinesPage` | system | `OmnitronPipelines` |
 | `/traces` | `TracesPage` | project | `OmnitronTraces` |
 | `/dashboard-builder` | `DashboardBuilderPage` | both | scoped application inventory, retained metric series and controller alerts |
 | `*` | redirect to `/` | — | — |

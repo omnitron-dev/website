@@ -624,7 +624,7 @@ Direct infrastructure mutations require a standalone installation. For projects 
 | Command | Effect |
 | ------- | ------ |
 | `omnitron pipeline list` | List all pipelines |
-| `omnitron pipeline save <file> [--id <id>]` | Validate and create a JSON definition, or replace the selected definition |
+| `omnitron pipeline save <file> [--id <id> --expected-revision <sha256>]` | Create a JSON definition, or replace its reviewed revision without overwriting concurrent edits |
 | `omnitron pipeline run <id> [--params-file <file>]` | Read the current revision and submit it for execution |
 | `omnitron pipeline status <runId> [--json] [--output]` | Inspect steps, attempts, status and optionally retained output |
 | `omnitron pipeline cancel <runId>` | Request cancellation and await the owned execution |

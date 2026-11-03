@@ -320,8 +320,8 @@ Xec and shell automation, shared by Console, CLI and local MCP. All methods requ
 | Method | Effect |
 | ------ | ------ |
 | `createPipeline(definition)` | Define a pipeline |
-| `updatePipeline({id, definition})` | Validate and replace a definition, preserving its ID |
-| `getPipeline({id})` | Read one pipeline and its revision |
+| `updatePipeline({id, definition, expectedRevision})` | Conditionally replace the reviewed definition, preserving its ID and run history |
+| `getPipeline({id})` | Read one pipeline, its revision and conditional-update capability |
 | `listPipelines()` | List all |
 | `deletePipeline({id})` | Drop a pipeline |
 | `executePipeline({id, expectedRevision, params?})` | Admit a reviewed revision; reject a definition changed since review |

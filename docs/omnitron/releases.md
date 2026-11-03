@@ -116,6 +116,64 @@ working-tree static directory cannot use this release selection. An application
 relying on a script or symlink outside the archive must package that dependency
 before it can be pinned.
 
+### Use an application from another project
+
+A consumer can pin one application from an independently built producer release.
+The producer release must already exist in the controller release store. Obtain
+its ID and exact `manifestSha256` with `omnitron --json release show <release-id>`;
+Console shows the same digest under **Releases → Built with → Manifest SHA-256**.
+Record both values in the consumer configuration:
+
+```ts
+{
+  name: 'collector',
+  releaseFrom: {
+    release: producerReleaseId,
+    manifestSha256: producerManifestSha256,
+    app: 'feed',
+  },
+  env: { CAPTURE_MODE: 'continuous' },
+}
+```
+
+Build the consumer through the ordinary `omnitron release build` command. It
+checks the producer gates, archive size and digest, frozen entry, package source
+and execution target. An old archive without those records cannot be imported.
+A consumer alias changes the application name in its stack; it does not rebuild
+the archive or replace the producer's SDK. The consumer carries the exact producer
+manifest bytes and its archive, so it remains self-contained if the standalone
+producer release is later removed from the store. Nested imports preserve every
+producer reference and its independent gate results.
+
+In **Releases → Artifacts**, expand an application's source to see its producer
+repository and commit, SDK commit, target and manifest chain. CLI text and JSON
+show the same per-application origin. The consumer's top-level source fields
+still describe its own build. These are recorded build inputs; current launch
+observations remain in **Deployment state**.
+
+Imported applications currently use verified **local** release installation.
+Prepare and select the consumer release as described above. The producer's Node
+executable, ABI and platform must match the local execution owner, and its own
+adapter and dependencies must remain inside the archive. Its default working
+directory is the installed package. An explicit `cwd` can name external mutable
+data, but must not reintroduce runtime code or dependencies from a development
+checkout. A `releaseFrom` entry cannot also override `bootstrap`, `script`,
+`releaseEntry`, `releaseRoot` or enable a watcher.
+
+Preparation verifies code without executing the producer bootstrap. Prerequisite
+and topology details remain unknown until its declaration is available through
+the normal application lifecycle; an unresolved import is reported explicitly.
+When replacing a selected release, migration checks compare the actual producer
+package and its existing migration files. Missing previous provenance or changed
+applied migrations block the update.
+
+Remote deployment of an imported application is refused before provisioning or
+registration changes. It needs producer-captured deployment declarations and a
+compatible remote owner; a local import does not grant those capabilities.
+Older local owners may run the verified package while reporting no launch
+receipt. The selected release and inspected files remain useful evidence, but
+neither is presented as a confirmed current process identity.
+
 ### Package a project-specific release
 
 Use the headless `@omnitron-dev/omnitron/release-archive` entry point when a

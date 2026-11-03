@@ -11446,7 +11446,7 @@
       "name": "AggregatedHealthDto",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/config/types.ts#L1095",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/config/types.ts#L1097",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron",
@@ -11466,7 +11466,7 @@
       "name": "AggregatedMetricsDto",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/config/types.ts#L1058",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/config/types.ts#L1060",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron",
@@ -11718,7 +11718,7 @@
       "name": "AppDiagnosticsDto",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/config/types.ts#L1214",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/config/types.ts#L1216",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron",
@@ -11846,7 +11846,7 @@
       "name": "AppStatus",
       "package": "@omnitron-dev/omnitron",
       "kind": "type",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/config/types.ts#L967",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/config/types.ts#L969",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron",
@@ -11891,6 +11891,18 @@
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
       "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/shared/dto/files.ts#L75",
+      "imports": [
+        {
+          "path": "@omnitron-dev/omnitron/dto/services",
+          "guide": "/docs/omnitron/services-reference"
+        }
+      ]
+    },
+    {
+      "name": "ArtifactSourceReading",
+      "package": "@omnitron-dev/omnitron",
+      "kind": "type",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/shared/dto/releases.ts#L5",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/dto/services",
@@ -11962,7 +11974,7 @@
       "name": "BuildRecord",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/shared/dto/releases.ts#L26",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/shared/dto/releases.ts#L41",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/dto/services",
@@ -11974,7 +11986,7 @@
       "name": "BuildRequest",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/shared/dto/releases.ts#L15",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/shared/dto/releases.ts#L30",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/dto/services",
@@ -11986,7 +11998,7 @@
       "name": "ChildDiagnosticsDto",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/config/types.ts#L1164",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/config/types.ts#L1166",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/config",
@@ -12322,7 +12334,7 @@
       "name": "DaemonStatusDto",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/config/types.ts#L1037",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/config/types.ts#L1039",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron",
@@ -12366,7 +12378,7 @@
       "name": "defineEcosystem",
       "package": "@omnitron-dev/omnitron",
       "kind": "function",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/config/define-ecosystem.ts#L9",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/config/define-ecosystem.ts#L10",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron",
@@ -12614,7 +12626,7 @@
       "name": "ECOSYSTEM_CONFIG_NOT_FOUND",
       "package": "@omnitron-dev/omnitron",
       "kind": "value",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/config/loader.ts#L97",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/config/loader.ts#L100",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/config",
@@ -12974,7 +12986,7 @@
       "name": "GateOutcome",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/release/manifest.ts#L85",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/release/manifest.ts#L114",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/dto/services",
@@ -13094,7 +13106,7 @@
       "name": "IAlertSink",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/config/types.ts#L870",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/config/types.ts#L872",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/config",
@@ -13134,7 +13146,7 @@
       "name": "IDaemonConfig",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/config/types.ts#L716",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/config/types.ts#L718",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/config",
@@ -13174,7 +13186,7 @@
       "name": "IEcosystemConfig",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/config/types.ts#L884",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/config/types.ts#L886",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron",
@@ -14066,7 +14078,7 @@
       "name": "IWatchConfig",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/config/types.ts#L692",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/config/types.ts#L694",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron",
@@ -14182,7 +14194,7 @@
       "name": "LastExitDto",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/config/types.ts#L1136",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/config/types.ts#L1138",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/config",
@@ -14242,7 +14254,7 @@
       "name": "loadEcosystemConfig",
       "package": "@omnitron-dev/omnitron",
       "kind": "function",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/config/loader.ts#L38",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/config/loader.ts#L41",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/config",
@@ -14254,7 +14266,7 @@
       "name": "loadEcosystemConfigSafe",
       "package": "@omnitron-dev/omnitron",
       "kind": "function",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/config/loader.ts#L108",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/config/loader.ts#L111",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/config",
@@ -14278,7 +14290,7 @@
       "name": "LogEntryDto",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/config/types.ts#L1122",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/config/types.ts#L1124",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron",
@@ -14322,7 +14334,7 @@
       "name": "LogPathsDto",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/config/types.ts#L1207",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/config/types.ts#L1209",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/config",
@@ -15130,7 +15142,7 @@
       "name": "PipelineRun",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/shared/dto/pipelines.ts#L66",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/shared/dto/pipelines.ts#L68",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/dto/services",
@@ -15142,7 +15154,7 @@
       "name": "PipelineRunStepResult",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/shared/dto/pipelines.ts#L48",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/shared/dto/pipelines.ts#L50",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/dto/services",
@@ -15154,7 +15166,7 @@
       "name": "PipelineRunSummary",
       "package": "@omnitron-dev/omnitron",
       "kind": "type",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/shared/dto/pipelines.ts#L78",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/shared/dto/pipelines.ts#L80",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/dto/services",
@@ -15226,7 +15238,7 @@
       "name": "PoolDiagnosticsDto",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/config/types.ts#L1188",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/config/types.ts#L1190",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/config",
@@ -15238,7 +15250,7 @@
       "name": "ProcessInfoDto",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/config/types.ts#L983",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/config/types.ts#L985",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron",
@@ -15354,7 +15366,7 @@
       "name": "PruneResult",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/release/store.ts#L296",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/release/store.ts#L334",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/dto/services",
@@ -15546,7 +15558,7 @@
       "name": "ReleaseArtifact",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/release/manifest.ts#L46",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/release/manifest.ts#L71",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/dto/services",
@@ -15582,7 +15594,7 @@
       "name": "ReleaseDetail",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/release/store.ts#L82",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/release/store.ts#L85",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/dto/services",
@@ -15618,7 +15630,7 @@
       "name": "ReleaseManifest",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/release/manifest.ts#L162",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/release/manifest.ts#L191",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/dto/services",
@@ -15666,7 +15678,7 @@
       "name": "ReleaseSummary",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/release/store.ts#L28",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/release/store.ts#L31",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/dto/services",
@@ -15750,7 +15762,7 @@
       "name": "RuntimeReleaseEvidence",
       "package": "@omnitron-dev/omnitron",
       "kind": "type",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/config/types.ts#L970",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/config/types.ts#L972",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/config",
@@ -16026,7 +16038,7 @@
       "name": "StackReleaseRequirements",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/release/manifest.ts#L393",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/release/manifest.ts#L438",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/dto/services",
@@ -16206,7 +16218,7 @@
       "name": "SubProcessInfoDto",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/config/types.ts#L1003",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/config/types.ts#L1005",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron",
@@ -63054,7 +63066,7 @@
       "name": "MetricsRegistry",
       "package": "@omnitron-dev/titan-metrics",
       "kind": "class",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-metrics/src/registry.ts#L93",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-metrics/src/registry.ts#L95",
       "imports": [
         {
           "path": "@omnitron-dev/titan-metrics",
@@ -63106,7 +63118,7 @@
       "name": "MetricsStorageCapabilities",
       "package": "@omnitron-dev/titan-metrics",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-metrics/src/types.ts#L275",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-metrics/src/types.ts#L277",
       "imports": [
         {
           "path": "@omnitron-dev/titan-metrics",
@@ -63122,7 +63134,7 @@
       "name": "MetricsStorageStatus",
       "package": "@omnitron-dev/titan-metrics",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-metrics/src/types.ts#L287",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-metrics/src/types.ts#L289",
       "imports": [
         {
           "path": "@omnitron-dev/titan-metrics",
@@ -63154,7 +63166,7 @@
       "name": "MetricsWriteReceipt",
       "package": "@omnitron-dev/titan-metrics",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-metrics/src/types.ts#L280",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-metrics/src/types.ts#L282",
       "imports": [
         {
           "path": "@omnitron-dev/titan-metrics",

@@ -42,7 +42,13 @@ omnitron pipeline cancel <run-id>
 
 Every pipeline command supports the global `--json` flag or `OMNITRON_OUTPUT=json`. Successful requests emit one `{ok: true, data: ...}` object on stdout; request failures emit `{ok: false, error: ...}` on stderr. A status request for a failed, cancelled or interrupted run still returns its record, with exit code 1.
 
-To update an existing automation without replacing its identity, use `omnitron pipeline save inspect.json --id <pipeline-id>`. Prefer IDs when names are ambiguous.
+To update an existing automation without replacing its identity or run history, first review its definition and `revision` in `omnitron --json pipeline list`, then run:
+
+```bash
+omnitron pipeline save inspect.json --id <pipeline-id> --expected-revision <reviewed-sha256>
+```
+
+The update compares that revision inside a database transaction. If another editor changed the definition, the save fails without replacing their work. Console sends the revision loaded when its editor opened and keeps your draft on a conflict. Reopen the current definition and reconcile both edits before saving again. Prefer IDs when names are ambiguous.
 
 ## Steps and targets
 
@@ -69,7 +75,7 @@ Every public pipeline method requires `admin`. Invocation revalidates the human 
 
 The run review shows source, target name and ID, working directory, dependencies, retries, condition and environment. Expand each step before admitting it.
 
-The definition carries a SHA-256 `revision`. Console submits the revision displayed for review; the CLI fetches the selected definition immediately before admission. Direct RPC and MCP callers must supply `expectedRevision`. If source, targets, environment or other stored definition fields changed, admission fails before inserting a run. This is optimistic concurrency control, not a separate multi-person approval workflow.
+The definition carries a SHA-256 `revision`. Console submits the revision displayed for review; the CLI fetches the selected definition immediately before admission. Direct RPC and MCP callers must supply `expectedRevision` for both execution and updates. If source, targets, environment or other stored definition fields changed, admission fails before inserting a run. This is optimistic concurrency control, not a separate multi-person approval workflow.
 
 Per-step history records a digest of the admitted definition, target ID, actor, attempts, timing, outcome and bounded stdout/stderr. It does not yet keep a complete immutable source archive. Do not treat the digest alone as recoverable source.
 
@@ -78,11 +84,13 @@ Per-step history records a digest of the admitted definition, target ID, actor, 
 Review saved definitions and their callers when upgrading the pipeline contract:
 
 - Step names are stable identifiers of 1–80 letters, digits, underscores, dots or hyphens. Update dependency references when renaming a step.
-- Direct RPC callers fetch the definition and submit its `revision` as `expectedRevision`. A recurring operator should pin the reviewed revision and stop dispatching after a conflict until the operator reviews the change; it must not automatically accept a newer definition.
+- Direct RPC callers fetch the definition and submit its `revision` as `expectedRevision`. Before updating, require `conditionalUpdates: true` in that response; older daemons ignore extra request fields and cannot enforce an update precondition. A recurring operator should pin the reviewed revision and stop dispatching after a conflict until the operator reviews the change; it must not automatically accept a newer definition.
 - Replace source interpolation with data parameters and remove unsupported trigger descriptors. Existing external schedulers can continue to dispatch manual runs.
 - A registered absolute interpreter path must still exist. Repeat the application's registration procedure after changing its Node installation, preserve the pipeline ID/history, then restart its recurring dispatcher with the accepted revision.
 
 Validate the updated definitions before enabling recurring dispatch. Re-registering a definition is separate from executing its deployment or publication steps.
+
+A pinned recurring application does not automatically pin the programs launched by its pipeline. Package one-shot entry points and delivery tools with the application, use the admitted executable paths in the saved definition, and keep mutable data directories separate. The dispatcher should require the exact reviewed command, target, environment and revision. Moving to another release requires an explicit conditional definition update; it must not silently accept a changed pipeline or compile a helper from a development checkout during a production run.
 
 ## Progress and failure
 
