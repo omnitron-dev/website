@@ -413,11 +413,25 @@ fleet.
 
 ## Scaling
 
-### `omnitron scale <app> <count>`
+### `omnitron scale <app> <count> --process <name>`
 
-Scale an app's worker pool to `<count>` instances. The pool
-respects the app's `IProcessEntry.scaling` constraints
-(`maxInstances`, `targetCPU`, etc.).
+Resize one declared process pool in a running bootstrap application. The process
+name is required; classic applications and singleton processes cannot be resized.
+The count must be a positive safe integer. A fixed pool accepts 1 through its
+configured `maxInstances` (the declared size when no maximum is configured).
+An automatic pool retains its declared initial size as the minimum and uses its
+configured maximum, or four times its initial size when omitted.
+
+This changes runtime membership until restart. It does not rewrite the application
+configuration; restart restores the declared size, and automatic scaling remains
+active. The result reports the selected pool's observed count. For agents,
+`omnitron --json scale <app> <count> --process <name>` returns the request,
+observation, and `lifetime: "until-restart"`. If a dispatched request times out or
+its outcome is unknown, inspect that pool before retrying.
+
+The owner must advertise `processPoolResize@1`. An older owner refuses the request
+without changing the application. Updating only the backend does not add this
+capability to a running owner.
 
 ## Diagnostics
 

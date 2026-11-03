@@ -234,7 +234,15 @@ The daemon checks these roles for each request.
 | `restartApp({ name })`                                          | `ProcessInfoDto`                 |
 | `restartAll()`                                                  | `ProcessInfoDto[]`               |
 | `reloadApp({ name })`                                           | `ProcessInfoDto`                 |
-| `scale({ name, instances })`                                    | `ProcessInfoDto`                 |
+| `scale({ name, process, instances })`                                    | `ProcessInfoDto`                 |
+
+`scale` requires an explicit declared pool process and a positive safe integer.
+It returns the existing `ProcessInfoDto`; read `processes` for the selected pool's
+observed `instances` and unchanged `declaredInstances`. Resizing lasts until
+restart and leaves automatic scaling enabled. The owner enforces the pool's
+configured bounds and must advertise `processPoolResize@1`; an older owner
+refuses before mutation. This optional capability does not prevent a backend
+update when the owner remains unchanged.
 
 #### Inspection (`viewer`)
 

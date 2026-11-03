@@ -89,8 +89,16 @@ making changes.
 | `apps.restart` | Stop + start |
 | `apps.status` | Daemon-wide overview |
 | `apps.logs` | Tail logs (lines + level + grep) |
-| `apps.scale` | Resize a worker pool |
+| `apps.scale` | Resize the explicit `process` pool in `name` to `count` instances until restart |
 | `apps.inspect` | Deep diagnostics for an app |
+
+`apps.scale` requires all three fields: `name`, `process`, and a positive integer
+`count`. It changes only an existing declared pool; classic applications and
+singletons refuse. The returned `ProcessInfoDto.processes` contains the selected
+pool's observed size. Configuration remains unchanged, restart restores its
+initial size, and automatic scaling can subsequently adjust it. The current
+owner must support `processPoolResize@1`; a backend-only update does not upgrade
+that owner. If an RPC outcome is unknown, inspect the process before retrying.
 
 ## Management tools — infra
 
