@@ -17,9 +17,10 @@ Omnitron is driven by two files:
 | `omnitron.config.ts` (repo root) | **Ecosystem** — what apps exist, stacks, infrastructure | `defineEcosystem({ ... })` |
 | `apps/<name>/src/bootstrap.ts` (per-app) | **System** — what processes the app runs | `defineSystem({ ... })` |
 
-Both files export their result as `default`. The CLI auto-locates
-the ecosystem config from CWD upward; the daemon hands each app's
-bootstrap to the orchestrator at launch.
+The ecosystem exports data or a factory as `default`; the bootstrap exports its
+system definition. The ecosystem loader checks the selected project directory for
+`omnitron.config.ts`, then `.js`, then `.mjs`. An explicit file can be selected with
+`loadEcosystemConfigFile`. The daemon reads each app's bootstrap at launch.
 
 Verified against `apps/omnitron/src/config/` (types.ts, define-ecosystem.ts,
 define-system.ts, defaults.ts).
@@ -40,6 +41,62 @@ export default defineEcosystem({
   logging:     { /* ... */ },
 });
 ```
+
+### Factories and fresh configuration reads
+
+An async factory can separate build inputs from runtime secrets:
+
+```typescript
+import { readFile } from 'node:fs/promises';
+import { defineEcosystem } from '@omnitron-dev/omnitron';
+import type { EcosystemPhase } from '@omnitron-dev/omnitron/config';
+import { selectedApplication } from './selected-registration.js';
+
+export default async ({ phase }: { phase: EcosystemPhase }) => defineEcosystem({
+  apps: [{
+    name: 'api',
+    ...selectedApplication,
+    ...(phase === 'runtime' && {
+      env: { API_TOKEN: (await readFile(new URL('./.local/api-token', import.meta.url), 'utf8')).trim() },
+    }),
+  }],
+});
+```
+
+`runtime` is the default phase. The ordinary release builder supplies `release`;
+it does not need to read the example's token. The example's selected application
+must still declare a bootstrap, script or exact release reference. Build inputs
+and imported registrations participate in [source admission](./releases.md).
+
+Every read evaluates the actual file and its full native import graph in a new,
+short-lived process. Changing a transitive import takes effect on the next reload;
+there is no retained ESM or CommonJS cache from an earlier selection. TypeScript,
+`import.meta.url`, `createRequire`, the invoking working directory and the current
+environment preserve their normal meanings. Relative app paths are subsequently
+anchored to the configuration directory; an explicit absolute `cwd` is retained.
+
+The factory returns plain declarative objects, arrays and finite primitive values.
+Optional `undefined` values are preserved. Functions inside the result, accessors,
+class instances, cycles, symbols and bigint values are refused rather than silently
+removed or coerced. Put executable lifecycle hooks in `defineSystem`, not in the
+ecosystem result. A factory must not start services or rely on changing the
+controller's `process.env`: its process exits after the read. Configuration remains
+trusted executable code with filesystem and network access; this isolation controls
+freshness and lifetime, not permissions.
+
+```typescript
+import { loadEcosystemConfig, loadEcosystemConfigFile } from '@omnitron-dev/omnitron/config';
+
+const config = await loadEcosystemConfig(projectDirectory, 'runtime', { timeoutMs: 30_000 });
+const build = await loadEcosystemConfigFile(configFile, 'release', { timeoutMs: 30_000 });
+```
+
+`EcosystemLoadOptions.timeoutMs` defaults to 60 seconds and accepts a positive value
+up to ten minutes. Definition and ecosystem reads use the same child lifecycle:
+the caller waits for the result and process exit, a deadline kills the reader, and
+parent disconnection ends a pending asynchronous read. Output is private and
+limited to 1 MiB; the returned data is limited to 16 MiB. Failures retain a bounded,
+credential-redacted reason and cause. Import output does not contaminate CLI JSON.
 
 ### Top-level fields — `IEcosystemConfig`
 
@@ -81,7 +138,7 @@ interface IEcosystemAppEntry {
 | Field           | Purpose                                                                   |
 | --------------- | ------------------------------------------------------------------------- |
 | `name`          | Unique app id — used by every CLI command                                 |
-| `bootstrap`     | Absolute path to compiled `bootstrap.js` (bootstrap mode)                |
+| `bootstrap`     | Source or compiled bootstrap path, relative to `cwd` or absolute                |
 | `script`        | Path to a classic `main.ts` (legacy single-process apps)                 |
 | `enabled`       | `false` skips during `startAll`                                          |
 | `critical`      | Crashing past `maxRestarts` brings the **daemon** down                   |
@@ -110,13 +167,16 @@ See [readiness and heartbeat examples](./diagnostics.md#classic-services-and-com
 interface IWatchConfig {
   directory: string;        // relative to cwd or absolute
   include?:  string[];      // additional directories
-  ignore?:   string[];      // glob patterns; merged with defaults
+  ignore?:   string[];      // whole path segments; merged with defaults
   debounce?: number;        // default 300 ms
 }
 ```
 
-Default ignored patterns include `node_modules`, `dist`, `.git`,
-log files, and source maps. Add to `ignore` rather than replace.
+The filesystem watcher compares whole path segments: `['test']` excludes a test
+directory; `['test/**']` is not a glob and matches no segment. Defaults include
+`node_modules`, `dist`, `.git` and test directories. Bootstrap source changes use
+the compiler's import graph, including workspace libraries. See the
+[development recipe](./recipes.md) for both watcher modes.
 
 ### `IStackConfig`
 
@@ -142,7 +202,7 @@ interface IStackConfig {
 | `type`            | `local` — single host; `remote` — single remote host; `cluster` — multi-node       |
 | `infrastructureOwnership` | `stack` (default) owns provisioning/migrations; `controller` is a generated non-owning node allocation; `external` uses explicitly configured existing services |
 | `managedOrigin`   | Required source project/stack binding for `controller` allocations; never inferred from a project basename |
-| `watch`           | Default `true` for `dev`, `false` otherwise                                        |
+| `watch`           | Default `true` for managed source apps; disable explicitly when required                                        |
 | `nodes`           | For `remote`/`cluster`: list of `IStackNode` participants                          |
 | `infrastructure`  | Per-stack override of ecosystem `infrastructure`                                   |
 | `settings`        | Container prefix, port offsets, env, log level                                     |

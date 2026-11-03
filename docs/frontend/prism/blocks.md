@@ -167,11 +167,40 @@ function RequestsPanel({ loading, series }) {
 | `variant` / `size` | `DashboardBlockVariant` / `…Size` | Visual style |
 | `loading` | `boolean` | Shows the loading skeleton |
 | `error` | `boolean` | Shows the error state (`errorConfig`) |
-| `collapsible` / `collapsed` / `onCollapseChange` | — | Collapse behaviour |
+| `collapsible` | `boolean` | Enables collapse controls; default `false` |
+| `defaultCollapsed` | `boolean` | Initial state for an uncontrolled block |
+| `collapsed` / `onCollapseChange` | `boolean` / callback | Controlled state and requested changes |
 
 `DashboardBlockHeader`, `DashboardBlockContent`, and
 `DashboardBlockFooter` are exported for fully custom composition,
 and `useDashboardBlock` drives collapse/loading state.
+
+Capability and state are separate: without `collapsible`, the block remains
+expanded, renders no collapse button and ignores context collapse actions, even
+if a collapsed state was supplied. Custom headers read the same `collapsible`
+flag from `useDashboardBlockContext`. An enabled block collapses its complete
+body, including loading, error and empty states; its header stays available.
+
+Use `defaultCollapsed` for internal state, or pair `collapsed` with
+`onCollapseChange` for state owned by the caller. The callback reports requested
+changes in both modes. The public hook supplies state props, so enable the
+capability explicitly when spreading them:
+
+```tsx
+import { DashboardBlock, useDashboardBlock } from '@omnitron-dev/prism/blocks';
+
+function ActivityPanel() {
+  const { blockProps } = useDashboardBlock({ defaultCollapsed: false });
+  return (
+    <DashboardBlock title="Activity" collapsible {...blockProps}>
+      <ActivityFeed />
+    </DashboardBlock>
+  );
+}
+```
+
+External controls can use the hook's `actions.expand()`, `actions.collapse()` and
+`actions.toggleCollapse()` to update that same controlled state.
 
 ## `<DataGridBlock>` — filterable / sortable / paginated table
 

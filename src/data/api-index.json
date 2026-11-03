@@ -217,6 +217,10 @@
       "guide": "/docs/omnitron/releases"
     },
     {
+      "path": "@omnitron-dev/omnitron/readiness",
+      "guide": "/docs/titan/modules/database"
+    },
+    {
       "path": "@omnitron-dev/omnitron/release-archive",
       "guide": "/docs/omnitron/releases"
     },
@@ -538,6 +542,10 @@
     },
     {
       "path": "@omnitron-dev/titan-database/plugins",
+      "guide": "/docs/titan/modules/database"
+    },
+    {
+      "path": "@omnitron-dev/titan-database/readiness",
       "guide": "/docs/titan/modules/database"
     },
     {
@@ -12150,7 +12158,7 @@
       "name": "ContainerState",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/infrastructure/types.ts#L212",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/infrastructure/types.ts#L222",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/dto/services",
@@ -12670,7 +12678,31 @@
       "name": "ECOSYSTEM_CONFIG_NOT_FOUND",
       "package": "@omnitron-dev/omnitron",
       "kind": "value",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/config/loader.ts#L100",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/config/loader.ts#L101",
+      "imports": [
+        {
+          "path": "@omnitron-dev/omnitron/config",
+          "guide": "/docs/omnitron/configuration"
+        }
+      ]
+    },
+    {
+      "name": "EcosystemLoadOptions",
+      "package": "@omnitron-dev/omnitron",
+      "kind": "interface",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/config/loader.ts#L41",
+      "imports": [
+        {
+          "path": "@omnitron-dev/omnitron/config",
+          "guide": "/docs/omnitron/configuration"
+        }
+      ]
+    },
+    {
+      "name": "EcosystemPhase",
+      "package": "@omnitron-dev/omnitron",
+      "kind": "type",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/config/loader.ts#L39",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/config",
@@ -12694,7 +12726,7 @@
       "name": "executeMigrationOperation",
       "package": "@omnitron-dev/omnitron",
       "kind": "function",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/migration/operation.ts#L20",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/migration/operation.ts#L21",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/migration",
@@ -13382,7 +13414,7 @@
       "name": "InfrastructureState",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/infrastructure/types.ts#L264",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/infrastructure/types.ts#L274",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/dto/services",
@@ -14346,7 +14378,19 @@
       "name": "loadEcosystemConfig",
       "package": "@omnitron-dev/omnitron",
       "kind": "function",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/config/loader.ts#L41",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/config/loader.ts#L43",
+      "imports": [
+        {
+          "path": "@omnitron-dev/omnitron/config",
+          "guide": "/docs/omnitron/configuration"
+        }
+      ]
+    },
+    {
+      "name": "loadEcosystemConfigFile",
+      "package": "@omnitron-dev/omnitron",
+      "kind": "function",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/config/loader.ts#L69",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/config",
@@ -14358,7 +14402,7 @@
       "name": "loadEcosystemConfigSafe",
       "package": "@omnitron-dev/omnitron",
       "kind": "function",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/config/loader.ts#L111",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/config/loader.ts#L112",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/config",
@@ -14586,11 +14630,23 @@
       "name": "MigrationAction",
       "package": "@omnitron-dev/omnitron",
       "kind": "type",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/migration/operation.ts#L4",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/migration/operation.ts#L5",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/migration",
           "guide": "/docs/omnitron/migrations"
+        }
+      ]
+    },
+    {
+      "name": "MigrationBinding",
+      "package": "@omnitron-dev/omnitron",
+      "kind": "interface",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/infrastructure/types.ts#L56",
+      "imports": [
+        {
+          "path": "@omnitron-dev/omnitron",
+          "guide": "/docs/omnitron/services-reference"
         }
       ]
     },
@@ -14706,7 +14762,7 @@
       "name": "migrationIntegrity",
       "package": "@omnitron-dev/omnitron",
       "kind": "function",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/migration/operation.ts#L14",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/migration/operation.ts#L15",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/migration",
@@ -14754,7 +14810,7 @@
       "name": "MigrationOperationOptions",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/migration/operation.ts#L5",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/migration/operation.ts#L6",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/migration",
@@ -15023,6 +15079,18 @@
         {
           "path": "@omnitron-dev/omnitron/node-check",
           "guide": "/docs/omnitron/cli"
+        }
+      ]
+    },
+    {
+      "name": "nullableColumn",
+      "package": "@omnitron-dev/omnitron",
+      "kind": "value",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-database/src/readiness/postgres.ts#L57",
+      "imports": [
+        {
+          "path": "@omnitron-dev/omnitron/readiness",
+          "guide": "/docs/titan/modules/database"
         }
       ]
     },
@@ -15351,6 +15419,66 @@
         {
           "path": "@omnitron-dev/omnitron/config",
           "guide": "/docs/omnitron/configuration"
+        }
+      ]
+    },
+    {
+      "name": "PostgresColumnRequirement",
+      "package": "@omnitron-dev/omnitron",
+      "kind": "interface",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-database/src/readiness/postgres.ts#L5",
+      "imports": [
+        {
+          "path": "@omnitron-dev/omnitron/readiness",
+          "guide": "/docs/titan/modules/database"
+        }
+      ]
+    },
+    {
+      "name": "PostgresForeignKeyRequirement",
+      "package": "@omnitron-dev/omnitron",
+      "kind": "interface",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-database/src/readiness/postgres.ts#L19",
+      "imports": [
+        {
+          "path": "@omnitron-dev/omnitron/readiness",
+          "guide": "/docs/titan/modules/database"
+        }
+      ]
+    },
+    {
+      "name": "PostgresReadinessOptions",
+      "package": "@omnitron-dev/omnitron",
+      "kind": "interface",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-database/src/readiness/postgres.ts#L72",
+      "imports": [
+        {
+          "path": "@omnitron-dev/omnitron/readiness",
+          "guide": "/docs/titan/modules/database"
+        }
+      ]
+    },
+    {
+      "name": "PostgresSchemaRequirement",
+      "package": "@omnitron-dev/omnitron",
+      "kind": "interface",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-database/src/readiness/postgres.ts#L36",
+      "imports": [
+        {
+          "path": "@omnitron-dev/omnitron/readiness",
+          "guide": "/docs/titan/modules/database"
+        }
+      ]
+    },
+    {
+      "name": "PostgresTableRequirement",
+      "package": "@omnitron-dev/omnitron",
+      "kind": "interface",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-database/src/readiness/postgres.ts#L26",
+      "imports": [
+        {
+          "path": "@omnitron-dev/omnitron/readiness",
+          "guide": "/docs/titan/modules/database"
         }
       ]
     },
@@ -15819,6 +15947,30 @@
       ]
     },
     {
+      "name": "requiredColumn",
+      "package": "@omnitron-dev/omnitron",
+      "kind": "value",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-database/src/readiness/postgres.ts#L56",
+      "imports": [
+        {
+          "path": "@omnitron-dev/omnitron/readiness",
+          "guide": "/docs/titan/modules/database"
+        }
+      ]
+    },
+    {
+      "name": "requirePostgresSchema",
+      "package": "@omnitron-dev/omnitron",
+      "kind": "function",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-database/src/readiness/postgres.ts#L81",
+      "imports": [
+        {
+          "path": "@omnitron-dev/omnitron/readiness",
+          "guide": "/docs/titan/modules/database"
+        }
+      ]
+    },
+    {
       "name": "resolveCheckouts",
       "package": "@omnitron-dev/omnitron",
       "kind": "function",
@@ -15927,6 +16079,18 @@
         {
           "path": "@omnitron-dev/omnitron/diagnostics",
           "guide": "/docs/omnitron/diagnostics"
+        }
+      ]
+    },
+    {
+      "name": "SchemaReadinessError",
+      "package": "@omnitron-dev/omnitron",
+      "kind": "class",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-database/src/readiness/postgres.ts#L59",
+      "imports": [
+        {
+          "path": "@omnitron-dev/omnitron/readiness",
+          "guide": "/docs/titan/modules/database"
         }
       ]
     },
@@ -21506,7 +21670,7 @@
       "name": "DashboardBlock",
       "package": "@omnitron-dev/prism",
       "kind": "function",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/blocks/dashboard-block/dashboard-block.tsx#L341",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/blocks/dashboard-block/dashboard-block.tsx#L339",
       "imports": [
         {
           "path": "@omnitron-dev/prism/blocks",
@@ -21566,7 +21730,7 @@
       "name": "DashboardBlockFooter",
       "package": "@omnitron-dev/prism",
       "kind": "function",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/blocks/dashboard-block/dashboard-block.tsx#L210",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/blocks/dashboard-block/dashboard-block.tsx#L208",
       "imports": [
         {
           "path": "@omnitron-dev/prism/blocks",
@@ -59259,6 +59423,18 @@
       ]
     },
     {
+      "name": "nullableColumn",
+      "package": "@omnitron-dev/titan-database",
+      "kind": "value",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-database/src/readiness/postgres.ts#L57",
+      "imports": [
+        {
+          "path": "@omnitron-dev/titan-database/readiness",
+          "guide": "/docs/titan/modules/database"
+        }
+      ]
+    },
+    {
       "name": "NullOperators",
       "package": "@omnitron-dev/titan-database",
       "kind": "type",
@@ -59611,6 +59787,30 @@
       ]
     },
     {
+      "name": "PostgresColumnRequirement",
+      "package": "@omnitron-dev/titan-database",
+      "kind": "interface",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-database/src/readiness/postgres.ts#L5",
+      "imports": [
+        {
+          "path": "@omnitron-dev/titan-database/readiness",
+          "guide": "/docs/titan/modules/database"
+        }
+      ]
+    },
+    {
+      "name": "PostgresForeignKeyRequirement",
+      "package": "@omnitron-dev/titan-database",
+      "kind": "interface",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-database/src/readiness/postgres.ts#L19",
+      "imports": [
+        {
+          "path": "@omnitron-dev/titan-database/readiness",
+          "guide": "/docs/titan/modules/database"
+        }
+      ]
+    },
+    {
       "name": "PostgresLeaseStore",
       "package": "@omnitron-dev/titan-database",
       "kind": "class",
@@ -59618,6 +59818,42 @@
       "imports": [
         {
           "path": "@omnitron-dev/titan-database/coordination",
+          "guide": "/docs/titan/modules/database"
+        }
+      ]
+    },
+    {
+      "name": "PostgresReadinessOptions",
+      "package": "@omnitron-dev/titan-database",
+      "kind": "interface",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-database/src/readiness/postgres.ts#L72",
+      "imports": [
+        {
+          "path": "@omnitron-dev/titan-database/readiness",
+          "guide": "/docs/titan/modules/database"
+        }
+      ]
+    },
+    {
+      "name": "PostgresSchemaRequirement",
+      "package": "@omnitron-dev/titan-database",
+      "kind": "interface",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-database/src/readiness/postgres.ts#L36",
+      "imports": [
+        {
+          "path": "@omnitron-dev/titan-database/readiness",
+          "guide": "/docs/titan/modules/database"
+        }
+      ]
+    },
+    {
+      "name": "PostgresTableRequirement",
+      "package": "@omnitron-dev/titan-database",
+      "kind": "interface",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-database/src/readiness/postgres.ts#L26",
+      "imports": [
+        {
+          "path": "@omnitron-dev/titan-database/readiness",
           "guide": "/docs/titan/modules/database"
         }
       ]
@@ -59719,6 +59955,18 @@
       ]
     },
     {
+      "name": "requiredColumn",
+      "package": "@omnitron-dev/titan-database",
+      "kind": "value",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-database/src/readiness/postgres.ts#L56",
+      "imports": [
+        {
+          "path": "@omnitron-dev/titan-database/readiness",
+          "guide": "/docs/titan/modules/database"
+        }
+      ]
+    },
+    {
       "name": "RequirePermission",
       "package": "@omnitron-dev/titan-database",
       "kind": "function",
@@ -59726,6 +59974,18 @@
       "imports": [
         {
           "path": "@omnitron-dev/titan-database/rls",
+          "guide": "/docs/titan/modules/database"
+        }
+      ]
+    },
+    {
+      "name": "requirePostgresSchema",
+      "package": "@omnitron-dev/titan-database",
+      "kind": "function",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-database/src/readiness/postgres.ts#L81",
+      "imports": [
+        {
+          "path": "@omnitron-dev/titan-database/readiness",
           "guide": "/docs/titan/modules/database"
         }
       ]
@@ -60130,6 +60390,18 @@
         },
         {
           "path": "@omnitron-dev/titan-database/transaction",
+          "guide": "/docs/titan/modules/database"
+        }
+      ]
+    },
+    {
+      "name": "SchemaReadinessError",
+      "package": "@omnitron-dev/titan-database",
+      "kind": "class",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-database/src/readiness/postgres.ts#L59",
+      "imports": [
+        {
+          "path": "@omnitron-dev/titan-database/readiness",
           "guide": "/docs/titan/modules/database"
         }
       ]
@@ -62526,7 +62798,7 @@
       "name": "MailDeliveryEvent",
       "package": "@omnitron-dev/titan-mailer",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-mailer/src/postgres.ts#L27",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-mailer/src/postgres.ts#L28",
       "imports": [
         {
           "path": "@omnitron-dev/titan-mailer/postgres",
@@ -62538,7 +62810,7 @@
       "name": "MailDeliveryState",
       "package": "@omnitron-dev/titan-mailer",
       "kind": "type",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-mailer/src/postgres.ts#L25",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-mailer/src/postgres.ts#L26",
       "imports": [
         {
           "path": "@omnitron-dev/titan-mailer/postgres",
@@ -62550,7 +62822,7 @@
       "name": "MailDeliveryStatus",
       "package": "@omnitron-dev/titan-mailer",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-mailer/src/postgres.ts#L34",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-mailer/src/postgres.ts#L35",
       "imports": [
         {
           "path": "@omnitron-dev/titan-mailer/postgres",
@@ -62742,7 +63014,7 @@
       "name": "MailSqlDatabase",
       "package": "@omnitron-dev/titan-mailer",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-mailer/src/postgres.ts#L13",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-mailer/src/postgres.ts#L14",
       "imports": [
         {
           "path": "@omnitron-dev/titan-mailer/postgres",
@@ -62754,7 +63026,7 @@
       "name": "MailSqlExecutor",
       "package": "@omnitron-dev/titan-mailer",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-mailer/src/postgres.ts#L7",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-mailer/src/postgres.ts#L8",
       "imports": [
         {
           "path": "@omnitron-dev/titan-mailer/postgres",
@@ -62799,10 +63071,22 @@
       ]
     },
     {
+      "name": "POSTGRES_MAIL_OUTBOX_REQUIREMENTS",
+      "package": "@omnitron-dev/titan-mailer",
+      "kind": "value",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-mailer/src/postgres-readiness.ts#L4",
+      "imports": [
+        {
+          "path": "@omnitron-dev/titan-mailer/postgres",
+          "guide": "/docs/titan/modules/mailer"
+        }
+      ]
+    },
+    {
       "name": "POSTGRES_MAIL_OUTBOX_SCHEMA",
       "package": "@omnitron-dev/titan-mailer",
       "kind": "value",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-mailer/src/postgres.ts#L51",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-mailer/src/postgres.ts#L52",
       "imports": [
         {
           "path": "@omnitron-dev/titan-mailer/postgres",
@@ -62814,7 +63098,7 @@
       "name": "PostgresMailOutbox",
       "package": "@omnitron-dev/titan-mailer",
       "kind": "class",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-mailer/src/postgres.ts#L66",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-mailer/src/postgres.ts#L67",
       "imports": [
         {
           "path": "@omnitron-dev/titan-mailer/postgres",
@@ -62826,7 +63110,7 @@
       "name": "PostgresMailOutboxOptions",
       "package": "@omnitron-dev/titan-mailer",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-mailer/src/postgres.ts#L17",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-mailer/src/postgres.ts#L18",
       "imports": [
         {
           "path": "@omnitron-dev/titan-mailer/postgres",

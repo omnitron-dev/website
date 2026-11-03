@@ -158,6 +158,7 @@ export default {
     ".": "titan/modules/cache.mdx"
   },
   "@omnitron-dev/titan-database": {
+    "./readiness": "titan/modules/database.mdx",
     "./sqlite": "titan/modules/database.mdx",
     "./coordination": "titan/modules/database.mdx",
     ".": "titan/modules/database.mdx",
@@ -212,6 +213,7 @@ export default {
     ".": "titan/modules/telemetry-relay.mdx"
   },
   "@omnitron-dev/omnitron": {
+    "./readiness": "titan/modules/database.mdx",
     ".": "omnitron/services-reference.md",
     "./config": "omnitron/configuration.md",
     "./operations": "omnitron/releases.md",

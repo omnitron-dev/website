@@ -110,6 +110,24 @@ The registered project's configuration still supplies its working directories,
 environment, data locations and infrastructure. A stack that has never selected
 a release continues to start from its working tree.
 
+Admission compares the configuration's source inputs with the release commit.
+Relative imports may reach sibling configurations or shared files anywhere in the
+same repository; those files and shipped configuration directories participate
+in the check. A used symbolic link and its resolved target both participate:
+changing only the link cannot silently select another configuration with identical
+current bytes. Every used link must be tracked, including links in directory paths;
+its resolved target must stay inside the same repository and cannot be an ignored
+source input. The same rules cover links used by shipped configuration files.
+Untracked or escaping links, ignored targets, imported code outside the repository,
+and source inside a Git submodule without its own verified binding refuse admission.
+
+An input-inventory error stops preparation; it does not silently reduce the set of
+checked files. Ordinary ignored runtime files, such as machine-local secrets read
+explicitly by configuration, remain runtime inputs whose bytes are not verified
+against the release commit. This exception does not make ignored imported code or
+a used symlink's ignored target admissible. A source receipt does not attest every
+external file or service that trusted configuration code can read.
+
 1. Build the project release for the local execution target. Each application
    needs a packaged entry and a complete production dependency graph. Bootstrap
    apps must resolve their own compatible Titan and Omnitron adapter. By default

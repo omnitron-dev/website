@@ -110,6 +110,155 @@ TitanDatabaseModule.forRootAsync({
 })
 ```
 
+## Read-only component schema readiness
+
+Use `@omnitron-dev/titan-database/readiness` when a component must verify the
+PostgreSQL schema it consumes before accepting traffic. This optional entry
+exports `requirePostgresSchema`, `SchemaReadinessError`, `requiredColumn`,
+`nullableColumn` and their contract types. It borrows an existing pool, performs
+catalog checks in a **read-only, repeatable-read transaction**, then releases its
+connection. Importing it does not create a pool, load a PostgreSQL driver, build a
+DI container or run migrations.
+
+Omnitron applications can import the identical API through
+`@omnitron-dev/omnitron/readiness`; they do not need to depend on Kysera or reach
+into Titan internals. Choose the public entry for the layer your application uses.
+
+### Declare what this component requires
+
+The application owns its driver and pool. This example uses `pg`; install that
+driver when it is not already an application dependency.
+
+```typescript
+import { Pool } from 'pg';
+import {
+  requirePostgresSchema,
+  requiredColumn,
+  nullableColumn,
+  type PostgresSchemaRequirement,
+} from '@omnitron-dev/omnitron/readiness';
+
+const notificationSchema = {
+  name: 'notification-worker',
+  schema: 'public',
+  tables: {
+    notification_jobs: {
+      insert: true,
+      columns: {
+        id: requiredColumn('uuid'),
+        payload: requiredColumn('jsonb'),
+        state: {
+          ...requiredColumn('text'),
+          default: true,
+          defaultExpression: "'pending'::text",
+        },
+        processed_at: nullableColumn('timestamptz'),
+      },
+      unique: [['id']],
+    },
+  },
+} satisfies PostgresSchemaRequirement;
+
+export async function openWorkerPool(connectionString: string): Promise<Pool> {
+  const pool = new Pool({ connectionString, connectionTimeoutMillis: 2_000 });
+  try {
+    await requirePostgresSchema(pool, notificationSchema, {
+      statementTimeoutMs: 10_000,
+      lockTimeoutMs: 1_000,
+    });
+    return pool;
+  } catch (error) {
+    await pool.end();
+    throw error;
+  }
+}
+```
+
+Call this during the component's normal startup, after the
+[stack-owned migration phase](../../omnitron/migrations.md#stack-owned-migrations)
+and before serving requests or consuming work. Continue using the returned pool;
+the application closes it on shutdown. The checker itself leaves a borrowed pool
+open. Avoid starting the component's own copy of a shared migration registry:
+a later, unrelated migration must not force an older compatible worker to become
+a schema writer.
+
+### Compatibility contract
+
+`PostgresSchemaRequirement` names a component, an optional schema and the tables
+and routines it needs. Without `schema`, PostgreSQL's `current_schema()` on the
+borrowed connection selects the namespace. Declare the required subset rather
+than an entire historical database snapshot.
+
+| Contract | What is checked |
+| --- | --- |
+| `PostgresTableRequirement.columns` | Required physical table and exact declared column shapes; views and foreign tables do not satisfy it |
+| `PostgresColumnRequirement.type` / `nullable` | PostgreSQL catalog type name and exact nullability; helpers set the nullability flag |
+| `typeSchema` | Type namespace; defaults to `pg_catalog`, and can name a schema containing an enum or domain |
+| `formattedType` | Optional exact `format_type` spelling, such as `numeric(12,2)` or `character varying(80)` |
+| `default` / `defaultExpression` | Presence of a default, or its exact `pg_get_expr` representation when its meaning matters |
+| `generated` | `false` requires a writable column; a string requires the exact generated expression |
+| `insert: true` | Declared columns must be writable unless an expression is explicitly required; extra non-null columns must provide a default, identity or generated value |
+| `unique` | Ordered primary/unique constraint columns; the constraint must be valid and non-deferrable |
+| `foreignKeys` | Ordered local/referenced columns, referenced table in the checked schema, and exact delete/update actions; defaults are `no action` |
+
+Compatible extra tables and nullable/defaulted columns are allowed. A read-only
+projection can omit the `generated` distinction; insert contracts default to
+non-generated declared columns. A standalone unique index is not a substitute
+for the declared primary/unique constraint. These checks do not prove arbitrary
+check constraints, indexes, query permissions, row-level policies or every
+possible PostgreSQL invariant.
+
+### Routines and triggers
+
+`routines` binds each ordinary scalar function to its exact ordered
+`argumentTypes` (no arguments by default), SHA-256 of `pg_proc.prosrc`, language
+(`sql` or `plpgsql`), volatility (`i`, `s` or `v`) and invoker security. Variadic,
+default-argument and set-returning functions cannot satisfy this contract. An
+unrelated overload does not count. Optional `returnType` uses `format_type`:
+for example, `bigint`, whereas a column's catalog `type` is `int8`.
+
+Table `triggers` bind the function name, reviewed body hash and PostgreSQL
+`tgtype` bitmask. The trigger must be enabled for ordinary execution, apply
+without a `WHEN` or column filter, have no trigger arguments and invoke an
+invoker-security PL/pgSQL function in the checked schema returning `trigger`.
+The `immutable` shorthand declares the row-level `BEFORE UPDATE OR DELETE`
+trigger shape (`type: 27`); its reviewed function body determines the actual
+rejection behavior.
+
+Derive `bodySha256` from the exact function body supplied by reviewed migration
+source. Do not derive an expected hash from the live function being checked:
+that would accept the drift this contract is intended to detect. The checker
+compares properties and bytes; it does not analyze arbitrary SQL semantics.
+
+For routines and trigger functions, `configuration` is the exact set of
+`pg_proc.proconfig` settings, empty by default. `schemaSearchPath: true` additionally
+requires `pg_catalog, <checked schema>, pg_temp` using PostgreSQL identifier
+quoting. Other intentional settings must still be declared. This binds name
+resolution to the component's namespace without trusting a caller's mutable
+search path; it is not a general SQL-security proof.
+
+### Deadlines and failure reporting
+
+The optional third argument is `PostgresReadinessOptions`:
+
+| Option | Default | Boundary |
+| --- | --- | --- |
+| `statementTimeoutMs` | 10,000 ms | Each PostgreSQL statement |
+| `lockTimeoutMs` | 1,000 ms | Each PostgreSQL lock wait |
+
+Both accept positive integer milliseconds within PostgreSQL's supported range.
+The settings are transaction-local and are restored afterward. They are **not**
+a total-operation deadline. Set a finite pool acquisition timeout separately,
+such as `pg`'s `connectionTimeoutMillis`; the pool owner controls acquisition.
+
+A schema mismatch throws `SchemaReadinessError` with stable
+`code: 'database_schema_incompatible'`, the component name and individual
+`violations`. Authentication, connection and PostgreSQL timeout failures retain
+their own errors. Report that actual failure through the application's normal
+health/diagnostic path; do not translate an unavailable database into “schema is
+compatible.” The check applies no DDL, writes no migration journal and never
+repairs the schema automatically.
+
 ## `DatabaseModuleOptions`
 
 | Option         | Type                                                                 |
