@@ -13966,7 +13966,7 @@
       "name": "IProjectRequirements",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/shared/dto/project.ts#L450",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/shared/dto/project.ts#L452",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/dto/services",
@@ -15426,7 +15426,7 @@
       "name": "ProjectDependency",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/shared/dto/project.ts#L483",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/shared/dto/project.ts#L485",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/dto/services",
@@ -15450,7 +15450,7 @@
       "name": "ProjectTopology",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/shared/dto/project.ts#L495",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/shared/dto/project.ts#L497",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/dto/services",
@@ -16554,7 +16554,7 @@
       "name": "TopologyMetadataRefresh",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/shared/dto/project.ts#L508",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/shared/dto/project.ts#L510",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/dto/services",
