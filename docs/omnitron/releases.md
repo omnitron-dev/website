@@ -12,6 +12,16 @@ and manifest.
 
 ## Rebuilding an artifact
 
+Register the project directory that contains its lockfile and ecosystem config.
+In a monorepo, the builder clones the whole repository at the selected commit
+and runs the build from that directory. The manifest records the relative path
+in `project.directory` when the project lives below the Git root.
+
+Declare `@omnitron-dev/titan` as a runtime dependency of every bootstrap
+application. During packaging, the builder resolves its public entry point
+inside the installed application graph. A Titan dependency provided only by a
+parent workspace fails this check before an archive is written.
+
 Build from clean project and framework commits with the checked-in lockfiles and
 their pinned package manager. The build timestamp in a clean framework package is
 the commit time; the release record records when the build actually ran. A source

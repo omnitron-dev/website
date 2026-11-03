@@ -303,12 +303,12 @@ operate on **all** managed apps.
 
 | Command | Effect |
 | ------- | ------ |
-| `omnitron start [app]` | Start app(s); auto-starts the daemon if needed |
+| `omnitron start [app]` | Start a named app through the running daemon. A fleet-wide start can also start a stopped daemon. |
 | `omnitron stop [app] [-f]` | Stop the selected applications. Pass `--force` to request a forced stop. |
 | `omnitron restart [app]` | Stop + start |
-| `omnitron reload [app]` | Zero-downtime reload — workers cycle one at a time |
+| `omnitron reload [app]` | Reload a named supervised application one child at a time. Classic applications restart. The current bulk command invokes a full restart. |
 
-Use a full application name such as `omnitron stop project/test/api` to limit the request to one process group. Use `omnitron stop all` to address every managed application. Both require a responsive daemon. When the connection fails or the daemon refuses the operation, the command reports the reason and exits with a failure. If the connection drops after sending the request, inspect `omnitron list` before retrying. Use `omnitron down` for an explicit daemon shutdown.
+Use a full application name such as `omnitron start project/test/api` or `omnitron stop project/test/api` to limit the request to one process group. If a named start cannot reach the daemon, it exits with an error. Starting the daemon with `omnitron up` can also start its configured stacks. Use `omnitron stop all` to address every managed application. Both require a responsive daemon. When the connection fails or the daemon refuses the operation, the command reports the reason and exits with a failure. If the connection drops after sending the request, inspect `omnitron list` before retrying. Use `omnitron down` for an explicit daemon shutdown.
 
 ## Information
 
