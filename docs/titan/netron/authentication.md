@@ -72,6 +72,21 @@ Service selection happens before authorization. The exact published service iden
 is used for ACL and policy evaluation, including batch HTTP calls. Selecting a version
 never evaluates another version's permissions.
 
+## Forwarding through a gateway
+
+Publishing a remote `Interface` at another Netron endpoint creates a delegation
+boundary. Register an `AuthorizationManager` ACL for the forwarded service or
+method at that gateway. Netron checks the actual incoming caller against that
+ACL before forwarding; the gateway's upstream credentials do not grant access
+to its clients. Missing ACLs refuse the request, including anonymous requests
+and HTTP authentication exemptions. ACL revocation applies to subsequent calls
+and property operations on existing connections.
+
+The upstream service still applies its own guards. Definitions carry transport
+restrictions, not executable authorization policies, so the gateway must declare
+its own delegation policy. Trusted local calls through an interface retain their
+in-process contract. Prefer narrow method grants and explicit service versions.
+
 ## Auth context
 
 Every authenticated call carries an auth context with:

@@ -151,6 +151,13 @@ class UsersService {
 look fine inside the process should not silently become RPC-callable
 without an explicit decision.
 
+A member's `transports` list narrows the service's own list; it cannot widen
+it. Omitted means unrestricted and `[]` denies all remote transports. The same
+rule covers methods and properties, HTTP and persistent transports. See
+[transport boundaries](../netron/transports.md#configuring-transports).
+`@Public({ transports: [...] })` and a separate `@Auth(...)` compose in either
+decorator order; transport options never erase the authorization requirements.
+
 ### `@Auth(config)`
 
 Configures authentication and authorisation for a method. Use

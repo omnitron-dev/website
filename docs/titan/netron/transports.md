@@ -44,8 +44,35 @@ await app.start();
 
 `registerTransportServer(name, { name, options })` takes a transport
 key, a server label, and an `options` bag (`{ host?, port?, path?, … }`).
-Only the transports you start are bound. A service is reachable over
-*every* bound transport — no per-method or per-service binding.
+Only the transports you start are bound. An unrestricted published service
+is reachable over each bound transport. Restrict its remote surface at the
+service or member declaration:
+
+```typescript
+@Service({ name: 'orders', transports: [new HttpTransport()] })
+class OrdersService {
+  @Public({ transports: ['http'], auth: { roles: ['operator'] } })
+  async list() { /* … */ }
+}
+```
+
+The effective surface is the intersection of service and member restrictions.
+Omitting `transports` adds no restriction; `[]` denies all remote transports.
+`ws` normalizes to `websocket`. Custom transports use their implementation's
+`name`, not a listener label. Invalid declarations fail during publication.
+Restrictions do not start listeners or replace authentication and permissions.
+
+The server determines the ingress transport. A request header or RPC argument
+cannot select another transport identity. HTTP calls and batches, persistent
+method calls and property operations all enforce the same boundary. Discovery,
+OpenAPI and returned nested service interfaces show the corresponding surface;
+calling a known service name or definition ID does not bypass it. Trusted
+in-process calls remain local operations.
+
+Forwarded definitions carry optional transport restrictions. A gateway cannot
+widen them; definitions from older publishers without these fields remain
+unrestricted by transport. Remote forwarding also requires an explicit
+[gateway ACL](./authentication.md#forwarding-through-a-gateway).
 
 ## When to choose what
 
