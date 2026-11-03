@@ -684,6 +684,13 @@ and Node built-ins remain external. Esbuild then observes changes to the importe
 workspace sources and rebuilds the affected application; no second library
 watcher is necessary for source-exporting packages.
 
+A shared library keeps ownership of its dependencies. If it imports a compiled
+package declared only in that library, the runtime build must retain that exact
+resolution and version. Applications should not repeat those dependencies merely
+to make a bundled development entry load. Generated local builds move with the
+workspace installation; release archives use their independently verified
+dependency closure.
+
 Bootstrap applications use this import graph. `watch.directory`, `watch.include`
 and `watch.ignore` configure the filesystem watcher for command-based
 applications; adding directories there does not extend a bootstrap application's
