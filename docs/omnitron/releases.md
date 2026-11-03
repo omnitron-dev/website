@@ -359,13 +359,34 @@ registry request that requires removing a key is refused before starting a
 worker rather than claiming isolation that the transport cannot provide. Git
 credential helpers and SSH configuration remain available.
 
+### Build from local sources
+
+The registered project's local Git checkout supplies its selected commit; a
+reachable project hosting service is not required to clone those local inputs.
+Use a local SDK repository explicitly when its commit is available only on the
+build machine:
+
+```bash
+omnitron release build sample \
+  --project-commit <full-project-commit> \
+  --framework-repository /srv/sources/omni \
+  --omni-commit <full-framework-commit>
+```
+
+The builder still creates clean clones, performs the frozen install and declared
+gates, and verifies archive contents. Prepared dependencies or an accessible
+registry are required; choosing local Git does not make missing packages available.
+For a fully offline build, prepare those dependencies and any gate fixtures first.
+
 Source publication is a separate, build-time observation. A local repository
 can be a valid build input without being remotely published. A network failure
 or unavailable ancestry is **unverified**, not evidence that a commit is
 unpublished. Cached remote-tracking branches alone do not establish publication.
 The stack's `release.requireOnRemote` policy decides whether confirmed remote
-publication is required for deployment; source overrides do not skip gates,
-checksum checks or that policy. These states never indicate where an application
+publication is required for deployment. When omitted or `false`, publication is
+not a prerequisite; a release must still satisfy every other requirement.
+An explicit `true` remains enforced, including for imported producers. Source
+overrides do not skip gates, checksum checks or that policy. These states never indicate where an application
 is running. Offline use also requires that the selected sources, dependencies
 and declared gates are available in that environment.
 
