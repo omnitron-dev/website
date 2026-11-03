@@ -56,7 +56,7 @@ reactivity primitives directly.
 
 Topic-focused references:
 
-- [Transports](./transports.md) — HTTP, WebSocket, auto-mode, reconnect tuning
+- [Transports](./transports.md) — choosing an HTTP or WebSocket endpoint, React selection and reconnect behaviour
 - [Middleware](./middleware.md) — three-stage pipeline, built-in middleware, custom middleware
 - [Caching](./caching.md) — LRU cache, stale-while-revalidate, tag invalidation
 - [Auth manager](./auth.md) — token rotation, cross-tab sync, inactivity timeout
@@ -77,7 +77,7 @@ interface UserService {
 
 const client = new NetronReactClient({
   url:       'https://api.example.com',
-  transport: 'auto',
+  transport: 'http',
 });
 
 function App() {

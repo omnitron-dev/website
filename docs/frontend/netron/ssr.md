@@ -35,7 +35,10 @@ export async function loader(req) {
 // client-side root:
 function App({ dehydratedState }: { dehydratedState: DehydratedState }) {
   const [client] = useState(() => {
-    const c = new NetronReactClient({ url: '/api', transport: 'auto' });
+    const c = new NetronReactClient({
+      url: new URL('/api', window.location.origin).href,
+      transport: 'http',
+    });
     c.hydrate(dehydratedState);    // populate cache from server
     return c;
   });
@@ -110,26 +113,34 @@ integrates cleanly.
 
 ## Per-user dehydration
 
+Use a request-scoped cache for authenticated data. For an upstream service
+that accepts bearer credentials, put the token on the HTTP client that makes
+the call. Keep the upstream base URL in trusted server configuration.
+
 ```typescript
-async function loader(req) {
-  const authToken = req.cookies.get('session');
+import { HttpClient } from '@omnitron-dev/netron-browser';
+import { NetronReactClient } from '@omnitron-dev/netron-react';
 
-  const client = new NetronReactClient({
-    url: process.env.API_URL,
-    headers: { Authorization: `Bearer ${authToken}` },
+async function prefetchWorkspace(apiUrl: string, accessToken: string) {
+  const rpc = new HttpClient({
+    url: apiUrl,
+    redirect: 'error',
+    headers: { Authorization: `Bearer ${accessToken}` },
   });
-
-  // ... prefetch ...
-
-  return {
-    dehydratedState: client.dehydrate(),
-  };
+  const client = new NetronReactClient({ url: apiUrl, transport: 'http' });
+  await rpc.connect();
+  try {
+    await client.prefetchQuery(['workspace', 'current'], () =>
+      rpc.invoke('Workspace', 'current', []),
+    );
+    return client.dehydrate();
+  } finally {
+    await rpc.disconnect();
+  }
 }
 ```
 
-Server-side prefetch carries the user's token; the dehydrated
-cache is specific to that user. Don't share dehydrated state
-across users — leak risk.
+Only include data the requesting user may receive in the page.
 
 ## Excluding queries from dehydration
 
@@ -149,15 +160,9 @@ const dehydratedState = client.dehydrate();
 
 ## Bundle size considerations
 
-The SSR client is identical to the browser client — there's no
-separate "server" build. If you're SSR-targeting workers /
-edge runtimes:
-
-- HTTP transport only (no WebSocket on edge).
-- `transport: 'http'` explicitly to avoid the WebSocket bundle.
-- Skip persistent `AuthenticationClient` storage (no localStorage
-  on edge); use cookie-based auth (`CookieClientTokenTransport` +
-  `NoopTokenStorage`).
+The browser and SSR use the same package entry point. Selecting
+`transport: 'http'` runs the HTTP path and avoids opening a socket on the server.
+Bundle size depends on the imports and bundler output.
 
 ## Caveats
 

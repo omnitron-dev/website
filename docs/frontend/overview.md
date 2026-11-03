@@ -95,7 +95,7 @@ import { RouterProvider }                      from 'react-router-dom';
 
 const client = new NetronReactClient({
   url:       import.meta.env.VITE_API_URL,
-  transport: 'auto',
+  transport: 'http',
 });
 
 // `AuthProvider` takes a `config` (refreshEndpoint?, logoutEndpoint?,

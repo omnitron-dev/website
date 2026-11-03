@@ -1,42 +1,39 @@
 ---
 sidebar_position: 4
 title: Transports
-description: HTTP vs WebSocket vs auto-mode — choosing and tuning.
+description: Choose a Netron transport, bound the lifetime of a call, and observe connection recovery.
 ---
 
 # Transports
 
-netron-browser ships two transports — HTTP and WebSocket — plus
-an "auto" mode that picks based on what your services declare.
+Choose the transport the service exposes at the URL you are calling. A gateway
+can serve HTTP RPC at one path and WebSocket upgrades at another.
 
-## Picking a transport
+| Client | Use it for | Transport selection |
+| --- | --- | --- |
+| `createClient` / `NetronClient` | Framework-independent RPC to one backend | `http` by default, or explicit `websocket` |
+| `HttpClient` | HTTP RPC with authentication or custom middleware | HTTP |
+| `WebSocketClient` | Binary RPC, server-initiated tasks and reconnect events | WebSocket |
+| `createMultiBackendClient` | Several backends with separate endpoints and policies | Configure `http` or `websocket` per backend |
+| `NetronReactClient` | React queries, mutations and event subscriptions | `http`, `websocket` or React-specific `auto` |
 
-| You need… | Transport |
-| --------- | --------- |
-| Request / response RPC with caching | `'http'` |
-| Server-side streaming (`AsyncIterable` returns) | `'websocket'` |
-| Bidirectional messaging / presence | `'websocket'` |
-| Mix of both — let the framework decide | `'auto'` |
+## HTTP
 
-For the typical "fetch some data" call, HTTP wins on caching,
-batching, and CDN compatibility. WebSocket wins when latency
-matters or when the call is a stream.
-
-## HTTP transport
+Supply an absolute base URL. The browser client appends `/netron/invoke` and
+sends a JSON POST. HTTP `connect()` initializes the client locally. To check
+whether a service is reachable, invoke a permitted read or its readiness probe.
 
 ```typescript
 import { createClient } from '@omnitron-dev/netron-browser';
 
 const client = createClient({
-  url:       'https://api.example.com',
+  url: new URL('/api', window.location.origin).href,
   transport: 'http',
-  timeout:   10_000,                  // ms per request
-  headers:   { 'X-Client': 'web/1.0' },
-  http: {
-    retry:      true,
-    maxRetries: 3,
-  },
+  timeout: 10_000,
+  headers: { 'X-Client': 'web/1.0' },
+  http: { retry: true, maxRetries: 3, redirect: 'error' },
 });
+await client.connect();
 ```
 
 ### Invocation lifetime and replay
@@ -64,13 +61,14 @@ write merely because a failed connection returned no answer. Use a domain
 operation ID with server-side replay semantics when a write must be retried.
 The direct HTTP client does not infer this property from a method name.
 
-For a fixed RPC endpoint, pass `redirect: 'error'` to the direct `HttpClient`.
+For a fixed RPC endpoint, use `http.redirect` on `createClient` or pass
+`redirect: 'error'` directly to `HttpClient`.
 Fetch then rejects a redirect before replaying the request at another address.
 This protects publication bodies and custom credential headers. With multiple
 backends, set `http.redirect` on the backend that needs this policy. Omitting
 the option preserves the default Fetch redirect behavior.
 
-Query hooks forward TanStack Query's cancellation signal. A component unmount does
+Service query hooks forward the query cancellation signal. A component unmount does
 not automatically cancel a mutation: its server-side outcome may already be committed.
 
 ### HTTP wire format
@@ -89,262 +87,88 @@ ID, malformed envelope or an HTTP failure carrying an RPC success is rejected.
 Application payloads still require their own runtime schemas; a TypeScript
 return type cannot validate bytes received over the network.
 
-### When HTTP loses
+## WebSocket
 
-- **Long-poll / streaming responses** — `fetch` can stream, but
-  the API isn't friendly. Use WebSocket.
-- **Sub-50 ms latency** — every HTTP call pays TLS handshake +
-  connection setup on cold network. WebSocket amortises both.
-
-## WebSocket transport
+Use the URL of a binary Netron WebSocket listener. Await `connect()` before
+issuing calls. It waits for the Netron handshake. Use the direct client for
+connection events, service discovery or server-initiated task handlers.
 
 ```typescript
-const client = createClient({
-  url:       'wss://api.example.com',
-  transport: 'websocket',
-  websocket: {
-    protocols:            ['netron-v1'],
-    reconnect:            true,
-    reconnectInterval:    1_000,         // initial backoff
-    maxReconnectAttempts: 20,
-  },
+import { WebSocketClient } from '@omnitron-dev/netron-browser';
+
+const socket = new WebSocketClient({
+  url: 'wss://api.example.com/rpc',
+  enableServiceDiscovery: true,
+  reconnect: true,
+  reconnectInterval: 1_000,
+  maxReconnectAttempts: 12,
 });
 
-await client.connect();
+socket.on('reconnecting', ({ attempt, delay, announced }) => {
+  console.info(announced ? 'Server restarting' : 'Connection lost', { attempt, delay });
+});
+await socket.connect();
+try {
+  const items = await socket.invoke('Catalog@1.0.0', 'list', []);
+  console.info(items);
+} finally {
+  await socket.disconnect();
+}
 ```
+
+Service discovery resolves a service's wire definition ID on the connected
+server. It is opt-in. Only enable it for a trusted endpoint. Alternatively,
+supply a known `serviceDefinitions` map. Register a named server-initiated task
+with `socket.onTask(name, handler)` when the service contract requires it.
 
 ### Reconnect behaviour
 
-```mermaid
-sequenceDiagram
-  participant App
-  participant Client
-  participant Server
+Automatic reconnect is enabled by default. The base retry interval is 1,000 ms
+and the default attempt limit is `Infinity`. Ordinary retries use exponential
+backoff with jitter, capped at 30 seconds with the default base. A server restart
+announced by close code 1012 gets an initial jittered delay of 1–3 seconds.
+The `reconnecting` event exposes the actual delay. Exhausting a finite limit
+sets the state to `failed` and emits `reconnect-failed`. Explicit `disconnect()`
+ends the reconnect loop.
 
-  App->>Client: connect()
-  Client->>Server: WS upgrade
-  Server-->>Client: connected
-  Note over Client: state := 'connected'
+A closed socket rejects its pending invocations. For an interrupted write,
+check its recorded outcome before submitting it again. For events, the React
+subscription manager re-registers subscribed names after reconnect. Recover
+events missed during the outage using the service's cursor or a fresh snapshot.
 
-  Note over Server: server dies
-  Server--xClient: socket closes
-  Client->>Client: state := 'disconnected'
-  Client->>Client: schedule reconnect
+## React transport selection
 
-  loop attempt N (capped at maxReconnectAttempts)
-    Client->>Client: wait reconnectInterval × 2^(N-1) (jittered)
-    Client->>Server: WS upgrade
-    alt success
-      Server-->>Client: connected
-      Client->>Client: re-subscribe in-flight streams
-      Note over Client: state := 'connected'
-    else fail
-      Client->>Client: N++
-    end
-  end
+Use `transport: 'http'` for an HTTP-only API, including a React application
+behind an HTTP gateway. Use `'websocket'` for a WebSocket-only service.
 
-  alt N > maxReconnectAttempts
-    Client->>Client: state := 'failed'
-    Note over App: handle via getState() === 'failed'
-  end
-```
+`NetronReactClient` defaults to `'auto'`. Without a browser `window` it selects
+HTTP. In the browser it opens WebSocket first, waits for the handshake, then
+initializes HTTP with the same configured URL. Calls prefer the connected
+WebSocket and can use the initialized HTTP client while the socket is down.
+If the initial WebSocket connection fails, `connect()` rejects before HTTP
+initialization. For this mode, supply an absolute HTTP(S) base that serves
+both the WebSocket upgrade and the HTTP RPC path. For separate endpoints,
+configure each backend explicitly.
 
-Defaults (`reconnect: true`, `reconnectInterval: 1_000`,
-`maxReconnectAttempts: 10`) give roughly a 17-minute window of
-reconnect attempts before giving up.
+## Connection state and metrics
 
-### Tuning per environment
-
-| Environment | Settings |
-| ----------- | -------- |
-| Mobile / flaky network | `maxReconnectAttempts: 50`, `reconnectInterval: 2_000` |
-| Server / desktop LAN | defaults |
-| Test / CI | `reconnect: false` (fail fast) |
-
-### Subscriptions over WS
-
-When a service method returns `AsyncIterable<T>`, the WS
-transport wires it as a long-running stream:
+The direct browser clients expose `getState()` and `getMetrics()`.
+Connection states are `disconnected`, `connecting`, `connected`,
+`reconnecting` and `failed`. A React component inside `NetronProvider`
+can read `state`, `error` and `reconnect` from `useNetronConnection()`.
 
 ```typescript
-interface OrderService {
-  watchAll(filter: OrderFilter): AsyncIterable<OrderEvent>;
-}
-
-const orders = client.service<OrderService>('orders');
-
-for await (const event of orders.watchAll({ tier: 'pro' })) {
-  console.log(event);
-}
+const { transport, state, requestsSent, responsesReceived, errors, avgLatency } =
+  client.getMetrics();
 ```
 
-The client tracks subscription IDs internally; on reconnect it
-re-subscribes transparently using the original args.
-
-### Custom protocols / sub-protocols
-
-```typescript
-const client = createClient({
-  url:       'wss://api.example.com',
-  transport: 'websocket',
-  websocket: {
-    protocols: ['netron-v1', 'netron-v0'],   // server picks one
-  },
-});
-```
-
-Useful for gradual server upgrades — old clients negotiate
-`netron-v0`, new clients prefer `netron-v1`.
-
-## Auto mode
-
-```typescript
-const client = createClient({
-  url:       'https://api.example.com',
-  transport: 'auto',
-});
-
-await client.connect();
-```
-
-Auto mode:
-
-1. Probes the server's transport descriptor on first call.
-2. If WebSocket is available **and** any used service declares
-   streaming methods → upgrades to WS.
-3. Otherwise stays on HTTP.
-
-Useful when you don't know upfront which services your app
-will call.
-
-## Connection state
-
-```typescript
-type ConnectionState =
-  | 'idle'           // not yet connected
-  | 'connecting'     // in-flight connect
-  | 'connected'      // active
-  | 'disconnected'   // lost; not retrying
-  | 'reconnecting'   // backoff in progress
-  | 'failed';        // gave up after maxReconnectAttempts
-
-client.getState();        // current state
-client.isConnected();     // boolean shortcut
-client.on('stateChange', (state) => console.log(state));
-```
-
-### React integration
-
-```tsx
-import { useNetronConnection } from '@omnitron-dev/netron-react';
-
-function ConnectionIndicator() {
-  const { state, lastError } = useNetronConnection();
-  return (
-    <Chip
-      label={state}
-      color={state === 'connected' ? 'success' :
-             state === 'reconnecting' ? 'warning' :
-             state === 'failed' ? 'error' : 'default'}
-    />
-  );
-}
-```
-
-## Headers, cookies, and CORS
-
-### Custom headers
-
-```typescript
-const client = createClient({
-  url:     'https://api.example.com',
-  headers: {
-    'X-App-Version': '1.4.2',
-    'X-Tenant-ID':   tenantId,
-  },
-});
-```
-
-Headers apply to every request; combine with auth middleware
-for `Authorization`.
-
-### Cookies
-
-```typescript
-const client = createClient({
-  url:        'https://api.example.com',
-  credentials: 'include',     // browser fetch default 'same-origin'
-});
-```
-
-For cross-origin cookie-based auth, the server must respond
-with `Access-Control-Allow-Credentials: true`.
-
-### CORS preflight tips
-
-- Allow `POST` + custom headers in server CORS config.
-- For WebSocket, the server's CORS doesn't apply (handshake
-  uses Origin header) — but ensure your reverse proxy allows
-  WS upgrades from your origin.
-
-## Metrics & introspection
-
-```typescript
-const metrics = client.getMetrics();
-// {
-//   requests:    1234,
-//   errors:      12,
-//   avgLatency:  45.2,
-//   cacheHits:   456,
-//   cacheMisses: 778,
-//   ...
-// }
-```
-
-Expose in devtools UI:
-
-```tsx
-import { useNetronClient } from '@omnitron-dev/netron-react';
-
-function Metrics() {
-  const client = useNetronClient();
-  const [m, setM] = useState(client.getMetrics());
-  useEffect(() => {
-    const i = setInterval(() => setM(client.getMetrics()), 1_000);
-    return () => clearInterval(i);
-  }, [client]);
-  return <pre>{JSON.stringify(m, null, 2)}</pre>;
-}
-```
-
-## Best practices
-
-- **One client per backend host.** Sharing the same backend
-  across pages = one client; multi-backend = wrap in
-  `MultiBackendProvider`.
-- **`'auto'` for unknown server features.** `'http'` if you
-  know all calls are request/response.
-- **Cap `maxReconnectAttempts`** in production — `Infinity`
-  keeps tabs hammering a dead server forever.
-- **Reconnect interval ≥ 1 s.** Faster intervals don't recover
-  faster; they just generate more failed handshakes.
-- **Set `timeout`** explicitly — browser fetch is effectively
-  unlimited by default.
-
-## Anti-patterns
-
-- **Recreating client per render.** Loses cache, breaks WS,
-  thrashes the server. Singleton.
-- **`maxReconnectAttempts: Infinity`.** A genuinely-dead
-  server has open sockets from every tab forever.
-- **Polling on HTTP when WS is available.** Subscribe instead;
-  faster + cheaper.
-- **`'websocket'` for pure request/response.** No batching, no
-  caching, harder to debug.
+These counters belong to this client. `avgLatency` is optional and measured
+in milliseconds. Use a query cache or the [fluent HTTP interface](./browser.md#fluent-http-interface--caching-retry-circuit-breaking)
+when individual reads require caching or deduplication.
 
 ## See also
 
-- [Middleware](./middleware.md) — pipeline run around every call
-- [Caching](./caching.md) — works with HTTP responses
-- [Error handling](./errors.md) — what each transport throws
-- [netron-browser](./browser.md) — full client API
+- [HTTP and WebSocket clients](./browser.md)
+- [Authentication and cookie transport](./auth.md)
+- [React subscriptions](./react.md)
+- [Multi-backend routing](./multi-backend.md)

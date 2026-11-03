@@ -70,7 +70,7 @@ flowchart TB
 ## Quick start
 
 ```typescript
-import { createClient } from '@omnitron-dev/netron-browser';
+import { createClient, WebSocketClient } from '@omnitron-dev/netron-browser';
 
 const client = createClient({
   url:       'http://localhost:3000',
@@ -91,9 +91,14 @@ const calc = client.service<Calculator>('calculator');
 const sum  = await calc.add(2, 3);
 
 // 3. Same call over WebSocket
-const ws = createClient({ url: 'wss://api.example.com', transport: 'websocket' });
+const ws = new WebSocketClient({ url: 'wss://api.example.com/rpc', enableServiceDiscovery: true });
 await ws.connect();
-const live = ws.service<Calculator>('calculator');
+try {
+  const liveSum = await ws.invoke('calculator@1.0.0', 'add', [2, 3]);
+  console.log(liveSum);
+} finally {
+  await ws.disconnect();
+}
 ```
 
 ## Client options
@@ -105,6 +110,7 @@ interface NetronClientOptions {
   timeout?:   number;                     // ms
   headers?:   Record<string, string>;
   http?: {
+    redirect?:   RequestRedirect;
     retry?:      boolean;
     maxRetries?: number;
   };
@@ -119,64 +125,33 @@ interface NetronClientOptions {
 
 ## Transports
 
-### HTTP
-
-The default. One fetch per call. Works through any reverse
-proxy, no special routing required. Supports:
-
-- **Retry on transient failures** — set `retry: true` and the
-  client re-sends on network/timeout errors with exponential
-  backoff (`2^n × 1000ms`), up to `maxRetries` attempts.
-- **Auth re-invocation** — when an auth-error middleware refreshes
-  the token after a 401, the request is automatically re-sent
-  once with the new credentials.
-
-For response caching, deduplication, richer retry strategies, and
-circuit breaking, use the [fluent HTTP
-interface](#fluent-http-interface--caching-retry-circuit-breaking).
+`createClient` selects HTTP by default. Choose `'websocket'` for a binary
+Netron listener. Supply an absolute base URL in either case.
 
 ```typescript
 const client = createClient({
-  url:       '/api',
+  url: new URL('/api', window.location.origin).href,
   transport: 'http',
-  http: {
-    retry:      true,    // default false
-    maxRetries: 3,       // default 3 when retry is enabled
-  },
-});
-```
-
-### WebSocket
-
-For subscriptions, bidirectional streaming, low-latency RPC:
-
-```typescript
-const client = createClient({
-  url:       'wss://api.example.com',
-  transport: 'websocket',
-  websocket: {
-    reconnect:            true,
-    reconnectInterval:    1_000,
-    maxReconnectAttempts: 20,
-  },
+  http: { retry: true, maxRetries: 3 },
 });
 
 await client.connect();
+const items = await client.invoke('Catalog', 'list', [], { idempotent: true });
 ```
 
-Reconnect uses exponential backoff capped at `reconnectInterval ×
-maxReconnectAttempts`. The client transparently re-subscribes
-streams on reconnect.
-
-### Connection state
+The direct HTTP client retries a network failure only when the client enables
+retries and that call declares `idempotent: true`. Cancellation and deadline
+expiry end the invocation. A WebSocket reconnect opens a new connection;
+calls still pending on the closed socket reject.
 
 ```typescript
-import type { ConnectionState } from '@omnitron-dev/netron-browser';
-
-client.getState();        // 'idle' | 'connecting' | 'connected' | 'disconnected' | 'reconnecting'
-client.isConnected();     // boolean
-client.getMetrics();      // { requests, errors, avgLatency, ... }
+const state = client.getState();
+const { requestsSent, responsesReceived, errors, avgLatency } = client.getMetrics();
 ```
+
+See [Transports](./transports.md) for the wire format, handshake, reconnect
+events and retry policies. For per-read caching and deduplication see the
+[fluent HTTP interface](#fluent-http-interface--caching-retry-circuit-breaking).
 
 ## Service proxies — typed RPC
 

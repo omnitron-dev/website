@@ -45,11 +45,9 @@ import { NetronReactClient, NetronProvider } from '@omnitron-dev/netron-react';
 
 const client = new NetronReactClient({
   url:       'https://api.example.com',
-  transport: 'auto',                 // 'auto' | 'http' | 'websocket'
+  transport: 'http',                 // matches this HTTP RPC endpoint
   timeout:   30_000,
   cache: {
-    staleTime:  30_000,              // ms before data is considered stale
-    cacheTime:  5 * 60_000,          // ms to keep unused data before GC
     maxEntries: 1000,
   },
   defaults: {                        // applied to every query unless overridden
@@ -72,9 +70,10 @@ function App() {
 ```
 
 `new NetronReactClient(config)` and the `createNetronClient(config)`
-factory are equivalent — both return a client that wraps a
-`NetronClient` (from netron-browser) and adds the query/mutation
-cache + React integration glue.
+factory return the same React client. Use `'websocket'` for an endpoint with
+a Netron WebSocket listener. The React-only `'auto'` default initializes HTTP
+on the server. In the browser it must complete the WebSocket handshake before
+initializing HTTP. See [transport selection](./transports.md#react-transport-selection).
 
 > Config field names are exact: it's `cacheTime` (not `gcTime`),
 > and `retry` accepts a plain number **or** a `RetryConfig`
@@ -339,8 +338,8 @@ items, capped at 100), `isConnected`, `isSubscribed`, `error`,
 `unsubscribe()`, `resubscribe()`, `clearHistory()`. Options:
 `event` (required), `filter`, `transform`, `buffer` (`{ size,
 timeout, strategy }`), `enabled`, `onData`, `onError`, `onConnect`,
-`onDisconnect`. Reconnect + re-subscribe on WS drops is handled by
-the underlying client.
+`onDisconnect`. The React subscription manager re-registers events after the WebSocket reconnects.
+Recover missed events from the service's cursor or a fresh snapshot.
 
 ## `useInfiniteQuery` — pagination
 
