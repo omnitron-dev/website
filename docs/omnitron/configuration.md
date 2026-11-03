@@ -178,6 +178,20 @@ directory; `['test/**']` is not a glob and matches no segment. Defaults include
 the compiler's import graph, including workspace libraries. See the
 [development recipe](./recipes.md) for both watcher modes.
 
+Watch is an application policy within a shared owner. Installed releases are
+excluded from both watchers and source compilation, even when other applications
+use development mode. Their `releaseRoot` marks the installed execution boundary;
+launch receipts and integrity checks still authenticate its files. Do not add
+`releaseRoot` to a source entry to bypass release admission.
+
+`watch: false` suppresses automatic rebuilding and restarting for a source entry;
+an explicit restart still compiles its current TypeScript sources. Disabling watch
+awaits watcher disposal and cancels queued automatic restarts. Enabling it
+reconciles changes made while it was disabled, without requiring another edit.
+Stopping and resuming an installed stack retains its verified release independently
+of this watch policy. These guarantees require an updated execution owner; updating
+only the controller cannot change the watcher already loaded in an older owner.
+
 ### `IStackConfig`
 
 A stack scopes an environment within a project:
