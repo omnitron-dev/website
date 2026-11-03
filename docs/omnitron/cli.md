@@ -566,13 +566,28 @@ daemon config.
 
 | Command | Effect |
 | ------- | ------ |
-| `omnitron secret set <key> <value>` | Store an encrypted secret |
+| `omnitron secret set <key>` | Store a secret using hidden terminal input or stdin |
+| `omnitron secret set <key> --stdin` | Explicit stdin input for automation |
 | `omnitron secret get <key>` | Read a decrypted secret |
 | `omnitron secret list` | List all keys (values hidden) |
 | `omnitron secret delete <key>` | Delete a secret |
 
-Backed by `~/.omnitron/secrets.enc` (file provider) or an
-external secret manager when configured.
+The daemon stores an encrypted envelope in its SQLite state store; the former
+`~/.omnitron/secrets.enc` is a legacy migration source. A running daemon owns
+writes to the vault. A rejected RPC write never falls back to changing its files.
+
+Omit the value to enter it without echo in a terminal, or feed it from a secure
+source on stdin. Input is limited to 64 KiB; one final LF or CRLF is removed.
+Empty input and conflicting positional/`--stdin` sources are refused. Positional
+values remain compatible, but emit a warning because shell history and process
+arguments can expose them. `secret get` deliberately prints the value; use it
+only when that output is intended.
+
+Keep references in project configuration, for example
+`settings.appEnv.api.API_KEY = { secret: 'service.api-key' }`. References limit
+which application receives the value. Do not put credentials in source files,
+frontend bundles or command arguments. Encryption at rest does not remove the
+need to protect the vault passphrase, state backups and the host account.
 
 ## Deployment
 
