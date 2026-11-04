@@ -120,6 +120,9 @@ To keep a local stack on reviewed code while the developer checkout changes,
 [prepare and select a local release](./releases.md#pin-a-local-stack). Record the
 selection for each stack. Its working directories and persistent data remain
 attached to the registered project.
+A checkout path is not proof of development mode: inspect the running application's
+release identity. See [development mode and a selected release](./releases.md#development-mode-and-a-selected-release)
+for the current stack-wide selection boundary and HMR behavior.
 
 Before starting a local stack, open **Stacks → Diagnose** or run
 `omnitron stack diagnose sample local`. This read-only check shows who manages

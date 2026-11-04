@@ -244,6 +244,28 @@ working-tree static directory cannot use this release selection. An application
 relying on a script or symlink outside the archive must package that dependency
 before it can be pinned.
 
+### Development mode and a selected release
+
+A local stack can run either its registered working tree or a selected release.
+A local host, a project checkout used as `cwd`, and `watch: true` do not imply
+that the running code comes from that checkout. Inspect each application's
+observed release identity and entry point. A packaged static web server does not
+run Vite or provide HMR; editing the checkout cannot update that server.
+
+The current persistent selection applies to the **whole stack**.
+`stack start --working-tree` changes later launches for all its applications and
+requires a reviewed stop of that stack. `project reread` preserves a selected
+release. There is currently no durable per-application switch between working-tree
+and release code. Do not replace an installed payload or redefine an owner entry
+privately to simulate one: that bypasses selection and can be lost on recovery.
+
+A reliable per-application transition requires the same persisted source selection
+in startup, reread and diagnostics, together with an owner transition scoped to the
+selected applications. It must preserve other process identities, survive a
+controller interruption and retain the previous source for rollback. Until that
+contract is implemented and qualified, a stack containing shared scientific or
+production services must not be switched to development mode as a frontend fix.
+
 ### Use an application from another project
 
 A consumer can pin one application from an independently built producer release.
