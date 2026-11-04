@@ -459,6 +459,8 @@ with the full serving and candidate commits and the exact target Node version.
 The test starts an application, replaces the guardian, verifies owner identity and
 exercises a backend update and rollback while checking application requests and logs.
 The full native scenario upgrades the guardian first, then verifies backend replacement and rollback under that guardian, crash recovery, and guardian rollback with an interrupted coordinator. The separate `--backend-only` scenario deliberately retains the original guardian and qualifies only that narrower operation.
+
+A failed availability probe records its transition phase, separate HTTP and owner-RPC results and durations, returned process identities, and the observer’s event-loop delay. Inspect `availability-probe-failed` in the run output and `probe-failures.jsonl` in the retained fixture directory. The application also reports slow writes of the fixture’s expected-log evidence. `availability-summary` keeps the total successful and failed probe counts. An availability failure still rejects qualification even when the lifecycle transitions succeed; complete log retention is a separate check.
 Use the [guardian transition procedure](#updating-the-guardian) for the
 one-time installation. Fleet handoff starts only after the guardian supports the
 protocol. The first management runtime must be installed through a separately
