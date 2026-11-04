@@ -49,6 +49,45 @@ Graph dragging changes the view layout only. Search, graph/list view, the connec
 inspector and [keyboard navigation](./console.md#topology) remain available without
 editing deployment intent.
 
+## Application service isolation
+
+Process topology is the local RPC graph inside one application launch. Each
+application that declares `topology.expose` or `topology.access` receives its own
+native Netron context and private Unix listener, owned by the resident process
+owner. The backend's management namespace is separate.
+
+Two projects, stacks, or instances can expose the same service name and version
+without sharing a provider. For example, `sample/dev/quotes` and
+`sample/test/quotes` can both expose `CollectorWorker`; each consumer resolves
+its own application's worker through `createToken('topology:CollectorWorker')`.
+No service renaming or extra namespace configuration is needed.
+
+Within one application, each service name/version has one declared provider.
+A second provider is a startup error; Omnitron never replaces another provider
+silently. Pool proxies retain PM load balancing, and singleton proxies resolve
+the current child after a restart without replacing consumers' service definitions.
+
+The same bounded discovery checks apply to pools and single processes. An application
+remains `starting` until its declared children have started and provider publication
+has completed; a ready child alone cannot announce an unfinished application online. Missing
+callable services, invalid metadata, and RPC failures retain the application and
+provider names in the startup error. CLI inspection and Console application
+details read the same recorded failure. Failed startup releases that launch's
+resources; incomplete cleanup remains owned and retryable rather than being
+reported as a successful stop.
+
+Stopping or rebuilding one application closes only its listener and providers.
+Backend handoff preserves these owner-held contexts. Existing sealed application
+SDKs keep using their bootstrap contract and `topology.access` API. An older owner
+must be upgraded to gain this isolation; the capability is reported as
+`applicationTopology@1`, and an owner upgrade requires a planned application restart.
+
+Intentional connections to another application's public services use an explicit
+Netron endpoint. A bare sibling lookup never falls back to another application or
+to the management socket. Unix directories use `0700` and sockets use `0600`;
+this separates routing namespaces, while OS accounts and containers provide
+isolation between mutually untrusted workloads.
+
 ## Declaration coverage
 
 Open **Declarations** for the selected project to refresh the bootstrap metadata

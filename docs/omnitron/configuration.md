@@ -445,14 +445,20 @@ processes: [
 ```
 
 - `expose: true` — Omnitron auto-discovers `@Service` metadata
-  from this process and registers a load-balanced proxy on daemon
-  Netron (pool processes only).
+  from this process and registers a proxy in the application's private
+  Netron context. Pools use load-balanced dispatch; singletons follow their
+  current child process.
 - `access: [...]` — list of Netron service names this process
   needs. Bootstrap injects proxies into DI under
   `createToken('topology:{ServiceName}')`.
 
-`access` is a DI convenience, not a security boundary — all
-processes managed by omnitron share the daemon's Unix socket.
+Service names resolve within one application launch. Identical names in another
+project or stack are independent; duplicate providers inside one application fail
+startup. See [application service isolation](./topology.md#application-service-isolation).
+
+`access` declares injected sibling proxies. Processes in one application share
+its private service namespace. It does not create OS isolation or per-method
+authorization between those siblings.
 
 #### Transports
 
