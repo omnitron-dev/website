@@ -29,6 +29,21 @@ backend declares the owner contracts it requires; the owner advertises the
 contracts it implements. The current `stackControl@1` contract includes durable
 stack intent, admission fences and confirmed process termination.
 
+The optional `executionScopes@1` owner contract reuses that durable mechanism for
+`{ project, stack, application? }`. The private Netron operations
+`inspectExecution`, `stopExecution` and `enableExecution` bind an application stop
+to its launch generation and parent stack revision. A child fence survives an
+owner restart; enabling the parent cannot clear it. Resuming the child requires
+its observed intent revision. Installed-stack recovery refuses a separately
+fenced child before launching any process. Older owners are refused before RPC
+or recovery-state changes.
+
+This contract is an owner primitive; it does not yet provide a Console or CLI
+selector for switching one application between its working tree and a release.
+Activating it requires an owner transition, independently of a backend update.
+Before downgrading the owner, reconcile child fences explicitly: a legacy owner
+does not understand them.
+
 Run the **candidate's CLI** with `backend upgrade <sealed-dist> --check` before
 planning activation. It validates the selected instance's owner identity and
 contracts before delegating to a guardian or draining the backend. The check runs
@@ -460,7 +475,7 @@ The test starts an application, replaces the guardian, verifies owner identity a
 exercises a backend update and rollback while checking application requests and logs.
 The full native scenario upgrades the guardian first, then verifies backend replacement and rollback under that guardian, crash recovery, and guardian rollback with an interrupted coordinator. The separate `--backend-only` scenario deliberately retains the original guardian and qualifies only that narrower operation.
 
-A failed availability probe records its transition phase, separate HTTP and owner-RPC results and durations, returned process identities, and the observer’s event-loop delay. Inspect `availability-probe-failed` in the run output and `probe-failures.jsonl` in the retained fixture directory. The application also reports slow writes of the fixture’s expected-log evidence. `availability-summary` keeps the total successful and failed probe counts. An availability failure still rejects qualification even when the lifecycle transitions succeed; complete log retention is a separate check.
+A failed availability probe records its transition phase, separate HTTP and owner-RPC results and durations, returned process identities, and the observer’s event-loop delay. Inspect `availability-probe-failed` in the run output and `probe-failures.jsonl` in the retained fixture directory. The application also reports slow writes of the fixture’s expected-log evidence. `availability-final` and the retained `availability-summary.json` keep the probe counts even when a later phase fails. The interrupted coordinator keeps its stdout, stderr and terminal error in `coordinator-result.json`; its 180-second checkpoint budget includes full artifact verification. A child failure is reported immediately rather than retried as readiness. HTTP and RPC probe deadlines remain unchanged. An availability failure still rejects qualification even when the lifecycle transitions succeed; complete log retention is a separate check.
 Use the [guardian transition procedure](#updating-the-guardian) for the
 one-time installation. Fleet handoff starts only after the guardian supports the
 protocol. The first management runtime must be installed through a separately
