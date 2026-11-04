@@ -208,18 +208,28 @@ respond.
 
 ### `omnitron service install|uninstall|status`
 
-Hand supervision of the daemon itself to the operating system.
-Omnitron supervises apps and infrastructure; without this, nothing
-supervises the daemon, so a daemon crash — disk full, a load spike,
-a container-runtime hiccup — leaves every managed app down until
-someone runs `omnitron up` by hand.
+Register the platform's processes with the operating system. In resident mode,
+the owner keeps applications running while the independent guardian supervises
+the backend. In coupled mode, the daemon also owns application processes, so its
+failure can interrupt them. OS supervision and application supervision have
+separate responsibilities.
 
 | Command | Effect |
 | ------- | ------ |
 | `omnitron service install` | Register OS supervision; resident mode requires a stopped backend and owner |
 | `omnitron service install --prepare` | Prepare independent owner/backend service definitions without stopping processes |
+| `omnitron service install --prepare --owner-runtime <sha256>` | Prepare an installed owner version separately from the selected guardian/backend |
 | `omnitron service uninstall` | Stop the supervised daemon and remove the service |
 | `omnitron service status` | Whether the OS is supervising, and what it reports |
+
+Preparation defaults both roles to the selected sealed runtime. `--owner-runtime`
+selects another already installed, verified owner by its full SHA-256. Its native
+executable and declared capabilities must satisfy the selected backend. Install
+with the same owner hash and service scope after the reviewed shutdown. Installation
+requires stopped processes and quiescent native services; a missing PID alone is
+insufficient. It does not stop services, choose a fallback or upgrade an old owner's
+capabilities automatically. Backend-only updates use `backend upgrade` and keep
+the current owner.
 
 | Platform | What is written |
 | -------- | --------------- |

@@ -152,6 +152,22 @@ The journal does not itself install an OS supervisor or promise recovery from ow
 
 With `executionHost.enabled`, `omnitron service install --prepare` writes a reviewable plan under `runtime/supervision-plan` without stopping processes or loading OS services. The plan contains the private runtime configuration and both service definitions. For a living backend, preparation requires its current recovery certificate and takes the environment from that process. Installation retains the prepared environment across the pause instead of replacing it with the installing shell’s values. An active unmanaged owner cannot change OS service ownership in place: complete a controlled initial shutdown before `omnitron service install`. Installation refuses a running backend or owner instead of stopping them implicitly.
 
+The default plan pins both roles to the selected runtime. To prepare a different
+installed owner, use `omnitron service install --prepare --owner-runtime <sha256>`.
+The ordinary artifact verifier checks its sealed bytes, native compatibility and
+execution capabilities against the selected backend. The plan records both hashes
+and renders each role from its own executable; installation requires the same owner
+hash and scope. This permits an explicitly qualified recovery combination without
+editing generated service files. It does not establish application or data-schema
+compatibility: qualify those separately, including any source-watch limitations.
+
+Preparation and installation share the runtime operation lock. Installation also
+requires launchd jobs to be unloaded, or systemd units to be inactive with no queued
+job, and rechecks process evidence before writing active files. Unknown OS query
+results refuse installation. For a planned owner window, first require a ready
+recovery certificate, a ready guardian with no pending operation, and a settled
+runtime selection; a certificate can become ready before a handoff finishes.
+
 The owner runs in `dev.omnitron.owner` on macOS or `omnitron-owner.service` on Linux. The existing daemon service runs a guardian, which owns all backend generations. It uses the same replacement and certified recovery functions as the CLI. CLI upgrades and recovery delegate through its private Unix socket, so a shell-launched successor cannot escape OS supervision. The selected backend’s private control identity determines its instance home before supervisor lookup; a custom public socket is never redirected to the invoking shell’s default instance. Recovery obtains the instance from the validated checkpoint or certified journal and checks its execution directory. A guardian refuses another instance’s upgrade or recovery. No public HTTP endpoint exposes this socket.
 
 Before accepting the managed owner, the backend verifies native launchd/systemd main PIDs, its guardian parent and, on Linux, separate owner/backend cgroups. Configuration or environment flags alone cannot establish isolation. Service entry points verify their pinned artifact before importing the runtime. Backend candidates remain in the guardian's process group; the owner and application processes remain in their separate service.
