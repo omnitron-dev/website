@@ -57,8 +57,10 @@ worst-status-wins rule:
 | Any `degraded`, none `unhealthy` | `degraded`  |
 | Any `unhealthy`                | `unhealthy`   |
 
-`degraded` means "I am still serving, but a dependency is flaky and
-you should know". `unhealthy` means "do not send me traffic".
+`degraded` reports a warning; `unhealthy` reports a failed check. Readiness
+decides whether the application can serve a particular workload. An operational
+failure must not become a warning just because other checks pass, and a warning
+must remain visible when readiness permits traffic.
 
 ## Adding an indicator
 
@@ -125,6 +127,27 @@ distinction important:
 
 If you collapse these into a single signal, the orchestrator will
 restart your app (good thing → bad thing) when a dependency hiccups.
+
+## Data origin during development
+
+Working-tree execution and an installed immutable release provide different
+origin evidence. A running process or a successful health probe does not establish
+that data came from a verified artifact. Report origin separately from database,
+transport and worker availability.
+
+Make the application's readiness policy explicit. A workload that requires
+verified producers should reject missing origin evidence by default. A local
+development stack can explicitly allow operational readiness while retaining an
+origin warning. That choice must not change persisted provenance, relabel old
+records or admit unverified observations to consumers that require verified data.
+Do not infer this exception merely from a project name or a missing environment
+variable.
+
+Preserve check severity through every adapter: a warning remains a warning in
+process health, CLI and Console; any actual failed dependency remains a failure.
+Document what an operator can use now, what evidence is missing, and what would
+make the warning clear. Test both policies through the actual configuration loader
+and the shared process-health adapter.
 
 ## Probe routes
 
