@@ -75,6 +75,25 @@ Start with the semantics of the underlying control. Avoid replacing a
 button with a clickable `div`. Custom renderers and slots can remove
 semantics that a default component supplies, so test the final composition.
 
+## Menus and popovers
+
+Under `createPrismTheme` or `PrismProvider`, menus, Select dropdowns and
+popovers release pointer input when `open` becomes `false`. Their exit
+animation may finish in the DOM, but the next click on a neighbouring control
+works immediately. Open overlays keep MUI's click-away behaviour, keyboard
+navigation and focus restoration. Closing a menu inside a dialog leaves
+the parent dialog modal.
+
+Keep the trigger mounted and give it an accessible name. Use the native
+Escape and focus-restoration behaviour; disabling it to compensate for
+an animation can strand keyboard users. Where an interaction needs immediate
+visual removal, the MUI `Menu` exported from `@omnitron-dev/prism/ui` accepts
+`transitionDuration={{ exit: 0 }}` through its ordinary public API.
+
+Test the first click after selection, immediate reopening, Escape followed
+by Tab, and menus inside dialogs. A test that retries a blocked click until
+an animation ends can hide a lost first click.
+
 ## Verification loop
 
 Navigate a representative screen using only Tab, Shift+Tab, Enter, Space
