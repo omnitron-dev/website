@@ -201,7 +201,12 @@ only the controller cannot change the watcher already loaded in an older owner.
 
 ### `IStackConfig`
 
-A stack scopes an environment within a project:
+A stack scopes an environment within a project. Boot and automatic recovery
+admit enabled stacks independently: local Docker availability does not gate
+remote attachment or stacks using external infrastructure. Provisioning failures
+remain attached to the affected stack, which retries with its own exponential
+backoff from one to fifteen minutes. Running and degraded stacks stay under
+application supervision; recovery does not restart them wholesale.
 
 ```typescript
 interface IStackConfig {
