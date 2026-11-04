@@ -157,9 +157,18 @@ installed owner, use `omnitron service install --prepare --owner-runtime <sha256
 The ordinary artifact verifier checks its sealed bytes, native compatibility and
 execution capabilities against the selected backend. The plan records both hashes
 and renders each role from its own executable; installation requires the same owner
-hash and scope. This permits an explicitly qualified recovery combination without
-editing generated service files. It does not establish application or data-schema
+and selected backend hashes and service scope. This permits an explicitly qualified
+recovery combination without editing generated service files. It does not establish application or data-schema
 compatibility: qualify those separately, including any source-watch limitations.
+
+After stopping the instance, repeat `omnitron service install --prepare` to
+review a different installed owner or newly selected backend. Preparation validates
+the saved plan's structure, instance, execution directory, service scope and native
+role identities. It copies the saved private environment exactly, including its
+secrets, even when the preparing shell has no corresponding variables. An invalid
+saved record is refused; preparation does not replace it with shell defaults.
+Review the new plan before installing. Installation still refuses changed owner
+or backend selections until an explicit preparation has recorded those bindings.
 
 Preparation and installation share the runtime operation lock. Installation also
 requires launchd jobs to be unloaded, or systemd units to be inactive with no queued

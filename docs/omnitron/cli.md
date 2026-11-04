@@ -225,10 +225,15 @@ separate responsibilities.
 Preparation defaults both roles to the selected sealed runtime. `--owner-runtime`
 selects another already installed, verified owner by its full SHA-256. Its native
 executable and declared capabilities must satisfy the selected backend. Install
-with the same owner hash and service scope after the reviewed shutdown. Installation
-requires stopped processes and quiescent native services; a missing PID alone is
-insufficient. It does not stop services, choose a fallback or upgrade an old owner's
-capabilities automatically. Backend-only updates use `backend upgrade` and keep
+with the same owner hash, selected backend hash and service scope after the reviewed
+shutdown. Repeat `service install --prepare` while stopped to review different
+installed roles. The saved plan must still belong to the same instance, execution
+directory, scope and native services; its validated private environment is preserved
+exactly, including secrets absent from the current shell. Invalid saved records
+refuse preparation. Installation retains strict role matching under the runtime
+operation lock and requires stopped processes and quiescent native services; a
+missing PID alone is insufficient. It does not stop services, choose a fallback or
+upgrade an old owner's capabilities automatically. Backend-only updates use `backend upgrade` and keep
 the current owner.
 
 | Platform | What is written |
