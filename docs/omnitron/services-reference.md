@@ -371,12 +371,24 @@ Use an immutable release directory for updates; a mutable `current` symlink can
 otherwise make process definitions and installed package identities disagree.
 
 Roles: all reads (`listProjects`, `getProject`, `scanRequirements`,
-`getProjectApps`, `getTopology`, `getTopologyInventory`, `getTopologyWorkspace`, `listStacks`, `getStack`, `getStackStatus`, `diagnoseStack`) gate on
+`getProjectApps`, `getTopology`, `getTopologyInventory`, `getTopologyWorkspace`, `listStacks`, `getStack`, `getStackStatus`, `diagnoseStack`, `reviewStackStop`) gate on
 `viewer`; `startStack`, `stopStack` and `resumeInstalledStack` on `operator`; project CRUD
 (`addProject`, `updateProject`, `removeProject`) and stack CRUD
 (`createStack`, `deleteStack`) on `admin`. Target mutations (`saveTopologyDraft`,
 `planTopology`, `applyTopologyPlan`) also require `admin`. They persist target intent,
 not executable deployment configuration. See the [workspace contract](./topology.md).
+
+`reviewStackStop({ project, stack, keepInfrastructure? })` and
+`stopStack({ project, stack, review?, keepInfrastructure? })` share the same strict
+boolean mode. Omitted or `false` removes the stack's containers after applications
+stop; `true` retains them and their ownership. Strings, numbers and `null` are
+invalid. The mode is part of the review digest, node plan and signed cluster
+permit; switching it invalidates the review. A confirmed retention receipt records
+`keepInfrastructure: true`, `keptContainers` and an empty `removedContainers` list.
+Public `stopOperation.keepInfrastructure` carries the selected mode across page
+and backend reloads. Retention preserves release selection but disables automatic
+application startup, just like a full stop. It does not add an administrator-only
+execution path or grant a viewer permission to mutate.
 
 ### `OmnitronSecrets` — `secrets.rpc-service.ts`
 

@@ -177,6 +177,18 @@ results refuse installation. For a planned owner window, first require a ready
 recovery certificate, a ready guardian with no pending operation, and a settled
 runtime selection; a certificate can become ready before a handoff finishes.
 
+For an owner maintenance window, review and stop each application stack with
+`stack stop <project> <stack> --keep-infrastructure --dry-run`, then execute the
+same mode with its review digest. This retains databases, caches, other stack
+containers, ownership and selected releases while durably disabling application
+resume and fencing watcher/recovery starts. Confirm process exit and every
+per-node receipt before shutting down native owner services. Do not substitute a
+full stack stop when the plan requires infrastructure to remain available.
+Retained containers alone do not prove application or data-schema recovery safety;
+qualify the exact releases and domain recovery separately. After the new owner is
+verified, explicitly start the reviewed releases and check their health. A backend
+or owner restart must not silently undo the maintenance stop.
+
 The owner runs in `dev.omnitron.owner` on macOS or `omnitron-owner.service` on Linux. The existing daemon service runs a guardian, which owns all backend generations. It uses the same replacement and certified recovery functions as the CLI. CLI upgrades and recovery delegate through its private Unix socket, so a shell-launched successor cannot escape OS supervision. The selected backend’s private control identity determines its instance home before supervisor lookup; a custom public socket is never redirected to the invoking shell’s default instance. Recovery obtains the instance from the validated checkpoint or certified journal and checks its execution directory. A guardian refuses another instance’s upgrade or recovery. No public HTTP endpoint exposes this socket.
 
 Before accepting the managed owner, the backend verifies native launchd/systemd main PIDs, its guardian parent and, on Linux, separate owner/backend cgroups. Configuration or environment flags alone cannot establish isolation. Service entry points verify their pinned artifact before importing the runtime. Backend candidates remain in the guardian's process group; the owner and application processes remain in their separate service.

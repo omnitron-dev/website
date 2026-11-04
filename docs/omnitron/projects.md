@@ -154,9 +154,19 @@ applications and containers. An unavailable owner or a missing source binding
 appears with its reason and prevents confirmation. Opening or closing the review
 does not change automatic resume or create a stop operation.
 
+Choose whether to stop **applications and infrastructure** (the default) or
+**applications only**, retaining the stack's containers. For the latter, use
+`--keep-infrastructure` in both review and execution:
+
+```bash
+omnitron --json stack stop example production --keep-infrastructure --dry-run
+omnitron --json stack stop example production --keep-infrastructure --review <digest>
+```
+
 Operators can confirm the reviewed inventory in Console. For automation, pass
 the returned `data.digest` to the same command with `--review <digest>`.
-A changed process generation, allocation or resource list requires a fresh review.
+The digest binds the chosen mode as well as the application/resource inventory.
+Changing the mode, process generation, allocation or resource list requires a fresh review.
 A nonzero exit status and a null digest mean the full impact could not be verified.
 
 `omnitron stack stop <project> <stack>` prepares an ownership-checked plan on
@@ -170,13 +180,24 @@ owner persists a separate execution fence before terminating anything. That fenc
 also rejects watcher restarts, scaling and automatic recovery starts. An explicit
 new stack start may clear it only after the preceding stop is confirmed.
 
-Applications terminate before their infrastructure. Infrastructure reconciliation and
-already admitted provisioning are drained before graceful container removal. Docker
-volumes are retained. Other projects/stacks and node RPC connections remain available.
-A failed process exit prevents infrastructure removal on that node.
+In the default mode, applications terminate before their infrastructure.
+Infrastructure reconciliation and already admitted provisioning are drained before
+graceful container removal. Docker volumes are retained. A failed process exit
+prevents infrastructure removal on that node.
+
+With `--keep-infrastructure`, application termination and its execution fence are
+the same, but the existing containers, infrastructure ownership and remote target
+inventory remain. The selected release is unchanged. Automatic application resume
+is disabled in both modes: retaining containers does not enable applications again
+after a backend or owner restart. Use an explicit stack start when maintenance is
+complete. A stopped application stack can therefore have running infrastructure;
+inspect `stack runtime` and infrastructure diagnostics separately. Other stacks
+and node RPC connections remain available.
 
 The node returns a durable receipt only after process termination, withdrawn RPC
-services and container absence are confirmed. Retrying an operation identity
+services and the requested infrastructure outcome are confirmed: container absence
+for a full stop, or the same retained container IDs for an applications-only stop.
+A changed retained container inventory leaves the operation unconfirmed. Retrying an operation identity
 reconciles its receipt; an old receipt cannot acknowledge a later application
 generation. A timeout or lost connection remains **unconfirmed**. It does not mean
 that the applications stopped, and it does not trigger a fallback that kills by
@@ -223,7 +244,11 @@ the binding and refuses to overwrite an allocation owned by another stack.
 An existing unbound allocation requires an explicit, evidence-checked migration;
 a new controller never guesses ownership from the project's name. Old owners and
 nodes lacking this protocol must be upgraded before confirmed remote stop is
-available. This is an activation prerequisite, not an automatic compatibility mode.
+available. A recipient must explicitly confirm `keepInfrastructure: true` in its
+inventory/plan and receipt for an applications-only stop. A legacy recipient that
+ignores the field is refused during preparation, before any node is stopped; the
+controller never silently substitutes a full stop. This is an activation
+prerequisite, not an automatic compatibility mode.
 
 The legacy `project/deployed/app` namespace still supports one source stack per
 project on a node. Concurrent source stacks on the same node need the canonical

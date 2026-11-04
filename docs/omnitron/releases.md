@@ -152,11 +152,14 @@ external file or service that trusted configuration code can read.
    report `prepared: true`, `ok: false`, `state: "requires-stop"`. The files
    are ready, but active applications still use the previous code.
 3. Record the current selection from `omnitron --json stack status <project> <stack>`
-   and agree on an application maintenance window. For a stop involving
-   infrastructure, inspect `omnitron stack stop <project> <stack> --dry-run`
-   and review the listed containers before proceeding. If only applications
-   should stop, stop their exact `project/stack/app` identities and confirm
-   each exit. Keep the previous release or working tree available for recovery.
+   and agree on an application maintenance window. To keep databases and other
+   stack containers running, review
+   `omnitron stack stop <project> <stack> --keep-infrastructure --dry-run`, then
+   execute the same mode with `--review <digest>`. This stops the applications,
+   disables automatic resume and preserves infrastructure ownership and the
+   selected release. Confirm every stop receipt before proceeding. Omit
+   `--keep-infrastructure` only when the reviewed plan includes container removal.
+   Keep the previous release or working tree available for recovery.
 4. Run `omnitron stack start <project> <stack> --release <release>`. Verify
    application readiness and source-specific health checks. A plain subsequent
    start, including controller recovery, selects the same manifest. Project

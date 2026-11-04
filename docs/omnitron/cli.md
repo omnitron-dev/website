@@ -290,8 +290,15 @@ infrastructure to a subset of the project's apps.
 | `omnitron stack start <project> <stack> [--release <id>]` | Start the stack. An explicit release becomes the durable local selection. Later starts reuse it. |
 | `omnitron stack start <project> <stack> --working-tree` | Start a stopped local stack from its registered source and clear its release selection. Release-only stacks refuse this option. |
 | `omnitron stack resume <project> <stack>` | Resume the retained release on the nodes in a confirmed cluster stop. Partial and unconfirmed results exit nonzero. Inspect each node in `--json` output. |
-| `omnitron stack stop <project> <stack> [--dry-run] [--review <digest>]` | Inspect every target with `--dry-run`. Pass its digest to stop the reviewed applications and containers. Volumes are retained. |
+| `omnitron stack stop <project> <stack> [--keep-infrastructure] [--dry-run] [--review <digest>]` | Inspect every target with `--dry-run`. The default stops applications and containers, retaining volumes. Add `--keep-infrastructure` to stop applications while preserving containers and ownership. Use the same mode and digest for execution. |
 | `omnitron stack runtime <project> <stack>` | Show runtime details (containers, ports) |
+
+An applications-only maintenance stop also disables automatic application resume
+and preserves the selected release. A backend or owner restart does not start it
+again; use an explicit `stack start`. Both stop modes share the same permissions,
+review, execution fence and per-node receipts. A legacy remote node that cannot
+confirm retention blocks preparation instead of receiving a destructive fallback.
+See [confirmed stack stops](./projects.md#confirmed-stack-stops).
 
 Before a first start or after changing an environment:
 

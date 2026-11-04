@@ -310,6 +310,17 @@ After a confirmed stop, **Deploy** starts the selected code. **Use working treeâ
 appears on stopped local stacks that permit source launches. It starts the stack
 from its registered directory and changes the choice for future restarts.
 
+In **Review stopâ€¦**, enable **Keep infrastructure** to stop only the
+applications. The confirmation becomes **Stop applications**, and the inventory
+labels retained resources **Containers kept**. With the option off,
+**Stop stack** removes the listed **Containers to remove** after application exit.
+Switching modes discards the previous review and obtains a new digest; confirmation
+stays disabled while the replacement review is loading, incomplete or not supported
+by the controller. A viewer can inspect the same inventory but cannot execute either
+stop. Retained containers remain visible in runtime diagnostics even when application
+status is **Stopped**. Neither mode clears the selected release, and both disable
+automatic application resume until an explicit start.
+
 The selected ID is launch intent. Current application health and any release
 evidence from the owner describe actual execution. A transfer record or a
 selected ID alone cannot establish that every running process loaded that release.
