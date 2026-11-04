@@ -66754,7 +66754,7 @@
       "name": "ProcessPool",
       "package": "@omnitron-dev/titan-pm",
       "kind": "class",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-pm/src/process-pool.ts#L97",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-pm/src/process-pool.ts#L99",
       "imports": [
         {
           "path": "@omnitron-dev/titan-pm",

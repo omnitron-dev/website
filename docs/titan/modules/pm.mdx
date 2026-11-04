@@ -128,7 +128,10 @@ details are hidden.
 ### Worker pools
 
 ```typescript
-const pool = await this.pm.pool(ImageWorker, { min: 2, max: 8 });
+const pool = await this.pm.pool(ImageWorker, {
+  size: 2,
+  autoScale: { enabled: true, min: 2, max: 8 },
+});
 const result = await pool.execute('resize', input, width);
 ```
 
@@ -136,6 +139,19 @@ The pool routes the call to a free worker, queues if all workers
 are busy, and respects the pool's load-balancing policy. The proxy
 returned by `pool()` also lets you call `@Public` methods directly
 (`pool.resize(input, width)`).
+
+Worker retirement excludes the old proxy from both direct and queued requests
+before termination begins. A replacement becomes ready first; already admitted
+calls finish within `requestTimeout` (30 seconds when disabled). If a planned
+drain cannot finish, it rejects and keeps the worker owned for retry. Explicit
+pool destruction retains its bounded shutdown policy. A failed termination never
+re-enables the old proxy. Requests are not automatically replayed, because an
+unknown outcome may already have changed application state.
+
+Only healthy, idle workers accept new calls. Requests wait in the bounded queue
+while every worker is busy, unhealthy or retiring, and resume when capacity or
+health recovers. Normal recycling can change worker PIDs without restarting the
+application or replacing its topology endpoint.
 
 ### Supervisors
 
