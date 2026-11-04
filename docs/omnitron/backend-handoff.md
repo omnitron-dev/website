@@ -385,6 +385,15 @@ It includes non-Node workers. The host and process-lifetime fences share the sta
 reboot. A dirty legacy receipt is preserved and can be bound to the current UUID
 only by explicit sealed reconciliation. Clean legacy shutdown receipts remain
 valid for ordinary startup; log assembly retains incomparable live legacy writers.
+Process births are collected in UTC through one shared identity contract for log
+recovery, native owner evidence and rollout coordination. A legacy local-time
+identity remains ambiguous while its PID is alive; changing the observer timezone
+cannot prove process death or release an update fence. New macOS recovery plans
+use protocol 2, so earlier recovery tools refuse them instead of misinterpreting
+the UTC identity. Use the current recovery tool and owner for such a plan; a
+legacy owner requires a separately reviewed compatible recovery procedure.
+Rollout journals retain a null legacy birth field alongside the canonical lifetime
+so older backends conservatively retain a live writer during rollback.
 Unlike Linux cgroups, process groups cannot reveal
 an unrecorded process that detached and reparented before observation. Supply the
 complete recorded cohort and independently audit the drain; incomplete native
