@@ -188,6 +188,13 @@ launch receipts and integrity checks still authenticate its files. Do not add
 an explicit restart still compiles its current TypeScript sources. Disabling watch
 awaits watcher disposal and cancels queued automatic restarts. Enabling it
 reconciles changes made while it was disabled, without requiring another edit.
+
+If an application is explicitly redefined while a restart is already stopping it,
+the earlier restart request is cancelled, including an identical redefinition.
+The application remains stopped with its current definition; inspect it and start
+it explicitly. Disabling global watch alone lets an already admitted restart
+finish when the application's definition is unchanged.
+
 Stopping and resuming an installed stack retains its verified release independently
 of this watch policy. These guarantees require an updated execution owner; updating
 only the controller cannot change the watcher already loaded in an older owner.
