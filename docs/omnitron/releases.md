@@ -420,6 +420,21 @@ commit determines how the controller obtains the framework.
   single Omnitron checkout. The controller builds the linked packages from its
   clean clone. Mixing linked and registry framework packages fails the build.
 
+### Read the build result
+
+A retained manifest means packaging finished; it does not mean the release passed
+its checks. CLI and Console interpret the same recorded gate and artifact outcomes.
+`release build` exits **0** only when every recorded check passed and no artifact
+failed, **1** for a failed check or artifact, and **2** when checks are absent or
+unfinished (including `--skip-gates`, timeouts and killed checks). A failure takes
+precedence over unfinished checks. Signals and earlier build exceptions retain
+their ordinary nonzero exit codes.
+
+Console marks an unsuccessful build as failed, displays the specific gate or
+artifact reason, and retains its release ID, manifest, logs and individual results
+for diagnosis. Successful build checks do not authorize deployment: destination,
+source, runtime, role and lifecycle admission still run when selecting the release.
+
 ### Choose an SDK source
 
 Repository location and trust are separate concerns. Omnitron uses Git rather
