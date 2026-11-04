@@ -156,13 +156,24 @@ directly.
 
 ## TS compiler — `ts-compiler.ts`
 
-JIT TypeScript compilation, used so the **daemon process** (which
-runs from compiled JS and can't `import` `.ts`) can read fresh
-`src/bootstrap.ts` topology in dev mode. Compiles a single
-bootstrap file and its relative imports to ESM via **esbuild**
-(<10 ms/file); all non-relative imports (npm / workspace
-packages) are marked external rather than bundled — only the
-static `defineSystem()` shape is needed.
+The declaration reader compiles TypeScript bootstrap definitions with esbuild so
+plain Node can inspect fresh topology before starting workers. Declaration reads,
+worker builds and watched rebuilds share `runtime-package-resolution.ts`:
+
+- TypeScript workspace dependencies are compiled with their relative imports,
+  decorators and constructor parameter properties. ESM-only package exports work.
+- Compiled SDK and registry packages stay external, preserving their installed
+  module and DI identities. Each import retains the dependency selected from its
+  original package, including a library's private dependency version.
+- External paths are relative to the **physical output directory**. A registered
+  project may be a directory symlink; Node resolves that symlink when importing
+  the output. Using its lexical depth would produce an invalid dependency path.
+  ESM paths also preserve spaces, `#` and `%` through URL encoding.
+
+Qualify a development stack through its registered path, including any symlink,
+not only through the physical checkout. Verify an initial launch, a shared-library
+edit that triggers a watched rebuild, and a fresh manual restart after disabling
+watch. This checks the same compilation policy used by the resident owner.
 
 > This module is `@deprecated` — superseded by `BuildService`,
 > which pre-bundles every entry point. It is retained for the

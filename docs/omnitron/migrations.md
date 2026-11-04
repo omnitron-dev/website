@@ -182,6 +182,12 @@ replace the URL's host, port, database or credentials. Conflicting owners of the
 resolved destination refuse the plan. Managed vault resolution remains part of the
 stack's existing environment contract; secrets never travel as command arguments.
 
+Migration preparation validates `settings.appEnv` against every application in the
+stack before selecting migration owners. Non-migrating applications may have their
+own environment overrides; an unknown application name still refuses the plan.
+Each selected migrator receives only its own resolved application environment,
+including managed secrets, rather than the environment of other stack members.
+
 All requested programs are prepared before executing any. A failed migration blocks
 candidate application activation, and an interrupted migration is never retried
 automatically. Previously committed registries remain committed: there is no global
