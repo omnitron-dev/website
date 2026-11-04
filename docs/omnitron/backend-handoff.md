@@ -28,6 +28,9 @@ A compatible RPC envelope does not imply compatible lifecycle behavior. A sealed
 backend declares the owner contracts it requires; the owner advertises the
 contracts it implements. The current `stackControl@1` contract includes durable
 stack intent, admission fences and confirmed process termination.
+Stack stop and launch admission cover the same complete stack prefix, including
+retained applications with legacy nested names. Watch and recovery cannot restart
+such an application while its parent stack is fenced.
 
 The optional `executionScopes@1` owner contract reuses that durable mechanism for
 `{ project, stack, application? }`. The private Netron operations
