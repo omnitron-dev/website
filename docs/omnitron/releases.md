@@ -86,15 +86,28 @@ system, architecture, Node binary and libc. `omnitron release show <release>` an
 **Releases → Built with** display the target. Older manifests display *Target not
 recorded*. The JSON output also includes the Node executable digest.
 
-On a remote deployment, the receiving node compares the shared Titan packages and their transitive
-dependencies with the independent process owner's installed graph. Package bytes,
-versions, resolved peers, optional dependencies and shared module identities must
-match. The owner, the application and its extensions then resolve shared modules
-to the same installed package. Application-specific packages stay in the release.
+The application owns its complete SDK and bootstrap adapter. Local and remote
+installation preserve the same archived dependency graph: package bytes, peers,
+optional dependencies and module identities remain those admitted by the build.
+An independently updated owner supplies process supervision and the exact Node
+executable; it does not replace the application's Titan or Omnitron packages.
+The application SDK commit and owner commit are separate identities and may differ.
 
-The deployment detail identifies a mismatched package or dependency. Check the
-owner build and target before retrying. The node verifies the stack settings and
-the installed graph before migrations or registration changes. Delivery runs offline.
+Both paths use the same bounded archive extraction and closure verification.
+Before execution, they verify the archive digest and size, compiled launch entry,
+private package graph, complete payload, target and allowed Node options. Checked
+delivery runs offline, without installing dependencies or rebinding the graph.
+A mismatch refuses the operation with its cause; rebuild for the required target
+or repair the declared input instead of modifying an installed archive.
+
+Remote checked delivery requires an authenticated independent execution owner
+using resident execution protocol 1. The receiving backend supplies the extractor
+from its attested runtime; the owner supplies the execution binding. Owner ID,
+PID and controller epoch are checked before delivery, registration and start.
+An unknown protocol, coupled daemon or changed grant refuses the operation.
+These checks preserve the existing role and recipient-fencing requirements;
+they are not a transaction across nodes. An older owner can run its application's
+own compatible SDK without claiming newer launch-receipt capabilities.
 
 The optional `NODE_OPTIONS=--max-old-space-size=<MiB>` setting must match the
 value recorded in the archive. Additional module paths, loaders and preloads cannot
@@ -447,10 +460,11 @@ and declared gates are available in that environment.
 
 In Console, **Releases → Built with** and the CLI command `omnitron release show`
 identify the framework source and package count. Use `--json` on the CLI to
-inspect the recorded npm versions and integrity digests. On a remote stack, a registry release
-requires the destination process owner's full, clean framework commit as well
-as a compatible runtime graph. A backend upgrade alone can leave an older owner
-in charge of the applications.
+inspect the recorded npm versions and integrity digests. On a remote stack, a
+registry release requires a verified execution owner and compatible Node target.
+Its application SDK remains the exact packed graph identified by the producer;
+it does not have to share the owner's SDK commit. A backend upgrade alone can
+leave an older owner in charge of the applications.
 
 If a resident owner predates build reporting, release admission asks the node to
 verify the running owner on demand. The node checks the registered systemd or
@@ -759,7 +773,19 @@ Use `--help` on a command for its complete option set.
 
 ## Prepare without damaging the running release
 
-Remote application installation uses a separate directory identified by package version and artifact digest. Reinstalling a package version does not clear the currently running directory. A failed transfer or dependency install leaves existing application files in place. Dependency installation enforces package engine requirements.
+Remote application installation uses a separate directory identified by package
+version and artifact digest. Reinstalling a package version does not clear the
+currently running directory. A failed transfer, archive validation or target check
+leaves existing application files in place. Checked releases never install
+packages on arrival. The explicit legacy development bundle path has separate
+installation and engine checks; it is not a fallback for a rejected checked release.
+
+The installation receipt records the unchanged application SDK and payload,
+producer and consumer identities, exact execution target and physical owner
+binding. Reusing another owner's receipt is refused even when its SDK bytes
+match. Preparation does not evaluate an application module. An installed entry
+must pass its receipt check before bootstrap introspection or script execution;
+a missing or modified receipt cannot silently turn it into a development app.
 
 For each node, all selected artifacts must install and migrate successfully before publishing new boot definitions. If one preparation fails, no candidate on that node is activated. Earlier successful migrations may already have committed: this is not a transaction across application databases. Use backward-compatible schema changes and verified database backups.
 
