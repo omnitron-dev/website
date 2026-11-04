@@ -13094,7 +13094,7 @@
       "name": "GateOutcome",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/release/manifest.ts#L111",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/release/manifest.ts#L125",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/dto/services",
@@ -13574,6 +13574,54 @@
         },
         {
           "path": "@omnitron-dev/omnitron/operations",
+          "guide": "/docs/omnitron/releases"
+        }
+      ]
+    },
+    {
+      "name": "InspectedReleaseFile",
+      "package": "@omnitron-dev/omnitron",
+      "kind": "interface",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/release/artifact-inspection.ts#L15",
+      "imports": [
+        {
+          "path": "@omnitron-dev/omnitron/release-archive",
+          "guide": "/docs/omnitron/releases"
+        }
+      ]
+    },
+    {
+      "name": "inspectReleaseArtifact",
+      "package": "@omnitron-dev/omnitron",
+      "kind": "function",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/release/artifact-inspection.ts#L135",
+      "imports": [
+        {
+          "path": "@omnitron-dev/omnitron/release-archive",
+          "guide": "/docs/omnitron/releases"
+        }
+      ]
+    },
+    {
+      "name": "InspectReleaseArtifactOptions",
+      "package": "@omnitron-dev/omnitron",
+      "kind": "interface",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/release/artifact-inspection.ts#L52",
+      "imports": [
+        {
+          "path": "@omnitron-dev/omnitron/release-archive",
+          "guide": "/docs/omnitron/releases"
+        }
+      ]
+    },
+    {
+      "name": "InspectReleaseFileRequest",
+      "package": "@omnitron-dev/omnitron",
+      "kind": "interface",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/release/artifact-inspection.ts#L46",
+      "imports": [
+        {
+          "path": "@omnitron-dev/omnitron/release-archive",
           "guide": "/docs/omnitron/releases"
         }
       ]
@@ -15838,11 +15886,23 @@
       "name": "ReleaseArtifact",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/release/manifest.ts#L68",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/release/manifest.ts#L82",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/dto/services",
           "guide": "/docs/omnitron/services-reference"
+        }
+      ]
+    },
+    {
+      "name": "ReleaseArtifactInspection",
+      "package": "@omnitron-dev/omnitron",
+      "kind": "interface",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/release/artifact-inspection.ts#L24",
+      "imports": [
+        {
+          "path": "@omnitron-dev/omnitron/release-archive",
+          "guide": "/docs/omnitron/releases"
         }
       ]
     },
@@ -15910,7 +15970,7 @@
       "name": "ReleaseManifest",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/release/manifest.ts#L192",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/release/manifest.ts#L206",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/dto/services",
@@ -16394,7 +16454,7 @@
       "name": "StackReleaseRequirements",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/release/manifest.ts#L438",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/release/manifest.ts#L452",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/dto/services",

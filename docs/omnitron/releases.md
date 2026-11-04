@@ -131,6 +131,67 @@ Admission checks the same identities without changing their pinned bytes. Restor
 a verified original manifest or create a new release with a credential-free
 remote; editing a selected manifest invalidates its digest.
 
+### Inspect migration provenance
+
+An application artifact records its owning Git package in
+`artifacts[].packageSource`. The `migrations` map identifies tracked migration
+files; `migrationPrograms` identifies the explicitly declared entry modules,
+including registries whose filenames do not contain `migrations`.
+
+Each declared entry records the source path, Git blob and SHA-256, plus the
+compiled path and SHA-256 from the actual packed closure. The builder uses the
+same database ownership and stack overrides as deployment. With `--for <stack>`,
+it records that stack's declarations. Without a selected stack, it combines the
+configured stacks and refuses conflicting bindings. It verifies physical files
+and committed source bytes without evaluating application or migration code.
+
+Program provenance does not prove which migrations ran in a database, nor does
+it inventory every imported source file. A registry can change when adding a
+migration; its fingerprint is separate from the immutable migration-file map.
+The shared Kysera runner remains responsible for comparing applied migration
+bodies with database history. Imported applications retain the producer's
+records. Missing records in an older artifact mean **unknown**, and an empty
+migration-file map does not prove the absence of migration programs.
+
+### Inspect an archive without running it
+
+Use the public `@omnitron-dev/omnitron/release-archive` entry point when tooling
+needs to inspect compiled modules, native binaries or static assets offline:
+
+```ts
+import { inspectReleaseArtifact } from '@omnitron-dev/omnitron/release-archive';
+
+const inspected = await inspectReleaseArtifact(releaseId, 'api', {
+  files: [
+    { path: 'dist/native/service' },
+    { path: 'dist/native/asset.json', includeContents: true },
+  ],
+});
+if (inspected.manifestSha256 !== trustedManifestSha256) {
+  throw new Error('Release differs from the trusted selection');
+}
+```
+
+Obtain `trustedManifestSha256` from the reviewed release selection, independently
+of the inspected store. The result includes the consumer artifact, its original
+producer and target, verified closure, and each requested file's size and SHA-256.
+The default store can be overridden with `releasesRoot`.
+
+Inspection reuses release loading, bounded extraction and complete closure
+verification. It accepts a target different from the inspection machine and
+never imports application code, starts an owner or records an installation.
+Requested files must be physical regular members. Hashing is streamed;
+`includeContents` opts into at most 4 MiB per file and 16 MiB per request.
+There may be up to 64 requested files, in addition to the launch entry. Private
+scratch copies are removed on success and failure. The existing full-tree
+verifier's resource limits still apply.
+
+This proves integrity against the trusted manifest, not deployment permission,
+passed release gates, application behavior or migration safety. A legacy archive
+without a recorded compiled launch, closure or target is refused. The shared
+loader verifies all archives in the selected release, so an absent or corrupt
+sibling artifact also refuses inspection.
+
 ### Match the execution target
 
 A checked application archive contains its compiled code, production dependencies,
