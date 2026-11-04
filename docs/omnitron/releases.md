@@ -37,6 +37,55 @@ Equal archive hashes identify delivered bytes. They do not by themselves identif
 a running process, or prove that native dependencies built for macOS will run on
 Linux. Use the launch receipt and the destination's runtime when checking a stack.
 
+### Qualify a separate working copy
+
+Install dependencies in each checkout using the Node target and the pnpm version
+pinned by the project. Keep `verifyDepsBeforeRun: error`. A symlink to another
+checkout's entire `node_modules` also reuses that checkout's workspace state and
+links; matching lockfiles alone do not make it this checkout's installation.
+Share the package manager's [content-addressable store](https://pnpm.io/symlinked-node-modules-structure)
+instead. On a fresh checkout, run the project's declared checks normally:
+
+```bash
+pnpm install --frozen-lockfile
+pnpm run typecheck
+pnpm run test
+pnpm run build
+```
+
+Use `--offline` for installation when the store already contains every required
+package. A missing package is a failed prerequisite. Keep the lockfile, archive
+integrity checks and allowed build scripts intact. Running an underlying test
+binary directly can help diagnose a failure, but does not prove that the normal
+package-manager entry point passed. Native dependencies must match the selected
+Node, operating system and architecture.
+
+Working-copy checks cover the files present during that run. For a release,
+commit the intended source and use the existing builder. It creates fresh clones,
+installs from the frozen lockfile and records the declared gates and artifacts.
+For vendored framework archives, supply their full source revision and a local
+repository containing it; the builder reproduces and verifies their bytes.
+A local Git repository is a supported source and does not require a push.
+
+An isolated controller directory keeps qualification registrations and output out
+of a running controller's registry. Create a fresh directory for the attempt,
+leave its daemon stopped, and use the same directory for both commands:
+
+```bash
+OMNITRON_HOME=/work/qualification-instance omnitron project add example /work/example
+OMNITRON_HOME=/work/qualification-instance omnitron release build example \
+  --project-commit <full-project-sha> \
+  --omni-commit <full-framework-sha> \
+  --framework-repository /work/framework
+```
+
+Register the directory containing `omnitron.config.ts`, which can be nested in a
+monorepo. Declare gates through `omnitron.release.gates` in the workspace's
+`package.json` or its existing `scripts/gates.mjs`, never both. With neither,
+the manifest records `not-run`; an artifact is not evidence that tests passed.
+`OMNITRON_HOME` isolates controller state, not test databases, application ports
+or external services. Configure those separately for the project's checks.
+
 ### Keep package-manager resolution semantics
 
 A checked release preserves the production dependency graph installed from its
