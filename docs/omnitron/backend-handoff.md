@@ -191,6 +191,8 @@ or owner restart must not silently undo the maintenance stop.
 
 The owner runs in `dev.omnitron.owner` on macOS or `omnitron-owner.service` on Linux. The existing daemon service runs a guardian, which owns all backend generations. It uses the same replacement and certified recovery functions as the CLI. CLI upgrades and recovery delegate through its private Unix socket, so a shell-launched successor cannot escape OS supervision. The selected backend’s private control identity determines its instance home before supervisor lookup; a custom public socket is never redirected to the invoking shell’s default instance. Recovery obtains the instance from the validated checkpoint or certified journal and checks its execution directory. A guardian refuses another instance’s upgrade or recovery. No public HTTP endpoint exposes this socket.
 
+A periodic guardian health inspection does not represent an operator operation. One command can reserve admission while that read-only inspection finishes, for at most ten seconds. A second command, active recovery or shutdown is refused. Admission repeats isolation checks before starting work. A timed-out command is never executed later, and `operationPending` includes the reserved command. The correction lives in the guardian: replacing only the backend cannot update an older guardian's admission behavior.
+
 Before accepting the managed owner, the backend verifies native launchd/systemd main PIDs, its guardian parent and, on Linux, separate owner/backend cgroups. Configuration or environment flags alone cannot establish isolation. Service entry points verify their pinned artifact before importing the runtime. Backend candidates remain in the guardian's process group; the owner and application processes remain in their separate service.
 
 If a backend dies, the guardian restores it only from a certified checkpoint or a recorded interrupted activation. If the guardian dies, the OS restarts it and the same ownership checks apply. Recovery retries use bounded backoff and preserve the reason when state cannot be proved. `omnitron service status` reads guardian diagnostics even while the backend is unavailable; private `execution/supervisor.log`, `supervisor-state.json` and `backend-startup.log` provide the underlying evidence. A living unverified backend is never duplicated or killed automatically.
@@ -456,6 +458,7 @@ window. In the repository’s GitHub Actions, run **Qualify a managed backend ha
 with the full serving and candidate commits and the exact target Node version.
 The test starts an application, replaces the guardian, verifies owner identity and
 exercises a backend update and rollback while checking application requests and logs.
+The full native scenario upgrades the guardian first, then verifies backend replacement and rollback under that guardian, crash recovery, and guardian rollback with an interrupted coordinator. The separate `--backend-only` scenario deliberately retains the original guardian and qualifies only that narrower operation.
 Use the [guardian transition procedure](#updating-the-guardian) for the
 one-time installation. Fleet handoff starts only after the guardian supports the
 protocol. The first management runtime must be installed through a separately
@@ -480,6 +483,8 @@ the same build is safe. A different runtime for the same commit and target
 requires resolving the build discrepancy. The publisher can admit foreign
 architectures without executing the contained Node binary. Only the local
 publisher can supply filesystem paths.
+
+The receiving node validates archive entries before extraction and restores each validated regular file's permissions before verifying the sealed runtime hash. Executable bits remain identical even when the service uses `umask 077`; the receiver does not change the process-wide mask. Special mode bits, group/other-writable entries, links outside the validated archive structure and ownership changes are refused. Distribution neither changes the selected runtime nor starts a backend.
 
 ### Distribute, review and activate
 
