@@ -342,10 +342,11 @@ process status: an online process can still have an unhealthy mail queue.
 Diagnostics reports RPC transport, authentication, heartbeat freshness and retry timing separately from replication backlog and acknowledgements. Read failures retain their cause instead of appearing as an empty queue or an unexamined node. Historical repairs show separate verified/restored counts; an unreadable reconciliation journal remains a warning. The same interpretation is available through `omnitron node check <id>`; see [operational diagnostics](./diagnostics.md#rpc-connection-and-replication).
 
 Diagnostics separates the replication channel from the optional telemetry relay.
-A slave can replicate normally without exposing the master-only
-`OmnitronTelemetry` service. Console explains that absence as **not exposed**;
-authentication and connectivity failures remain **unavailable** with their actual
-reason. On a master, a missing relay requires checking its startup logs.
+Every updated node exposes its relay observation: a controller can report a local
+database aggregator; a worker explicitly reports **not applicable** and points to
+durable replication. A missing endpoint on an older backend stays **unavailable**,
+as do authentication and connectivity errors. CLI and Console interpret the same
+contract; absence never becomes an invented healthy or zero-loss reading.
 
 Live mode polls `OmnitronLogs.streamLogs`; time ranges and older pages use
 `queryLogs`. Both apply the same node, application, level and label filters.

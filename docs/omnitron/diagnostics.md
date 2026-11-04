@@ -48,6 +48,24 @@ does not prove application correctness: register domain health checks and
 monitor their coverage. Older daemons without the runtime indicator appear as
 unexamined coverage in `doctor`.
 
+## Process, health and start prerequisites
+
+`stack list`, `stack status` and Console show process lifecycle separately from
+application health. **Running** means the expected processes were observed online;
+it does not prove their domain checks passed. **Healthy**, **Health warning**,
+**Unhealthy** and **Health unknown** describe those checks. A deliberately stopped
+application has **Not running** health, rather than an invented probe failure.
+
+Stack detail preserves the application, physical node and failed or warning
+checks. A healthy replica cannot hide an unobserved replica on another node.
+Missing measurements and failed owner/node reads remain unknown. Concurrent local
+stack readers share one owner observation, and a process replaced during that read
+cannot inherit the previous process's health. CLI and Console use the same reading.
+
+**Start prerequisites** (`stack diagnose`) is a separate, read-only preflight:
+it explains what starting would require or change. It does not start applications
+and cannot establish the health of a future launch.
+
 ## Stack infrastructure ownership
 
 `omnitron stack diagnose <project> <stack>` and Console's stack diagnosis inspect
@@ -97,6 +115,15 @@ acknowledgements do not refresh progress. Database read failures propagate as
 unavailable, never as an empty queue. The slave's legacy `connected` field
 represents its optional push channel and is not evidence about master-driven
 replication. A failed status request is shown as **unavailable**, with its reason.
+
+The optional telemetry relay has its own explicit observation. A controller using
+a local database aggregator reports **local database** without requiring a remote
+transport. A stopped relay, missing destination, transport failure or dropped
+entries remain visible. Workers report **not applicable** because their logs and
+metrics use the durable replication outbox; inspect its acknowledgement evidence
+above. This is an explicit node reply, never an inference from a missing service
+error. Older nodes without this contract, failed authentication and failed reads
+remain **unavailable** with a reason, without fabricated zero-loss counters.
 
 Netron disconnect events and heartbeat failures trigger reconnect with backoff
 from 5 seconds to 2 minutes. Peer and SSH tunnel cleanup run independently and

@@ -65,6 +65,10 @@ commit the intended source and use the existing builder. It creates fresh clones
 installs from the frozen lockfile and records the declared gates and artifacts.
 For vendored framework archives, supply their full source revision and a local
 repository containing it; the builder reproduces and verifies their bytes.
+Reproduction executes the framework's declared `pnpm run build`, including any
+auxiliary generation/declaration steps, with Turbo cache reads disabled. It does
+not substitute a partial list of tasks. The result must match every committed
+archive's SHA-512 before application installation or gates run.
 A local Git repository is a supported source and does not require a push.
 
 An isolated controller directory keeps qualification registrations and output out

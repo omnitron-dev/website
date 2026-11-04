@@ -136,10 +136,11 @@ omnitron logs sample/local/api --lines 50
 ```
 
 Open the stack’s **Applications** section in Console or read the **Apps** rows
-in CLI status. Check each expected application's status and inspect the logs for
-the first one that failed. A local stack can report `running` even when its
-application exited during startup. For service readiness, check the application's
-[configured health probes](./diagnostics.md) as well.
+in CLI status. **Process** and **Health** are separate columns: online processes
+may have failed domain checks. The stack health summary identifies warnings,
+failures and missing observations; detail retains the application and node.
+**Start prerequisites** checks configuration and provisioning without starting
+anything. See [process and health readings](./diagnostics.md#process-health-and-start-prerequisites).
 
 Standalone deployments use the ordinary start workflow. On an enrolled HA
 cluster, an operator recovering a previously stopped installation can
