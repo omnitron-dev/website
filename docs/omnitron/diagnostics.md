@@ -7,6 +7,11 @@ service. Omnitron uses the same finding contract in commands, runtime health and
 notification adapters. Capture does not mean recovery, and broker acceptance
 does not mean a person received a message.
 
+`doctor` checks the complete internal database schema, including Titan’s
+`metrics_samples` table. The normal test typecheck verifies that the required
+table list covers inherited module tables as well as Omnitron’s own tables.
+A missing metrics table is a database finding, not a healthy empty chart.
+
 ## Investigate a failure
 
 ```bash

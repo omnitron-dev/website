@@ -53634,7 +53634,7 @@
       "name": "WebSocketServerAdapter",
       "package": "@omnitron-dev/titan",
       "kind": "class",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan/src/netron/transport/websocket/server.ts#L18",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan/src/netron/transport/websocket/server.ts#L39",
       "imports": [
         {
           "path": "@omnitron-dev/titan/netron/transport/websocket",

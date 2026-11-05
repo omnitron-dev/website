@@ -273,6 +273,12 @@ runtime.
 | `EVENT_METADATA_SERVICE_TOKEN`| —                                    | Metadata propagation                   |
 | `EVENT_DISCOVERY_SERVICE_TOKEN`| —                                   | Decorator discovery                    |
 
+`EventValidationService.registerSchema(name, schema)` accepts Zod schemas,
+JSON Schema and custom `ISchemaValidator` implementations. Pass Zod objects
+directly; the service adapts their parse results to its validation contract.
+`validateData(name, payload)` returns a boolean; `validate(name, payload)`
+returns the validation result, including field errors.
+
 ## Lifecycle
 
 `EventsService` implements `onInit`, `onStart`, `onStop`,

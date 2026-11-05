@@ -56,7 +56,9 @@ The root `pnpm test` runs the workspace suite. `pnpm test:ci` starts a dedicated
 Compose project, runs that suite and removes its test resources on success or
 failure. CI runs the complete suite in addition to focused release and security
 gates; a passing focused gate does not substitute for the full run. For repeated
-local tests, use `pnpm test:up` and `pnpm test:down` instead. Read
+local tests, use `pnpm test:up` and `pnpm test:down` instead. Redis-backed suites
+use real test infrastructure in CI too. `USE_MOCK_REDIS=true` is an explicit
+unit-only mode; unavailable Redis does not silently select it. Read
 [Testing](../testing/index.md) for the distinctions between unit,
 integration and cross-runtime tests.
 

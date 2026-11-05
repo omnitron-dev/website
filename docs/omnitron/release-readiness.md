@@ -31,7 +31,11 @@ preparing its npm archives:
    its browser configuration. Both belong to normal workspace typecheck.
 3. Qualify the same commit through independent clean builds, all packed package
    entry points and consumers, tests with isolated services, documentation,
-   and native backend transition/rollback on the fleet's Node versions.
+   and native backend transition/rollback on the fleet's Node versions. The native
+   qualification also delivers an application built with the candidate SDK through
+   the previous execution owner, verifies its private dependency graph, reuses the
+   verified installation and restores the retained application. A matching
+   controller version alone is not proof of application compatibility.
    Record CLI and Console acceptance separately from isolated fixtures.
 
 Do not reuse a passing result from an earlier commit as proof for the selected

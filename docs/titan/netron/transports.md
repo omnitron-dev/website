@@ -218,6 +218,10 @@ Startup succeeds only when every configured server transport is available and ha
 started. If any listener fails, Netron waits for the other factories to settle,
 then closes all created listeners and connections through the same cleanup path
 as `stop()`. A late factory cannot leave a socket behind a failed startup.
+WebSocket readiness waits for the native listener, including host resolution and
+an external HTTP server. Bind errors reject startup instead of returning a ready
+adapter. Port `0`, in options or a `ws://host:0` address, asks the OS for a free
+port; it never selects the protocol default.
 Concurrent `stop()` joins that lifecycle; a new `start()` or `connect()` is refused
 while cleanup is running. The configuration remains available for a retry.
 
