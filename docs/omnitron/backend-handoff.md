@@ -337,6 +337,20 @@ and drop-ins. Apply rechecks these properties and preserves the unit's account,
 environment and working directory. Prepare and review a separate guardian plan
 for installations that predate the fenced fleet handoff. Updating the execution owner's runtime still requires an application maintenance window.
 
+On Linux, the complete guardian cgroup must contain only the recorded guardian
+and backend, with no occupied descendants. A refusal reports the relative group
+and expected/observed PIDs separately from frozen or ambiguous group state.
+Short-lived native commands used by a health inspection can temporarily occupy
+that group. Inspect the reported processes, allow their operation to finish, and
+repeat preparation; do not exempt them from the stop fence or kill an unknown
+process to make the check pass. Apply repeats the check before stopping the unit.
+
+The kernel defines `cgroup.procs` as an unordered process set and can repeat a PID
+during a read. The reader normalizes ordering and repeated entries while retaining
+strict rejection of additional or missing processes. Process lifetimes, executable
+identities and cgroup membership are independently checked twice; normalization
+does not waive those checks. See the [Linux cgroup v2 interface](https://docs.kernel.org/admin-guide/cgroup-v2.html#core-interface-files).
+
 The recovery checkpoint monitor retries a busy snapshot once after 250 ms. This
 avoids repeatedly sampling a short metrics drain at the same phase of a shared
 five-second period. A busy owner is never certified: controller generation,
