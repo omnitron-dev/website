@@ -49,6 +49,24 @@ Activating it requires an owner transition, independently of a backend update.
 Before downgrading the owner, reconcile child fences explicitly: a legacy owner
 does not understand them.
 
+The optional `stoppedStackReconciliation@1` contract allows an explicit local
+stack start to reconcile a stopped stack's complete application graph, whether
+its source is a selected release or the registered development configuration. The
+owner validates the current parent revision, every retained generation and the
+absence of live process handles. It revokes obsolete source watches and retires
+only registrations absent from the selected graph. Logs, release archives,
+infrastructure and other stacks remain intact. Stop and reconciliation share
+one in-flight execution boundary; a parallel start cannot reopen the stack.
+
+The controller commits its existing SQLite release selection behind the durable
+stop fence. A failed write, lost reply or watcher failure leaves the stack fenced
+for inspection and explicit retry or rollback. Automatic boot/resume never
+retires retained registrations. This contract is optional for backend handoff;
+older owners continue supporting unchanged stack membership and refuse a graph
+change before the controller changes the selection. Updating the owner itself
+still needs an application maintenance window. See
+[changing a local stack's applications](./releases.md#changing-a-local-stacks-applications).
+
 Run the **candidate's CLI** with `backend upgrade <sealed-dist> --check` before
 planning activation. It validates the selected instance's owner identity and
 contracts before delegating to a guardian or draining the backend. The check runs

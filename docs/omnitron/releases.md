@@ -312,6 +312,43 @@ working-tree static directory cannot use this release selection. An application
 relying on a script or symlink outside the archive must package that dependency
 before it can be pinned.
 
+### Changing a local stack's applications
+
+Use the same release preparation, reviewed stop and explicit start when a local
+stack adds or removes applications. An unpinned development stack uses the same
+owner contract with its registered configuration. The owner must advertise
+`stoppedStackReconciliation@1`. CLI `stack prepare-release` and Console's release
+admission show which retained registrations will be retired. An older owner
+reports the required owner upgrade before the selected release changes.
+
+1. Keep the previous configuration, release and data recovery plan. Prepare the
+   new configuration and release, including complete producer archives for any
+   imported applications. A shared worker's script hash alone does not pin the
+   SDK it imports.
+2. Review and complete a stop of the **entire old stack**. Its retained inventory
+   includes applications already removed from the target configuration. Use
+   `--keep-infrastructure` when its databases and other containers must remain.
+3. Start the new release explicitly. The owner verifies the exact stopped
+   generations, disposes obsolete source watches, updates retained definitions
+   and retires registrations outside the target graph. It then admits the normal
+   dependency-ordered startup. Logs, artifacts and infrastructure are preserved.
+4. Verify each application's observed release and health. After a controller
+   interruption, inspect the actual owner state and explicitly retry the selected
+   start. Cold recovery reads the same SQLite selection. Boot and automatic resume
+   never remove retained applications on their own.
+
+For rollback, stop the current stack, restore the previous configuration and
+explicitly select its previous release. Previously retired registrations are
+created from those original sealed artifacts. A stale plan, unconfirmed process
+exit, unfinished operation or failed durable write blocks the transition; it is
+not treated as a successful removal.
+
+A separate development stack can then provide HMR while a shared-services stack
+keeps its sealed producer graph. Splitting an existing mixed stack still requires
+one reviewed stop of all applications belonging to that old stack. This does not
+provide persistent public per-application stop or source selection, and does not
+make a whole-stack switch safe without reviewing the shared services it affects.
+
 ### Development mode and a selected release
 
 A local stack can run either its registered working tree or a selected release.
