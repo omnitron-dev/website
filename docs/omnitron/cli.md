@@ -334,6 +334,16 @@ operate on **all** managed apps.
 
 Use a full application name such as `omnitron start project/test/api` or `omnitron stop project/test/api` to limit the request to one process group. If a named start cannot reach the daemon, it exits with an error. Starting the daemon with `omnitron up` can also start its configured stacks. Use `omnitron stop all` to address every managed application. Both require a responsive daemon. When the connection fails or the daemon refuses the operation, the command reports the reason and exits with a failure. If the connection drops after sending the request, inspect `omnitron list` before retrying. Use `omnitron down` for an explicit daemon shutdown.
 
+A named `stop` controls the current process group; it does **not** persist an
+application exclusion in an enabled stack. A later stack start or boot recovery
+can start that application again. Do not use a successful stop receipt as a
+promise that a port or workload identity stays available for a replacement.
+`stack stop` records durable intent for the **whole stack**; it is not a substitute
+for excluding one application while its siblings remain active. The
+[scoped owner contract](./backend-handoff.md#owner-compatibility) provides the
+lower-level fence, but the public per-application lifecycle does not yet expose
+that guarantee.
+
 ## Information
 
 | Command | Effect |

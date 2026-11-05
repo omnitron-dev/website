@@ -41,8 +41,10 @@ its observed intent revision. Installed-stack recovery refuses a separately
 fenced child before launching any process. Older owners are refused before RPC
 or recovery-state changes.
 
-This contract is an owner primitive; it does not yet provide a Console or CLI
-selector for switching one application between its working tree and a release.
+This contract is an owner primitive. The public named `stop` operation still
+controls current execution without committing this durable child fence; it must
+not be used to promise exclusion after boot recovery. There is also no Console or
+CLI selector for switching one application between its working tree and a release.
 Activating it requires an owner transition, independently of a backend update.
 Before downgrading the owner, reconcile child fences explicitly: a legacy owner
 does not understand them.
