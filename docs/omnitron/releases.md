@@ -710,6 +710,18 @@ request remains unknown, not stopped or empty. Launch receipts trust the node,
 its process owner and local filesystem; they are not signed remote attestations
 against a compromised host or another process with the same OS-user privileges.
 
+The owner also reports the application's current `generation`, independently of
+its receipt's `launchId`. The shared reader requires these to match when the
+owner supplies a generation. This covers thread workers, process pools and
+worker-only applications that have no single main PID; `pid: null` does not mean
+such an application stopped. A child replacement invalidates the launch receipt.
+A stale or malformed generation cannot be rescued by a positive PID. Older
+owners without a generation retain their PID-based reading; applications without
+a main PID remain **unreported** until an updated owner can observe their launch.
+A backend update alone cannot invent this missing evidence. For distributed
+stacks, each physical replica carries its own generation and receipt; an aggregate
+row never substitutes for an unavailable replica.
+
 ```bash
 omnitron release status sample
 omnitron --json release status sample
