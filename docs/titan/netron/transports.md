@@ -69,6 +69,12 @@ OpenAPI and returned nested service interfaces show the corresponding surface;
 calling a known service name or definition ID does not bypass it. Trusted
 in-process calls remain local operations.
 
+If interface discovery is denied by a transport restriction, the client receives
+the same service-not-found response as for an unknown service. The server logs
+a warning with the requested service, peer ID and actual ingress transport, so
+operators can distinguish a denied route from a missing publication without
+revealing a private service to the caller.
+
 Forwarded definitions carry optional transport restrictions. A gateway cannot
 widen them; definitions from older publishers without these fields remain
 unrestricted by transport. Remote forwarding also requires an explicit

@@ -52,8 +52,11 @@ Pass test paths directly to pnpm scripts, for example:
 pnpm -F @omnitron-dev/omnitron test test/unit/release-owner-admission.test.ts
 ```
 
-The root `pnpm test` runs the workspace suite. Use `pnpm test:up` and
-`pnpm test:down` for the Docker test services. Read
+The root `pnpm test` runs the workspace suite. `pnpm test:ci` starts a dedicated
+Compose project, runs that suite and removes its test resources on success or
+failure. CI runs the complete suite in addition to focused release and security
+gates; a passing focused gate does not substitute for the full run. For repeated
+local tests, use `pnpm test:up` and `pnpm test:down` instead. Read
 [Testing](../testing/index.md) for the distinctions between unit,
 integration and cross-runtime tests.
 

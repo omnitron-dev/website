@@ -42,7 +42,12 @@ flowchart TB
 | [`@omnitron-dev/testing`](./testing-package.md) | Cross-runtime helpers + async primitives + Titan-specific test glue |
 | [`@playwright/test`](https://playwright.dev/) | E2E browser automation. Used by the webapp. |
 | [`@omnitron-dev/netron-react/test`](../frontend/netron/testing.md) | `TestNetronProvider` for React components that call Netron |
-| Test-fixture databases | Postgres via `@kysera/migrations-rollback` for transaction-isolated tests |
+| Test-fixture databases | Dedicated PostgreSQL databases with real application migrations; never the running daemon database |
+
+Omnitron SQL integration suites create a database per suite on the test
+PostgreSQL server and drop it after completion. `pnpm test:ci` owns the test
+services for the full workspace run. A missing test server is reported as a
+skip with a reason; it is not evidence that SQL behavior passed.
 
 ## What lives where
 
