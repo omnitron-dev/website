@@ -75,28 +75,38 @@ Pick the level that matches your need:
 
 ## Subpath exports
 
-There is no per-component subpath. `./components/*` and `./blocks/*`
-globs used to appear in the package's `exports`, which made every
-component directory resolvable to TypeScript while only three of them
-shipped JavaScript — so `@omnitron-dev/prism/components/alert`
-typechecked and then failed in the browser, and these pages recommended
-that form in 55 places. The globs are gone: such an import is now a
-compile error, which is where it belongs.
+Public subpaths are explicit package exports with matching JavaScript and
+TypeScript declarations. For example, `./components/card`, `./components/table`,
+`./components/tabs`, `./components/chart` and `./components/map` are available.
+A source directory by itself does not create a public import path; there are no
+wildcard component exports.
 
-`<Editor>` and `<EmojiPicker>` keep their own subpaths because they are
-deliberately code-split — the emoji dataset alone is ~80 kB gzipped and
-should not sit on the critical path. Everything else comes from the root
-or from `./components`; the bundler tree-shakes either.
+Named imports from the root or `./components` discard unused component modules.
+Importing `Card` does not retain the editor, maps or chart engines. Choose a
+public subpath when it makes a route's lazy-loading boundary clearer. Editors,
+maps, research documents and emoji pickers should load with the routes that use
+them.
+
+Import documented `styles.css` entries explicitly for components that need CSS;
+these styles remain side-effectful and survive production optimization. Calendar
+locale registration stays with its component. CI builds consumers from the real
+package archive and verifies both unused dependency removal and preservation of
+calendar, map and stylesheet dependencies. Run `pnpm check:packages` after the
+workspace build to repeat this check. Measure final application chunks separately:
+the size depends on selected components, peers and route boundaries.
 
 
 | Subpath | What it exports |
 | ------- | --------------- |
-| `@omnitron-dev/prism` | Everything; convenient but largest |
+| `@omnitron-dev/prism` | Named imports across the public API; unused modules are discarded |
 | `@omnitron-dev/prism/theme` | `createPrismTheme()`, palette, typography, shadows, presets |
 | `@omnitron-dev/prism/core` | `<PrismProvider>`, `<ProviderStack>`, context primitives |
 | `@omnitron-dev/prism/layouts` | `<DashboardLayout>`, `<AuthCenteredLayout>` / `<AuthSplitLayout>` / `<AuthSimpleLayout>`, `<LayoutProvider>` |
 | `@omnitron-dev/prism/blocks` | `<AuthBlock>`, `<DashboardBlock>`, `<DataGridBlock>` |
-| `@omnitron-dev/prism/components` | All 50+ components |
+| `@omnitron-dev/prism/components` | Named imports from the component catalog |
+| `@omnitron-dev/prism/components/card` | `Card`, `CardSection`, `StatCard` |
+| `@omnitron-dev/prism/components/table` | `Table`, `useTable` |
+| `@omnitron-dev/prism/components/map` | MapLibre map, markers, layers and place search |
 | `@omnitron-dev/prism/components/editor` | `<Editor>` alone, as its own chunk |
 | `@omnitron-dev/prism/components/emoji-picker` | `<EmojiPicker>` alone — the dataset is ~80 kB gz |
 | `@omnitron-dev/prism/forms` | Schema-aware form helpers |

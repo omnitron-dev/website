@@ -16,7 +16,7 @@ Browser-side packages:
 | ------- | ---- | --------- | ---- |
 | [`@omnitron-dev/netron-browser`](./netron/browser.md) | RPC transport (HTTP + WebSocket), middleware, auth, multi-backend pool | **Framework-agnostic** — vanilla JS, Vue, Svelte, Solid, Angular, Lit, React, Web Workers | ~25 kB gz |
 | [`@omnitron-dev/netron-react`](./netron/react.md) | React hooks, query/mutation cache, auth guards, devtools | **React-only** — optional layer on top of netron-browser | ~15 kB gz |
-| [`@omnitron-dev/prism`](./prism/index.md) | Design system: MUI v9 components, blocks, layouts, forms, hooks | **React-only** (MUI v9 is React) — optional | ~80 kB gz (root); tree-shakeable |
+| [`@omnitron-dev/prism`](./prism/index.md) | Design system: MUI v9 components, blocks, layouts, forms, hooks | **React-only** (MUI v9 is React) — optional | Depends on selected components and peers; unused modules are discarded |
 
 `netron-browser` works everywhere. Add `netron-react` + `prism`
 **only** for React apps. For Vue / Svelte / Solid / Angular / Lit,
@@ -187,16 +187,23 @@ const users = useBackendService<UserService>('auth', 'users');
 
 | Stage | Bundle goal |
 | ----- | ----------- |
-| First paint (auth screen) | Prism `<AuthBlock>` + auth provider — ~50 kB gz |
-| Authenticated shell | + `<DashboardLayout>` + nav + topbar — ~80 kB gz |
-| Per-route page | Lazy-load with `React.lazy()` — pages add 10–30 kB each |
-| Charts / editor / lightbox | Lazy import only on routes that use them |
+| First paint (auth screen) | Load the auth screen and its providers |
+| Authenticated shell | Add the dashboard layout and shared navigation after authentication |
+| Per-route page | Lazy-load with `React.lazy()` and measure the emitted route chunks |
+| Charts / editor / maps | Load engines and styles with the routes that use them |
 
-Import from the root or from `@omnitron-dev/prism/components`; both
-tree-shake, and there is no per-component subpath to reach for. The two
-exceptions are `@omnitron-dev/prism/components/editor` and
-`.../emoji-picker`, which are separate entry points precisely so a route
-that does not use them never pays for them — lazy-import those.
+Named imports from the root and `@omnitron-dev/prism/components` discard unused
+modules. Public subpaths such as `components/card`, `components/chart`,
+`components/map`, `components/editor` and `components/emoji-picker` are also
+available for explicit composition and lazy loading. Only declared exports are
+public; there is no wildcard mapping from every source directory.
+
+Import each component's documented CSS entry when required. CSS remains in the
+production output. The package archive check verifies that a simple `Card`
+consumer does not retain optional engines and that selected calendar, map and
+stylesheet dependencies remain. It does not set an application-wide size promise:
+measure initial requests, route chunks and shared peer dependencies in the actual
+production build.
 
 ## Production reference
 
