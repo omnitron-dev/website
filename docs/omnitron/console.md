@@ -939,6 +939,12 @@ This workspace is restricted to administrators because its scripts execute with 
 
 Re-enabling watch uses the daemon’s last accepted boot or reload configuration, including a configuration selected from a registered project. It does not rediscover an unrelated configuration from the caller’s working directory. Build watchers for registered applications appear in the same watch status as classic file watchers.
 
+Definition reads, initial builds and watch rebuilds resolve compiler source labels
+and diagnostics relative to the source entry. They do not depend on the
+controller process's working directory. Workspace package source is compiled
+under the same resolution policy; installed packages retain their runtime
+dependency identity.
+
 
 ## File workspace
 

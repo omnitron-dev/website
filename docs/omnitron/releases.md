@@ -652,6 +652,12 @@ omnitron release show <release-id>
 ```
 
 `--for <stack>` includes the static bundle for that stack's gateway environment.
+The deployment retains the build directories mounted by running and stopped
+gateways, including older gateways that mount a build directly. A missing
+`current-<project>-<stack>` link does not identify another build: the original
+mount remains protected from retention cleanup. Existing browser tabs keep
+access to their content-hashed assets when a newer build is published.
+
 `--keep-source` retains the build clones after success. `--skip-gates` records
 the gates as not run; it does not produce a verified release suitable for a
 stack that requires those gates.

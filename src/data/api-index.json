@@ -13362,7 +13362,7 @@
       "name": "immutableAssetsRoot",
       "package": "@omnitron-dev/omnitron",
       "kind": "function",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/services/static-carry-forward.ts#L188",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/services/static-carry-forward.ts#L191",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/operations",
@@ -16574,7 +16574,7 @@
       "name": "StaticAssetOwner",
       "package": "@omnitron-dev/omnitron",
       "kind": "type",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/services/static-carry-forward.ts#L173",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/services/static-carry-forward.ts#L176",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/operations",
@@ -16586,7 +16586,7 @@
       "name": "StaticAssetPublication",
       "package": "@omnitron-dev/omnitron",
       "kind": "type",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/services/static-carry-forward.ts#L175",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/services/static-carry-forward.ts#L178",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/operations",
@@ -16598,7 +16598,7 @@
       "name": "StaticAssetReceipt",
       "package": "@omnitron-dev/omnitron",
       "kind": "type",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/services/static-carry-forward.ts#L179",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/services/static-carry-forward.ts#L182",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/operations",
@@ -16610,7 +16610,7 @@
       "name": "StaticAssetSource",
       "package": "@omnitron-dev/omnitron",
       "kind": "type",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/services/static-carry-forward.ts#L174",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/services/static-carry-forward.ts#L177",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/operations",
