@@ -15154,7 +15154,7 @@
       "name": "nullableColumn",
       "package": "@omnitron-dev/omnitron",
       "kind": "value",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-database/src/readiness/postgres.ts#L57",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-database/src/readiness/postgres.ts#L58",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/readiness",
@@ -15518,7 +15518,7 @@
       "name": "PostgresReadinessOptions",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-database/src/readiness/postgres.ts#L72",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-database/src/readiness/postgres.ts#L73",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/readiness",
@@ -15530,7 +15530,7 @@
       "name": "PostgresSchemaRequirement",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-database/src/readiness/postgres.ts#L36",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-database/src/readiness/postgres.ts#L37",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/readiness",
@@ -16054,7 +16054,7 @@
       "name": "requiredColumn",
       "package": "@omnitron-dev/omnitron",
       "kind": "value",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-database/src/readiness/postgres.ts#L56",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-database/src/readiness/postgres.ts#L57",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/readiness",
@@ -16066,7 +16066,7 @@
       "name": "requirePostgresSchema",
       "package": "@omnitron-dev/omnitron",
       "kind": "function",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-database/src/readiness/postgres.ts#L81",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-database/src/readiness/postgres.ts#L82",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/readiness",
@@ -16190,7 +16190,7 @@
       "name": "SchemaReadinessError",
       "package": "@omnitron-dev/omnitron",
       "kind": "class",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-database/src/readiness/postgres.ts#L59",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-database/src/readiness/postgres.ts#L60",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/readiness",
@@ -59542,7 +59542,7 @@
       "name": "nullableColumn",
       "package": "@omnitron-dev/titan-database",
       "kind": "value",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-database/src/readiness/postgres.ts#L57",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-database/src/readiness/postgres.ts#L58",
       "imports": [
         {
           "path": "@omnitron-dev/titan-database/readiness",
@@ -59942,7 +59942,7 @@
       "name": "PostgresReadinessOptions",
       "package": "@omnitron-dev/titan-database",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-database/src/readiness/postgres.ts#L72",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-database/src/readiness/postgres.ts#L73",
       "imports": [
         {
           "path": "@omnitron-dev/titan-database/readiness",
@@ -59954,7 +59954,7 @@
       "name": "PostgresSchemaRequirement",
       "package": "@omnitron-dev/titan-database",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-database/src/readiness/postgres.ts#L36",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-database/src/readiness/postgres.ts#L37",
       "imports": [
         {
           "path": "@omnitron-dev/titan-database/readiness",
@@ -60074,7 +60074,7 @@
       "name": "requiredColumn",
       "package": "@omnitron-dev/titan-database",
       "kind": "value",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-database/src/readiness/postgres.ts#L56",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-database/src/readiness/postgres.ts#L57",
       "imports": [
         {
           "path": "@omnitron-dev/titan-database/readiness",
@@ -60098,7 +60098,7 @@
       "name": "requirePostgresSchema",
       "package": "@omnitron-dev/titan-database",
       "kind": "function",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-database/src/readiness/postgres.ts#L81",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-database/src/readiness/postgres.ts#L82",
       "imports": [
         {
           "path": "@omnitron-dev/titan-database/readiness",
@@ -60514,7 +60514,7 @@
       "name": "SchemaReadinessError",
       "package": "@omnitron-dev/titan-database",
       "kind": "class",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-database/src/readiness/postgres.ts#L59",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-database/src/readiness/postgres.ts#L60",
       "imports": [
         {
           "path": "@omnitron-dev/titan-database/readiness",

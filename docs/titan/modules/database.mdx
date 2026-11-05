@@ -198,15 +198,24 @@ than an entire historical database snapshot.
 | `default` / `defaultExpression` | Presence of a default, or its exact `pg_get_expr` representation when its meaning matters |
 | `generated` | `false` requires a writable column; a string requires the exact generated expression |
 | `insert: true` | Declared columns must be writable unless an expression is explicitly required; extra non-null columns must provide a default, identity or generated value |
-| `unique` | Ordered primary/unique constraint columns; the constraint must be valid and non-deferrable |
+| `unique` | Ordered whole-table unique key columns, enforced immediately by a valid unique index; primary/unique constraints and standalone indexes share this check |
 | `foreignKeys` | Ordered local/referenced columns, referenced table in the checked schema, and exact delete/update actions; defaults are `no action` |
 
 Compatible extra tables and nullable/defaulted columns are allowed. A read-only
 projection can omit the `generated` distinction; insert contracts default to
-non-generated declared columns. A standalone unique index is not a substitute
-for the declared primary/unique constraint. These checks do not prove arbitrary
-check constraints, indexes, query permissions, row-level policies or every
-possible PostgreSQL invariant.
+non-generated declared columns.
+
+A standalone `CREATE UNIQUE INDEX` can enforce the same key as a primary/unique
+constraint and can support a foreign key. Readiness inspects that enforcing index
+in PostgreSQL's catalog: it must be unique, valid, ready, live and immediate, with
+no predicate or expression. `INCLUDE` columns carry payload and are excluded from
+the ordered key. Partial, invalid, unfinished, dropping or deferrable indexes do
+not satisfy `unique`. Foreign keys are checked independently. This does not
+require changing migrations to turn an existing valid index into a constraint.
+See [PostgreSQL index metadata](https://www.postgresql.org/docs/current/catalog-pg-index.html).
+
+These checks do not prove arbitrary check constraints, index performance, query
+permissions, row-level policies or every possible PostgreSQL invariant.
 
 ### Routines and triggers
 
