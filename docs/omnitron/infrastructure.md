@@ -98,6 +98,42 @@ closed until migrated. An older unbound generated configuration cannot be identi
 from its name; it needs an audited source binding and compatible runtime. The new
 generator does not retroactively fix running nodes.
 
+## Readiness includes required service setup
+
+A running container, a successful native health probe, and completed service setup
+are separate facts. Omnitron retains all three. A preset with `postProvision` must
+finish successfully before the infrastructure becomes ready. PostgreSQL database
+creation and required extensions, and MinIO bucket creation with anonymous access
+disabled, are required setup. Partial success does not allow the stack to report
+ready; the diagnostic identifies the failed declaration.
+
+Use `omnitron infra status --stack <project>/<stack>` or `omnitron stack status
+<project> <stack>` to see the setup state and reason. Console shows the same evidence
+in Containers and stack infrastructure. The Docker health column remains the native
+probe result; it can say `healthy` beside a failed setup. `pending` means setup has
+not completed, `ready` confirms completion for the observed container generation,
+and `failed` includes its reason. An absent setup observation is **not verified**;
+an older daemon or a native-only listing cannot prove setup succeeded. When the
+local daemon is unavailable, `infra status` explicitly labels its native-only view.
+
+Failed setup is retried with bounded backoff while native health permits it. This
+does not restart an otherwise healthy container. New container identity, restart
+time or changed setup declarations invalidate the previous confirmation. Backend
+handoff preserves observations; native polling cannot erase a failed setup. An
+older backend does not enforce these new setup diagnostics after rollback.
+
+Custom preset hooks must be idempotent and throw on any required step failure.
+PostgreSQL extensions must exist in the selected image. MinIO setup retries restore
+`anonymous=none` even for a bucket created by an older configuration. Setup errors
+use Titan diagnostics and redact known service credentials before limiting text.
+An infrastructure readiness result does not attest application schema migrations,
+external services or end-to-end application health; those have separate checks.
+
+The native regression check `node test/runtime/preset-readiness.mjs dist` (from
+`apps/omnitron` after building) requires cached PostgreSQL and MinIO preset images.
+It creates only private containers with no network or published ports, bounded
+CPU/memory and memory-backed data, and removes those exact containers afterward.
+
 ## Ecosystem layer — `InfrastructureConfig`
 
 ```typescript

@@ -13434,7 +13434,7 @@
       "name": "InfrastructureState",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/infrastructure/types.ts#L274",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/infrastructure/types.ts#L276",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/dto/services",
@@ -14066,7 +14066,7 @@
       "name": "IProjectRequirements",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/shared/dto/project.ts#L473",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/shared/dto/project.ts#L475",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/dto/services",
@@ -15622,7 +15622,7 @@
       "name": "ProjectDependency",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/shared/dto/project.ts#L506",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/shared/dto/project.ts#L508",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/dto/services",
@@ -15646,7 +15646,7 @@
       "name": "ProjectTopology",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/shared/dto/project.ts#L518",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/shared/dto/project.ts#L520",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/dto/services",
@@ -16178,7 +16178,7 @@
       "name": "sanitizeDiagnostic",
       "package": "@omnitron-dev/omnitron",
       "kind": "function",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan/src/diagnostics/index.ts#L69",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan/src/diagnostics/index.ts#L75",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/diagnostics",
@@ -16466,7 +16466,7 @@
       "name": "StackRuntime",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/shared/dto/project.ts#L436",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/shared/dto/project.ts#L438",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/dto/services",
@@ -16654,7 +16654,7 @@
       "name": "summariseProvisioning",
       "package": "@omnitron-dev/omnitron",
       "kind": "function",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/infrastructure/provisioning-outcome.ts#L71",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/infrastructure/provisioning-outcome.ts#L107",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/operations",
@@ -16834,7 +16834,7 @@
       "name": "TopologyMetadataRefresh",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/shared/dto/project.ts#L531",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/shared/dto/project.ts#L533",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/dto/services",
@@ -51950,7 +51950,7 @@
       "name": "sanitizeDiagnostic",
       "package": "@omnitron-dev/titan",
       "kind": "function",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan/src/diagnostics/index.ts#L69",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan/src/diagnostics/index.ts#L75",
       "imports": [
         {
           "path": "@omnitron-dev/titan/diagnostics",

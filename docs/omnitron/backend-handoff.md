@@ -669,3 +669,11 @@ this workflow refuses dispatch in that configuration. Upgrading the execution
 owner, changing Node versions or applying schema changes each requires a
 separately qualified transition. The local Console container follows its
 controller's publication procedure.
+
+### Service unit file preservation
+
+Systemd recovery preserves the reviewed service file's owner and permission bits,
+including under a restrictive process umask. It writes an exclusive temporary
+regular file, flushes it, rechecks the original identity and content, and then
+atomically replaces the file and flushes its directory. A symlink at either path
+or a concurrent change refuses the replacement rather than following the link.

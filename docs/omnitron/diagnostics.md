@@ -359,7 +359,9 @@ Import from `@omnitron-dev/omnitron/diagnostics`, or from
   state, and optional correlation/resource identifiers.
 - `DiagnosticSink.deliver(event)`: returns a queued/duplicate receipt or rejects.
 - `describeError`: bounded, cycle-safe nested cause formatting, including
-  `AggregateError` and database driver codes.
+  `AggregateError` and database driver codes. `describeError(error, 0, sensitiveValues)`
+  also redacts supplied credential values before truncating messages or nested causes;
+  use it when a subprocess error can include credentials as positional arguments.
 - `sanitizeDiagnostic`: validates the contract, allowlists fields, redacts common
   credential forms and bounds text/evidence before delivery.
 
