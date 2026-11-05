@@ -11814,7 +11814,7 @@
       "name": "ApplicationRuntime",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/services/host-upgrade.ts#L6",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/services/host-upgrade.ts#L7",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/operations",
@@ -13642,7 +13642,7 @@
       "name": "InstalledBundle",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/services/host-upgrade.ts#L20",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/services/host-upgrade.ts#L23",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/operations",

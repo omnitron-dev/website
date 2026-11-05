@@ -214,10 +214,17 @@ delivery runs offline, without installing dependencies or rebinding the graph.
 A mismatch refuses the operation with its cause; rebuild for the required target
 or repair the declared input instead of modifying an installed archive.
 
-Remote checked delivery requires an authenticated independent execution owner
-using resident execution protocol 1. The receiving backend supplies the extractor
-from its attested runtime; the owner supplies the execution binding. Owner ID,
-PID and controller epoch are checked before delivery, registration and start.
+Remote admission and checked delivery use the same authenticated native owner
+probe. It verifies the registered supervisor, live process, sealed runtime and
+private Netron resident execution protocol 1. The probe measures the target with
+the owner's actual Node executable, independently of the controller and SSH
+login shell. Admission compares platform, architecture, Node version, native ABI,
+executable SHA-256 and libc against each artifact's producer. A matching framework
+commit cannot substitute for this evidence; different framework commits are valid.
+
+The receiving backend supplies the extractor from its attested runtime; the
+owner supplies the execution binding. Owner ID, PID and controller epoch are
+checked before delivery, registration and start.
 An unknown protocol, coupled daemon or changed grant refuses the operation.
 These checks preserve the existing role and recipient-fencing requirements;
 they are not a transaction across nodes. An older owner can run its application's
@@ -620,13 +627,16 @@ Its application SDK remains the exact packed graph identified by the producer;
 it does not have to share the owner's SDK commit. A backend upgrade alone can
 leave an older owner in charge of the applications.
 
-If a resident owner predates build reporting, release admission asks the node to
-verify the running owner on demand. The node checks the registered systemd or
-launchd service, process identity and executable, and the contents of its sealed
-runtime. A change of owner or controller during verification invalidates the
-result. If the node cannot prove the owner build, the deployment detail reports
-the reason before any migration or application restart. Inspect the owner service
-on that node and retry the release check once its identity can be verified.
+Release admission obtains native evidence through the same registered SSH
+credentials, host verification and private Netron endpoint as installation. It
+does not infer compatibility from the public daemon version or demand that an
+application use the controller's SDK. The current remote managed-owner probe
+supports Linux systemd installations; local installation verifies its resident
+owner and native executable on the local host. A changed owner or controller
+grant invalidates the proof. An unavailable owner, incomplete target or coupled
+daemon produces a refusal before any migration or application restart. Repair
+the stated condition and repeat the release check; changing a build stamp does
+not establish compatibility.
 
 Pin `--project-commit` to reproduce a build. For linked sources,
 `--omni-commit` selects a revision. For registry packages it checks the exact
