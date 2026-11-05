@@ -42,6 +42,16 @@ lost projection coverage; restarting clears process-local state, not the log.
 Unhandled failures are not automatically declared recovered. Periodic jobs clear
 their own finding only after their next successful execution.
 
+The emergency stderr boundary uses native synchronous writes. A full disk, closed
+pipe or unwritable descriptor cannot emit an unhandled stream error and terminate
+the owner while it is reporting another failure. Failed writes retain their count,
+last error and timestamp in `runtime-diagnostics` health, even after the original
+finding resolves. These records remain in bounded memory; unavailable storage
+means they are not durably recorded. The next successful output attempt clears
+the current output error, while the failure count remains. Titan logger sink
+health and the durable log journal report their own asynchronous failures and
+commit acknowledgments; accepting a log call does not prove persistence.
+
 The process monitor observes exceptions without replacing Titan's shutdown
 policy. A fatal exception is not made safe by logging it. A healthy status also
 does not prove application correctness: register domain health checks and

@@ -386,6 +386,11 @@ and the original receipt when recording an explicit reconciliation.
 Explicit crash reconciliation supports launchd on macOS and systemd system
 services on Linux. The CLI seals the native observation before a separately
 approved drain, then verifies it again before issuing a one-use acknowledgment.
+Preparation requires all recorded previous owner identities to be proven gone
+and no live owner socket. A surviving backend/guardian and its socket remain in
+the sealed inventory; they do not prevent preparing a reviewable plan. They must
+be stopped, together with all recorded application processes and sockets, before
+acknowledgment. Preparation never authorizes a drain or starts a new owner.
 The replacement owner checks the same evidence under an inherited-descriptor
 kernel lock (`lockf` on macOS, `flock` on Linux). Helper exit leaves the lock held
 by Node; process death releases it without stale lock-file deletion. The original
