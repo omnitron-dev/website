@@ -16,6 +16,28 @@ limitations. Do not silently defer an item by renaming it a roadmap feature. If 
 external dependency prevents completion, record the exact dependency and keep the
 capability unavailable or explicitly limited until its acceptance criteria pass.
 
+## Final npm qualification
+
+Freeze one source commit for publication. Complete these three checks before
+preparing its npm archives:
+
+1. Remote release admission uses the verified resident owner protocol and the
+   exact Node target that installation will use. A frozen application owns its
+   SDK; equality with the owner's Git commit is not a compatibility contract.
+   Missing identity, unsupported owner protocol, an incomplete closure or a
+   different target must refuse delivery. See [release admission](./releases.md).
+2. Compiler and linter checks cover production code and all test fixtures.
+   Omnitron's server tests inherit its strict backend options; Console tests use
+   its browser configuration. Both belong to normal workspace typecheck.
+3. Qualify the same commit through independent clean builds, all packed package
+   entry points and consumers, tests with isolated services, documentation,
+   and native backend transition/rollback on the fleet's Node versions.
+   Record CLI and Console acceptance separately from isolated fixtures.
+
+Do not reuse a passing result from an earlier commit as proof for the selected
+one. Preparation and publication do not activate the fleet. Any required live
+pause needs an explicit transition, verification and rollback plan first.
+
 ## Invariants
 
 - One project owns multiple environments/stacks; an allocation identifies its

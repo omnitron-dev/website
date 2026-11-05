@@ -37,6 +37,21 @@ pnpm lint
 pnpm fm:check
 ```
 
+Omnitron's `pnpm -F @omnitron-dev/omnitron typecheck` checks the Node.js
+implementation and every server test. `typecheck:tests` runs the latter check
+on its own. Server fixtures retain the backend's strict settings, with the
+module resolution used by Vitest. `pnpm -F @omnitron/console typecheck` checks
+the browser implementation and all Console tests against the same Prism and
+browser contracts. These commands run in the workspace CI typecheck job.
+A test that executes successfully must also satisfy its current public types;
+do not hide obsolete fixture fields or missing evidence behind casts.
+
+Pass test paths directly to pnpm scripts, for example:
+
+```bash
+pnpm -F @omnitron-dev/omnitron test test/unit/release-owner-admission.test.ts
+```
+
 The root `pnpm test` runs the workspace suite. Use `pnpm test:up` and
 `pnpm test:down` for the Docker test services. Read
 [Testing](../testing/index.md) for the distinctions between unit,
