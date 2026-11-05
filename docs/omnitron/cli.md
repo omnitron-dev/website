@@ -695,24 +695,56 @@ All pipeline RPC methods require `admin`. Parameters are data, not source substi
 
 | Command | Effect |
 | ------- | ------ |
-| `omnitron backup create [database]` | Back up one database, or every running-stack database with no argument |
-| `omnitron backup full` | **Everything**: all stack databases plus MinIO storage, Tor keys and the daemon's own state |
-| `omnitron backup list` | List available backups |
-| `omnitron backup restore <id>` | Restore from a backup |
-| `omnitron backup schedule <target> <cron>` | Schedule a backup; `<target>` may be `all` |
-| `omnitron backup schedules` | List configured schedules |
+| `omnitron backup create [database]` | Back up one database, or every locally provisioned stack database with no argument |
+| `omnitron backup artifact storage-objects --project <name> --stack <name> --bucket <name>` | Capture the current object contents of one bucket |
+| `omnitron backup artifact tor-keys --project <name> --stack <name>` | Capture one stack's onion identity |
+| `omnitron backup full` | Visit stack databases, declared MinIO buckets, Tor keys and daemon state on this host |
+| `omnitron backup list` | List backups with their ID, stack, target and bucket |
+| `omnitron backup restore <id>` | Restore to the recorded origin |
+| `omnitron backup schedule <target> <cron>` | Schedule one database, `all` databases, or a `full` pass |
+| `omnitron backup schedules` | Show configured schedules, their latest outcome and next run |
 | `omnitron backup unschedule <target>` | Remove a schedule |
 
-**`full` is not a bigger `create`.** `create` backs up databases; `full` also
-takes the object storage, the Tor keys and the daemon state — the three things
-that are not in any database and that a restored stack is useless without. It
-reports per target, so a partial result is visible rather than aggregated into
-one success or failure, and it says so plainly when there is nothing to back up
-because no stack is running.
+Use the explicit project and stack for resource backups. Infrastructure retained
+while application writers are stopped remains addressable. The daemon verifies
+container ownership and uses its immutable ID. The archive index records the
+project, stack and bucket; a restore refuses an unavailable origin instead of
+choosing another stack. Legacy archives without origin metadata require exactly
+one eligible local target. Legacy object archives refer to the `storage` bucket.
 
-Schedules live in the daemon and survive its restarts, so `schedule` is not a
-substitute for host cron in one respect only: nothing runs while the daemon is
-down. `<target>` takes `all` to mean every database of every running stack.
+```sh
+omnitron backup artifact storage-objects --project acme --stack prod --bucket uploads --json
+omnitron backup artifact tor-keys --project acme --stack prod
+omnitron backup list
+omnitron backup restore <id>
+```
+
+Creation and restore require an administrator. CLI and Console clients share the
+`OmnitronBackups` Netron contract; `createArtifactBackup` accepts
+`{ project, stack, kind: 'storage-objects', bucket }` or
+`{ project, stack, kind: 'tor-keys' }`.
+
+A `full` pass reports each target independently, including undeclared bucket
+inventories and failures. It covers provisioned resources on the receiving daemon;
+it does not automatically contact remote daemons. MinIO bucket inventory comes
+from the stack's declared `buckets`. Explicit artifact capture can name another
+bucket on that same provisioned service.
+
+Object contents stream through the shared backup pipeline with bounded concurrency.
+Each operation owns a private credential directory; credentials do not appear in
+host command arguments. A snapshot is published only after transfer and archive
+validation. Inventory changes during the copy, unsupported object names and names
+that collide on a portable filesystem cause an explicit failure.
+
+These object archives preserve current bytes, not S3 version history, policies,
+object metadata or tags. A full pass is not an atomic snapshot across services.
+Quiesce writers when application consistency is required. Restore overwrites the
+archived keys, leaves other keys intact and requires an existing bucket. If restore
+is interrupted, reconcile the destination before resuming writers.
+
+Schedules persist across daemon restarts; they do not run while the daemon is down.
+Active capture, restore and scheduled retention block backend handoff. Preparation
+pauses schedule admission, and an aborted handoff re-arms persisted schedules.
 
 ## Kubernetes
 

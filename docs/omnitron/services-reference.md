@@ -29,7 +29,7 @@ diffs them against the index table below.
 | `alert.rpc-service.ts` | `OmnitronAlerts` | 8 | viewer (read) + operator (mutate) |
 | `audit.rpc-service.ts` | `OmnitronAudit` | 2 | admin |
 | `auth.rpc-service.ts` | `OmnitronAuth` | 7 | mixed (5 allowAnonymous; 2 authenticated) |
-| `backup.rpc-service.ts` | `OmnitronBackups` | 11 | viewer (read) + admin (mutate) |
+| `backup.rpc-service.ts` | `OmnitronBackups` | 12 | viewer (read) + admin (mutate) |
 | `deploy.rpc-service.ts` | `OmnitronDeploy` | 4 | viewer (history) + operator (deploy/rollback) |
 | `discovery.rpc-service.ts` | `OmnitronDiscovery` | 3 | viewer |
 | `event-broadcaster.rpc-service.ts` | `OmnitronEvents` | 3 | viewer (subscribe, unsubscribe, stats) |
@@ -152,6 +152,7 @@ Database backup, restore, scheduling.
 | Method | Effect |
 | ------ | ------ |
 | `createBackup({database, compress?})` | One-shot backup of one database |
+| `createArtifactBackup({project, stack, kind, bucket?})` | Capture one stack’s `storage-objects` (explicit bucket) or `tor-keys` |
 | `createAllBackups(...)` | Back up every registered database |
 | `createFullBackup(...)` | Full backup including non-database state |
 | `listBackups({database?})` | List available backups |
