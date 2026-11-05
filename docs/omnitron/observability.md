@@ -53,6 +53,8 @@ The local delivery files are `data/application-logs.sqlite` and `data/backend-lo
 
 A database response is acknowledged only after the enclosing transaction commits. PostgreSQL confirmation requires `synchronous_commit=on`, `fsync=on`, `full_page_writes=on` and a logged `logs` table. Persistent SQLite requires WAL with `FULL`/`EXTRA`, or a disk rollback journal with `EXTRA`. A slave's local rows and replication outbox share one transaction. Retries keep the original IDs; conflicting content under an existing ID is retained and reported, never overwritten.
 
+Database and outbox failures use Titan's bounded diagnostic formatter, including the underlying connection failures of an `AggregateError` with an empty message. Common credential forms are redacted. A failed confirmation rejects the current drain and retains the same records for a later retry; it does not immediately loop during owner acknowledgment or shutdown. CLI ingestion status and Console use the same reading and show ingestion, local-journal and owner-journal failures separately. An empty error reported by an older backend is still a failure, with an explicit notice that its details are unavailable.
+
 File projection has its own acknowledgment. Before appending, the journal records the file identity and original offset. After a crash, matching complete bytes are accepted once; a proven partial append is replayed from that offset. Unrelated or replaced bytes cause a diagnostic and remain intact. Rotation and compression are serialized with appends. File retention may remove acknowledged historical archives according to `maxSize`/`maxFiles`; it does not evict pending delivery records.
 
 ### Time and multiline messages

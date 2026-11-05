@@ -16178,7 +16178,7 @@
       "name": "sanitizeDiagnostic",
       "package": "@omnitron-dev/omnitron",
       "kind": "function",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan/src/diagnostics/index.ts#L68",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan/src/diagnostics/index.ts#L69",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/diagnostics",
@@ -51950,7 +51950,7 @@
       "name": "sanitizeDiagnostic",
       "package": "@omnitron-dev/titan",
       "kind": "function",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan/src/diagnostics/index.ts#L68",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan/src/diagnostics/index.ts#L69",
       "imports": [
         {
           "path": "@omnitron-dev/titan/diagnostics",
