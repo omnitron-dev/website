@@ -42,6 +42,16 @@ Do not reuse a passing result from an earlier commit as proof for the selected
 one. Preparation and publication do not activate the fleet. Any required live
 pause needs an explicit transition, verification and rollback plan first.
 
+For a maintainer SDK export, run the same reproducibility gate from the source repository:
+
+```sh
+node scripts/check-reproducible-backend.mjs --revision <full-commit> --out /absolute/new/qualification
+```
+
+It runs the ordinary frozen install and complete build in two independent checkouts, then compares both the sealed runtime and every normalized public npm archive. A successful output contains `runtime/`, `sdk/framework-manifest.json`, the SDK archives and `QUALIFICATION.json`. Treat the qualification receipt as the completion marker; a partial directory is not an accepted export. Without `--revision`, the selected commit is `HEAD`.
+
+Export from these verified archives. A clean Git status does not make an existing build directory canonical: Console publication intentionally retains older hashed assets so open tabs can continue loading their chunks. Those retained generations belong to the served directory, not to a new SDK archive. The ordinary `release --prepare` path also builds from a clean source export; do not replace its sealed archives with a later pack of a working checkout.
+
 ## Invariants
 
 - One project owns multiple environments/stacks; an allocation identifies its
