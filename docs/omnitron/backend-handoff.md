@@ -549,10 +549,14 @@ order and verifies each handoff before contacting the next server for activation
 Application processes stay with their existing owner.
 
 For an older guardian, qualify its transition on native Linux before the maintenance
-window. In the repository’s GitHub Actions, run **Qualify a managed backend handoff**
-with the full serving and candidate commits and the exact target Node version.
-The test starts an application, replaces the guardian, verifies owner identity and
-exercises a backend update and rollback while checking application requests and logs.
+window. Run the repository fixture on an isolated native host or use the
+**Qualify a managed backend handoff** workflow with the full serving and candidate
+commits and exact target Node version. GitHub and npm publication are not required
+for qualification from verified local sources. The result must identify the exact
+artifacts and runtime roles being tested; a container-only test does not qualify
+native service supervision. The test starts an application, replaces the guardian,
+verifies owner identity and exercises a backend update and rollback while checking
+application requests and logs.
 The full native scenario upgrades the guardian first, then verifies backend replacement and rollback under that guardian, crash recovery, and guardian rollback with an interrupted coordinator. The separate `--backend-only` scenario deliberately retains the original guardian and qualifies only that narrower operation.
 
 The same native fixture also qualifies an execution-owner replacement with
@@ -564,14 +568,18 @@ compares the existing migration journal exactly, and checks that every recorded
 test process has exited. This scenario requires an application pause in a real
 installation; a successful backend handoff does not qualify owner replacement.
 
-When the serving backend differs from the owner’s runtime, qualify those exact
-roles with `--initial-backend`. For example, from the repository root:
+The execution owner, guardian and serving backend can use three different
+runtimes. Observe each role independently and qualify the exact combination with
+`--initial-guardian` and `--initial-backend`; both default to the owner artifact
+when omitted. Rollback restores each original role. For example, from the
+repository root:
 
 ```sh
 node apps/omnitron/test/runtime/managed-backend.mjs \
   /builds/omnitron-handoff-old-owner/packages/0/dist \
   /builds/omnitron-handoff-candidate/packages/0/dist \
   --owner-roundtrip \
+  --initial-guardian /builds/omnitron-handoff-serving-guardian/packages/0/dist \
   --initial-backend /builds/omnitron-handoff-serving-backend/packages/0/dist
 ```
 
