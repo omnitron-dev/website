@@ -565,7 +565,11 @@ infrastructure, confirms the old owner’s clean shutdown, selects the candidate
 through the public CLI, and restarts unique test OS services. The stack must stay
 stopped until an explicit start. The fixture repeats the sequence for rollback,
 compares the existing migration journal exactly, and checks that every recorded
-test process has exited. This scenario requires an application pause in a real
+test process has exited. The producer journal is compared with durable SQLite
+log rows across both owner changes: timestamps and multiline text must match,
+with no losses or duplicates. Each private Linux owner/guardian service is bounded
+to 2 GiB of memory, one CPU and 128 tasks, including its descendants.
+This scenario requires an application pause in a real
 installation; a successful backend handoff does not qualify owner replacement.
 
 The execution owner, guardian and serving backend can use three different
