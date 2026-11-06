@@ -67,6 +67,18 @@ sequenceDiagram
 
 ## Startup and node diagnostics
 
+A master prepares its control-plane database before Titan eagerly initializes
+providers. Foreground CLI, detached CLI and native supervision share this path.
+A configured `OMNITRON_DATABASE_URL` uses the supplied database without creating a
+local PostgreSQL container. `--no-infra` skips Docker provisioning, but still
+initializes the master schema through the shared Kysera migration runner. A
+slave keeps its SQLite lifecycle and does not connect to PostgreSQL.
+
+During backend handoff, this stage only verifies schema compatibility; it does
+not provision or migrate. Database or migration failures stop startup before
+claiming the resident owner or publishing listeners, preserving the concrete
+cause in the boot diagnostic. Prepare schema changes before replacing a backend.
+
 `omnitron up` launches a detached daemon and releases both the child-process
 and IPC event-loop references. The CLI exits after its readiness checks while
 the daemon keeps running. Startup stderr is appended to the boot log reported
