@@ -530,6 +530,7 @@ interface ContainerState {
   containerId?: string;
   ports?:      Record<string, number>;
   health?:     'healthy' | 'unhealthy' | 'starting' | 'none';
+  healthCheck?: { completedAt: string; exitCode: number };
   startedAt?:  string;
   error?:      string;
 }
@@ -562,9 +563,13 @@ flowchart LR
   Decide -- missing --> Create[Create + start]
   Decide -- stopped --> Start[Start it again]
   Decide -- wrong-image --> Recreate[Stop + remove + create]
-  Decide -- unhealthy --> Confirm{2nd tick?}
-  Confirm -- no --> Wait[Wait one tick]
-  Confirm -- yes --> Rebuild[Remove + create]
+  Decide -- unhealthy --> Confirm{Fresh failures + elapsed grace?}
+  Confirm -- no --> Wait[Keep container and report reason]
+  Confirm -- yes --> Delay{Recovery backoff elapsed?}
+  Delay -- no --> Wait
+  Delay -- yes --> Verify{Same incarnation still failing?}
+  Verify -- no --> Wait
+  Verify -- yes --> Rebuild[Remove + create under service lock]
   Decide -- restarting --> Yield[Yield to Docker]
   Decide -- orphan --> Remove[Stop + remove]
   Decide -- ok --> NoOp[Skip]
@@ -595,19 +600,43 @@ reconciler corrects), or run a throwaway container the daemon does not manage.
 
 ### When it stops trying
 
-A restart that throws puts the service in an exponential backoff — 30 s
-doubling to a ceiling of 15 minutes — and ticks inside that window are skipped
-with `Service not running — in restart backoff, skipping tick` at debug level.
-A container that cannot start therefore does not hammer the supervisor every
-30 s, and does not fill the log with one message either. One successful start
-clears the counter.
+A failed restart enters exponential backoff: 30 seconds, doubling to a ceiling
+of 15 minutes. Recovery of a running **unhealthy** container uses the same delay
+and counts every recreation attempt, including a successful creation whose new
+container has not become healthy. `starting`, unknown health and a successful
+create call do not establish recovery. A running container observed as `healthy`
+(or declaring no native probe), with no failed required setup, clears the delay.
+Backoff remains visible in the daemon's diagnostic log.
 
-An **unhealthy** container is treated more slowly than a stopped one: it must
-report unhealthy on two consecutive ticks — 60 seconds of grace — before it is
-removed and recreated. A single failed healthcheck during a slow start is not a
-reason to destroy a container. And a container Docker is already restarting
-under its own policy is left alone, so the two supervisors cannot both act on
-it.
+Unhealthy recovery requires all of the following:
+
+- Different completed, failed Docker probes for the same full container ID and
+  `StartedAt`; rereading one cached result does not count as another failure.
+- At least 60 seconds since the first valid observation of that unhealthy
+  incarnation, with a new failure at or after the deadline.
+- A last probe no older than 60 seconds, not dated in the future or before the
+  current container start. Missing or invalid native evidence leaves the
+  container in place and logs why recovery is waiting.
+- An expired retry delay and a fresh native inspection immediately before
+  removal. A recovered, restarted or replaced container cancels that decision.
+
+Docker's own `restarting` state is left to its native restart policy. Automatic
+health recovery and ordinary provisioning use the same per-container mutation
+lock, and both drain before monitoring ownership is handed off. Only the exact
+native ID with matching Omnitron allocation labels can be removed. Probe command
+output is excluded from `healthCheck`; the metadata contains only completion
+time and exit code, so command output cannot leak through this diagnostic field.
+
+Backend handoff retains native failure evidence and retry delays. Importing an
+older snapshot starts a new confirmation window: historical poll counts cannot
+prove distinct failures. A rollback to an older backend restores that version's
+recovery policy; it does not retain the newer safety guarantees.
+
+To verify Docker's real probe timestamps and elapsed grace, run
+`node test/runtime/native-health-recovery.mjs dist` from `apps/omnitron` after
+building. It uses a cached `alpine:3.24` image in one disposable container with
+0.25 CPU, 32 MiB memory, no network, ports or volumes. It observes actual failure
+and recovery for at least 60 seconds, then removes only its own container.
 
 ## Phantom endpoint janitor
 
