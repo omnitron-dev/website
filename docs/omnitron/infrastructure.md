@@ -562,7 +562,7 @@ flowchart LR
   Diff --> Decide{action}
   Decide -- missing --> Create[Create + start]
   Decide -- stopped --> Start[Start it again]
-  Decide -- wrong-image --> Recreate[Stop + remove + create]
+  Decide -- changed-spec --> Recreate[Stop + remove + create]
   Decide -- unhealthy --> Confirm{Fresh failures + elapsed grace?}
   Confirm -- no --> Wait[Keep container and report reason]
   Confirm -- yes --> Delay{Recovery backoff elapsed?}
@@ -571,17 +571,49 @@ flowchart LR
   Verify -- no --> Wait
   Verify -- yes --> Rebuild[Remove + create under service lock]
   Decide -- restarting --> Yield[Yield to Docker]
-  Decide -- orphan --> Remove[Stop + remove]
   Decide -- ok --> NoOp[Skip]
   Create --> Update[Update state]
   Start --> Update
   Recreate --> Update
   Rebuild --> Update
-  Remove --> Update
 ```
 
 The reconciler runs every 30 s, plus on demand (`omnitron infra up` /
 `infra down`).
+
+### Applying changed declarations
+
+After rereading a project's configuration, starting its stopped or failed stack
+resolves the current infrastructure declaration again. The local manager and
+receiving node apply this plan through the same provisioning path. An existing
+observer is reused; its first declaration is not a permanent cache. Starting an
+already running stack remains idempotent and does not deploy configuration changes.
+
+A changed image, environment, mount, command or native health check goes through
+normal specification reconciliation. Only affected containers are recreated;
+unchanged services keep their native identities. Named volumes remain in place.
+Changing database or bucket setup invalidates its previous readiness result even
+if the container specification is unchanged, and required setup must succeed again.
+Container replacement can interrupt the affected service: plan that interruption
+and verify data/schema compatibility before applying a changed declaration.
+
+The complete candidate is resolved before replacing the previous definition.
+Earlier health sweeps, native reconciliation and endpoint cleanup drain first.
+Concurrent provisioning, stop, ownership refresh or backend handoff cannot silently
+acknowledge a conflicting operation for the same stack. A failed retry retains the
+observer and the accepted desired state for diagnosis and retry. Invalid resolution
+leaves the previous definition intact.
+
+Removing a declaration releases its observer; it does **not** delete that
+container or its data. Explicit removal still requires the ordinary reviewed stop
+path for the resources owned by the stack. Monitoring-only ownership refresh also
+remains separate: it cannot change the specification of a retained container.
+
+Run `node test/runtime/stack-infrastructure-reconfiguration.mjs dist receipt.json`
+from `apps/omnitron` after building to exercise native reconfiguration, idempotent
+retry and reviewed stop/start with a retained volume sentinel. The fixture uses
+two isolated containers from cached `alpine:3.24`, publishes no ports, and removes
+only its own containers and temporary volume after verification.
 
 ### A container you stopped comes back
 

@@ -16394,7 +16394,7 @@
       "name": "StackInfrastructureManager",
       "package": "@omnitron-dev/omnitron",
       "kind": "class",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/infrastructure/stack-infra-manager.ts#L50",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/apps/omnitron/src/infrastructure/stack-infra-manager.ts#L51",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/operations",
