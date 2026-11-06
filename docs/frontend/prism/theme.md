@@ -64,6 +64,29 @@ Avoid hex codes in app code — use theme tokens:
 This keeps dark mode working automatically and lets you re-skin
 without touching component code.
 
+### Readable status surfaces
+
+Standard and soft alerts, soft chips and soft labels share one contrast
+policy. Prism compares the semantic colour tones against their translucent
+fill composited over `background.paper`, selecting a tone with at least
+4.5:1 contrast when available. It preserves the colour token and emits both
+scheme rules, so custom CSS variable prefixes and live light/dark switching
+continue to work. This also covers MUI `Alert` and `Chip` used directly under
+`PrismProvider` or `createPrismTheme`.
+
+Custom palettes can use either ordinary MUI tonal roles or Prism's inverted
+dark scale. When none of the supplied tones is readable, or a colour can
+only be resolved by the browser, Prism uses `text.primary`. Inverted labels
+use the theme's white surface and grey text fallback. Browser-resolved
+colours, custom parent backgrounds and application `sx` overrides still
+need contrast checks in the final UI; the calculation assumes an opaque
+`background.paper` beneath the translucent fill.
+
+An alert's `color` overrides its appearance; `severity` still selects its
+meaning and icon. For example, `<Alert severity="warning" color="error">`
+uses the error palette with the warning icon. Use text as well as colour
+to explain the state.
+
 ## Typography
 
 ```typescript

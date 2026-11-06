@@ -18698,7 +18698,7 @@
       "name": "BooleanLabel",
       "package": "@omnitron-dev/prism",
       "kind": "function",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/label/label.tsx#L288",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/label/label.tsx#L245",
       "imports": [
         {
           "path": "@omnitron-dev/prism",
@@ -20354,7 +20354,7 @@
       "name": "componentOverrides",
       "package": "@omnitron-dev/prism",
       "kind": "function",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/theme/components/index.ts#L70",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/theme/components/index.ts#L71",
       "imports": [
         {
           "path": "@omnitron-dev/prism",
@@ -25066,7 +25066,7 @@
       "name": "FormAlert",
       "package": "@omnitron-dev/prism",
       "kind": "function",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/alert/alert.tsx#L240",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/alert/alert.tsx#L237",
       "imports": [
         {
           "path": "@omnitron-dev/prism",
@@ -25086,7 +25086,7 @@
       "name": "FormAlertProps",
       "package": "@omnitron-dev/prism",
       "kind": "type",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/alert/alert.tsx#L205",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/alert/alert.tsx#L202",
       "imports": [
         {
           "path": "@omnitron-dev/prism",
@@ -27030,7 +27030,7 @@
       "name": "InlineAlert",
       "package": "@omnitron-dev/prism",
       "kind": "function",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/alert/alert.tsx#L157",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/alert/alert.tsx#L154",
       "imports": [
         {
           "path": "@omnitron-dev/prism",
@@ -27050,7 +27050,7 @@
       "name": "InlineAlertProps",
       "package": "@omnitron-dev/prism",
       "kind": "type",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/alert/alert.tsx#L146",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/alert/alert.tsx#L143",
       "imports": [
         {
           "path": "@omnitron-dev/prism",
@@ -27710,7 +27710,7 @@
       "name": "Label",
       "package": "@omnitron-dev/prism",
       "kind": "function",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/label/label.tsx#L220",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/label/label.tsx#L177",
       "imports": [
         {
           "path": "@omnitron-dev/prism",
@@ -34790,7 +34790,7 @@
       "name": "StatusLabel",
       "package": "@omnitron-dev/prism",
       "kind": "function",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/label/label.tsx#L262",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/prism/src/components/label/label.tsx#L219",
       "imports": [
         {
           "path": "@omnitron-dev/prism",
