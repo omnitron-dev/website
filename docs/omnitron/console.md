@@ -461,8 +461,13 @@ one request.
 The inventory shows observed status, image, health, published ports and scope.
 **Not reported** does not establish health. Inspect logs from a row. Start, stop,
 remove and log loading show progress on the affected container and prevent
-concurrent duplicate actions; failures keep a readable reason and allow an explicit
-retry. Lifecycle actions still obey roles and ownership. A **Read only** indicator
+concurrent duplicate actions. After a lifecycle request, Console refreshes the
+observed inventory before enabling another action. A timeout or disconnected RPC
+means the acknowledgement is unavailable: the operation may already have completed.
+Console shows that uncertainty and never replays the mutation automatically. If
+the refresh also fails, the table retains the last inventory with a separate read
+error; inspect the current state before retrying. Other failures retain their
+reported reason. Lifecycle actions still obey roles and ownership. A **Read only** indicator
 explains cluster or platform restrictions; focus it to inspect the reason.
 
 ### Deployments
