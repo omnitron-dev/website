@@ -184,12 +184,14 @@ ancestor.
 | ---------------------------- | ----------------------------------------------------- |
 | `-c, --config <path>`        | Explicit path to `omnitron.config.ts`                 |
 | `-p, --project <name>`       | Initial project name (default: auto-detect from CWD)  |
-| `-f, --foreground`           | Block the terminal — useful for `tail -F` style use   |
+| `-f, --foreground`           | Run the daemon attached to the terminal or supervisor |
 | `--no-infra`                 | Skip Docker infrastructure provisioning               |
 | `--no-watch`                 | Disable file watching daemon-wide                     |
 | `--master`                   | First-run: configure as master in a cluster          |
 | `--slave [host:port]`        | First-run: configure as slave; optional master address |
 | `--webapp` / `--no-webapp`   | Toggle automatic console UI start                     |
+
+Foreground startup returns control to the daemon lifecycle, not to the CLI exit handler. The process continues serving RPC after initialization; Titan handles its shutdown. If the daemon is already running, another `up --foreground` reports that state and returns without starting a second controller.
 
 ### `omnitron down`
 

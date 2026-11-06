@@ -136,6 +136,8 @@ After the first successful upgrade, use the stable entry point:
 
 For a different `OMNITRON_HOME`, the launcher lives in that instance's `runtime/bin` directory and retains the instance path. It follows the selected release and uses that release's own Node. The normal detached and foreground startup paths also honor the selector. A missing, modified or incompatible selected artifact is an error, never an implicit fallback to a source checkout.
 
+Foreground startup releases the installation lease after initialization while keeping the daemon process running. A launcher that forwards to the selected runtime waits for that process and preserves its exit status. The native CLI qualification covers detached startup, installed foreground startup and forwarding from another runtime, including RPC shutdown and a repeated invocation against an already running daemon.
+
 To prepare an installation while the backend and execution owner are stopped:
 
 ```sh
