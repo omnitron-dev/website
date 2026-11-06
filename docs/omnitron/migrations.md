@@ -71,6 +71,18 @@ Direct CLI migration writes require standalone lifecycle authority. On an enroll
 | Retry | No blind retry after an ambiguous connection failure; inspect durable history first |
 | Cleanup | Commands close their owned connections and preserve both operation and cleanup failures |
 
+New daemon PostgreSQL and local SQLite migration executions record checksums through
+that same engine. The older procedural daemon definitions carry declared SHA-256
+source digests, checked against their immutable source files in CI; transpilation
+and installation paths do not change them. New SQL definitions use
+`defineSqlMigration` to derive their digest directly from the SQL.
+
+A fresh database must pass `omnitron --json migrate up --daemon` followed by
+`omnitron --json migrate verify --daemon`. Older journal rows without checksums
+remain `unverified`: neither inspection nor another `up` invents historical
+integrity or replaces recorded execution times. Existing migration bodies and
+history are not rewritten by adding a checksum declaration.
+
 PostgreSQL and SQLite support transactional schema changes. MySQL DDL can commit
 implicitly, so batch mode refuses MySQL. SQLite has no cross-process advisory
 lock: concurrent writers can fail with a busy error. Serialize deployments and
