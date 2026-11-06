@@ -553,6 +553,33 @@ The test starts an application, replaces the guardian, verifies owner identity a
 exercises a backend update and rollback while checking application requests and logs.
 The full native scenario upgrades the guardian first, then verifies backend replacement and rollback under that guardian, crash recovery, and guardian rollback with an interrupted coordinator. The separate `--backend-only` scenario deliberately retains the original guardian and qualifies only that narrower operation.
 
+The same native fixture also qualifies an execution-owner replacement with
+`--owner-roundtrip`. It reviews and stops only its private stack while retaining
+infrastructure, confirms the old owner’s clean shutdown, selects the candidate
+through the public CLI, and restarts unique test OS services. The stack must stay
+stopped until an explicit start. The fixture repeats the sequence for rollback,
+compares the existing migration journal exactly, and checks that every recorded
+test process has exited. This scenario requires an application pause in a real
+installation; a successful backend handoff does not qualify owner replacement.
+
+When the serving backend differs from the owner’s runtime, qualify those exact
+roles with `--initial-backend`. For example, from the repository root:
+
+```sh
+node apps/omnitron/test/runtime/managed-backend.mjs \
+  /builds/omnitron-handoff-old-owner/packages/0/dist \
+  /builds/omnitron-handoff-candidate/packages/0/dist \
+  --owner-roundtrip \
+  --initial-backend /builds/omnitron-handoff-serving-backend/packages/0/dist
+```
+
+Use sealed disposable artifacts built for the host and its exact Node version.
+The fixture uses private application data and unique launchd/systemd jobs. Linux
+requires permission to create its isolated system services. The native GitHub
+qualification includes owner replacement and rollback with the selected previous
+and candidate versions; a separately versioned serving owner still needs its
+exact role combination checked before activation.
+
 A failed availability probe records its transition phase, separate HTTP and owner-RPC results and durations, returned process identities, and the observer’s event-loop delay. Inspect `availability-probe-failed` in the run output and `probe-failures.jsonl` in the retained fixture directory. The application also reports slow writes of the fixture’s expected-log evidence. `availability-final` and the retained `availability-summary.json` keep the probe counts even when a later phase fails. The interrupted coordinator keeps its stdout, stderr and terminal error in `coordinator-result.json`; its 180-second checkpoint budget includes full artifact verification. A child failure is reported immediately rather than retried as readiness. HTTP and RPC probe deadlines remain unchanged. An availability failure still rejects qualification even when the lifecycle transitions succeed; complete log retention is a separate check.
 Use the [guardian transition procedure](#updating-the-guardian) for the
 one-time installation. Fleet handoff starts only after the guardian supports the
