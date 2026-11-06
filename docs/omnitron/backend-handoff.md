@@ -562,6 +562,15 @@ advertising `kernelHandoff@1`. The controller updates servers in the requested
 order and verifies each handoff before contacting the next server for activation.
 Application processes stay with their existing owner.
 
+Fleet planning runs the candidate's ordinary `backend upgrade --check` on each
+node. CLI, Console and a local upgrade therefore use the same owner contracts,
+attested database scope and migration compatibility rules. A standalone worker
+checks its SQLite registry; a controller or enrolled worker also checks the
+PostgreSQL registry. Compatible checksum metadata requires a guardian that can
+verify it. Actual schema changes still require the separate database transition;
+the fleet does not apply migrations or bypass a guardian refusal. The supervisor
+revalidates the candidate and live identities when applying the reviewed plan.
+
 For an older guardian, qualify its transition on native Linux before the maintenance
 window. Run the repository fixture on an isolated native host or use the
 **Qualify a managed backend handoff** workflow with the full serving and candidate
