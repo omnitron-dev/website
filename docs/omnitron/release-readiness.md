@@ -84,7 +84,11 @@ pause needs an explicit transition, verification and rollback plan first.
 G05 can be prepared while no active runtime changes are pending. G07 grows with each
 implemented gate; it is not postponed to the end. Progress proceeds through small,
 reviewable commits. Package versions become release candidates only after their
-runtime, public types and packed artifacts pass the same contracts.
+runtime, public types and packed artifacts pass the same contracts. SDK compatibility
+also requires an application upgrade and rollback through the same resident owner,
+including a development installation whose bootstrap path stays unchanged. Record
+the owner capability `applicationRuntimeResolution: 1` separately from the backend
+version. Fresh-owner startup and fresh-shell imports do not qualify that transition.
 
 ## Activation and rollback contract
 
