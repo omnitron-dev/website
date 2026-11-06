@@ -438,6 +438,41 @@ Note `volumes` is a **map** (`name → path | spec`), not an array,
 and container env is `environment` (not `env`). There is no
 `privileged` / `capabilities` field.
 
+### Container resource limits
+
+`docker.resources` applies to service containers and Docker applications through
+the same allocator:
+
+```typescript
+resources: {
+  memory: '512m',
+  memoryReservation: '256m',
+  cpus: 0.5,
+  shmSize: '64m',
+}
+```
+
+Memory sizes use Docker's binary units. A positive RAM limit or reservation
+must be at least 6 MiB; a reservation cannot exceed a nonzero hard limit. The
+reservation is a soft target, not a hard cap. Zero memory or CPU removes that
+limit; it does not configure swap. CPU values must be finite, nonnegative and
+exactly representable in nano CPUs. A zero shared-memory size selects Docker's
+default. Top-level `docker.shmSize`, when present, overrides
+`docker.resources.shmSize`.
+
+Validation runs before creating networks, volumes or containers. After creation,
+Omnitron checks the actual Docker `HostConfig`, including CPU-quota overrides;
+a desired-spec label alone is not proof that the limits are enforced. The same
+observation participates in infrastructure reconciliation and handoff adoption.
+
+**Existing deployments:** earlier versions could retain resource declarations
+without passing them to Docker. Reconciliation now reports those containers as
+requiring recreation, including stateful services. Inspect the plan, named
+volumes, image pins and actual limits before a maintenance window. A backend
+handoff must reject mismatched infrastructure instead of silently accepting it;
+replacement container IDs are expected when recreation is required. Existing
+named volumes are reused, but container replacement interrupts the service.
+
 ### `IVolumeMount`
 
 ```typescript

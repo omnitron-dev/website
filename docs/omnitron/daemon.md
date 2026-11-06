@@ -37,7 +37,7 @@ sequenceDiagram
   participant PM as PID manager
   participant SS as State store
   participant N as Netron bus
-  participant SVC as 19 RPC services
+  participant SVC as RPC services
   participant Orch as Orchestrator
   participant Apps
 
@@ -46,20 +46,19 @@ sequenceDiagram
     PM-->>Init: error — already running
     Init->>Init: exit 1
   end
-  Init->>SS: load persisted state (SQLite)
-  alt unreadable / empty
-    SS->>SS: start empty
-  end
+  Init->>SS: open durable state and project registry
+  Init->>Init: register cleanup before signal handlers
   Init->>N: bind Unix socket + [TCP / HTTP]
   Init->>SVC: register all services
-  Init->>Orch: rehydrate state
-  loop per app in state where status was 'running'
-    Orch->>Apps: relaunch
+  Init->>Orch: read registered projects and enabled stacks
+  loop per enabled stack
+    Orch->>Apps: resume selected release or development configuration
   end
   Init-->>Init: ready
   Note over Init: serve indefinitely
   Note over Init: SIGTERM
-  Init->>Orch: stopAll (graceful)
+  Init->>Init: cancel remaining startup steps, join in-flight work
+  Init->>Orch: stopAll (coupled mode)
   Init->>SS: persist final state
   Init->>PM: release lock
   Init->>Init: exit 0
@@ -89,6 +88,23 @@ The Nodes API exposes `getNodeDaemonStatus`, `getNodeDaemonHealth` and
 live daemon readers as the CLI; remote requests use the authenticated mesh.
 `reachable: false` includes the failure reason and no answer. It is not a
 health verdict, and a remote failure never falls back to the local node's data.
+
+### Shutdown during startup
+
+The daemon registers cleanup before Titan installs its signal handlers. If
+`SIGTERM` or `SIGINT` arrives during startup, it stops beginning new startup
+phases and enabled stacks. Titan's first shutdown task waits for the current
+startup operation and any in-flight health-monitor spawn or restart before
+cleanup closes their resources. The existing Titan shutdown deadline still
+applies: an operation that cannot finish is reported as a shutdown failure,
+not successful cleanup.
+
+An interrupted startup does not announce `daemon.started` or a replacement
+backend's readiness. The startup diagnostic remains an error if an actual
+operation failed while shutdown was pending. A resident owner's applications
+continue running when only its backend terminates; explicit `omnitron down`
+still requests application shutdown. Event-loop monitoring and the reload
+signal handler are disposed with the backend.
 
 ## PID manager — `pid-manager.ts`
 
