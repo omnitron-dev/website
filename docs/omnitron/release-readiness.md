@@ -155,6 +155,13 @@ from npm. Their SHA-512 digests matched the preparation receipts and the public
 registry metadata. Frozen installs resolve the packages used by each workspace.
 Run `pnpm audit --audit-level low` to check runtime and development dependencies,
 and `pnpm check:packages` to verify every public export inside the packed archives.
+CI and release preparation additionally install the actual archives into an independent
+npm consumer and audit its production dependencies: workspace overrides do not protect
+a published consumer. KB publishes its tested extraction dependency tree using standard
+npm bundled dependencies. Framework admission checks every included package's identity,
+files and declared dependency edges, both in the npm installation and after the portable
+application graph is materialized. Undeclared bundles, altered files, missing dependencies
+and archive links remain refusals.
 Each target still needs its own runtime identity, launch evidence and rollout record.
 
 G09 and G14 include a Chromium check of the production topology component and its

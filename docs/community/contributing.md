@@ -78,10 +78,19 @@ pnpm build
 pnpm check:packages
 ```
 
-Review major-version migrations and peer ranges. Do not force a transitive
-package onto a different major than its parent supports. Keep package-manager
-supply-chain checks and review any version-specific exceptions added by an
-explicit update. Run checks for the affected runtime, browser and CLI paths.
+Review major-version migrations and peer ranges. A transitive security override
+across a major version needs compatibility checks for the actual consuming API;
+changing its resolution alone does not establish compatibility. Keep package-manager
+supply-chain checks and review version-specific exceptions. Run checks for the
+affected runtime, browser and CLI paths.
+
+The workspace uses the hoisted pnpm layout declared in `pnpm-workspace.yaml`.
+It enables standard `bundledDependencies` archives for the KB extraction toolchain:
+`ts-morph` and its dependency tree are packed from the tested lockfile. This keeps
+the corrected glob implementation in the published package. Consumers choose their
+own installation layout and do not need Omnitron's workspace overrides. Reinstall
+with `pnpm install --frozen-lockfile` when changing the workspace layout; a local
+package-manager configuration must not override the tracked layout.
 
 The workspace installs the native TypeScript 7 compiler as `@typescript/native`
 and the current compatible Compiler API as `typescript` through the
@@ -91,7 +100,12 @@ not runtime requirements for applications.
 
 `pnpm check:packages` packs every public workspace and verifies that all declared
 exports, types and command entry points exist in the archive. CI runs it after
-building. Netron React supplies both ESM and CommonJS declarations. The testing
+building. Its `--install-consumer /absolute/new/directory` option also installs the
+real archives with npm and runs a production dependency audit outside the workspace.
+Release preparation requires that audit and the public runtime checks, including
+TypeScript extraction and a SQLite journal write/read. An unavailable audit or a
+reported vulnerability fails preparation; a clean workspace audit cannot substitute
+for this consumer check. Netron React supplies both ESM and CommonJS declarations. The testing
 package uses Node.js 22.12+ native `require(esm)` support for its CommonJS entry
 conditions. Validate
 consumer applications against the same package artifacts and ensure Titan

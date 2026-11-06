@@ -617,6 +617,26 @@ qualification includes owner replacement and rollback with the selected previous
 and candidate versions; a separately versioned serving owner still needs its
 exact role combination checked before activation.
 
+For a project that needs a MASTER controller, use the same fixture with
+`--master-scenario /absolute/scenario.mjs --fixture-root /absolute/new/root
+--master-config /absolute/private-config.json`. This is a separate mode from
+`--owner-roundtrip` and `--backend-only`. The JSON file must be owned, regular,
+0600 and contain explicit `port` and `httpPort` values. Prepare a separate
+loopback PostgreSQL database and pass its URL as `OMNITRON_DATABASE_URL`.
+The scenario exports `managedMasterScenario(context)`, uses `context.createClient()`
+for public services, registers its child PIDs with `context.track(...)`, and returns
+`{ success: true }` only after its assertions pass. The common fixture owns the
+native owner/guardian lifecycle and cleanup; the scenario must not launch another
+anonymous daemon or duplicate migrations. External database/store fixtures remain
+the caller's responsibility. An explicit Unix `DOCKER_HOST` is forwarded to the
+native runtime with competing Docker context/TLS selectors cleared.
+
+Fixture OS unit files are created exclusively and tracked by identity, contents
+and permissions. A checked guardian plan authorizes only its exact replacement;
+cleanup refuses a substituted file. This protects unrelated services even when
+setup or the transition is interrupted. These are isolated qualification tools,
+not an alternative production activation path.
+
 A failed availability probe records its transition phase, separate HTTP and owner-RPC results and durations, returned process identities, and the observer’s event-loop delay. Inspect `availability-probe-failed` in the run output and `probe-failures.jsonl` in the retained fixture directory. The application also reports slow writes of the fixture’s expected-log evidence. `availability-final` and the retained `availability-summary.json` keep the probe counts even when a later phase fails. The interrupted coordinator keeps its stdout, stderr and terminal error in `coordinator-result.json`; its 180-second checkpoint budget includes full artifact verification. A child failure is reported immediately rather than retried as readiness. HTTP and RPC probe deadlines remain unchanged. An availability failure still rejects qualification even when the lifecycle transitions succeed; complete log retention is a separate check.
 Use the [guardian transition procedure](#updating-the-guardian) for the
 one-time installation. Fleet handoff starts only after the guardian supports the
