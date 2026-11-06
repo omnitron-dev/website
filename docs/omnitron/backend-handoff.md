@@ -271,6 +271,33 @@ Rollback restores service ownership, configuration and the retained runtime. It 
 
 Remote application deployment recognizes a settled, sealed managed backend through its selected runtime, native guardian parent and separate owner/backend cgroups. A stale selection or mismatched process is refused. The coupled `fleet upgrade` workflow refuses an independently supervised node before stopping or rebinding any application. Use `fleet rollout` for registered remote managed backends and `backend upgrade <sealed-runtime>/packages/0/dist` for the local supervisor. Keep framework bundles still referenced by applications.
 
+## Checksum metadata on existing migrations
+
+Adding a declared checksum to an existing procedural migration does not change
+its schema operation. The shared compatibility check used by cold selection and
+backend replacement admits this change only when all migration files and
+folders are unchanged and the registry's executable syntax is identical after
+removing those literal checksum properties. Names, order, imported `up`/`down`
+bindings and SQL migration references must remain unchanged. Dynamic entries,
+changed bodies, hooks, extra statements and replacement of an already declared
+checksum are refused. Inspection parses the registries without importing them or
+executing migration code.
+
+An older guardian still compares the complete registry byte for byte. The
+candidate CLI explains this limitation before draining anything. Use the
+[existing guardian transition](#updating-the-guardian) to install a guardian with
+`migrationChecksumMetadata: 1`, retaining the selected backend, execution owner
+and application processes. Then repeat `backend upgrade --check` and the
+reviewed backend transition. This does not require an owner replacement; other
+owner capability changes remain a separate maintenance operation.
+
+No migration-history rows are rewritten or adopted by this compatibility check.
+Historical null checksums stay unknown, including their original execution times.
+Rollback to an older registry may remove checksum declarations, but never removes
+recorded checksums from the database. That older runtime may be unable to verify
+those declarations; it must not be reported as fresh integrity proof. Changed
+SQL/schema still requires the separate schema plan below.
+
 ## Compatible schema expansion
 
 Schema changes and backend replacement are separate operations. `omnitron backend schema prepare` reads the running master’s database and saves a private plan; `omnitron backend schema apply` applies or resumes that plan under the same Kysera advisory lock as normal Omnitron migrations.

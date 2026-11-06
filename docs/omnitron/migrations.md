@@ -81,7 +81,11 @@ A fresh database must pass `omnitron --json migrate up --daemon` followed by
 `omnitron --json migrate verify --daemon`. Older journal rows without checksums
 remain `unverified`: neither inspection nor another `up` invents historical
 integrity or replaces recorded execution times. Existing migration bodies and
-history are not rewritten by adding a checksum declaration.
+history are not rewritten by adding a checksum declaration. Updating a daemon
+with these declarations requires a guardian that supports the
+[checked metadata transition](./backend-handoff.md#checksum-metadata-on-existing-migrations).
+The candidate CLI reports an older guardian before changing lifecycle state;
+this is separate from applying a schema migration or adopting historical hashes.
 
 PostgreSQL and SQLite support transactional schema changes. MySQL DDL can commit
 implicitly, so batch mode refuses MySQL. SQLite has no cross-process advisory
