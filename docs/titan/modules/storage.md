@@ -32,10 +32,21 @@ streaming interface; this is not a browser upload client.
 
 If `storage.s3` is absent, S3 reads `S3_ENDPOINT`, `S3_ACCESS_KEY`,
 `S3_SECRET_KEY` and `S3_BUCKET` from the environment. Supply credentials through
-runtime configuration. Local initialization creates the base directory. S3
-initialization creates its client; teardown destroys it. Lifecycle ownership
+runtime configuration. Local initialization resolves the configured path against
+the application's working directory without creating files. The first storage
+operation creates and validates the root; concurrent operations share this work.
+An unused local adapter therefore leaves the filesystem untouched when another
+provider serves the application. Failed initialization reaches every waiting
+caller and can be retried after the storage problem is repaired.
+
+S3 initialization creates its client; teardown destroys it. Lifecycle ownership
 belongs to Titan when the adapter is registered as a module provider. A caller
 constructing an adapter directly must invoke its lifecycle itself.
+
+`exists()` returns `false` for a missing object. Permission errors, unsafe paths
+and corrupt metadata remain errors. Usage calculation fails on unreadable
+directories rather than returning an apparently complete partial total.
+Keep persistent data outside sealed application and execution-owner runtimes.
 
 ## Operations
 

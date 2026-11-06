@@ -108,6 +108,17 @@ class MediaService {
 `spawn()` accepts either a process **class** or a **module path string**
 (for fork/process isolation where the worker runs in a separate module).
 
+Process options use one contract from the manager through the native spawner to
+the worker. `cwd`, environment, logging, startup and shutdown budgets, RPC
+`requestTimeout`, and explicit method visibility are preserved. Without
+`allMethodsPublic: true`, undecorated methods remain unavailable over RPC.
+
+Use `cwd` with child-process isolation for an application-specific working
+directory. Worker threads share the parent's directory and reject a different
+`cwd`; they never change the parent's directory. Pools inherit common
+`spawnOptions`; `spawnOptionsFactory(index)` supplies per-worker overrides.
+Keep mutable application state outside sealed runtime directories.
+
 | Method                                                                  | Returns                                       |
 | ----------------------------------------------------------------------- | --------------------------------------------- |
 | `spawn<T>(processClassOrPath, options?)`                                | `Promise<ServiceProxy<T>>`                    |

@@ -66150,7 +66150,7 @@
       "name": "IBackoffOptions",
       "package": "@omnitron-dev/titan-pm",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-pm/src/types.ts#L1030",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-pm/src/types.ts#L1039",
       "imports": [
         {
           "path": "@omnitron-dev/titan-pm",
@@ -66174,7 +66174,7 @@
       "name": "IHealthCheck",
       "package": "@omnitron-dev/titan-pm",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-pm/src/types.ts#L780",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-pm/src/types.ts#L789",
       "imports": [
         {
           "path": "@omnitron-dev/titan-pm",
@@ -66186,7 +66186,7 @@
       "name": "IHealthStatus",
       "package": "@omnitron-dev/titan-pm",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-pm/src/types.ts#L771",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-pm/src/types.ts#L780",
       "imports": [
         {
           "path": "@omnitron-dev/titan-pm",
@@ -66198,7 +66198,7 @@
       "name": "ILatencyMetrics",
       "package": "@omnitron-dev/titan-pm",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-pm/src/types.ts#L759",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-pm/src/types.ts#L768",
       "imports": [
         {
           "path": "@omnitron-dev/titan-pm",
@@ -66210,7 +66210,7 @@
       "name": "IPoolMetrics",
       "package": "@omnitron-dev/titan-pm",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-pm/src/types.ts#L739",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-pm/src/types.ts#L748",
       "imports": [
         {
           "path": "@omnitron-dev/titan-pm",
@@ -66222,7 +66222,7 @@
       "name": "IProcessEvents",
       "package": "@omnitron-dev/titan-pm",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-pm/src/types.ts#L628",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-pm/src/types.ts#L637",
       "imports": [
         {
           "path": "@omnitron-dev/titan-pm",
@@ -66234,7 +66234,7 @@
       "name": "IProcessInfo",
       "package": "@omnitron-dev/titan-pm",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-pm/src/types.ts#L220",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-pm/src/types.ts#L229",
       "imports": [
         {
           "path": "@omnitron-dev/titan-pm",
@@ -66246,7 +66246,7 @@
       "name": "IProcessManager",
       "package": "@omnitron-dev/titan-pm",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-pm/src/types.ts#L1044",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-pm/src/types.ts#L1053",
       "imports": [
         {
           "path": "@omnitron-dev/titan-pm",
@@ -66258,7 +66258,7 @@
       "name": "IProcessManagerConfig",
       "package": "@omnitron-dev/titan-pm",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-pm/src/types.ts#L1229",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-pm/src/types.ts#L1215",
       "imports": [
         {
           "path": "@omnitron-dev/titan-pm",
@@ -66270,7 +66270,7 @@
       "name": "IProcessManagerModule",
       "package": "@omnitron-dev/titan-pm",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-pm/src/types.ts#L1330",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-pm/src/types.ts#L1316",
       "imports": [
         {
           "path": "@omnitron-dev/titan-pm",
@@ -66282,7 +66282,7 @@
       "name": "IProcessMetadata",
       "package": "@omnitron-dev/titan-pm",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-pm/src/types.ts#L178",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-pm/src/types.ts#L187",
       "imports": [
         {
           "path": "@omnitron-dev/titan-pm",
@@ -66294,7 +66294,7 @@
       "name": "IProcessMethodMetadata",
       "package": "@omnitron-dev/titan-pm",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-pm/src/types.ts#L187",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-pm/src/types.ts#L196",
       "imports": [
         {
           "path": "@omnitron-dev/titan-pm",
@@ -66306,7 +66306,7 @@
       "name": "IProcessMetrics",
       "package": "@omnitron-dev/titan-pm",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-pm/src/types.ts#L645",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-pm/src/types.ts#L654",
       "imports": [
         {
           "path": "@omnitron-dev/titan-pm",
@@ -66330,7 +66330,7 @@
       "name": "IProcessPool",
       "package": "@omnitron-dev/titan-pm",
       "kind": "type",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-pm/src/types.ts#L440",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-pm/src/types.ts#L449",
       "imports": [
         {
           "path": "@omnitron-dev/titan-pm",
@@ -66342,7 +66342,7 @@
       "name": "IProcessPoolOptions",
       "package": "@omnitron-dev/titan-pm",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-pm/src/types.ts#L293",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-pm/src/types.ts#L302",
       "imports": [
         {
           "path": "@omnitron-dev/titan-pm",
@@ -66354,7 +66354,7 @@
       "name": "IProcessSpawner",
       "package": "@omnitron-dev/titan-pm",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-pm/src/types.ts#L1101",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-pm/src/types.ts#L1110",
       "imports": [
         {
           "path": "@omnitron-dev/titan-pm",
@@ -66366,7 +66366,7 @@
       "name": "IProcessTraffic",
       "package": "@omnitron-dev/titan-pm",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-pm/src/types.ts#L693",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-pm/src/types.ts#L702",
       "imports": [
         {
           "path": "@omnitron-dev/titan-pm",
@@ -66378,7 +66378,7 @@
       "name": "IProcessTrafficReporter",
       "package": "@omnitron-dev/titan-pm",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-pm/src/types.ts#L732",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-pm/src/types.ts#L741",
       "imports": [
         {
           "path": "@omnitron-dev/titan-pm",
@@ -66390,7 +66390,7 @@
       "name": "IRestartPolicy",
       "package": "@omnitron-dev/titan-pm",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-pm/src/types.ts#L1319",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-pm/src/types.ts#L1305",
       "imports": [
         {
           "path": "@omnitron-dev/titan-pm",
@@ -66426,7 +66426,7 @@
       "name": "IServiceProxyControl",
       "package": "@omnitron-dev/titan-pm",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-pm/src/types.ts#L279",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-pm/src/types.ts#L288",
       "imports": [
         {
           "path": "@omnitron-dev/titan-pm",
@@ -66450,7 +66450,7 @@
       "name": "ISpawnOptions",
       "package": "@omnitron-dev/titan-pm",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-pm/src/types.ts#L1168",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-pm/src/types.ts#L1177",
       "imports": [
         {
           "path": "@omnitron-dev/titan-pm",
@@ -66462,7 +66462,7 @@
       "name": "ISupervisorChild",
       "package": "@omnitron-dev/titan-pm",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-pm/src/types.ts#L488",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-pm/src/types.ts#L497",
       "imports": [
         {
           "path": "@omnitron-dev/titan-pm",
@@ -66474,7 +66474,7 @@
       "name": "ISupervisorChildConfig",
       "package": "@omnitron-dev/titan-pm",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-pm/src/types.ts#L552",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-pm/src/types.ts#L561",
       "imports": [
         {
           "path": "@omnitron-dev/titan-pm",
@@ -66486,7 +66486,7 @@
       "name": "ISupervisorConfig",
       "package": "@omnitron-dev/titan-pm",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-pm/src/types.ts#L539",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-pm/src/types.ts#L548",
       "imports": [
         {
           "path": "@omnitron-dev/titan-pm",
@@ -66498,7 +66498,7 @@
       "name": "ISupervisorOptions",
       "package": "@omnitron-dev/titan-pm",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-pm/src/types.ts#L467",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-pm/src/types.ts#L476",
       "imports": [
         {
           "path": "@omnitron-dev/titan-pm",
@@ -66510,7 +66510,7 @@
       "name": "IWorkerHandle",
       "package": "@omnitron-dev/titan-pm",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-pm/src/types.ts#L1139",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-pm/src/types.ts#L1148",
       "imports": [
         {
           "path": "@omnitron-dev/titan-pm",
@@ -66726,7 +66726,7 @@
       "name": "PoolStrategy",
       "package": "@omnitron-dev/titan-pm",
       "kind": "type",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-pm/src/types.ts#L408",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-pm/src/types.ts#L417",
       "imports": [
         {
           "path": "@omnitron-dev/titan-pm",
@@ -66906,7 +66906,7 @@
       "name": "ProcessSpawnerFactory",
       "package": "@omnitron-dev/titan-pm",
       "kind": "class",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-pm/src/process-spawner.ts#L1645",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-pm/src/process-spawner.ts#L1658",
       "imports": [
         {
           "path": "@omnitron-dev/titan-pm",
@@ -66918,7 +66918,7 @@
       "name": "ProcessStatus",
       "package": "@omnitron-dev/titan-pm",
       "kind": "type",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-pm/src/types.ts#L250",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-pm/src/types.ts#L259",
       "imports": [
         {
           "path": "@omnitron-dev/titan-pm",
@@ -66966,7 +66966,7 @@
       "name": "RestartDecision",
       "package": "@omnitron-dev/titan-pm",
       "kind": "type",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-pm/src/types.ts#L572",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-pm/src/types.ts#L581",
       "imports": [
         {
           "path": "@omnitron-dev/titan-pm",
@@ -67002,7 +67002,7 @@
       "name": "ServiceProxy",
       "package": "@omnitron-dev/titan-pm",
       "kind": "type",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-pm/src/types.ts#L268",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-pm/src/types.ts#L277",
       "imports": [
         {
           "path": "@omnitron-dev/titan-pm",
@@ -67038,7 +67038,7 @@
       "name": "SupervisionStrategy",
       "package": "@omnitron-dev/titan-pm",
       "kind": "type",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-pm/src/types.ts#L477",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-pm/src/types.ts#L486",
       "imports": [
         {
           "path": "@omnitron-dev/titan-pm",

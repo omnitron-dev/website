@@ -247,6 +247,20 @@ A coupled daemon owns its application processes. Its first transition to indepen
 
 Prepare a sealed copy using the Node executable and installed dependencies of that node. Before stopping anything, validate its application bootstrap readers, operational health, private socket permissions, native supervisor identity and saved environment. Save the old configuration, unit definitions, project registrations and online SQLite backups; prepare the new owner/backend units and a concrete rollback procedure alongside the running installation.
 
+An owner replacement also requires cold application recovery checks in both
+directions. Run ordinary release admission against the actual project
+registrations, configuration inputs and selected archives for the candidate and
+rollback. A running application's retained launch handle does not prove that a
+fresh owner can load its release after those inputs change. Successful backend
+handoff checks alone do not qualify that recovery. Resolve declaration drift
+before the window; do not bypass digest verification during recovery.
+
+Bootstrap children and pools use the application's declared `cwd`, falling back
+to its project directory. Persistent files belong there or in an explicitly
+configured data directory, never in the sealed owner runtime. Validate this
+boundary with real child processes; an unchanged package hash does not excuse
+unexpected writes to an installed runtime tree.
+
 Preserve the existing instance account, home and application dependency bindings. Changing a root-owned legacy installation to another account is a separate migration: it can affect application files, credentials and container access. The automatic `service install --prepare` flow continues to require a non-root account for new system installations. An administrator-reviewed migration of an existing root-owned instance must explicitly retain that identity and private control paths; it does not authorize a second daemon or shared sockets.
 
 During the approved window, disable file watching, stop applications gracefully, verify their processes have exited, and then retire the old daemon. Enable resident execution, select the sealed runtime and install the two independently supervised services. Start the owner before the backend. Confirm the original application inventory, operational health, ready recovery certificate, separate native cgroups and durable log delivery before proceeding to another node.
