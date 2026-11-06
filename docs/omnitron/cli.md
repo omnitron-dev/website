@@ -958,6 +958,15 @@ for compare-and-swap checks, so a stale plan cannot overwrite a newer owner stat
 Consult `omnitron infra ingress --help` for the available operations and supply
 the JSON manifest belonging to the intended host and owner.
 
+For a controlled maintenance window, preserve the owner's domains, TLS and
+reserved ports and use `[{ "path": "/", "deny": 503 }]` for each route's locations.
+Validate and apply before changing its services or static mounts. HTTPS returns
+`503`, `Retry-After: 60` and `Cache-Control: no-store`; other owners keep their
+routes. Retain the previous generation and maintenance owner revision for
+`infra ingress restore`. Open traffic only after private readiness checks pass.
+Restoring ingress changes routing, not application processes or data. Maintenance
+persists across daemon restarts until an explicit publication or restoration.
+
 ## Console access and interactive SSH
 
 `omnitron access` and `omnitron terminal` use the same services and policy as Console.
