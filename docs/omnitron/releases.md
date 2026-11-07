@@ -436,6 +436,35 @@ Older local owners may run the verified package while reporting no launch
 receipt. The selected release and inspected files remain useful evidence, but
 neither is presented as a confirmed current process identity.
 
+### Mount a release artifact in a local Docker service
+
+Use `infrastructure.artifactVolumes` when a service such as a gateway needs
+files shipped in an application artifact. For example, a gateway can serve the
+`dist/public` directory of a pinned application named `web`:
+
+```ts
+infrastructure: {
+  services: {
+    gateway: { ports: {}, env: {}, docker: { image: gatewayImage } },
+  },
+  artifactVolumes: {
+    website: { service: 'gateway', app: 'web', directory: 'dist/public', target: '/srv/site' },
+  },
+}
+```
+
+Declare `web` in `apps`. Set `enabled: false` when the gateway serves its
+files and the stack should start no web process. The release builder includes
+the referenced artifact, checks the mount declaration and records any declared
+migration programs. Building the first consumer release requires no running
+stack or existing consumer installation.
+
+Before starting the stack, prepare and select the consumer release. Omnitron
+verifies the installed payload and mounts its directory read-only at `target`.
+Stack diagnosis in CLI and Console names the application, service and target
+still awaiting selection. Topology can show the declared service before its
+artifact is installed.
+
 ### Read the executing application's origin
 
 A packaged application can use the public `@omnitron-dev/omnitron/runtime` entry
