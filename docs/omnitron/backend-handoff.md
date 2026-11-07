@@ -583,8 +583,11 @@ application requests and logs.
 The full native scenario upgrades the guardian first, then verifies backend replacement and rollback under that guardian, crash recovery, and guardian rollback with an interrupted coordinator. The separate `--backend-only` scenario deliberately retains the original guardian and qualifies only that narrower operation.
 
 The same native fixture also qualifies an execution-owner replacement with
-`--owner-roundtrip`. It reviews and stops only its private stack while retaining
-infrastructure, confirms the old owner’s clean shutdown, selects the candidate
+`--owner-roundtrip`. It verifies that the reviewed footprint contains exactly its
+private counter application and no owned containers, then uses the ordinary
+digest-bound stack stop. The same operation works with the retained old backend
+and the candidate; this fixture does not qualify the separate infrastructure
+retention extension. It confirms the old owner’s clean shutdown, selects the candidate
 through the public CLI, and restarts unique test OS services. The stack must stay
 stopped until an explicit start. The fixture repeats the sequence for rollback,
 compares the existing migration journal exactly, and checks that every recorded
