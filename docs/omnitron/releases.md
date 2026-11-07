@@ -71,6 +71,13 @@ not substitute a partial list of tasks. The result must match every committed
 archive's SHA-512 before application installation or gates run.
 A local Git repository is a supported source and does not require a push.
 
+Current SDK package builds resolve the compiler from the workspace lockfile. For
+a historical SDK, keep the build tools required by that revision on the isolated
+builder’s `PATH`. If its build scripts call `npx`, include the npm CLI bundled
+with the pinned Node.js distribution. Run the package’s declared build in the
+same image, with the same `PATH` and network policy, before qualifying the full
+release. The receipt for the full build identifies the resulting artifacts.
+
 An isolated controller directory keeps qualification registrations and output out
 of a running controller's registry. Create a fresh directory for the attempt,
 leave its daemon stopped, and use the same directory for both commands:
