@@ -390,6 +390,12 @@ server, credentials, and query options. Omnitron's PostgreSQL integration probes
 fail CI when that test service is unavailable. Local runs report the affected
 suites as skipped and explain how to start the test infrastructure.
 
+Workspace tests use Turbo's strict environment mode. The declared `TEST_*`,
+`OMNITRON_TEST_*`, `OMNITRON_HOME` and `USE_MOCK_REDIS` settings reach test
+processes and affect their cache keys. Docker connection settings and temporary
+directories pass through explicitly. A custom test port therefore selects the
+same endpoint in a direct package test and in the full workspace command.
+
 ## Vitest configuration baseline
 
 ```typescript
