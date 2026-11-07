@@ -403,10 +403,13 @@ for installations that predate the fenced fleet handoff. Updating the execution 
 On Linux, the complete guardian cgroup must contain only the recorded guardian
 and backend, with no occupied descendants. A refusal reports the relative group
 and expected/observed PIDs separately from frozen or ambiguous group state.
-Short-lived native commands used by a health inspection can temporarily occupy
-that group. Inspect the reported processes, allow their operation to finish, and
-repeat preparation; do not exempt them from the stop fence or kill an unknown
-process to make the check pass. Apply repeats the check before stopping the unit.
+A health inspection can briefly start another process in the root group.
+During preparation, Omnitron can wait up to 1.5 seconds between full inspections
+when both original processes are present. It verifies the same process lifetimes
+and accepts the plan only after the extra process leaves. If the refusal persists,
+inspect the reported PIDs. A missing process, an occupied descendant or an
+ambiguous group state fails inspection. Review and apply check the current scope
+immediately, including the check before stopping the unit.
 
 The kernel defines `cgroup.procs` as an unordered process set and can repeat a PID
 during a read. The reader normalizes ordering and repeated entries while retaining
@@ -612,6 +615,14 @@ node apps/omnitron/test/runtime/managed-backend.mjs \
   --initial-guardian /builds/omnitron-handoff-serving-guardian/packages/0/dist \
   --initial-backend /builds/omnitron-handoff-serving-backend/packages/0/dist
 ```
+
+To exercise a development stack and a pinned application release through the
+same owner replacement, add `--application-sdk <installed-package>` and
+`--application-sdk-commit <full-sha>` to the command. Take the SHA from the
+reviewed application release. Before creating services, the fixture verifies the
+installed package name, clean build stamp and commit. The result records the
+application framework commit alongside the execution owner's commit and artifact
+hash. This supports an application SDK released independently of the controller.
 
 Use sealed disposable artifacts built for the host and its exact Node version.
 The fixture uses private application data and unique launchd/systemd jobs. Linux
