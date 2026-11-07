@@ -335,6 +335,14 @@ In the Omnitron repository, `pnpm test:ci` starts a dedicated Compose project, r
 `createRedisCluster()` and `createRedisSentinel()` — and
 `DockerTestManager` is the lower-level driver the other two use.
 
+For container commands, pass an array to preserve literal arguments, including
+empty strings: `command: ['redis-server', '--save', '']`. A string deliberately
+runs through `sh -c`; never interpolate untrusted values into that form. Docker
+starts run asynchronously so one node cannot block another node's readiness
+checks. If cluster creation fails, the helper waits for every attempted creation,
+cleans all returned nodes, and removes its own network. Startup and cleanup
+failures remain visible together.
+
 ## Performance helpers — `@omnitron-dev/testing/performance`
 
 ```typescript
@@ -373,6 +381,14 @@ const dbUrl = testPostgresUrl('other'); // …:15432/other
 
 Every value is overridable through the matching environment variable
 (`TEST_REDIS_HOST`, `TEST_REDIS_PORT`, `TEST_POSTGRES_*`).
+
+Use the shared `TEST_POSTGRES_URL` in database tests instead of repeating a
+fixed port. An explicit `TEST_POSTGRES_URL` takes precedence; the existing
+`TEST_DATABASE_URL` CI variable remains accepted by the shared resolver.
+`testPostgresUrl(name)` changes only the database name and preserves the selected
+server, credentials, and query options. Omnitron's PostgreSQL integration probes
+fail CI when that test service is unavailable. Local runs report the affected
+suites as skipped and explain how to start the test infrastructure.
 
 ## Vitest configuration baseline
 
