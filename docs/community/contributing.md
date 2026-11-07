@@ -216,7 +216,11 @@ node scripts/release.mjs <version> --github
 ```
 
 The first command atomically pushes the selected commit and its annotated tag.
-The second checks the remote tag and compares archive integrity against npm.
+The second checks the remote tag, downloads every published archive and compares
+its SHA-512 with the sealed artifact. A staged upload is not a confirmed release:
+Xec waits up to 30 minutes for version metadata, the tarball and the release
+channel to agree. Pending upload receipts let a later resume continue confirmation
+without publishing the same archive again.
 After an interruption, keep the artifacts and use `node scripts/release.mjs <version>
 --resume` at the same clean commit. GitHub publication checks all packages
 before creating the release. An internal registry can be selected explicitly
@@ -224,8 +228,8 @@ using `--registry <url>` for publication, resumption and confirmation.
 
 The CI rehearsal runs two dependent packages through Git and a loopback npm
 registry. It interrupts publication after the first package, resumes the
-second and rejects a conflicting digest. It also checks that unrelated tags
-stay local.
+second through delayed staged visibility, downloads both archives and rejects a
+conflicting digest. It also checks that unrelated tags stay local.
 
 ## Report a problem
 

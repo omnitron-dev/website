@@ -417,6 +417,11 @@ port reservations until removal succeeds. The Xec Docker adapter resolves a name
 to an immutable container ID and verifies absence after removal. A replaced name,
 unavailable daemon, or denied request is an explicit failure.
 
+Omnitron requires Xec 0.11.3 or later in the compatible release line. Its Docker
+adapter preserves the requested stop grace period and allows time for the
+transport acknowledgement. An expired command deadline does not prove that the
+container stopped; inspect its state before retrying or escalating.
+
 RPC service withdrawal is part of the acknowledgement. Failed withdrawal retains
 its router for retry while process termination still runs. Destroyed pools reject
 late background spawns; destruction is terminal.
