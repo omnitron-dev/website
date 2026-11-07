@@ -105,7 +105,14 @@ real archives with npm and runs a production dependency audit outside the worksp
 Release preparation requires that audit and the public runtime checks, including
 TypeScript extraction and a SQLite journal write/read. An unavailable audit or a
 reported vulnerability fails preparation; a clean workspace audit cannot substitute
-for this consumer check. Netron React supplies both ESM and CommonJS declarations. The testing
+for this consumer check.
+
+When a library embeds a development dependency, list its exact name in
+`package.json#tsup.noExternal` and use that list in the tsup build. The source
+check accepts that build input; the archive check rejects a JavaScript import or
+type declaration that would still require the package on a consumer's machine.
+
+Netron React supplies both ESM and CommonJS declarations. The testing
 package uses Node.js 22.12+ native `require(esm)` support for its CommonJS entry
 conditions. Validate
 consumer applications against the same package artifacts and ensure Titan
