@@ -409,15 +409,20 @@ export default defineConfig({
     include:       ['src/**/*.test.ts', 'test/**/*.test.ts'],
     coverage:      { reporter: ['text', 'html', 'lcov'] },
     pool:          'forks',          // crash isolation
-    poolOptions: {
-      forks: { singleFork: false },  // parallel
-    },
+    maxWorkers:    2,               // bounded concurrency
     testTimeout:   10_000,
     hookTimeout:   30_000,
     globals:       false,             // explicit imports
   },
 });
 ```
+
+When tests enable globals, declare `"types": ["node", "vitest/globals"]` in
+their TypeScript configuration. Package resolution supports both hoisted and
+isolated dependency layouts; an explicit `node_modules/vitest/globals.d.ts`
+include assumes one layout. Omnitron shares these options through
+`tsconfig.vitest.json`. Keep the test `tsBuildInfoFile` separate from the build
+cache so incremental checks cannot reuse diagnostics from a different file set.
 
 ## Cross-runtime tests — Node + Bun + Deno
 

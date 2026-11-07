@@ -67662,7 +67662,7 @@
       "name": "CacheOptions",
       "package": "@omnitron-dev/titan-redis",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-redis/src/redis.types.ts#L225",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-redis/src/redis.types.ts#L228",
       "imports": [
         {
           "path": "@omnitron-dev/titan-redis",
@@ -67806,7 +67806,7 @@
       "name": "InternalRedisModuleOptions",
       "package": "@omnitron-dev/titan-redis",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-redis/src/redis.types.ts#L183",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-redis/src/redis.types.ts#L185",
       "imports": [
         {
           "path": "@omnitron-dev/titan-redis",
@@ -68034,7 +68034,7 @@
       "name": "LockOptions",
       "package": "@omnitron-dev/titan-redis",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-redis/src/redis.types.ts#L234",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-redis/src/redis.types.ts#L237",
       "imports": [
         {
           "path": "@omnitron-dev/titan-redis",
@@ -68058,7 +68058,7 @@
       "name": "RateLimitOptions",
       "package": "@omnitron-dev/titan-redis",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-redis/src/redis.types.ts#L243",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-redis/src/redis.types.ts#L246",
       "imports": [
         {
           "path": "@omnitron-dev/titan-redis",
@@ -68178,7 +68178,7 @@
       "name": "RedisManager",
       "package": "@omnitron-dev/titan-redis",
       "kind": "class",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-redis/src/redis.manager.ts#L27",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-redis/src/redis.manager.ts#L26",
       "imports": [
         {
           "path": "@omnitron-dev/titan-redis",
@@ -68202,7 +68202,7 @@
       "name": "RedisModuleAsyncOptions",
       "package": "@omnitron-dev/titan-redis",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-redis/src/redis.types.ts#L213",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-redis/src/redis.types.ts#L216",
       "imports": [
         {
           "path": "@omnitron-dev/titan-redis",
@@ -68226,7 +68226,7 @@
       "name": "RedisOptionsFactory",
       "package": "@omnitron-dev/titan-redis",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-redis/src/redis.types.ts#L221",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-redis/src/redis.types.ts#L224",
       "imports": [
         {
           "path": "@omnitron-dev/titan-redis",
@@ -68298,7 +68298,7 @@
       "name": "toInternalClientOptions",
       "package": "@omnitron-dev/titan-redis",
       "kind": "function",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-redis/src/redis.types.ts#L259",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-redis/src/redis.types.ts#L262",
       "imports": [
         {
           "path": "@omnitron-dev/titan-redis",
@@ -68310,7 +68310,7 @@
       "name": "toInternalModuleOptions",
       "package": "@omnitron-dev/titan-redis",
       "kind": "function",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-redis/src/redis.types.ts#L334",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-redis/src/redis.types.ts#L337",
       "imports": [
         {
           "path": "@omnitron-dev/titan-redis",

@@ -111,7 +111,8 @@ RedisModule.forRootAsync({
 | `config`          | `IRedisClientOptions` — single-client config                      |
 | `clients`         | `IRedisClientOptions[]` — multiple named clients                  |
 | `commonOptions`   | `Partial<IRedisClientOptions>` — applied to every client          |
-| `closeClient`     | `boolean` — close on `onDestroy` (default: `true`)                |
+| `closeClient`     | `boolean` — close during module shutdown (default: `true`)       |
+| `shutdownTimeout` | `number` — QUIT acknowledgement budget in milliseconds (default: `5000`; `0` disconnects immediately) |
 | `readyLog`        | `boolean` — log when each client emits 'ready'                    |
 | `errorLog`        | `boolean` — log on connection errors                              |
 | `logger`          | `ILogger` — override default logger                               |
@@ -310,14 +311,27 @@ For tier-based / sliding-window strategies use
 
 ## Lifecycle
 
-`RedisManager` implements:
+The module's provider factory calls `RedisManager.init()` before consumers
+receive the manager. It initializes non-lazy clients and preloads declared Lua
+scripts. `TitanRedisModule.onStop()` calls `destroy()` after dependent modules
+have stopped. Applications using the module do not need a second shutdown hook.
+The manager also exposes `onModuleInit()` and `onModuleDestroy()` for hosts that
+explicitly invoke those compatibility methods.
 
-- `async onModuleInit()` — connect every non-lazy client; preload Lua scripts.
-- `async onModuleDestroy()` — close every client gracefully (skipped if `closeClient: false`).
+Shutdown sends `QUIT` only to a ready client and waits up to `shutdownTimeout`
+for its acknowledgement. A client that is lazy, connecting or reconnecting is
+disconnected immediately, so stopping an application cannot start a new Redis
+connection. The deadline applies independently to clients closed in parallel.
+A timeout or failed acknowledgement is logged with its namespace, then the
+socket and reconnect loop are closed. This bounds shutdown; it does not prove
+that an unacknowledged command reached the server.
 
-The framework wires these into the Titan application lifecycle —
-clients connect before your services' `onInit` and close after every
-service's `onStop`.
+`destroyClient(namespace)` uses the same close path and removes the registration
+even when closing fails; the caller receives the failure. `destroy()` attempts
+to close every owned client and logs individual failures. With
+`closeClient: false`, the caller retains responsibility for connections and must
+close them explicitly. Set `shutdownTimeout: 0` only when immediate disconnect
+is intended; otherwise use a finite non-negative integer up to `2147483647`.
 
 ## DB-index isolation pattern
 
