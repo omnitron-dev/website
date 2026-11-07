@@ -205,7 +205,10 @@ node scripts/release.mjs <version> --prepare
 ```
 
 Preparation commits public package versions, builds an isolated copy of the
-source and verifies the exported files in each archive. Inspect `release.json`
+source and verifies the exported files in each archive. Two ordinary npm installs
+check the published dependency graph without workspace overrides: the minimal
+CLI/Netron consumer exercises the runtime, and an install of every public package
+audits optional modules as well. Inspect `release.json`
 and `NOTES.md` in `.release-artifacts/<version>/<commit>/`. The public npm
 channel for `1.0.0-rc.1`, for example, is `rc`.
 

@@ -20,6 +20,11 @@ under the application's Prism theme. Buttons, search fields, insertion dialogs
 and block menus use MUI, so application component overrides and locale settings
 apply inside the workspace too.
 
+`parseResearchMarkdown` recognizes inline and block equations without loading an
+equation renderer. The reader and editor render through Prism's declared KaTeX
+dependency; the Markdown tokenizer ships with Prism. Consumers do not need to
+override a second renderer version.
+
 ## One visual system
 
 Colours come from `theme.palette`; editor and graph radii come from
