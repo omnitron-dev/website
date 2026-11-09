@@ -493,15 +493,14 @@ experiment; changing old hashes would invalidate its reproducibility.
 
 ### Execution handoff: architecture boundary
 
-**Design target, not a current zero-downtime capability.** The control daemon
-currently owns Titan PM supervisors, fork IPC channels, worker threads and app
-routing. Fork workers terminate on parent disconnect; the parent-death watchdog
+In coupled mode the control daemon owns Titan PM supervisors, fork IPC
+channels, worker threads and application routing. Fork workers terminate on parent disconnect; the parent-death watchdog
 and cold-start janitor enforce that ownership. Simply disabling `stopAll` or
 reusing PIDs would either lose in-process workers or create unmanaged processes.
 
-The migration boundary is a separately supervised execution host in Titan PM.
-It must own application processes, threads, restart policy, log capture, metrics
-and the child registry independently of the Omnitron control daemon. Omnitron
+In resident mode a separately supervised execution owner uses Titan PM to manage
+application processes, threads, restart policy, log capture, metrics and the
+child registry across backend replacements. Omnitron
 retains project orchestration and RBAC, communicating through authenticated,
 local Netron RPC. A private socket and a persistent host identity must be verified
 before a controller can attach; PID existence alone is not identity evidence.
@@ -514,10 +513,8 @@ A controller outage leaves existing work supervised, while new mutations stop
 until authorization and ownership can be verified. Telemetry has a bounded,
 observable buffer and resumes with acknowledgements rather than silent loss.
 
-Before enabling this mode, test fork and thread workers, pools, classic scripts,
-service routing, rolling configuration, revocation during disconnect, PID reuse,
-crashes at each transfer phase, lost acknowledgements and rollback to the prior
-controller. Migration of existing coupled workers needs one controlled restart;
+Use the [backend handoff procedure](./backend-handoff.md) to inspect
+capabilities, prepare the candidate, switch controllers and verify rollback. Migration of existing coupled workers needs one controlled restart;
 only workers already owned by the execution host can survive later control-daemon
 updates. Immutable application runtimes and experiment registrations must remain
 separate from controller upgrades.
