@@ -288,9 +288,11 @@ so an app with 10 processes loads 10 disjoint subsets of code.
 
 ## Titan identity and installed application paths
 
-In worker mode, the application and the bootstrap adapter that launches it must resolve the same physical Titan installation. Two copies can report the same package version and export different `Container` classes. Dependency injection then fails. The startup diagnostic reports both paths. The adapter can belong to the application when the owner supports application runtimes.
+The application and its bootstrap adapter must resolve the same physical Titan installation. Two copies of the same version export different `Container` classes. If dependency injection reports an identity mismatch, check both paths in the startup diagnostic and restore the application's frozen installation.
 
-The owner resolves the current application adapter through the same bounded fresh-process reader used for application metadata. Node reads the installed package graph once per application generation; its pools and individual processes use that same adapter. The reader exits before the launch continues. An installed adapter that is broken or resolves a different Titan is rejected. The owner adapter is allowed only when the application has no adapter and both use the same physical Titan.
+Both coupled and resident daemons resolve the adapter from the application's current dependencies. A fresh reader runs once per application generation, so single processes and pool workers share the chosen adapter. A damaged adapter or a different Titan installation prevents launch. When only Titan is installed, the application can use an owner adapter that resolves that same Titan.
+
+Coupled mode also accepts a plain bootstrap with neither framework package installed or declared. In that case the daemon supplies its own adapter.
 
 This behavior is advertised as the owner capability `applicationRuntimeResolution: 1`, reported in `execution.ownerCapabilities` by `omnitron status --json` and the shared daemon status API. Older owners can retain Node package resolutions across application restarts. Replacing `node_modules` under the same absolute bootstrap path can then launch the previous adapter against the new application. Updating only the backend does not update the owner's resolver. Restore the previous coherent application SDK or prepare a qualified owner transition with an application pause and rollback.
 

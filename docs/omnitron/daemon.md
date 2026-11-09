@@ -459,9 +459,10 @@ launch. The app stays stopped until a new start is requested. When ready, run
 
 ## Updating a source runtime
 
-A daemon restart stops its managed application processes. Prepare a controlled
-maintenance window when updating a source checkout; process handoff between
-daemon versions is not implemented.
+In coupled mode the daemon directly supervises application processes. Replacing
+it requires a controlled maintenance window. A resident owner can retain running
+applications across a backend update. Check the reported execution mode before
+choosing the [handoff procedure](./backend-handoff.md).
 
 1. Record the active build, enabled stacks, application states and remote node
    process IDs. Save the daemon configuration, account database, project registry,
@@ -474,10 +475,10 @@ daemon versions is not implemented.
 3. Unload the OS supervisor before replacing a watched checkout. Wait for owned
    application processes to stop. Fast-forward clean working copies and install
    from the verified lockfiles; preserve other branches and local configuration.
-4. Bind source-mode applications to the same physical Titan package as the daemon.
-   Matching version strings alone do not guarantee shared dependency-injection
-   identity. Verify transitive backend imports as well as direct dependencies.
-   Published deployments should use their pinned framework artifacts.
+4. Install each source application's adapter and Titan from its frozen lockfile.
+   They must resolve one physical Titan package. The daemon may use its own
+   SDK. Check the active owner's capabilities when upgrading an older
+   installation. Published deployments use their pinned framework artifacts.
 5. Build the daemon and Console from the same revision, then restore OS supervision.
    Check each enabled stack and its child processes against the saved baseline.
    A responding daemon does not mean its applications have finished starting.
