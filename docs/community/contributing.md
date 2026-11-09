@@ -101,7 +101,9 @@ not runtime requirements for applications.
 `pnpm check:packages` packs every public workspace and verifies that all declared
 exports, types and command entry points exist in the archive. CI runs it after
 building. Its `--install-consumer /absolute/new/directory` option also installs the
-real archives with npm and runs a production dependency audit outside the workspace.
+real archives with npm, replays the consumer's generated lockfile with `npm ci`
+and audits the resulting production dependencies. Both minimal and all-package
+installations must pass.
 Release preparation requires that audit and the public runtime checks, including
 TypeScript extraction and a SQLite journal write/read. An unavailable audit or a
 reported vulnerability fails preparation; a clean workspace audit cannot substitute
