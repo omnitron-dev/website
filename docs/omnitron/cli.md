@@ -808,13 +808,17 @@ targets that may or may not run a daemon.
 
 | Command | Effect |
 | ------- | ------ |
-| `omnitron node list` (alias `ls`) | All registered nodes |
+| `omnitron node list` (alias `ls`) | Registered nodes and last observed connectivity. `--json` returns full IDs in `data.nodes`. |
 | `omnitron node add ...` | Register a node (see flags below) |
 | `omnitron node update <id> ...` | Update a node |
 | `omnitron node remove <id>` (alias `rm`) | Remove a node |
 | `omnitron node check [id]` | Connectivity check (all nodes if omitted) |
 | `omnitron node ssh-keys` | List available SSH keys from `~/.ssh/` |
 | `omnitron node reconcile <node>` | Inspect historical unverified metrics; administrator only |
+
+Use `omnitron --json node list` for fleet automation. Each node includes its full ID, endpoints, runtime, tags and the most recent status. A null status means the controller has no observation yet. The same command works against older controllers.
+
+For SSH key authentication, the node registry keeps a file reference or an encrypted private key. Reading or editing a node shows **Keep stored key** for an inline key. Changing a node's host, port or SSH account requires an explicit credential choice. Existing inline keys move to the vault during startup. If the vault is unavailable, the original credential is retained for recovery and the controller reports the pending migration.
 
 `node reconcile` is read-only unless `--restore` is supplied. It compares retained
 source samples with PostgreSQL using the original timestamp, value and normalized
