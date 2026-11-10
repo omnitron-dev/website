@@ -719,8 +719,8 @@ custom) provisioned per app's `omnitronConfig.infrastructure`.
 | `omnitron infra down` | Remove containers owned by the current standalone configuration and preserve their volumes. The legacy `--volumes` option is rejected. |
 | `omnitron infra status` (alias `infra ps`) | Container status |
 | `omnitron infra logs [service] [-f] [-n N]` | View logs for one or all infra services |
-| `omnitron infra psql [database]` | Open `psql` shell |
-| `omnitron infra redis-cli` | Open `redis-cli` shell |
+| `omnitron infra psql [database] [--stack project/stack] [-c sql]` | Open the local stack’s PostgreSQL shell or run SQL once. The command returns the client exit status. |
+| `omnitron infra redis-cli [--stack project/stack] [--db index] [command...]` | Open the local stack’s Redis shell or execute a Redis command in the selected database. |
 | `omnitron infra migrate [app] [--dry-run]` | In a standalone ecosystem, resolve the selected applications to package migration scripts and run each package once in dependency order. Preview the packages with `--dry-run`. A failing script stops the sequence and identifies its application. |
 | `omnitron infra reset --yes` | Recreate owned containers using their existing volumes. |
 

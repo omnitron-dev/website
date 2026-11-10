@@ -794,10 +794,17 @@ always points at the current location.
 | `omnitron infra down` | Stop and remove owned standalone containers by their observed Docker IDs. Their volumes are retained. The legacy `--volumes` flag returns an error. |
 | `omnitron infra status` (`ps`) | Container inventory |
 | `omnitron infra logs [service] [-f] [-n N]` | Tail container logs |
-| `omnitron infra psql [database]` | Open psql against the managed Postgres |
-| `omnitron infra redis-cli` | Open redis-cli against the managed Redis |
+| `omnitron infra psql [database] [--stack project/stack] [-c sql]` | Open the local stack’s PostgreSQL shell or run SQL once. The command returns the client exit status. |
+| `omnitron infra redis-cli [--stack project/stack] [--db index] [command...]` | Open the local stack’s Redis shell or execute a Redis command in the selected database. |
 | `omnitron infra migrate [app] [--dry-run]` | Resolve and run workspace package migration scripts in dependency order. Use `--dry-run` to inspect the packages. |
 | `omnitron infra reset --yes` | Recreate owned standalone containers and reuse their existing volumes. |
+
+When several stacks have the same service on one host, select the owning stack explicitly. The CLI matches the project and stack labels and opens the inspected container by ID. A missing scoped application database ends the command with an error. For a remote stack, open a terminal on its node and run the command there.
+
+```bash
+omnitron infra psql payments --stack sample/dev -c 'SELECT current_database()'
+omnitron infra redis-cli --stack sample/dev --db 3 XLEN orders
+```
 
 → Full reference: [CLI / Infrastructure](./cli.md#infrastructure).
 
