@@ -10,6 +10,37 @@ records the **project commit** and the **Omnitron commit** used to build its
 applications. The build runs in clean clones and stores its gates, artifacts
 and manifest.
 
+## Local SDK development and registry deployments
+
+Commit exact platform versions in your pnpm catalog and the resulting registry
+lockfile. With a local framework checkout, `omnitron sdk init` prepares a small
+pnpm hook for the consumer repository. Commit that hook and its updated lockfile.
+Stop working-tree applications before switching their installed dependencies.
+From the consumer workspace:
+
+```sh
+omnitron sdk dev /work/framework --stack dev
+```
+
+The command builds the selected packages and verifies their physical resolution
+across workspace importers. A private profile under `.omnitron/dev-sdk` supplies
+the local overrides and pnpm lock to normal installs, test commands and IDEs.
+Keep the command running while editing the platform. It watches source changes,
+waits for successful builds, then refreshes affected online applications whose
+watch policy is enabled in the named local stack. A Vite frontend can serve the
+selected packages' built modules through its normal HMR path. Omit `--stack`
+to own application reload yourself. Use `--no-watch` to install the profile
+separately. Resume with `omnitron sdk dev --stack dev`.
+
+`omnitron --json sdk status` reports the active origin and verified import count.
+After stopping source applications, `omnitron sdk registry` restores the normal
+frozen installation. A release can be built while a developer uses a local SDK:
+the builder installs the lockfile from the selected Git commit in a clean clone.
+To enforce this input policy, set `omnitron.release.frameworkInput` to
+`"registry"` in the workspace package.json. For an external deployment publish
+changed platform packages first, update their catalog and lockfile together in
+a registry checkout, then build and deploy the resulting project commit.
+
 ## Rebuilding an artifact
 
 Register the directory containing the ecosystem configuration. The builder

@@ -41,6 +41,7 @@ when piped into another process. Check both the JSON result and the exit status.
 | ----- | -------- |
 | **Daemon lifecycle** | `up`, `down`, `ping`, `kill` |
 | **Backend installation and replacement** | `backend status`, `backend install`, `backend installation`, `backend select`, `backend upgrade`, `backend abort`, `backend recover`, `backend owner-reconcile prepare`, `backend owner-reconcile acknowledge` |
+| **Development SDK** | `sdk init`, `sdk dev`, `sdk status`, `sdk registry` |
 | **Project** | `project add`, `project list`, `project remove`, `project scan`, `project topology` |
 | **Topology** | `topology refresh`, `topology show`, `topology export`, `topology draft`, `topology plan`, `topology apply` |
 | **Stack** | `stack list`, `stack create`, `stack delete`, `stack status`, `stack progress`, `stack diagnose`, `stack prepare-release`, `stack start`, `stack stop`, `stack resume`, `stack runtime` |
@@ -254,6 +255,18 @@ In coupled mode, the supervisor runs the same `daemon-entry.js` that `omnitron u
 forks — one daemon codepath with two launchers — and that entry
 point holds a single-instance pid guard, so the two can never both
 bind.
+
+## Development SDK
+
+| Command | Result |
+| --- | --- |
+| `omnitron sdk init` | Prepare the consumer workspace pnpm hook and distribution lockfile |
+| `omnitron sdk dev [checkout]` | Select a local SDK and watch it; `--stack <name>` enables refresh of watched local applications |
+| `omnitron sdk status` | Verify imports and show the active source; supports global `--json` |
+| `omnitron sdk registry` | Restore the frozen registry installation |
+
+Each command accepts `--project-dir <path>`. The developer selection is machine-local.
+See [local SDK development and registry deployments](./releases.md#local-sdk-development-and-registry-deployments).
 
 ## Project management
 
