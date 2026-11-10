@@ -69,6 +69,8 @@ An Xec script receives `params`, `$` for local commands and `$target` for the se
 
 Shell steps receive parameters as `OMNITRON_PARAMS` JSON. `{{parameter}}` source substitution is rejected. Unsupported conditions and cron/webhook triggers are rejected rather than silently ignored; this release supports manual triggers. Xec validates the complete dependency graph before any step executes.
 
+From Omnitron 0.3.5 with Xec Ops 0.11.4, SSH shell steps receive their declared environment and `OMNITRON_PARAMS`. Local callbacks can still read the controller environment. Configure credentials and paths on the node that owns them.
+
 ## Review and authority
 
 Every public pipeline method requires `admin`. Invocation revalidates the human session, including its current account role. Sensitive mutations must write an audit intent before taking effect; a failed audit write denies the operation. The owner-only Unix socket remains an OS-authorized administrative interface.

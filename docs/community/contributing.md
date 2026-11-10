@@ -222,42 +222,18 @@ and `NOTES.md` in `.release-artifacts/<version>/<commit>/`. The public npm
 channel for `1.0.0-rc.1`, for example, is `rc`.
 
 ```sh
-node scripts/release.mjs <version> --push
-node scripts/release.mjs <version> --publish
-node scripts/release.mjs <version> --github
+node scripts/release.mjs <version> --finish
 ```
 
-The first command atomically pushes the selected commit and its annotated tag.
-The second checks the remote tag, downloads every published archive and compares
-its SHA-512 with the sealed artifact. A staged upload is not a confirmed release:
-Xec waits up to 30 minutes for version metadata, the tarball and the release
-channel to agree. Pending upload receipts let a later resume continue confirmation
-without publishing the same archive again.
-After an interruption, keep the artifacts and use `node scripts/release.mjs <version>
---resume` at the same clean commit. GitHub publication checks all packages
-before creating the release. An internal registry can be selected explicitly
-using `--registry <url>` for publication, resumption and confirmation.
+From 0.3.5, `--finish` completes the prepared release through Xec Ops. It checks the destination and the interactive npm session before pushing the selected commit and annotated tag. It then publishes the sealed archives and creates the GitHub release after the registry confirms the batch. The separate `--push`, `--publish`, `--resume` and `--github` operations remain available for release pipelines that divide these responsibilities.
+
+If npm reports an expired session, run `npm login --auth-type=web --registry=https://registry.npmjs.org/` and verify the account with `npm whoami --registry=https://registry.npmjs.org/`. The account needs write access to the destination packages. An npm 404 on PUT can indicate missing authentication or scope permissions even when the package is publicly readable.
 
 ### Browser approval for a package batch
 
-Omnitron 0.3.2 pins Xec Ops 0.11.3. That publisher requests a numeric OTP per
-package and waits for each registry scan. An updated Xec release operator can
-resume the same tagged Omnitron checkout and its original receipts. From a Xec
-checkout containing batch publication and native npm browser authorization, run:
+Complete the npm challenge in the browser. When npm offers temporary approval for the current IP and token, selecting it allows subsequent uploads during that approval period. Xec submits the archives in dependency order and checks version metadata, downloaded SHA-512 and the release channel. Another challenge may appear when approval expires. Builds, tests and consumer audits run during preparation. [npm browser authorization](https://github.blog/changelog/2022-07-26-general-availability-of-improved-2fa-experience-in-npm/).
 
-```sh
-pnpm release <version> --resume --workspace /path/to/tagged/omni --no-push
-```
-
-Finish or cancel the previous publisher before starting this command. On npm's
-first challenge, confirm in the browser and select the five-minute option
-for the current IP and token when offered. Xec submits the accepted archives
-in dependency order while npm scans them. An explicit version conflict must
-be reconciled before the next submission. At the end, Xec downloads and checks
-the whole batch before creating the GitHub release in the checkout's repository.
-Builds, tests and consumer audits run during preparation. A registry challenge
-after the authorization expires opens a new prompt.
-[npm browser authorization](https://github.blog/changelog/2022-07-26-general-availability-of-improved-2fa-experience-in-npm/).
+After an interruption, keep the tagged checkout and its original release directory. Run `--finish` again for the same version. Xec uses the saved receipts to reconcile staged uploads and waits up to 30 minutes for registry confirmation. An explicit conflict requires matching the published bytes. Use `--registry <url>` consistently when publishing to a private registry.
 
 The CI rehearsal runs two dependent packages through Git and a loopback npm
 registry. It interrupts publication after the first package, resumes the
