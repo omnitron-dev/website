@@ -238,6 +238,27 @@ After an interruption, keep the artifacts and use `node scripts/release.mjs <ver
 before creating the release. An internal registry can be selected explicitly
 using `--registry <url>` for publication, resumption and confirmation.
 
+### Browser approval for a package batch
+
+Omnitron 0.3.2 pins Xec Ops 0.11.3. That publisher requests a numeric OTP per
+package and waits for each registry scan. An updated Xec release operator can
+resume the same tagged Omnitron checkout and its original receipts. From a Xec
+checkout containing batch publication and native npm browser authorization, run:
+
+```sh
+pnpm release <version> --resume --workspace /path/to/tagged/omni --no-push
+```
+
+Finish or cancel the previous publisher before starting this command. On npm's
+first challenge, confirm in the browser and select the five-minute option
+for the current IP and token when offered. Xec submits the accepted archives
+in dependency order while npm scans them. An explicit version conflict must
+be reconciled before the next submission. At the end, Xec downloads and checks
+the whole batch before creating the GitHub release in the checkout's repository.
+Builds, tests and consumer audits run during preparation. A registry challenge
+after the authorization expires opens a new prompt.
+[npm browser authorization](https://github.blog/changelog/2022-07-26-general-availability-of-improved-2fa-experience-in-npm/).
+
 The CI rehearsal runs two dependent packages through Git and a loopback npm
 registry. It interrupts publication after the first package, resumes the
 second through delayed staged visibility, downloads both archives and rejects a
