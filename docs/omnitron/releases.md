@@ -175,6 +175,50 @@ Admission checks the same identities without changing their pinned bytes. Restor
 a verified original manifest or create a new release with a credential-free
 remote; editing a selected manifest invalidates its digest.
 
+### Independent project operations
+
+A project team can submit a controller build from the CLI or **Releases → Build** in Console. Both submit to the same Netron service. The returned job ID identifies the work across clients. Closing the client leaves the job under controller supervision.
+
+```bash
+omnitron --json release build example --for test --detach
+omnitron --json release builds example
+omnitron release job <job-id> --follow
+omnitron release stop-build <job-id>
+```
+
+Run `omnitron --json release preflight` to inspect installed tools, build slots and publication support. The Console build dialog reads the same capabilities and respects older controllers with one exclusive builder. Different projects can build simultaneously. A duplicate submission is refused with the existing job ID. Use that ID to follow or cancel the job. The controller starts up to two builds by default, or one on a single-CPU builder. Set `releaseBuildConcurrency` in the instance configuration to match CPU, memory, disk and test-service capacity. Further projects wait in submission order. Cancelling a queued job removes it before installation or execution. Each running job has its own source directory, logs, process groups and cancellation signal.
+
+Queued and running jobs appear in the project's **Releases** view. The global workspace shows active jobs across projects. Operators can cancel one job. Viewers can inspect its progress. Environment overrides require administrator access. Job history retains environment names and omits their values. After a controller restart, a final manifest recovers the result. An incomplete job is identified as interrupted and is available for inspection. Use a new submission to retry it.
+
+#### Deploy a qualified release
+
+Build on a machine matching the execution target, including the Node executable, ABI and libc. The foreground `release build` entry point supports isolated CI builders without a working controller. A configured, shared S3-compatible release store carries qualified releases between a builder and a controller. The index is published after all bytes have arrived. Current writers address each payload by SHA-256 and commit a format 2 index using a conditional S3 PUT. Concurrent publishers with different builds under the same ID cannot overwrite the winning payload. Concurrent measurements of the same build merge against the current index. Readers verify each payload and the manifest before installing the release.
+
+Upgrade the controllers that publish or pull from a shared store before enabling format 2 writes. Current readers also accept format 1. An unchanged legacy index stays in format 1. Updating its contents or issuing a repair publishes a verified format 2 snapshot. Already-installed applications use their local selection. The S3 endpoint must support conditional PUTs and strong ETags.
+
+```bash
+# On a controller running on the build target
+omnitron --json release build example --for test --publish --detach
+omnitron release job <job-id> --follow
+
+# On the deployment controller
+omnitron --json stack check-release example test <release-id>
+omnitron --json stack prepare-release example test <release-id>
+omnitron stack start example test --release <release-id>
+omnitron stack progress example test
+omnitron --json release status example
+```
+
+**Releases → Build a release** offers **Publish verified build to shared store** when the controller advertises a configured destination. Both clients submit the same job. Publication starts after all gates pass and the requested artifacts build. The final receipt includes the index SHA-256. If a controller loses the reply, inspect the job and use `release push <id>` to reconcile the completed build. An isolated builder can still run a foreground build and publish its checked directory with `release push` from a configured machine.
+
+**Releases → Deploy** and the stack's release dialog accept a catalog selection or an exact release ID. The initial check is read-only. **Fetch and verify** transfers a missing release into the controller catalog and repeats target admission. Preparation also stages the installed archives for a local stack. Operators on different stacks requesting the same missing release share the download. An incomplete local directory stays intact for investigation. An explicit `stack start --release` can fetch from the configured store itself. Automatic resumption uses the installed selection.
+
+During a start, the interactive CLI and Console display changing node and application observations for the selected project, stack and release. The dialog can open the stack while execution continues. A completed transfer or an unavailable progress feed does not settle the start. After deployment, inspect launch receipts and application readiness. Rollback uses the previous verified release through the same admission and start operations. Check database compatibility and retain a stack-specific recovery point when a migration changes persisted data.
+
+Build slots and deployment leases protect different resources. On disjoint nodes, projects deploy independently. Immutable deployments wait up to five minutes for an identified writer on a shared node. Set `settings.deploymentLeaseWaitSeconds` from 0 to 1800 in the stack declaration. Zero reports contention immediately. `stack progress` and the Console deployment view show the occupied node and the stack holding it. Other acquired nodes are released while waiting. A new admission check precedes the first mutation after contention. An unresolved remote command requires inspection. All target nodes must be reachable to acquire their leases for an immutable deployment.
+
+The control-plane design describes the ownership boundaries and failure scenarios for shared hosts. [Multi-project deployment audit and design](./resilient-control-plane.md#multi-project-deployment-audit-and-design)
+
 ### Inspect migration provenance
 
 An application artifact records its owning Git package in
@@ -896,6 +940,8 @@ The browser-safe `@omnitron-dev/omnitron/release-reading` entry point exports
 audit APIs without provisioning, starting, stopping or deploying anything.
 
 ## Dependency identity
+
+For local SDK development, run `omnitron sdk init` to install or upgrade the managed pnpm hook. Relative `file:` and `link:` overrides resolve from the consumer workspace in the development profile, including transitive dependencies. `omnitron sdk registry` restores the distribution lockfile.
 
 The local bundle carries workspace packages and local `file:` archive overrides.
 It asks pnpm for the effective overrides, validates each archive's package name,

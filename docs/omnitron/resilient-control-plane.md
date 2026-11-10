@@ -398,3 +398,39 @@ An initial implementation is releasable when its advertised capability set is ve
 its unsupported cases are explicit, and recovery procedures reproduce the stored
 evidence. Industrial quality is the strength and clarity of those guarantees, not the
 number of controls or adapters exposed at once.
+
+## Multi-project deployment audit and design
+
+The control plane uses a project registration for ownership, a stack for the intended environment, a manifest digest for the artifact, and a node identity and owner epoch for execution. Human operators and agents use the same authenticated Netron methods. A target can host several projects. Shared infrastructure needs an explicit owner and consumers.
+
+| Boundary | Implemented behaviour | Operational implication |
+| --- | --- | --- |
+| Source and build | A submitted build pins project and SDK revisions. The controller schedules distinct projects in bounded slots. Each job owns its logs, cancellation and build directory. | Another team can submit while a build is running. A duplicate submission for the same project identifies its existing job. |
+| Builder capacity | Jobs wait in FIFO order on a controller with full slots. The job record survives controller replacement. | CLI and Console expose queued, running, stopped, failed, interrupted and completed outcomes. A missing completion receipt requires inspection. |
+| Artifact transport | A controller build can publish its checked artifacts to a configured S3-compatible store and record the index digest. A pull verifies files against the index and admits the manifest before exposing the release in the receiving catalog. | A builder and a deployment controller must have access to the same store. A loopback MinIO endpoint on each host can refer to different buckets. |
+| Target admission | The release check and stack start share source, gate, runtime and placement checks. A frozen application supplies its own SDK. | Test and production may have different placement. Diagnose missing release bytes, differing source inputs and an incompatible runtime before changing processes. |
+| Mutation ownership | The controller obtains renewable deployment leases for affected nodes. An ambiguous remote command retains its execution fence across connection loss. | Distinct nodes admit independent writers. Native mutations on a shared host currently serialize. An immutable deployment can wait for an identified holder while releasing all other target leases. A timeout requires an observation of the prior operation. |
+| Data and rollback | Migration checksums, deployment history, runtime launch evidence and application readiness are separate observations. | Reapply a previous verified artifact only after checking its data compatibility. An additive migration may survive rollback. A legacy process with no attestation is shown as unreported. |
+| Supervision | A resident owner keeps application processes alive through compatible backend handoff. Owner replacement has its own lifecycle and capability checks. | An application team can deploy to a compatible node while another team qualifies a platform update. Replacement of a shared owner requires its own reviewed maintenance window. |
+
+### Isolation on a shared host
+
+The receiving node keeps the infrastructure declaration, observed state and service credentials for each project and stack. Current controllers request only the database, cache and storage credentials declared for the deployment. A credential request without a scope is refused on a node hosting several allocations. Container names, overlapping published ports and a shared mount source with a writable user conflict with another registered allocation. Shared read-only mounts remain usable. A verified single-scope infrastructure instance inherited at handoff can continue serving its original stack.
+
+A build slot isolates scheduling, cancellation and the build directory. Registered project code still executes with the builder OS account. Use separate builders and test resources for mutually untrusted projects. Controller operator roles currently span registered projects. Node provisioning and writable infrastructure still use a host-level lease. Retained application recovery in an enrolled cluster has separate signed operations. Its deployment adapter requires recipient fencing before it can admit a new remote release.
+
+### Requirements for independent operations on a shared host
+
+The current exclusive native write lease also protects host-global operations such as provisioning an execution service or changing ingress. Shortening it safely requires the receiver to prove every mutation's write set. Application slots and credentials belong to a project and stack. A published port belongs to a bound address and protocol. A database migration belongs to a physical database and migration namespace. A shared system service or volume has one declared owner. Multiple controllers must acquire those resources in a deterministic order and revalidate ownership at the receiver before applying a mutation.
+
+A deployment operation should retain its authenticated initiating principal, project and stack, immutable manifest and previous selection, observed owner epoch, resource set and per-phase receipts. Recovery first observes each completed effect. A worker can retry a read or a content-addressed upload. Repeating an uncertain migration, process stop or traffic switch requires reconciliation with the owning service. Clients can safely reconnect to the same operation ID.
+
+The current build runs on the controller or in an explicitly configured native CI builder. Routing a build automatically to an enrolled Linux worker requires a declared build environment, trust policy, resource limits and a portable source revision. Development machines may be the only source of a private commit. A worker must verify the supplied Git revision and registry lock before executing project code in its build environment. Working application credentials must stay outside that environment.
+
+### Acceptance scenarios
+
+* Submit two projects, cancel a third queued job, and observe independent progress and exit states in CLI and Console.
+* Replace the controller after a final manifest has been written and before a job result is delivered. Recover the result from the manifest. If the manifest is absent, surface interruption.
+* Attempt a second write to an occupied target. Report the holder and scope without issuing another mutation. A deployment to a disjoint target can proceed.
+* Drop the RPC link after a state-changing request and before its response. Retain the fence, reconnect, and inspect the recorded effect before continuing.
+* Exercise forward and reverse transitions on the actual Node executable and ABI. Verify the admitted artifact, application readiness, database migration ledger and restored traffic independently.

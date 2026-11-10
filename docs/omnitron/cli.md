@@ -41,6 +41,8 @@ when piped into another process. Check both the JSON result and the exit status.
 | ----- | -------- |
 | **Daemon lifecycle** | `up`, `down`, `ping`, `kill` |
 | **Backend installation and replacement** | `backend status`, `backend install`, `backend installation`, `backend select`, `backend upgrade`, `backend abort`, `backend recover`, `backend owner-reconcile prepare`, `backend owner-reconcile acknowledge` |
+| **Controller builds** | `release build --publish --detach`, `release builds [project]`, `release job <id> --follow`, `release stop-build <id>` |
+| **Release admission** | `stack check-release <project> <stack> <id>` |
 | **Development SDK** | `sdk init`, `sdk dev`, `sdk status`, `sdk registry` |
 | **Project** | `project add`, `project list`, `project remove`, `project scan`, `project topology` |
 | **Topology** | `topology refresh`, `topology show`, `topology export`, `topology draft`, `topology plan`, `topology apply` |
@@ -199,6 +201,26 @@ Foreground startup returns control to the daemon lifecycle, not to the CLI exit 
 Stop the daemon — gracefully stops every project, stack, and
 infrastructure container.
 
+### `omnitron release preflight`
+
+Inspect tool availability, the configured builder capacity, active and queued jobs, and support for shared-store publication. Use `--json` in a pipeline.
+
+### `omnitron release builds`
+
+List controller jobs, optionally restricted to one project. Use `--json` in an agent or CI client.
+
+### `omnitron release job`
+
+Read a single job by ID. Use `--follow` to observe phases until it settles.
+
+### `omnitron release stop-build`
+
+Cancel the specified queued or executing job. Other projects retain their slots.
+
+### `omnitron stack check-release`
+
+Check admission for a specified project, stack and release ID. This uses the same read-only method as the Console deployment dialog. The exit status is nonzero on refusal.
+
 ### `omnitron ping`
 
 Probe whether the daemon is alive. Exit code `0` = up, non-zero =
@@ -301,7 +323,7 @@ infrastructure to a subset of the project's apps.
 | `omnitron stack status <project> <stack>` | Per-app status within the stack |
 | `omnitron stack progress <project> [stack]` | Latest remote transfer observation per stack, node and app, including its operation ID and any release ID |
 | `omnitron stack diagnose <project> <stack>` | Read-only prerequisite checks and planned changes before start |
-| `omnitron stack prepare-release <project> <stack> <release>` | Verify and stage an immutable release for an independent local stack while its applications are running |
+| `omnitron stack prepare-release <project> <stack> <release>` | Fetch a missing release from the configured store, check target admission and stage archives on a local stack |
 | `omnitron stack start <project> <stack> [--release <id>]` | Start the stack. An explicit release becomes the durable local selection. Later starts reuse it. |
 | `omnitron stack start <project> <stack> --working-tree` | Start a stopped local stack from its registered source and clear its release selection. Release-only stacks refuse this option. |
 | `omnitron stack resume <project> <stack>` | Resume the retained release on the nodes in a confirmed cluster stop. Partial and unconfirmed results exit nonzero. Inspect each node in `--json` output. |
