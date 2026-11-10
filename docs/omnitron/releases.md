@@ -1055,6 +1055,32 @@ A pull checks the received release before making it available locally.
 `--root <dir>` changes the local release root. `push --repair` rewrites objects
 when a store was found damaged; it is an explicit repair operation.
 
+### Private S3 on a build node
+
+One S3 bucket can serve builders on different machines. Use its HTTPS endpoint when the builders can reach it directly. For a MinIO service bound to loopback, configure the builder on the storage host with its local endpoint. On other builders, add an SSH route to the same bucket in the daemon configuration. Omnitron uses Xec to open a private forwarding socket for each transfer. The CLI, build jobs and Console use the same configuration.
+
+```json
+{
+  "releaseStore": {
+    "endpoint": "http://127.0.0.1:9000",
+    "bucket": "platform-releases",
+    "accessKey": { "secret": "release.reader.id" },
+    "secretKey": { "secret": "release.reader.secret" },
+    "ssh": {
+      "host": "storage.example.net",
+      "port": 22,
+      "username": "release-forward",
+      "hostFingerprint": "<verified SHA256 host fingerprint>",
+      "privateKey": { "secret": "release.forward.private-key" }
+    }
+  }
+}
+```
+
+The SSH service account only needs local forwarding to the declared numeric loopback address and port. Restrict its key to that destination. Keep shell sessions, agent forwarding, PTYs and remote forwarding disabled. An encrypted private key can name a vault entry in `ssh.passphrase`. Before enabling the route, verify the SSH server fingerprint through the node registration or another trusted channel. The S3 key controls access independently. Scope a writer to its project's objects and grant readers only the access needed to fetch verified releases.
+
+Run `omnitron release preflight` or open **Releases → Build a release** to see the configured destination. This inspection reads configuration. Confirm actual delivery by publishing a checked release, pulling it on another host and comparing the index SHA-256. A closed SSH route aborts the transfer. Repeating the operation checks the S3 index. Loopback endpoints on different machines address separate services unless the route is configured. Upgrade all participating clients before introducing the optional SSH configuration or writing format 2 indices to a shared bucket.
+
 ## Retain recoverable artifacts
 
 ```bash
