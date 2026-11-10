@@ -43,6 +43,12 @@ a registry checkout, then build and deploy the resulting project commit.
 
 ## Rebuilding an artifact
 
+A targeted build resolves the same stack names as the daemon. It reads
+`omnitron.stacks.json` from the registered directory in the clean checkout,
+then applies declarations from the ecosystem file with precedence on name
+collisions. Artifact selection, database migration programs and gateway
+statics use that resolved map. An invalid stack file stops the build.
+
 Register the directory containing the ecosystem configuration. The builder
 clones the whole repository at the selected commit and reads this configuration
 from its registered path. Starting there, it finds the nearest committed
