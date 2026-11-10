@@ -1081,6 +1081,12 @@ The SSH service account only needs local forwarding to the declared numeric loop
 
 Run `omnitron release preflight` or open **Releases → Build a release** to see the configured destination. This inspection reads configuration. Confirm actual delivery by publishing a checked release, pulling it on another host and comparing the index SHA-256. A closed SSH route aborts the transfer. Repeating the operation checks the S3 index. Loopback endpoints on different machines address separate services unless the route is configured. Upgrade all participating clients before introducing the optional SSH configuration or writing format 2 indices to a shared bucket.
 
+For a shared store, issue independent writer credentials for each project's prefix and read-only credentials to its consumers. Grant writers conditional PUT and GET on their project objects. Keep the administrative identity on the storage host. Validate access with a synthetic release before assigning a working profile. A reader must fail to write, a builder must fail to write into another project's prefix, and an anonymous GET of a known index must fail. Compare the actual index digest and archive bytes after a pull on each participating host and after an interrupted transfer.
+
+A forwarding-only OpenSSH account can use `AuthenticationMethods publickey`, `AllowTcpForwarding local`, `PermitOpen 127.0.0.1:<s3-port>` and `MaxSessions 0`. Disable Unix-socket and reverse forwarding, agent forwarding, X11 and PTY allocation for this account. Issue a separate key per node and make the authorized public keys readable by the account. Confirm the effective `sshd -T -C` policy and exercise an allowed and a refused destination. Keep SSH credentials and S3 credentials in their respective node vaults.
+
+Check the S3 server's security support as well as its compatibility with conditional writes. The archived MinIO Community image from September 2025 accepts forged unsigned-trailer writes under the conditions documented in the vendor advisory. An isolated bucket and private network do not verify a request signature. [MinIO security advisory](https://github.com/minio/minio/security/advisories/GHSA-hv4r-mvr4-25vw)
+
 ## Retain recoverable artifacts
 
 ```bash
