@@ -328,9 +328,11 @@ database transition; the recipe does not bypass that refusal.
 Use `--request-id <uuid>` to reuse a known planning request. After a lost
 activation response, inspect or reconcile that ID; never replay activation
 blindly. An already qualified runtime from another builder can be supplied with
-`--runtime <directory>`. `--cli <executable>` selects the installed controller CLI.
+`--runtime <directory>`. `--cli <executable>` selects the fleet controller CLI.
 
-The local controller uses the existing supervised backend transition:
+The local controller uses the existing supervised backend transition. Xec runs
+the sealed candidate’s own Node and CLI so admission checks understand its
+requirements; `--cli` cannot substitute an older CLI for these local operations:
 
 ```sh
 pnpm exec xec update local-check <qualified-runtime>/packages/0/dist
