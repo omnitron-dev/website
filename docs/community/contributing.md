@@ -285,6 +285,17 @@ Repeat `--finish` for that version; Xec reconciles saved uploads and waits for
 registry confirmation. Never rebuild a reserved version to resolve a conflict.
 Use the same `--registry <url>` when resuming a private registry release.
 
+### Correct an unsubmitted draft
+
+If qualification finds a defect after local preparation, preserve that clean
+checkout and its archives. After committing the fix in another worktree of the
+same repository, run `xec release <version> --supersede <old-checkout>` there.
+Xec verifies the old sealed artifacts, refuses any publication journal or remote
+tag, and preserves the annotated object under `refs/release-attempts/` before
+removing the old local tag with compare-and-swap. It never changes an npm version
+or remote reference. Then repeat preparation on the new commit. A release that
+was already submitted must resume its exact bytes or use a new version.
+
 ### Managed controller updates
 
 Xec coordinates the update through Omnitron's existing lifecycle API. The daemon
