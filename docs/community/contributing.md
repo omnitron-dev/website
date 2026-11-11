@@ -230,6 +230,9 @@ the CI/native checks through Xec Pipeline. The policy in
 `.xec/release-policy.mjs` selects the CI executor and exact Node versions.
 This repository uses GitHub Actions; the Omnitron platform and application
 deployment do not require GitHub.
+The CI reproducibility job installs this same frozen workspace before running
+`pnpm check:reproducibility`, which invokes the pinned Xec engine. A fresh runner
+does not depend on a globally installed Xec or another job’s build output.
 
 The qualification binds every result to the candidate commit, previous backend,
 policy and build Node version. It requires all five CI jobs and native transition
@@ -317,6 +320,10 @@ pnpm exec xec update apply <plan-id>
 pnpm exec xec update status <plan-id>
 pnpm exec xec update reconcile <plan-id>
 ```
+
+A blocked or uncertain operation retains its receipt and returns a nonzero exit
+status with the controller’s reason. Migration incompatibility requires a separate
+database transition; the recipe does not bypass that refusal.
 
 Use `--request-id <uuid>` to reuse a known planning request. After a lost
 activation response, inspect or reconcile that ID; never replay activation
