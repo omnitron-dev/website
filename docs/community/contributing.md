@@ -204,41 +204,132 @@ Use a descriptive conventional commit title, such as
 
 ## Release process
 
-From a clean `main`, list the public workspaces and preview an exact semantic
-version. The plan reports the source revision, package count and npm channel.
+The repository uses Xec as its scripting engine. Run the checked-in recipes through
+the pinned CLI installed by `pnpm install --frozen-lockfile`; `pnpm release` is the
+same entry point as `pnpm exec xec release`. No temporary publisher or personal
+shell setup is required.
+
+From a clean `main`, inspect the inventory and plan:
 
 ```sh
-node scripts/release.mjs --list
-node scripts/release.mjs <version> --dry-run
-node scripts/release.mjs <version> --prepare
+pnpm exec xec release --list
+pnpm exec xec release <version> --dry-run
 ```
 
-Preparation commits public package versions, builds an isolated copy of the
-source and verifies the exported files in each archive. Two ordinary npm installs
-check the published dependency graph without workspace overrides: the minimal
-CLI/Netron consumer exercises the runtime, and an install of every public package
-audits optional modules as well. Inspect `release.json`
-and `NOTES.md` in `.release-artifacts/<version>/<commit>/`. The public npm
-channel for `1.0.0-rc.1`, for example, is `rc`.
+Prepare and qualify the release with the full commit of the backend being replaced:
 
 ```sh
-node scripts/release.mjs <version> --finish
+pnpm exec xec release <version> --prepare --previous <full-previous-commit> --push-source
 ```
 
-From 0.3.5, `--finish` completes the prepared release through Xec Ops. It checks the destination and the interactive npm session before pushing the selected commit and annotated tag. It then publishes the sealed archives and creates the GitHub release after the registry confirms the batch. The separate `--push`, `--publish`, `--resume` and `--github` operations remain available for release pipelines that divide these responsibilities.
+This command commits synchronized public versions, builds and checks the package
+archives in an isolated source export, creates a local annotated tag, and pushes
+only the exact source branch for CI. Omit `--push-source` if your Git publication
+is handled separately. The command runs the independent build comparison and
+the CI/native checks through Xec Pipeline. The policy in
+`.xec/release-policy.mjs` selects the CI executor and exact Node versions.
+This repository uses GitHub Actions; the Omnitron platform and application
+deployment do not require GitHub.
 
-If npm reports an expired session, run `npm login --auth-type=web --registry=https://registry.npmjs.org/` and verify the account with `npm whoami --registry=https://registry.npmjs.org/`. The account needs write access to the destination packages. An npm 404 on PUT can indicate missing authentication or scope permissions even when the package is publicly readable.
+The qualification binds every result to the candidate commit, previous backend,
+policy and build Node version. It requires all five CI jobs and native transition
+and rollback on every configured Node. A lost workflow dispatch response is
+reconciled by its saved intent; repeating the command does not dispatch a duplicate.
+A failed native run remains failed. Inspect it before explicitly retrying the
+GitHub run; Xec observes its new attempt when qualification is resumed.
 
-### Browser approval for a package batch
+```sh
+pnpm exec xec release <version> --qualify --previous <full-previous-commit>
+pnpm exec xec release <version> --status
+```
 
-Complete the npm challenge in the browser. When npm offers temporary approval for the current IP and token, selecting it allows subsequent uploads during that approval period. Xec submits the archives in dependency order and checks version metadata, downloaded SHA-512 and the release channel. Another challenge may appear when approval expires. Builds, tests and consumer audits run during preparation. [npm browser authorization](https://github.blog/changelog/2022-07-26-general-availability-of-improved-2fa-experience-in-npm/).
+Completed independent builds are verified and reused. Native CI retains the actual
+tested Linux runtimes. Xec downloads them, verifies their source, run, attempt,
+archive checksum and runtime digest, and extracts them with Omnitron's existing
+archive validator. Evidence and artifacts live under `.release-artifacts/`.
+Use an external development volume for large builds and set `TMPDIR` and package
+manager cache directories before the command if required by your machine.
 
-After an interruption, keep the tagged checkout and its original release directory. Run `--finish` again for the same version. Xec uses the saved receipts to reconcile staged uploads and waits up to 30 minutes for registry confirmation. An explicit conflict requires matching the published bytes. Use `--registry <url>` consistently when publishing to a private registry.
+Package preparation also verifies exports and two ordinary npm consumers without
+workspace overrides: a minimal CLI/Netron runtime and every public package,
+including optional dependencies. Inspect `release.json`, SHA-512 digests and
+`NOTES.md` under `.release-artifacts/<version>/<commit>/`.
 
-The CI rehearsal runs two dependent packages through Git and a loopback npm
-registry. It interrupts publication after the first package, resumes the
-second through delayed staged visibility, downloads both archives and rejects a
-conflicting digest. It also checks that unrelated tags stay local.
+Publish the sealed batch:
+
+```sh
+pnpm exec xec release <version> --finish
+```
+
+Publication rechecks the saved qualification and archive bytes; it does not rerun
+builds or tests. Xec checks npm authorization before pushing the selected commit
+and its single tag, submits the archives and completes the GitHub release only
+after npm confirms the batch. The separate `--push`, `--publish`, `--resume`
+and `--github` operations use the same qualification gate.
+
+If npm reports an expired session, run
+`npm login --auth-type=web --registry=https://registry.npmjs.org/` and check
+`npm whoami --registry=https://registry.npmjs.org/`. Credentials remain in
+npm's normal configuration; qualification receipts contain no tokens.
+
+### Browser approval and recovery
+
+Complete the npm challenge in the browser. If npm offers temporary approval for
+the current IP and token, it can cover subsequent uploads during that period.
+Xec submits the archives in dependency order, then verifies version metadata,
+downloaded SHA-512 and the release channel. Registry scanning can continue after
+an upload is accepted. [npm browser authorization](https://github.blog/changelog/2022-07-26-general-availability-of-improved-2fa-experience-in-npm/).
+
+Keep the exact clean checkout and its original artifacts after an interruption.
+Repeat `--finish` for that version; Xec reconciles saved uploads and waits for
+registry confirmation. Never rebuild a reserved version to resolve a conflict.
+Use the same `--registry <url>` when resuming a private registry release.
+
+### Managed controller updates
+
+Xec coordinates the update through Omnitron's existing lifecycle API. The daemon
+owns role checks, immutable runtime pins, operation locks, progress and rollback.
+Xec does not stop services over SSH or implement another process owner.
+
+From the qualified checkout, prepare selected registered remote nodes:
+
+```sh
+pnpm exec xec update plan <candidate-commit> --node test-controller --node production-controller
+```
+
+The recipe imports the retained native runtimes, stages matching variants and
+returns the durable Omnitron plan. It does not activate them. Review that plan and
+its impact before applying it:
+
+```sh
+pnpm exec xec update apply <plan-id>
+pnpm exec xec update status <plan-id>
+pnpm exec xec update reconcile <plan-id>
+```
+
+Use `--request-id <uuid>` to reuse a known planning request. After a lost
+activation response, inspect or reconcile that ID; never replay activation
+blindly. An already qualified runtime from another builder can be supplied with
+`--runtime <directory>`. `--cli <executable>` selects the installed controller CLI.
+
+The local controller uses the existing supervised backend transition:
+
+```sh
+pnpm exec xec update local-check <qualified-runtime>/packages/0/dist
+pnpm exec xec update local-apply <qualified-runtime>/packages/0/dist
+```
+
+These commands retain the execution owner. A required owner, guardian or schema
+transition is reported by Omnitron and must follow its own reviewed plan; it is
+never silently folded into a backend update. Updating the Console container is
+also a separate service operation when required by its deployment configuration.
+
+The CI rehearsal executes the release through the actual Xec CLI against a
+loopback registry. It covers partial publication, delayed visibility, conflicting
+digests and exact Git refs. Qualification tests cover failed and skipped jobs,
+lost dispatch responses, resumed builds and incomplete evidence. Update tests
+verify that planning cannot activate a backend and that uncertain activation is
+not repeated.
 
 ## Report a problem
 
