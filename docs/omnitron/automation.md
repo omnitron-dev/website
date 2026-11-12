@@ -57,8 +57,10 @@ The update compares that revision inside a database transaction. If another edit
 | Field | Meaning |
 | --- | --- |
 | `name` | Unique graph key, 1–80 letters, digits, `_`, `.` or `-` |
-| `kind` | `shell` by default; `xec` for TypeScript |
-| `run` | Shell source or TypeScript script |
+| `kind` | `shell` by default; `xec` for TypeScript; `release` for a pinned compiled entry |
+| `run` | Shell source or TypeScript script; absent for a release step |
+| `target` | Release step only: registered project, stack, app, producer artifact and package-relative entry |
+| `args` | Release step only: literal argument strings |
 | `cwd` | Existing working directory; module imports resolve relative to it |
 | `nodeId` | Registered node ID; omission or `local` selects the local machine |
 | `dependsOn` | Names of steps that must complete first |
@@ -72,6 +74,70 @@ An Xec script receives `params`, `$` for local commands and `$target` for the se
 Shell steps receive parameters as `OMNITRON_PARAMS` JSON. `{{parameter}}` source substitution is rejected. Unsupported conditions and cron/webhook triggers are rejected rather than silently ignored; this release supports manual triggers. Xec validates the complete dependency graph before any step executes.
 
 From Omnitron 0.3.5 with Xec Ops 0.11.4, SSH shell steps receive their declared environment and `OMNITRON_PARAMS`. Local callbacks can still read the controller environment. Configure credentials and paths on the node that owns them.
+
+## Execute a pinned release {#execute-a-pinned-release}
+
+Use `kind: 'release'` when an operation must run a compiled member of an installed
+application release. The definition pins a producer artifact and a package-relative
+entry. Omnitron verifies the selected installation and uses the resident execution
+owner's Node through the existing Xec executor. The definition contains no physical
+installation path or interpreter path.
+
+A caller running at its registered compiled launch entry can obtain the producer
+identity through the public runtime API:
+
+```ts
+import { verifyInstalledRuntime } from '@omnitron-dev/omnitron/runtime';
+import type { PipelineDef } from '@omnitron-dev/omnitron/dto/services';
+
+const runtime = await verifyInstalledRuntime(new URL(import.meta.url));
+if (runtime.state !== 'verified') throw Error(runtime.reason);
+const definition: PipelineDef = {
+  name: 'publish-results',
+  steps: [{
+    name: 'publish',
+    kind: 'release',
+    target: {
+      project: 'sample', stack: 'tools', app: 'publisher',
+      artifact: runtime.producer,
+      entry: 'dist/publish.js',
+    },
+    cwd: '/srv/sample-output',
+    args: ['--checked'],
+    timeout: 180000,
+    retries: 0,
+  }],
+};
+```
+
+`artifact` records `releaseId`, `manifestSha256`, `artifactSha256`, `producerApp`,
+`projectCommit` and `frameworkCommit`. An imported artifact retains its producer;
+the run records the selected consumer release separately. The entry must be a
+physical compiled JavaScript member of the same verified closure. Arguments are
+literal array elements; parameters remain JSON in `OMNITRON_PARAMS`.
+
+Prepare and select the release through the ordinary stack lifecycle before
+admitting the pipeline. Admission checks the installation, source identity,
+selected release, declaration, environment and native owner binding again before
+each attempt. It does not install or prepare a missing artifact, provision
+infrastructure, change release selection or start the application. This contract
+supports independently owned local stacks; remote release targets are refused.
+It keeps the admitted owner during the run. Repeated full verification can be
+expensive for large closures.
+
+Use the ordinary pipeline save/run commands or Console's Advanced JSON editor.
+Saving retains the target and arguments. Changing the owner can change the
+verified physical installation without changing the logical definition, ID or
+history; selecting a different producer requires an explicit reviewed update.
+Run details show per-attempt artifact, installed-tree, executable, target, native
+owner lifetime, process ID and environment fingerprint. Environment values are
+not copied into that evidence.
+
+The release step cannot set `PATH`, `NODE_OPTIONS` or `NODE_PATH`. The verified
+application supplies its resource-only Node options. Inherited or declared
+`LD_*` and `DYLD_*` loader controls are refused; Linux library paths are derived
+only from the verified closure. `cwd` must be an absolute physical directory,
+and application output belongs outside the immutable installation.
 
 ## Review and authority {#review-and-authority}
 
@@ -90,17 +156,26 @@ Review saved definitions and their callers when upgrading the pipeline contract:
 - Step names are stable identifiers of 1–80 letters, digits, underscores, dots or hyphens. Update dependency references when renaming a step.
 - Direct RPC callers fetch the definition and submit its `revision` as `expectedRevision`. Before updating, require `conditionalUpdates: true` in that response; older daemons ignore extra request fields and cannot enforce an update precondition. A recurring operator should pin the reviewed revision and stop dispatching after a conflict until the operator reviews the change; it must not automatically accept a newer definition.
 - Replace source interpolation with data parameters and remove unsupported trigger descriptors. Existing external schedulers can continue to dispatch manual runs.
-- A registered absolute interpreter path must still exist. Repeat the application's registration procedure after changing its Node installation, preserve the pipeline ID/history, then restart its recurring dispatcher with the accepted revision.
+- New release-bound integrations use `kind: 'release'` and a producer artifact identity. The owner resolves the physical executable. Existing shell definitions that compare absolute paths or generated `PATH` values need a separately reviewed caller and an explicit conditional definition update; this framework contract does not rewrite them automatically.
 
 Validate the updated definitions before enabling recurring dispatch. Re-registering a definition is separate from executing its deployment or publication steps.
 
-A pinned recurring application does not automatically pin the programs launched by its pipeline. Package one-shot entry points and delivery tools with the application, use the admitted executable paths in the saved definition, and keep mutable data directories separate. The dispatcher should require the exact reviewed command, target, environment and revision. Moving to another release requires an explicit conditional definition update; it must not silently accept a changed pipeline or compile a helper from a development checkout during a production run.
+A pinned recurring application does not automatically pin the programs launched by shell steps. Package one-shot entry points with the application and use a release target for those compiled members. Keep mutable data directories separate. The dispatcher must require the reviewed target, arguments, environment and revision. Moving to another producer requires an explicit conditional definition update; it must not silently accept a changed pipeline or compile a helper from a development checkout during a production run.
 
 ## Progress and failure {#progress-and-failure}
 
 Console shows individual step states, elapsed time, attempt counts, exit codes and output. Open a run for details; the history table fetches summaries without downloading every run's output. A failed refresh is displayed as stale data. On narrow windows, details use the full viewport and long code/output remains inside its scroll area.
 
 `omnitron pipeline cancel <run-id>` first records `cancelling`, signals active work and awaits executor termination before returning a terminal state. Dependent steps do not start after cancellation. A daemon restart marks unfinished runs `interrupted`; it never replays operations automatically. Inspect external effects before retrying an interrupted run.
+
+Release attempts retain `prepared`, `started`, `completed` or `unconfirmed`
+execution evidence. If execution began but its binding or durable completion
+cannot be confirmed, the attempt is `unconfirmed` and automatic retries are
+refused. Recovery marks unfinished prepared/started attempts unconfirmed while
+preserving completed attempts. Missing spawn acknowledgement does not prove that
+no effect occurred. Inspect effects before explicitly running again. The owner
+proof is an observation, not an operating-system process lease or a promise of
+exactly-once execution.
 
 Local process groups and Xec SSH channels participate in cancellation. A command that deliberately detaches a remote process can outlive its SSH channel; channel closure is not proof that every remote side effect stopped. Use managed Omnitron jobs or an explicitly reversible playbook for long-lived services.
 

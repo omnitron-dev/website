@@ -60,7 +60,7 @@ Plus the core supervisor:
 
 | File | Service id | Methods | Role gate |
 | ---- | ---------- | ------- | --------- |
-| `daemon/daemon.rpc-service.ts` | `OmnitronDaemon` | 28 | mixed — see [Daemon](./daemon.md#rpc-surface--omnitrondaemon-service) |
+| `daemon/daemon.rpc-service.ts` | `OmnitronDaemon` | 29 | mixed — see [Daemon](./daemon.md#rpc-surface--omnitrondaemon-service) |
 
 The daemon exposes its role-protected metrics facade and imports the Titan health service:
 
@@ -333,7 +333,7 @@ Xec and shell automation, shared by Console, CLI and local MCP. All methods requ
 | `getRunStatus({runId})` | One run with bounded per-step output and diagnostics |
 | `listRuns({pipelineId?, limit?})` | Bounded history summaries; excludes step output and parameters |
 
-See [Xec automation](./automation.md) for execution limits, revision review, cancellation and failure recovery. A child process is not a sandbox for untrusted agent code.
+See [Xec automation](./automation.md) for execution limits, revision review, cancellation and failure recovery. A `kind: "release"` step carries a `PipelineReleaseTarget`: registered project, stack, app, producer artifact identity and package-relative compiled entry. The verified resident owner supplies the executable. Per-attempt `PipelineReleaseExecution` records keep observed installation and owner evidence separate from the saved definition. See [pinned release steps](./automation.md#execute-a-pinned-release). A child process is not a sandbox for untrusted agent code.
 
 ### `OmnitronProject` — `project.rpc-service.ts` {#omnitronproject--projectrpc-servicets}
 

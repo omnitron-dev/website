@@ -247,7 +247,7 @@ The daemon checks these roles for each request.
 | ------------ | ------------------------------------ | ----------------------------------------------------------------------- |
 | Control-plane read | `viewer`, `operator`, `admin`, authenticated `service_role` | `list`, `getApp`, `status`, `getMetrics`, `getHealth`, `getLogs`, `inspect`, `inspectInstalledArtifacts`, `getDependencyGraph`, `getWatchStatus` |
 | Control-plane operation | `operator`, `admin`, authenticated `service_role` | `getEnv` (redacted values), `attestApplicationOwner` |
-| `operator`   | `operator`, `admin`                  | `startApp`, `startAll`, `stopApp`, `stopAll`, `restartApp`, `restartAll`, `reloadApp`, `scale`, `enableWatch`, `disableWatch` |
+| `operator`   | `operator`, `admin`                  | `startApp`, `startAll`, `stopApp`, `stopAll`, `restartApp`, `restartAfterChange`, `restartAll`, `reloadApp`, `scale`, `enableWatch`, `disableWatch` |
 | `admin`      | `admin` only                         | `shutdown`, `reloadConfig`, `setMetricsEnabled`, `exec`, `revealEnv` |
 | anonymous    | anyone with socket access            | `ping` (allowAnonymous) |
 
@@ -262,6 +262,7 @@ The daemon checks these roles for each request.
 | `stopApp({ name, force?, timeout? })`                           | `{ success: boolean }`           |
 | `stopAll({ force? })`                                           | `{ count: number }`              |
 | `restartApp({ name })`                                          | `ProcessInfoDto`                 |
+| `restartAfterChange({ name, generation, definitionRevision })`   | `SourceRefreshReceipt`           |
 | `restartAll()`                                                  | `ProcessInfoDto[]`               |
 | `reloadApp({ name })`                                           | `ProcessInfoDto`                 |
 | `scale({ name, process, instances })`                                    | `ProcessInfoDto`                 |
@@ -273,6 +274,17 @@ restart and leaves automatic scaling enabled. The owner enforces the pool's
 configured bounds and must advertise `processPoolResize@1`; an older owner
 refuses before mutation. This optional capability does not prevent a backend
 update when the owner remains unchanged.
+
+`restartAfterChange` is the automatic source-refresh operation used by SDK
+watch mode. Supply the canonical application name, generation and declaration
+revision observed in `getWatchStatus()`. The execution owner must advertise
+`sourceRefresh@1`; it refuses stale bindings, disabled watching and pinned release
+applications before restarting. The response is the owner's exact
+`SourceRefreshReceipt`: `{ process, source }`. `process` confirms a new online
+generation; `source` carries that same generation with its `name`, `directory` and
+`definitionRevision`. A later inventory read must not be substituted for this
+acknowledgement. A successful build alone does not prove that an application
+loaded it. Application health probes remain separate from the refresh receipt.
 
 #### Inspection (`viewer`) {#inspection-viewer}
 
@@ -287,7 +299,7 @@ update when the owner remains unchanged.
 | `inspect({ name })`                                             | `AppDiagnosticsDto`              |
 | `inspectInstalledArtifacts({ names })`                          | Installed artifact evidence per application |
 | `getDependencyGraph({ name })`                                  | Graph object                     |
-| `getWatchStatus()`                                              | `{ enabled, apps: [...] }`       |
+| `getWatchStatus()`                                              | `{ enabled, watching, apps: WatchedApplication[] }` |
 
 #### Owner and environment inspection {#owner-and-environment-inspection}
 
@@ -305,7 +317,7 @@ confirms the write. A node without audit storage can still return redacted value
 
 | Method                                                          | Returns                          |
 | --------------------------------------------------------------- | -------------------------------- |
-| `enableWatch({ apps? })`                                        | `{ watching: [...] }`            |
+| `enableWatch({ apps? })`                                        | `{ watching: WatchedApplication[] }` |
 | `disableWatch()`                                                | `{ success: boolean }`           |
 
 #### Admin (`admin`) {#admin-admin}
