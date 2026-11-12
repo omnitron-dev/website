@@ -10,14 +10,20 @@ Start with the [Lumen overview](docs/lumen/overview.md),
 [authoring guide](docs/lumen/authoring.md) or
 [explanation of this site's build](docs/lumen/this-site.md).
 
-The site targets `@omnitron-dev/lumen`, `@omnitron-dev/lumen-ui` and
-`@omnitron-dev/prism` **0.4.6**. Registry verification is pending: the tracked
-lockfile still describes the previous Docusaurus dependencies. Until it is
-regenerated from the published packages, use the source SDK workflow below.
+The site uses the released `@omnitron-dev/lumen`, `@omnitron-dev/lumen-ui` and
+`@omnitron-dev/prism` packages at **0.4.6**. The tracked lockfile records the npm
+dependency graph used by CI and distribution.
 
 ## Develop
 
 Use Node **24.13.0** and the pnpm version in [package.json](package.json).
+For a registry checkout:
+
+```bash
+pnpm install --frozen-lockfile
+pnpm start
+```
+
 For framework development, use a separate, full
 [Omnitron checkout](https://github.com/omnitron-dev/omni) with its dependencies
 installed. From this repository:
@@ -37,7 +43,9 @@ The path passed to `sdk dev` selects the framework checkout explicitly. Append
 `--no-watch` for one build. Inspect the selection with
 `node ../omni/apps/omnitron/bin/sdk.js status --project-dir .`. The canonical [.pnpmfile.mjs](.pnpmfile.mjs) and private development
 lock belong to this workflow; do not add another SDK hook or substitute local
-archives into the registry lock.
+archives into the registry lock. To return from a selected source SDK to the
+locked npm packages, stop any managed preview and run
+`node ../omni/apps/omnitron/bin/sdk.js registry --project-dir .`.
 
 On the development Mac, put `LUMEN_OUT_DIR`, `LUMEN_VIRTUAL_STORE_DIR` and `TMPDIR`
 on the mounted AGI development volume before SDK selection and pnpm commands.
@@ -119,8 +127,8 @@ is not proof of a working example: run the complete examples you change.
 install released npm packages with a frozen application lock; neither uses a
 local SDK profile. Source checks use the matching Omni release tag, `v0.4.6`.
 
-The remaining registry step is to generate the lock from published 0.4.6 packages
-in a clean consumer, then verify frozen install, dependency audit, types, build
-and browser interactions. Commit the resulting lock before pushing this site's
-`main`; that push also triggers the Pages deployment. Local SDK acceptance does
-not establish registry reproducibility.
+When updating packages, generate the lock from published npm versions in a clean
+consumer, then verify frozen install, dependency audit, types, build and browser
+interactions. Commit the lock together with its workspace configuration. Pushing
+`main` triggers the Pages deployment. Local SDK acceptance does not establish
+registry reproducibility.

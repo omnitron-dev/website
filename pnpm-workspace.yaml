@@ -7,6 +7,21 @@ allowBuilds:
   core-js: false
 minimumReleaseAgeExclude:
   - "@types/node@26.6.6"
+  - "@omnitron-dev/access@0.4.6"
+  - "@omnitron-dev/common@0.4.6"
+  - "@omnitron-dev/cuid@0.4.6"
+  - "@omnitron-dev/eventemitter@0.4.6"
+  - "@omnitron-dev/kb@0.4.6"
+  - "@omnitron-dev/lumen-ast@0.4.6"
+  - "@omnitron-dev/lumen-ui@0.4.6"
+  - "@omnitron-dev/lumen@0.4.6"
+  - "@omnitron-dev/msgpack@0.4.6"
+  - "@omnitron-dev/netron-browser@0.4.6"
+  - "@omnitron-dev/netron-http-core@0.4.6"
+  - "@omnitron-dev/netron-protocol@0.4.6"
+  - "@omnitron-dev/netron-react@0.4.6"
+  - "@omnitron-dev/prism@0.4.6"
+  - fontkit@3.0.0
 verifyDepsBeforeRun: error
 
 overrides:
