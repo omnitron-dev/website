@@ -1,7 +1,7 @@
 import './site.css';
 import React, { lazy, Suspense, useEffect, useState } from 'react';
 import { createRoot } from 'react-dom/client';
-import { NetronPlayground } from '@omnitron-dev/lumen-ui';
+import { MermaidDiagram, NetronPlayground } from '@omnitron-dev/lumen-ui';
 import { LumenShell } from '@omnitron-dev/lumen-ui/runtime';
 import { LumenSearchDialog } from '@omnitron-dev/lumen-ui/search';
 import { PrismProvider } from '@omnitron-dev/prism/core';
@@ -18,7 +18,7 @@ const readMode = (): 'light' | 'dark' => {
 function SearchPage() {
   return React.createElement('button', { type: 'button', onClick: () => document.querySelector<HTMLButtonElement>('[data-open-search]')?.click() }, 'Search all documentation');
 }
-const islands = { SiteBrand: OmnitronBrand, SiteMark: OmnitronMark, ApiExplorer: ApiExplorerIsland, SearchPage, Playground: NetronPlayground };
+const islands = { MermaidDiagram, SiteBrand: OmnitronBrand, SiteMark: OmnitronMark, ApiExplorer: ApiExplorerIsland, SearchPage, Playground: NetronPlayground };
 function Client() {
   const [theme, setTheme] = useState(readMode);
   const [searchOpen, setSearchOpen] = useState(false);

@@ -110,12 +110,24 @@
       "guide": "/docs/lumen/authoring"
     },
     {
+      "path": "@omnitron-dev/lumen-ast/diagrams",
+      "guide": "/docs/lumen/authoring"
+    },
+    {
       "path": "@omnitron-dev/lumen-ast/execution",
       "guide": "/docs/lumen/authoring"
     },
     {
       "path": "@omnitron-dev/lumen-ast/execution/limits",
       "guide": "/docs/lumen/authoring"
+    },
+    {
+      "path": "@omnitron-dev/lumen-ast/islands",
+      "guide": "/docs/lumen/authoring"
+    },
+    {
+      "path": "@omnitron-dev/lumen-ast/mcp",
+      "guide": "/docs/lumen/overview"
     },
     {
       "path": "@omnitron-dev/lumen-ast/typst",
@@ -4343,7 +4355,7 @@
       "name": "defineLumenConfig",
       "package": "@omnitron-dev/lumen",
       "kind": "function",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/lumen/src/config/define.ts#L3",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/lumen/src/config/define.ts#L4",
       "imports": [
         {
           "path": "@omnitron-dev/lumen",
@@ -4595,7 +4607,7 @@
       "name": "loadCorpusFromDirectory",
       "package": "@omnitron-dev/lumen",
       "kind": "function",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/lumen/src/cli/index.ts#L156",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/lumen/src/cli/index.ts#L157",
       "imports": [
         {
           "path": "@omnitron-dev/lumen",
@@ -4623,7 +4635,7 @@
       "name": "LumenConfig",
       "package": "@omnitron-dev/lumen",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/lumen/src/config/schema.ts#L102",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/lumen/src/config/schema.ts#L98",
       "imports": [
         {
           "path": "@omnitron-dev/lumen",
@@ -4647,7 +4659,7 @@
       "name": "LumenLocalesConfigSchema",
       "package": "@omnitron-dev/lumen",
       "kind": "value",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/lumen/src/config/schema.ts#L68",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/lumen/src/config/schema.ts#L62",
       "imports": [
         {
           "path": "@omnitron-dev/lumen",
@@ -4671,7 +4683,7 @@
       "name": "LumenPdfConfigSchema",
       "package": "@omnitron-dev/lumen",
       "kind": "value",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/lumen/src/config/schema.ts#L63",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/lumen/src/config/schema.ts#L58",
       "imports": [
         {
           "path": "@omnitron-dev/lumen",
@@ -4752,22 +4764,10 @@
       ]
     },
     {
-      "name": "LumenTitanConfigSchema",
-      "package": "@omnitron-dev/lumen",
-      "kind": "value",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/lumen/src/config/schema.ts#L58",
-      "imports": [
-        {
-          "path": "@omnitron-dev/lumen",
-          "guide": "/docs/lumen/overview"
-        }
-      ]
-    },
-    {
       "name": "LumenUserConfig",
       "package": "@omnitron-dev/lumen",
       "kind": "type",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/lumen/src/config/schema.ts#L100",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/lumen/src/config/schema.ts#L96",
       "imports": [
         {
           "path": "@omnitron-dev/lumen",
@@ -4779,7 +4779,7 @@
       "name": "LumenUserConfigSchema",
       "package": "@omnitron-dev/lumen",
       "kind": "value",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/lumen/src/config/schema.ts#L76",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/lumen/src/config/schema.ts#L70",
       "imports": [
         {
           "path": "@omnitron-dev/lumen",
@@ -4863,7 +4863,7 @@
       "name": "renderDocumentHtml",
       "package": "@omnitron-dev/lumen",
       "kind": "function",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/lumen/src/ssg/render-html.ts#L26",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/lumen/src/ssg/render-html.ts#L27",
       "imports": [
         {
           "path": "@omnitron-dev/lumen",
@@ -4923,7 +4923,7 @@
       "name": "runLumenCli",
       "package": "@omnitron-dev/lumen",
       "kind": "function",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/lumen/src/cli/index.ts#L347",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/lumen/src/cli/index.ts#L375",
       "imports": [
         {
           "path": "@omnitron-dev/lumen",
@@ -4939,7 +4939,7 @@
       "name": "runLumenMcpServer",
       "package": "@omnitron-dev/lumen",
       "kind": "function",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/lumen/src/ai/mcp-server.ts#L21",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/lumen/src/ai/mcp-server.ts#L16",
       "imports": [
         {
           "path": "@omnitron-dev/lumen",
@@ -5128,6 +5128,18 @@
       ]
     },
     {
+      "name": "createLumenMcpServer",
+      "package": "@omnitron-dev/lumen-ast",
+      "kind": "function",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/lumen-ast/src/mcp/index.ts#L28",
+      "imports": [
+        {
+          "path": "@omnitron-dev/lumen-ast/mcp",
+          "guide": "/docs/lumen/overview"
+        }
+      ]
+    },
+    {
       "name": "createMathEnvironmentNode",
       "package": "@omnitron-dev/lumen-ast",
       "kind": "function",
@@ -5176,18 +5188,6 @@
       ]
     },
     {
-      "name": "defaultDiagramRenderer",
-      "package": "@omnitron-dev/lumen-ast",
-      "kind": "value",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/lumen-ast/src/diagrams/renderer.ts#L931",
-      "imports": [
-        {
-          "path": "@omnitron-dev/lumen-ast",
-          "guide": "/docs/lumen/authoring"
-        }
-      ]
-    },
-    {
       "name": "defaultDocRoleHierarchy",
       "package": "@omnitron-dev/lumen-ast",
       "kind": "value",
@@ -5224,13 +5224,33 @@
       ]
     },
     {
-      "name": "DiagramRenderer",
+      "name": "DIAGRAM_LIMITS",
       "package": "@omnitron-dev/lumen-ast",
-      "kind": "class",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/lumen-ast/src/diagrams/renderer.ts#L808",
+      "kind": "value",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/lumen-ast/src/diagrams/renderer.ts#L4",
       "imports": [
         {
           "path": "@omnitron-dev/lumen-ast",
+          "guide": "/docs/lumen/authoring"
+        },
+        {
+          "path": "@omnitron-dev/lumen-ast/diagrams",
+          "guide": "/docs/lumen/authoring"
+        }
+      ]
+    },
+    {
+      "name": "DiagramRenderOptions",
+      "package": "@omnitron-dev/lumen-ast",
+      "kind": "interface",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/lumen-ast/src/diagrams/renderer.ts#L26",
+      "imports": [
+        {
+          "path": "@omnitron-dev/lumen-ast",
+          "guide": "/docs/lumen/authoring"
+        },
+        {
+          "path": "@omnitron-dev/lumen-ast/diagrams",
           "guide": "/docs/lumen/authoring"
         }
       ]
@@ -5399,6 +5419,18 @@
       "imports": [
         {
           "path": "@omnitron-dev/lumen-ast",
+          "guide": "/docs/lumen/authoring"
+        }
+      ]
+    },
+    {
+      "name": "HydrationTrigger",
+      "package": "@omnitron-dev/lumen-ast",
+      "kind": "type",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/lumen-ast/src/islands/index.ts#L6",
+      "imports": [
+        {
+          "path": "@omnitron-dev/lumen-ast/islands",
           "guide": "/docs/lumen/authoring"
         }
       ]
@@ -5824,6 +5856,30 @@
       ]
     },
     {
+      "name": "LumenMcpCorpus",
+      "package": "@omnitron-dev/lumen-ast",
+      "kind": "interface",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/lumen-ast/src/mcp/index.ts#L16",
+      "imports": [
+        {
+          "path": "@omnitron-dev/lumen-ast/mcp",
+          "guide": "/docs/lumen/overview"
+        }
+      ]
+    },
+    {
+      "name": "LumenMcpSearchResult",
+      "package": "@omnitron-dev/lumen-ast",
+      "kind": "interface",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/lumen-ast/src/mcp/index.ts#L7",
+      "imports": [
+        {
+          "path": "@omnitron-dev/lumen-ast/mcp",
+          "guide": "/docs/lumen/overview"
+        }
+      ]
+    },
+    {
       "name": "LumenNode",
       "package": "@omnitron-dev/lumen-ast",
       "kind": "type",
@@ -6100,50 +6156,26 @@
       ]
     },
     {
-      "name": "MermaidConfig",
+      "name": "MAX_ISLAND_PROPS_BYTES",
       "package": "@omnitron-dev/lumen-ast",
-      "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/lumen-ast/src/diagrams/directives.ts#L5",
+      "kind": "value",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/lumen-ast/src/islands/index.ts#L2",
       "imports": [
         {
-          "path": "@omnitron-dev/lumen-ast",
+          "path": "@omnitron-dev/lumen-ast/islands",
           "guide": "/docs/lumen/authoring"
         }
       ]
     },
     {
-      "name": "MermaidRenderJob",
+      "name": "MCP_RESOURCE_URI_PREFIX",
       "package": "@omnitron-dev/lumen-ast",
-      "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/lumen-ast/src/diagrams/renderer.ts#L842",
+      "kind": "value",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/lumen-ast/src/mcp/index.ts#L5",
       "imports": [
         {
-          "path": "@omnitron-dev/lumen-ast",
-          "guide": "/docs/lumen/authoring"
-        }
-      ]
-    },
-    {
-      "name": "MermaidWorkerPool",
-      "package": "@omnitron-dev/lumen-ast",
-      "kind": "class",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/lumen-ast/src/diagrams/renderer.ts#L857",
-      "imports": [
-        {
-          "path": "@omnitron-dev/lumen-ast",
-          "guide": "/docs/lumen/authoring"
-        }
-      ]
-    },
-    {
-      "name": "MermaidWorkerPoolOptions",
-      "package": "@omnitron-dev/lumen-ast",
-      "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/lumen-ast/src/diagrams/renderer.ts#L837",
-      "imports": [
-        {
-          "path": "@omnitron-dev/lumen-ast",
-          "guide": "/docs/lumen/authoring"
+          "path": "@omnitron-dev/lumen-ast/mcp",
+          "guide": "/docs/lumen/overview"
         }
       ]
     },
@@ -6220,22 +6252,34 @@
       ]
     },
     {
-      "name": "parseJsxTag",
+      "name": "parseHydrationTrigger",
       "package": "@omnitron-dev/lumen-ast",
       "kind": "function",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/lumen-ast/src/compiler/jsx-parser.ts#L587",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/lumen-ast/src/islands/index.ts#L8",
       "imports": [
         {
-          "path": "@omnitron-dev/lumen-ast",
+          "path": "@omnitron-dev/lumen-ast/islands",
           "guide": "/docs/lumen/authoring"
         }
       ]
     },
     {
-      "name": "parseMermaidDirectives",
+      "name": "parseIslandProps",
       "package": "@omnitron-dev/lumen-ast",
       "kind": "function",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/lumen-ast/src/diagrams/directives.ts#L11",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/lumen-ast/src/islands/index.ts#L72",
+      "imports": [
+        {
+          "path": "@omnitron-dev/lumen-ast/islands",
+          "guide": "/docs/lumen/authoring"
+        }
+      ]
+    },
+    {
+      "name": "parseJsxTag",
+      "package": "@omnitron-dev/lumen-ast",
+      "kind": "function",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/lumen-ast/src/compiler/jsx-parser.ts#L587",
       "imports": [
         {
           "path": "@omnitron-dev/lumen-ast",
@@ -6407,10 +6451,30 @@
       "name": "renderDiagramHtml",
       "package": "@omnitron-dev/lumen-ast",
       "kind": "function",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/lumen-ast/src/diagrams/renderer.ts#L814",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/lumen-ast/src/diagrams/renderer.ts#L13",
       "imports": [
         {
           "path": "@omnitron-dev/lumen-ast",
+          "guide": "/docs/lumen/authoring"
+        },
+        {
+          "path": "@omnitron-dev/lumen-ast/diagrams",
+          "guide": "/docs/lumen/authoring"
+        }
+      ]
+    },
+    {
+      "name": "renderDiagramSvg",
+      "package": "@omnitron-dev/lumen-ast",
+      "kind": "function",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/lumen-ast/src/diagrams/renderer.ts#L35",
+      "imports": [
+        {
+          "path": "@omnitron-dev/lumen-ast",
+          "guide": "/docs/lumen/authoring"
+        },
+        {
+          "path": "@omnitron-dev/lumen-ast/diagrams",
           "guide": "/docs/lumen/authoring"
         }
       ]
@@ -6536,6 +6600,18 @@
       ]
     },
     {
+      "name": "serializeIslandProps",
+      "package": "@omnitron-dev/lumen-ast",
+      "kind": "function",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/lumen-ast/src/islands/index.ts#L68",
+      "imports": [
+        {
+          "path": "@omnitron-dev/lumen-ast/islands",
+          "guide": "/docs/lumen/authoring"
+        }
+      ]
+    },
+    {
       "name": "slugifyHeading",
       "package": "@omnitron-dev/lumen-ast",
       "kind": "function",
@@ -6575,7 +6651,7 @@
       "name": "SsrOptions",
       "package": "@omnitron-dev/lumen-ast",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/lumen-ast/src/transformers/to-html-ssr.ts#L13",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/lumen-ast/src/transformers/to-html-ssr.ts#L14",
       "imports": [
         {
           "path": "@omnitron-dev/lumen-ast",
@@ -6716,6 +6792,22 @@
       ]
     },
     {
+      "name": "validateDiagramSource",
+      "package": "@omnitron-dev/lumen-ast",
+      "kind": "function",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/lumen-ast/src/diagrams/renderer.ts#L6",
+      "imports": [
+        {
+          "path": "@omnitron-dev/lumen-ast",
+          "guide": "/docs/lumen/authoring"
+        },
+        {
+          "path": "@omnitron-dev/lumen-ast/diagrams",
+          "guide": "/docs/lumen/authoring"
+        }
+      ]
+    },
+    {
       "name": "validateFrontmatter",
       "package": "@omnitron-dev/lumen-ast",
       "kind": "function",
@@ -6731,7 +6823,7 @@
       "name": "autogenerateSidebarForDir",
       "package": "@omnitron-dev/lumen-migrate",
       "kind": "function",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/lumen-migrate/src/docusaurus/autogenerator.ts#L8",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/lumen-migrate/src/docusaurus/autogenerator.ts#L6",
       "imports": [
         {
           "path": "@omnitron-dev/lumen-migrate",
@@ -6743,7 +6835,7 @@
       "name": "compareDirectories",
       "package": "@omnitron-dev/lumen-migrate",
       "kind": "function",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/lumen-migrate/src/parity/parity-engine.ts#L75",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/lumen-migrate/src/parity/parity-engine.ts#L66",
       "imports": [
         {
           "path": "@omnitron-dev/lumen-migrate",
@@ -6815,7 +6907,7 @@
       "name": "crawlDocumentationDirectory",
       "package": "@omnitron-dev/lumen-migrate",
       "kind": "function",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/lumen-migrate/src/parity/crawler.ts#L159",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/lumen-migrate/src/parity/crawler.ts#L188",
       "imports": [
         {
           "path": "@omnitron-dev/lumen-migrate",
@@ -6827,7 +6919,7 @@
       "name": "CrawledProjectUrls",
       "package": "@omnitron-dev/lumen-migrate",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/lumen-migrate/src/parity/crawler.ts#L6",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/lumen-migrate/src/parity/crawler.ts#L11",
       "imports": [
         {
           "path": "@omnitron-dev/lumen-migrate",
@@ -6875,7 +6967,7 @@
       "name": "loadDocusaurusConfigFromDir",
       "package": "@omnitron-dev/lumen-migrate",
       "kind": "function",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/lumen-migrate/src/docusaurus/config-parser.ts#L428",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/lumen-migrate/src/docusaurus/config-parser.ts#L355",
       "imports": [
         {
           "path": "@omnitron-dev/lumen-migrate",
@@ -6899,7 +6991,7 @@
       "name": "MigrationOptions",
       "package": "@omnitron-dev/lumen-migrate",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/lumen-migrate/src/types.ts#L114",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/lumen-migrate/src/types.ts#L98",
       "imports": [
         {
           "path": "@omnitron-dev/lumen-migrate",
@@ -6911,7 +7003,7 @@
       "name": "MigrationResult",
       "package": "@omnitron-dev/lumen-migrate",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/lumen-migrate/src/types.ts#L122",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/lumen-migrate/src/types.ts#L103",
       "imports": [
         {
           "path": "@omnitron-dev/lumen-migrate",
@@ -6944,18 +7036,6 @@
       ]
     },
     {
-      "name": "ParityCheckResult",
-      "package": "@omnitron-dev/lumen-migrate",
-      "kind": "type",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/lumen-migrate/src/types.ts#L112",
-      "imports": [
-        {
-          "path": "@omnitron-dev/lumen-migrate",
-          "guide": "/docs/lumen/this-site"
-        }
-      ]
-    },
-    {
       "name": "ParityReport",
       "package": "@omnitron-dev/lumen-migrate",
       "kind": "interface",
@@ -6971,7 +7051,7 @@
       "name": "parseConfigFile",
       "package": "@omnitron-dev/lumen-migrate",
       "kind": "function",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/lumen-migrate/src/docusaurus/config-parser.ts#L404",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/lumen-migrate/src/docusaurus/config-parser.ts#L347",
       "imports": [
         {
           "path": "@omnitron-dev/lumen-migrate",
@@ -6983,7 +7063,7 @@
       "name": "parseDocusaurusConfigContent",
       "package": "@omnitron-dev/lumen-migrate",
       "kind": "function",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/lumen-migrate/src/docusaurus/config-parser.ts#L357",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/lumen-migrate/src/docusaurus/config-parser.ts#L313",
       "imports": [
         {
           "path": "@omnitron-dev/lumen-migrate",
@@ -6995,7 +7075,7 @@
       "name": "parseDocusaurusSidebarsContent",
       "package": "@omnitron-dev/lumen-migrate",
       "kind": "function",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/lumen-migrate/src/docusaurus/config-parser.ts#L392",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/lumen-migrate/src/docusaurus/config-parser.ts#L342",
       "imports": [
         {
           "path": "@omnitron-dev/lumen-migrate",
@@ -7007,7 +7087,7 @@
       "name": "parseSidebarsFile",
       "package": "@omnitron-dev/lumen-migrate",
       "kind": "function",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/lumen-migrate/src/docusaurus/config-parser.ts#L416",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/lumen-migrate/src/docusaurus/config-parser.ts#L351",
       "imports": [
         {
           "path": "@omnitron-dev/lumen-migrate",
@@ -7031,7 +7111,7 @@
       "name": "runLumenMigrateCli",
       "package": "@omnitron-dev/lumen-migrate",
       "kind": "function",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/lumen-migrate/src/cli/index.ts#L10",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/lumen-migrate/src/cli/index.ts#L8",
       "imports": [
         {
           "path": "@omnitron-dev/lumen-migrate",
@@ -7131,7 +7211,7 @@
       "name": "verifyUrlAndAnchorParity",
       "package": "@omnitron-dev/lumen-migrate",
       "kind": "function",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/lumen-migrate/src/parity/parity-engine.ts#L91",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/lumen-migrate/src/parity/parity-engine.ts#L73",
       "imports": [
         {
           "path": "@omnitron-dev/lumen-migrate",
@@ -7143,7 +7223,7 @@
       "name": "ApiExplorer",
       "package": "@omnitron-dev/lumen-ui",
       "kind": "function",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/lumen-ui/src/interactive/api-explorer.tsx#L39",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/lumen-ui/src/interactive/api-explorer.tsx#L38",
       "imports": [
         {
           "path": "@omnitron-dev/lumen-ui",
@@ -7223,7 +7303,7 @@
       "name": "CodeBlock",
       "package": "@omnitron-dev/lumen-ui",
       "kind": "function",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/lumen-ui/src/blocks/code-block.tsx#L11",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/lumen-ui/src/blocks/code-block.tsx#L23",
       "imports": [
         {
           "path": "@omnitron-dev/lumen-ui",
@@ -7239,7 +7319,7 @@
       "name": "CodeBlockProps",
       "package": "@omnitron-dev/lumen-ui",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/lumen-ui/src/blocks/code-block.tsx#L4",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/lumen-ui/src/blocks/code-block.tsx#L6",
       "imports": [
         {
           "path": "@omnitron-dev/lumen-ui",
@@ -7443,7 +7523,7 @@
       "name": "HydrationTrigger",
       "package": "@omnitron-dev/lumen-ui",
       "kind": "type",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/lumen-ui/src/hydration/triggers.ts#L5",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/lumen-ast/src/islands/index.ts#L6",
       "imports": [
         {
           "path": "@omnitron-dev/lumen-ui",
@@ -7699,7 +7779,7 @@
       "name": "LumenShell",
       "package": "@omnitron-dev/lumen-ui",
       "kind": "function",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/lumen-ui/src/hydration/shell.tsx#L399",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/lumen-ui/src/hydration/shell.tsx#L413",
       "imports": [
         {
           "path": "@omnitron-dev/lumen-ui",
@@ -7715,7 +7795,7 @@
       "name": "LumenShellProps",
       "package": "@omnitron-dev/lumen-ui",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/lumen-ui/src/hydration/shell.tsx#L7",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/lumen-ui/src/hydration/shell.tsx#L8",
       "imports": [
         {
           "path": "@omnitron-dev/lumen-ui",
@@ -7771,6 +7851,30 @@
         },
         {
           "path": "@omnitron-dev/lumen-ui/blocks",
+          "guide": "/docs/lumen/authoring"
+        }
+      ]
+    },
+    {
+      "name": "MermaidDiagram",
+      "package": "@omnitron-dev/lumen-ui",
+      "kind": "function",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/lumen-ui/src/interactive/mermaid-diagram.tsx#L13",
+      "imports": [
+        {
+          "path": "@omnitron-dev/lumen-ui",
+          "guide": "/docs/lumen/authoring"
+        }
+      ]
+    },
+    {
+      "name": "MermaidDiagramProps",
+      "package": "@omnitron-dev/lumen-ui",
+      "kind": "interface",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/lumen-ui/src/interactive/mermaid-diagram.tsx#L6",
+      "imports": [
+        {
+          "path": "@omnitron-dev/lumen-ui",
           "guide": "/docs/lumen/authoring"
         }
       ]
@@ -7883,7 +7987,7 @@
       "name": "PagefindAdapter",
       "package": "@omnitron-dev/lumen-ui",
       "kind": "class",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/lumen-ui/src/search/pagefind-adapter.ts#L9",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/lumen-ui/src/search/pagefind-adapter.ts#L19",
       "imports": [
         {
           "path": "@omnitron-dev/lumen-ui",
@@ -7979,7 +8083,7 @@
       "name": "PortalIslandHost",
       "package": "@omnitron-dev/lumen-ui",
       "kind": "function",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/lumen-ui/src/hydration/host.tsx#L34",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/lumen-ui/src/hydration/host.tsx#L15",
       "imports": [
         {
           "path": "@omnitron-dev/lumen-ui",
@@ -7995,7 +8099,7 @@
       "name": "PortalIslandHostProps",
       "package": "@omnitron-dev/lumen-ui",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/lumen-ui/src/hydration/host.tsx#L4",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/lumen-ui/src/hydration/host.tsx#L5",
       "imports": [
         {
           "path": "@omnitron-dev/lumen-ui",
@@ -8011,7 +8115,7 @@
       "name": "PortalIslandManager",
       "package": "@omnitron-dev/lumen-ui",
       "kind": "function",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/lumen-ui/src/hydration/shell.tsx#L70",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/lumen-ui/src/hydration/shell.tsx#L90",
       "imports": [
         {
           "path": "@omnitron-dev/lumen-ui",
@@ -8027,7 +8131,7 @@
       "name": "PortalIslandManagerProps",
       "package": "@omnitron-dev/lumen-ui",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/lumen-ui/src/hydration/shell.tsx#L16",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/lumen-ui/src/hydration/shell.tsx#L17",
       "imports": [
         {
           "path": "@omnitron-dev/lumen-ui",
@@ -8059,7 +8163,7 @@
       "name": "setupEventTrigger",
       "package": "@omnitron-dev/lumen-ui",
       "kind": "function",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/lumen-ui/src/hydration/triggers.ts#L141",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/lumen-ui/src/hydration/triggers.ts#L138",
       "imports": [
         {
           "path": "@omnitron-dev/lumen-ui",
@@ -8075,7 +8179,7 @@
       "name": "setupIdleTrigger",
       "package": "@omnitron-dev/lumen-ui",
       "kind": "function",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/lumen-ui/src/hydration/triggers.ts#L129",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/lumen-ui/src/hydration/triggers.ts#L126",
       "imports": [
         {
           "path": "@omnitron-dev/lumen-ui",
@@ -8091,7 +8195,7 @@
       "name": "setupInteractionTrigger",
       "package": "@omnitron-dev/lumen-ui",
       "kind": "function",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/lumen-ui/src/hydration/triggers.ts#L105",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/lumen-ui/src/hydration/triggers.ts#L102",
       "imports": [
         {
           "path": "@omnitron-dev/lumen-ui",
@@ -8107,7 +8211,7 @@
       "name": "setupLoadTrigger",
       "package": "@omnitron-dev/lumen-ui",
       "kind": "function",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/lumen-ui/src/hydration/triggers.ts#L50",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/lumen-ui/src/hydration/triggers.ts#L47",
       "imports": [
         {
           "path": "@omnitron-dev/lumen-ui",
@@ -8123,7 +8227,7 @@
       "name": "setupTrigger",
       "package": "@omnitron-dev/lumen-ui",
       "kind": "function",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/lumen-ui/src/hydration/triggers.ts#L22",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/lumen-ui/src/hydration/triggers.ts#L23",
       "imports": [
         {
           "path": "@omnitron-dev/lumen-ui",
@@ -8139,7 +8243,7 @@
       "name": "setupVisibleTrigger",
       "package": "@omnitron-dev/lumen-ui",
       "kind": "function",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/lumen-ui/src/hydration/triggers.ts#L63",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/lumen-ui/src/hydration/triggers.ts#L60",
       "imports": [
         {
           "path": "@omnitron-dev/lumen-ui",
@@ -8155,7 +8259,7 @@
       "name": "TriggerCleanup",
       "package": "@omnitron-dev/lumen-ui",
       "kind": "type",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/lumen-ui/src/hydration/triggers.ts#L16",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/lumen-ui/src/hydration/triggers.ts#L17",
       "imports": [
         {
           "path": "@omnitron-dev/lumen-ui",
@@ -8171,7 +8275,7 @@
       "name": "TriggerOptions",
       "package": "@omnitron-dev/lumen-ui",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/lumen-ui/src/hydration/triggers.ts#L7",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/lumen-ui/src/hydration/triggers.ts#L8",
       "imports": [
         {
           "path": "@omnitron-dev/lumen-ui",
@@ -46047,7 +46151,7 @@
       "name": "RedisClusterContainers",
       "package": "@omnitron-dev/testing",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/testing/src/docker/types.ts#L166",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/testing/src/docker/types.ts#L172",
       "imports": [
         {
           "path": "@omnitron-dev/testing/docker",
@@ -46059,7 +46163,7 @@
       "name": "RedisClusterOptions",
       "package": "@omnitron-dev/testing",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/testing/src/docker/types.ts#L145",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/testing/src/docker/types.ts#L151",
       "imports": [
         {
           "path": "@omnitron-dev/testing/docker",
@@ -46071,7 +46175,7 @@
       "name": "RedisContainerOptions",
       "package": "@omnitron-dev/testing",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/testing/src/docker/types.ts#L127",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/testing/src/docker/types.ts#L133",
       "imports": [
         {
           "path": "@omnitron-dev/testing/docker",
@@ -46095,7 +46199,7 @@
       "name": "RedisSentinelContainers",
       "package": "@omnitron-dev/testing",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/testing/src/docker/types.ts#L202",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/testing/src/docker/types.ts#L208",
       "imports": [
         {
           "path": "@omnitron-dev/testing/docker",
@@ -46107,7 +46211,7 @@
       "name": "RedisSentinelOptions",
       "package": "@omnitron-dev/testing",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/testing/src/docker/types.ts#L184",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/testing/src/docker/types.ts#L190",
       "imports": [
         {
           "path": "@omnitron-dev/testing/docker",
@@ -67643,7 +67747,7 @@
       "name": "LiveEditService",
       "package": "@omnitron-dev/titan-lumen",
       "kind": "class",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-lumen/src/live/live-edit.service.ts#L56",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-lumen/src/live/live-edit.service.ts#L60",
       "imports": [
         {
           "path": "@omnitron-dev/titan-lumen",
@@ -67715,7 +67819,7 @@
       "name": "LumenMcpAdapter",
       "package": "@omnitron-dev/titan-lumen",
       "kind": "class",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-lumen/src/mcp.ts#L31",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-lumen/src/mcp.ts#L25",
       "imports": [
         {
           "path": "@omnitron-dev/titan-lumen",
@@ -67727,7 +67831,7 @@
       "name": "LumenMcpOptions",
       "package": "@omnitron-dev/titan-lumen",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-lumen/src/mcp.ts#L13",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-lumen/src/mcp.ts#L11",
       "imports": [
         {
           "path": "@omnitron-dev/titan-lumen",
@@ -67788,18 +67892,6 @@
       "package": "@omnitron-dev/titan-lumen",
       "kind": "interface",
       "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-lumen/src/types.ts#L128",
-      "imports": [
-        {
-          "path": "@omnitron-dev/titan-lumen",
-          "guide": "/docs/lumen/overview"
-        }
-      ]
-    },
-    {
-      "name": "MCP_RESOURCE_URI_PREFIX",
-      "package": "@omnitron-dev/titan-lumen",
-      "kind": "value",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-lumen/src/constants.ts#L3",
       "imports": [
         {
           "path": "@omnitron-dev/titan-lumen",

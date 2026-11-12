@@ -49,6 +49,25 @@ Every public document has a Markdown mirror. [This page as Markdown](/docs/lumen
 
 The default static audience is anonymous. Restricted documents and sections are projected out before HTML, search or agent exports are produced. Do not put secrets in public content or client props.
 
+## Local MCP access
+
+```bash
+lumen mcp --stdio --root .
+```
+
+The official MCP SDK serves `search_corpus`, `get_document` and
+`lumen_inspect_ast`. Resource paths are corpus-relative, for example
+`lumen://corpus/docs/intro.md`. The local endpoint exposes the anonymous
+projection only: restricted documents and sections are absent from search,
+resources and AST output. It rejects missing or invalid corpora at startup.
+
+The spawning process owns this local trust boundary. Caller-supplied roles do
+not grant access. Use Titan-Lumen's adapter for authenticated live calls through
+Netron. Both adapters share the isolated Node-only `lumen-ast/mcp` contract;
+the AST root and browser entry do not import the server SDK. Diagnostics go to
+stderr, and the transport closes an input exceeding its 1 MiB buffer limit even
+before a newline arrives.
+
 ## Continue
 
 - [Author documents and interactive examples](./authoring.md)

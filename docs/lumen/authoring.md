@@ -39,6 +39,13 @@ flowchart LR
   AST --> Markdown[Markdown mirror]
 ```
 
+Mermaid diagrams use the real browser engine, including its ELK layouts. Static
+HTML retains readable diagram source. The client registers `MermaidDiagram` and
+loads the engine when the island becomes visible; invalid diagrams show an error
+and retain their source. The shared helper is available from
+`@omnitron-dev/lumen-ast/diagrams`. It requires a browser DOM for SVG rendering;
+PDF and Markdown exports currently retain diagram source.
+
 ## Selective React islands
 
 A PDX widget declares literal props. The site's client entry registers its React component with `LumenShell`; the shared portal runtime activates it at the declared trigger.
@@ -49,7 +56,10 @@ A PDX widget declares literal props. The site's client entry registers its React
 
 This site's [API explorer](../reference/api-index.mdx) is a working island backed by a generated public export inventory. The rest of the document remains server-rendered and readable without JavaScript.
 
-Supported activation triggers are `load`, `idle`, `visible` and `interaction`. Arbitrary document expressions are not application code. Import and register application components in the trusted client entry.
+Supported activation triggers are `load`, `idle`, `visible` and `interaction`.
+Props cross a strict JSON boundary shared by SSR and the browser through
+`@omnitron-dev/lumen-ast/islands`. Unsupported values, cycles and oversized props
+fail explicitly; they are not silently converted to different values. Arbitrary document expressions are not application code. Import and register application components in the trusted client entry.
 
 ## Run an isolated example
 

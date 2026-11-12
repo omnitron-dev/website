@@ -1,7 +1,7 @@
 // Every current public entry point has an explicit guide. New exports require a deliberate mapping.
 export default {
   "@omnitron-dev/lumen": { ".": "lumen/overview.md", "./cli": "lumen/overview.md" },
-  "@omnitron-dev/lumen-ast": { ".": "lumen/authoring.md", "./execution": "lumen/authoring.md", "./execution/limits": "lumen/authoring.md", "./typst": "lumen/authoring.md" },
+  "@omnitron-dev/lumen-ast": { ".": "lumen/authoring.md", "./execution": "lumen/authoring.md", "./execution/limits": "lumen/authoring.md", "./typst": "lumen/authoring.md", "./mcp": "lumen/overview.md", "./diagrams": "lumen/authoring.md", "./islands": "lumen/authoring.md" },
   "@omnitron-dev/lumen-ui": { ".": "lumen/authoring.md", "./runtime": "lumen/authoring.md", "./layout": "lumen/this-site.md", "./blocks": "lumen/authoring.md", "./search": "lumen/this-site.md" },
   "@omnitron-dev/lumen-migrate": { ".": "lumen/this-site.md", "./cli": "lumen/this-site.md" },
   "@omnitron-dev/titan-lumen": { ".": "lumen/overview.md" },

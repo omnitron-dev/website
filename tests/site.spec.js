@@ -85,3 +85,16 @@ test('visible playground uses its compiled worker and recovers after a deadline'
   await playground.getByRole('button', { name: 'Run code' }).click();
   await expect(playground.locator('.lumen-playground-result')).toHaveText('42');
 });
+
+test('Mermaid source activates the real diagram engine in the production client', async ({ page }) => {
+  await page.goto('/docs/lumen/authoring');
+  const diagram = page.locator('[data-component="MermaidDiagram"]').first();
+  await diagram.scrollIntoViewIfNeeded();
+  await expect(diagram.locator('svg')).toBeVisible();
+  await expect(diagram.locator('svg .node')).toHaveCount(5);
+  await expect(diagram.locator('svg')).toContainText('Document source');
+  await expect(diagram.locator('svg')).toContainText('Markdown mirror');
+  await expect(diagram.getByRole('alert')).toHaveCount(0);
+  await diagram.getByText('Diagram source', { exact: true }).click();
+  await expect(diagram.locator('pre')).toContainText('flowchart LR');
+});
