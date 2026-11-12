@@ -1,3 +1,4 @@
+import '@omnitron-dev/prism/components/research/styles.css';
 import './site.css';
 import React, { lazy, Suspense, useEffect, useState } from 'react';
 import { createRoot } from 'react-dom/client';

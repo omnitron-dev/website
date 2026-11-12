@@ -86,15 +86,46 @@ test('visible playground uses its compiled worker and recovers after a deadline'
   await expect(playground.locator('.lumen-playground-result')).toHaveText('42');
 });
 
-test('Mermaid source activates the real diagram engine in the production client', async ({ page }) => {
+test('Mermaid source activates the real diagram engine in the production client', async ({ page }, testInfo) => {
+  await page.setViewportSize({ width: 320, height: 900 });
   await page.goto('/docs/lumen/authoring');
   const diagram = page.locator('[data-component="MermaidDiagram"]').first();
   await diagram.scrollIntoViewIfNeeded();
   await expect(diagram.locator('svg')).toBeVisible();
   await expect(diagram.locator('svg .node')).toHaveCount(5);
-  await expect(diagram.locator('svg')).toContainText('Document source');
-  await expect(diagram.locator('svg')).toContainText('Markdown mirror');
+  // Mermaid wraps a label into adjacent SVG tspans without text-node spaces.
+  await expect(diagram.locator('svg .node').filter({ hasText: /Document\s*source/ })).toHaveCount(1);
+  await expect(diagram.locator('svg .node').filter({ hasText: /Markdown\s*mirror/ })).toHaveCount(1);
   await expect(diagram.getByRole('alert')).toHaveCount(0);
   await diagram.getByText('Diagram source', { exact: true }).click();
   await expect(diagram.locator('pre')).toContainText('flowchart LR');
+  expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(320);
+  await page.screenshot({ path: testInfo.outputPath('diagram-320-dark.png') });
+  const viewport = diagram.locator('.lumen-diagram-content');
+  const scroll = await viewport.evaluate(element => { element.scrollLeft = element.scrollWidth; return element.scrollLeft; });
+  expect(scroll).toBeGreaterThan(0);
+  await page.screenshot({ path: testInfo.outputPath('diagram-320-dark-scrolled.png') });
+});
+
+test('generated type annotations and math remain readable in the document', async ({ page }, testInfo) => {
+  await page.setViewportSize({ width: 320, height: 900 });
+  const response = await page.goto('/docs/lumen/authoring');
+  const html = await response.text();
+  expect(html).toContain('number[]');
+  expect(html).toContain('katex-mathml');
+  const annotation = page.locator('.lumen-twoslash-popup');
+  await expect(annotation).toContainText('number[]');
+  await expect(annotation).toBeVisible();
+  const formula = page.locator('.katex-display .katex-html');
+  await formula.scrollIntoViewIfNeeded();
+  await expect(formula).toBeVisible();
+  await page.evaluate(() => document.fonts.ready);
+  expect(await page.evaluate(() => [...document.fonts].some(font => font.family.includes('KaTeX') && font.status === 'loaded'))).toBe(true);
+  const token = page.locator('.shiki span[style*="--shiki-dark"]').first();
+  const darkColor = await token.evaluate(element => getComputedStyle(element).color);
+  await page.screenshot({ path: testInfo.outputPath('authoring-320-dark.png') });
+  await page.getByRole('button', { name: 'Switch color theme' }).click();
+  await expect.poll(() => token.evaluate(element => getComputedStyle(element).color)).not.toBe(darkColor);
+  expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(320);
+  await page.screenshot({ path: testInfo.outputPath('authoring-320-light.png') });
 });

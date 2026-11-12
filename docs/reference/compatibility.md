@@ -20,7 +20,7 @@ describes the current source tree; pin the versions you deploy.
 | Other runtimes | [Cross-runtime tests](../testing/cross-runtime.md) cover selected packages; they do not establish daemon support on Bun or Deno |
 | Daemon IPC | Unix sockets; validate your operating system and deployment target before adopting the daemon |
 | Infrastructure provisioning | Docker for container-backed infrastructure; [bare-metal](../deployment/bare-metal.md) has separate requirements |
-| Documentation site | A separate Docusaurus project with its own manifest, lockfile and TypeScript version |
+| Documentation site | A separate Lumen consumer with its own manifest and TypeScript version; use the canonical SDK bridge for unpublished source and a registry lock for released packages |
 
 ## Implemented API versus design {#implemented-api-versus-design}
 

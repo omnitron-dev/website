@@ -20,3 +20,12 @@
 .omnitron-site .lumen-doc{padding:0}.omnitron-site .lumen-shell{min-height:0;background:transparent;color:inherit;font-family:inherit;--lumen-bg:var(--omni-bg);--lumen-surface:var(--omni-surface);--lumen-fg:var(--omni-text);--lumen-muted:var(--omni-text-muted);--lumen-border:var(--omni-border);--lumen-accent:var(--omni-accent)}
 .mobile-nav summary{list-style:none;white-space:nowrap}.mobile-nav summary::-webkit-details-marker{display:none}.mobile-document-nav{display:none}
 @media(max-width:900px){.mobile-document-nav{display:block;border-bottom:1px solid var(--omni-border);padding:12px 22px;font-size:12px}.mobile-document-nav summary{font-weight:600}.mobile-document-nav nav{padding-top:12px;max-height:65vh;overflow:auto}.mobile-document-nav ul{list-style:none;padding-left:12px}.mobile-document-nav a{display:block;padding:6px;text-decoration:none;color:var(--omni-text-muted)}.mobile-document-nav a[aria-current=page]{color:var(--omni-accent)}.mobile-document-nav details{margin:8px 0}}
+
+.omnitron-site[data-omnitron-theme=dark] .shiki span[style]{color:var(--shiki-dark,inherit);font-style:var(--shiki-dark-font-style,normal)}
+.omnitron-site[data-omnitron-theme=light] .shiki span[style]{color:var(--shiki-light,inherit);font-style:var(--shiki-light-font-style,normal)}
+.lumen-twoslash-popup,.lumen-twoslash-error{display:block;white-space:pre-wrap;padding:8px 12px;margin:8px 0;border-left:2px solid var(--omni-accent);color:var(--omni-text-muted);font:11px/1.6 var(--omni-font-mono)}.lumen-twoslash-error{border-color:var(--omni-error)}
+.lumen-doc .katex-display{overflow-x:auto;overflow-y:hidden;padding:8px 0}
+
+.lumen-doc p{overflow-wrap:anywhere}
+
+.lumen-doc .lumen-diagram{margin:24px 0}.lumen-diagram-content svg{min-width:28rem}

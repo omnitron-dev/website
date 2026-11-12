@@ -16,6 +16,14 @@ node ../omni/apps/omnitron/bin/sdk.js dev ../omni --project-dir . --no-watch
 pnpm start
 ```
 
+The path after `sdk dev` explicitly selects the source workspace. For ongoing
+framework development, the command above selects the primary `../omni` checkout.
+A qualification run can instead select a separate frozen checkout; that choice
+persists and does not automatically follow edits in another workspace. The
+selected source is recorded in the local `.omnitron/dev-sdk/install.json`.
+Re-run the canonical command to switch sources once the target workspace is
+prepared for development: selection runs that workspace's normal build graph.
+
 The SDK checkout must be separate from this repository. `sdk dev` uses the
 workspace's Turbo build graph and a private development lock. The tracked root
 lock still describes the previous published application graph; it does not
@@ -23,6 +31,14 @@ certify this Lumen candidate. Normal `pnpm install --frozen-lockfile` becomes a
 distribution check only after the Lumen release is published and that application
 lock is regenerated with the released versions. A package-manager metadata
 document added by pnpm does not establish a registry baseline.
+
+CI and GitHub Pages install released npm dependencies with the frozen application
+lock; neither selects a development SDK. The source inventory check uses the
+matching Omni release tag. Before pushing this migration to `main`, qualify and
+publish Omni 0.4.0, regenerate the application lock in a clean registry consumer,
+and run the frozen install, build and browser checks there. Commit that lock
+before the website push. A push to this repository's `main` also starts its
+existing GitHub Pages deployment workflow.
 
 The development preview rebuilds content and client sources. Restart after
 changing the configuration. Build and inspect the production output before

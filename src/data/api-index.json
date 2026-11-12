@@ -4187,7 +4187,7 @@
       "name": "buildStaticSite",
       "package": "@omnitron-dev/lumen",
       "kind": "function",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/lumen/src/ssg/ssg-engine.ts#L70",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/lumen/src/ssg/ssg-engine.ts#L71",
       "imports": [
         {
           "path": "@omnitron-dev/lumen",
@@ -4975,7 +4975,7 @@
       "name": "SsgBuildOptions",
       "package": "@omnitron-dev/lumen",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/lumen/src/ssg/ssg-engine.ts#L20",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/lumen/src/ssg/ssg-engine.ts#L21",
       "imports": [
         {
           "path": "@omnitron-dev/lumen",
@@ -4987,7 +4987,7 @@
       "name": "SsgBuildResult",
       "package": "@omnitron-dev/lumen",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/lumen/src/ssg/ssg-engine.ts#L31",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/lumen/src/ssg/ssg-engine.ts#L32",
       "imports": [
         {
           "path": "@omnitron-dev/lumen",
@@ -5059,7 +5059,7 @@
       "name": "CleanMarkdownOptions",
       "package": "@omnitron-dev/lumen-ast",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/lumen-ast/src/transformers/to-clean-markdown.ts#L9",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/lumen-ast/src/transformers/to-clean-markdown.ts#L18",
       "imports": [
         {
           "path": "@omnitron-dev/lumen-ast",
@@ -6315,7 +6315,7 @@
       "name": "parseTwoslashAnnotations",
       "package": "@omnitron-dev/lumen-ast",
       "kind": "function",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/lumen-ast/src/highlight/twoslash.ts#L288",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/lumen-ast/src/highlight/twoslash.ts#L85",
       "imports": [
         {
           "path": "@omnitron-dev/lumen-ast",
@@ -6495,7 +6495,7 @@
       "name": "renderNodesToHtml",
       "package": "@omnitron-dev/lumen-ast",
       "kind": "function",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/lumen-ast/src/transformers/to-html-ssr.ts#L149",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/lumen-ast/src/transformers/to-html-ssr.ts#L141",
       "imports": [
         {
           "path": "@omnitron-dev/lumen-ast",
@@ -6567,7 +6567,7 @@
       "name": "sanitizeUrl",
       "package": "@omnitron-dev/lumen-ast",
       "kind": "function",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/lumen-ast/src/transformers/to-html-ssr.ts#L64",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/lumen-ast/src/transformers/to-html-ssr.ts#L61",
       "imports": [
         {
           "path": "@omnitron-dev/lumen-ast",
@@ -6672,46 +6672,10 @@
       ]
     },
     {
-      "name": "TipTapDoc",
-      "package": "@omnitron-dev/lumen-ast",
-      "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/lumen-ast/src/transformers/to-tiptap-doc.ts#L20",
-      "imports": [
-        {
-          "path": "@omnitron-dev/lumen-ast",
-          "guide": "/docs/lumen/authoring"
-        }
-      ]
-    },
-    {
-      "name": "TipTapNode",
-      "package": "@omnitron-dev/lumen-ast",
-      "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/lumen-ast/src/transformers/to-tiptap-doc.ts#L12",
-      "imports": [
-        {
-          "path": "@omnitron-dev/lumen-ast",
-          "guide": "/docs/lumen/authoring"
-        }
-      ]
-    },
-    {
-      "name": "TipTapOptions",
-      "package": "@omnitron-dev/lumen-ast",
-      "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/lumen-ast/src/transformers/to-tiptap-doc.ts#L7",
-      "imports": [
-        {
-          "path": "@omnitron-dev/lumen-ast",
-          "guide": "/docs/lumen/authoring"
-        }
-      ]
-    },
-    {
       "name": "toCleanMarkdown",
       "package": "@omnitron-dev/lumen-ast",
       "kind": "function",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/lumen-ast/src/transformers/to-clean-markdown.ts#L16",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/lumen-ast/src/transformers/to-clean-markdown.ts#L23",
       "imports": [
         {
           "path": "@omnitron-dev/lumen-ast",
@@ -6723,19 +6687,7 @@
       "name": "toHtmlSsr",
       "package": "@omnitron-dev/lumen-ast",
       "kind": "function",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/lumen-ast/src/transformers/to-html-ssr.ts#L124",
-      "imports": [
-        {
-          "path": "@omnitron-dev/lumen-ast",
-          "guide": "/docs/lumen/authoring"
-        }
-      ]
-    },
-    {
-      "name": "toTipTapDoc",
-      "package": "@omnitron-dev/lumen-ast",
-      "kind": "function",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/lumen-ast/src/transformers/to-tiptap-doc.ts#L25",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/lumen-ast/src/transformers/to-html-ssr.ts#L121",
       "imports": [
         {
           "path": "@omnitron-dev/lumen-ast",
@@ -6759,7 +6711,7 @@
       "name": "TwoslashAnnotation",
       "package": "@omnitron-dev/lumen-ast",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/lumen-ast/src/highlight/twoslash.ts#L8",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/lumen-ast/src/highlight/twoslash.ts#L9",
       "imports": [
         {
           "path": "@omnitron-dev/lumen-ast",
@@ -6771,7 +6723,7 @@
       "name": "TwoslashParseResult",
       "package": "@omnitron-dev/lumen-ast",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/lumen-ast/src/highlight/twoslash.ts#L17",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/lumen-ast/src/highlight/twoslash.ts#L18",
       "imports": [
         {
           "path": "@omnitron-dev/lumen-ast",

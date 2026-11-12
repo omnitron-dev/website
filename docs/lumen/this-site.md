@@ -17,6 +17,10 @@ This repository consumes Lumen's ordinary CLI. Its layout uses Lumen navigation 
 
 There is no application RPC required to read or search this static manual.
 
+The trusted configuration, layout and renderer are compiled into one Vite SSR graph. Local components and imported React packages share the project's React peers, so state and context hooks also work during static rendering. The compiler preserves source module paths and ESM resolution and releases its temporary files after success or failure.
+
+Browser resources enter through `clientEntry`, `stylesheets` or `publicDir`. Importing a separate CSS, image or font file from the SSR layout fails with a diagnostic instead of leaving a missing resource in the published site. Self-contained inline assets need no separate file.
+
 Publication persists a small recovery journal before moving the previous output.
 After interruption, the next build or serve verifies ownership and file hashes
 before retaining the complete new generation or restoring the complete previous
@@ -29,7 +33,8 @@ Linux filesystem, with a brief rename gap; Windows publication is not supported.
 
 - The header opens Lumen's local search dialog.
 - The API index filters the generated public symbols by package, import path and kind.
-- The authoring guide runs editable JavaScript inside a bounded QuickJS worker.
+- The authoring guide runs editable JavaScript inside a bounded QuickJS worker and renders a Mermaid diagram with the actual browser engine.
+- Type annotations and mathematical typesetting are generated during the build and remain readable without JavaScript.
 - The shared brand and theme control switch between the shared light and dark palettes.
 - The API inventory is fetched only when its island is present on the page.
 - Navigation and page contents remain ordinary links and static HTML.

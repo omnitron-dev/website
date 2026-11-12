@@ -44,7 +44,7 @@ HTML retains readable diagram source. The client registers `MermaidDiagram` and
 loads the engine when the island becomes visible; invalid diagrams show an error
 and retain their source. The shared helper is available from
 `@omnitron-dev/lumen-ast/diagrams`. It requires a browser DOM for SVG rendering;
-PDF and Markdown exports currently retain diagram source.
+PDF and Markdown exports currently retain diagram source. On narrow screens, scroll the diagram horizontally or expand its source.
 
 ## Selective React islands
 
@@ -60,6 +60,35 @@ Supported activation triggers are `load`, `idle`, `visible` and `interaction`.
 Props cross a strict JSON boundary shared by SSR and the browser through
 `@omnitron-dev/lumen-ast/islands`. Unsupported values, cycles and oversized props
 fail explicitly; they are not silently converted to different values. Arbitrary document expressions are not application code. Import and register application components in the trusted client entry.
+
+## Inspect inferred types
+
+A `typescript twoslash` fence requests analysis from the actual TypeScript language service. The caret points to the symbol on the preceding line:
+
+```typescript twoslash
+const doubled = [1, 2, 3].map(value => value * 2);
+//    ^?
+```
+
+The annotation above is generated during this site's build. It is not a handwritten type label. Analysis uses the compiler's packaged standard libraries in a standalone virtual file; it does not execute the code or import this website's workspace dependencies.
+
+## Mathematical documents
+
+Inline mathematics such as $E = mc^2$ and display equations use KaTeX:
+
+$$
+\sum_{i=1}^{n} i = \frac{n(n+1)}{2}
+$$
+
+This site's client entry imports `@omnitron-dev/prism/components/research/styles.css`, so Vite publishes the shared math stylesheet and its fonts with the other local assets. No font CDN is required.
+
+For a paper, set `pdf.paperSections` to the document IDs or source paths you want, then run:
+
+```bash
+lumen pdf --outDir papers
+```
+
+The command writes one PDF per selected public document using the offline Typst compiler. Unsupported mathematical commands fail explicitly. HTML `katexMacros` do not define PDF macros; diagram blocks retain their source in PDF output.
 
 ## Run an isolated example
 

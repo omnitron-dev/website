@@ -227,7 +227,7 @@ Fix: bump `heartbeatTTL` to `5 × heartbeatInterval` (default is
 
 ### Build fails with "broken anchor" {#build-fails-with-broken-anchor}
 
-Docusaurus markdown links use kebab-cased anchor IDs derived
+Lumen Markdown links use heading anchor IDs derived
 from headings. If you link to `#someAnchor` but the heading is
 `## Some long heading`, the anchor is `#some-long-heading`.
 
