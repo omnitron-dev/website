@@ -1,6 +1,4 @@
 import React from 'react';
-import { PortalIslandHost } from '@omnitron-dev/lumen-ui/runtime';
-import { OmnitronMark } from '@omnitron-dev/prism/identity';
 
 const layers = [
   ['01', 'Titan', 'Runtime', 'Compose services with explicit modules, dependency injection and a managed lifecycle.', '/docs/titan/overview'],
@@ -19,16 +17,20 @@ export function Home() {
         <p className="hero-lead">One language. Every layer under your control.</p>
         <p className="hero-description">Start with a service. Connect an interface. Document its contract. Add supervision when you need it.</p>
         <div className="hero-actions"><a className="primary-link" href="/docs/getting-started/quickstart">Build your first service <span>→</span></a><a className="quiet-link" href="/docs/foundations/architecture">Explore the architecture ↗</a></div>
-      </div><div className="system-diagram" aria-label="Prism interface, Netron transport, Titan runtime, Lumen documentation and Omnitron operations">
-        <div className="diagram-meta"><span>SYSTEM / 001</span><span>EXPLICIT BOUNDARIES</span></div>
-        <div className="hero-mark"><PortalIslandHost islandId="site-mark" component="SiteMark" hydrate="load" props={{ size: 152 }}><OmnitronMark size={152} /></PortalIslandHost></div>
-        <div className="system-row"><span>INTERFACE</span><strong>Prism</strong></div>
-        <div className="system-connector">↓ <span>TYPE CONTRACT</span> ↑</div>
-        <div className="system-row"><span>TRANSPORT</span><strong>Netron</strong></div>
-        <div className="system-connector">↓ <span>SERVICE BOUNDARY</span> ↑</div>
-        <div className="system-row"><span>RUNTIME</span><strong>Titan</strong></div>
-        <div className="system-tools"><div><small>DOCUMENT</small><strong>Lumen</strong></div><div><small>OPERATE</small><strong>Omnitron</strong></div></div>
-      </div></div>
+      </div><aside className="system-diagram" aria-labelledby="system-topology-title">
+        <p className="diagram-meta">PLATFORM / TOPOLOGY</p>
+        <h2 id="system-topology-title">From interface to service.</h2>
+        <div className="topology-path">
+          <a className="topology-node" href="/docs/frontend/prism"><small>CLIENT</small><strong>Prism</strong><span>React interface</span></a>
+          <a className="topology-connection" href="/docs/titan/netron"><span aria-hidden="true">↔</span><strong>Netron</strong><small>Typed RPC</small><small>HTTP / WebSocket</small></a>
+          <a className="topology-node" href="/docs/titan/overview"><small>SERVICE</small><strong>Titan</strong><span>Modules + lifecycle</span></a>
+        </div>
+        <p className="topology-caption">Shared types describe the contract. Validate requests at the service boundary.</p>
+        <div className="system-tools">
+          <a href="/docs/lumen/overview"><small>DOCUMENT</small><strong>Lumen</strong><span>Publishes these contracts</span></a>
+          <a href="/docs/omnitron/overview"><small>OPERATE</small><strong>Omnitron</strong><span>Supervises these processes</span></a>
+        </div>
+      </aside></div>
       <div className="hero-principles"><span><b>01</b> Shared contracts</span><span><b>02</b> Explicit ownership</span><span><b>03</b> Observable outcomes</span></div>
     </header>
     <section className="home-section" aria-labelledby="layers-title"><div className="section-heading"><p className="eyebrow">01 / THE STACK</p><h2 id="layers-title">Compose what you need.</h2><p>Each layer has a clear job. Follow its contract from source to operation.</p></div>

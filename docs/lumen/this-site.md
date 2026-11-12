@@ -35,9 +35,15 @@ Linux filesystem, with a brief rename gap; Windows publication is not supported.
 - The API index filters the generated public symbols by package, import path and kind.
 - The authoring guide runs editable JavaScript inside a bounded QuickJS worker and renders a Mermaid diagram with the actual browser engine.
 - Type annotations and mathematical typesetting are generated during the build and remain readable without JavaScript.
-- The shared brand and theme control switch between the shared light and dark palettes.
+- The theme menu offers Light, Dark and System. It remembers the selected mode;
+  System follows changes to the operating-system preference. Shared color tokens
+  apply before the client mounts, and PrismProvider owns live theme updates.
+- The header mark unfolds on hover or keyboard focus and returns afterward.
+  It remains still when reduced motion is requested.
 - The API inventory is fetched only when its island is present on the page.
-- Navigation and page contents remain ordinary links and static HTML.
+- Navigation and page contents remain ordinary links and static HTML. Theme and
+  search controls enable after their client handlers are ready; the document and
+  navigation remain usable without JavaScript.
 
 The API inventory is generated from public package manifests and TypeScript re-exports. It checks that each entry point has a guide; it does not prove that every behavior has a complete example.
 

@@ -1,5 +1,10 @@
 import { test, expect } from '@playwright/test';
 
+async function chooseTheme(page, mode) {
+  await page.getByRole('button', { name: /^Color theme:/ }).click();
+  await page.getByRole('menuitem', { name: new RegExp('^' + mode + '(?: · current)?$') }).click();
+}
+
 for (const width of [320, 768, 1440]) {
   for (const mode of ['dark', 'light']) {
     test(`home and documentation at ${width}px in ${mode}`, async ({ page }, testInfo) => {
@@ -10,7 +15,7 @@ for (const width of [320, 768, 1440]) {
       for (const [name, route] of [['home', '/'], ['guide', '/docs/lumen/this-site']]) {
         const response = await page.goto(route);
         expect(response.status()).toBe(200);
-        await expect(page.locator('.omnitron-site')).toHaveAttribute('data-omnitron-theme', mode);
+        await expect(page.locator('html')).toHaveAttribute('data-omnitron-theme', mode);
         await expect(page.locator('h1')).toHaveCount(1);
         await page.evaluate(() => document.fonts.ready);
         await expect(page.locator('.brand .MuiTypography-root')).toHaveCSS('color', mode === 'dark' ? 'rgb(230, 237, 240)' : 'rgb(22, 32, 38)');
@@ -27,7 +32,7 @@ for (const width of [320, 768, 1440]) {
 test('theme toggle updates shared identity and mobile section navigation works', async ({ page }) => {
   await page.setViewportSize({ width: 320, height: 900 });
   await page.goto('/docs/lumen/this-site');
-  await page.getByRole('button', { name: 'Switch color theme' }).click();
+  await chooseTheme(page, 'Light');
   await expect(page.locator('.brand .MuiTypography-root')).toHaveCSS('color', 'rgb(22, 32, 38)');
   await page.locator('.mobile-document-nav > summary').click();
   await page.getByRole('navigation', { name: 'Mobile documentation sections' }).getByRole('link', { name: 'Authoring with Lumen' }).click();
@@ -108,6 +113,7 @@ test('Mermaid source activates the real diagram engine in the production client'
 });
 
 test('generated type annotations and math remain readable in the document', async ({ page }, testInfo) => {
+  await page.addInitScript(() => localStorage.setItem('omnitron-theme', 'dark'));
   await page.setViewportSize({ width: 320, height: 900 });
   const response = await page.goto('/docs/lumen/authoring');
   const html = await response.text();
@@ -124,8 +130,183 @@ test('generated type annotations and math remain readable in the document', asyn
   const token = page.locator('.shiki span[style*="--shiki-dark"]').first();
   const darkColor = await token.evaluate(element => getComputedStyle(element).color);
   await page.screenshot({ path: testInfo.outputPath('authoring-320-dark.png') });
-  await page.getByRole('button', { name: 'Switch color theme' }).click();
+  await chooseTheme(page, 'Light');
   await expect.poll(() => token.evaluate(element => getComputedStyle(element).color)).not.toBe(darkColor);
   expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(320);
   await page.screenshot({ path: testInfo.outputPath('authoring-320-light.png') });
+});
+
+
+test('header identity unfolds on hover and keyboard focus and respects reduced motion', async ({ page }, testInfo) => {
+  await page.goto('/docs/intro');
+  const brand = page.getByRole('link', { name: 'Omnitron home' });
+  const facet = brand.locator('[data-facet]').first();
+  const transform = () => facet.evaluate(element => getComputedStyle(element).transform);
+  await expect.poll(transform).toBe('none');
+  await brand.hover();
+  await expect.poll(transform).not.toBe('none');
+  await facet.evaluate(element => Promise.all(element.getAnimations().map(animation => animation.finished)));
+  await page.screenshot({ path: testInfo.outputPath('header-hover.png') });
+  await page.mouse.move(700, 300);
+  await expect.poll(transform).toBe('none');
+  await page.getByRole('link', { name: 'Skip to content' }).focus();
+  await page.keyboard.press('Tab');
+  await expect(brand).toBeFocused();
+  expect(await brand.evaluate(element => element.matches(':focus-visible'))).toBe(true);
+  await expect.poll(transform).not.toBe('none');
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await expect.poll(transform).toBe('none');
+  await brand.hover();
+  await expect.poll(transform).toBe('none');
+});
+
+for (const width of [320, 1440]) {
+  test(`pagination keeps document direction at ${width}px with either neighbor absent`, async ({ page }, testInfo) => {
+    await page.setViewportSize({ width, height: 900 });
+    for (const [route, previous, next] of [['/docs/intro', false, true], ['/docs/lumen/authoring', true, true], ['/docs/lumen/this-site', true, false]]) {
+      await page.goto(route);
+      const pagination = page.getByRole('navigation', { name: 'Docs pagination' });
+      await pagination.scrollIntoViewIfNeeded();
+      const bounds = await pagination.boundingBox();
+      const prev = pagination.locator('.lumen-pagination-prev');
+      const forward = pagination.locator('.lumen-pagination-next');
+      await expect(prev).toHaveCount(previous ? 1 : 0);
+      await expect(forward).toHaveCount(next ? 1 : 0);
+      if (previous) expect((await prev.boundingBox()).x).toBeCloseTo(bounds.x, 0);
+      if (next) expect((await forward.boundingBox()).x).toBeGreaterThan(bounds.x + bounds.width / 2);
+      expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(width);
+      if (route === '/docs/intro') await page.screenshot({ path: testInfo.outputPath(`pagination-${width}.png`) });
+    }
+  });
+}
+
+test('category landing pages sit between their previous document and first child', async ({ page }) => {
+  for (const [route, previous, firstChild] of [
+    ['/docs/tutorial', '/docs/getting-started/project-structure', '/docs/tutorial/scaffold'],
+    ['/docs/titan/netron', '/docs/titan/errors/classification', '/docs/titan/netron/services'],
+    ['/docs/frontend/prism', '/docs/frontend/overview', '/docs/frontend/prism/components'],
+  ]) {
+    await page.goto(route);
+    const pagination = page.getByRole('navigation', { name: 'Docs pagination' });
+    await expect(pagination.locator('.lumen-pagination-prev')).toHaveAttribute('href', previous);
+    await expect(pagination.locator('.lumen-pagination-next')).toHaveAttribute('href', firstChild);
+    await pagination.locator('.lumen-pagination-next').click();
+    await expect(page).toHaveURL(new RegExp(firstChild + '$'));
+    await expect(page.locator('.lumen-pagination-prev')).toHaveAttribute('href', route);
+  }
+});
+
+test('system theme follows OS changes while explicit choices persist', async ({ page }, testInfo) => {
+  await page.emulateMedia({ colorScheme: 'dark' });
+  await page.goto('/docs/intro');
+  const shell = page.locator('html');
+  const button = page.getByRole('button', { name: /^Color theme:/ });
+  await expect(button).toHaveAccessibleName('Color theme: System');
+  await expect(shell).toHaveAttribute('data-omnitron-theme', 'dark');
+  await expect(button.locator('svg')).toHaveAttribute('data-theme-icon', 'system');
+  await chooseTheme(page, 'System');
+  await expect(button).toBeFocused();
+  await chooseTheme(page, 'Light');
+  await expect(shell).toHaveAttribute('data-omnitron-theme', 'light');
+  await expect(button.locator('svg')).toHaveAttribute('data-theme-icon', 'light');
+  await page.reload();
+  await expect(button).toHaveAccessibleName('Color theme: Light');
+  await page.emulateMedia({ colorScheme: 'light' });
+  await page.emulateMedia({ colorScheme: 'dark' });
+  await expect(shell).toHaveAttribute('data-omnitron-theme', 'light');
+  await chooseTheme(page, 'System');
+  await expect.poll(() => page.evaluate(() => localStorage.getItem('omnitron-theme'))).toBe('system');
+  await expect(shell).toHaveAttribute('data-omnitron-theme', 'dark');
+  await page.emulateMedia({ colorScheme: 'light' });
+  await expect(shell).toHaveAttribute('data-omnitron-theme', 'light');
+  await page.emulateMedia({ colorScheme: 'dark' });
+  await expect(shell).toHaveAttribute('data-omnitron-theme', 'dark');
+  await page.reload();
+  await expect(button).toHaveAccessibleName('Color theme: System');
+  await chooseTheme(page, 'Dark');
+  await expect(button.locator('svg')).toHaveAttribute('data-theme-icon', 'dark');
+  await page.emulateMedia({ colorScheme: 'light' });
+  await expect(shell).toHaveAttribute('data-omnitron-theme', 'dark');
+  await button.click();
+  await page.screenshot({ path: testInfo.outputPath('theme-options.png') });
+  await expect(page.getByRole('menuitem', { name: 'Dark · current' })).toBeVisible();
+});
+
+test('theme menu supports keyboard selection, escape and mobile focus return', async ({ page }, testInfo) => {
+  await page.setViewportSize({ width: 320, height: 900 });
+  await page.goto('/docs/intro');
+  const button = page.getByRole('button', { name: /^Color theme:/ });
+  await button.focus();
+  await page.keyboard.press('Enter');
+  await expect(page.getByRole('menu')).toBeVisible();
+  await expect(page.getByRole('menuitem', { name: 'Light' })).toBeFocused();
+  await page.keyboard.press('ArrowDown');
+  await expect(page.getByRole('menuitem', { name: 'Dark' })).toBeFocused();
+  await page.keyboard.press('Enter');
+  await expect(page.getByRole('menu')).toHaveCount(0);
+  await expect(button).toBeFocused();
+  await expect(button).toHaveAccessibleName('Color theme: Dark');
+  await page.keyboard.press('Space');
+  await expect(page.getByRole('menu')).toBeVisible();
+  const menu = await page.getByRole('menu').boundingBox();
+  expect(menu.x).toBeGreaterThanOrEqual(0);
+  expect(menu.x + menu.width).toBeLessThanOrEqual(320);
+  await page.screenshot({ path: testInfo.outputPath('theme-menu-320.png') });
+  await page.keyboard.press('Escape');
+  await expect(page.getByRole('menu')).toHaveCount(0);
+  await expect(button).toBeFocused();
+  expect(await button.evaluate(element => getComputedStyle(element).outlineStyle)).not.toBe('none');
+});
+
+test('home topology explains platform boundaries without a second brand mark', async ({ page }) => {
+  await page.goto('/');
+  const topology = page.getByRole('complementary', { name: 'From interface to service.' });
+  await expect(topology.getByRole('link')).toHaveCount(5);
+  await expect(topology.locator('[data-omnitron-mark]')).toHaveCount(0);
+  await expect(topology.getByText('Typed RPC', { exact: true })).toBeVisible();
+  await expect(topology.getByText('HTTP / WebSocket', { exact: true })).toBeVisible();
+  await expect(topology.getByText('Publishes these contracts')).toBeVisible();
+  await expect(topology.getByText('Supervises these processes')).toBeVisible();
+});
+
+
+for (const [saved, system, expected, background, text] of [
+  ['light', 'dark', 'light', 'rgb(243, 246, 247)', 'rgb(22, 32, 38)'],
+  ['dark', 'light', 'dark', 'rgb(11, 15, 18)', 'rgb(230, 237, 240)'],
+  ['system', 'light', 'light', 'rgb(243, 246, 247)', 'rgb(22, 32, 38)'],
+]) {
+  test(`theme prepaint applies ${saved} before client modules load`, async ({ page }) => {
+    await page.emulateMedia({ colorScheme: system });
+    await page.addInitScript(mode => {
+      localStorage.setItem('omnitron-theme', mode);
+      new PerformanceObserver(list => {
+        if (list.getEntries().some(entry => entry.name === 'first-contentful-paint')) {
+          window.__firstThemePaint = {
+            mode: document.documentElement.dataset.omnitronTheme,
+            background: getComputedStyle(document.querySelector('.omnitron-site')).backgroundColor,
+            text: getComputedStyle(document.querySelector('.brand .MuiTypography-root')).color,
+          };
+        }
+      }).observe({ type: 'paint', buffered: true });
+    }, saved);
+    await page.route('**/*', route => route.request().resourceType() === 'script' ? route.abort() : route.continue());
+    await page.goto('/docs/intro');
+    await expect.poll(() => page.evaluate(() => window.__firstThemePaint)).toEqual({ mode: expected, background, text });
+    await expect(page.locator('h1')).toBeVisible();
+  });
+}
+
+test('documentation remains readable without JavaScript using the system palette', async ({ browser, baseURL }) => {
+  const context = await browser.newContext({ baseURL, javaScriptEnabled: false, colorScheme: 'light', viewport: { width: 320, height: 900 } });
+  try {
+    const page = await context.newPage();
+    await page.goto('/docs/intro');
+    await expect(page.locator('.omnitron-site')).toHaveCSS('background-color', 'rgb(243, 246, 247)');
+    await expect(page.locator('.brand .MuiTypography-root')).toHaveCSS('color', 'rgb(22, 32, 38)');
+    await expect(page.locator('h1')).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Choose color theme' })).toBeDisabled();
+    await expect(page.getByRole('button', { name: /^Search/ })).toBeDisabled();
+    await page.getByText('In this section', { exact: true }).click();
+    await expect(page.getByRole('navigation', { name: 'Mobile documentation sections' })).toBeVisible();
+  } finally { await context.close(); }
 });
