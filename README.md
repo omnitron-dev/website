@@ -12,17 +12,27 @@ through the canonical SDK bridge:
 
 ```bash
 node ../omni/apps/omnitron/bin/sdk.js init --project-dir .
-node ../omni/apps/omnitron/bin/sdk.js dev ../omni --project-dir . --no-watch
+node ../omni/apps/omnitron/bin/sdk.js dev ../omni --project-dir .
+```
+
+Leave `sdk dev` running. It watches the selected SDK's source and build inputs,
+rebuilds affected packages through Turbo, and reports a successful build
+checkpoint. Once it reports that the SDK is ready, start the site in another
+terminal:
+
+```bash
 pnpm start
 ```
 
 The path after `sdk dev` explicitly selects the source workspace. For ongoing
 framework development, the command above selects the primary `../omni` checkout.
-A qualification run can instead select a separate frozen checkout; that choice
-persists and does not automatically follow edits in another workspace. The
-selected source is recorded in the local `.omnitron/dev-sdk/install.json`.
-Re-run the canonical command to switch sources once the target workspace is
-prepared for development: selection runs that workspace's normal build graph.
+For a one-time qualification, select a separate reviewed checkout and append
+`--no-watch`; that command builds once and exits. The selection persists and does
+not automatically follow edits in another workspace. Inspect it with
+`node ../omni/apps/omnitron/bin/sdk.js status --project-dir .`; the source is also
+recorded in the local `.omnitron/dev-sdk/install.json`. Re-run the canonical
+command to switch sources once the target workspace is prepared for development:
+selection runs that workspace's normal build graph.
 
 The SDK checkout must be separate from this repository. `sdk dev` uses the
 workspace's Turbo build graph and a private development lock. The tracked root
@@ -40,9 +50,12 @@ and run the frozen install, build and browser checks there. Commit that lock
 before the website push. A push to this repository's `main` also starts its
 existing GitHub Pages deployment workflow.
 
-The development preview rebuilds content and client sources. Restart after
-changing the configuration. Build and inspect the production output before
-submitting a change:
+The development preview rebuilds the site's content, public assets and `src`
+files. It does not watch the SDK's compiled output or replace already loaded
+Node modules. After `sdk dev` reports a changed SDK build, restart `pnpm start`
+to load it; no manual SDK build is needed. Also restart after changing the site
+configuration. Build and inspect the production output before submitting a
+change:
 
 ```bash
 pnpm check:content
