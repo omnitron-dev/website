@@ -54,9 +54,9 @@ or Linux.
 On the development Mac, set `LUMEN_OUT_DIR` to a project directory on the mounted
 AGI development disk. Build artifacts and new dependency caches belong there.
 Set `LUMEN_VIRTUAL_STORE_DIR` to a separate directory on that volume before SDK
-selection and subsequent pnpm commands. This uses pnpm's standard virtual store;
+selection and subsequent pnpm commands. This uses pnpm's standard isolated node linker and virtual store;
 the project keeps its own physical `node_modules` directory and normal package
-links. Without that variable, other machines use `node_modules/.pnpm`.
+links, while package contents live in the selected store. Without that variable, other machines use `node_modules/.pnpm`.
 The canonical `.pnpmfile.mjs` is maintained by `sdk init`; do not add a second SDK
 hook or invent a registry lock for unpublished dependencies.
 The initial migration uses an explicitly qualified local SDK candidate until
