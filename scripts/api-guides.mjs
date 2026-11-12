@@ -1,5 +1,10 @@
 // Every current public entry point has an explicit guide. New exports require a deliberate mapping.
 export default {
+  "@omnitron-dev/lumen": { ".": "lumen/overview.md", "./cli": "lumen/overview.md" },
+  "@omnitron-dev/lumen-ast": { ".": "lumen/authoring.md", "./execution": "lumen/authoring.md", "./execution/limits": "lumen/authoring.md", "./typst": "lumen/authoring.md" },
+  "@omnitron-dev/lumen-ui": { ".": "lumen/authoring.md", "./runtime": "lumen/authoring.md", "./layout": "lumen/this-site.md", "./blocks": "lumen/authoring.md", "./search": "lumen/this-site.md" },
+  "@omnitron-dev/lumen-migrate": { ".": "lumen/this-site.md", "./cli": "lumen/this-site.md" },
+  "@omnitron-dev/titan-lumen": { ".": "lumen/overview.md" },
   "@omnitron-dev/access": {
     ".": "auth/access-policy.md",
     "./roles": "auth/access-policy.md",
@@ -56,6 +61,7 @@ export default {
     "./test": "frontend/netron/testing.md"
   },
   "@omnitron-dev/prism": {
+    "./identity": "frontend/prism/theme.md",
     "./components/admin-filters": "frontend/prism/components.md",
     "./components/alert": "frontend/prism/components.md",
     "./components/animate": "frontend/prism/components.md",
@@ -129,7 +135,6 @@ export default {
     "./lifecycle": "titan/application/lifecycle.md",
     "./decorators": "titan/decorators/index.md",
     "./netron": "titan/netron.md",
-    "./netron/service-descriptor": "titan/netron/services.md",
     "./netron/transport/http": "titan/netron/transports.md",
     "./netron/transport/websocket": "titan/netron/transports.md",
     "./netron/transport/tcp": "titan/netron/transports.md",

@@ -1,4 +1,6 @@
 ---
+id: "omnitron/overview"
+slug: "/docs/omnitron/overview"
 sidebar_position: 1
 title: Overview
 description: What Omnitron is, what it solves, and how the pieces fit together.
@@ -29,7 +31,7 @@ omnitron logs --grep error           # tail filtered logs
 omnitron webapp open                 # open the web console
 ```
 
-## What you get
+## What you get {#what-you-get}
 
 | Layer | Responsibility |
 | ----- | -------------- |
@@ -42,7 +44,7 @@ omnitron webapp open                 # open the web console
 | **Infrastructure** | Provisions Postgres / Redis / S3-compatible / custom containers via Docker (dev) or bare-metal hooks (prod) |
 | **MCP** | Built-in Model Context Protocol surface — let agents (IDE assistants, CI bots) read state and trigger operations |
 
-## When you reach for Omnitron
+## When you reach for Omnitron {#when-you-reach-for-omnitron}
 
 - **You have ≥ 2 Titan apps** and want one place to start, watch,
   inspect, and shut them down together.
@@ -62,7 +64,7 @@ If you only ever run **one** Titan app on **one** machine, `node
 my-app.js` may be enough. Omnitron starts to pay back at two apps
 or two machines.
 
-## The mental model
+## The mental model {#the-mental-model}
 
 ```mermaid
 flowchart TB
@@ -113,7 +115,7 @@ go; the daemon stays. CLI invocations are short-lived RPC clients
 talking to the daemon — they exit immediately after the RPC
 returns.
 
-## Filesystem layout
+## Filesystem layout {#filesystem-layout}
 
 Omnitron owns a single directory:
 
@@ -134,7 +136,7 @@ By default everything else is project-local — the daemon never
 writes outside `~/.omnitron/` unless you point it at custom
 paths.
 
-## Default endpoints
+## Default endpoints {#default-endpoints}
 
 | Plane | Endpoint | Purpose |
 | ----- | -------- | ------- |
@@ -146,7 +148,7 @@ The Unix socket is the **trust boundary** — owner-only file
 permissions make local CLI calls implicit-auth. TCP and HTTP
 require JWT.
 
-## A minimal `omnitron.config.ts`
+## A minimal `omnitron.config.ts` {#a-minimal-omnitronconfigts}
 
 The single configuration file at the repo root:
 
@@ -184,7 +186,7 @@ export default defineEcosystem({
 Each app's `bootstrap.ts` exports a `defineSystem(...)` that
 declares the **processes** (one OS process per `IProcessEntry`).
 
-## How an app launches
+## How an app launches {#how-an-app-launches}
 
 ```mermaid
 sequenceDiagram
@@ -214,7 +216,7 @@ exactly one fork (or a pool when `instances > 1`). The child
 imports **only** that module's file — no full bootstrap re-load —
 so dependencies stay process-isolated.
 
-## Multi-project / multi-stack
+## Multi-project / multi-stack {#multi-project--multi-stack}
 
 Omnitron groups apps into **projects** and projects into
 **stacks**:
@@ -234,7 +236,7 @@ operate on the named subset. Use stacks to keep
 `development` / `staging` / `production` boots side-by-side on
 one daemon.
 
-## Built-in observability
+## Built-in observability {#built-in-observability}
 
 Every supervised process gets, for free:
 
@@ -249,7 +251,7 @@ Every supervised process gets, for free:
 Both the CLI and webapp read these through the daemon — there's no
 separate metrics agent to deploy.
 
-## Webapp (Omnitron Console)
+## Webapp (Omnitron Console) {#webapp-omnitron-console}
 
 The console is a React + Vite + MUI SPA that lives at
 `apps/omnitron/webapp/` and talks to the daemon via the
@@ -271,7 +273,7 @@ for a Vite dev server with HMR.
 
 → Full webapp reference: [console](./console.md).
 
-## Compatibility
+## Compatibility {#compatibility}
 
 | Component | Requirement |
 | --------- | ----------- |
@@ -280,7 +282,7 @@ for a Vite dev server with HMR.
 | Docker | Required for `infra` commands (provisioning Postgres / Redis / etc.) |
 | Bun / Deno | Apps may run on Bun/Deno individually, but the daemon expects Node |
 
-## Where to go next
+## Where to go next {#where-to-go-next}
 
 - **Architecture deep-dive:** [Architecture](./architecture.md) —
   every component, every plane, every data flow.

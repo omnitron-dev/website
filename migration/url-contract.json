@@ -1,0 +1,3803 @@
+{
+  "generator": "Docusaurus 3.10.2",
+  "routes": {
+    "/": {
+      "anchors": [
+        "contract-title",
+        "layers-title",
+        "start-title"
+      ]
+    },
+    "/404": {
+      "anchors": []
+    },
+    "/blog": {
+      "anchors": []
+    },
+    "/blog/archive": {
+      "anchors": [
+        "2026"
+      ]
+    },
+    "/blog/authors": {
+      "anchors": []
+    },
+    "/blog/authors/omnitron-team": {
+      "anchors": []
+    },
+    "/blog/tags": {
+      "anchors": [
+        "I",
+        "R"
+      ]
+    },
+    "/blog/tags/intro": {
+      "anchors": []
+    },
+    "/blog/tags/release": {
+      "anchors": []
+    },
+    "/blog/welcome": {
+      "anchors": [
+        "whats-in-v01",
+        "whats-next"
+      ]
+    },
+    "/docs/auth": {
+      "anchors": [
+        "reading-order-for-first-time-integrators"
+      ]
+    },
+    "/docs/auth/abac-conditions": {
+      "anchors": [
+        "built-in-policies",
+        "composition",
+        "custom-policies",
+        "failure-semantics",
+        "per-call-configuration",
+        "see-also"
+      ]
+    },
+    "/docs/auth/access-policy": {
+      "anchors": [
+        "choose-exactly-what-you-need",
+        "compose-authentication-and-enforcement",
+        "define-a-role-policy",
+        "optional-platform-preset-and-migration",
+        "select-matching-semantics-explicitly",
+        "share-a-permission-catalog",
+        "verification-and-build-budget"
+      ]
+    },
+    "/docs/auth/audit-trail": {
+      "anchors": [
+        "read-surface",
+        "recovery--actor-capture-invariant",
+        "redaction",
+        "see-also",
+        "shape",
+        "what-gets-logged"
+      ]
+    },
+    "/docs/auth/mental-model": {
+      "anchors": [
+        "layer-1--roles",
+        "layer-2--permissions",
+        "layer-3--abac-conditions",
+        "layer-4--rls",
+        "live-propagation",
+        "see-also",
+        "why-one-mental-model"
+      ]
+    },
+    "/docs/auth/overrides": {
+      "anchors": [
+        "admin-rpc-surface",
+        "live-propagation",
+        "resolution",
+        "see-also",
+        "two-scopes-identical-shape",
+        "why-overrides-exist"
+      ]
+    },
+    "/docs/auth/permissions": {
+      "anchors": [
+        "composition",
+        "grammar",
+        "matcher",
+        "scopes",
+        "see-also",
+        "validation",
+        "wildcards"
+      ]
+    },
+    "/docs/auth/rls-bridge": {
+      "anchors": [
+        "permver-counter",
+        "redis-fail-open",
+        "rls-policies",
+        "see-also",
+        "strict-vs-permissive-plugin-tiers",
+        "the-shared-wrapper",
+        "user-activity"
+      ]
+    },
+    "/docs/auth/token-issuance": {
+      "anchors": [
+        "clearing",
+        "csrf-is-two-pieces-and-both-are-optional",
+        "how-the-context-is-found",
+        "issuing",
+        "reading-a-cookie-back",
+        "the-transports",
+        "what-each-mode-assumes-of-the-client"
+      ]
+    },
+    "/docs/category/community": {
+      "anchors": []
+    },
+    "/docs/category/foundations": {
+      "anchors": []
+    },
+    "/docs/category/getting-started": {
+      "anchors": []
+    },
+    "/docs/community/changelog": {
+      "anchors": [
+        "breaking-change-communication",
+        "per-package-versioning",
+        "pre-10-exception",
+        "release-cadence",
+        "see-also",
+        "subscribe-to-releases",
+        "support-windows",
+        "upgrade-guides",
+        "versioning-policy",
+        "where-to-find-release-notes"
+      ]
+    },
+    "/docs/community/contributing": {
+      "anchors": [
+        "browser-approval-for-a-package-batch",
+        "change-the-code",
+        "release-process",
+        "report-a-problem",
+        "submit-a-change",
+        "update-dependencies-together",
+        "work-on-the-documentation",
+        "work-on-the-runtime",
+        "write-a-useful-page"
+      ]
+    },
+    "/docs/community/security": {
+      "anchors": [
+        "contact",
+        "disclosure",
+        "hall-of-fame",
+        "hardening-guidance",
+        "past-advisories",
+        "reporting-a-vulnerability",
+        "scope",
+        "severity-classification",
+        "supported-versions",
+        "what-happens-next",
+        "what-we-look-at-first"
+      ]
+    },
+    "/docs/comparison": {
+      "anchors": [
+        "honest-tradeoffs",
+        "pick-docker-compose--k8s-when",
+        "pick-nestjs-when",
+        "pick-omnitron-when",
+        "pick-omnitron-when-1",
+        "pick-omnitron-when-2",
+        "pick-omnitron-when-3",
+        "pick-pm2-when",
+        "pick-systemd-when",
+        "pick-the-http-server-when",
+        "pick-trpc-when",
+        "see-also",
+        "the-big-picture",
+        "vs-fastify--express--hono",
+        "vs-nestjs",
+        "vs-pm2--systemd--docker-compose",
+        "vs-the-typical-modern-typescript-stack",
+        "vs-trpc"
+      ]
+    },
+    "/docs/deployment": {
+      "anchors": [
+        "backups",
+        "choose-your-path",
+        "cross-cutting-concerns",
+        "environment-variables--the-canonical-set",
+        "logs-and-metrics",
+        "migrations",
+        "multi-region",
+        "observability-checklist",
+        "read-the-per-target-guides",
+        "rollback",
+        "secrets",
+        "security-checklist-deploy-time",
+        "see-also",
+        "what-you-provide-at-the-target",
+        "what-you-ship",
+        "zero-downtime-deploys"
+      ]
+    },
+    "/docs/deployment/bare-metal": {
+      "anchors": [
+        "backups",
+        "database-setup",
+        "enable--start",
+        "firewall",
+        "hardening-checklist",
+        "monitoring",
+        "multi-server-fleet",
+        "prerequisites",
+        "reverse-proxy-nginx",
+        "see-also",
+        "ship-the-build",
+        "systemd-unit",
+        "tls-via-lets-encrypt",
+        "topology",
+        "updating",
+        "when-bare-metal-beats-dockerk8s"
+      ]
+    },
+    "/docs/deployment/docker": {
+      "anchors": [
+        "build--ship",
+        "compose-for-dev",
+        "env-file",
+        "health-checks",
+        "logging",
+        "resource-limits",
+        "see-also",
+        "the-dockerfile",
+        "the-minimal-compose-file",
+        "updating-the-stack",
+        "volumes",
+        "what-this-doesnt-give-you"
+      ]
+    },
+    "/docs/deployment/kubernetes": {
+      "anchors": [
+        "cost-savings-tips",
+        "database-migrations",
+        "disaster-recovery",
+        "horizontalpodautoscaler",
+        "ingress",
+        "networkpolicy",
+        "observability",
+        "omnitron-daemon-as-statefulset",
+        "per-app-deployment",
+        "poddisruptionbudget",
+        "rolling-updates",
+        "secrets",
+        "see-also",
+        "topology",
+        "webapp-deployment"
+      ]
+    },
+    "/docs/deployment/paas": {
+      "anchors": [
+        "boot-command",
+        "common-patterns-across-paas",
+        "cost-rough-order",
+        "database-migrations",
+        "flyio",
+        "health-check-path",
+        "logs",
+        "multi-app-on-one-paas-service",
+        "paas-limitations",
+        "persistent-volume",
+        "railway",
+        "render",
+        "scaling",
+        "secrets",
+        "see-also"
+      ]
+    },
+    "/docs/deployment/production-readiness": {
+      "anchors": [
+        "coordinate-independently-supervised-processes",
+        "define-what-is-ready",
+        "diagnose-a-failure",
+        "keep-rollback-and-restore-separate",
+        "observe-the-right-signals",
+        "rehearse-a-release",
+        "set-the-access-boundary"
+      ]
+    },
+    "/docs/foundations/architecture": {
+      "anchors": [
+        "a-request-end-to-end",
+        "cross-cutting-concerns",
+        "the-layers",
+        "where-each-package-lives-in-this-picture"
+      ]
+    },
+    "/docs/foundations/composition": {
+      "anchors": [
+        "keep-expensive-features-behind-an-import-boundary",
+        "keep-policy-portable",
+        "verify-the-artifact"
+      ]
+    },
+    "/docs/foundations/monorepo": {
+      "anchors": [
+        "build-orchestration",
+        "package-independence",
+        "workspace-boundaries"
+      ]
+    },
+    "/docs/foundations/principles": {
+      "anchors": [
+        "compose-explicitly",
+        "make-lifecycle-observable",
+        "report-what-happened",
+        "separate-runtime-from-supervision",
+        "share-contracts"
+      ]
+    },
+    "/docs/foundations/titan-vs-omnitron": {
+      "anchors": [
+        "add-omnitron-later",
+        "at-a-glance",
+        "cost-comparison",
+        "drop-omnitron-later",
+        "migration-paths",
+        "real-numbers",
+        "see-also",
+        "start-with-titan-alone",
+        "titan-alone-no-omnitron",
+        "tldr",
+        "what-omnitron-adds",
+        "what-the-docs-cover-for-each",
+        "when-you-dont",
+        "when-you-need-omnitron"
+      ]
+    },
+    "/docs/frontend/netron": {
+      "anchors": [
+        "deep-dives",
+        "how-they-relate",
+        "quick-start--multi-backend",
+        "quick-start--single-backend",
+        "see-also"
+      ]
+    },
+    "/docs/frontend/netron/auth": {
+      "anchors": [
+        "anti-patterns",
+        "auto-refresh-flow",
+        "best-practices",
+        "concurrent-request-deduplication",
+        "constructor-options",
+        "cross-tab-sync",
+        "custom-refresh",
+        "event-subscriptions",
+        "inactivity-timeout",
+        "programmatic-token-access-advanced",
+        "react-integration",
+        "role-gated-content",
+        "route-guards",
+        "security-considerations",
+        "see-also",
+        "sign-in-flow-with-2fa",
+        "sign-in-flow-with-webauthn--passkey",
+        "storage-backends",
+        "token--result-shapes",
+        "token-transports-bearer--cookie--hybrid",
+        "wiring"
+      ]
+    },
+    "/docs/frontend/netron/browser": {
+      "anchors": [
+        "anti-patterns",
+        "architecture",
+        "authentication",
+        "best-practices",
+        "built-in-middleware",
+        "caching",
+        "client-options",
+        "custom-middleware",
+        "errors",
+        "examples",
+        "fluent-http-interface--caching-retry-circuit-breaking",
+        "health-checks",
+        "middleware-pipeline",
+        "multi-backend-client",
+        "performance-characteristics",
+        "quick-start",
+        "retry--circuit-breaking",
+        "see-also",
+        "service-descriptor",
+        "service-proxies--typed-rpc",
+        "subpaths",
+        "transports"
+      ]
+    },
+    "/docs/frontend/netron/caching": {
+      "anchors": [
+        "anti-patterns",
+        "best-practices",
+        "cache-key",
+        "cache-stats",
+        "filter-patterns",
+        "netron-react-querycache",
+        "optimistic-updates",
+        "prefetching",
+        "programmatic-cache-access",
+        "react-query-parity",
+        "see-also",
+        "stale-while-revalidate",
+        "tag-based-invalidation",
+        "two-cache-layers"
+      ]
+    },
+    "/docs/frontend/netron/errors": {
+      "anchors": [
+        "anti-patterns",
+        "best-practices",
+        "circuit-breaker-integration",
+        "error-boundaries",
+        "error-ui-patterns",
+        "errors-in-usequery--usemutation",
+        "global-error-handling",
+        "http-error-contract",
+        "inline-form-errors-mutations",
+        "page-level-error-query-failure",
+        "reporting-to-sentry",
+        "retry-classification",
+        "see-also",
+        "server-side-validation-errors",
+        "titanerror",
+        "toast-background-failure",
+        "transport-level-errors"
+      ]
+    },
+    "/docs/frontend/netron/middleware": {
+      "anchors": [
+        "best-practices",
+        "built-in-middleware",
+        "circuit-breaking--caching--the-fluent-http-interface",
+        "createautherrormiddleware",
+        "createauthmiddleware",
+        "createcsrfmiddleware",
+        "createerrortransformmiddleware",
+        "createloggingmiddleware",
+        "createtimingmiddleware",
+        "custom-middleware",
+        "middleware-shape",
+        "not-middleware",
+        "ordering-rules",
+        "registering-middleware",
+        "retry--an-httpclient-option",
+        "see-also",
+        "three-stage-pipeline",
+        "useful-patterns"
+      ]
+    },
+    "/docs/frontend/netron/multi-backend": {
+      "anchors": [
+        "anti-patterns",
+        "backend-pool-no-react",
+        "best-practices",
+        "connection-aware-rendering",
+        "default-backend",
+        "health-checks",
+        "per-backend-auth",
+        "per-backend-hooks",
+        "per-backend-service-hooks",
+        "prism-integration",
+        "routed-useservice",
+        "routing-patterns",
+        "see-also",
+        "setup",
+        "shared-cache"
+      ]
+    },
+    "/docs/frontend/netron/react": {
+      "anchors": [
+        "anti-patterns",
+        "authentication",
+        "backend-aware-components",
+        "backend-aware-hooks",
+        "best-practices",
+        "cache-key",
+        "cache-management",
+        "connection-aware-rendering-single-backend",
+        "custom-service-hook",
+        "devtools",
+        "guards",
+        "hooks-at-a-glance",
+        "keeppreviousdata",
+        "multi-backend-support",
+        "optimistic-updates",
+        "provider",
+        "query-options",
+        "see-also",
+        "ssr-support",
+        "state-management",
+        "subpaths",
+        "suspense--error-boundaries",
+        "testing",
+        "useinfinitequery--pagination",
+        "usemutation--for-writes",
+        "usequeries--parallel-reads",
+        "usequery--the-workhorse",
+        "useservice--typed-proxy",
+        "usesubscription--live-data"
+      ]
+    },
+    "/docs/frontend/netron/ssr": {
+      "anchors": [
+        "anti-patterns",
+        "best-practices",
+        "bundle-size-considerations",
+        "caveats",
+        "excluding-queries-from-dehydration",
+        "hydration-semantics",
+        "pattern--nextjs--remix-style",
+        "per-user-dehydration",
+        "see-also",
+        "streaming-ssr",
+        "usehydration"
+      ]
+    },
+    "/docs/frontend/netron/testing": {
+      "anchors": [
+        "anti-patterns",
+        "best-practices",
+        "cache-control-in-tests",
+        "custom-mock-responses",
+        "deterministic-clock",
+        "integration-tests-against-a-real-backend",
+        "loading--error-states",
+        "mock-latency",
+        "multi-backend-tests",
+        "mutation-assertions",
+        "see-also",
+        "suspense--error-boundary-tests",
+        "testnetronprovider"
+      ]
+    },
+    "/docs/frontend/netron/transports": {
+      "anchors": [
+        "connection-state-and-metrics",
+        "http",
+        "http-wire-format",
+        "invocation-lifetime-and-replay",
+        "react-transport-selection",
+        "reconnect-behaviour",
+        "see-also",
+        "websocket"
+      ]
+    },
+    "/docs/frontend/overview": {
+      "anchors": [
+        "bundle-strategy",
+        "end-to-end-types",
+        "how-they-compose",
+        "multi-backend-out-of-the-box",
+        "production-reference",
+        "read-on",
+        "what-lives-where",
+        "wiring-an-app-from-scratch"
+      ]
+    },
+    "/docs/frontend/prism": {
+      "anchors": [
+        "accessibility",
+        "best-practices",
+        "cli--prism-binary",
+        "further-guides",
+        "minimum-wiring",
+        "netron-integration--omnitron-devprismnetron",
+        "see-also",
+        "state-management--createprismstore--createpersistedstore",
+        "subpath-exports",
+        "three-layers-of-api"
+      ]
+    },
+    "/docs/frontend/prism/accessibility": {
+      "anchors": [
+        "compose-accessible-screens",
+        "menus-and-popovers",
+        "simulate-colour-perception",
+        "verification-loop"
+      ]
+    },
+    "/docs/frontend/prism/blocks": {
+      "anchors": [
+        "authblock",
+        "columns",
+        "common-form-props",
+        "dashboardblock--collapsible-content-panel",
+        "datagridblock--filterable--sortable--paginated-table",
+        "guard-only-entry-point",
+        "per-form-props",
+        "route-guards",
+        "row-actions",
+        "see-also",
+        "selection--bulk-operations",
+        "server-side-data--usedatagridblock",
+        "subpath-imports",
+        "the-forms",
+        "toolbar-config",
+        "when-to-use-a-block-vs-compose-your-own"
+      ]
+    },
+    "/docs/frontend/prism/cli": {
+      "anchors": [
+        "command-reference",
+        "programmatic-use",
+        "work-with-local-changes"
+      ]
+    },
+    "/docs/frontend/prism/components": {
+      "anchors": [
+        "accessibility--across-the-catalog",
+        "accordion",
+        "alert--formalert",
+        "also-exported",
+        "animateborder--motionlazy",
+        "avatar",
+        "badge",
+        "breadcrumbs",
+        "card",
+        "carousel",
+        "changelog--changelogtimeline--changelogentry",
+        "chart",
+        "charts",
+        "commandpalette",
+        "confirmdialog",
+        "content",
+        "contentrenderer",
+        "countryselect",
+        "data-display",
+        "daterangepicker",
+        "doclayout",
+        "drawer",
+        "durationpicker",
+        "editor--tiptaprenderer",
+        "elsewhere",
+        "emptycontent",
+        "engine-choices-and-scope",
+        "errorboundary",
+        "feedback-and-overlays",
+        "field",
+        "filtertoolbar",
+        "image",
+        "input--form",
+        "knowledgegraph",
+        "label",
+        "layout--utility",
+        "lightbox",
+        "linearprogress--circularprogress--progressbar--countdownring",
+        "lists-and-layout",
+        "loadingscreen",
+        "megamenu",
+        "menu",
+        "mui-v9-slot-props",
+        "navcard--navcardgrid",
+        "navigation",
+        "navigation-internals",
+        "navigationprogress",
+        "navsection",
+        "opt-in-component-imports",
+        "pagecontent",
+        "per-component-subpaths",
+        "refs-react-19",
+        "research-documents",
+        "researcheditor",
+        "scrollbar",
+        "scrollspy--scrollspyprovider",
+        "scrolltotop",
+        "searchinput",
+        "see-also",
+        "settings-drawer--settingsprovider--settingsdrawer",
+        "skeleton",
+        "snackbar",
+        "status--feedback",
+        "stepper",
+        "svgcolor",
+        "table",
+        "tabs--tabpanel",
+        "tagcloud",
+        "tooltip"
+      ]
+    },
+    "/docs/frontend/prism/forms": {
+      "anchors": [
+        "accessibility",
+        "anti-patterns",
+        "async-field-validation",
+        "conditional-fields",
+        "dynamic-forms",
+        "error-display",
+        "field-arrays",
+        "field-types",
+        "form-level",
+        "inline-per-field",
+        "localized-validation-messages-optional",
+        "multi-step-wizards",
+        "optimistic-submit",
+        "password-visibility-toggle",
+        "patterns",
+        "see-also",
+        "server-validation-merging",
+        "submit-state",
+        "the-pieces",
+        "validation-modes"
+      ]
+    },
+    "/docs/frontend/prism/hooks-catalog": {
+      "anchors": [
+        "also-exported",
+        "composition-patterns",
+        "hooks-used-internally-by-components",
+        "interaction",
+        "layout--sizing",
+        "layout-and-sizing",
+        "pointer-and-keyboard",
+        "see-also",
+        "ssr--isomorphism",
+        "state",
+        "state--data",
+        "timers--lifecycle",
+        "timers-and-lifecycle",
+        "usearrayt",
+        "useasynct",
+        "usebacktotop",
+        "useclientrect",
+        "useconfigfromquery",
+        "usecountdowndate--usecountdownseconds",
+        "usedoubleclick",
+        "usefocustrap",
+        "useimagedimensions",
+        "useinfinitescroll",
+        "useintersectionobserver",
+        "useisomorphiclayouteffect",
+        "usekeyboardshortcut",
+        "uselazyquery",
+        "usemutation-prisms",
+        "useonlinestatus",
+        "usepasswordvisibility",
+        "usepopoverhover",
+        "usescrollposition--usescrolloffsettop",
+        "usesessionstoraget--usecookies",
+        "usethrottlet",
+        "useupdateeffect",
+        "usewindowsize",
+        "visibility--focus"
+      ]
+    },
+    "/docs/frontend/prism/http": {
+      "anchors": [
+        "cancel-work-on-disposal",
+        "interceptors-and-retries",
+        "make-a-request",
+        "request-surface"
+      ]
+    },
+    "/docs/frontend/prism/layouts": {
+      "anchors": [
+        "auth-layouts",
+        "authcenteredlayout",
+        "authsimplelayout",
+        "authsplitlayout",
+        "behaviour",
+        "bounded-workspaces",
+        "core-primitives-custom-shells",
+        "dashboardcontent",
+        "dashboardlayout",
+        "headersection",
+        "hooks",
+        "layout-density",
+        "layoutnavdata",
+        "layoutnavitem",
+        "layoutprovider",
+        "layoutsection",
+        "mixing-layouts-in-one-app",
+        "props",
+        "secondary-navigation-with-panellayout",
+        "see-also",
+        "usermenu"
+      ]
+    },
+    "/docs/frontend/prism/maps": {
+      "anchors": [
+        "map",
+        "mapcoveragelayer",
+        "mapmarker",
+        "mapplacesearch",
+        "mappointpicker",
+        "related",
+        "the-tile-source-is-yours"
+      ]
+    },
+    "/docs/frontend/prism/research": {
+      "anchors": [
+        "equations-in-place",
+        "keep-document-and-knowledge-semantics-separate",
+        "observation-badges-in-knowledge-graphs",
+        "one-visual-system"
+      ]
+    },
+    "/docs/frontend/prism/state": {
+      "anchors": [
+        "built-in-stores",
+        "choose-a-store",
+        "persist-preferences-deliberately",
+        "server-rendering-and-tests"
+      ]
+    },
+    "/docs/frontend/prism/theme": {
+      "anchors": [
+        "anti-patterns",
+        "application-icon-families",
+        "components-theme-overrides",
+        "css-variables-export",
+        "dark-mode",
+        "density",
+        "flash-of-wrong-theme-prevention-ssr",
+        "mixins",
+        "palette",
+        "presets",
+        "readable-status-surfaces",
+        "see-also",
+        "semantic-colour-tokens",
+        "shape--shadows",
+        "spacing",
+        "typography"
+      ]
+    },
+    "/docs/getting-started/developer-map": {
+      "anchors": [
+        "build-a-backend",
+        "build-an-interface",
+        "find-the-exact-api",
+        "test-and-operate"
+      ]
+    },
+    "/docs/getting-started/installation": {
+      "anchors": [
+        "backend--browser-client-any-frontend-framework",
+        "backend--omnitron-devtitan",
+        "backend--react-frontend",
+        "backend-modules-optional-14-packages",
+        "backend-only-service-rpc-server-no-frontend",
+        "browser-client--omnitron-devnetron-browser",
+        "design-system--omnitron-devprism-optional-react",
+        "for-vue--svelte--solid--angular--lit",
+        "full-operator-supervised-platform",
+        "install-matrices--common-setups",
+        "next",
+        "prerequisites",
+        "react-bindings--omnitron-devnetron-react-only-for-react-apps",
+        "service-to-service-one-titan-app-calling-another",
+        "supervisor-opt-in--omnitron-devomnitron",
+        "testing-utilities-dev-only",
+        "utilities-optional",
+        "verify",
+        "when-youd-skip-this"
+      ]
+    },
+    "/docs/getting-started/project-structure": {
+      "anchors": [
+        "configuration",
+        "conventions",
+        "monorepo-layout",
+        "pnpm-workspaceyaml",
+        "sharing-service-types",
+        "single-app-layout"
+      ]
+    },
+    "/docs/getting-started/quickstart": {
+      "anchors": [
+        "1-create-the-project",
+        "2-declare-the-service",
+        "3-register-the-module-and-transport",
+        "4-make-a-typed-call",
+        "extend-the-service",
+        "if-it-fails"
+      ]
+    },
+    "/docs/intro": {
+      "anchors": [
+        "add-capabilities-deliberately",
+        "choose-a-starting-point",
+        "contracts-across-the-wire",
+        "read-implementation-status-before-adopting-a-design",
+        "the-stack",
+        "work-from-source"
+      ]
+    },
+    "/docs/omnitron/access": {
+      "anchors": [
+        "activation",
+        "automation-and-future-agents",
+        "change-roles-and-revoke-sessions",
+        "concurrent-sign-ins",
+        "implementation-and-validation",
+        "manage-accounts",
+        "one-policy-across-interfaces",
+        "scope-and-extension-points"
+      ]
+    },
+    "/docs/omnitron/agents": {
+      "anchors": [
+        "alerts-and-notifications",
+        "boundaries-and-ownership",
+        "codex-provider",
+        "delegation-in-the-existing-role-system",
+        "delivery-and-acceptance",
+        "efficiency-and-scale",
+        "monitoring-as-evidence",
+        "permission-families",
+        "review-artifacts-and-approvals",
+        "untrusted-input-and-remediation",
+        "worker-and-broker-isolation"
+      ]
+    },
+    "/docs/omnitron/architecture": {
+      "anchors": [
+        "1-management-plane--unixomnitrondaemonsock",
+        "2-public-tcp-plane--tcp00009700",
+        "3-http--ws-plane--http00009800",
+        "auth-model--three-roles",
+        "built-in-rpc-services",
+        "cluster-subsystem",
+        "component-map",
+        "daemon-lifecycle",
+        "daemon-scheduler",
+        "data-flow--leader-election-cluster-mode",
+        "data-flow--log-shipping",
+        "data-flow--metrics-aggregation",
+        "database-and-diagnostics-boundaries",
+        "infrastructure-subsystem",
+        "orchestrator-subsystem",
+        "pid-manager",
+        "putting-it-together",
+        "state-store--statejson",
+        "the-three-planes",
+        "webapp-host"
+      ]
+    },
+    "/docs/omnitron/auth-rbac": {
+      "anchors": [
+        "activate-an-authorization-update",
+        "anonymous-and-service-to-service-endpoints",
+        "anti-patterns",
+        "api-key-pattern-for-headless-integrations",
+        "application-authority-without-duplicate-policy-engines",
+        "audit-logging",
+        "auth-in-websockets",
+        "multi-key-jwt-verification-rotation-without-downtime",
+        "private-runtime-storage",
+        "refresh-token-rotation",
+        "rls-context-propagation",
+        "role-hierarchy-patterns-for-end-user-rbac",
+        "see-also",
+        "shared-auth-factory-pattern",
+        "shared-jwt-across-fan-out-apps",
+        "three-identity-surfaces",
+        "three-rbac-roles",
+        "token-binding-via-cnffp",
+        "token-cache",
+        "totp--webauthn-second-factor"
+      ]
+    },
+    "/docs/omnitron/automation": {
+      "anchors": [
+        "first-automation",
+        "progress-and-failure",
+        "resource-bounds",
+        "review-and-authority",
+        "ssh-ownership-and-uncertain-effects",
+        "steps-and-targets",
+        "upgrading-existing-integrations"
+      ]
+    },
+    "/docs/omnitron/backend-handoff": {
+      "anchors": [
+        "build-and-seal",
+        "changing-owner-log-routing",
+        "checksum-metadata-on-existing-migrations",
+        "choose-the-update-mechanism",
+        "compatible-schema-expansion",
+        "diagnostics-and-access",
+        "distribute-review-and-activate",
+        "first-transition",
+        "follow-a-batch-or-recover-an-interrupted-handoff",
+        "independent-os-supervision",
+        "interrupted-operation",
+        "long-lived-rpc-clients",
+        "migrating-an-existing-linux-node",
+        "owner-compatibility",
+        "owner-shutdown-boundaries",
+        "permanent-installation-and-cold-start",
+        "publish-the-batch-to-the-controller",
+        "recovery-after-a-backend-crash",
+        "replace-the-backend",
+        "reverse-an-accepted-node",
+        "service-unit-file-preservation",
+        "short-lived-socket-probes",
+        "updating-the-guardian",
+        "upgrade-a-fleet-of-managed-backends"
+      ]
+    },
+    "/docs/omnitron/best-practices": {
+      "anchors": [
+        "custom-http-routes-alongside-rpc",
+        "custom-infrastructure-with-networkmode-variants",
+        "dev-mode-without-surprises",
+        "eager-loading-heavy-services",
+        "hot-reloadable-runtime-settings",
+        "monitoring--supervision-baseline",
+        "ordered-startup-with-dependson",
+        "per-app-config-with-env-override",
+        "per-app-http-transport-tuning",
+        "redis-one-client-many-logical-databases",
+        "restart-policies--be-sparing-with-critical",
+        "reverse-proxy-with-maintenance-mode-flag-in-redis",
+        "rls-context-propagation",
+        "see-also",
+        "shared-authentication-across-apps",
+        "shutdown-priority",
+        "the-five-app-fan-out",
+        "token-binding-cnffp",
+        "tor-hidden-service-for-operator-console",
+        "tuning-startuptimeout-per-app",
+        "what-this-looks-like-at-scale",
+        "when-this-fan-out-shape-is-wrong",
+        "worker-processes-within-an-app",
+        "workers-critical-false--health-check-tuning"
+      ]
+    },
+    "/docs/omnitron/cli": {
+      "anchors": [
+        "additional-operational-commands",
+        "app-lifecycle",
+        "backend-replacement",
+        "backups",
+        "cluster-leader-election",
+        "command-index",
+        "console-access-and-interactive-ssh",
+        "daemon-lifecycle",
+        "database-migrations",
+        "deployment",
+        "development-sdk",
+        "diagnostics",
+        "exit-codes",
+        "file-workspace",
+        "fleet-operations",
+        "fleet-recovery-and-host-ingress",
+        "global-options",
+        "information",
+        "infrastructure",
+        "knowledge-base-mcp",
+        "kubernetes",
+        "monitoring",
+        "nodes-infrastructure-machines",
+        "omnitron-deploy-build-app",
+        "omnitron-discover",
+        "omnitron-doctor",
+        "omnitron-down",
+        "omnitron-env-app",
+        "omnitron-exec-app-service-method-args",
+        "omnitron-health-app",
+        "omnitron-health-check-app",
+        "omnitron-inspect-app",
+        "omnitron-kill",
+        "omnitron-logs-app",
+        "omnitron-metrics-app",
+        "omnitron-monit",
+        "omnitron-node-add-flags",
+        "omnitron-ping",
+        "omnitron-release-builds",
+        "omnitron-release-job",
+        "omnitron-release-stop-build",
+        "omnitron-scale-app-count---process-name",
+        "omnitron-service-installuninstallstatus",
+        "omnitron-stack-check-release",
+        "omnitron-system",
+        "omnitron-tor",
+        "omnitron-up",
+        "pipelines-xec-automation",
+        "project-management",
+        "recover-after-an-execution-owner-crash",
+        "releases",
+        "remote-daemons",
+        "scaling",
+        "secrets-encrypted-at-rest",
+        "see-also",
+        "stack-deployment-and-rollback",
+        "stack-management",
+        "tips",
+        "topology-workspace",
+        "tor",
+        "webapp-console-ui"
+      ]
+    },
+    "/docs/omnitron/cluster": {
+      "anchors": [
+        "anti-patterns",
+        "authority-and-effect-fencing",
+        "config-sync--configsyncservice",
+        "connection-credentials",
+        "connectivity-loss-and-database-failover",
+        "enroll-a-controller-or-worker",
+        "fleet-liveness",
+        "fleetnode",
+        "history-before-delivery-receipts",
+        "multi-region-patterns",
+        "omnitroncluster-rpc-service",
+        "omnitronfleet-rpc-service--node-inventory",
+        "omnitronnodes--extended-node-management",
+        "operations",
+        "postgresql-authoritative-coordination",
+        "reading-connection-backlog-and-delivery-separately",
+        "reconcile-historical-metric-receipts",
+        "reproducible-native-node-bundles",
+        "rolling-upgrades-and-database-replacement",
+        "see-also",
+        "state-sync--omnitronsync-service",
+        "sync-config--isyncconfig",
+        "sync-flow",
+        "two-roles-two-layers",
+        "upgrade-boundary",
+        "uptime-bars",
+        "when-to-use-what"
+      ]
+    },
+    "/docs/omnitron/configuration": {
+      "anchors": [
+        "aggregatedmetricsdto-aggregatedhealthdto-logentrydto-appdiagnosticsdto",
+        "anti-patterns",
+        "appreadinessconfig",
+        "custom-routes",
+        "daemon-config--idaemonconfig-not-project-config",
+        "daemonstatusdto",
+        "defineecosystemconfig--omnitronconfigts",
+        "definesystemdefinition--per-app-bootstrapts",
+        "factories-and-fresh-configuration-reads",
+        "file-workspace-exports",
+        "gateway",
+        "iecosystemappentry",
+        "interactive-ssh-policy",
+        "iprocessentry--the-heart-of-definesystem",
+        "istackconfig",
+        "istacknode",
+        "istacksettings",
+        "iwatchconfig",
+        "lifecycle-hooks",
+        "loader-behaviour",
+        "logging",
+        "monitoring",
+        "omnitronappconfig--declarative-infrastructure-per-app-configdefaultjson",
+        "per-process-auth",
+        "processinfodto",
+        "recommended-layout",
+        "runtime-dtos-returned-by-rpc",
+        "scaling-pool-mode-instances--1",
+        "see-also",
+        "supervision--restart-policy",
+        "top-level-fields--iappdefinition",
+        "top-level-fields--iecosystemconfig",
+        "topology--cross-process-service-mesh",
+        "transports",
+        "validation"
+      ]
+    },
+    "/docs/omnitron/console": {
+      "anchors": [
+        "adding-a-new-page",
+        "alerts",
+        "anti-patterns",
+        "apps-list--detail",
+        "auth-flow",
+        "automation-workspace",
+        "build--run-modes",
+        "compact-navigation-and-scrolling",
+        "consistent-action-placement",
+        "containers",
+        "dashboard",
+        "dashboard-builder",
+        "dependency-evidence-in-topology",
+        "deployments",
+        "dev-mode",
+        "empty--error-states",
+        "feedback-for-operations",
+        "file-workspace",
+        "filesystem-layout",
+        "historical-coverage-in-node-diagnostics",
+        "live-log-tail-and-complete-history",
+        "logs",
+        "metrics",
+        "nodes",
+        "one-keyboard-model",
+        "open-the-webapp",
+        "page-by-page",
+        "performance-characteristics",
+        "pipelines",
+        "production-build",
+        "project-switcher",
+        "projects",
+        "publishing-console-updates",
+        "rbac-in-the-ui",
+        "reading-an-expanded-log-event",
+        "real-time-event-flow",
+        "releases-and-current-deployments",
+        "route-map",
+        "see-also",
+        "settings",
+        "shared-api-contracts",
+        "ssh-and-role-administration",
+        "stacks",
+        "system",
+        "tables-filters-and-overlays",
+        "tech-stack",
+        "topology",
+        "traces",
+        "watch-configuration",
+        "workspace-and-stack-scope"
+      ]
+    },
+    "/docs/omnitron/daemon": {
+      "anchors": [
+        "admin-admin",
+        "anti-patterns",
+        "app-lifecycle-operator",
+        "auth-flow",
+        "auto-restart-and-backoff",
+        "console-request-limits",
+        "daemon-client--daemon-clientts",
+        "daemon-configuration",
+        "daemon-scheduler--daemon-schedulerts",
+        "execution-handoff-architecture-boundary",
+        "failure-scenarios",
+        "file-permissions-and-sqlite-locks",
+        "heartbeat-anonymous",
+        "inspection-viewer",
+        "lifecycle",
+        "methods-by-intent",
+        "operating-runbook",
+        "owner-and-environment-inspection",
+        "pid-manager--pid-managerts",
+        "rpc-plumbing-admin",
+        "rpc-surface--omnitrondaemon-service",
+        "see-also",
+        "shutdown-during-startup",
+        "startup-and-node-diagnostics",
+        "state-store--state-storets",
+        "updating-a-source-runtime",
+        "watch-control-operator"
+      ]
+    },
+    "/docs/omnitron/diagnostics": {
+      "anchors": [
+        "classic-services-and-completed-work",
+        "connect-the-existing-omnitron-alert-outbox",
+        "container-state-and-stack-intent",
+        "domain-readiness",
+        "failure-injection-checklist",
+        "immutable-releases",
+        "investigate-a-failure",
+        "one-transport-independent-contract",
+        "optional-titan-notification-adapter",
+        "process-health-and-start-prerequisites",
+        "rpc-connection-and-replication",
+        "stack-infrastructure-ownership",
+        "storage-exhaustion-and-execution-ownership",
+        "supervise-maintenance-with-the-same-health-contract"
+      ]
+    },
+    "/docs/omnitron/files": {
+      "anchors": [
+        "cli",
+        "configure-access-per-node",
+        "copy-a-directory-through-an-archive",
+        "design-references-and-extension-points",
+        "edit-without-losing-another-writers-change",
+        "start-with-a-location",
+        "transfer-protocol-and-recovery",
+        "typed-api-clients"
+      ]
+    },
+    "/docs/omnitron/infrastructure": {
+      "anchors": [
+        "a-container-you-stopped-comes-back",
+        "anti-patterns",
+        "api-gateway-integration",
+        "app-layer--omnitronappconfig",
+        "applying-changed-declarations",
+        "bare-metal-provider",
+        "built-in-presets",
+        "cli-surface",
+        "container-resource-limits",
+        "container-state",
+        "custom-infrastructure",
+        "docker-provider",
+        "ecosystem-layer--infrastructureconfig",
+        "env-variable-templating",
+        "failure-modes",
+        "health-checks-per-service",
+        "ibaremetalserviceconfig",
+        "idockerserviceconfig",
+        "infrastructure-ownership",
+        "iservicerequirement--the-universal-shape",
+        "ivolumemount",
+        "legacy-shape",
+        "network-modes",
+        "phantom-endpoint-janitor",
+        "provisioning-flow",
+        "readiness-before-provisioning",
+        "readiness-includes-required-service-setup",
+        "reconcile-loop",
+        "secrets-in-infrastructure",
+        "see-also",
+        "shorthand-booleans",
+        "stack-level-overrides",
+        "tracking-host-packages",
+        "two-layers-of-declaration",
+        "when-it-stops-trying"
+      ]
+    },
+    "/docs/omnitron/mcp": {
+      "anchors": [
+        "anti-patterns",
+        "auth-model",
+        "best-practices-for-agent-callable-tools",
+        "common-agent-workflows",
+        "cost-and-latency",
+        "fix-this-failing-deploy",
+        "indexing-strategy-for-a-monorepo",
+        "is-the-platform-healthy",
+        "kb-index-lifecycle",
+        "kb-tools",
+        "management-tools--apps",
+        "management-tools--control-plane",
+        "management-tools--infra",
+        "management-tools--monitoring",
+        "scaffold-a-new-app",
+        "see-also",
+        "starting-the-server",
+        "tool-authoring-extend-mcp",
+        "what-does-x-do",
+        "what-the-agent-sees"
+      ]
+    },
+    "/docs/omnitron/migrations": {
+      "anchors": [
+        "adopt-an-existing-application",
+        "existing-scripts",
+        "guarantees-and-limits",
+        "preview-and-diagnosis",
+        "programmatic-use-and-responsibility-boundaries",
+        "stack-owned-migrations",
+        "start-with-one-configuration"
+      ]
+    },
+    "/docs/omnitron/observability": {
+      "anchors": [
+        "aggregated-metrics--aggregatedmetricsdto",
+        "anti-patterns",
+        "apphealthindicator",
+        "application-metrics-and-worker-replication",
+        "auditing-history-before-receipts",
+        "bounded-queries-and-agent-evidence",
+        "capture-persistence-and-replay",
+        "cli",
+        "cli-1",
+        "cli-2",
+        "cli-3",
+        "dockerhealthindicator",
+        "files-and-startup-failures",
+        "flow",
+        "flow-1",
+        "health",
+        "interpreting-diagnostics",
+        "logs",
+        "metric-persistence-and-confirmation",
+        "metrics",
+        "omnitronhealth--active-probing",
+        "omnitronhealth-rpc",
+        "omnitronlogs-rpc",
+        "omnitronnodes-health-cross-machine",
+        "omnitrontraces-rpc",
+        "operational-failures",
+        "owner-and-supervisor-journals",
+        "producer-side--metricsbridge",
+        "prometheus-scrape-endpoint--metricsserver",
+        "putting-it-together--what-the-daemon-stores",
+        "read-side--omnitronmetrics-from-titan-metrics",
+        "retention",
+        "see-also",
+        "the-four-pipelines",
+        "time-and-multiline-messages",
+        "tracefilter",
+        "traces",
+        "wiring-telemetry-from-your-apps"
+      ]
+    },
+    "/docs/omnitron/orchestrator": {
+      "anchors": [
+        "anti-patterns",
+        "app-handle",
+        "bootstrap-loader--bootstrap-loaderts",
+        "build-service--build-servicets",
+        "classic-launcher--classic-launcherts",
+        "classic-mode",
+        "dependency-resolver--dependency-resolverts",
+        "failure-recovery",
+        "file-watcher--file-watcherts",
+        "launch-pipeline",
+        "module-worker-entrypoint--module-worker-processts",
+        "module-worker-mode-default-for-new-apps",
+        "per-app-observability",
+        "process-janitor--process-janitorts",
+        "reload-semantics",
+        "see-also",
+        "service-router--service-routerts",
+        "stop-acknowledgements",
+        "titan-identity-and-installed-application-paths",
+        "ts-compiler--ts-compilerts",
+        "two-launch-modes",
+        "watch-control-operator-api"
+      ]
+    },
+    "/docs/omnitron/overview": {
+      "anchors": [
+        "a-minimal-omnitronconfigts",
+        "built-in-observability",
+        "compatibility",
+        "default-endpoints",
+        "filesystem-layout",
+        "how-an-app-launches",
+        "multi-project--multi-stack",
+        "the-mental-model",
+        "webapp-omnitron-console",
+        "what-you-get",
+        "when-you-reach-for-omnitron",
+        "where-to-go-next"
+      ]
+    },
+    "/docs/omnitron/projects": {
+      "anchors": [
+        "compose-configurations-in-a-large-repository",
+        "confirmed-stack-stops",
+        "consolidate-an-older-registration-without-interrupting-applications",
+        "existing-allocations-and-rollout",
+        "resume-installed-applications",
+        "reuse-a-service-across-project-boundaries",
+        "start-with-one-configuration",
+        "verify-a-standalone-stack-start"
+      ]
+    },
+    "/docs/omnitron/recipes": {
+      "anchors": [
+        "1-stream-based-fan-in-ingest--aggregate--serve",
+        "10-cross-app-service-mesh-via-topology",
+        "11-per-app-database-with-shared-infrastructure",
+        "12-dev-hot-reload-with-shared-workspace-deps",
+        "13-two-database-deploy-per-stack",
+        "14-webhook-receiver-alongside-rpc",
+        "2-cpu-bound-worker-pool-with-p2c-balancing",
+        "3-scheduler-triggered-work-dispatched-to-a-pool",
+        "4-websocket-realtime-app-alongside-http-rpc",
+        "5-multi-step-deposit--settlement-pipeline",
+        "6-object-storage-with-image-transforms",
+        "7-per-tenant-data-isolation-via-rls",
+        "8-hot-reloadable-maintenance-mode",
+        "9-onion-routed-operator-console",
+        "bypassing-rls-for-admin-operations",
+        "calling-the-pool",
+        "custom-route-alongside-rpc",
+        "definesystem",
+        "definesystem-1",
+        "definesystem-2",
+        "definesystem-3",
+        "gateway-snippet",
+        "gotcha--instances--1-on-the-scheduler-host",
+        "gotchas",
+        "gotchas-1",
+        "gotchas-2",
+        "gotchas-3",
+        "pattern",
+        "see-also",
+        "topology",
+        "topology-1",
+        "topology-2",
+        "topology-3",
+        "topology-4",
+        "why-a-separate-worker-process",
+        "why-redis-streams-not-pubsub"
+      ]
+    },
+    "/docs/omnitron/release-readiness": {
+      "anchors": [
+        "activation-and-rollback-contract",
+        "current-implementation-evidence",
+        "documentation-contract",
+        "final-npm-qualification",
+        "invariants",
+        "ordered-delivery-gates",
+        "roll-out-a-group-of-changes"
+      ]
+    },
+    "/docs/omnitron/releases": {
+      "anchors": [
+        "build-and-inspect",
+        "build-from-local-sources",
+        "changing-a-local-stacks-applications",
+        "choose-an-sdk-source",
+        "command-reference",
+        "dependency-identity",
+        "deploy-a-qualified-release",
+        "development-mode-and-a-selected-release",
+        "following-a-remote-transfer",
+        "independent-project-operations",
+        "inspect-an-archive-without-running-it",
+        "inspect-migration-provenance",
+        "keep-package-manager-resolution-semantics",
+        "keep-repository-identity-separate-from-credentials",
+        "local-sdk-development-and-registry-deployments",
+        "match-the-execution-target",
+        "mount-a-release-artifact-in-a-local-docker-service",
+        "move-a-release-between-machines",
+        "package-a-project-specific-release",
+        "pin-a-local-stack",
+        "prepare-without-damaging-the-running-release",
+        "project-tool-integration",
+        "promoting-a-dependency-from-npm",
+        "qualify-a-separate-working-copy",
+        "read-the-build-result",
+        "read-the-executing-applications-origin",
+        "rebuilding-an-artifact",
+        "retain-recoverable-artifacts",
+        "understand-what-is-built-and-what-is-running",
+        "use-an-application-from-another-project",
+        "validate-linked-source-checkouts",
+        "verify-the-deployed-system"
+      ]
+    },
+    "/docs/omnitron/resilient-control-plane": {
+      "anchors": [
+        "acceptance-scenarios",
+        "audit-of-the-existing-foundations",
+        "delivery-gates",
+        "distributed-ingress-and-service-publication",
+        "durable-operations-and-control-plane-availability",
+        "from-a-laptop-to-production",
+        "multi-project-deployment-audit-and-design",
+        "one-lifecycle-explicit-responsibility",
+        "placement-and-reserve-capacity",
+        "product-interaction",
+        "recovery-without-competing-owners",
+        "requirements-for-independent-operations-on-a-shared-host",
+        "resource-model",
+        "scaling-at-the-correct-level",
+        "security-and-agent-parity",
+        "state-contracts"
+      ]
+    },
+    "/docs/omnitron/services-reference": {
+      "anchors": [
+        "anti-patterns",
+        "auth-role-recap",
+        "console-administration-and-ssh",
+        "file-workspace-services",
+        "naming-convention",
+        "omnitronalerts--alertrpc-servicets",
+        "omnitronauth--authrpc-servicets",
+        "omnitronbackups--backuprpc-servicets",
+        "omnitroncluster--clusterclusterrpc-servicets",
+        "omnitrondeploy--deployrpc-servicets",
+        "omnitrondiscovery--discoveryrpc-servicets",
+        "omnitronevents--event-broadcasterrpc-servicets",
+        "omnitronfleet--fleetrpc-servicets",
+        "omnitronhealth--health-checkrpc-servicets",
+        "omnitroninfra--infrastructurerpc-servicets",
+        "omnitronkubernetes--kubernetesrpc-servicets",
+        "omnitronlogs--log-collectorrpc-servicets",
+        "omnitronnodes--node-managerrpc-servicets",
+        "omnitronpipelines--pipelinerpc-servicets",
+        "omnitronproject--projectrpc-servicets",
+        "omnitronsecrets--secretsrpc-servicets",
+        "omnitronsync--syncrpc-servicets",
+        "omnitronsysteminfo--system-inforpc-servicets",
+        "omnitrontelemetry--telemetryrpc-servicets",
+        "omnitrontraces--trace-collectorrpc-servicets",
+        "per-service-summary",
+        "querying-a-service-from-your-code",
+        "quick-index",
+        "release-and-audit-services",
+        "see-also",
+        "what-availableservices-lists"
+      ]
+    },
+    "/docs/omnitron/terminal": {
+      "anchors": [
+        "authorization-and-audit",
+        "connection-and-closure-feedback",
+        "equivalent-cli-workflow",
+        "integration-boundary",
+        "session-lifetime-and-limits",
+        "verify-the-host-before-connecting",
+        "what-persists",
+        "working-with-tabs"
+      ]
+    },
+    "/docs/omnitron/topology": {
+      "anchors": [
+        "application-service-isolation",
+        "cli-parity",
+        "declaration-coverage",
+        "design-a-target",
+        "durability-and-limits",
+        "read-the-infrastructure-map"
+      ]
+    },
+    "/docs/reference/api-index": {
+      "anchors": []
+    },
+    "/docs/reference/compatibility": {
+      "anchors": [
+        "implemented-api-versus-design",
+        "reporting-a-compatibility-problem",
+        "versioning"
+      ]
+    },
+    "/docs/reference/glossary": {
+      "anchors": [
+        "a",
+        "b",
+        "c",
+        "d",
+        "e",
+        "f",
+        "g",
+        "h",
+        "i",
+        "j",
+        "k",
+        "l",
+        "m",
+        "n",
+        "o",
+        "p",
+        "q",
+        "r",
+        "s",
+        "see-also",
+        "t",
+        "u",
+        "v",
+        "w",
+        "z"
+      ]
+    },
+    "/docs/reference/packages": {
+      "anchors": [
+        "backend--browser-client-any-framework",
+        "backend--react-frontend",
+        "backend-modules-opt-in",
+        "backend-service-only",
+        "browser-side--frontend",
+        "core-framework",
+        "full-omnitron-supervised-platform",
+        "install-matrices",
+        "license",
+        "see-also",
+        "server-side--backend",
+        "shared-internals",
+        "shared-utilities-framework-agnostic",
+        "supervisor-opt-in"
+      ]
+    },
+    "/docs/reference/protocol": {
+      "anchors": [
+        "omnitron-devnetron-http-core",
+        "omnitron-devnetron-protocol",
+        "upgrade-server-and-client-deliberately"
+      ]
+    },
+    "/docs/testing": {
+      "anchors": [
+        "anti-patterns",
+        "best-practices",
+        "e2e",
+        "integration",
+        "module",
+        "per-module-mocking",
+        "quick-reference--one-test-per-level",
+        "see-also",
+        "the-four-pages",
+        "the-pyramid",
+        "tooling",
+        "unit",
+        "what-lives-where"
+      ]
+    },
+    "/docs/testing/cross-runtime": {
+      "anchors": [
+        "anti-patterns",
+        "benchmarks-across-runtimes",
+        "best-practices",
+        "bun",
+        "common-pitfalls",
+        "conditional-skips",
+        "crypto",
+        "deno",
+        "esm-resolution",
+        "file-system-access",
+        "performance-apis",
+        "process--environment",
+        "running-the-suite",
+        "see-also",
+        "suite-level-configuration",
+        "the-adapter",
+        "vitest",
+        "where-the-platform-itself-uses-this",
+        "why-bother"
+      ]
+    },
+    "/docs/testing/integration": {
+      "anchors": [
+        "anti-patterns",
+        "best-practices",
+        "ci-considerations",
+        "custom-routes",
+        "database-integration",
+        "docker-managed-test-db",
+        "event-driven-assertions",
+        "fake-clock",
+        "fake-mailer",
+        "fake-patterns",
+        "in-memory-sqlite",
+        "lifecycle-test",
+        "netron-integration-tests",
+        "real-postgres",
+        "see-also",
+        "speed-budget",
+        "stubbed-external-http",
+        "the-base-pattern",
+        "transaction-rollback-in-detail"
+      ]
+    },
+    "/docs/testing/react": {
+      "anchors": [
+        "anti-patterns",
+        "best-practices",
+        "cache-control",
+        "e2e-with-playwright",
+        "form-testing-pattern",
+        "loading--error-states",
+        "multi-backend-mock",
+        "mutation-assertions",
+        "routing-tests",
+        "see-also",
+        "single-backend-mock",
+        "subscriptions",
+        "suspense--error-boundary",
+        "testnetronprovider--multi-backend",
+        "with-prism-components"
+      ]
+    },
+    "/docs/testing/testing-package": {
+      "anchors": [
+        "anti-patterns",
+        "async-helpers--omnitron-devtestingasync",
+        "best-practices",
+        "collecteventstarget-event-condition-timeout",
+        "createdeferred--defer--a-promise-resolved-from-outside",
+        "createeventspytarget-event-and-eventcollector",
+        "createmocktimer--mocktimercontroller",
+        "createtestmoduleoptions--testmodule",
+        "cross-runtime-tests--node--bun--deno",
+        "docker-helpers--omnitron-devtestingdocker",
+        "env-helpers--omnitron-devtestingenv",
+        "errors--errorsts",
+        "eventlistenertracker",
+        "fixtures",
+        "flushpromises",
+        "generic-helpers--omnitron-devtestinghelpers",
+        "performance-helpers--omnitron-devtestingperformance",
+        "runtime-detection",
+        "see-also",
+        "testapplication",
+        "titan-specific-glue--omnitron-devtestingtitan",
+        "typed-mock-function",
+        "vitest-configuration-baseline",
+        "waitforcondition-options--waitforconditioncondition-timeout-interval",
+        "waitforeventstarget-events-timeout",
+        "whats-inside",
+        "withtimeoutpromise-ms--retryfn-options--delayms--nexttick"
+      ]
+    },
+    "/docs/titan/application": {
+      "anchors": [
+        "applicationcreate--two-overloads",
+        "conventions",
+        "core-modules",
+        "public-surface",
+        "the-application-as-a-di-participant",
+        "the-minimal-app",
+        "what-the-kernel-exposes"
+      ]
+    },
+    "/docs/titan/application/bootstrap": {
+      "anchors": [
+        "anti-patterns",
+        "bootstrap-diagnostics",
+        "createandstartapp--when-you-want-both-calls-together",
+        "step-1--applicationcreate",
+        "step-2--appstart",
+        "step-3--running",
+        "titan--the-simplest-entry-point",
+        "useful-variants"
+      ]
+    },
+    "/docs/titan/application/events": {
+      "anchors": [
+        "anti-patterns",
+        "api",
+        "boot-timing",
+        "common-subscriptions",
+        "config-change-audit",
+        "crash-signals",
+        "custom-events",
+        "event-ordering-guarantees",
+        "framework-emitted-events",
+        "shutdown-bookkeeping",
+        "typed-handlers"
+      ]
+    },
+    "/docs/titan/application/health": {
+      "anchors": [
+        "adding-an-indicator",
+        "anti-patterns",
+        "data-origin-during-development",
+        "indicators",
+        "liveness-vs-readiness",
+        "probe-routes",
+        "programmatic-shutdown-on-unhealthy",
+        "reading-health-from-inside-the-app"
+      ]
+    },
+    "/docs/titan/application/lifecycle": {
+      "anchors": [
+        "anti-patterns",
+        "application-level-lifecycle-hooks",
+        "decorator-marked-hooks",
+        "dependency-order-guarantees",
+        "failure-semantics",
+        "hook-signatures",
+        "the-four-hooks",
+        "when-to-use-which"
+      ]
+    },
+    "/docs/titan/application/shutdown": {
+      "anchors": [
+        "anti-patterns",
+        "appstop-options",
+        "custom-shutdown-tasks",
+        "disabling-auto-binding",
+        "draining-netron-work",
+        "hook-driven-shutdown",
+        "observability",
+        "the-hard-exit-guarantee",
+        "triggering-shutdown"
+      ]
+    },
+    "/docs/titan/best-practices": {
+      "anchors": []
+    },
+    "/docs/titan/best-practices/error-handling": {
+      "anchors": [
+        "anti-patterns-consolidated",
+        "centralise-domain-errors",
+        "differentiate-validation-from-business-errors",
+        "logging-errors",
+        "patterns",
+        "rule-1--throw-typed-errors-at-the-boundary",
+        "rule-2--dont-catch-what-you-cant-handle",
+        "rule-3--failure-modes-should-be-explicit",
+        "use-the-cause-field",
+        "wrap-third-party-errors"
+      ]
+    },
+    "/docs/titan/best-practices/observability": {
+      "anchors": [
+        "alerting-policy",
+        "anti-patterns",
+        "correlation",
+        "logs",
+        "metrics",
+        "traces",
+        "what-to-instrument"
+      ]
+    },
+    "/docs/titan/best-practices/performance": {
+      "anchors": [
+        "anti-patterns",
+        "cache",
+        "database-queries",
+        "logging",
+        "measuring",
+        "per-call-profiling",
+        "per-method-latency",
+        "process-level-profiling",
+        "read-also",
+        "scaling-vertically-vs-horizontally",
+        "validation-overhead",
+        "whats-on-you",
+        "where-the-framework-spends-time"
+      ]
+    },
+    "/docs/titan/best-practices/structuring-services": {
+      "anchors": [
+        "anti-patterns",
+        "avoid-service-to-service-calls-in-the-same-process-when-you-can",
+        "avoid-the-service-sub-classes-service-pattern",
+        "calls-across-applications",
+        "group-services-into-modules-by-domain-not-by-layer",
+        "keep-public-methods-small",
+        "size-a-service-by-its-bounded-context",
+        "use-module-private-providers-liberally"
+      ]
+    },
+    "/docs/titan/concepts": {
+      "anchors": []
+    },
+    "/docs/titan/concepts/architecture": {
+      "anchors": [
+        "bootstrap-applicationcreate-start-stop",
+        "boundaries-between-subsystems",
+        "config-store",
+        "event-bus",
+        "health-aggregator",
+        "lifecycle-state-machine",
+        "module-registry",
+        "process-host",
+        "service-exposer",
+        "shutdown-coordinator",
+        "subsystem-responsibilities",
+        "the-nine-subsystems",
+        "the-two-rpc-layers",
+        "what-lives-where"
+      ]
+    },
+    "/docs/titan/concepts/design-principles": {
+      "anchors": [
+        "1-explicitness-over-magic",
+        "2-pay-only-for-what-you-use",
+        "3-the-same-primitives-operate-the-system",
+        "4-the-contract-is-a-typescript-type",
+        "5-errors-are-values",
+        "6-lifecycle-is-observable",
+        "7-the-container-is-the-single-source-of-truth",
+        "the-shape-these-decisions-produce"
+      ]
+    },
+    "/docs/titan/concepts/mental-model": {
+      "anchors": [
+        "1-the-container-is-the-world",
+        "2-methods-are-just-methods",
+        "3-the-framework-gets-out-of-the-way",
+        "three-things-to-internalise",
+        "viewpoint-1--from-outside-the-process",
+        "viewpoint-2--from-inside-a-service-method",
+        "viewpoint-3--from-the-lifecycles-perspective",
+        "what-this-means-for-performance"
+      ]
+    },
+    "/docs/titan/configuration": {
+      "anchors": []
+    },
+    "/docs/titan/configuration/hot-reload": {
+      "anchors": [
+        "anti-patterns",
+        "atomicity",
+        "enabling",
+        "multi-pod-considerations",
+        "subscribing-to-changes",
+        "validation-on-reload",
+        "watch-mechanism",
+        "what-gets-emitted",
+        "when-hot-reload-is-the-right-tool"
+      ]
+    },
+    "/docs/titan/configuration/overview": {
+      "anchors": [
+        "read-on",
+        "reading-config",
+        "the-mental-model",
+        "through-configservice",
+        "through-decorators",
+        "when-to-use-what",
+        "why-validate-at-boot"
+      ]
+    },
+    "/docs/titan/configuration/sources": {
+      "anchors": [
+        "anti-patterns",
+        "argv",
+        "conventional-source-layout",
+        "custom-sources",
+        "environment-variables",
+        "file--json--yaml--toml--ini--env",
+        "five-built-in-source-types",
+        "inline-object",
+        "remote-http",
+        "source-ordering",
+        "what-optional-forgives"
+      ]
+    },
+    "/docs/titan/configuration/validation": {
+      "anchors": [
+        "anti-patterns",
+        "branded-types-for-safety",
+        "coercion",
+        "defaults",
+        "defining-a-schema",
+        "per-section-validation",
+        "what-happens-at-boot"
+      ]
+    },
+    "/docs/titan/decorators": {
+      "anchors": [
+        "anti-patterns",
+        "authconfig",
+        "cacheconfig",
+        "class-level",
+        "decorator-order",
+        "deprecated-message-version-",
+        "global",
+        "injectableoptions",
+        "injectalltoken-injectmanytoken",
+        "injecttoken",
+        "lazytokenfactory",
+        "lifecycle-decorators",
+        "memoize",
+        "method-level--rpc",
+        "method-level--utilities",
+        "moduleoptions",
+        "optional",
+        "parameter-level",
+        "postconstruct-predestroy",
+        "publicoptions",
+        "ratelimitconfig",
+        "retry-attempts-delay-",
+        "scope-shorthands",
+        "serviceoptions",
+        "timeout-ms--retryable-log-monitor",
+        "validateschema-options-and-contractcontract",
+        "valuepath-default-injectenvkey-default-injectconfigpath"
+      ]
+    },
+    "/docs/titan/decorators/lifecycle": {
+      "anchors": [
+        "anti-patterns",
+        "mapping-to-lifecycle-phases",
+        "postconstruct",
+        "predestroy",
+        "when-to-prefer-decorators",
+        "when-to-prefer-the-interface-form"
+      ]
+    },
+    "/docs/titan/decorators/method-traits": {
+      "anchors": [
+        "admin-only-endpoint",
+        "anti-patterns",
+        "authenticated-write-endpoint",
+        "class-level-vs-method-level",
+        "combining-lifecycle-decorators",
+        "common-stacks",
+        "composed-stacked-decorators",
+        "custom-traits-via-createmethodinterceptor",
+        "inline-single-decorator",
+        "internal-method-not-rpc",
+        "public-read-endpoint",
+        "the-order-rule-when-composing",
+        "two-ways-to-express-the-same-thing"
+      ]
+    },
+    "/docs/titan/di": {
+      "anchors": []
+    },
+    "/docs/titan/di/circular-dependencies": {
+      "anchors": [
+        "1-extract-the-shared-concept",
+        "2-invert-the-dependency",
+        "3-lazy-resolution-with-forwardref",
+        "avoiding-cycles-in-design",
+        "cycles-between-modules-vs-cycles-between-providers",
+        "diagnosing-a-cycle-in-a-large-graph",
+        "domain-types-in-their-own-module",
+        "layer-your-modules",
+        "three-ways-to-break-a-cycle",
+        "what-you-see",
+        "why-cycles-are-bad"
+      ]
+    },
+    "/docs/titan/di/contextual-injection": {
+      "anchors": [
+        "anti-patterns",
+        "building-a-context-aware-provider",
+        "built-in-strategies",
+        "composition-with-scopes",
+        "custom-strategies",
+        "defining-a-context-key",
+        "end-to-end-context-driven-provider-selection",
+        "how-resolution-threads-context",
+        "injectcontext-decorator",
+        "setting-context-per-request",
+        "when-you-need-it"
+      ]
+    },
+    "/docs/titan/di/devtools": {
+      "anchors": [
+        "anti-patterns",
+        "observers",
+        "production-guidance",
+        "the-dependency-graph--containerexportgraph",
+        "two-things-you-can-inspect"
+      ]
+    },
+    "/docs/titan/di/middleware": {
+      "anchors": [
+        "anti-patterns",
+        "applying-middleware",
+        "built-in-middleware",
+        "composing-middleware",
+        "conditional-execution",
+        "custom-middleware-via-createmiddleware",
+        "per-token-middleware",
+        "the-middleware-interface",
+        "when-to-write-di-middleware"
+      ]
+    },
+    "/docs/titan/di/multi-injection": {
+      "anchors": [
+        "a-real-example--health-indicators",
+        "anti-patterns",
+        "cross-module-multi-tokens",
+        "mixing-multi-and-single",
+        "optional-empty-arrays",
+        "order",
+        "the-basic-pattern",
+        "why-this-matters"
+      ]
+    },
+    "/docs/titan/di/overview": {
+      "anchors": [
+        "a-complete-example",
+        "error-types-exposed",
+        "read-the-deep-pages",
+        "what-a-di-container-does",
+        "what-nexus-brings-beyond-a-basic-di-container",
+        "what-the-container-guarantees"
+      ]
+    },
+    "/docs/titan/di/providers": {
+      "anchors": [
+        "1-classprovider--useclass",
+        "2-valueprovider--usevalue",
+        "3-factoryprovider--usefactory",
+        "4-tokenprovider--usetoken",
+        "5-multiprovider--multi-true-or-createmultiprovider",
+        "anti-patterns",
+        "choosing-between-provider-types",
+        "conditional-providers--createconditionalprovider",
+        "provider-options-summary",
+        "provider-predicates"
+      ]
+    },
+    "/docs/titan/di/scopes": {
+      "anchors": [
+        "anti-patterns",
+        "lifetime-by-scope",
+        "mixing-scopes--the-narrower-into-wider-rule",
+        "request",
+        "scoped",
+        "singleton",
+        "transient"
+      ]
+    },
+    "/docs/titan/di/tokens": {
+      "anchors": [
+        "anti-patterns",
+        "async-token--createasynctokentname",
+        "class--token-helper",
+        "class-token--the-class-itself",
+        "config-token--createconfigtokentname--validate-defaults-",
+        "injecting-tokens",
+        "lazy-token--createlazytokentname-metadata",
+        "multi-token--createmultitokentname",
+        "optional-token--createoptionaltokentname",
+        "scoped-token--createscopedtokentname-scope",
+        "stream-token--createstreamtokentname",
+        "symbol-token--createtokentname",
+        "token-interface",
+        "token-kinds",
+        "token-naming-conventions",
+        "token-uniqueness"
+      ]
+    },
+    "/docs/titan/errors": {
+      "anchors": []
+    },
+    "/docs/titan/errors/classification": {
+      "anchors": [
+        "alerting-policy",
+        "anti-patterns",
+        "errorcategory-enum",
+        "errorcode-driven-classification",
+        "isoperationalerrorerror--for-retry-decisions",
+        "putting-it-together",
+        "telemetry-partitioning"
+      ]
+    },
+    "/docs/titan/errors/factories": {
+      "anchors": [
+        "assertcondition-errorormessage-details",
+        "assertdefinedvalue-message",
+        "asserttypevalue-predicate-message",
+        "autherrors--auth-specific-subclasses",
+        "conversion-helpers",
+        "custom-project-factories",
+        "ensureerrorvalue",
+        "errors--the-general-namespace",
+        "httperrors--when-you-need-an-httperror-subclass",
+        "netronerrors--rpc-specific",
+        "totitanerrorerror"
+      ]
+    },
+    "/docs/titan/errors/hierarchy": {
+      "anchors": [
+        "aggregateerror",
+        "autherror-401",
+        "class-hierarchy",
+        "discrimination-on-the-client",
+        "domainerror",
+        "permissionerror-403",
+        "ratelimiterror-429",
+        "the-narrow-subclasses--when-class-identity-matters",
+        "the-wide-use-of-errorcode"
+      ]
+    },
+    "/docs/titan/errors/overview": {
+      "anchors": [
+        "errorcode--the-universal-vocabulary",
+        "errors-in-lifecycle-hooks",
+        "helper-functions",
+        "internal-vs-domain-errors",
+        "on-the-client",
+        "the-base-class--titanerror",
+        "the-http-status-code-is-universal",
+        "throwing-the-right-error"
+      ]
+    },
+    "/docs/titan/identifiers": {
+      "anchors": [
+        "choosing",
+        "generateuuidv7--the-default-for-stored-rows",
+        "the-rest"
+      ]
+    },
+    "/docs/titan/logging": {
+      "anchors": []
+    },
+    "/docs/titan/logging/child-loggers": {
+      "anchors": [
+        "across-async-boundaries",
+        "anti-patterns",
+        "creating-a-child",
+        "dont-pass-the-parent-logger",
+        "per-call-binding-via-context",
+        "per-service-binding-automatic",
+        "performance"
+      ]
+    },
+    "/docs/titan/logging/overview": {
+      "anchors": [
+        "decorators",
+        "helpers",
+        "integration-with-tracing",
+        "output-format-json-or-pretty-in-dev",
+        "read-on",
+        "setting-the-level",
+        "the-ilogger-interface",
+        "the-minimal-usage",
+        "tokens",
+        "why-a-structured-logger"
+      ]
+    },
+    "/docs/titan/logging/processors": {
+      "anchors": [
+        "anti-patterns",
+        "how-the-pipeline-runs",
+        "other-shaping-mechanisms",
+        "pretty-output",
+        "redact-pino-native",
+        "redaction",
+        "redactionprocessor",
+        "the-ilogprocessor-interface"
+      ]
+    },
+    "/docs/titan/logging/transports": {
+      "anchors": [
+        "anti-patterns",
+        "async-stdout-and-shutdown",
+        "built-in-transport",
+        "caveat-configure-transports-at-forroot",
+        "consoletransport",
+        "destinations-vs-transports-which-to-use",
+        "fanning-out-to-extra-streams-with-destinations",
+        "flush",
+        "how-write-is-driven",
+        "the-itransport-interface",
+        "the-real-write-path-async-pino-streams"
+      ]
+    },
+    "/docs/titan/migrations": {
+      "anchors": [
+        "boot-time-bridging",
+        "common-patterns-regardless-of-source",
+        "guides",
+        "see-also",
+        "strangler-fig--module-by-module",
+        "testing-during-migration",
+        "two-way-bridges"
+      ]
+    },
+    "/docs/titan/migrations/auth-1-to-2": {
+      "anchors": [
+        "decorator-fa\u00e7ades",
+        "dtos--removed-actor-fields",
+        "frontend",
+        "per-user-permission-overrides",
+        "permission-strings",
+        "permver-jwt-claim",
+        "quick-sanity-check",
+        "rls-plugin-split",
+        "tldr"
+      ]
+    },
+    "/docs/titan/migrations/from-express": {
+      "anchors": [
+        "a-side-by-side-concrete-example",
+        "at-a-glance",
+        "authentication",
+        "background-work-cron-queues",
+        "configuration",
+        "cors--helmet--compression",
+        "graceful-shutdown",
+        "logging",
+        "logging-requests",
+        "mapping-middleware",
+        "migration-order--recommended",
+        "see-also",
+        "what-you-gain",
+        "what-you-give-up"
+      ]
+    },
+    "/docs/titan/migrations/from-nestjs": {
+      "anchors": [
+        "at-a-glance",
+        "di-scopes",
+        "errors--exception-filters--typed-errors",
+        "guards--middleware",
+        "lifecycle-hooks",
+        "migration-order--recommended",
+        "module-helpers",
+        "see-also",
+        "the-biggest-delta--controllers-vs-services",
+        "validation--class-validator--zod",
+        "what-you-gain",
+        "whats-different-not-better-or-worse-just-different"
+      ]
+    },
+    "/docs/titan/migrations/from-prom-client": {
+      "anchors": [
+        "1-install-the-module-keep-prom-client-for-now",
+        "2-boot-the-module",
+        "3-migrate-one-metric-at-a-time",
+        "4-migrate-the-exposition-route",
+        "5-drop-prom-client",
+        "a-side-by-side-concrete-example",
+        "at-a-glance",
+        "default-metrics",
+        "histograms",
+        "labels",
+        "naming-conventions",
+        "persistence--the-bit-prom-client-doesnt-do",
+        "see-also",
+        "step-by-step-migration",
+        "whats-different"
+      ]
+    },
+    "/docs/titan/modules": {
+      "anchors": [
+        "built-in-modules",
+        "choosing-modules",
+        "community-modules",
+        "composition",
+        "official-modules-titan--packages",
+        "redis-dependency-among-official-modules"
+      ]
+    },
+    "/docs/titan/modules-system": {
+      "anchors": []
+    },
+    "/docs/titan/modules-system/authoring-modules": {
+      "anchors": [
+        "module-conventions-checklist",
+        "optional--async-options-patterns",
+        "optional--decorators",
+        "optional--health-indicator",
+        "package-skeleton",
+        "packagejson-essentials",
+        "publishing",
+        "see-also",
+        "step-1--define-the-options-interface",
+        "step-2--define-the-di-tokens",
+        "step-3--write-the-service",
+        "step-4--write-the-module-class",
+        "step-5--write-the-public-barrel",
+        "step-6--write-the-consumer-facing-readme",
+        "useclass--for-factories-with-their-own-dependencies",
+        "useexisting--when-the-factory-class-is-already-provided",
+        "usefactory-most-common",
+        "what-a-module-means-in-titan",
+        "worked-example--complete-titan-foo"
+      ]
+    },
+    "/docs/titan/modules-system/defining-modules": {
+      "anchors": [
+        "a-complete-example",
+        "avoid-circular-imports",
+        "bundle-related-infra-modules-with-forroot",
+        "designing-well",
+        "keep-exports-minimal",
+        "module-identity",
+        "one-module-per-bounded-context",
+        "static-vs-dynamic-modules",
+        "the-composition-rule",
+        "the-root-module",
+        "the-visibility-rule"
+      ]
+    },
+    "/docs/titan/modules-system/dynamic-modules": {
+      "anchors": [
+        "anti-patterns",
+        "async-dynamic-modules--forrootasync",
+        "authoring-a-dynamic-module",
+        "composing-options-across-forroot-calls",
+        "forroot-vs-forfeature",
+        "global-modules",
+        "the-shape"
+      ]
+    },
+    "/docs/titan/modules-system/module-discovery": {
+      "anchors": [
+        "detecting-cycles",
+        "lazy-loading",
+        "the-discovery-walk",
+        "the-registered-set",
+        "why-this-is-explicit"
+      ]
+    },
+    "/docs/titan/modules/auth": {
+      "anchors": [
+        "anti-patterns",
+        "async-configuration",
+        "auth-flow",
+        "authmiddleware",
+        "decorators",
+        "hs256-symmetric--simplest",
+        "iauthmoduleoptions",
+        "jwtservice",
+        "lifecycle",
+        "multi-key-rotation-hs256",
+        "portable-role-and-permission-policy",
+        "quickstart",
+        "requireauthoptions",
+        "rs256--es256-with-jwks-external-idp",
+        "see-also",
+        "shared-sessions-across-backends",
+        "shorthands",
+        "signed-urls",
+        "token-verification",
+        "tokens",
+        "when-you-need-it"
+      ]
+    },
+    "/docs/titan/modules/cache": {
+      "anchors": [
+        "anti-patterns",
+        "async-configuration",
+        "cacheableoptions--read-through-cache",
+        "cacheinvalidateoptions--bust-on-mutation",
+        "cachekey--parameter-marker",
+        "cacheputoptions--write-through-cache",
+        "cacheservice",
+        "compression",
+        "decorators",
+        "icachemoduleoptions",
+        "icachet--the-per-cache-surface",
+        "inter-module-dependencies",
+        "lifecycle",
+        "multi-tier-api--imultitiercachet-extends-icachet",
+        "multi-tier-l1-in-memory--l2-redis",
+        "partitions",
+        "property-injection-helpers",
+        "quickstart",
+        "see-also",
+        "single-tier-in-memory",
+        "stats",
+        "tags-based-invalidation",
+        "toctou-note-on-has",
+        "tokens",
+        "warming",
+        "when-you-need-it"
+      ]
+    },
+    "/docs/titan/modules/community": {
+      "anchors": [
+        "adopting-a-community-module--what-to-check",
+        "future-entries",
+        "publishing-your-own",
+        "what-counts-as-a-community-module"
+      ]
+    },
+    "/docs/titan/modules/config": {
+      "anchors": [
+        "anti-patterns",
+        "atomic-reload-semantics",
+        "bound-configuration-class",
+        "cache-semantics",
+        "configservice-api",
+        "configsource-union",
+        "conventional-layout",
+        "decorators",
+        "deep-merge-edge-cases",
+        "iconfigmoduleoptions",
+        "lifecycle",
+        "multi-environment-scaffold",
+        "quickstart",
+        "remote-config-source",
+        "see-also",
+        "services",
+        "source-merge--validation-pipeline",
+        "strict-mode",
+        "tokens",
+        "validation-error-ux",
+        "watcher-cascade",
+        "when-you-need-it"
+      ]
+    },
+    "/docs/titan/modules/database": {
+      "anchors": [
+        "adding-your-own-kysera-plugins",
+        "anti-patterns",
+        "async-configuration",
+        "compatibility-contract",
+        "databaseconnection",
+        "databasemanager",
+        "databasemoduleoptions",
+        "deadlines-and-failure-reporting",
+        "declare-what-this-component-requires",
+        "decorators",
+        "forfeature--repository-registration",
+        "helpers",
+        "inherited-methods",
+        "injection",
+        "inter-module-dependencies",
+        "lifecycle",
+        "migrations",
+        "multiple-named-connections",
+        "one-execution-engine",
+        "plugin-lifecycle-ordering",
+        "postgresql-coordination-leases",
+        "protected-accessors",
+        "quickstart",
+        "read-only-component-schema-readiness",
+        "repository--plugins",
+        "repository-pattern--transactionawarerepositorydb-table",
+        "routines-and-triggers",
+        "row-level-security",
+        "see-also",
+        "single-connection",
+        "sqlite",
+        "tokens",
+        "transaction-context",
+        "transaction-context-1",
+        "what-comes-through-from-kysera"
+      ]
+    },
+    "/docs/titan/modules/decorators-catalog": {
+      "anchors": [
+        "anti-patterns",
+        "built-in-module-decorators",
+        "composability-rules",
+        "config",
+        "core-decorators",
+        "di",
+        "lifecycle",
+        "logger",
+        "method-utilities",
+        "name-collisions--which-one-to-import",
+        "official-module-decorators",
+        "quick-lookup-by-purpose",
+        "rpc-surface",
+        "see-also",
+        "titan-auth",
+        "titan-cache",
+        "titan-database",
+        "titan-discovery",
+        "titan-events",
+        "titan-health",
+        "titan-lock",
+        "titan-metrics",
+        "titan-notifications",
+        "titan-pm",
+        "titan-ratelimit",
+        "titan-redis",
+        "titan-scheduler",
+        "titan-telemetry-relay"
+      ]
+    },
+    "/docs/titan/modules/discovery": {
+      "anchors": [
+        "anti-patterns",
+        "client-mode",
+        "discovery",
+        "discoverymoduleoptions",
+        "discoveryservice--the-api",
+        "events",
+        "failure-scenarios--what-happens-what-to-alert-on",
+        "heartbeat-retry-behaviour",
+        "how-it-works",
+        "lifecycle",
+        "multi-region-topology",
+        "netron-integration",
+        "performance-notes",
+        "quickstart",
+        "redis-key-layout",
+        "registration",
+        "see-also",
+        "sentinel--cluster-mode",
+        "tokens",
+        "ttl-tuning-guide",
+        "when-you-need-it"
+      ]
+    },
+    "/docs/titan/modules/errors-catalog": {
+      "anchors": [
+        "aggregate-count-per-module",
+        "anti-patterns",
+        "badrequest-400--bad_request",
+        "bespoke-error-classes-per-module",
+        "common-patterns-per-error-kind",
+        "conflict-409--conflict",
+        "errorcode-cheat-sheet",
+        "handling-errors-generically",
+        "internal-500--internal_error",
+        "notfound-404--not_found",
+        "retryability-matrix",
+        "see-also",
+        "throwing-your-own",
+        "timeout-408--request_timeout",
+        "titan-auth",
+        "titan-database",
+        "titan-pm",
+        "titan-ratelimit",
+        "toomanyrequests-429--too_many_requests",
+        "two-flavours-of-error",
+        "unavailable-503--service_unavailable"
+      ]
+    },
+    "/docs/titan/modules/events": {
+      "anchors": [
+        "anti-patterns",
+        "batcheventsoptions",
+        "decorators",
+        "emit-modes",
+        "emiteventoptions--emit-when-a-method-runs",
+        "eventemitternamespace--class-level-emitter-binding",
+        "eventsservice--the-api",
+        "ieventsmoduleoptions",
+        "introspection--patterns",
+        "lifecycle",
+        "onanyevent--wildcard-catch-all",
+        "onceeventoptions--fire-once-then-unsubscribe",
+        "oneventoptions",
+        "onmoduleevent-event-filter---listen-to-framework-module-events",
+        "other-services-exposed",
+        "quickstart",
+        "scheduleeventoptions",
+        "see-also",
+        "subscribe--unsubscribe",
+        "transactions",
+        "when-you-need-it",
+        "wildcard-semantics"
+      ]
+    },
+    "/docs/titan/modules/health": {
+      "anchors": [
+        "aggregate-health",
+        "aggregation-rule",
+        "anti-patterns",
+        "built-in-indicators",
+        "custom-indicators",
+        "healthmoduleoptions",
+        "healthrpcservice",
+        "healthservice--the-api",
+        "indicator-registry",
+        "kubernetes-probes--typical-wiring",
+        "lifecycle",
+        "quickstart",
+        "see-also",
+        "tokens",
+        "ttl-caching",
+        "when-you-need-it"
+      ]
+    },
+    "/docs/titan/modules/lifecycle-reference": {
+      "anchors": [
+        "built-in-modules",
+        "config",
+        "lifecycle-behaviour-by-module",
+        "logger",
+        "practical-rules",
+        "putting-it-together--full-bootshutdown-timeline",
+        "see-also",
+        "the-four-phases",
+        "titan-auth",
+        "titan-cache",
+        "titan-database",
+        "titan-discovery",
+        "titan-events",
+        "titan-health",
+        "titan-lock",
+        "titan-metrics",
+        "titan-notifications",
+        "titan-pm",
+        "titan-ratelimit",
+        "titan-redis",
+        "titan-scheduler",
+        "titan-telemetry-relay"
+      ]
+    },
+    "/docs/titan/modules/lock": {
+      "anchors": [
+        "anti-patterns",
+        "distributedlockservice--the-api",
+        "embedded-lua-scripts",
+        "failure-tracking",
+        "high-level--withlock",
+        "ilockmoduleoptions",
+        "lock-semantics",
+        "low-level--explicit-acquire--release",
+        "quickstart",
+        "see-also",
+        "tokens",
+        "when-you-need-it",
+        "withdistributedlock-decorator"
+      ]
+    },
+    "/docs/titan/modules/logger": {
+      "anchors": [
+        "anti-patterns",
+        "decorators",
+        "delivery-failures-and-bounded-output",
+        "extra-sinks-destinations-and-transports",
+        "log--method-auto-logging",
+        "logger--property-injection",
+        "monitor--performance-instrumentation",
+        "per-request-child-loggers",
+        "pipeline",
+        "quickstart",
+        "redaction-and-enrichment",
+        "see-also",
+        "services-and-helpers",
+        "setting-the-level-from-config--at-runtime",
+        "the-ilogger-interface",
+        "tokens",
+        "usage-in-a-service",
+        "when-you-need-it"
+      ]
+    },
+    "/docs/titan/modules/mailer": {
+      "anchors": [
+        "application-module",
+        "delivery-diagnostics",
+        "postgresql-delivery-store",
+        "redis-notification-workers",
+        "templates",
+        "verification"
+      ]
+    },
+    "/docs/titan/modules/metrics": {
+      "anchors": [
+        "anti-patterns",
+        "apply-the-schema-once",
+        "await-a-durable-write",
+        "bounded-history-queries",
+        "buffered-collection-and-diagnostics",
+        "ghost-app-filtering",
+        "imetricsmoduleoptions",
+        "lifecycle",
+        "lifecycle-1",
+        "metrics-decorator",
+        "metricsqueryfilter--the-shape-of-time-series-queries",
+        "metricsservice--the-api",
+        "metricssnapshot--what-getsnapshot-returns",
+        "pipeline-at-runtime",
+        "prometheus-exposition",
+        "query-api",
+        "quickstart",
+        "recording-api",
+        "retention-tuning",
+        "rpc-surface--omnitronmetrics",
+        "see-also",
+        "sizing--cardinality-control",
+        "storage-and-commit-boundaries",
+        "tokens",
+        "when-you-need-it",
+        "why-recordtyped-matters-t74"
+      ]
+    },
+    "/docs/titan/modules/module-map": {
+      "anchors": [
+        "common-stacks",
+        "dependency-graph",
+        "edge--offline-node",
+        "install-footprint",
+        "lifecycle-order--first-to-last",
+        "multi-instance-app",
+        "notification-gateway",
+        "picking-the-right-tier",
+        "replacement--overlap-matrix",
+        "see-also",
+        "similar-modules--when-which",
+        "web-api-service",
+        "where-redis-sits",
+        "worker-fleet"
+      ]
+    },
+    "/docs/titan/modules/notifications": {
+      "anchors": [
+        "anti-patterns",
+        "channels",
+        "health-indicator",
+        "lifecycle",
+        "notificationrecipientid-is-the-only-required-field-and-it-is-load-bearing",
+        "notificationsmoduleoptions",
+        "notificationsservice--the-producer-api",
+        "onnotification-decorator",
+        "operational-diagnostics",
+        "quickstart--producer-the-app-that-emits-notifications",
+        "quickstart--worker-the-pod-that-consumes-and-delivers",
+        "rate-limiting-and-preferences",
+        "see-also",
+        "templates",
+        "templates-are-opt-in-and-caller-driven",
+        "tokens-selection",
+        "when-you-need-it",
+        "worker-model"
+      ]
+    },
+    "/docs/titan/modules/observability-matrix": {
+      "anchors": [
+        "alert-thresholds--common-starting-points",
+        "at-a-glance",
+        "built-in-modules",
+        "config",
+        "cross-cutting-recommendations",
+        "dont-log-per-call-by-default",
+        "logger",
+        "per-module-reference",
+        "see-also",
+        "subscribe-instead-of-poll",
+        "tie-metrics-to-events",
+        "titan-auth",
+        "titan-cache",
+        "titan-database",
+        "titan-discovery",
+        "titan-events",
+        "titan-health",
+        "titan-lock",
+        "titan-metrics",
+        "titan-notifications",
+        "titan-pm--the-most-chatty-module",
+        "titan-ratelimit",
+        "titan-redis",
+        "titan-scheduler",
+        "titan-telemetry-relay"
+      ]
+    },
+    "/docs/titan/modules/options-patterns": {
+      "anchors": [
+        "async-lifecycle-of-forrootasync",
+        "common-gotchas",
+        "forfeature--register-additional-resources",
+        "forrootasync-usefactory-inject-imports---di-driven",
+        "forrootoptions--synchronous-configuration",
+        "forworker--separate-runtime",
+        "global-vs-scoped-modules",
+        "importing-extra-modules-into-the-factory-scope",
+        "migration-tip--sync-to-async",
+        "see-also",
+        "support-matrix",
+        "titan-cacheforfeaturecaches",
+        "titan-databaseforfeaturerepositories",
+        "titan-eventsforfeatureemitters",
+        "titan-healthforfeatureindicators",
+        "titan-redisforfeatureclients",
+        "titan-schedulerforfeatureproviders",
+        "useclass--useexisting-variants"
+      ]
+    },
+    "/docs/titan/modules/pm": {
+      "anchors": [
+        "anti-patterns",
+        "architecture",
+        "class-level",
+        "combined-example--a-worker-class",
+        "confirmed-process-termination",
+        "decorators",
+        "iprocessmanagerconfig",
+        "isolation-modes",
+        "lifecycle",
+        "method-level--exposure-and-lifecycle",
+        "method-level--observability",
+        "method-level--resilience",
+        "processmanager--the-api",
+        "quickstart",
+        "see-also",
+        "supervisors",
+        "tokens",
+        "transport-choice",
+        "when-you-need-it",
+        "worker-pools",
+        "workflow-failure-and-recovery"
+      ]
+    },
+    "/docs/titan/modules/ratelimit": {
+      "anchors": [
+        "algorithm-selection--what-to-pick",
+        "algorithms",
+        "anti-patterns",
+        "decorators",
+        "fairness-comparison",
+        "in-memory-single-pod",
+        "integration-with-titan-notifications",
+        "iratelimitmoduleoptions",
+        "iratelimitresult",
+        "iratelimitstorage-interface",
+        "iratelimittier",
+        "lifecycle",
+        "per-algorithm-distributed-coordination",
+        "per-api-key-burst-tolerant",
+        "per-endpoint-compound-key",
+        "per-ip-throttle-behind-trusted-proxy",
+        "per-user-tier-aware",
+        "performance-notes",
+        "queueing",
+        "quickstart",
+        "ratelimitoptions",
+        "ratelimitservice--the-api",
+        "recipes",
+        "redis-backed-multi-pod",
+        "see-also",
+        "storage-backends",
+        "throttlerps--convenience",
+        "tiered-plans",
+        "tokens"
+      ]
+    },
+    "/docs/titan/modules/redis": {
+      "anchors": [
+        "anti-patterns",
+        "async-configuration",
+        "cluster",
+        "connection-helpers",
+        "db-index-isolation-pattern",
+        "decorators",
+        "hashes--sets--lists--sorted-sets--streams",
+        "injectredismanager--parameter",
+        "injectredisnamespace--parameter",
+        "iredisclientoptions",
+        "lifecycle",
+        "lua-scripts",
+        "multiple-named-clients",
+        "quickstart",
+        "rediscacheoptions--method",
+        "redislockoptions--method",
+        "redismanager--low-level-api",
+        "redismoduleoptions",
+        "redisratelimitoptions--method",
+        "redisservice--the-high-level-api",
+        "see-also",
+        "sentinel",
+        "single-client",
+        "strings-counters-expiry",
+        "tls",
+        "tokens"
+      ]
+    },
+    "/docs/titan/modules/rls": {
+      "anchors": [
+        "guards-and-behaviour",
+        "three-separate-boundaries"
+      ]
+    },
+    "/docs/titan/modules/scheduler": {
+      "anchors": [
+        "a-job-that-fails-to-register-stops-the-boot",
+        "a-module-level-distributed-config-sc-1",
+        "anti-patterns",
+        "async-configuration",
+        "b-per-job-withdistributedlock",
+        "cronexpression-enum",
+        "cronexpression-options",
+        "decorate-methods",
+        "decorators",
+        "distributed-coordination",
+        "ibasejoboptions--shared-across-all-job-types",
+        "intervalms-options",
+        "ischedulermoduleoptions",
+        "lifecycle",
+        "listeners",
+        "persistence-providers",
+        "quickstart",
+        "schedulable",
+        "schedulerservice",
+        "see-also",
+        "status--priority-enums",
+        "timeoutms-options",
+        "tokens",
+        "when-you-need-it"
+      ]
+    },
+    "/docs/titan/modules/security-checklist": {
+      "anchors": [
+        "audit-logging",
+        "config-built-in",
+        "cross-cutting",
+        "dependency-hygiene",
+        "logger-built-in",
+        "per-module-hardening",
+        "secrets-management",
+        "see-also",
+        "surface-area-overview",
+        "titan-auth",
+        "titan-cache",
+        "titan-database",
+        "titan-discovery",
+        "titan-events",
+        "titan-health",
+        "titan-lock",
+        "titan-metrics",
+        "titan-notifications",
+        "titan-pm",
+        "titan-ratelimit",
+        "titan-redis",
+        "titan-scheduler",
+        "titan-telemetry-relay",
+        "transport--network"
+      ]
+    },
+    "/docs/titan/modules/shared-session": {
+      "anchors": [
+        "canonical-authority",
+        "cooperating-backends",
+        "credentials-and-expiry",
+        "registry-compatibility-mode",
+        "session-conditions"
+      ]
+    },
+    "/docs/titan/modules/storage": {
+      "anchors": [
+        "application-boundary",
+        "configuration-and-lifecycle",
+        "operations"
+      ]
+    },
+    "/docs/titan/modules/telemetry-relay": {
+      "anchors": [
+        "aggregator-contract",
+        "choosing-a-destination",
+        "constructor-options--telemetryrelaymoduleoptions",
+        "convenience-emitters",
+        "delivery-and-recovery",
+        "lifecycle",
+        "operational-checks",
+        "quickstart--aggregator",
+        "quickstart--both-single-node--sidecar",
+        "quickstart--producer",
+        "see-also",
+        "sizing-guidance",
+        "statistics",
+        "telemetrybufferconfig",
+        "telemetryentry--the-universal-unit",
+        "telemetrywalconfig",
+        "three-roles",
+        "transport-contract",
+        "wal-on-disk-format",
+        "when-to-use-this-vs-the-built-in-logger",
+        "when-you-need-it"
+      ]
+    },
+    "/docs/titan/modules/tokens-reference": {
+      "anchors": [
+        "built-in-module-tokens",
+        "config-omnitron-devtitanmoduleconfig",
+        "hardening-checklist",
+        "health-rpc-surface--health100",
+        "importing-tokens--the-convention",
+        "logger-omnitron-devtitanmodulelogger",
+        "official-module-tokens",
+        "rpc-services--whats-reachable-from-the-wire",
+        "see-also",
+        "titan-auth",
+        "titan-cache",
+        "titan-database",
+        "titan-discovery",
+        "titan-events",
+        "titan-health",
+        "titan-lock",
+        "titan-metrics",
+        "titan-notifications",
+        "titan-pm",
+        "titan-ratelimit",
+        "titan-redis",
+        "titan-scheduler",
+        "titan-telemetry-relay"
+      ]
+    },
+    "/docs/titan/netron": {
+      "anchors": [
+        "performance-characteristics",
+        "the-short-tour",
+        "what-netron-is",
+        "what-netron-is-not"
+      ]
+    },
+    "/docs/titan/netron/authentication": {
+      "anchors": [
+        "anti-patterns",
+        "auth-context",
+        "authconfig--configuring-a-method",
+        "builtinpolicies--reusable-policy-definitions",
+        "class-level-vs-method-level",
+        "custom-policies",
+        "failure-semantics",
+        "forwarding-through-a-gateway",
+        "install-http-authority-before-listening",
+        "one-invocation-decision-across-transports",
+        "the-two-managers",
+        "verification-failure-versus-service-failure"
+      ]
+    },
+    "/docs/titan/netron/middleware": {
+      "anchors": [
+        "a-custom-middleware--timing",
+        "anti-patterns",
+        "error-interception",
+        "modifying-the-request",
+        "modifying-the-response",
+        "per-method-policy-via-decorators",
+        "registering-middleware",
+        "scoping-middleware-to-specific-methods",
+        "stages-and-order",
+        "the-middleware-function"
+      ]
+    },
+    "/docs/titan/netron/multi-backend": {
+      "anchors": [
+        "anti-patterns",
+        "connection-model",
+        "failover",
+        "health-monitoring",
+        "observability",
+        "service-level-routing-rules",
+        "strategies",
+        "the-minimal-example",
+        "when-not-to-use-multibackend"
+      ]
+    },
+    "/docs/titan/netron/serialization": {
+      "anchors": [
+        "anti-patterns",
+        "custom-types",
+        "payload-limits",
+        "performance",
+        "registered-types-titan-ships",
+        "round-trip-type-fidelity",
+        "what-the-serializer-handles-natively",
+        "when-not-to-use-a-custom-codec"
+      ]
+    },
+    "/docs/titan/netron/services": {
+      "anchors": [
+        "anti-patterns",
+        "local-vs-remote-calls--the-same-code",
+        "multiple-services-per-class-no",
+        "peers",
+        "public--opt-in-exposure",
+        "selecting-a-service-version",
+        "service-descriptors",
+        "service-level-decorators",
+        "servicenameversion"
+      ]
+    },
+    "/docs/titan/netron/streaming": {
+      "anchors": [
+        "anti-patterns",
+        "backpressure",
+        "bidirectional-streaming",
+        "cancellation",
+        "consuming-a-stream",
+        "defining-a-streaming-method",
+        "performance",
+        "reconnection"
+      ]
+    },
+    "/docs/titan/netron/transports": {
+      "anchors": [
+        "configuring-transports",
+        "connection-limits-and-lifecycle",
+        "cross-runtime-transport-availability",
+        "http",
+        "same-service-multiple-transports--what-changes",
+        "share-a-request-budget-across-http-and-websocket",
+        "tcp",
+        "the-four-transports",
+        "the-transport-registry",
+        "tls",
+        "transport-options--common",
+        "unix-sockets",
+        "websocket",
+        "when-to-choose-what"
+      ]
+    },
+    "/docs/titan/overview": {
+      "anchors": [
+        "the-mental-model",
+        "versioning-and-public-boundaries",
+        "what-this-section-covers",
+        "what-titan-is",
+        "what-titan-is-not"
+      ]
+    },
+    "/docs/titan/recipes": {
+      "anchors": [
+        "how-to-read-a-recipe",
+        "module-dependency-map",
+        "recipes-1"
+      ]
+    },
+    "/docs/titan/recipes/api-service": {
+      "anchors": [
+        "a-typical-service",
+        "appmodule",
+        "architecture",
+        "cross-module-wiring-notes",
+        "production-checklist",
+        "see-also",
+        "shape"
+      ]
+    },
+    "/docs/titan/recipes/multi-tenant-saas": {
+      "anchors": [
+        "anti-patterns-specific-to-multi-tenant",
+        "architecture",
+        "cross-module-wiring-notes",
+        "per-tenant-di--contextual-providers",
+        "production-checklist",
+        "rls-on-every-repository",
+        "see-also",
+        "setting-the-tenant-context",
+        "shape",
+        "tenant-scoped-cache-keys",
+        "tenant-tier-rate-limits"
+      ]
+    },
+    "/docs/titan/recipes/notifications-pipeline": {
+      "anchors": [
+        "a-custom-channel--eg-smtp-email",
+        "appmodule--producer-api-pod",
+        "architecture",
+        "cross-module-wiring-notes",
+        "producer-side--emitting-a-notification",
+        "production-checklist",
+        "see-also",
+        "shape",
+        "worker-pod--consuming-and-delivering"
+      ]
+    },
+    "/docs/titan/recipes/oauth-callback": {
+      "anchors": [
+        "architecture",
+        "cross-module-wiring-notes",
+        "implementation",
+        "production-checklist",
+        "see-also",
+        "setup",
+        "shape"
+      ]
+    },
+    "/docs/titan/recipes/observability-stack": {
+      "anchors": [
+        "a-typical-instrumented-service",
+        "aggregator-pod",
+        "appmodule--producer-side",
+        "architecture",
+        "cross-module-wiring-notes",
+        "production-checklist",
+        "see-also",
+        "shape",
+        "trace-propagation-in-your-code",
+        "wiring-the-telemetry-relay"
+      ]
+    },
+    "/docs/titan/recipes/webhook-receiver": {
+      "anchors": [
+        "architecture",
+        "cross-module-wiring-notes",
+        "handler--async-processing",
+        "handler--verify-deduplicate-enqueue",
+        "production-checklist",
+        "see-also",
+        "setup",
+        "shape"
+      ]
+    },
+    "/docs/titan/recipes/worker-fleet": {
+      "anchors": [
+        "a-cpu-bound-worker-pool",
+        "a-scheduled-task-exactly-once",
+        "appmodule",
+        "architecture",
+        "cross-module-wiring-notes",
+        "production-checklist",
+        "see-also",
+        "shape"
+      ]
+    },
+    "/docs/titan/resilience": {
+      "anchors": []
+    },
+    "/docs/titan/resilience/circuit-breaker": {
+      "anchors": [
+        "anti-patterns",
+        "basic-usage",
+        "composing-with-retry",
+        "observability",
+        "per-instance-state",
+        "reading-state",
+        "states"
+      ]
+    },
+    "/docs/titan/resilience/overview": {
+      "anchors": [
+        "read-on",
+        "the-minimal-example",
+        "when-you-need-each"
+      ]
+    },
+    "/docs/titan/resilience/retry": {
+      "anchors": [
+        "anti-patterns",
+        "compose-with-a-circuit-breaker",
+        "retry-strategies-registry",
+        "the-computebackoff-helper",
+        "the-retry-decorator-simplest",
+        "the-retry-function-flexible",
+        "when-not-to-retry"
+      ]
+    },
+    "/docs/titan/resilience/timeout": {
+      "anchors": [
+        "anti-patterns",
+        "cancellation",
+        "cascading-timeouts",
+        "choosing-a-timeout",
+        "detecting-timeouts",
+        "timeout--the-decorator",
+        "withtimeout--the-function"
+      ]
+    },
+    "/docs/titan/testing": {
+      "anchors": []
+    },
+    "/docs/titan/testing/di-overrides": {
+      "anchors": [
+        "a-canonical-fake",
+        "anti-patterns",
+        "createtestmodule--testmodule",
+        "fake-vs-mock-vs-stub",
+        "how-overriding-works",
+        "mockprovider-and-createmockprovider",
+        "module-level-overrides",
+        "overriding-through-applicationcreate",
+        "spying-without-replacing",
+        "the-omnitron-devtestingtitan-helpers",
+        "the-two-real-one-fake-pattern"
+      ]
+    },
+    "/docs/titan/testing/integration": {
+      "anchors": [
+        "anti-patterns",
+        "fixture-lifetime",
+        "helpers",
+        "hybrid",
+        "per-suite--fastest",
+        "per-test--safest",
+        "testing-async-startup-failures",
+        "testing-lifecycle-hooks",
+        "the-pattern",
+        "what-you-get-from-a-real-application"
+      ]
+    },
+    "/docs/titan/testing/modules": {
+      "anchors": [
+        "anti-patterns",
+        "built-in-modules",
+        "configmodule",
+        "cross-runtime-testing",
+        "disablegracefulshutdown-true",
+        "generic-patterns",
+        "loggermodule",
+        "official-modules",
+        "one-mock-per-test-not-shared",
+        "see-also",
+        "titan-auth",
+        "titan-cache",
+        "titan-database",
+        "titan-discovery",
+        "titan-events",
+        "titan-health",
+        "titan-lock",
+        "titan-metrics",
+        "titan-notifications",
+        "titan-pm",
+        "titan-ratelimit",
+        "titan-redis",
+        "titan-scheduler",
+        "titan-telemetry-relay"
+      ]
+    },
+    "/docs/titan/testing/overview": {
+      "anchors": [
+        "the-right-ratio",
+        "the-unit-test-pattern",
+        "when-to-go-end-to-end",
+        "when-to-use-the-container"
+      ]
+    },
+    "/docs/titan/tracing": {
+      "anchors": [
+        "anti-patterns",
+        "establishing-a-context",
+        "manual-propagation",
+        "public-surface",
+        "reading-the-active-context",
+        "starting-a-span",
+        "tracecontext",
+        "w3c-traceparent-header"
+      ]
+    },
+    "/docs/titan/validation": {
+      "anchors": []
+    },
+    "/docs/titan/validation/contracts": {
+      "anchors": [
+        "anti-patterns",
+        "basic-shape",
+        "output-validation",
+        "per-status-error-schemas",
+        "predefined-contract-templates",
+        "versioning",
+        "when-to-use-validate-vs-contract",
+        "why-contracts-not-just-schemas"
+      ]
+    },
+    "/docs/titan/validation/error-handling": {
+      "anchors": [
+        "anti-patterns",
+        "customising-messages",
+        "default-error-shape",
+        "on-the-client-side",
+        "rejected-http-uploads",
+        "structured-field-errors",
+        "translating-to-client-formats",
+        "validation-vs-domain-errors"
+      ]
+    },
+    "/docs/titan/validation/overview": {
+      "anchors": [
+        "how-validation-runs",
+        "read-on",
+        "the-minimal-example",
+        "validation-result-options",
+        "what-titan-validates",
+        "what-you-can-express"
+      ]
+    },
+    "/docs/troubleshooting": {
+      "anchors": [
+        "app-boots-but-first-request-hangs",
+        "build-fails-with-broken-anchor",
+        "can-i-use-bun-or-deno",
+        "cannot-resolve-token-x",
+        "cli-command-returns-nothing",
+        "container-class-identity-mismatch",
+        "daemon-already-running",
+        "database-migration-locked",
+        "faq",
+        "health-probe-times-out",
+        "heartbeat--discovery-flapping",
+        "how-does-pricing--licensing-work",
+        "is-titan-production-ready",
+        "jwt-expired-but-i-just-signed-in",
+        "maximum-call-stack-exceeded-in-middleware",
+        "pull-request-fails-ci-on-unrelated-test",
+        "react-component-re-renders-too-often",
+        "redis-econnrefused-on-dev-boot",
+        "see-also",
+        "source-workspace-package-fails-while-reading-a-bootstrap-definition",
+        "troubleshooting",
+        "typescript-type-x-is-not-assignable-to-type-y-after-server-change",
+        "watcher-fires-constantly-in-dev",
+        "webapp-shows-chunkloaderror-after-deploy",
+        "when-should-i-not-use-this-stack",
+        "where-to-look-next",
+        "why-a-custom-di-container-nexus",
+        "why-decorators",
+        "why-isnt-there-x-module",
+        "why-messagepack-over-json-for-the-wire",
+        "why-monorepo",
+        "why-one-daemon-not-per-app-sidecars"
+      ]
+    },
+    "/docs/tutorial": {
+      "anchors": [
+        "conventions",
+        "prerequisites",
+        "the-steps",
+        "what-this-tutorial-assumes-you-know",
+        "when-youre-done"
+      ]
+    },
+    "/docs/tutorial/auth": {
+      "anchors": [
+        "add-the-auth-module--redis",
+        "auth-service",
+        "commit",
+        "gate-usersservicelist-to-admins",
+        "next",
+        "schema-additions",
+        "seed-an-admin-user",
+        "troubleshooting",
+        "verify",
+        "whats-new",
+        "wire-the-module"
+      ]
+    },
+    "/docs/tutorial/deploy": {
+      "anchors": [
+        "backups",
+        "build-the-api",
+        "build-the-webapp",
+        "caddyfile-tls-auto-provisioned",
+        "commit",
+        "congratulations",
+        "deploy-script",
+        "dns",
+        "docker-composeyml",
+        "env-gitignored",
+        "monitoring",
+        "updates",
+        "verify",
+        "what-youve-shipped",
+        "where-to-go-from-here"
+      ]
+    },
+    "/docs/tutorial/frontend": {
+      "anchors": [
+        "commit",
+        "next",
+        "note-the-type-flow",
+        "providers",
+        "routes",
+        "run",
+        "scaffold-the-frontend",
+        "share-the-service-types",
+        "sign-in-page",
+        "the-client",
+        "troubleshooting",
+        "users-list-page",
+        "verify-auth-gating"
+      ]
+    },
+    "/docs/tutorial/scaffold": {
+      "anchors": [
+        "commit",
+        "create-the-first-app",
+        "create-the-monorepo",
+        "next",
+        "the-first-titan-app",
+        "troubleshooting",
+        "verify",
+        "what-just-happened"
+      ]
+    },
+    "/docs/tutorial/service": {
+      "anchors": [
+        "add-the-database-module",
+        "commit",
+        "migration",
+        "next",
+        "repository",
+        "schema",
+        "service",
+        "troubleshooting",
+        "what-changed",
+        "wire-the-module"
+      ]
+    },
+    "/docs/tutorial/tests": {
+      "anchors": [
+        "add-vitest",
+        "ci-workflow",
+        "commit",
+        "compile-backend-decorators",
+        "cross-runtime-test-a-utility",
+        "e2e-test-playwright",
+        "frontend-component-test",
+        "integration-test-real-api-over-the-wire",
+        "next",
+        "repository-integration-test-api",
+        "service-test-with-mocks",
+        "troubleshooting",
+        "what-we-covered"
+      ]
+    },
+    "/docs/utilities": {
+      "anchors": [
+        "standalone-use",
+        "where-theyre-used"
+      ]
+    },
+    "/docs/utilities/common": {
+      "anchors": [
+        "data-structures",
+        "decimal--lossless-decimal-arithmetic",
+        "defer--externally-controlled-promise",
+        "delayms-value-opts",
+        "entriesobj-opts--keysobj-opts--valuesobj-opts",
+        "listbuffert--o1-fifo-queue",
+        "modules",
+        "object-tools",
+        "omitobj-keys--predicate--regex--string-opts",
+        "plimitn--concurrency-limiter",
+        "primitives",
+        "promise-helpers",
+        "promisifyfn--callbackifyfn",
+        "propsobj",
+        "retrycallback-opts--max",
+        "see-also",
+        "the-standalone-helpers",
+        "timedmapk-v--auto-expiring-map",
+        "timeoutpromise-ms-opts",
+        "type-predicates",
+        "use-across-the-stack"
+      ]
+    },
+    "/docs/utilities/cuid": {
+      "anchors": [
+        "api",
+        "database-default",
+        "examples",
+        "format",
+        "generate-ids-for-entities",
+        "idempotency-keys",
+        "performance",
+        "properties",
+        "request-ids",
+        "see-also",
+        "when-not-to-use-cuid",
+        "when-to-use-cuid",
+        "where-its-used-in-the-stack"
+      ]
+    },
+    "/docs/utilities/eventemitter": {
+      "anchors": [
+        "concurrency-control",
+        "emitparallel",
+        "emitreduce",
+        "emitserial",
+        "four-emission-patterns",
+        "history",
+        "metrics",
+        "performance",
+        "quick-start",
+        "scheduled-emissions",
+        "see-also",
+        "subscription-management",
+        "when-to-use-this-vs-titan-events",
+        "where-its-used-in-the-stack",
+        "why-not-just-a-plain-sync-emitter",
+        "wildcard-subscriptions"
+      ]
+    },
+    "/docs/utilities/kb": {
+      "anchors": [
+        "architecture",
+        "cli",
+        "discovery",
+        "embedding-model-setup",
+        "entry-types",
+        "hybrid-search",
+        "per-package-configuration--kbkbconfigts",
+        "performance",
+        "programmatic-api",
+        "see-also",
+        "store-backends",
+        "what-it-does",
+        "when-youd-use-this-directly",
+        "where-it-sits-in-the-stack"
+      ]
+    },
+    "/docs/utilities/msgpack": {
+      "anchors": [
+        "api-surface",
+        "built-in-native-types",
+        "custom-extensions",
+        "error-round-trips",
+        "performance",
+        "quick-start",
+        "safe-decoding--trydecode",
+        "see-also",
+        "smartbuffer",
+        "spec-compliance",
+        "when-to-use-vs-json",
+        "where-its-used-in-the-stack",
+        "why-messagepack-not-json"
+      ]
+    },
+    "/search": {
+      "anchors": []
+    }
+  },
+  "excludedUiIds": [
+    "__blog-post-container",
+    "__docusaurus",
+    "__docusaurus-base-url-issue-banner",
+    "__docusaurus-base-url-issue-banner-suggestion-container",
+    "__docusaurus_skipToContent_fallback",
+    "theme-svg-external-link"
+  ],
+  "description": "Public route and content-anchor contract; excludes framework-owned icon and component IDs.",
+  "baselineHtmlIdCount": 3566,
+  "initialCandidateIdCount": 3092,
+  "excludedUiIdCounts": {
+    "__blog-post-container": 1,
+    "__docusaurus": 236,
+    "__docusaurus-base-url-issue-banner": 1,
+    "__docusaurus-base-url-issue-banner-suggestion-container": 1,
+    "__docusaurus_skipToContent_fallback": 236,
+    "theme-svg-external-link": 236
+  },
+  "sourceCommit": "829cb5d02cd74943b01ef729883c45be905172e5"
+}

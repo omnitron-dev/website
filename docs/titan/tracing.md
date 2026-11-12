@@ -1,4 +1,6 @@
 ---
+id: "titan/tracing"
+slug: "/docs/titan/tracing"
 sidebar_position: 1
 title: Tracing
 description: W3C-compatible trace context propagation, zero dependencies.
@@ -15,7 +17,7 @@ collector, exemplars, sampling), layer the
 [`titan-telemetry-relay`](./modules/telemetry-relay) or your own
 OTel integration on top.
 
-## Public surface
+## Public surface {#public-surface}
 
 ```typescript
 import {
@@ -40,7 +42,7 @@ import {
 } from '@omnitron-dev/titan/tracing';
 ```
 
-## `TraceContext`
+## `TraceContext` {#tracecontext}
 
 ```typescript
 interface TraceContext {
@@ -65,7 +67,7 @@ TRACE_FLAGS.SAMPLED  // 0x01
 TRACE_FLAGS.NONE     // 0x00   (there is no TRACE_FLAGS.NOT_SAMPLED)
 ```
 
-## Reading the active context
+## Reading the active context {#reading-the-active-context}
 
 ```typescript
 const trace = currentTrace();   // TraceContext | undefined
@@ -74,7 +76,7 @@ const trace = currentTrace();   // TraceContext | undefined
 Returns `undefined` if no trace is active in the current async
 scope.
 
-## Establishing a context
+## Establishing a context {#establishing-a-context}
 
 ```typescript
 import { makeTraceContext, withTrace, TRACE_FLAGS } from '@omnitron-dev/titan/tracing';
@@ -92,7 +94,7 @@ async) via `AsyncLocalStorage`, then restores the previous context.
 `makeTraceContext` is a convenience for building a context literal
 with `flags` defaulted to `SAMPLED`.
 
-## Starting a span
+## Starting a span {#starting-a-span}
 
 ```typescript
 import { startSpan, withTrace } from '@omnitron-dev/titan/tracing';
@@ -114,7 +116,7 @@ There is **no** span lifecycle, attributes, or `end()` here — this
 module is propagation-only. Span timing/attributes/export belong to
 a telemetry layer (the relay module or an OTel sink) on top.
 
-## W3C `traceparent` header
+## W3C `traceparent` header {#w3c-traceparent-header}
 
 ```typescript
 // Parse incoming header
@@ -129,7 +131,7 @@ const header = formatTraceparent(trace);            // '00-T-S-01'
 Netron uses these helpers internally to propagate trace context
 across RPC calls.
 
-## Manual propagation
+## Manual propagation {#manual-propagation}
 
 `AsyncLocalStorage` does not propagate across worker threads,
 queue boundaries, or some Promise pool implementations. Capture
@@ -147,7 +149,7 @@ worker.on('message', async ({ work, trace }) => {
 });
 ```
 
-## Anti-patterns
+## Anti-patterns {#anti-patterns}
 
 - **Reading the trace context manually inside business logic.**
   Defeats the point. Trust the framework's propagation; let the

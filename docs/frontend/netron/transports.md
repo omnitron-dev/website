@@ -1,4 +1,6 @@
 ---
+id: "frontend/netron/transports"
+slug: "/docs/frontend/netron/transports"
 sidebar_position: 4
 title: Transports
 description: Choose a Netron transport, bound the lifetime of a call, and observe connection recovery.
@@ -17,7 +19,7 @@ can serve HTTP RPC at one path and WebSocket upgrades at another.
 | `createMultiBackendClient` | Several backends with separate endpoints and policies | Configure `http` or `websocket` per backend |
 | `NetronReactClient` | React queries, mutations and event subscriptions | `http`, `websocket` or React-specific `auto` |
 
-## HTTP
+## HTTP {#http}
 
 Supply an absolute base URL. The browser client appends `/netron/invoke` and
 sends a JSON POST. HTTP `connect()` initializes the client locally. To check
@@ -36,7 +38,7 @@ const client = createClient({
 await client.connect();
 ```
 
-### Invocation lifetime and replay
+### Invocation lifetime and replay {#invocation-lifetime-and-replay}
 
 ```typescript
 const controller = new AbortController();
@@ -71,7 +73,7 @@ the option preserves the default Fetch redirect behavior.
 Service query hooks forward the query cancellation signal. A component unmount does
 not automatically cancel a mutation: its server-side outcome may already be committed.
 
-### HTTP wire format
+### HTTP wire format {#http-wire-format}
 
 The direct browser transport posts JSON to `/netron/invoke`:
 
@@ -87,7 +89,7 @@ ID, malformed envelope or an HTTP failure carrying an RPC success is rejected.
 Application payloads still require their own runtime schemas; a TypeScript
 return type cannot validate bytes received over the network.
 
-## WebSocket
+## WebSocket {#websocket}
 
 Use the URL of a binary Netron WebSocket listener. Await `connect()` before
 issuing calls. It waits for the Netron handshake. Use the direct client for
@@ -121,7 +123,7 @@ server. It is opt-in. Only enable it for a trusted endpoint. Alternatively,
 supply a known `serviceDefinitions` map. Register a named server-initiated task
 with `socket.onTask(name, handler)` when the service contract requires it.
 
-### Reconnect behaviour
+### Reconnect behaviour {#reconnect-behaviour}
 
 Automatic reconnect is enabled by default. The base retry interval is 1,000 ms
 and the default attempt limit is `Infinity`. Ordinary retries use exponential
@@ -136,7 +138,7 @@ check its recorded outcome before submitting it again. For events, the React
 subscription manager re-registers subscribed names after reconnect. Recover
 events missed during the outage using the service's cursor or a fresh snapshot.
 
-## React transport selection
+## React transport selection {#react-transport-selection}
 
 Use `transport: 'http'` for an HTTP-only API, including a React application
 behind an HTTP gateway. Use `'websocket'` for a WebSocket-only service.
@@ -150,7 +152,7 @@ initialization. For this mode, supply an absolute HTTP(S) base that serves
 both the WebSocket upgrade and the HTTP RPC path. For separate endpoints,
 configure each backend explicitly.
 
-## Connection state and metrics
+## Connection state and metrics {#connection-state-and-metrics}
 
 The direct browser clients expose `getState()` and `getMetrics()`.
 Connection states are `disconnected`, `connecting`, `connected`,
@@ -166,7 +168,7 @@ These counters belong to this client. `avgLatency` is optional and measured
 in milliseconds. Use a query cache or the [fluent HTTP interface](./browser.md#fluent-http-interface--caching-retry-circuit-breaking)
 when individual reads require caching or deduplication.
 
-## See also
+## See also {#see-also}
 
 - [HTTP and WebSocket clients](./browser.md)
 - [Authentication and cookie transport](./auth.md)

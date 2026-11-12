@@ -1,4 +1,6 @@
 ---
+id: "titan/resilience/overview"
+slug: "/docs/titan/resilience/overview"
 sidebar_position: 1
 title: Resilience
 description: Defending against partial failure — retry, circuit breaker, timeout, backoff.
@@ -26,7 +28,7 @@ method — but it is intentionally minimal (no exponential backoff, no
 classifier). For sophisticated resilience, use the primitives from
 `utils/`.
 
-## When you need each
+## When you need each {#when-you-need-each}
 
 - **Retry** — for transient failures: network errors, 503s,
   timeouts. Use `isOperationalError(e)` to classify.
@@ -65,7 +67,7 @@ client, the esbuild sidecar, a gRPC channel) that recreates the
 instance via a `factory` when a call throws a fatal error. See
 `utils/resilience.ts` for its API.
 
-## The minimal example
+## The minimal example {#the-minimal-example}
 
 ```typescript
 import { retry, withTimeout, CircuitBreaker } from '@omnitron-dev/titan/utils';
@@ -91,7 +93,7 @@ class PaymentsService {
 }
 ```
 
-## Read on
+## Read on {#read-on}
 
 - [Retry](./retry.md) — backoff strategies, the `retry()` function,
   the `@Retry` decorator.

@@ -1,4 +1,6 @@
 ---
+id: "titan/di/scopes"
+slug: "/docs/titan/di/scopes"
 sidebar_position: 3
 title: Scopes
 description: Transient, Singleton, Scoped, Request — how Nexus decides when to reuse an instance.
@@ -41,7 +43,7 @@ flowchart LR
 
 `Singleton` is the default.
 
-## Singleton
+## Singleton {#singleton}
 
 One instance for the lifetime of the container. The container caches
 the result of the first `resolve()` and returns it on every
@@ -61,7 +63,7 @@ construction.
 **Avoid for**: services that hold per-request state (current user,
 transaction handle). Use `Request` instead.
 
-## Transient
+## Transient {#transient}
 
 A new instance every time the container resolves the token.
 
@@ -83,7 +85,7 @@ short-lived calculators) where instantiation is cheap.
 sockets, large caches). Each instance leaks unless explicitly
 disposed.
 
-## Scoped
+## Scoped {#scoped}
 
 One instance per child container scope. Used to isolate state for a
 feature or for a request handler.
@@ -100,7 +102,7 @@ encapsulation; you can usually achieve the same isolation by
 declaring the provider in the module that owns the scope and not
 exporting it.
 
-## Request
+## Request {#request}
 
 One instance per request scope. The container creates a child scope
 per request (typically per Netron call); providers in `Request`
@@ -123,7 +125,7 @@ container.register(REQUEST_CONTEXT, {
 pool would create a new connection per request — exactly what the
 pool is meant to prevent.
 
-## Mixing scopes — the "narrower-into-wider" rule
+## Mixing scopes — the "narrower-into-wider" rule {#mixing-scopes--the-narrower-into-wider-rule}
 
 A wider-scoped provider **must not** depend on a narrower-scoped
 one. This is a `ScopeMismatchError`:
@@ -142,7 +144,7 @@ requests see stale data.
 The fix: inject a *factory* that resolves the narrower scope on
 demand, or use `Lazy` (see [Tokens](./tokens.md)).
 
-## Lifetime by scope
+## Lifetime by scope {#lifetime-by-scope}
 
 | Scope         | Created                       | Disposed                                            |
 | ------------- | ----------------------------- | --------------------------------------------------- |
@@ -154,7 +156,7 @@ demand, or use `Lazy` (see [Tokens](./tokens.md)).
 `Transient` instances are not tracked by the container. If they
 hold resources, the caller must dispose them.
 
-## Anti-patterns
+## Anti-patterns {#anti-patterns}
 
 - **`Singleton` for per-request state.** Easy mistake; usually
   fixed by wrapping the state in a service that injects a

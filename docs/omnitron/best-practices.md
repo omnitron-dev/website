@@ -1,4 +1,6 @@
 ---
+id: "omnitron/best-practices"
+slug: "/docs/omnitron/best-practices"
 sidebar_position: 12
 title: Production best practices
 description: Patterns proven in real multi-app Omnitron deployments.
@@ -18,7 +20,7 @@ Every example uses generic placeholder names (`auth`, `ledger`,
 `media`, `realtime`, `analytics`). Substitute the names that fit
 your domain.
 
-## The five-app fan-out
+## The five-app fan-out {#the-five-app-fan-out}
 
 A common production shape: **one app owns identity**; **N
 specialist apps delegate authentication back to it** via a
@@ -103,7 +105,7 @@ export default defineEcosystem({
 });
 ```
 
-## Shared authentication across apps
+## Shared authentication across apps {#shared-authentication-across-apps}
 
 Use the [shared-session preset](../titan/modules/shared-session.md) rather than
 implementing token, session and role validation in each bootstrap. A shared
@@ -139,7 +141,7 @@ A failed authority lookup refuses protected traffic with 503; cached grants
 must not turn an outage into a permission bypass. Signature caches remain
 independent of live session checks.
 
-### Token binding (`cnf.fp`)
+### Token binding (`cnf.fp`) {#token-binding-cnffp}
 
 With `cnfHmacSecret`, an access token can bind to the active refresh-token ID.
 The canonical adapter returns that ID from the same snapshot as the session.
@@ -147,7 +149,7 @@ When it disappears or changes, the previous confirmation is refused. Registry
 compatibility mode cannot provide this guarantee for legacy entries without a
 refresh-token ID, and the preset never rewrites registry entries itself.
 
-## Ordered startup with `dependsOn`
+## Ordered startup with `dependsOn` {#ordered-startup-with-dependson}
 
 Specialist apps that need the auth app warm before they start:
 
@@ -164,7 +166,7 @@ The orchestrator waits for an app's `dependsOn[]` to all report
 healthy before starting it. Shutdown reverses the order
 automatically.
 
-## Tuning `startupTimeout` per app
+## Tuning `startupTimeout` per app {#tuning-startuptimeout-per-app}
 
 The default 30 s startup timeout is fine for most apps. Apps
 that initialise heavy resources need more:
@@ -180,7 +182,7 @@ Set per app in `IEcosystemAppEntry.startupTimeout`. If an app
 hits the timeout without reporting ready, the supervisor counts
 it as a failed start and applies the restart policy.
 
-## Worker processes within an app
+## Worker processes within an app {#worker-processes-within-an-app}
 
 `defineSystem` lets you fan out workers as separate processes
 inside the same app:
@@ -225,7 +227,7 @@ The pattern:
 Result: CPU-bound work happens off the request event loop;
 restarts of the worker pool don't take down the HTTP surface.
 
-## Shutdown priority
+## Shutdown priority {#shutdown-priority}
 
 When the daemon shuts down apps, lower `shutdown.priority`
 numbers stop first; higher numbers stop later. Use this to drain
@@ -246,7 +248,7 @@ shutdown: { priority: -10, timeout: 5_000, drainConnections: true },
 
 Heuristic: an app that *depends on* another should shut **first**.
 
-## Custom infrastructure with `networkMode` variants
+## Custom infrastructure with `networkMode` variants {#custom-infrastructure-with-networkmode-variants}
 
 When an app needs a service the presets don't cover (a search
 engine, a blockchain daemon, a custom queue broker), declare it
@@ -309,7 +311,7 @@ What this delivers:
 - `networkMode: 'cluster'` swaps the Docker config when a stack
   declares it.
 
-## Redis: one client, many logical databases
+## Redis: one client, many logical databases {#redis-one-client-many-logical-databases}
 
 Avoid running multiple Redis containers. One instance with
 named clients per concern:
@@ -347,7 +349,7 @@ sessions.
 → Recommended DB split is also documented in
 [titan-redis module-map](../titan/modules/module-map.mdx#where-redis-sits).
 
-## Per-app HTTP transport tuning
+## Per-app HTTP transport tuning {#per-app-http-transport-tuning}
 
 Tuning the HTTP transport per-process by use case:
 
@@ -378,7 +380,7 @@ Headers-timeout > keep-alive-timeout > request-timeout is the
 common ordering; setting them all explicitly is more reliable
 than relying on Node defaults.
 
-## Custom HTTP routes alongside RPC
+## Custom HTTP routes alongside RPC {#custom-http-routes-alongside-rpc}
 
 Co-locate non-RPC endpoints (object serving, file streaming,
 image transforms, webhooks) with the RPC surface:
@@ -416,7 +418,7 @@ above must call the same `assertAccess('read')` gate the RPC
 path uses. Don't skip auth in custom routes just because the
 RPC layer "usually handles it".
 
-## Hot-reloadable runtime settings
+## Hot-reloadable runtime settings {#hot-reloadable-runtime-settings}
 
 For settings that should change without restart (commission
 rate, feature flags, business rules), store them in the
@@ -443,7 +445,7 @@ update at runtime; subscribers in-process get notified via
 This pattern is for **business logic settings**, not connection
 strings — those still belong to the static config.
 
-## Eager-loading heavy services
+## Eager-loading heavy services {#eager-loading-heavy-services}
 
 Some services (blockchain RPC clients, encryption providers,
 machine-learning model loaders) take seconds to initialise.
@@ -472,7 +474,7 @@ Without this, the supervisor reports the app "ready" but the
 first user request still pays the cold-start cost on a
 critical path.
 
-## Reverse-proxy with maintenance-mode flag in Redis
+## Reverse-proxy with maintenance-mode flag in Redis {#reverse-proxy-with-maintenance-mode-flag-in-redis}
 
 A gateway in front of every app that can be flipped to
 maintenance mode without restart:
@@ -558,7 +560,7 @@ infrastructure: {
 }
 ```
 
-## Tor hidden service for operator console
+## Tor hidden service for operator console {#tor-hidden-service-for-operator-console}
 
 For sensitive operator surfaces (the webapp, an admin portal),
 expose them over a `.onion` address — no DNS, no SNI, no public
@@ -587,7 +589,7 @@ volume. Print them after bootstrap with `omnitron tor`.
 This is a control-plane convenience for distributed teams — not a
 substitute for proper RBAC. Defense in depth.
 
-## RLS context propagation
+## RLS context propagation {#rls-context-propagation}
 
 Every app in the fan-out has the same auth wrapper:
 
@@ -606,7 +608,7 @@ session variables.
 Even the auth app uses this wrapper — its own queries against
 `user_sessions` / `refresh_tokens` benefit from RLS just as much.
 
-## Per-app config with env override
+## Per-app config with env override {#per-app-config-with-env-override}
 
 A two-source pattern works for almost every app:
 
@@ -628,7 +630,7 @@ appear in committed files.
 Prefix matters: `MEDIA_` for media, `LEDGER_` for ledger, etc.
 Avoids cross-app env collisions.
 
-## Restart policies — be sparing with `critical`
+## Restart policies — be sparing with `critical` {#restart-policies--be-sparing-with-critical}
 
 `critical: true` means "kill the whole daemon if this crashes
 past `maxRestarts`". Reserve it for the **one** app whose
@@ -647,7 +649,7 @@ apps: [
 If you mark everything critical, any single bug brings the whole
 daemon down — including the apps that were working fine.
 
-## Workers: `critical: false` + health-check tuning
+## Workers: `critical: false` + health-check tuning {#workers-critical-false--health-check-tuning}
 
 Worker subprocesses (`captcha-generator`, `notification-worker`,
 `deposit-worker`) have different health-check needs:
@@ -662,7 +664,7 @@ Health probes per worker run inside the worker process — set
 `health.enabled: false` for workers without a credible health
 signal to save the probe overhead.
 
-## Monitoring + supervision baseline
+## Monitoring + supervision baseline {#monitoring--supervision-baseline}
 
 The same supervision block fits ~90% of deployments:
 
@@ -696,7 +698,7 @@ Tune from here:
 - **`logging.maxSize: '50mb' × maxFiles: 10`** = 500 MB per app
   of log retention. Adjust for disk budget.
 
-## Dev mode without surprises
+## Dev mode without surprises {#dev-mode-without-surprises}
 
 For the dev experience:
 
@@ -716,7 +718,7 @@ Don't watch `node_modules`, `dist`, or any test-output directory
 — the file watcher's default ignores cover the common ones, but
 extend `watch.ignore` if needed.
 
-## What this looks like at scale
+## What this looks like at scale {#what-this-looks-like-at-scale}
 
 Five apps + one gateway + Postgres + Redis + S3-compatible
 storage + one custom blockchain daemon = roughly 12 supervised
@@ -735,7 +737,7 @@ CPU: each app idles at near-zero; spikes track load. The
 biggest CPU consumer is usually the gateway (Lua + nginx) under
 heavy traffic.
 
-## When this fan-out shape is wrong
+## When this fan-out shape is wrong {#when-this-fan-out-shape-is-wrong}
 
 - **Single tenant, single concern.** Don't split for the sake of
   splitting; one app with multiple `IProcessEntry` processes is
@@ -749,7 +751,7 @@ heavy traffic.
 - **You need < 100ms cold deploy.** Multi-app boots take longer.
   Single binary may win.
 
-## See also
+## See also {#see-also}
 
 - [Configuration](./configuration.md) — every field used above
 - [Infrastructure](./infrastructure.md) — `OmnitronAppConfig` and `IServiceRequirement` deep dive

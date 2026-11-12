@@ -1,4 +1,6 @@
 ---
+id: "titan/netron/authentication"
+slug: "/docs/titan/netron/authentication"
 sidebar_position: 4
 title: Authentication
 description: AuthenticationManager, AuthorizationManager, BuiltInPolicies, AuthConfig.
@@ -32,7 +34,7 @@ import {
 } from '@omnitron-dev/titan/netron/auth';
 ```
 
-## The two managers
+## The two managers {#the-two-managers}
 
 | Manager                  | Job                                                         |
 | ------------------------ | ----------------------------------------------------------- |
@@ -53,7 +55,7 @@ flowchart LR
 These are wired by the `titan-auth` ecosystem module (or by your own
 integration). You rarely construct them directly.
 
-## One invocation decision across transports
+## One invocation decision across transports {#one-invocation-decision-across-transports}
 
 HTTP and the persistent Netron transports use the same authorization decision:
 registered service ACLs, then declared method requirements, then optional
@@ -72,7 +74,7 @@ Service selection happens before authorization. The exact published service iden
 is used for ACL and policy evaluation, including batch HTTP calls. Selecting a version
 never evaluates another version's permissions.
 
-## Forwarding through a gateway
+## Forwarding through a gateway {#forwarding-through-a-gateway}
 
 Publishing a remote `Interface` at another Netron endpoint creates a delegation
 boundary. Register an `AuthorizationManager` ACL for the forwarded service or
@@ -87,7 +89,7 @@ restrictions, not executable authorization policies, so the gateway must declare
 its own delegation policy. Trusted local calls through an interface retain their
 in-process contract. Prefer narrow method grants and explicit service versions.
 
-## Auth context
+## Auth context {#auth-context}
 
 Every authenticated call carries an auth context with:
 
@@ -105,7 +107,7 @@ Every authenticated call carries an auth context with:
 This is what `AuthConfig` policies match against. (`userId`, `roles`,
 and `permissions` are required; `scopes` is optional.)
 
-## `@Auth(config)` — configuring a method
+## `@Auth(config)` — configuring a method {#authconfig--configuring-a-method}
 
 `AuthConfig` (from `@omnitron-dev/titan/decorators`):
 
@@ -155,7 +157,7 @@ async list() { /* … */ }
 
 Pick one style per project.
 
-## `BuiltInPolicies` — reusable policy definitions
+## `BuiltInPolicies` — reusable policy definitions {#builtinpolicies--reusable-policy-definitions}
 
 The `BuiltInPolicies` namespace produces policy definitions you can
 register with the policy engine:
@@ -187,7 +189,7 @@ The policy name follows the convention shown in the helper
 (`role:admin`, `role:any:admin,support`, etc.) — the registration
 sets the name based on the helper's logic.
 
-## Custom policies
+## Custom policies {#custom-policies}
 
 A policy is a `PolicyDefinition`:
 
@@ -223,7 +225,7 @@ Note there is **no** `context.args` (use `context.method?.args`) and
 policy needs. The exact shapes live in `netron/auth/policy-engine.ts`
 and `netron/auth/types.ts`.
 
-## Class-level vs method-level
+## Class-level vs method-level {#class-level-vs-method-level}
 
 Both work; method-level overrides class-level for that method:
 
@@ -247,7 +249,7 @@ class OrdersService {
 Use `inherit` / `override` flags in `AuthConfig` to control
 combination semantics for fine-grained cases.
 
-## Install HTTP authority before listening
+## Install HTTP authority before listening {#install-http-authority-before-listening}
 
 Configure native authentication and cookie security before starting the HTTP
 transport. Do not reach into a transport's private middleware pipeline from an
@@ -304,7 +306,7 @@ transport reconstructs authority from the verified credential. A service using
 `getCurrentRLSAuthContext()`; anonymous invocations must receive their own empty
 scope rather than inherit an enclosing actor.
 
-## Verification failure versus service failure
+## Verification failure versus service failure {#verification-failure-versus-service-failure}
 
 A rejected credential and an unavailable credential verifier have different
 meanings. Return the ordinary invalid-credential outcome for a token that the
@@ -333,7 +335,7 @@ and parallel batches. It lets an editor retain its draft during an outage withou
 granting authority from a cached browser identity. The public response omits the
 underlying database/provider error.
 
-## Failure semantics
+## Failure semantics {#failure-semantics}
 
 The Netron enforcement path throws a plain `TitanError` carrying an
 error **code** (not the `AuthError`/`PermissionError` subclasses):
@@ -351,7 +353,7 @@ exist in the errors module (both extend `HttpError` extends
 `TitanError`), but the auth layer does not instantiate them, so
 `instanceof AuthError` will not match a thrown auth error.
 
-## Anti-patterns
+## Anti-patterns {#anti-patterns}
 
 - **Auth checks in method bodies.** Defeats the policy framework.
   Use `@Auth(...)`. Inline checks duplicate the policy and drift

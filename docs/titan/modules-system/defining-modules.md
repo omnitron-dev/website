@@ -1,4 +1,6 @@
 ---
+id: "titan/modules-system/defining-modules"
+slug: "/docs/titan/modules-system/defining-modules"
 sidebar_position: 1
 title: Defining Modules
 description: The unit of composition in Titan — what a module is, how it composes, and how to design well.
@@ -24,7 +26,7 @@ export class UsersModule {}
 
 That is the entire surface for most modules.
 
-## The visibility rule
+## The visibility rule {#the-visibility-rule}
 
 A provider is visible to:
 
@@ -52,7 +54,7 @@ This is the same encapsulation rule modules in any modular system give
 you. Use it. A module that exports everything is harder to refactor
 than a module that exports only its public surface.
 
-## The composition rule
+## The composition rule {#the-composition-rule}
 
 `imports` is transitive in one direction: if `A` imports `B`, then `A`
 can use `B`'s exports. It is **not** transitive across — if `A`
@@ -70,7 +72,7 @@ export class MyModule {}
 Re-export when you want to *bundle* a dependency into your public
 contract. Otherwise, importers should import what they need directly.
 
-## A complete example
+## A complete example {#a-complete-example}
 
 ```typescript
 import { Module, Service, Injectable, Inject } from '@omnitron-dev/titan';
@@ -115,7 +117,7 @@ Read the structure top to bottom:
 - `UsersModule` exports `UsersService` so other modules that import
   `UsersModule` can inject it.
 
-## The root module
+## The root module {#the-root-module}
 
 One module is special: the one you pass to `Application.create`. It is
 the **root**. The root module's transitive `imports` form the entire
@@ -143,7 +145,7 @@ This is a strong convention. It means the root module is the
 "manifest" of your application — open `AppModule` and you see what
 the app is made of.
 
-## Static vs dynamic modules
+## Static vs dynamic modules {#static-vs-dynamic-modules}
 
 The example above is a **static module** — it has fixed structure
 declared at class-definition time. Most modules in your codebase will
@@ -159,7 +161,7 @@ DatabaseModule.forRoot({ url: env.DATABASE_URL, dialect: 'postgres' })
 
 See [Dynamic Modules](./dynamic-modules.md) for details.
 
-## Module identity
+## Module identity {#module-identity}
 
 Modules are identified by **class reference**, not by name. Importing
 the same module class twice is a no-op; the framework deduplicates.
@@ -171,11 +173,11 @@ This means you cannot have two `UsersModule`s in the same
 application. If you want to compose two unrelated services that both
 manage "users", give the modules different names.
 
-## Designing well
+## Designing well {#designing-well}
 
 A few rules of thumb that pay off as the codebase grows:
 
-### One module per bounded context
+### One module per bounded context {#one-module-per-bounded-context}
 
 Group services by the domain concept they serve, not by the technical
 layer. `UsersModule` contains `UsersService`, `UsersRepository`, and
@@ -186,12 +188,12 @@ which `UsersModule` imports.
 A module that grows past 5–10 providers is usually two modules
 masquerading as one. Split.
 
-### Keep `exports` minimal
+### Keep `exports` minimal {#keep-exports-minimal}
 
 If a provider does not need to be visible outside the module, do not
 export it. Smaller export surfaces are easier to refactor.
 
-### Avoid circular imports
+### Avoid circular imports {#avoid-circular-imports}
 
 If `A` imports `B` and `B` imports `A`, both modules need to be
 restructured. The framework will detect this at boot and throw with a
@@ -202,7 +204,7 @@ clear cycle path. Common fixes:
 
 See [Circular Dependencies](../di/circular-dependencies.md).
 
-### Bundle related infra modules with `forRoot`
+### Bundle related infra modules with `forRoot` {#bundle-related-infra-modules-with-forroot}
 
 `AuthModule.forRoot({ jwt: { … } })` is better than asking every
 caller to wire `JwtSigner` and `JwtVerifier` themselves. Provide a

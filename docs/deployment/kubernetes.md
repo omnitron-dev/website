@@ -1,4 +1,6 @@
 ---
+id: "deployment/kubernetes"
+slug: "/docs/deployment/kubernetes"
 sidebar_position: 3
 title: Kubernetes
 description: Production-grade Kubernetes deployment patterns.
@@ -10,7 +12,7 @@ For production at scale. The pattern: one Deployment per
 Titan app, one Statefulset for the daemon (with its persistent
 state), managed Postgres + Redis as separate clusters.
 
-## Topology
+## Topology {#topology}
 
 ```mermaid
 flowchart TB
@@ -49,7 +51,7 @@ In Kubernetes you have two valid patterns:
 
 This page covers pattern 2 — the production default.
 
-## Per-app Deployment
+## Per-app Deployment {#per-app-deployment}
 
 ```yaml
 # k8s/api/deployment.yaml
@@ -144,7 +146,7 @@ Key points:
 - **`terminationGracePeriodSeconds: 45`** — > app's
   `shutdown.timeout`. Otherwise k8s SIGKILLs mid-drain.
 
-## Omnitron daemon as StatefulSet
+## Omnitron daemon as StatefulSet {#omnitron-daemon-as-statefulset}
 
 The daemon needs persistent state (`~/.omnitron/`) and a stable
 identity:
@@ -210,7 +212,7 @@ the daemon's RPC directly, operators can
 `kubectl port-forward svc/omnitron 9801`; to open the Console,
 port-forward the `webapp` service instead.
 
-## Ingress
+## Ingress {#ingress}
 
 ```yaml
 # k8s/ingress.yaml
@@ -242,7 +244,7 @@ Two hosts — one for the API (Titan apps), one for the Console
 webapp (the nginx-served [`webapp` Deployment](#webapp-deployment),
 **not** the daemon).
 
-## Secrets
+## Secrets {#secrets}
 
 ```yaml
 # k8s/secrets.yaml — do NOT commit. Use sealed-secrets or external-secrets in real life.
@@ -266,7 +268,7 @@ Production options:
 - **Pod-level secret manager mount** (e.g., AWS Secrets Store CSI
   Driver).
 
-## HorizontalPodAutoscaler
+## HorizontalPodAutoscaler {#horizontalpodautoscaler}
 
 ```yaml
 apiVersion: autoscaling/v2
@@ -292,7 +294,7 @@ spec:
 within a process; HPA operates at the pod level. Use both —
 HPA for cross-pod scale, `titan-pm` for cross-worker.
 
-## PodDisruptionBudget
+## PodDisruptionBudget {#poddisruptionbudget}
 
 ```yaml
 apiVersion: policy/v1
@@ -309,7 +311,7 @@ spec:
 Keeps at least 2 pods up during voluntary disruptions (node
 drains, cluster upgrades).
 
-## NetworkPolicy
+## NetworkPolicy {#networkpolicy}
 
 ```yaml
 apiVersion: networking.k8s.io/v1
@@ -338,7 +340,7 @@ spec:
 Allow ingress only from the nginx ingress controller; restrict
 egress to in-namespace + DNS.
 
-## Rolling updates
+## Rolling updates {#rolling-updates}
 
 ```yaml
 spec:
@@ -356,7 +358,7 @@ ready, then terminates an old one.
 For high-throughput apps, set `maxSurge: 25%` for faster
 rollouts.
 
-## Database migrations
+## Database migrations {#database-migrations}
 
 Run as an initContainer or pre-deploy Job:
 
@@ -382,7 +384,7 @@ spec:
 
 Wire as a Helm pre-install / pre-upgrade hook.
 
-## Webapp deployment
+## Webapp deployment {#webapp-deployment}
 
 Static assets behind an nginx container:
 
@@ -409,7 +411,7 @@ This mirrors what `omnitron webapp` does on a single host: an
 upstream at the `omnitron` Service (`9801` HTTP, `9802` WS)
 instead of `host.docker.internal`.
 
-## Observability
+## Observability {#observability}
 
 - **Logs** → stdout → cluster log aggregator (Loki / Datadog /
   ELK).
@@ -431,7 +433,7 @@ instead of `host.docker.internal`.
   `titan-telemetry-relay`).
 - **Alerts** → `OmnitronAlerts` + PrometheusRules.
 
-## Disaster recovery
+## Disaster recovery {#disaster-recovery}
 
 Backup priorities:
 
@@ -444,7 +446,7 @@ Backup priorities:
 The Postgres data is the only **catastrophic** loss.
 Everything else can be reconstructed.
 
-## Cost-savings tips
+## Cost-savings tips {#cost-savings-tips}
 
 - **Spot / preemptible** for worker pools; on-demand for the
   daemon.
@@ -454,7 +456,7 @@ Everything else can be reconstructed.
 - **`titan-cache` L1 only** for read-heavy apps to avoid Redis
   hops.
 
-## See also
+## See also {#see-also}
 
 - [Deployment overview](./index.md)
 - [PaaS](./paas.md) — for smaller setups

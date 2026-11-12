@@ -1,4 +1,6 @@
 ---
+id: "frontend/prism/cli"
+slug: "/docs/frontend/prism/cli"
 title: Component CLI
 description: Initialise, inspect, copy and maintain Prism components with the shipped CLI.
 ---
@@ -22,7 +24,7 @@ The commands are `init`, `add`, `remove`, `list`, `diff`, `update` and
 `doctor`. Component names are arguments to `add`; `component` is not an
 intermediate subcommand.
 
-## Command reference
+## Command reference {#command-reference}
 
 | Command | Purpose | Useful options |
 | --- | --- | --- |
@@ -37,7 +39,7 @@ intermediate subcommand.
 Run `pnpm exec prism <command> --help` for the exact options in the version
 installed in your lockfile.
 
-## Work with local changes
+## Work with local changes {#work-with-local-changes}
 
 Commit or otherwise preserve local modifications before updating copied
 components. Inspect `diff` first. `--overwrite` allows replacement of
@@ -47,7 +49,7 @@ item was modified. Those flags are explicit decisions about your source.
 `add --install` also installs the selected item's npm dependencies.
 Review the package and lockfile diff together with the copied source.
 
-## Programmatic use
+## Programmatic use {#programmatic-use}
 
 `@omnitron-dev/prism/cli` exports `createCli`, `cli`, command factories,
 `PRISM_VERSION`, `DEFAULT_CONFIG` and the configuration types. This is a

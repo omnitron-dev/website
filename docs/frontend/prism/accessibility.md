@@ -1,4 +1,6 @@
 ---
+id: "frontend/prism/accessibility"
+slug: "/docs/frontend/prism/accessibility"
 title: Accessibility
 description: Vision simulation, keyboard interaction and accessible composition with Prism.
 ---
@@ -11,7 +13,7 @@ Prism's accessibility subpath exports **vision simulation** tools:
 Component accessibility also depends on the labels, semantics and focus
 behaviour supplied by the application.
 
-## Simulate colour perception
+## Simulate colour perception {#simulate-colour-perception}
 
 ```tsx
 import {
@@ -59,7 +61,7 @@ Simulation helps find colour-dependent distinctions. It does not measure
 contrast, establish conformance or replace keyboard and assistive-technology
 testing.
 
-## Compose accessible screens
+## Compose accessible screens {#compose-accessible-screens}
 
 | Surface | Application responsibility |
 | --- | --- |
@@ -75,7 +77,7 @@ Start with the semantics of the underlying control. Avoid replacing a
 button with a clickable `div`. Custom renderers and slots can remove
 semantics that a default component supplies, so test the final composition.
 
-## Menus and popovers
+## Menus and popovers {#menus-and-popovers}
 
 Under `createPrismTheme` or `PrismProvider`, menus, Select dropdowns and
 popovers release pointer input when `open` becomes `false`. Their exit
@@ -94,7 +96,7 @@ Test the first click after selection, immediate reopening, Escape followed
 by Tab, and menus inside dialogs. A test that retries a blocked click until
 an animation ends can hide a lost first click.
 
-## Verification loop
+## Verification loop {#verification-loop}
 
 Navigate a representative screen using only Tab, Shift+Tab, Enter, Space
 and Escape. Check visible focus in both themes, then test zoom and a narrow

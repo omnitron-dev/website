@@ -1,4 +1,6 @@
 ---
+id: "omnitron/resilient-control-plane"
+slug: "/docs/omnitron/resilient-control-plane"
 title: Resilient control plane
 description: Target architecture for environments, verified promotion, placement, recovery, scaling and delegated infrastructure operations.
 ---
@@ -22,7 +24,7 @@ models and policies specify their development; they are not new configuration
 options that can already be enabled in `omnitron.config.ts`.
 :::
 
-## One lifecycle, explicit responsibility
+## One lifecycle, explicit responsibility {#one-lifecycle-explicit-responsibility}
 
 ```mermaid
 flowchart LR
@@ -63,7 +65,7 @@ Keep optional capabilities independently importable. The basic local daemon shou
 not require a consensus service, agent SDK, cloud account or container runtime.
 Unsupported capabilities are discoverable and cause a precise plan refusal.
 
-## Audit of the existing foundations
+## Audit of the existing foundations {#audit-of-the-existing-foundations}
 
 These findings determine the implementation sequence rather than a parallel replacement platform.
 
@@ -89,7 +91,7 @@ the master's peer or clearing its local status cannot count as stopping remote p
 No automatic migration may depend on that shortcut. All accepted target edits are
 isolated from executable configuration until an execution path satisfies these boundaries.
 
-## Resource model
+## Resource model {#resource-model}
 
 Use one canonical environment model. Existing stacks become its compatibility surface;
 do not maintain an unrelated environment scheduler beside the stack manager.
@@ -124,7 +126,7 @@ rewritten by Console or an agent. Console can propose a change to it, or operate
 fields assigned to runtime policy. Admission resolves conflicts rather than relying
 on whichever controller wrote last.
 
-## From a laptop to production
+## From a laptop to production {#from-a-laptop-to-production}
 
 Development uses local source and fast feedback. Test/stage/prod consume immutable
 releases under environment policy. Production promotion references the same verified
@@ -151,7 +153,7 @@ contract, not once per replica. Prefer expand/contract changes that allow old an
 application revisions to overlap. A release rollback must explicitly assess schema and
 data compatibility; changing an application symlink cannot undo an irreversible migration.
 
-## Placement and reserve capacity
+## Placement and reserve capacity {#placement-and-reserve-capacity}
 
 Separate feasibility from ranking. A lightly loaded but incompatible machine is not
 a candidate. This distinction also appears in [Nomad's scheduling model](https://developer.hashicorp.com/nomad/docs/concepts/scheduling/how-scheduling-works):
@@ -192,7 +194,7 @@ on a different eligible node with a named expiry, resource ceiling and remediati
 It must still satisfy security, data and minimum-availability constraints. Never silently
 evict another critical service or exceed its quota to make the plan appear successful.
 
-## Recovery without competing owners
+## Recovery without competing owners {#recovery-without-competing-owners}
 
 Loss of RPC means loss of observation. A network partition may leave the original
 application serving users or writing to its database. Starting a replacement single
@@ -221,7 +223,7 @@ reclaim its old allocation or write authority just because it has the same addre
 Avoid automatic failback oscillation; moving from an emergency placement to its final
 home requires another plan and availability-budget check.
 
-### State contracts
+### State contracts {#state-contracts}
 
 | Workload class | Required recovery evidence |
 | --- | --- |
@@ -237,7 +239,7 @@ Measure achievable recovery against them. PostgreSQL, Redis, object storage and 
 stateful services keep their own recovery protocols. Do not replace those protocols
 with a generic volume copy or confuse monitoring replication with application-data replication.
 
-## Scaling at the correct level
+## Scaling at the correct level {#scaling-at-the-correct-level}
 
 Titan PM controls local pool concurrency. Omnitron controls fleet allocations and
 aggregate workload capacity. Each decision variable has one owner. The fleet policy
@@ -259,7 +261,7 @@ then consume approved reserves. Provider-specific machine provisioning is option
 requires its own cost, credential and failure-domain policy. Bare-metal, virtual and
 container-based workloads remain expressible without a mandatory cloud integration.
 
-## Durable operations and control-plane availability
+## Durable operations and control-plane availability {#durable-operations-and-control-plane-availability}
 
 An operation journal records immutable intent and every state transition. The minimal
 record includes operation/step IDs, actor/delegation, target IDs and incarnations, desired
@@ -304,7 +306,7 @@ authority-store restore and node re-enrollment require explicit incarnation/epoc
 reconciliation. The control store and its bootstrap path cannot depend solely on an
 application that the unavailable controller must first start.
 
-## Security and agent parity
+## Security and agent parity {#security-and-agent-parity}
 
 Extend the existing role/permission system; do not add an agent-only allowlist. Resource
 scope covers organization/project, environment, workload, node pool, data resource and
@@ -333,7 +335,7 @@ failure of the authoritative journal blocks new effects. Export security audit t
 independent sink under retention policy. A local append-only table is not tamper-proof
 against a host administrator.
 
-## Product interaction
+## Product interaction {#product-interaction}
 
 The Console environment workspace should keep scope, desired generation and current
 health visible without duplicating large headings. Offer logical workload, physical
@@ -357,7 +359,7 @@ views, keyboard shortcuts and topology layout are user preferences; they do not 
 infrastructure. Prefer incremental event updates and coalesced inventory reads over
 polling the whole fleet separately from every panel.
 
-## Distributed ingress and service publication
+## Distributed ingress and service publication {#distributed-ingress-and-service-publication}
 
 The model supports gateways, origin services, protection workers and publication
 controllers as ordinary typed workloads and relationships. Separate a traffic edge
@@ -371,7 +373,7 @@ capacity and independent failure domains apply to protection workers too. Protec
 load must not consume the control plane's last resources or silently bypass origin
 isolation. Each optional adapter reports the capabilities it actually implements.
 
-## Delivery gates
+## Delivery gates {#delivery-gates}
 
 | Stage | Required result before enabling it |
 | --- | --- |
@@ -399,7 +401,7 @@ its unsupported cases are explicit, and recovery procedures reproduce the stored
 evidence. Industrial quality is the strength and clarity of those guarantees, not the
 number of controls or adapters exposed at once.
 
-## Multi-project deployment audit and design
+## Multi-project deployment audit and design {#multi-project-deployment-audit-and-design}
 
 The control plane uses a project registration for ownership, a stack for the intended environment, a manifest digest for the artifact, and a node identity and owner epoch for execution. Human operators and agents use the same authenticated Netron methods. A target can host several projects. Shared infrastructure needs an explicit owner and consumers.
 
@@ -419,7 +421,7 @@ The receiving node keeps the infrastructure declaration, observed state and serv
 
 A build slot isolates scheduling, cancellation and the build directory. Registered project code still executes with the builder OS account. Use separate builders and test resources for mutually untrusted projects. Controller operator roles currently span registered projects. Node provisioning and writable infrastructure still use a host-level lease. Retained application recovery in an enrolled cluster has separate signed operations. Its deployment adapter requires recipient fencing before it can admit a new remote release.
 
-### Requirements for independent operations on a shared host
+### Requirements for independent operations on a shared host {#requirements-for-independent-operations-on-a-shared-host}
 
 The current exclusive native write lease also protects host-global operations such as provisioning an execution service or changing ingress. Shortening it safely requires the receiver to prove every mutation's write set. Application slots and credentials belong to a project and stack. A published port belongs to a bound address and protocol. A database migration belongs to a physical database and migration namespace. A shared system service or volume has one declared owner. Multiple controllers must acquire those resources in a deterministic order and revalidate ownership at the receiver before applying a mutation.
 
@@ -427,7 +429,7 @@ A deployment operation should retain its authenticated initiating principal, pro
 
 The current build runs on the controller or in an explicitly configured native CI builder. Routing a build automatically to an enrolled Linux worker requires a declared build environment, trust policy, resource limits and a portable source revision. Development machines may be the only source of a private commit. A worker must verify the supplied Git revision and registry lock before executing project code in its build environment. Working application credentials must stay outside that environment.
 
-### Acceptance scenarios
+### Acceptance scenarios {#acceptance-scenarios}
 
 * Submit two projects, cancel a third queued job, and observe independent progress and exit states in CLI and Console.
 * Replace the controller after a final manifest has been written and before a job result is delivered. Recover the result from the manifest. If the manifest is absent, surface interruption.

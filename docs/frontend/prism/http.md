@@ -1,4 +1,6 @@
 ---
+id: "frontend/prism/http"
+slug: "/docs/frontend/prism/http"
 title: HTTP client
 description: Typed REST requests, cancellation, interceptors and explicit retries.
 ---
@@ -11,7 +13,7 @@ Use it for REST endpoints and downloads; use
 [Prism's Netron bindings](./index.md#netron-integration--omnitron-devprismnetron)
 for named RPC services.
 
-## Make a request
+## Make a request {#make-a-request}
 
 ```typescript
 import { createHttpClient } from '@omnitron-dev/prism/http';
@@ -32,7 +34,7 @@ The result is `HttpResponse<T>` with `data`, `status`, `statusText`,
 payload; it does not validate JSON at runtime. Validate untrusted payloads
 at the application boundary.
 
-## Request surface
+## Request surface {#request-surface}
 
 | Method | Arguments |
 | --- | --- |
@@ -47,7 +49,7 @@ Use `params` for query parameters, `headers` for per-request headers and
 controls cookie credentials; configure the server's CORS and CSRF policy
 as well when credentials cross an origin.
 
-## Cancel work on disposal
+## Cancel work on disposal {#cancel-work-on-disposal}
 
 ```typescript
 const controller = new AbortController();
@@ -65,7 +67,7 @@ try {
 `timeout` fields, plus the request `config`. A network failure may have no
 HTTP status. Narrow the caught value before reading those properties.
 
-## Interceptors and retries
+## Interceptors and retries {#interceptors-and-retries}
 
 `addRequestInterceptor`, `addResponseInterceptor` and `addErrorInterceptor`
 return removal functions. Install long-lived interceptors once; remove

@@ -1,4 +1,6 @@
 ---
+id: "omnitron/diagnostics"
+slug: "/docs/omnitron/diagnostics"
 title: Operational diagnostics
 ---
 
@@ -12,7 +14,7 @@ does not mean a person received a message.
 table list covers inherited module tables as well as Omnitron’s own tables.
 A missing metrics table is a database finding, not a healthy empty chart.
 
-## Investigate a failure
+## Investigate a failure {#investigate-a-failure}
 
 ```bash
 omnitron --json health
@@ -63,7 +65,7 @@ does not prove application correctness: register domain health checks and
 monitor their coverage. Older daemons without the runtime indicator appear as
 unexamined coverage in `doctor`.
 
-## Process, health and start prerequisites
+## Process, health and start prerequisites {#process-health-and-start-prerequisites}
 
 `stack list`, `stack status` and Console show process lifecycle separately from
 application health. **Running** means the expected processes were observed online;
@@ -81,7 +83,7 @@ cannot inherit the previous process's health. CLI and Console use the same readi
 it explains what starting would require or change. It does not start applications
 and cannot establish the health of a future launch.
 
-## Stack infrastructure ownership
+## Stack infrastructure ownership {#stack-infrastructure-ownership}
 
 `omnitron stack diagnose <project> <stack>` and Console's stack diagnosis inspect
 provisioning authority before checking inferred services. For `controller` and
@@ -93,7 +95,7 @@ green. Conflicting infrastructure declarations or a missing controller source
 binding block diagnosis with a configuration reason. See
 [infrastructure ownership](./infrastructure.md#infrastructure-ownership).
 
-## RPC connection and replication
+## RPC connection and replication {#rpc-connection-and-replication}
 
 Run `omnitron node check <id>` or open **Nodes → Diagnostics**. Both use the
 same connection reading. A running application, an SSH-reachable machine and a
@@ -154,7 +156,7 @@ implicitly; only explicitly retryable, idempotent operations opt into retry.
 observations, not guarantees between polls. Console refreshes an open diagnostic
 dialog every five seconds and pauses requests while it is hidden or busy.
 
-## Classic services and completed work
+## Classic services and completed work {#classic-services-and-completed-work}
 
 Applications launched through `script` declare `readiness` in their ecosystem
 entry. Without it they remain `degraded` with `readiness_not_configured`:
@@ -231,7 +233,7 @@ configuration or launch invalidates that cache. State transitions produce
 `health-check` probes and Console use these same measurements. After adding a
 heartbeat declaration, restart its worker to receive the channel variables.
 
-### Immutable releases
+### Immutable releases {#immutable-releases}
 
 An operator can add HTTP readiness without editing an installed release. In the
 node's `~/.omnitron/config.json`, `applicationReadiness` maps exact qualified app
@@ -254,7 +256,7 @@ declaration; an application-owned declaration takes precedence. Native domain
 health is always preserved. A new application release should declare its own
 contract, allowing this operator fallback to be removed during normal rollout.
 
-## Container state and stack intent
+## Container state and stack intent {#container-state-and-stack-intent}
 
 The Docker indicator reads Docker and the local stack registry. Containers of an
 enabled or running local stack are required: missing or stopped containers fail
@@ -272,7 +274,7 @@ explicit. Inspect project configuration, stack startup and container logs before
 changing intent. Docker unavailability fails the indicator even when a cached
 reconciler state claimed readiness. All simultaneous failure reasons are retained.
 
-## Domain readiness
+## Domain readiness {#domain-readiness}
 
 Process state and readiness answer different questions. `online` means the
 supervised process is running. A worker with a working event loop can still be
@@ -319,7 +321,7 @@ artifacts. Verify the pinned artifacts before and after activation, and restart
 only the affected worker. Operational recovery must not silently create a new
 implementation under an existing experiment identity.
 
-## Supervise maintenance with the same health contract
+## Supervise maintenance with the same health contract {#supervise-maintenance-with-the-same-health-contract}
 
 Declare infrastructure maintenance as an ecosystem application when it needs an
 independent lifecycle. Use Titan Scheduler for intervals, overlap prevention and
@@ -349,7 +351,7 @@ artifacts when changing operational policy must not change an experiment's
 registered implementation. Document the producer's own retention limits too;
 a maintenance guard cannot promise stronger guarantees than the entire pipeline.
 
-## One transport-independent contract
+## One transport-independent contract {#one-transport-independent-contract}
 
 Import from `@omnitron-dev/omnitron/diagnostics`, or from
 `@omnitron-dev/titan/diagnostics` in a standalone Titan application.
@@ -369,7 +371,7 @@ Only send operational facts. Credential redaction is a defense, not permission
 to include request bodies, personal data, SQL literals or arbitrary metadata.
 Raw stacks, headers and payload objects are not forwarded by the adapter.
 
-## Optional Titan notification adapter
+## Optional Titan notification adapter {#optional-titan-notification-adapter}
 
 Messenger-specific integrations are deliberately separate. The universal bridge
 uses a configured `titan-notifications` transport, its queue, retry policy and
@@ -413,7 +415,7 @@ When upgrading, keys previously changed by underscore substitution start a new
 broker deduplication window. Consumer idempotency must cover retries that cross
 that deployment boundary.
 
-## Connect the existing Omnitron alert outbox
+## Connect the existing Omnitron alert outbox {#connect-the-existing-omnitron-alert-outbox}
 
 `createAlertDiagnosticHandler(sink)` converts the payload of
 `monitoring.alertSink` into the shared contract. Call it from the exposed method
@@ -436,7 +438,7 @@ findings. Its timestamp records receipt at the adapter; the original alert
 identity remains available for correlation. Messenger routing, credentials,
 recipient policy and escalation are consumer responsibilities to add separately.
 
-## Failure-injection checklist
+## Failure-injection checklist {#failure-injection-checklist}
 
 Test denied access, an unreachable database, a rollback failure, a missing alert
 consumer, a rejected event handler and recovery after each transient failure.
@@ -445,7 +447,7 @@ not repeat committed effects. [Migration guarantees](migrations.md) describe the
 transaction and checksum boundaries used by all framework layers.
 
 
-## Storage exhaustion and execution ownership
+## Storage exhaustion and execution ownership {#storage-exhaustion-and-execution-ownership}
 
 A failed background state write is observed immediately and retained by the
 resident owner. It does not become an unhandled promise rejection. Owner snapshots

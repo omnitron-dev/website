@@ -1,12 +1,13 @@
 ---
+id: "titan/modules/pm"
+slug: "/docs/titan/modules/pm"
 title: titan-pm
 ---
 
-import ModuleBadge from '@site/src/components/ModuleBadge';
 
 # titan-pm
 
-<ModuleBadge origin="official" pkg="@omnitron-dev/titan-pm" status="stable" />
+<span class="module-badge">official · @omnitron-dev/titan-pm · stable</span>
 
 Process supervision with worker pools, IPC (Unix / TCP / WebSocket),
 supervisor patterns, restart policies with exponential backoff,
@@ -18,7 +19,7 @@ and decorators for in-process workflows and resilience.
 pnpm add @omnitron-dev/titan-pm
 ```
 
-## When you need it
+## When you need it {#when-you-need-it}
 
 - **CPU-bound work.** Image processing, ML inference, parsing —
   isolate from the main event loop.
@@ -30,7 +31,7 @@ pnpm add @omnitron-dev/titan-pm
   Workflow state is in memory; process or host loss requires an external durable
   operation/recovery contract.
 
-## Quickstart
+## Quickstart {#quickstart}
 
 ```typescript
 import { ProcessManagerModule } from '@omnitron-dev/titan-pm';
@@ -65,7 +66,7 @@ class AppModule {}
 
 Async config via `forRootAsync({ useFactory, inject?, useExisting? })`.
 
-## `IProcessManagerConfig`
+## `IProcessManagerConfig` {#iprocessmanagerconfig}
 
 | Option            | Type                                                                                                |
 | ----------------- | --------------------------------------------------------------------------------------------------- |
@@ -79,7 +80,7 @@ Async config via `forRootAsync({ useFactory, inject?, useExisting? })`.
 
 Defaults are pulled from `DEFAULT_PM_CONFIG`.
 
-## `ProcessManager` — the API
+## `ProcessManager` — the API {#processmanager--the-api}
 
 ```typescript
 import { ProcessManager, PM_MANAGER_TOKEN, Process, Public }
@@ -136,7 +137,7 @@ The `ServiceProxy` returned by `spawn()` exposes every `@Public`
 method of the process class as a typed remote call — transport
 details are hidden.
 
-### Worker pools
+### Worker pools {#worker-pools}
 
 ```typescript
 const pool = await this.pm.pool(ImageWorker, {
@@ -164,7 +165,7 @@ while every worker is busy, unhealthy or retiring, and resume when capacity or
 health recovers. Normal recycling can change worker PIDs without restarting the
 application or replacing its topology endpoint.
 
-### Supervisors
+### Supervisors {#supervisors}
 
 ```typescript
 const supervisor = this.pm.createSupervisor(ParentProcess);
@@ -191,13 +192,13 @@ Recovery is serialized per supervisor. `ONE_FOR_ONE` preserves unaffected siblin
 
 Use `child:start-failed` for the original cause, `child:restart` for attempts, and `child:started` for readiness. `child:recovery-stopped` means policy declined further attempts or failed itself; critical exhaustion emits `escalate`. Explicit `restartChild(name)` can retry a failed declaration. Omnitron preserves the last failure until the whole application is online and reports when the policy stops recovery.
 
-## Decorators
+## Decorators {#decorators}
 
 The rich decorator set is what makes processes feel like local
 services. Annotated processes can declare lifecycle, observability,
 resilience and workflow compensation declaratively.
 
-### Class-level
+### Class-level {#class-level}
 
 | Decorator         | Purpose                                                          |
 | ----------------- | ---------------------------------------------------------------- |
@@ -206,7 +207,7 @@ resilience and workflow compensation declaratively.
 | `@Actor()`        | Compatibility metadata only; no actor runtime or serial mailbox                         |
 | `@Supervisor(opts?)`| Supervisor for child processes                                 |
 
-### Method-level — exposure and lifecycle
+### Method-level — exposure and lifecycle {#method-level--exposure-and-lifecycle}
 
 | Decorator         | Purpose                                                          |
 | ----------------- | ---------------------------------------------------------------- |
@@ -217,7 +218,7 @@ resilience and workflow compensation declaratively.
 | `@OnShutdown()`   | Cleanup hook before the process exits                            |
 | `@Child()`        | Supervisor: declare a supervised child                           |
 
-### Method-level — observability
+### Method-level — observability {#method-level--observability}
 
 | Decorator                | Purpose                                                          |
 | ------------------------ | ---------------------------------------------------------------- |
@@ -226,7 +227,7 @@ resilience and workflow compensation declaratively.
 | `@Validate(options)`     | Validate input (`{ schema?, validator? }`)                       |
 | `@Cache(options?)`       | Cache the result (`{ ttl?, key?, condition? }`)                  |
 
-### Method-level — resilience
+### Method-level — resilience {#method-level--resilience}
 
 | Decorator                | Purpose                                                      |
 | ------------------------ | ------------------------------------------------------------ |
@@ -234,7 +235,7 @@ resilience and workflow compensation declaratively.
 | `@RateLimit(opts)`       | Rate-limit the method (`{ rps?, burst?, strategy?, key? }`)  |
 | `@Idempotent(opts)`      | Deduplicate by key (`{ key, ttl? }` — `key` names the arg field, `ttl` a duration string like `'1h'`) |
 
-### Combined example — a worker class
+### Combined example — a worker class {#combined-example--a-worker-class}
 
 ```typescript
 import {
@@ -265,7 +266,7 @@ class ImageWorker {
 }
 ```
 
-## Architecture
+## Architecture {#architecture}
 
 ```mermaid
 flowchart TB
@@ -289,7 +290,7 @@ without firing its exit signal, the sweep detects the dead PID
 (every `livenessSweepIntervalMs`, default 30 s) and tells the
 supervisor to restart per policy.
 
-## Tokens
+## Tokens {#tokens}
 
 | Token                   |
 | ----------------------- |
@@ -300,7 +301,7 @@ supervisor to restart per policy.
 | `PM_METRICS_TOKEN`      |
 | `PM_HEALTH_TOKEN`       |
 
-## Lifecycle
+## Lifecycle {#lifecycle}
 
 `ProcessManager` is registered as a singleton service. On
 application shutdown, `shutdown({ timeout?, force? })` runs to
@@ -321,7 +322,7 @@ application handles and reports aggregate failures while keeping the manager
 available for a later explicit start. Terminal manager shutdown belongs to the
 resident execution owner or Titan's application lifecycle.
 
-## Isolation modes
+## Isolation modes {#isolation-modes}
 
 | Isolation | Backed by            | Best for                                                     |
 | --------- | -------------------- | ------------------------------------------------------------ |
@@ -338,7 +339,7 @@ Sandboxing is a separate option, `security.isolation` on a spawn
 that shares the parent's filesystem and network, and say so in a warning at
 spawn time. Do not rely on either as a security boundary.
 
-## Transport choice
+## Transport choice {#transport-choice}
 
 | Transport   | Best for                                            |
 | ----------- | --------------------------------------------------- |
@@ -346,7 +347,7 @@ spawn time. Do not rely on either as a security boundary.
 | `tcp`       | Cross-host workers; encrypt with TLS if needed     |
 | `ws`        | Long-lived workers behind a proxy                   |
 
-## Anti-patterns
+## Anti-patterns {#anti-patterns}
 
 - **Tiny tasks in `child` isolation.** Process fork has ~50 ms
   startup cost. Reserve for long-lived work or pre-warmed pools.
@@ -359,7 +360,7 @@ spawn time. Do not rely on either as a security boundary.
   shared mutable state. If you need shared state, put it in Redis
   or a database.
 
-## See also
+## See also {#see-also}
 
 - [Resilience / Retry](../resilience/retry.md), [Circuit Breaker](../resilience/circuit-breaker.md)
 - [`titan-metrics`](./metrics.mdx) — collects process metrics
@@ -367,7 +368,7 @@ spawn time. Do not rely on either as a security boundary.
 - [`titan-events`](./events.mdx) — inter-process event delivery
 
 
-## Workflow failure and recovery
+## Workflow failure and recovery {#workflow-failure-and-recovery}
 
 `@Workflow()`, `@Stage({ dependsOn, timeout, retries })` and `@Compensate(stageName)`
 are executed by Titan PM. Dependency validation uses Titan's shared
@@ -396,7 +397,7 @@ contracts in the [resilient control-plane design](../../omnitron/resilient-contr
 The `@Actor()` compatibility decorator records metadata only; it does not create an
 actor mailbox, serialize messages or provide distributed actor supervision.
 
-## Confirmed process termination
+## Confirmed process termination {#confirmed-process-termination}
 
 `kill()` resolves `true` after termination and cleanup, and `false` only when the
 process is not registered. An unconfirmed exit rejects and retains the worker

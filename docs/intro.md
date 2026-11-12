@@ -1,4 +1,6 @@
 ---
+id: "intro"
+slug: "/docs/intro"
 sidebar_position: 1
 title: Introduction
 description: Choose the Omnitron layers you need, understand their boundaries, and build your first service.
@@ -14,7 +16,7 @@ manages applications and infrastructure.
 Start with a Titan application. Add the client, interface and supervision
 layers when your system needs them.
 
-## Choose a starting point
+## Choose a starting point {#choose-a-starting-point}
 
 | Your goal | Start here | What you will produce |
 | --- | --- | --- |
@@ -28,7 +30,7 @@ layers when your system needs them.
 Use the [developer map](./getting-started/developer-map.md) for task-based
 routes through the manual, including a verification step for each route.
 
-## The stack
+## The stack {#the-stack}
 
 | Layer | Package | Boundary |
 | --- | --- | --- |
@@ -43,7 +45,7 @@ Node.js; installing the Omnitron supervisor is optional. Prism and the React
 bindings are also optional. See the [architecture](./foundations/architecture.md)
 for the runtime relationships.
 
-## Contracts across the wire
+## Contracts across the wire {#contracts-across-the-wire}
 
 A client can import a service's TypeScript type and call its methods through a
 Netron proxy. Sharing that type catches incompatible calls **when both sides
@@ -56,7 +58,7 @@ Use [validation](./titan/validation/overview.md) for untrusted inputs,
 The [quickstart](./getting-started/quickstart.md) shows the complete registration
 and transport setup.
 
-## Add capabilities deliberately
+## Add capabilities deliberately {#add-capabilities-deliberately}
 
 Titan modules are separate packages. Their dependency and lifecycle contracts
 are documented alongside their configuration.
@@ -70,7 +72,7 @@ are documented alongside their configuration.
 | Operational signals | [Health](./titan/modules/health.mdx) · [Metrics](./titan/modules/metrics.mdx) |
 | A complete module inventory | [Module map](./titan/modules/module-map.mdx) |
 
-## Read implementation status before adopting a design
+## Read implementation status before adopting a design {#read-implementation-status-before-adopting-a-design}
 
 The module and API references describe shipped code. Pages labelled
 **Design RFC** describe architectural proposals and application patterns that
@@ -83,7 +85,7 @@ The project is pre-1.0. Pin package versions, read the
 before upgrading. See [compatibility](./reference/compatibility.md) for runtime
 requirements and support boundaries.
 
-## Work from source
+## Work from source {#work-from-source}
 
 The framework, packages and supervisor live in the
 [Omnitron repository](https://github.com/omnitron-dev/omni). This manual has its

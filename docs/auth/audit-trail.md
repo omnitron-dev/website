@@ -1,4 +1,6 @@
 ---
+id: "auth/audit-trail"
+slug: "/docs/auth/audit-trail"
 title: Audit Trail
 sidebar_position: 5
 ---
@@ -14,7 +16,7 @@ Every authorisation-relevant mutation lands in the platform's
 substrate — without it, post-incident reconstruction is
 impossible on a closed, anonymous platform.
 
-## Shape
+## Shape {#shape}
 
 ```ts
 interface NewAuditLog {
@@ -42,7 +44,7 @@ Two invariants the platform protects mechanically:
    service-layer code paths running under a real JWT or the
    `'system'` escape hatch (migrations, workers).
 
-## What gets logged
+## What gets logged {#what-gets-logged}
 
 | Surface                                       | Action prefix                            |
 |-----------------------------------------------|------------------------------------------|
@@ -62,7 +64,7 @@ delegates to a service that does (the per-permission services
 in [Per-user overrides](./overrides.md) are the canonical
 template).
 
-## Recovery + actor capture invariant
+## Recovery + actor capture invariant {#recovery--actor-capture-invariant}
 
 The admin recovery surface
 (`OrganizationsService.forceTransferOwnership`) requires the
@@ -85,7 +87,7 @@ Same pattern applies to other recovery-style actions; the
 reason is enforced at the RPC-zod schema level so it never
 becomes optional by convention.
 
-## Read surface
+## Read surface {#read-surface}
 
 The admin UI reads via the `Audit` RPC service:
 
@@ -115,7 +117,7 @@ every role except `'system'`, so audit entries can only be
 written through the authorised service-layer path — never via a
 raw client-issued INSERT.
 
-## Redaction
+## Redaction {#redaction}
 
 Free-form `details` blobs are written as-is. Two rules:
 
@@ -129,7 +131,7 @@ Free-form `details` blobs are written as-is. Two rules:
 A redaction sweep over historical entries is a separate
 batch job — see the security checklist for the procedure.
 
-## See also
+## See also {#see-also}
 
 - [Permissions](./permissions.md) — `admin.audit.view` and the
   registry it sits in.

@@ -1,4 +1,6 @@
 ---
+id: "utilities/eventemitter"
+slug: "/docs/utilities/eventemitter"
 sidebar_position: 4
 title: eventemitter
 description: Async event emitter with parallel/serial/reduce patterns.
@@ -18,7 +20,7 @@ wildcards, history, metrics, and scheduling.
 
 Verified against `packages/eventemitter/src/`.
 
-## Why not just a plain sync emitter?
+## Why not just a plain sync emitter? {#why-not-just-a-plain-sync-emitter}
 
 The Node built-in `EventEmitter` calls handlers **synchronously** in
 registration order. That's wrong for two common cases:
@@ -31,7 +33,7 @@ registration order. That's wrong for two common cases:
 This package solves both. The standard `on` / `once` / `emit` /
 `off` surface is preserved; the async `emit*` methods are additive.
 
-## Quick start
+## Quick start {#quick-start}
 
 ```typescript
 import { EventEmitter } from '@omnitron-dev/eventemitter';
@@ -50,7 +52,7 @@ await bus.emitParallel('user.created', newUser);
 > (`emitTyped`), wildcards, history, and metrics, use
 > `EnhancedEventEmitter<TEventMap>` (below).
 
-## Four emission patterns
+## Four emission patterns {#four-emission-patterns}
 
 | Method | Behaviour | Use case |
 | ------ | --------- | -------- |
@@ -60,7 +62,7 @@ await bus.emitParallel('user.created', newUser);
 | `emitReduce(event, ...args)` | Chains handlers; each receives the prior return | Building up a result through middleware |
 | `emitReduceRight(event, ...args)` | Like `emitReduce` but reverse order | Right-associative pipelines |
 
-### `emitParallel`
+### `emitParallel` {#emitparallel}
 
 ```typescript
 bus.on('order.placed', async (order) => sendConfirmation(order));
@@ -72,7 +74,7 @@ await bus.emitParallel('order.placed', order);
 // If any throws, the others still run; the error propagates.
 ```
 
-### `emitSerial`
+### `emitSerial` {#emitserial}
 
 ```typescript
 bus.on('migration.run', async () => createTables());
@@ -84,7 +86,7 @@ await bus.emitSerial('migration.run');
 // If one throws, subsequent handlers don't run.
 ```
 
-### `emitReduce`
+### `emitReduce` {#emitreduce}
 
 ```typescript
 bus.on('request.transform', async (req) => ({ ...req, signed: true }));
@@ -99,7 +101,7 @@ The seed is the argument(s) you pass after the event name; each
 handler receives the **return value** of the previous one as its
 argument. Middleware-style.
 
-## Concurrency control
+## Concurrency control {#concurrency-control}
 
 ```typescript
 const bus = new EventEmitter(3);     // or: bus.setConcurrency(3)
@@ -116,7 +118,7 @@ for (const img of images) {
 Useful to avoid stampeding handlers that hit limited resources
 (database connections, third-party APIs, CPU-bound work).
 
-## Subscription management
+## Subscription management {#subscription-management}
 
 ```typescript
 const unsubscribe = bus.subscribe('user.created', handler);
@@ -130,7 +132,7 @@ bus.once('user.created', handleFirstOnly);
 `subscribe()` returns an `() => void` — cleaner than `.off()` in
 React `useEffect` cleanup.
 
-## Wildcard subscriptions
+## Wildcard subscriptions {#wildcard-subscriptions}
 
 ```typescript
 import { EnhancedEventEmitter } from '@omnitron-dev/eventemitter';
@@ -154,7 +156,7 @@ constructor takes `{ wildcard?, delimiter?, concurrency? }` —
 wildcards are enabled unless `wildcard: false`. Use `**` to match
 across delimiter levels.
 
-## History
+## History {#history}
 
 History is built into `EnhancedEventEmitter` — enable it, then
 query or replay:
@@ -177,7 +179,7 @@ a custom `storage` implementing the `EventStorage` interface. The
 `EventHistory` / `MemoryEventStorage` classes are also exported if
 you want to wire history up by hand.
 
-## Metrics
+## Metrics {#metrics}
 
 Metrics are likewise built into `EnhancedEventEmitter`:
 
@@ -203,7 +205,7 @@ bus.getMetricsSummary();   // human-readable string
 Per-event counts, error counts, latency. The underlying collector
 class is exported as `MetricsCollector`.
 
-## Scheduled emissions
+## Scheduled emissions {#scheduled-emissions}
 
 Scheduling is built into `EnhancedEventEmitter` via `schedule()`:
 
@@ -224,7 +226,7 @@ bus.cancelSchedule(id);
 The standalone `EventScheduler` class — `schedule(event, data,
 options, emitFn)`, `cancel(id)`, `cancelAll()` — is also exported.
 
-## Where it's used in the stack
+## Where it's used in the stack {#where-its-used-in-the-stack}
 
 | Module | What for |
 | ------ | -------- |
@@ -234,7 +236,7 @@ options, emitFn)`, `cancel(id)`, `cancelAll()` — is also exported.
 | `titan-pm` | Process lifecycle events (`process:crash`, `pool:scaled`, …) |
 | `titan-discovery` | Node-registry events |
 
-## When to use this vs `titan-events`
+## When to use this vs `titan-events` {#when-to-use-this-vs-titan-events}
 
 | If you… | Use |
 | ------- | --- |
@@ -245,7 +247,7 @@ options, emitFn)`, `cancel(id)`, `cancelAll()` — is also exported.
 This package is the **primitive**; `titan-events` is the
 framework integration around it.
 
-## Performance
+## Performance {#performance}
 
 | Op | Time |
 | -- | ---- |
@@ -255,7 +257,7 @@ framework integration around it.
 | Wildcard match | O(handlers) per emission (linear scan) |
 | Subscribe / unsubscribe | O(1) |
 
-## See also
+## See also {#see-also}
 
 - [titan-events](../titan/modules/events.mdx) — Titan module built on this
 - [common](./common.md) — sibling utility (`pLimit` powers the concurrency limiter)

@@ -1,4 +1,6 @@
 ---
+id: "titan/modules/rls"
+slug: "/docs/titan/modules/rls"
 title: RLS context guards
 description: The shipped context guard decorators, their bypass semantics and the boundary with database policies.
 ---
@@ -24,7 +26,7 @@ class TenantReports {
 Establish a trusted context before invoking the method. A context supplied
 from unverified request data is not an authorization boundary.
 
-## Guards and behaviour
+## Guards and behaviour {#guards-and-behaviour}
 
 | Export | Check |
 | --- | --- |
@@ -48,7 +50,7 @@ requires each group to pass. A trusted context with `auth.isSystem`
 The wrapper is asynchronous. Await guarded methods and test both accepted
 and rejected calls.
 
-## Three separate boundaries
+## Three separate boundaries {#three-separate-boundaries}
 
 1. [RPC authentication](../netron/authentication.md) establishes identity.
 2. A context guard controls whether a method may execute in that context.

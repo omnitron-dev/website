@@ -1,4 +1,6 @@
 ---
+id: "frontend/netron/auth"
+slug: "/docs/frontend/netron/auth"
 sidebar_position: 7
 title: Auth client
 description: AuthenticationClient — token storage, auto-refresh, cross-tab sync, inactivity timeout.
@@ -25,7 +27,7 @@ works standalone.
 
 Verified against `packages/netron-browser/src/auth/`.
 
-## Wiring
+## Wiring {#wiring}
 
 Pass an `AuthenticationClient` to the transport client. The
 client attaches the token to every request and the built-in
@@ -64,7 +66,7 @@ await auth.logout();   // POSTs logoutConfig.endpoint if set, then clearAuth()
 > `AuthManager`, no `setTokens`, no `clear()`. Use `setAuth()` /
 > `clearAuth()` / `logout()` and `getToken()`.
 
-## Constructor options
+## Constructor options {#constructor-options}
 
 `new AuthenticationClient(options: AuthOptions)` — all fields optional:
 
@@ -81,7 +83,7 @@ await auth.logout();   // POSTs logoutConfig.endpoint if set, then clearAuth()
 | `crossTabSync` | `{ enabled: true, syncKey: 'netron_auth_sync' }` | Sync sign-in/out across tabs |
 | `transport` | — | A token transport strategy (Bearer / Cookie / Hybrid — see below) |
 
-## Storage backends
+## Storage backends {#storage-backends}
 
 `storage` takes a `TokenStorage` **instance** (not a string).
 Four implementations ship from `@omnitron-dev/netron-browser`:
@@ -105,7 +107,7 @@ removeToken() / hasToken()` plus generic `getValue() / setValue()
 / removeValue()` (the client persists a serialized context
 alongside the token).
 
-### Token transports (Bearer / Cookie / Hybrid)
+### Token transports (Bearer / Cookie / Hybrid) {#token-transports-bearer--cookie--hybrid}
 
 How the token reaches the server is a pluggable
 `IClientTokenTransport` (T#176). Pass one as `transport`:
@@ -127,7 +129,7 @@ const auth = new AuthenticationClient({
 });
 ```
 
-## Token + result shapes
+## Token + result shapes {#token--result-shapes}
 
 After authenticating, you hand the client an `AuthResult` (the
 shape your server's authenticate task returns):
@@ -156,7 +158,7 @@ interface AuthContext {
 proactive refresh. For a bare token (no full result) use
 `setToken(token, context?)`.
 
-## Auto-refresh flow
+## Auto-refresh flow {#auto-refresh-flow}
 
 ```mermaid
 sequenceDiagram
@@ -187,13 +189,13 @@ Proactive (`autoRefresh` + `refreshThreshold`) covers clock skew
 and slow networks; the reactive `auth-error-handler` middleware
 covers a refresh that fired mid-request.
 
-### Concurrent-request deduplication
+### Concurrent-request deduplication {#concurrent-request-deduplication}
 
 `refreshToken()` coalesces concurrent calls via a single shared
 `refreshPromise` — multiple requests that 401 simultaneously
 share one refresh call rather than all hitting the endpoint.
 
-## Cross-tab sync
+## Cross-tab sync {#cross-tab-sync}
 
 With `crossTabSync: { enabled: true }`, sign-in / sign-out in one
 tab propagates to others via the storage `storage` event (the
@@ -221,7 +223,7 @@ sequenceDiagram
 runtime.) Cross-tab auth sync uses `storage` events; the separate
 multi-tab WebSocket leader-election feature is unrelated.
 
-## Inactivity timeout
+## Inactivity timeout {#inactivity-timeout}
 
 ```typescript
 new AuthenticationClient({
@@ -241,7 +243,7 @@ in your app:
 auth.on('inactivity', () => navigate('/sign-in?reason=timeout'));
 ```
 
-## Event subscriptions
+## Event subscriptions {#event-subscriptions}
 
 Subscribe with `on(event, handler)` / unsubscribe with
 `off(event, handler)`. The six event types:
@@ -255,7 +257,7 @@ auth.on('inactivity',      ({ lastActivity }) => { /* idle timeout */ });
 auth.on('cross-tab-sync',  ({ type })         => { /* another tab changed auth */ });
 ```
 
-## React integration
+## React integration {#react-integration}
 
 netron-react's `AuthProvider` wraps the auth lifecycle and
 exposes `useAuth()`. Sign-in runs through the provider's
@@ -293,7 +295,7 @@ function UserMenu() {
 refresh, getAuthHeaders, hasRole, hasPermission, hasAnyRole,
 hasAllRoles }`.
 
-### Route guards
+### Route guards {#route-guards}
 
 ```tsx
 import { AuthGuard, GuestGuard } from '@omnitron-dev/netron-react/auth';
@@ -313,7 +315,7 @@ import { AuthGuard, GuestGuard } from '@omnitron-dev/netron-react/auth';
 `<RoleGuard role="…">` / `<PermissionGuard permission="…">` gate
 on RBAC.
 
-### Role-gated content
+### Role-gated content {#role-gated-content}
 
 ```tsx
 import { useAuth } from '@omnitron-dev/netron-react/auth';
@@ -328,7 +330,7 @@ function AdminPanel() {
 `hasRole(role)` checks the context's `roles`; `hasAnyRole(roles)`
 / `hasAllRoles(roles)` cover the array cases.
 
-## Sign-in flow with 2FA
+## Sign-in flow with 2FA {#sign-in-flow-with-2fa}
 
 ```tsx
 async function handleSignIn(values: { email: string; password: string; totpCode?: string }) {
@@ -352,7 +354,7 @@ The two-step flow keeps the 2FA input out of the password form
 until needed. (Through React, prefer `useAuth().login(values)` —
 it runs the provider's `onLogin` and calls `setAuth` for you.)
 
-## Sign-in flow with WebAuthn / passkey
+## Sign-in flow with WebAuthn / passkey {#sign-in-flow-with-webauthn--passkey}
 
 ```typescript
 const challenge  = await client.invoke('auth', 'getWebAuthnChallenge', [{ email }]);
@@ -364,7 +366,7 @@ auth.setAuth(result);
 The client doesn't care about the source — `setAuth` stores the
 result the same way regardless of method.
 
-## Programmatic token access (advanced)
+## Programmatic token access (advanced) {#programmatic-token-access-advanced}
 
 ```typescript
 const token   = auth.getToken();              // string | undefined (synchronous)
@@ -378,7 +380,7 @@ Useful for direct `fetch` calls outside the RPC client (file
 uploads, third-party SDKs) — merge `getAuthHeaders()` into your
 request.
 
-## Custom refresh
+## Custom refresh {#custom-refresh}
 
 `refreshConfig` shapes the refresh request — use `buildBody` /
 `headers` / `method` when refresh isn't a plain
@@ -395,7 +397,7 @@ new AuthenticationClient({
 });
 ```
 
-## Security considerations
+## Security considerations {#security-considerations}
 
 - **Default storage is memory** — secure-by-default. Opt into
   `LocalTokenStorage` only when you need persistence across
@@ -411,7 +413,7 @@ new AuthenticationClient({
 - **Token rotation hooks** (`auth.on('token-refreshed', …)`) can
   surface session rotation in a security dashboard.
 
-## Best practices
+## Best practices {#best-practices}
 
 - **One `AuthenticationClient` per app**, wired before any RPC
   calls fire.
@@ -424,14 +426,14 @@ new AuthenticationClient({
 - **`crossTabSync: { enabled: true }`** unless you have a
   specific reason not to.
 
-## Anti-patterns
+## Anti-patterns {#anti-patterns}
 
 - **Storing tokens in both cookies and localStorage.** Pick one
   transport model; mixed approaches cause refresh / clear bugs.
 - **Reaching for `AuthManager` / `setTokens`.** Those don't
   exist — it's `AuthenticationClient` + `setAuth` / `clearAuth`.
 
-## See also
+## See also {#see-also}
 
 - [netron-react auth](./react.md#authentication) — the React provider + guards
 - [Middleware](./middleware.md) — `createAuthMiddleware`, `createAuthErrorMiddleware`, `createCsrfMiddleware`

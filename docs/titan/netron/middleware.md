@@ -1,4 +1,6 @@
 ---
+id: "titan/netron/middleware"
+slug: "/docs/titan/netron/middleware"
 sidebar_position: 3
 title: RPC Middleware
 description: Per-call wrapping for cross-cutting concerns.
@@ -27,7 +29,7 @@ over HTTP. (The transport-agnostic *context* type used below,
 > resolution. See [DI Middleware](../di/middleware.md) for the
 > distinction.
 
-## The middleware function
+## The middleware function {#the-middleware-function}
 
 A middleware is a plain function, not a class with `handle()`:
 
@@ -64,7 +66,7 @@ The HTTP-specific `HttpMiddlewareContext` extends this with `request`,
 `Promise<void>` — there is no result to return; read/write `ctx.result`
 instead.
 
-## Registering middleware
+## Registering middleware {#registering-middleware}
 
 Middleware is registered on the HTTP server's `MiddlewarePipeline`,
 not on `Netron`. The pipeline exposes:
@@ -82,7 +84,7 @@ defaults (request-id, token extraction, the `NetronAuthMiddleware`);
 app bootstrap code adds custom middleware where it constructs the
 transport.
 
-## Stages and order
+## Stages and order {#stages-and-order}
 
 The pipeline runs in five **stages** (`MiddlewareStage`), and within a
 stage middleware is ordered by `priority` (lower runs first, default
@@ -104,7 +106,7 @@ PRE_PROCESS → PRE_INVOKE → [dispatch] → POST_INVOKE → POST_PROCESS
 Put cheaper checks before expensive ones (rate-limit lookup before a
 heavy parse) by giving them a lower `priority`.
 
-## A custom middleware — timing
+## A custom middleware — timing {#a-custom-middleware--timing}
 
 ```typescript
 import { type MiddlewareFunction, MiddlewareStage } from '@omnitron-dev/titan/netron/transport/http/middleware';
@@ -136,7 +138,7 @@ Titan also ships ready-made factories on `NetronBuiltinMiddleware`
 `HttpBuiltinMiddleware` (CORS, compression, body parsing, security
 headers).
 
-## Per-method policy via decorators
+## Per-method policy via decorators {#per-method-policy-via-decorators}
 
 Method decorators (`@Auth`, `@RateLimit`, `@Cache`) are **not**
 middleware classes — they stamp `reflect-metadata` onto the method
@@ -161,7 +163,7 @@ middleware instance. The global step does the heavy lifting (validate
 token, resolve user); the decorator metadata supplies the specific
 policy.
 
-## Scoping middleware to specific methods
+## Scoping middleware to specific methods {#scoping-middleware-to-specific-methods}
 
 There is no `@Skip` decorator. To limit (or exclude) middleware, use
 the registration filters on `MiddlewareConfig` — `services` /
@@ -180,7 +182,7 @@ The built-in auth middleware (`createAuthMiddleware` /
 middleware can set `ctx.skipRemaining` to short-circuit the rest of its
 stage (honoured by the pipeline at `ctx.skipRemaining` in `MiddlewarePipeline`).
 
-## Modifying the request
+## Modifying the request {#modifying-the-request}
 
 Middleware can mutate `ctx.input` before calling `next()` — for
 example, normalising input or injecting derived data:
@@ -198,7 +200,7 @@ Mutate sparingly. Per-method validation is a better fit for
 content rules; middleware should handle cross-cutting transforms
 (normalisation, trimming, conversion to canonical form).
 
-## Modifying the response
+## Modifying the response {#modifying-the-response}
 
 `next()` runs dispatch and populates `ctx.result`; transform it after:
 
@@ -213,7 +215,7 @@ const stamp: MiddlewareFunction = async (ctx, next) => {
 
 Useful for response envelopes, version stamping, redaction.
 
-## Error interception
+## Error interception {#error-interception}
 
 Dispatch errors surface as a throw from `next()` (and are also set on
 `ctx.error`). Common pattern:
@@ -236,7 +238,7 @@ Avoid swallowing. Errors that middleware suppresses become silent
 failures; the client sees a successful response that has no real
 result.
 
-## Anti-patterns
+## Anti-patterns {#anti-patterns}
 
 - **Calling `next()` more than once.** The result is undefined.
   Some middleware in the chain will run twice; client may receive

@@ -1,4 +1,6 @@
 ---
+id: "omnitron/files"
+slug: "/docs/omnitron/files"
 title: File workspace
 description: Navigate, edit and transfer files across Omnitron nodes through the same audited Console and CLI contract.
 ---
@@ -9,7 +11,7 @@ Open **Files** in Console. Panels **A** and **B** both open on the local daemon.
 
 **Local means the daemon host.** Upload and Download refer to the computer running your browser. Selecting a project does not restrict filesystem authority: this is an administrator workspace.
 
-## Start with a location
+## Start with a location {#start-with-a-location}
 
 1. To work locally, navigate immediately in either panel. To open another location, press **+** in that panel and choose a node. To compare two directories on the same node, choose that node again. Escape cancels without opening a tab or reading the remote filesystem.
 2. A node that exports one file area opens it directly. The default **Filesystem** is `/` on the daemon host, within its operating-system permissions. If a node exports several areas, choose one; read-only areas are marked. The tab keeps its node, area and directory history. To change node or area, open another tab. If access to an area is revoked, the tab reports that and does not switch to a different area.
@@ -36,7 +38,7 @@ Keyboard entry from the sidebar lands at the same list focus target as pointer e
 
 Panel menus also provide New file, New folder, Upload, Download and Restore from trash. Symlinks are displayed but not followed; navigate to the real target path. Special files, sockets and devices are not opened as regular content.
 
-## Edit without losing another writer's change
+## Edit without losing another writer's change {#edit-without-losing-another-writers-change}
 
 The editor loads on demand and supports UTF-8 files up to 1 MiB, eight buffers, search/replace, undo, line numbers and JSON/JavaScript/TypeScript highlighting. Ctrl/Command+S saves a changed writable buffer. Theme, wrapping, language-label and read-only changes preserve the CodeMirror instance, cursor and undo history. The editor focuses the active document, exposes line/column and selection length, and offers a Wrap control for long lines. F6 cycles tabs, tools and document inside the dialog; Escape can minimize the editor without discarding buffers. Buffers stay in memory when the editor is minimized or you navigate to another Console section; a page unload warns about unsaved buffers. They are cleared on sign-out and are not stored in browser storage.
 
@@ -44,7 +46,7 @@ Saving requires the version returned by the read. A stale version is rejected, l
 
 A staged regular file is synchronized before atomic publication. Existing text files retain owner/group and basic permission bits. ACLs, extended attributes, sparse layout and hard-link relationships are not preserved by text replacement or copy. Version checks serialize Omnitron writes; they are not an operating-system compare-and-swap against unrelated processes. Avoid editing a file concurrently through another privileged program.
 
-## Configure access per node
+## Configure access per node {#configure-access-per-node}
 
 The default `/` export does not elevate the daemon to root. Unreadable directories and files return permission errors. Configure each node independently in `~/.omnitron/config.json`, restart it through your normal controlled rollout, and inspect **Files → Node → Root**. Merge the `files` field into the existing JSON object; preserve its role, authentication and transport settings. This is daemon configuration, not a `daemon` block in a project’s `omnitron.config.ts`.
 
@@ -86,7 +88,7 @@ not authorization. Older nodes need a backend update to enforce the new policy.
 
 Temporary writes and recoverable trash live in a private `.omnitron-files` directory in the item's parent directory, on the destination filesystem. The directory must belong to the daemon user and have mode 0700. It is hidden from listings and cannot be addressed through the API. This permits a `/` export without requiring write permission at `/`, and avoids cross-filesystem atomic-renaming problems.
 
-## Transfer protocol and recovery
+## Transfer protocol and recovery {#transfer-protocol-and-recovery}
 
 `OmnitronFiles` is the human-facing service shared by Console and CLI. Every public method requires `admin`; sensitive calls revalidate the current human session independently of cached transport authorization. Content reads and write intents are audited. Required intent persistence fails closed. File contents and chunk payloads are not written to audit details.
 
@@ -117,7 +119,7 @@ The coordinator acknowledges final receipts only after persisting its next curso
 
 Browser upload/download progress belongs to that page; leaving or closing it can interrupt these operations. Node-to-node transfers are daemon-owned. After a browser upload loses its publication response, inspect its displayed receipt before retrying. Do not assume a network error means no file was published.
 
-## Copy a directory through an archive
+## Copy a directory through an archive {#copy-a-directory-through-an-archive}
 
 Select exactly one directory, choose the other panel's destination, and open Copy.
 The output mode is explicit:
@@ -162,7 +164,7 @@ receipt cleanup cannot be confirmed, the result remains completed/cancelled with
 the transfer or overwrite the destination. Such jobs are retained until cleanup
 is confirmed.
 
-## CLI
+## CLI {#cli}
 
 `omnitron files` uses the same service. All commands support the global `--json` mode. The local CLI has the trusted local socket identity; it does not inherit the browser account, so its transfer/trash ownership is separate.
 
@@ -190,7 +192,7 @@ omnitron --json files cancel <transfer-id>
 
 `files upload <path> --from <local-file> --root <id>` streams verified chunks. `files download <path> --to <new-local-file> --root <id>` stages locally and refuses overwriting. After an ambiguous upload, `files upload-status <id>`, `files upload-finish <id>` and `files upload-abort <id>` inspect/reconcile its receipt on the selected `--node`. Finish cannot publish incomplete data; abort cannot discard an unresolved committing receipt.
 
-## Typed API clients
+## Typed API clients {#typed-api-clients}
 
 The same authenticated service is available through `IOmnitronFilesService` from
 `@omnitron-dev/omnitron/dto/services`. Obtain its `OmnitronFiles` proxy through your
@@ -248,7 +250,7 @@ and execution validate the selected format again.
 on a node. `fileNameError` and `fileStructureError` support advisory UI validation;
 the node independently enforces name, structural and authorization checks.
 
-## Design references and extension points
+## Design references and extension points {#design-references-and-extension-points}
 
 The interaction model compares representative managers across desktop, terminal and browser environments; it is not a claim to inventory every file manager.
 

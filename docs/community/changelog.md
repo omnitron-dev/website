@@ -1,4 +1,6 @@
 ---
+id: "community/changelog"
+slug: "/docs/community/changelog"
 sidebar_position: 3
 title: Changelog
 description: Versioning policy + how to find release notes per package.
@@ -6,7 +8,7 @@ description: Versioning policy + how to find release notes per package.
 
 # Changelog
 
-## Where to find release notes
+## Where to find release notes {#where-to-find-release-notes}
 
 Each package versions independently and publishes its own
 changelog. Release notes live in three places:
@@ -23,7 +25,7 @@ changelog. Release notes live in three places:
 3. **npm versions** — `pnpm view @omnitron-dev/titan versions`
    for the version history of any package.
 
-## Versioning policy
+## Versioning policy {#versioning-policy}
 
 We follow **strict semver**:
 
@@ -33,7 +35,7 @@ We follow **strict semver**:
 | **MINOR** (`1.0.0 → 1.1.0`) | New feature or non-breaking improvement. New module, new option with a safe default, performance improvement. |
 | **PATCH** (`1.0.0 → 1.0.1`) | Bug fix. No API change. |
 
-### Pre-1.0 exception
+### Pre-1.0 exception {#pre-10-exception}
 
 Packages with version `0.x.y` may have breaks in minor versions
 (`0.1.0 → 0.2.0` may break). Once a package hits `1.0.0`, full
@@ -42,7 +44,7 @@ semver applies.
 This matches semver's [definition](https://semver.org/#spec-item-4)
 for pre-1.0 packages.
 
-### Per-package versioning
+### Per-package versioning {#per-package-versioning}
 
 Each `@omnitron-dev/*` package versions independently. This means:
 
@@ -55,7 +57,7 @@ Each `@omnitron-dev/*` package versions independently. This means:
 Peer-dependency relationships make this manageable; each module
 declares which `titan` versions it supports.
 
-## Support windows
+## Support windows {#support-windows}
 
 We aim for:
 
@@ -67,7 +69,7 @@ We aim for:
 
 Pre-1.0 packages are best-effort.
 
-## Breaking change communication
+## Breaking change communication {#breaking-change-communication}
 
 Breaking changes get:
 
@@ -80,7 +82,7 @@ Breaking changes get:
 We aim to avoid surprise breaks. If you depend on undocumented
 internals, expect them to break without notice.
 
-## Release cadence
+## Release cadence {#release-cadence}
 
 Roughly:
 
@@ -93,7 +95,7 @@ Roughly:
 
 There is no fixed schedule — releases ship when they're ready.
 
-## Upgrade guides
+## Upgrade guides {#upgrade-guides}
 
 When a major version requires non-trivial migration, an upgrade
 guide is added to the docs:
@@ -105,7 +107,7 @@ guide is added to the docs:
 For specific packages, the package's `CHANGELOG.md` has the
 detail.
 
-## Subscribe to releases
+## Subscribe to releases {#subscribe-to-releases}
 
 | Channel | URL |
 | ------- | --- |
@@ -114,7 +116,7 @@ detail.
 | npm package | `npm info @omnitron-dev/<pkg>` |
 | Blog | [/blog](/blog) (significant releases get a post) |
 
-## See also
+## See also {#see-also}
 
 - [Contributing / Release process](./contributing.md#release-process)
 - [Security policy](./security.md) — security-fix SLA

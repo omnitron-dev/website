@@ -1,12 +1,13 @@
 ---
+id: "titan/modules/discovery"
+slug: "/docs/titan/modules/discovery"
 title: titan-discovery
 ---
 
-import ModuleBadge from '@site/src/components/ModuleBadge';
 
 # titan-discovery
 
-<ModuleBadge origin="official" pkg="@omnitron-dev/titan-discovery" status="stable" />
+<span class="module-badge">official · @omnitron-dev/titan-discovery · stable</span>
 
 Redis-backed service discovery with TTL-based heartbeats, pub/sub
 event broadcasting, automatic Netron integration so clients can
@@ -18,7 +19,7 @@ heartbeat failures.
 pnpm add @omnitron-dev/titan-discovery @omnitron-dev/titan-redis
 ```
 
-## When you need it
+## When you need it {#when-you-need-it}
 
 - **Dynamic service topology.** Pods come and go (autoscaling,
   rolling deploys); discovery keeps the routing table current.
@@ -27,7 +28,7 @@ pnpm add @omnitron-dev/titan-discovery @omnitron-dev/titan-redis
 - **Health-aware routing.** Unhealthy nodes drop out of the registry
   automatically when heartbeats stop and the TTL expires.
 
-## Quickstart
+## Quickstart {#quickstart}
 
 ```typescript
 import { DiscoveryModule } from '@omnitron-dev/titan-discovery';
@@ -52,7 +53,7 @@ import { TitanRedisModule } from '@omnitron-dev/titan-redis';
 class AppModule {}
 ```
 
-## `DiscoveryModuleOptions`
+## `DiscoveryModuleOptions` {#discoverymoduleoptions}
 
 `forRoot()` accepts `DiscoveryModuleOptions`, which extends `DiscoveryOptions`
 (the heartbeat / pub-sub fields) with the three module-wiring fields
@@ -76,7 +77,7 @@ class AppModule {}
 > heartbeat ratio of 3 strikes balance between premature ejection
 > (`TTL < 2×`) and slow recovery (`TTL > 5×`).
 
-## `DiscoveryService` — the API
+## `DiscoveryService` — the API {#discoveryservice--the-api}
 
 ```typescript
 import { DISCOVERY_SERVICE_TOKEN, type IDiscoveryService }
@@ -93,7 +94,7 @@ class AdminService {
 }
 ```
 
-### Registration
+### Registration {#registration}
 
 | Method                                                                            | Purpose                                          |
 | --------------------------------------------------------------------------------- | ------------------------------------------------ |
@@ -106,7 +107,7 @@ class AdminService {
 | `updateAddress(address)`                                                          | Self-update (uses `this.nodeId`)                 |
 | `updateServices(services)`                                                        | Self-update services                             |
 
-### Discovery
+### Discovery {#discovery}
 
 | Method                                       | Returns                          |
 | -------------------------------------------- | -------------------------------- |
@@ -118,7 +119,7 @@ class AdminService {
 | `nodeExists(nodeId)`                         | `Promise<boolean>`               |
 | `getNodeInfo(nodeId)`                        | `Promise<NodeInfo \| null>`      |
 
-### Events
+### Events {#events}
 
 ```typescript
 this.disco.onEvent((event) => {
@@ -133,7 +134,7 @@ When `pubSubEnabled: true`, registration / update events propagate
 changes only on their next `getActiveNodes` / `findNodesByService`
 call — fine for periodic sync, too slow for fast failover.
 
-## Redis key layout
+## Redis key layout {#redis-key-layout}
 
 The module owns four namespaces under `redisPrefix` (default
 `titan:discovery`):
@@ -150,7 +151,7 @@ exists. The Lua script that publishes a heartbeat refreshes both
 the node hash and the heartbeat marker atomically with the same
 TTL — no half-state.
 
-## How it works
+## How it works {#how-it-works}
 
 ```mermaid
 sequenceDiagram
@@ -182,7 +183,7 @@ The Lua script makes registration atomic:
 succeed together or not at all. **No partial state in the
 registry.**
 
-## Heartbeat retry behaviour
+## Heartbeat retry behaviour {#heartbeat-retry-behaviour}
 
 When a heartbeat fails (Redis hiccup, network blip), the service
 retries with exponential backoff:
@@ -199,7 +200,7 @@ warning is logged. The next periodic tick (5 s later by default)
 attempts again — so a sustained Redis outage causes node ejection
 once the TTL elapses without a successful refresh.
 
-## TTL tuning guide
+## TTL tuning guide {#ttl-tuning-guide}
 
 | Scenario                              | `heartbeatInterval` | `heartbeatTTL` | Why                                                |
 | ------------------------------------- | :-----------------: | :------------: | -------------------------------------------------- |
@@ -220,7 +221,7 @@ Rules of thumb:
   pods at 1 s interval, it's 100 ops/s — still cheap but plan
   Redis sizing.
 
-## Multi-region topology
+## Multi-region topology {#multi-region-topology}
 
 ```mermaid
 flowchart LR
@@ -256,7 +257,7 @@ For multi-region, two patterns work:
 Pattern (1) is almost always the right answer unless you have a
 strong reason to want a single global view.
 
-## Sentinel / cluster mode
+## Sentinel / cluster mode {#sentinel--cluster-mode}
 
 `titan-discovery` consumes whatever `Redis` client
 `titan-redis` provides — sentinel and cluster modes work
@@ -277,7 +278,7 @@ DiscoveryModule.forRoot({
 This guarantees the Lua script's multi-key atomicity holds in
 cluster mode.
 
-## Netron integration
+## Netron integration {#netron-integration}
 
 When `enableNetronIntegration: true` (default), the module
 registers a `NetronDiscoveryIntegration` service that subscribes to
@@ -307,7 +308,7 @@ await app.expose(usersService);
 The integration also re-registers existing services when itself
 starts up (`registerExisting: true`, default).
 
-## Client mode
+## Client mode {#client-mode}
 
 For pods that only consume the registry (don't host services —
 gateways, admin UIs, schedulers):
@@ -326,7 +327,7 @@ In client mode:
 - `registerNode` / `registerService` raise no error but do nothing
   observable to peers.
 
-## Failure scenarios — what happens, what to alert on
+## Failure scenarios — what happens, what to alert on {#failure-scenarios--what-happens-what-to-alert-on}
 
 | Scenario                              | Discovery behaviour                                   | What to alert on                       |
 | ------------------------------------- | ----------------------------------------------------- | -------------------------------------- |
@@ -338,7 +339,7 @@ In client mode:
 | Pub/sub channel mis-configured        | Events don't propagate; discovery still works via polling | `pubSubEnabled` mismatch in config |
 | Many pods, slow `heartbeatInterval`   | Stale registry; new pods take long to be seen         | Set `heartbeatInterval` < `5_000`      |
 
-## Tokens
+## Tokens {#tokens}
 
 | Token                                  |
 | -------------------------------------- |
@@ -351,7 +352,7 @@ In client mode:
 > only** to avoid circular deps. Always import `LOGGER_TOKEN` from
 > `@omnitron-dev/titan/module/logger`.
 
-## Lifecycle
+## Lifecycle {#lifecycle}
 
 `DiscoveryModule` implements:
 
@@ -372,7 +373,7 @@ Service-level hooks (run in dependency order from the module hooks):
 In `clientMode: true`, `onStart` still opens pub/sub (so events
 arrive) but skips registration and heartbeat.
 
-## Performance notes
+## Performance notes {#performance-notes}
 
 - **Heartbeat cost.** One Lua script EVAL per pod per
   `heartbeatInterval`. At default 5 s, 100 pods → 20 EVAL/s
@@ -385,7 +386,7 @@ arrive) but skips registration and heartbeat.
   + N SUBSCRIBE callbacks where N is the number of subscribed
   pods. Negligible at hundreds of pods.
 
-## Anti-patterns
+## Anti-patterns {#anti-patterns}
 
 - **Long `heartbeatInterval`.** Slow node-loss detection. Pick
   intervals such that `heartbeatTTL = 3 × heartbeatInterval`.
@@ -407,7 +408,7 @@ arrive) but skips registration and heartbeat.
   hiccup ejects healthy nodes — exactly the time your app needs
   the registry most.
 
-## See also
+## See also {#see-also}
 
 - [Netron / Multi-backend](../netron/multi-backend.md) — pairs with discovery
 - [`titan-redis`](./redis.mdx) — backing store

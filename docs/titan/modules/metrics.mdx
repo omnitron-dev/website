@@ -1,12 +1,13 @@
 ---
+id: "titan/modules/metrics"
+slug: "/docs/titan/modules/metrics"
 title: titan-metrics
 ---
 
-import ModuleBadge from '@site/src/components/ModuleBadge';
 
 # titan-metrics
 
-<ModuleBadge origin="official" pkg="@omnitron-dev/titan-metrics" status="stable" />
+<span class="module-badge">official · @omnitron-dev/titan-metrics · stable</span>
 
 Pure Titan-native counters, gauges, and histograms with a Prometheus
 exposition registry, pluggable storage backends (memory / PostgreSQL
@@ -23,7 +24,7 @@ pnpm add @omnitron-dev/titan-metrics
 > Scrape with any Prometheus-compatible tool; persist locally with
 > SQLite; aggregate across pods with PostgreSQL.
 
-## When you need it
+## When you need it {#when-you-need-it}
 
 - **Dashboards.** Counters for throughput, histograms for latency,
   gauges for resource use.
@@ -35,7 +36,7 @@ pnpm add @omnitron-dev/titan-metrics
   persistent Titan storage and the `OmnitronMetrics` facade let the
   CLI and webapp read history and database confirmation directly.
 
-## Quickstart
+## Quickstart {#quickstart}
 
 ```typescript
 import { TitanMetricsModule } from '@omnitron-dev/titan-metrics';
@@ -62,7 +63,7 @@ class AppModule {}
 
 Async config via `forRootAsync({ useFactory, inject? })`.
 
-## `IMetricsModuleOptions`
+## `IMetricsModuleOptions` {#imetricsmoduleoptions}
 
 | Option              | Type                                                                          | Default                  |
 | ------------------- | ----------------------------------------------------------------------------- | ------------------------ |
@@ -73,7 +74,7 @@ Async config via `forRootAsync({ useFactory, inject? })`.
 | `sync`              | `{ enabled?, onFlush?: (batch) => Promise<void> }`                           | —                        |
 | `isGlobal`          | `boolean`                                                                     | `false`                  |
 
-## `MetricsService` — the API
+## `MetricsService` — the API {#metricsservice--the-api}
 
 ```typescript
 import { MetricsService, METRICS_SERVICE_TOKEN }
@@ -99,7 +100,7 @@ class UsersService {
 }
 ```
 
-### Recording API
+### Recording API {#recording-api}
 
 | Method                                                            | Purpose                                          |
 | ----------------------------------------------------------------- | ------------------------------------------------ |
@@ -114,7 +115,7 @@ updates the Prometheus registry and queues history together. The queue
 is volatile until its write commits; use `recordDurable` to await that boundary. Lower-level `record` is for cases where you've
 already built a sample object.
 
-### Query API
+### Query API {#query-api}
 
 | Method                                                            | Purpose                                          |
 | ----------------------------------------------------------------- | ------------------------------------------------ |
@@ -123,7 +124,7 @@ already built a sample object.
 | `getPrometheusText()`                                             | Standard Prometheus exposition format            |
 | `evictApp(app)`                                                   | Drop all metrics for a given app tag             |
 
-### Lifecycle
+### Lifecycle {#lifecycle}
 
 | Method                                                            | Purpose                                          |
 | ----------------------------------------------------------------- | ------------------------------------------------ |
@@ -133,7 +134,7 @@ already built a sample object.
 | `getStorageStatus()`                                              | Inspect queue, commit evidence and errors         |
 | `cleanup()`                                                       | Apply retention policy                           |
 
-## Why `recordTyped` matters (T#74)
+## Why `recordTyped` matters (T#74) {#why-recordtyped-matters-t74}
 
 The unified entry point exists because pre-T#74, callers had two
 incompatible ways to write metrics:
@@ -152,7 +153,7 @@ the correct type-specific method, and pushes the sample to the
 storage buffer in the same call. Use it unless you have a specific
 reason not to.
 
-## `MetricsQueryFilter` — the shape of time-series queries
+## `MetricsQueryFilter` — the shape of time-series queries {#metricsqueryfilter--the-shape-of-time-series-queries}
 
 ```typescript
 interface MetricsQueryFilter {
@@ -192,7 +193,7 @@ const series = await metrics.querySeries({
 Pagination uses `limit` + repeated calls with adjusted `from` —
 there's no opaque cursor.
 
-## `MetricsSnapshot` — what `getSnapshot()` returns
+## `MetricsSnapshot` — what `getSnapshot()` returns {#metricssnapshot--what-getsnapshot-returns}
 
 ```typescript
 interface MetricsSnapshot {
@@ -218,7 +219,7 @@ interface MetricsSnapshot {
 The snapshot powers the omnitron-console dashboard. It includes
 **per-app aggregates** plus cluster-wide totals.
 
-### Ghost-app filtering
+### Ghost-app filtering {#ghost-app-filtering}
 
 A subtle but important property: `getSnapshot()` filters out apps
 whose freshest `app_status` sample is older than
@@ -231,7 +232,7 @@ The staleness multiplier is fixed at 3× (the smallest value that
 survives normal flush jitter). Override the floor by configuring
 a longer `collection.interval`.
 
-## Storage and commit boundaries
+## Storage and commit boundaries {#storage-and-commit-boundaries}
 
 | Backend | Setup | What survives restart |
 | --- | --- | --- |
@@ -256,7 +257,7 @@ so a retry with the same IDs cannot append the outbox twice. `writeInTransaction
 joins a caller-owned transaction; only the outer commit confirms persistence.
 Initialize the SQLite adapter before joining another transaction.
 
-### Apply the schema once
+### Apply the schema once {#apply-the-schema-once}
 
 Titan owns the immutable `METRICS_POSTGRES_SCHEMA_V1` and `METRICS_SQLITE_SCHEMA_V1`
 DDL. PostgreSQL schema changes run through the application's migration framework,
@@ -280,7 +281,7 @@ Existing `metrics_raw` tables are not adopted or erased: the new contract uses
 SQLite initialization creates that table idempotently; use `initializeSchema: false`
 when your migrations own its creation. Setup errors propagate and remain retryable.
 
-### Await a durable write
+### Await a durable write {#await-a-durable-write}
 
 ```typescript
 import { MetricsService, PostgresMetricsStorage } from '@omnitron-dev/titan-metrics';
@@ -307,7 +308,7 @@ write transaction; it never changes the caller's PRAGMAs. This follows
 [SQLite's durability matrix](https://sqlite.org/pragma.html#pragma_synchronous).
 An in-memory SQLite database is reported as volatile. Database commit does not certify a backup or availability of replicas.
 
-### Buffered collection and diagnostics
+### Buffered collection and diagnostics {#buffered-collection-and-diagnostics}
 
 `record`, `recordBatch` and `recordTyped` are synchronous collection calls, **not
 commit acknowledgements**. The service assigns IDs before queuing. `flush()` awaits
@@ -334,7 +335,7 @@ must not leave a green persistence claim on screen.
 is reported separately and never retries an already committed storage write. Use
 `afterWrite` with the supplied transaction for reliable enqueueing.
 
-### Bounded history queries
+### Bounded history queries {#bounded-history-queries}
 
 Names, apps and labels filter in SQL before per-series limits. Node labels remain
 separate series. `limit` is 1–2000 points per series (default 120); SQL adapters
@@ -349,7 +350,7 @@ An exceeded budget rejects with an instruction to narrow the query; it does not
 silently truncate history. Labels are returned once per series. Samples allow up
 to 64 string labels and 8 KiB of serialized labels. Keep cardinality low.
 
-## `@Metrics` decorator
+## `@Metrics` decorator {#metrics-decorator}
 
 ```typescript
 import { Metrics } from '@omnitron-dev/titan-metrics';
@@ -380,7 +381,7 @@ on every call:
 > It writes to the registry only (Prometheus exposition); these metrics
 > are not pushed to the storage buffer.
 
-## Prometheus exposition
+## Prometheus exposition {#prometheus-exposition}
 
 ```typescript
 const text = await this.metrics.getPrometheusText();
@@ -393,7 +394,7 @@ const text = await this.metrics.getPrometheusText();
 Serve this on a `/metrics` route from a tiny HTTP handler and point
 Prometheus at it. No `prom-client` needed.
 
-## RPC surface — `OmnitronMetrics`
+## RPC surface — `OmnitronMetrics` {#rpc-surface--omnitronmetrics}
 
 Expose `MetricsRpcService` explicitly on Netron when needed. The standalone service is defined in
 [`packages/titan-metrics/src/rpc-service.ts`](https://github.com/omnitron-dev/omni/tree/main/packages/titan-metrics/src/rpc-service.ts).
@@ -419,7 +420,7 @@ const metricsClient = await peer.queryInterface<MetricsRpcService>('OmnitronMetr
 const snap = await metricsClient.getSnapshot();
 ```
 
-## Pipeline at runtime
+## Pipeline at runtime {#pipeline-at-runtime}
 
 ```mermaid
 flowchart LR
@@ -444,7 +445,7 @@ Key invariants:
 - **Cleanup runs hourly.** `cleanupInterval` default 3 600 000 ms;
   applies `maxAgeMs` to the storage backend.
 
-## Retention tuning
+## Retention tuning {#retention-tuning}
 
 The default retention is 7 days with an hourly sweep. Duration values must be
 positive and use `s`, `m`, `h` or `d`. SQL cleanup deletes at most 10,000 rows per
@@ -457,7 +458,7 @@ Reduce collection frequency, label cardinality or retention to fit the workload.
 An hourly deletion policy is not partitioning or downsampling. Replication outbox
 retention is independent: pruning chart history cannot delete pending deliveries.
 
-## Sizing & cardinality control
+## Sizing & cardinality control {#sizing--cardinality-control}
 
 The single biggest operational risk is **label cardinality**.
 Every unique combination of label values creates a separate
@@ -486,7 +487,7 @@ Healthy cardinality targets:
 Monitor `metrics.getRegistry()` size as a meta-metric; alert when
 it grows faster than your service count.
 
-## Tokens
+## Tokens {#tokens}
 
 | Token                       | Type                          |
 | --------------------------- | ----------------------------- |
@@ -494,7 +495,7 @@ it grows faster than your service count.
 | `METRICS_OPTIONS_TOKEN`     | `IMetricsModuleOptions`       |
 | `METRICS_STORAGE_TOKEN`     | `IMetricsStorage`             |
 
-## Lifecycle
+## Lifecycle {#lifecycle-1}
 
 `MetricsService.start()` is invoked at module init and:
 - Starts the collector (process / system / RPC samples on
@@ -516,7 +517,7 @@ uncommitted in-memory buffer.
 
 Both timers `unref()` so they don't pin the event loop alive.
 
-## Anti-patterns
+## Anti-patterns {#anti-patterns}
 
 - **Per-user labels.** A label per `userId` creates a new time
   series per user, blowing up cardinality. Keep labels low-
@@ -536,7 +537,7 @@ Both timers `unref()` so they don't pin the event loop alive.
   mutate state. The defaults require auth — don't relax this in
   production.
 
-## See also
+## See also {#see-also}
 
 - [Best Practices / Observability](../best-practices/observability.md)
   — logs, metrics, traces working together

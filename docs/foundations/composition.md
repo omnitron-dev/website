@@ -1,4 +1,6 @@
 ---
+id: "foundations/composition"
+slug: "/docs/foundations/composition"
 title: Composition and build boundaries
 description: Select small primitives first, then add transports, user interfaces and infrastructure deliberately.
 ---
@@ -19,7 +21,7 @@ application. Add framework adapters at the boundary that needs them.
 | Object bytes | `@omnitron-dev/titan-storage` | Application metadata, quotas, ownership and sharing |
 | Process supervision | `@omnitron-dev/omnitron` | Deployment, telemetry and operational workflows |
 
-## Keep policy portable
+## Keep policy portable {#keep-policy-portable}
 
 Place a role definition and permission catalog in a shared application package.
 The server uses it for enforcement; the UI uses it for affordances. A token
@@ -32,7 +34,7 @@ They own tenant isolation, transaction boundaries, cache invalidation and
 failure behavior. A failed lookup must not accidentally produce an unrestricted
 permission set. Do not make application service names or schemas framework defaults.
 
-## Keep expensive features behind an import boundary
+## Keep expensive features behind an import boundary {#keep-expensive-features-behind-an-import-boundary}
 
 Import Prism UI primitives from `/ui`. Load a map, research editor or knowledge
 graph from its own public entry point where that feature is used. Import its
@@ -44,7 +46,7 @@ both browser policy and Node adapters: evaluating that barrel can pull server
 code into a browser build. A package manifest's `exports` is the supported
 boundary; a source directory is not automatically a public import path.
 
-## Verify the artifact
+## Verify the artifact {#verify-the-artifact}
 
 A typecheck proves type compatibility. Also build the actual browser and server
 entry points, inspect their contributing modules and test the packed package in

@@ -1,4 +1,6 @@
 ---
+id: "omnitron/mcp"
+slug: "/docs/omnitron/mcp"
 sidebar_position: 15
 title: MCP + Knowledge base
 description: AI agent integration via Model Context Protocol — kb + management tools.
@@ -21,7 +23,7 @@ Verified against `apps/omnitron/src/mcp/` and
 
 The current stdio management server connects through the daemon owner’s administrative Unix socket. It is suitable only for a trusted local agent host. Filtering visible tools in that host is not server-side delegation. See [Agents and delegated operations](./agents.md) before embedding an agent in a multi-user Console.
 
-## Starting the server
+## Starting the server {#starting-the-server}
 
 ```bash
 omnitron kb mcp
@@ -45,7 +47,7 @@ configuration typically wires it as:
 The exact config varies by host (Claude Desktop, IDE plugins,
 custom agents).
 
-## What the agent sees
+## What the agent sees {#what-the-agent-sees}
 
 Two surfaces, registered conditionally on what's available:
 
@@ -59,7 +61,7 @@ Two surfaces, registered conditionally on what's available:
 
 When a dependency is unavailable, the corresponding tool names remain visible as **UNAVAILABLE** stubs. Calling one returns an error explaining how to start the daemon or index the KB. Missing data is not presented as a successful empty result.
 
-## KB tools
+## KB tools {#kb-tools}
 
 | Tool | Purpose |
 | ---- | ------- |
@@ -79,7 +81,7 @@ Agents typically lead with `kb.repo_map` (orient), then
 `kb.query` (find), then `kb.get_api` (verify signature) before
 making changes.
 
-## Management tools — apps
+## Management tools — apps {#management-tools--apps}
 
 | Tool | Effect |
 | ---- | ------ |
@@ -100,7 +102,7 @@ initial size, and automatic scaling can subsequently adjust it. The current
 owner must support `processPoolResize@1`; a backend-only update does not upgrade
 that owner. If an RPC outcome is unknown, inspect the process before retrying.
 
-## Management tools — infra
+## Management tools — infra {#management-tools--infra}
 
 | Tool | Effect |
 | ---- | ------ |
@@ -122,7 +124,7 @@ that owner. If an RPC outcome is unknown, inspect the process before retrying.
 > it starts and stops containers for a whole stack, which is not
 > something to hand an agent by default.
 
-## Management tools — monitoring
+## Management tools — monitoring {#management-tools--monitoring}
 
 | Tool | Effect |
 | ---- | ------ |
@@ -136,7 +138,7 @@ that owner. If an RPC outcome is unknown, inspect the process before retrying.
 | `logs.tail` | The most recent entries, oldest-first — poll for near-real-time |
 | `logs.stats` | Exact stored record counts; may scan a large archive, so avoid frequent polling |
 
-## Management tools — control plane
+## Management tools — control plane {#management-tools--control-plane}
 
 | Tool | Effect |
 | ---- | ------ |
@@ -160,7 +162,7 @@ Use the registered `tools/list` response as the live catalog. It depends on the 
 
 See [bounded monitoring evidence](./observability.md#bounded-queries-and-agent-evidence) and [Xec automation](./automation.md) for limits, authority and cancellation behavior.
 
-## KB index lifecycle
+## KB index lifecycle {#kb-index-lifecycle}
 
 ```bash
 omnitron kb index              # incremental reindex (default)
@@ -184,7 +186,7 @@ Hybrid search combines:
 
 Both indexes update during `omnitron kb index`.
 
-## Indexing strategy for a monorepo
+## Indexing strategy for a monorepo {#indexing-strategy-for-a-monorepo}
 
 Reindexing is incremental by default (manifest-cached), so a
 plain `omnitron kb index` after a batch of edits is cheap — wire
@@ -203,7 +205,7 @@ even on large codebases.
 Useful when running the MCP server from outside the project
 directory.
 
-## Tool authoring (extend MCP)
+## Tool authoring (extend MCP) {#tool-authoring-extend-mcp}
 
 Tools live under `apps/omnitron/src/mcp/tool-groups/`. Each
 group exports a factory:
@@ -249,7 +251,7 @@ yourself or you'll double-encode.
 The `description` field is **what the agent reads to decide
 whether to call the tool**. Make it specific.
 
-## Best practices for agent-callable tools
+## Best practices for agent-callable tools {#best-practices-for-agent-callable-tools}
 
 - **Atomic operations.** One tool, one outcome — don't bundle
   "deploy + scale + restart" into one tool.
@@ -266,7 +268,7 @@ whether to call the tool**. Make it specific.
   (`infra.down --volumes`, `backup.restore`) should require
   explicit confirmation flags.
 
-## Auth model
+## Auth model {#auth-model}
 
 The MCP server **inherits the local Unix-socket trust**. The
 `kb mcp` command takes no connection flags — it always builds a
@@ -287,16 +289,16 @@ Match agent power to its expected scope. Because local-socket
 access is effectively admin, the strongest control is *where*
 you run the MCP server and *which* host's daemon it can reach.
 
-## Common agent workflows
+## Common agent workflows {#common-agent-workflows}
 
-### "What does X do?"
+### "What does X do?" {#what-does-x-do}
 
 1. `kb.repo_map` → orient
 2. `kb.query "X"` → find relevant entries
 3. `kb.get_api "X"` or `kb.get_module "X"` → details
 4. Agent answers from results
 
-### "Is the platform healthy?"
+### "Is the platform healthy?" {#is-the-platform-healthy}
 
 1. `apps.status` → daemon overview
 2. `health.check` → composite health
@@ -304,7 +306,7 @@ you run the MCP server and *which* host's daemon it can reach.
 4. `apps.logs` → recent error filter
 5. Agent summarises
 
-### "Fix this failing deploy"
+### "Fix this failing deploy" {#fix-this-failing-deploy}
 
 1. `deploy.status <runId>` → what failed
 2. `apps.logs <appName> --level error --grep deploy` → context
@@ -312,13 +314,13 @@ you run the MCP server and *which* host's daemon it can reach.
 4. `apps.inspect <appName>` → live state
 5. Agent proposes fix; operator confirms
 
-### "Scaffold a new app"
+### "Scaffold a new app" {#scaffold-a-new-app}
 
 1. `kb.get_pattern "new-app-bootstrap"` → canonical scaffold
 2. `kb.get_module "<related-app>"` → similar example
 3. Agent generates files; operator reviews
 
-## Cost and latency
+## Cost and latency {#cost-and-latency}
 
 - **Tool calls** to the daemon are essentially free (Unix socket
   RPC).
@@ -329,7 +331,7 @@ you run the MCP server and *which* host's daemon it can reach.
 Run it as a long-lived companion to your agent session;
 restarting on every prompt adds noticeable latency.
 
-## Anti-patterns
+## Anti-patterns {#anti-patterns}
 
 - **Running the MCP server next to a production daemon socket**
   without thinking. Local-socket access is admin — keep the
@@ -347,7 +349,7 @@ restarting on every prompt adds noticeable latency.
   radius, hard to audit, hard for the agent to use correctly.
   Narrow domain-specific tools win.
 
-## See also
+## See also {#see-also}
 
 - [CLI / Knowledge base](./cli.md#knowledge-base-mcp)
 - [Configuration](./configuration.md) — daemon config

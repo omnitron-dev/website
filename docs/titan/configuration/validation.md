@@ -1,4 +1,6 @@
 ---
+id: "titan/configuration/validation"
+slug: "/docs/titan/configuration/validation"
 sidebar_position: 3
 title: Configuration Validation
 description: Schema-checked config — crash at boot, not at 3 AM.
@@ -10,7 +12,7 @@ A typed schema for your config is the cheapest reliability win you
 can take. Misconfiguration becomes a startup failure instead of a
 runtime crash hours later.
 
-## Defining a schema
+## Defining a schema {#defining-a-schema}
 
 ```typescript
 import { z } from '@omnitron-dev/titan/validation';
@@ -64,7 +66,7 @@ ConfigModule.forRoot({
 })
 ```
 
-## What happens at boot
+## What happens at boot {#what-happens-at-boot}
 
 1. Sources load and merge into a candidate config object.
 2. The candidate is parsed against the schema.
@@ -104,7 +106,7 @@ validate locally won't validate in production either.
 This runs only when both `validateOnStartup` and `schema` are set, as
 above.
 
-## Defaults
+## Defaults {#defaults}
 
 Schema-level defaults (`z.number().default(60_000)`) apply when no
 source supplies the value. This is the right place for "sensible
@@ -119,7 +121,7 @@ cache: z.object({
 Don't put production defaults here — they should come from
 `production.yaml` so they're explicit.
 
-## Coercion
+## Coercion {#coercion}
 
 `@omnitron-dev/titan/validation` exposes Zod with coercion enabled
 for env-var sources. A `z.number()` field can read its value from
@@ -128,7 +130,7 @@ the string `"3000"` and coerce. Same for booleans, dates.
 For stricter parsing (the source must provide the right type), use
 `z.number().strict()` etc.
 
-## Per-section validation
+## Per-section validation {#per-section-validation}
 
 You can validate just a slice of the config without loading the
 whole schema:
@@ -144,7 +146,7 @@ config when `path` is omitted) and throws if it doesn't match.
 Useful in dynamic modules whose options are a subtree of the global
 config.
 
-## Branded types for safety
+## Branded types for safety {#branded-types-for-safety}
 
 For values that should never accidentally interconvert (e.g. URLs vs
 plain strings), use Zod's `.brand`:
@@ -162,7 +164,7 @@ const Schema = z.object({
 plain string where a `DatabaseUrl` is expected. Catches "I forgot to
 read the right config key" bugs at the type level.
 
-## Anti-patterns
+## Anti-patterns {#anti-patterns}
 
 - **`z.unknown()` everywhere.** Defeats the point. Use specific
   types; if a value can be one of several shapes, use a union.

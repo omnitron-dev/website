@@ -1,4 +1,6 @@
 ---
+id: "titan/errors/hierarchy"
+slug: "/docs/titan/errors/hierarchy"
 sidebar_position: 2
 title: Error Hierarchy
 description: The classes the framework exports — and the codes that classify what they are.
@@ -12,7 +14,7 @@ classify the underlying error). Most errors are instances of
 `TitanError` with a specific `ErrorCode`; a few have dedicated
 subclasses.
 
-## Class hierarchy
+## Class hierarchy {#class-hierarchy}
 
 ```mermaid
 classDiagram
@@ -49,12 +51,12 @@ with `code: ErrorCode.NOT_FOUND`, `ErrorCode.CONFLICT`,
 `ErrorCode.VALIDATION_ERROR`. Use the `Errors` namespace to throw
 them; use `e.code === ErrorCode.X` to discriminate on the client.
 
-## The narrow subclasses — when class identity matters
+## The narrow subclasses — when class identity matters {#the-narrow-subclasses--when-class-identity-matters}
 
 Three subclasses are dedicated because they need extra fields beyond
 what `TitanError` carries:
 
-### `AuthError` (401)
+### `AuthError` (401) {#autherror-401}
 
 Authentication failure. Carries auth-specific context (provider,
 reason, hints for the client about how to re-authenticate).
@@ -75,7 +77,7 @@ Catch by `instanceof AuthError` when you want auth-specific
 handling (e.g. redirect to login). The third `options` argument
 carries `{ authType, realm }` for the `WWW-Authenticate` header.
 
-### `PermissionError` (403)
+### `PermissionError` (403) {#permissionerror-403}
 
 Authorisation failure — caller is known but lacks the right scope or
 role. Carries the missing capability for diagnostics.
@@ -93,7 +95,7 @@ throw new PermissionError('users:write scope required', undefined, {
 throw PermissionError.insufficientPermissions('users:write', ['users:read']);
 ```
 
-### `RateLimitError` (429)
+### `RateLimitError` (429) {#ratelimiterror-429}
 
 Throttling. Carries the retry-after hint:
 
@@ -112,7 +114,7 @@ throw Errors.tooManyRequests(60);
 `getRateLimitHeaders()` renders the matching `X-RateLimit-*` /
 `Retry-After` response headers.
 
-### `AggregateError`
+### `AggregateError` {#aggregateerror}
 
 Multiple errors batched into one. Useful when a batch operation
 partially fails:
@@ -140,7 +142,7 @@ The batched errors are exposed on `.errors`, and a one-line
 `.summary`. `TitanError.aggregate(errors, opts?)` is an equivalent
 static shortcut.
 
-### `DomainError`
+### `DomainError` {#domainerror}
 
 Base for project-specific error classes. Use the `defineDomainCodes`
 helper to declare a typed code namespace, then create errors from it:
@@ -170,7 +172,7 @@ The framework provides `createDomainErrorFactory`,
 `getDomainCode` helpers for richer typing — see the source for
 current signatures.
 
-## The wide use of `ErrorCode`
+## The wide use of `ErrorCode` {#the-wide-use-of-errorcode}
 
 For everything *not* in the class tree above, use the appropriate
 `ErrorCode`:
@@ -195,7 +197,7 @@ The `NetronErrors` namespace covers transport-specific failures:
 `NetronError` subclass (`ServiceNotFoundError`, `TransportError`,
 `RpcError`, …) with the appropriate code.
 
-## Discrimination on the client
+## Discrimination on the client {#discrimination-on-the-client}
 
 Two ways, both supported:
 

@@ -1,4 +1,6 @@
 ---
+id: "frontend/prism/forms"
+slug: "/docs/frontend/prism/forms"
 sidebar_position: 5
 title: Forms
 description: Schema-aware forms with react-hook-form + zod + Prism Field.
@@ -15,7 +17,7 @@ wire it into `useForm` via `zodResolver`, and place `Field.*` components
 addressed by `name`. Validation runs through the resolver; each `Field`
 reads its own error from react-hook-form state and renders it inline.
 
-## The pieces
+## The pieces {#the-pieces}
 
 1. **A zod schema** — the source of truth for shape + validation, wired
    in via `zodResolver`.
@@ -79,7 +81,7 @@ function SignInForm() {
 [Error display](#error-display) below.
 :::
 
-## Localized validation messages (optional)
+## Localized validation messages (optional) {#localized-validation-messages-optional}
 
 `SchemaProvider` does **not** take a `schema` prop and does **not** drive
 field rendering. It supplies an i18n context — a translate function `t`,
@@ -129,7 +131,7 @@ const userSchema = z.object({ email: schema.email() });
 `useSchemaOptional()` is the non-throwing variant — it returns `null`
 outside a provider, for components that may render either way.
 
-## Field types
+## Field types {#field-types}
 
 Each control is a member of the `Field` namespace. Every field takes a
 `name` (the RHF path), reads its error from react-hook-form, and renders
@@ -211,7 +213,7 @@ import { DateRangePicker } from '@omnitron-dev/prism';
 />
 ```
 
-## Validation modes
+## Validation modes {#validation-modes}
 
 ```typescript
 useForm({
@@ -231,9 +233,9 @@ Recommendations:
 - **`onChange`** — only for password-strength meter or live
   preview cases
 
-## Error display
+## Error display {#error-display}
 
-### Inline per-field
+### Inline per-field {#inline-per-field}
 
 Every `Field.*` component renders its error message automatically below
 the input when `form.formState.errors[name]` is set — it reads
@@ -241,7 +243,7 @@ the input when `form.formState.errors[name]` is set — it reads
 into the MUI control's `helperText` (with `error`, `aria-invalid`, and
 `aria-describedby` wired up). No extra markup needed.
 
-### Form-level
+### Form-level {#form-level}
 
 For root errors (server-side rejections, business-rule failures), use
 `<FormAlert>`. It is the platform's canonical inline surface for
@@ -291,7 +293,7 @@ below the fold isn't missed.
 **Inline form errors, not toasts** — toasts disappear; the user needs
 the error visible while they fix the field.
 
-### Server validation merging
+### Server validation merging {#server-validation-merging}
 
 ```tsx
 catch (e) {
@@ -308,7 +310,7 @@ catch (e) {
 Per-field server errors land on the matching `Field.*` exactly like
 client-side errors — no special UI path; the field renders them inline.
 
-## Submit state
+## Submit state {#submit-state}
 
 ```tsx
 const { formState: { isSubmitting, isValid, isDirty } } = form;
@@ -331,9 +333,9 @@ const { formState: { isSubmitting, isValid, isDirty } } = form;
 | `isSubmitSuccessful` | Last submit didn't throw |
 | `submitCount` | Total submissions |
 
-## Dynamic forms
+## Dynamic forms {#dynamic-forms}
 
-### Conditional fields
+### Conditional fields {#conditional-fields}
 
 ```tsx
 const role = form.watch('role');
@@ -360,7 +362,7 @@ const Schema = z.discriminatedUnion('role', [
 ]);
 ```
 
-### Field arrays
+### Field arrays {#field-arrays}
 
 `Field.*` components address array members by index path
 (`items.0.label`, `items.1.label`, …), so they compose directly with
@@ -399,7 +401,7 @@ items: z.array(z.object({
 })).min(1, 'At least one item required').max(10),
 ```
 
-## Multi-step wizards
+## Multi-step wizards {#multi-step-wizards}
 
 ```tsx
 import { Stepper } from '@omnitron-dev/prism';
@@ -451,9 +453,9 @@ function Wizard() {
 without committing to a full submit. (Step components read state via
 `useFormContext()`, so they need no `form` prop.)
 
-## Patterns
+## Patterns {#patterns}
 
-### Password visibility toggle
+### Password visibility toggle {#password-visibility-toggle}
 
 `usePasswordVisibility()` returns `{ visible, toggle, show, hide, type }`
 — state and handlers only, **no** rendered button. Supply your own
@@ -492,7 +494,7 @@ function PasswordField() {
 }
 ```
 
-### Async field validation
+### Async field validation {#async-field-validation}
 
 For "is this email taken?" checks:
 
@@ -507,7 +509,7 @@ const Schema = z.object({
 
 Use `mode: 'onBlur'` — every keystroke would hammer the server.
 
-### Optimistic submit
+### Optimistic submit {#optimistic-submit}
 
 ```tsx
 const submit = async (data: ProfileInput) => {
@@ -522,7 +524,7 @@ const submit = async (data: ProfileInput) => {
 };
 ```
 
-## Accessibility
+## Accessibility {#accessibility}
 
 Every `Field.*`:
 - Has a programmatic `<label>` (via MUI's `TextField` / `FormControlLabel`).
@@ -534,7 +536,7 @@ Every `Field.*`:
 For custom controls wired via `<Controller>`, follow the same contract —
 pass `error` + `helperText` props that map to ARIA attributes.
 
-## Anti-patterns
+## Anti-patterns {#anti-patterns}
 
 - **Mixing controlled and uncontrolled fields.** Pick one (`Field.*` is
   controlled via react-hook-form) and stick to it.
@@ -553,7 +555,7 @@ pass `error` + `helperText` props that map to ARIA attributes.
 - **Storing form state in a global store.** Use react-hook-form for form
   state; lift only the final submitted values.
 
-## See also
+## See also {#see-also}
 
 - [Components catalog / Field](./components.md#field) — the `Field` API
 - [Hooks catalog](./hooks-catalog.md) — `usePasswordVisibility`,

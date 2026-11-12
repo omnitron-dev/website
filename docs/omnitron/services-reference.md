@@ -1,4 +1,6 @@
 ---
+id: "omnitron/services-reference"
+slug: "/docs/omnitron/services-reference"
 sidebar_position: 6
 title: Services reference
 description: Every RPC service exposed by the daemon — names, methods, roles.
@@ -19,7 +21,7 @@ Re-check this page against the source with
 reads `@Service`/`@Public` out of `src/**/*.rpc-service.ts` and
 diffs them against the index table below.
 
-## Quick index
+## Quick index {#quick-index}
 
 | File | Service id (Netron) | Methods | Role gate (typical) |
 | ---- | ------------------- | ------- | ------------------- |
@@ -35,12 +37,12 @@ diffs them against the index table below.
 | `event-broadcaster.rpc-service.ts` | `OmnitronEvents` | 3 | viewer (subscribe, unsubscribe, stats) |
 | `fleet.rpc-service.ts` | `OmnitronFleet` | 7 | Viewer reads and operator inventory changes |
 | `health-check.rpc-service.ts` | `OmnitronHealth` | 4 | viewer |
-| `infrastructure.rpc-service.ts` | `OmnitronInfra` | 18 | viewer (read) + operator (start/stop/remove) |
+| `infrastructure.rpc-service.ts` | `OmnitronInfra` | 19 | viewer (read) + operator (start/stop/remove) |
 | `kubernetes.rpc-service.ts` | `OmnitronKubernetes` | 9 | admin |
 | `log-collector.rpc-service.ts` | `OmnitronLogs` | 4 | viewer |
 | `node-manager.rpc-service.ts` | `OmnitronNodes` | 38 | viewer (read), operator (operations), admin (historical repair and managed kernel rollout) |
 | `pipeline.rpc-service.ts` | `OmnitronPipelines` | 9 | admin + live human session / trusted local CLI |
-| `project.rpc-service.ts` | `OmnitronProject` | 43 | Viewer reads and reviews, operator starts/stops, administrator manages registrations, machine credentials run the recipient protocol |
+| `project.rpc-service.ts` | `OmnitronProject` | 44 | Viewer reads and reviews, operator starts/stops, administrator manages registrations, machine credentials run the recipient protocol |
 | `release.rpc-service.ts` | `OmnitronRelease` | 12 | viewer (read), operator (build/attest), admin (prune) |
 | `secrets.rpc-service.ts` | `OmnitronSecrets` | 6 | admin |
 | `sync.rpc-service.ts` | `OmnitronSync` | 5 | authenticated control plane; historical repair excludes operators |
@@ -69,7 +71,7 @@ The daemon exposes its role-protected metrics facade and imports the Titan healt
 
 `OmnitronMetrics` requires authorization for every method. Use `omnitron doctor` to check which diagnostic methods a particular daemon exposes to an unauthenticated connection. It reports observed exposure as `auth.anonymous-surface`.
 
-## Naming convention
+## Naming convention {#naming-convention}
 
 Most service ids use the `Omnitron<Subsystem>` PascalCase shape with no
 version suffix. `Health@1.0.0` is the exception, and it is not going to
@@ -78,7 +80,7 @@ be renamed: the id is Netron's own versioned form, declared by
 module, so it is not omnitron's to change. Query it with the suffix
 included.
 
-## What `availableServices` lists
+## What `availableServices` lists {#what-availableservices-lists}
 
 When a `query_interface` fails, the daemon logs the ids it does have.
 That list is a **superset** of this page: managed applications register
@@ -103,13 +105,13 @@ subpath (`IDaemonService`, `IProjectRpcService`, `IOmnitronAuthService`,
 `IOmnitronLogsService`, `IInfraService`); other services can be queried
 untyped via `queryInterface(serviceId)`.
 
-## Per-service summary
+## Per-service summary {#per-service-summary}
 
 Each subsection lists the methods you can call directly. For full
 parameter and return types, refer to `src/services/<name>.rpc-service.ts`
 and the `src/shared/dto/` types it imports.
 
-### `OmnitronAlerts` — `alert.rpc-service.ts`
+### `OmnitronAlerts` — `alert.rpc-service.ts` {#omnitronalerts--alertrpc-servicets}
 
 Alert rules + delivery for operator-defined thresholds (metric
 exceeds value, app crashed N times, etc.).
@@ -125,7 +127,7 @@ exceeds value, app crashed N times, etc.).
 | `getActiveAlerts()` | Currently firing, unresolved alerts |
 | `getSummary()` | Aggregate counts (open / acknowledged / resolved) |
 
-### `OmnitronAuth` — `auth.rpc-service.ts`
+### `OmnitronAuth` — `auth.rpc-service.ts` {#omnitronauth--authrpc-servicets}
 
 User authentication, session management, JWT issuance.
 
@@ -145,7 +147,7 @@ credential). `getActiveSessions` and `changePassword` are
 `@Public({ auth: true })` — any authenticated caller, operating on
 its own identity (not admin-gated).
 
-### `OmnitronBackups` — `backup.rpc-service.ts`
+### `OmnitronBackups` — `backup.rpc-service.ts` {#omnitronbackups--backuprpc-servicets}
 
 Database backup, restore, scheduling.
 
@@ -167,7 +169,7 @@ Driven by `omnitron backup` commands. Reads (`listBackups`,
 `getSchedule`, `listSchedules`) gate on `viewer`; every mutation
 requires `admin`.
 
-### `OmnitronDeploy` — `deploy.rpc-service.ts`
+### `OmnitronDeploy` — `deploy.rpc-service.ts` {#omnitrondeploy--deployrpc-servicets}
 
 Compatibility access to legacy per-app operation records.
 
@@ -180,7 +182,7 @@ Compatibility access to legacy per-app operation records.
 
 Historical strategy labels are retained as recorded requests, not evidence of an implemented rollout.
 
-### `OmnitronDiscovery` — `discovery.rpc-service.ts`
+### `OmnitronDiscovery` — `discovery.rpc-service.ts` {#omnitrondiscovery--discoveryrpc-servicets}
 
 Discovery of Omnitron-managed targets across Docker and SSH.
 
@@ -192,7 +194,7 @@ Discovery of Omnitron-managed targets across Docker and SSH.
 
 Used by `omnitron discover`.
 
-### `OmnitronEvents` — `event-broadcaster.rpc-service.ts`
+### `OmnitronEvents` — `event-broadcaster.rpc-service.ts` {#omnitronevents--event-broadcasterrpc-servicets}
 
 Cross-process event bus over Netron. Webapp subscribes here for
 live UI updates.
@@ -205,7 +207,7 @@ live UI updates.
 
 All three methods admit viewers. Publication is internal to the daemon.
 
-### `OmnitronFleet` — `fleet.rpc-service.ts`
+### `OmnitronFleet` — `fleet.rpc-service.ts` {#omnitronfleet--fleetrpc-servicets}
 
 Cross-node fleet operations: register nodes, drain, set roles.
 
@@ -223,7 +225,7 @@ Reads (`listNodes`, `getNode`, `getSummary`) gate on `viewer`;
 mutations (`registerNode`, `removeNode`, `setRole`, `drainNode`)
 on `operator`. The scheduler records local liveness against its own registration.
 
-### `OmnitronHealth` — `health-check.rpc-service.ts`
+### `OmnitronHealth` — `health-check.rpc-service.ts` {#omnitronhealth--health-checkrpc-servicets}
 
 Active health probes — runs HTTP / TCP / DB checks on demand.
 
@@ -234,7 +236,7 @@ Active health probes — runs HTTP / TCP / DB checks on demand.
 | `checkInfrastructure()` | Probe Postgres / Redis / etc. |
 | `checkAll()` | Full platform health report |
 
-### `OmnitronInfra` — `infrastructure.rpc-service.ts`
+### `OmnitronInfra` — `infrastructure.rpc-service.ts` {#omnitroninfra--infrastructurerpc-servicets}
 
 Provisioned infrastructure inventory, container control and host-owned ingress.
 
@@ -247,6 +249,7 @@ Provisioned infrastructure inventory, container control and host-owned ingress.
 | `startContainer({container})` | Start a managed container |
 | `stopContainer({container})` | Stop a managed container |
 | `removeContainer({container})` | Remove a managed container |
+| `reviewStack` | Inspect an existing stack infrastructure for preservation without reconciling it |
 | `provisionStack` / `inspectHostServices` | Reconcile or inspect infrastructure on the executing host |
 | `configureHostIngress` / `getHostIngress` | Configure ingress ownership or read configured/observed state |
 | `checkHostIngress` / `validateHostIngress` | Inspect the proposed change and validate publication inputs |
@@ -260,7 +263,7 @@ recovery require `admin` or trusted `service_role`; check/apply/remove/owner
 restore use control-plane roles. Read the generated API signature and the
 method’s declared gate before composing an operational workflow.
 
-### `OmnitronKubernetes` — `kubernetes.rpc-service.ts`
+### `OmnitronKubernetes` — `kubernetes.rpc-service.ts` {#omnitronkubernetes--kubernetesrpc-servicets}
 
 Kubernetes integration.
 
@@ -278,7 +281,7 @@ Kubernetes integration.
 
 Driven by `omnitron k8s ...`. Every method requires `admin`.
 
-### `OmnitronLogs` — `log-collector.rpc-service.ts`
+### `OmnitronLogs` — `log-collector.rpc-service.ts` {#omnitronlogs--log-collectorrpc-servicets}
 
 Log query + streaming.
 
@@ -294,7 +297,7 @@ full-text filter is `search`, not `grep`, and `streamLogs` is a
 poll — it returns a page ending at now, it does not hold a
 subscription open.
 
-### `OmnitronNodes` — `node-manager.rpc-service.ts`
+### `OmnitronNodes` — `node-manager.rpc-service.ts` {#omnitronnodes--node-managerrpc-servicets}
 
 Node inventory, health history, bundle activation, managed rollout and recovery include 38 public methods.
 
@@ -314,7 +317,7 @@ Node inventory, health history, bundle activation, managed rollout and recovery 
 Includes the uptime-bar machinery the webapp uses to draw
 green/yellow/red availability bars.
 
-### `OmnitronPipelines` — `pipeline.rpc-service.ts`
+### `OmnitronPipelines` — `pipeline.rpc-service.ts` {#omnitronpipelines--pipelinerpc-servicets}
 
 Xec and shell automation, shared by Console, CLI and local MCP. All methods require `admin`; a human session is revalidated at the service boundary. Mutations must record an audit intent before taking effect.
 
@@ -332,7 +335,7 @@ Xec and shell automation, shared by Console, CLI and local MCP. All methods requ
 
 See [Xec automation](./automation.md) for execution limits, revision review, cancellation and failure recovery. A child process is not a sandbox for untrusted agent code.
 
-### `OmnitronProject` — `project.rpc-service.ts`
+### `OmnitronProject` — `project.rpc-service.ts` {#omnitronproject--projectrpc-servicets}
 
 `refreshTopologyMetadata({ project, stack? })` is admin-only: it captures bootstrap
 declarations in bounded child processes and persists the last successful snapshot.
@@ -357,7 +360,7 @@ The project and stack registry exposes release checks, account operations, infra
 | Projects | `listProjects`, `getProject`, `scanRequirements`, `addProject`, `updateProject`, `removeProject`, `importConfiguration`, `detachConfiguration` |
 | Project apps and topology | `getProjectApps`, `getTopology`, `getTopologyInventory`, `refreshTopologyMetadata` |
 | Target workspace | `getTopologyWorkspace`, `saveTopologyDraft`, `planTopology`, `applyTopologyPlan` |
-| Stacks | `listStacks`, `getStack`, `getStackStatus`, `diagnoseStack`, `inspectInstalledArtifacts`, `createStack`, `deleteStack`, `startStack`, `reviewStackStop`, `stopStack`, `resumeInstalledStack` |
+| Stacks | `listStacks`, `getStack`, `getStackStatus`, `diagnoseStack`, `inspectInstalledArtifacts`, `createStack`, `deleteStack`, `reviewStackStart`, `startStack`, `reviewStackStop`, `stopStack`, `resumeInstalledStack` |
 | Infrastructure ownership | `refreshInfrastructureOwnership`, `inspectStackHost`, `probeLeftovers`, `stackMaintenance` |
 | Stack accounts | `censusStackAccounts`, `createStackAccount`, `removeStackAccount`, `showStackAccount` |
 | Recipient lifecycle protocol | `inspectNodeStackStop`, `prepareNodeStackStop`, `executeNodeStackStop`, `prepareNodeInstalledResume`, `executeNodeInstalledResume`, `getNodeInstalledResumeReceipt` |
@@ -391,7 +394,7 @@ and backend reloads. Retention preserves release selection but disables automati
 application startup, just like a full stop. It does not add an administrator-only
 execution path or grant a viewer permission to mutate.
 
-### `OmnitronSecrets` — `secrets.rpc-service.ts`
+### `OmnitronSecrets` — `secrets.rpc-service.ts` {#omnitronsecrets--secretsrpc-servicets}
 
 Encrypted secret CRUD.
 
@@ -404,7 +407,7 @@ Encrypted secret CRUD.
 
 Always gated by `admin` role.
 
-### `OmnitronSync` — `sync.rpc-service.ts`
+### `OmnitronSync` — `sync.rpc-service.ts` {#omnitronsync--syncrpc-servicets}
 
 Cross-daemon state synchronisation (service-to-service, used in
 cluster mode).
@@ -429,7 +432,7 @@ Inspect pending entries, the last
 acknowledgement, node reachability and mesh logs when diagnosing replication.
 An unavailable reading is unknown, not an empty backlog.
 
-### `OmnitronSystemInfo` — `system-info.rpc-service.ts`
+### `OmnitronSystemInfo` — `system-info.rpc-service.ts` {#omnitronsysteminfo--system-inforpc-servicets}
 
 Host inventory.
 
@@ -439,11 +442,11 @@ Host inventory.
 
 The webapp uses this for the host-info card.
 
-### `OmnitronTelemetry` — `telemetry.rpc-service.ts`
+### `OmnitronTelemetry` — `telemetry.rpc-service.ts` {#omnitrontelemetry--telemetryrpc-servicets}
 
 `getRelayStats()` returns relay statistics to authorized readers and machine peers on the master. Workers use the authenticated `OmnitronSync` protocol for log and metric replication. A controller acknowledges committed data. See [replication evidence](./cluster.md).
 
-### `OmnitronCluster` — `cluster/cluster.rpc-service.ts`
+### `OmnitronCluster` — `cluster/cluster.rpc-service.ts` {#omnitroncluster--clusterclusterrpc-servicets}
 
 Controllers, workers and standalone daemons report their participation. An enrolled controller additionally reports its PostgreSQL lease.
 
@@ -458,7 +461,7 @@ Step-down requires an administrator. The former
 anonymous vote and heartbeat methods have been removed. A lease observation is
 not a fence for remote effects; see [cluster coordination](./cluster.md).
 
-### `OmnitronTraces` — `trace-collector.rpc-service.ts`
+### `OmnitronTraces` — `trace-collector.rpc-service.ts` {#omnitrontraces--trace-collectorrpc-servicets}
 
 Distributed trace ingestion + query.
 
@@ -470,7 +473,7 @@ Distributed trace ingestion + query.
 | `queryTraces(filter)` | Filter by service / duration / status / time range |
 | `getServiceMap()` | Derived service-call topology |
 
-## Auth role recap
+## Auth role recap {#auth-role-recap}
 
 | Role        | Members                            | Typical capability |
 | ----------- | ---------------------------------- | ------------------ |
@@ -488,7 +491,7 @@ Methods on the same service can vary in role:
   `OmnitronProject.startStack` is operator; `OmnitronProject.deleteStack`
   is admin.
 
-## Querying a service from your code
+## Querying a service from your code {#querying-a-service-from-your-code}
 
 ```typescript
 import { Netron } from '@omnitron-dev/titan/netron';
@@ -515,7 +518,7 @@ const legacyOperations = await deploy.getHistory({ app: 'sample/test/api', limit
 The same code works against a remote daemon by swapping the URL
 (`tcp://server:9700`).
 
-## Anti-patterns
+## Anti-patterns {#anti-patterns}
 
 - **Calling mutating methods over the public TCP plane without
   RBAC.** Operator-level methods change app state — expose only
@@ -528,14 +531,14 @@ The same code works against a remote daemon by swapping the URL
   daemon plumbing. The shape may change between releases without
   notice.
 
-## See also
+## See also {#see-also}
 
 - [Daemon](./daemon.md) — the `OmnitronDaemon` service + auth model
 - [Architecture](./architecture.md) — where these services live
 - [CLI](./cli.md) — most commands map directly to one method here
 - [Console](./console.md) — webapp uses the same services
 
-## Release and audit services
+## Release and audit services {#release-and-audit-services}
 
 `OmnitronRelease` provides `preflight`, `list`, `get`, `getLog`, `builds`,
 `getBuild`, `build`, `stopBuild`, `prune`, `attest`, `attestOnNode` and
@@ -547,14 +550,14 @@ Check availability before interpreting an empty result as proof that no
 operation took place. The audit trail records who requested control-plane
 changes and their outcomes.
 
-## Console administration and SSH
+## Console administration and SSH {#console-administration-and-ssh}
 
 `OmnitronAccess`: `describe`, `listUsers`, `createUser`, `setRole`, `revokeSessions`. See [Console access](./access.md) for transactions, audit and revocation.
 
 `OmnitronTerminal`: `capabilities`, `inspectHost`, `trustHost`, `open`, `list`, `read`, `write`, `resize`, `close`. See [SSH workspace](./terminal.md) for ownership, host verification and bounded binary I/O. Both services are registered on a master; they are not application user-management APIs.
 
 
-## File workspace services
+## File workspace services {#file-workspace-services}
 
 | File | Service id | Methods | Role gate |
 | --- | --- | --- | --- |

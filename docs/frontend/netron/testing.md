@@ -1,4 +1,6 @@
 ---
+id: "frontend/netron/testing"
+slug: "/docs/frontend/netron/testing"
 sidebar_position: 10
 title: Testing
 description: TestNetronProvider, integration patterns, deterministic fixtures.
@@ -10,7 +12,7 @@ netron-react ships testing utilities (under
 `@omnitron-dev/netron-react/test`) that let you drive components
 without a real backend.
 
-## `TestNetronProvider`
+## `TestNetronProvider` {#testnetronprovider}
 
 ```tsx
 import { TestNetronProvider } from '@omnitron-dev/netron-react/test';
@@ -40,7 +42,7 @@ Each mock entry is a `MockResponse`: `{ service, method, response?,
 error?, delay? }`. Provide `error` to make the matching call
 reject, and `delay` to simulate latency.
 
-## Custom mock responses
+## Custom mock responses {#custom-mock-responses}
 
 Each entry in `mocks` returns a **static** `response` for one
 `service.method`. To branch on arguments, override the client's
@@ -78,7 +80,7 @@ async methods. It is **not** auto-wired into the provider —
 dispatch to it via `invoke` as above (or pass `vi.fn()`
 implementations so you can assert calls).
 
-## Mock latency
+## Mock latency {#mock-latency}
 
 ```tsx
 render(
@@ -97,7 +99,7 @@ render(
 A per-mock `delay` (or `testConfig.defaultDelay`) lets you assert
 intermediate loading states before the response settles.
 
-## Multi-backend tests
+## Multi-backend tests {#multi-backend-tests}
 
 For multi-backend apps, build a `MultiBackendProvider` around a
 mock multi-backend client in your test setup — the test utils
@@ -118,7 +120,7 @@ render(
 See [Multi-backend](./multi-backend.md) for the production
 `MultiBackendProvider` API the mock client must satisfy.
 
-## Cache control in tests
+## Cache control in tests {#cache-control-in-tests}
 
 ```tsx
 import { createTestClient, TestNetronProvider }
@@ -136,7 +138,7 @@ render(<TestNetronProvider client={client}><App /></TestNetronProvider>);
 through `config`. With `staleTime: 0`, every mount re-fetches —
 useful for asserting "fetched N times" without caching surprises.
 
-## Loading + error states
+## Loading + error states {#loading--error-states}
 
 ```tsx
 it('shows skeleton while loading', async () => {
@@ -174,7 +176,7 @@ it('shows error on failure', async () => {
 });
 ```
 
-## Mutation assertions
+## Mutation assertions {#mutation-assertions}
 
 Spy on the client's `invoke` to assert a mutation fired with the
 right arguments — the proxy calls `invoke(service, method, args)`:
@@ -205,7 +207,7 @@ it('calls invite on submit', async () => {
 `useMutation` exposes `isLoading` while the mutation is in flight
 (plus `isSuccess` / `isError` / `data`).
 
-## Suspense + error boundary tests
+## Suspense + error boundary tests {#suspense--error-boundary-tests}
 
 Suspense is the `suspense: true` option on `useQuery` — it makes
 the hook throw the in-flight fetch to the nearest `<Suspense>`,
@@ -232,7 +234,7 @@ it('falls back to error boundary on render error', () => {
 });
 ```
 
-## Integration tests against a real backend
+## Integration tests against a real backend {#integration-tests-against-a-real-backend}
 
 For higher confidence, point tests at a running Titan dev
 server:
@@ -267,7 +269,7 @@ pnpm test:integration
 omnitron stack stop my-project test
 ```
 
-## Deterministic clock
+## Deterministic clock {#deterministic-clock}
 
 For time-sensitive behaviour (`refetchInterval`, retries,
 debounce):
@@ -293,7 +295,7 @@ vi.useRealTimers();
 `advanceTimersAndFlush(ms)` advances vitest fake timers and
 flushes pending microtasks; `nextTick()` awaits a single tick.
 
-## Best practices
+## Best practices {#best-practices}
 
 - **Mock per test file**, not globally. Sharing mocks across
   tests causes order dependencies.
@@ -307,7 +309,7 @@ flushes pending microtasks; `nextTick()` awaits a single tick.
 - **Integration tests** for the critical happy path; unit
   tests with mocks for edge cases.
 
-## Anti-patterns
+## Anti-patterns {#anti-patterns}
 
 - **Mocking `fetch` directly.** Bypasses the client logic;
   use `TestNetronProvider`.
@@ -318,7 +320,7 @@ flushes pending microtasks; `nextTick()` awaits a single tick.
 - **Real backend in unit tests.** Slow, flaky, hard to seed —
   reserve for integration suite.
 
-## See also
+## See also {#see-also}
 
 - [netron-react](./react.md) — hooks under test
 - [Multi-backend](./multi-backend.md) — `MultiBackendProvider`

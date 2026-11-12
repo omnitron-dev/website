@@ -1,4 +1,6 @@
 ---
+id: "titan/application/events"
+slug: "/docs/titan/application/events"
 sidebar_position: 5
 title: Application Events
 description: The framework event bus — what fires, what to subscribe to, and what to ignore.
@@ -10,7 +12,7 @@ The kernel emits a typed set of events through the `Application`
 event bus. Subscribe when you need to observe framework behaviour or
 instrument the runtime.
 
-## API
+## API {#api}
 
 ```typescript
 import { ApplicationEvent } from '@omnitron-dev/titan';
@@ -25,7 +27,7 @@ app.emit('user.created', { id, email });   // user events too
 custom events). Handlers receive `(data, meta?)` where `meta`
 carries event metadata. Handler return values are ignored.
 
-## Framework-emitted events
+## Framework-emitted events {#framework-emitted-events}
 
 | Enum                              | String value             | Payload (as emitted by the kernel)               |
 | --------------------------------- | ------------------------ | ------------------------------------------------ |
@@ -55,7 +57,7 @@ carries event metadata. Handler return values are ignored.
 The full enum is exported as `ApplicationEvent` from
 `@omnitron-dev/titan/application` or via the root barrel.
 
-## Typed handlers
+## Typed handlers {#typed-handlers}
 
 ```typescript
 app.on(ApplicationEvent.ShutdownComplete, ({ reason, success }) => {
@@ -67,7 +69,7 @@ The data type is what the kernel actually emits for that event;
 exact field shapes can change between minor versions, so handlers
 that read deep fields should be defensive (use optional chaining).
 
-## Custom events
+## Custom events {#custom-events}
 
 Modules can emit and subscribe to their own events. The event name
 is a free-form string; the payload is typed by the emitter.
@@ -84,9 +86,9 @@ validation, scheduled delivery, and structured handler composition.
 The application event bus is for *framework-level* signalling and
 ad-hoc lightweight notifications, not for business workflows.
 
-## Common subscriptions
+## Common subscriptions {#common-subscriptions}
 
-### Boot timing
+### Boot timing {#boot-timing}
 
 `Started` carries no payload — read `app.uptime` (ms since start) at
 the moment it fires:
@@ -97,7 +99,7 @@ app.on(ApplicationEvent.Started, () => {
 });
 ```
 
-### Crash signals
+### Crash signals {#crash-signals}
 
 `Error` delivers the raw `Error` (the in-process event bus may wrap it
 as `{ error }` — be defensive):
@@ -109,7 +111,7 @@ app.on(ApplicationEvent.Error, (data) => {
 });
 ```
 
-### Config-change audit
+### Config-change audit {#config-change-audit}
 
 ```typescript
 app.on(ApplicationEvent.ConfigChanged, (data) => {
@@ -118,7 +120,7 @@ app.on(ApplicationEvent.ConfigChanged, (data) => {
 });
 ```
 
-### Shutdown bookkeeping
+### Shutdown bookkeeping {#shutdown-bookkeeping}
 
 ```typescript
 app.on(ApplicationEvent.ShutdownComplete, ({ reason, success }) => {
@@ -126,7 +128,7 @@ app.on(ApplicationEvent.ShutdownComplete, ({ reason, success }) => {
 });
 ```
 
-## Event ordering guarantees
+## Event ordering guarantees {#event-ordering-guarantees}
 
 - Framework events for the same phase fire in dependency order
   (same as the hooks themselves).
@@ -135,7 +137,7 @@ app.on(ApplicationEvent.ShutdownComplete, ({ reason, success }) => {
 - `emit` does **not** await handlers. For synchronous coordination,
   use the lifecycle hooks instead.
 
-## Anti-patterns
+## Anti-patterns {#anti-patterns}
 
 - **Mutating application state from handlers.** Handlers are
   observers. If you find yourself starting / stopping providers

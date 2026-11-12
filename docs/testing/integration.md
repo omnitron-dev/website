@@ -1,4 +1,6 @@
 ---
+id: "testing/integration"
+slug: "/docs/testing/integration"
 sidebar_position: 3
 title: Integration patterns
 description: Real Application, fake boundaries — the recipes that scale.
@@ -11,7 +13,7 @@ together with real DI, but external services (DB, mailer,
 payment provider, S3) are faked. This is the layer with the
 highest signal-to-noise.
 
-## The base pattern
+## The base pattern {#the-base-pattern}
 
 ```typescript
 import { describe, beforeEach, afterEach, it, expect } from 'vitest';
@@ -65,9 +67,9 @@ Transaction isolation is not part of this API — arrange it in your own
 `beforeEach`/`afterEach` around the connection your module resolves, or
 give each worker its own database (see below).
 
-## Fake patterns
+## Fake patterns {#fake-patterns}
 
-### Fake mailer
+### Fake mailer {#fake-mailer}
 
 ```typescript
 class FakeMailer implements IMailer {
@@ -81,7 +83,7 @@ class FakeMailer implements IMailer {
 
 Just records calls. Assert on `sent` after the action.
 
-### Fake clock
+### Fake clock {#fake-clock}
 
 ```typescript
 import { vi } from 'vitest';
@@ -100,7 +102,7 @@ it('respects backoff', async () => {
 Use fake timers for **anything time-dependent** — backoff,
 TTL, cron, debounce. Real clocks make tests slow and flaky.
 
-### Stubbed external HTTP
+### Stubbed external HTTP {#stubbed-external-http}
 
 ```typescript
 import { setupServer } from 'msw/node';
@@ -119,7 +121,7 @@ afterAll(()  => server.close());
 [`msw`](https://mswjs.io/) intercepts at the network layer
 without changing app code.
 
-## Transaction-rollback in detail
+## Transaction-rollback in detail {#transaction-rollback-in-detail}
 
 ```typescript
 app = await createTestApp({
@@ -144,7 +146,7 @@ afterEach:  await db.exec('ROLLBACK');
 **Caveat**: tests that span multiple connections won't see each
 other's writes (different transactions). Move those to E2E.
 
-## Lifecycle test
+## Lifecycle test {#lifecycle-test}
 
 ```typescript
 it('runs onStart hooks in dependency order', async () => {
@@ -172,9 +174,9 @@ it('runs onStart hooks in dependency order', async () => {
 
 Asserts lifecycle ordering, hook firing, error propagation.
 
-## Database integration
+## Database integration {#database-integration}
 
-### In-memory SQLite
+### In-memory SQLite {#in-memory-sqlite}
 
 ```typescript
 app = await createTestApp({
@@ -188,7 +190,7 @@ Use when:
   exercised.
 - Speed > realism.
 
-### Real Postgres
+### Real Postgres {#real-postgres}
 
 Use a real Postgres when RLS, triggers, advisory locks or jsonb
 queries matter, or when the schema is Postgres-specific. The shared
@@ -203,7 +205,7 @@ mod = createTestModule({
 });
 ```
 
-### Docker-managed test DB
+### Docker-managed test DB {#docker-managed-test-db}
 
 When a suite needs its own instance rather than the shared stack:
 
@@ -233,7 +235,7 @@ beforeEach(() => {
 suites to run in parallel — a fixed port makes them collide, and the
 failure names a port the test never chose.
 
-## Netron integration tests
+## Netron integration tests {#netron-integration-tests}
 
 ```typescript
 import { createTestModule } from '@omnitron-dev/testing/titan';
@@ -275,7 +277,7 @@ This is the highest-value integration test — actual wire format,
 actual serialisation, actual auth, actual middleware. Catches a
 huge class of bugs that mocked-RPC tests miss.
 
-## Event-driven assertions
+## Event-driven assertions {#event-driven-assertions}
 
 ```typescript
 import { waitForEvents } from '@omnitron-dev/testing';
@@ -298,7 +300,7 @@ requested. Set up the wait **before** triggering the action — race-free.
 `createEventSpy(bus, 'user.created')` is the alternative when you want
 to inspect everything that was emitted rather than wait for the first.
 
-## Custom routes
+## Custom routes {#custom-routes}
 
 Custom routes alongside RPC need their own tests:
 
@@ -316,7 +318,7 @@ it('serves images via /render/image/*', async () => {
 Hit the route with a plain `fetch`; assert on status, headers,
 body.
 
-## Speed budget
+## Speed budget {#speed-budget}
 
 For an integration suite to stay fast:
 
@@ -331,7 +333,7 @@ For an integration suite to stay fast:
 If you blow past those, you're probably testing too much in
 one — split the test or push to E2E.
 
-## CI considerations
+## CI considerations {#ci-considerations}
 
 - **Parallelism**: Vitest forks per-file. Tests within a file
   share a process; tests across files don't. Keep file-level
@@ -343,7 +345,7 @@ one — split the test or push to E2E.
 - **Snapshot updates**: gate behind explicit `pnpm test --update`
   — never auto-update in CI.
 
-## Best practices
+## Best practices {#best-practices}
 
 - **One test, one behaviour.** A failing test should point at a
   single change.
@@ -354,7 +356,7 @@ one — split the test or push to E2E.
   party APIs. Don't override internal services.
 - **Fake the clock**, never sleep.
 
-## Anti-patterns
+## Anti-patterns {#anti-patterns}
 
 - **Asserting on log output.** Logs change; assert on observable
   state.
@@ -365,7 +367,7 @@ one — split the test or push to E2E.
 - **Snapshot tests for non-deterministic output.** Timestamps,
   IDs, hashes — exclude or sanitise.
 
-## See also
+## See also {#see-also}
 
 - [Testing overview](./index.md)
 - [Testing package](./testing-package.md) — `createTestApp` API

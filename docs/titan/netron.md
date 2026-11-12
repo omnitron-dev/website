@@ -1,4 +1,6 @@
 ---
+id: "titan/netron"
+slug: "/docs/titan/netron"
 sidebar_position: 1
 title: Netron RPC
 description: A transport-agnostic RPC plane — same service surface across HTTP, WebSocket, TCP, Unix.
@@ -23,7 +25,7 @@ This page is the Netron entry point. The mechanics live in:
 | [Multi-backend](./netron/multi-backend.md)        | Client → many servers, failover, load balancing       |
 | [Serialization](./netron/serialization.md)        | Wire format, msgpack, custom codecs                    |
 
-## The short tour
+## The short tour {#the-short-tour}
 
 Server — define the service, then bind a transport server on the
 running `Netron` instance:
@@ -58,7 +60,7 @@ error mapping, and trace propagation all happen behind it.
 > (`@omnitron-dev/netron-browser`) with its own connection API; this
 > page covers the server-side `@omnitron-dev/titan/netron` runtime.
 
-## What Netron is
+## What Netron is {#what-netron-is}
 
 A few specific things, each with a deliberate scope:
 
@@ -81,7 +83,7 @@ A few specific things, each with a deliberate scope:
   WebSocket / TCP / Unix. An `async *` generator method is
   auto-wrapped into a stream for remote callers.
 
-## What Netron is not
+## What Netron is not {#what-netron-is-not}
 
 - **Not a service mesh.** Discovery, mTLS, traffic shaping at
   cluster scope are out of scope. Use a real mesh (Linkerd, Istio,
@@ -93,7 +95,7 @@ A few specific things, each with a deliberate scope:
 - **Not a schema language.** The TypeScript interface is the schema.
   No `.proto` files, no OpenAPI YAML.
 
-## Performance characteristics
+## Performance characteristics {#performance-characteristics}
 
 Per-call cost on a warmed-up connection (HTTP/1.1, localhost,
 no middleware):

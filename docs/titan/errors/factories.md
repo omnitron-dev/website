@@ -1,4 +1,6 @@
 ---
+id: "titan/errors/factories"
+slug: "/docs/titan/errors/factories"
 sidebar_position: 3
 title: Error Factories
 description: The Errors / NetronErrors / HttpErrors / AuthErrors namespaces.
@@ -9,7 +11,7 @@ description: The Errors / NetronErrors / HttpErrors / AuthErrors namespaces.
 A factory is a function that produces a properly-typed `TitanError`
 for a common pattern. Titan groups factories into four namespaces.
 
-## `Errors` — the general namespace
+## `Errors` — the general namespace {#errors--the-general-namespace}
 
 ```typescript
 import { Errors } from '@omnitron-dev/titan/errors';
@@ -42,7 +44,7 @@ The catalogue is exhaustive — check the source for the latest
 methods. Use `Errors.create(code, message, details)` for codes that
 don't have a dedicated factory.
 
-## `NetronErrors` — RPC-specific
+## `NetronErrors` — RPC-specific {#netronerrors--rpc-specific}
 
 ```typescript
 import { NetronErrors } from '@omnitron-dev/titan/errors';
@@ -70,7 +72,7 @@ Each returns the matching `NetronError` subclass
 (`ServiceNotFoundError`, `TransportError`, `TransportLostError`,
 `RpcError`, `PeerError`, `StreamError`, `SerializationError`).
 
-## `HttpErrors` — when you need an `HttpError` subclass
+## `HttpErrors` — when you need an `HttpError` subclass {#httperrors--when-you-need-an-httperror-subclass}
 
 ```typescript
 import { HttpErrors } from '@omnitron-dev/titan/errors';
@@ -91,7 +93,7 @@ catch (e) {
 }
 ```
 
-## `AuthErrors` — auth-specific subclasses
+## `AuthErrors` — auth-specific subclasses {#autherrors--auth-specific-subclasses}
 
 ```typescript
 import { AuthErrors } from '@omnitron-dev/titan/errors';
@@ -100,9 +102,9 @@ import { AuthErrors } from '@omnitron-dev/titan/errors';
 Produces `AuthError`, `PermissionError`, or `RateLimitError`
 instances. Use when class-based dispatch matters on the client.
 
-## Conversion helpers
+## Conversion helpers {#conversion-helpers}
 
-### `toTitanError(error)`
+### `toTitanError(error)` {#totitanerrorerror}
 
 Convert any thrown value (a native `Error`, a string, an object) into
 a `TitanError`:
@@ -117,12 +119,12 @@ try {
 
 Useful at boundaries where you do not control what's thrown.
 
-### `ensureError(value)`
+### `ensureError(value)` {#ensureerrorvalue}
 
 Coerce a value into a `TitanError`. Same as `toTitanError` but with
 a slightly different policy for non-error inputs.
 
-### `assert(condition, errorOrMessage, details?)`
+### `assert(condition, errorOrMessage, details?)` {#assertcondition-errorormessage-details}
 
 Throw a `TitanError` if the condition is falsy. Type-narrows on the
 truthy branch:
@@ -136,7 +138,7 @@ function process(input: Input | null) {
 }
 ```
 
-### `assertDefined(value, message)`
+### `assertDefined(value, message)` {#assertdefinedvalue-message}
 
 Specialised `assert` for null/undefined:
 
@@ -148,11 +150,11 @@ assertDefined(user, 'user not found');
 // `user` is `User`, not `User | undefined`.
 ```
 
-### `assertType(value, predicate, message)`
+### `assertType(value, predicate, message)` {#asserttypevalue-predicate-message}
 
 Specialised `assert` with a type predicate.
 
-## Custom project factories
+## Custom project factories {#custom-project-factories}
 
 For domain-specific errors that recur across modules, wrap the
 generic factories in a per-domain helper:

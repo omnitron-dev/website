@@ -1,4 +1,6 @@
 ---
+id: "tutorial/service"
+slug: "/docs/tutorial/service"
 sidebar_position: 3
 title: 2. Service with a database
 description: Replace the hello service with a real one backed by Postgres.
@@ -9,7 +11,7 @@ description: Replace the hello service with a real one backed by Postgres.
 By the end: a `UsersService` with `findById` / `create` /
 `list`, persisting to Postgres via `titan-database`.
 
-## Add the database module
+## Add the database module {#add-the-database-module}
 
 ```bash
 cd apps/api
@@ -30,7 +32,7 @@ Spin up Postgres locally:
 docker run -d --name pg -e POSTGRES_PASSWORD=dev -e POSTGRES_DB=platform -p 127.0.0.1:5432:5432 postgres:16-alpine
 ```
 
-## Schema
+## Schema {#schema}
 
 `apps/api/src/db/schema.ts`:
 
@@ -49,7 +51,7 @@ export interface Database {
 }
 ```
 
-## Migration
+## Migration {#migration}
 
 `apps/api/migrations/001_users.sql`:
 
@@ -68,7 +70,7 @@ Run it:
 PGPASSWORD=dev psql -U postgres -h localhost -d platform < apps/api/migrations/001_users.sql
 ```
 
-## Repository
+## Repository {#repository}
 
 `apps/api/src/users/user.repo.ts`:
 
@@ -115,7 +117,7 @@ export class UserRepo {
 }
 ```
 
-## Service
+## Service {#service}
 
 `apps/api/src/users/users.service.ts`:
 
@@ -156,7 +158,7 @@ export class UsersService {
 }
 ```
 
-## Wire the module
+## Wire the module {#wire-the-module}
 
 `apps/api/src/app.module.ts`:
 
@@ -240,7 +242,7 @@ JS
 
 The round trip exercises the database through the HTTP transport. Use a typed service proxy, as in the [quickstart](../getting-started/quickstart.md), when calling from TypeScript.
 
-## What changed
+## What changed {#what-changed}
 
 | Piece | What it does |
 | ----- | ------------ |
@@ -254,19 +256,19 @@ The round trip exercises the database through the HTTP transport. Use a typed se
 Repo + service split is the canonical pattern — easier to test,
 clearer responsibilities.
 
-## Commit
+## Commit {#commit}
 
 ```bash
 git add .
 git commit -m "step 2: real users service with Postgres"
 ```
 
-## Next
+## Next {#next}
 
 **[Step 3 — Auth →](./03-auth.md)** — JWT sign-in, sessions,
 role-gated methods.
 
-## Troubleshooting
+## Troubleshooting {#troubleshooting}
 
 | Symptom | Fix |
 | ------- | --- |

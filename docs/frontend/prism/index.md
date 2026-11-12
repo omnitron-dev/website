@@ -1,4 +1,6 @@
 ---
+id: "frontend/prism/index"
+slug: "/docs/frontend/prism"
 sidebar_position: 1
 title: Overview
 description: Design system for production React frontends — MUI v9 + Prism.
@@ -41,7 +43,7 @@ and [Components → MUI v9 slot props](./components.md#mui-v9-slot-props)
 for the consumer-side migration cheat sheet.
 :::
 
-## Three layers of API
+## Three layers of API {#three-layers-of-api}
 
 ```mermaid
 flowchart LR
@@ -73,7 +75,7 @@ Pick the level that matches your need:
 - [**Maps**](./maps.md) — self-hosted MapLibre map, markers,
   point picker and coverage layer.
 
-## Subpath exports
+## Subpath exports {#subpath-exports}
 
 Public subpaths are explicit package exports with matching JavaScript and
 TypeScript declarations. For example, `./components/card`, `./components/table`,
@@ -120,7 +122,7 @@ the size depends on selected components, peers and route boundaries.
 Tree-shaking works on every subpath — import the smallest scope
 your bundler needs.
 
-## Minimum wiring
+## Minimum wiring {#minimum-wiring}
 
 ```tsx
 import { PrismProvider } from '@omnitron-dev/prism/core';
@@ -173,7 +175,7 @@ multiple providers cleanly:
 </ProviderStack>
 ```
 
-## State management — `createPrismStore` / `createPersistedStore`
+## State management — `createPrismStore` / `createPersistedStore` {#state-management--createprismstore--createpersistedstore}
 
 Prism ships Zustand-based store factories (Immer + DevTools +
 optional localStorage persistence baked in). Use
@@ -221,14 +223,14 @@ When you bump `version`, persisted state from older versions
 runs through `migrate` before being adopted. (See also the
 versioned-settings helpers in `@omnitron-dev/prism/state`.)
 
-## Accessibility
+## Accessibility {#accessibility}
 
 `@omnitron-dev/prism/accessibility` exports vision simulation through
 `VisionModeProvider`, `useVisionMode`, `VISION_MODE_OPTIONS` and
 `getVisionModeStyles`. See [Accessibility](./accessibility.md) for
 the actual surface and an application-level verification workflow.
 
-## Netron integration — `@omnitron-dev/prism/netron`
+## Netron integration — `@omnitron-dev/prism/netron` {#netron-integration--omnitron-devprismnetron}
 
 Pre-wired auth + UI bindings for apps that talk to a Titan
 backend via Netron:
@@ -273,7 +275,7 @@ The bindings re-export `@omnitron-dev/netron-react` hooks —
 see [netron/react](../netron/react.md) for the full hook
 reference.
 
-## CLI — `prism` binary
+## CLI — `prism` binary {#cli--prism-binary}
 
 ```bash
 prism init                 # scaffold Prism config in current project
@@ -285,7 +287,7 @@ The CLI uses templates from `templates/` (shipped with the
 package) plus the schema in `registry.json` for available
 component metadata.
 
-## Best practices
+## Best practices {#best-practices}
 
 - **Pick the smallest layer.** A [`<DashboardBlock>`](./blocks.md)
   is faster than composing it from 12 components, but constrains
@@ -304,7 +306,7 @@ component metadata.
   Zustand** for any state that persists — the versioned-settings
   helpers handle migrations.
 
-## See also
+## See also {#see-also}
 
 - [Components catalog](./components.md) — 50+ widgets with
   props + examples
@@ -318,7 +320,7 @@ component metadata.
 - [netron-react](../netron/react.md) — React hooks for RPC
 - [Frontend overview](../overview.md) — the three-package picture
 
-## Further guides
+## Further guides {#further-guides}
 
 - [State and persistence](./state.md) — stores, hydration and migrations.
 - [HTTP client](./http.md) — REST requests, cancellation and interceptors.

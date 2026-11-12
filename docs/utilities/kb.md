@@ -1,4 +1,6 @@
 ---
+id: "utilities/kb"
+slug: "/docs/utilities/kb"
 sidebar_position: 6
 title: kb
 description: Knowledge-base framework — code intelligence + semantic search.
@@ -18,7 +20,7 @@ the stack uses.
 
 Verified against `packages/kb/src/`.
 
-## What it does
+## What it does {#what-it-does}
 
 - **Extracts** structured knowledge (symbols, modules, patterns,
   gotchas, docs) from TypeScript packages.
@@ -30,7 +32,7 @@ Verified against `packages/kb/src/`.
 End-to-end: from `.ts` files on disk to "find the canonical way
 to do X" answers in milliseconds.
 
-## Architecture
+## Architecture {#architecture}
 
 ```mermaid
 flowchart LR
@@ -53,7 +55,7 @@ flowchart LR
   Q --> MCP
 ```
 
-## Entry types
+## Entry types {#entry-types}
 
 | Type | What | Example |
 | ---- | ---- | ------- |
@@ -67,7 +69,7 @@ flowchart LR
 Each entry has: id, type, name, summary, body, related (cross-
 references), source-location (file + line).
 
-## Per-package configuration — `kb/kb.config.ts`
+## Per-package configuration — `kb/kb.config.ts` {#per-package-configuration--kbkbconfigts}
 
 Each package contributes its own extraction rules from a
 `kb/kb.config.ts` file:
@@ -99,7 +101,7 @@ standard decorator set, `entryPoints: ['src/index.ts']`,
 `kb/kb.config.ts` and the indexer merges the results into the
 central store.
 
-## CLI
+## CLI {#cli}
 
 ```bash
 # Build / rebuild the index:
@@ -119,7 +121,7 @@ omnitron kb mcp                 # stdio MCP for AI agents
 → [Omnitron MCP page](../omnitron/mcp.md) covers the agent
 integration in full.
 
-## Programmatic API
+## Programmatic API {#programmatic-api}
 
 ```typescript
 import { KnowledgeBase } from '@omnitron-dev/kb';
@@ -152,7 +154,7 @@ await kb.close();
 The return shapes mirror the MCP tool responses — see
 [Omnitron MCP](../omnitron/mcp.md#kb-tools).
 
-## Store backends
+## Store backends {#store-backends}
 
 | Backend | When | Notes |
 | ------- | ---- | ----- |
@@ -189,7 +191,7 @@ interface IKbStore {
 shipped implementation; implement `IKbStore` to point kb at any
 backing store you prefer.
 
-## Hybrid search
+## Hybrid search {#hybrid-search}
 
 Two indexes per entry:
 
@@ -202,7 +204,7 @@ The default query runs both and ranks-combined. Pure-keyword
 queries work without embeddings; semantic-aware queries need an
 embedding model wired up.
 
-### Embedding model setup
+### Embedding model setup {#embedding-model-setup}
 
 `KnowledgeBase` defaults to `NullEmbeddingProvider` (no semantic
 vectors). To enable semantic search, pass a real provider — the
@@ -226,7 +228,7 @@ from the package root), `OllamaEmbeddingProvider`,
 `OpenAIEmbeddingProvider`, and `VoyageEmbeddingProvider`. Without a
 real provider, semantic search is a no-op — full-text still works.
 
-## Discovery
+## Discovery {#discovery}
 
 ```typescript
 import { KnowledgeDiscovery } from '@omnitron-dev/kb';
@@ -241,7 +243,7 @@ constructor takes the path to the built-in cross-cutting specs; the
 `discover(workspaceRoot)` method finds every `kb/kb.config.ts` in
 the workspace without you listing them manually.
 
-## When you'd use this directly
+## When you'd use this directly {#when-youd-use-this-directly}
 
 - **Building a custom MCP server** with project-specific tools
   on top of the standard kb base.
@@ -252,7 +254,7 @@ the workspace without you listing them manually.
 
 For most users, the `omnitron kb mcp` CLI is enough.
 
-## Performance
+## Performance {#performance}
 
 | Op | Time |
 | -- | ---- |
@@ -265,7 +267,7 @@ For most users, the `omnitron kb mcp` CLI is enough.
 
 Embedding model is the dominant cost; the rest is near-free.
 
-## Where it sits in the stack
+## Where it sits in the stack {#where-it-sits-in-the-stack}
 
 ```mermaid
 flowchart LR
@@ -281,7 +283,7 @@ flowchart LR
 The store is the same artefact serving both human and agent
 queries — no separate "agent API".
 
-## See also
+## See also {#see-also}
 
 - [Omnitron / MCP](../omnitron/mcp.md) — agent integration
   built on top of this package

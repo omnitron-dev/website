@@ -1,4 +1,6 @@
 ---
+id: "titan/netron/serialization"
+slug: "/docs/titan/netron/serialization"
 sidebar_position: 7
 title: Serialization
 description: msgpack as the wire format — types, custom codecs, when to override.
@@ -17,7 +19,7 @@ single shared instance, `serializer`, in
 encode/decode and the common-type registrations live in
 `packages/msgpack/src/`.
 
-## What the serializer handles natively
+## What the serializer handles natively {#what-the-serializer-handles-natively}
 
 | Type                | Wire form                              |
 | ------------------- | -------------------------------------- |
@@ -32,7 +34,7 @@ encode/decode and the common-type registrations live in
 Anything else — `Date`, `BigInt`, `Map`, `Set`, custom classes —
 is handled through *registered types* (below).
 
-## Registered types Titan ships
+## Registered types Titan ships {#registered-types-titan-ships}
 
 A registered ("extension") type is a single-byte code paired with an
 `encode`/`decode` callback. Codes are a single byte, `0..127`, and the
@@ -83,7 +85,7 @@ any subclass-specific fields (`serviceId`, `requiredPermission`,
 server-internal paths; dev tooling can opt in via
 `setSerializerErrorOptions({ includeStackTraces: true })`.
 
-## Custom types
+## Custom types {#custom-types}
 
 For domain types you want to send as themselves (preserving class
 identity on the receiver), register a type on the shared `serializer`.
@@ -129,7 +131,7 @@ Both peers must register the same constructor against the same code,
 with codecs that agree on field order. If only one side registers it,
 or the codes differ, the receiver cannot reconstruct the value.
 
-## When NOT to use a custom codec
+## When NOT to use a custom codec {#when-not-to-use-a-custom-codec}
 
 - **For JSON-shaped data.** Plain objects and arrays serialise
   natively. A custom codec for `User` or `Order` adds overhead
@@ -140,7 +142,7 @@ or the codes differ, the receiver cannot reconstruct the value.
 - **When you can't update both sides.** Codec mismatches are
   silent — the receiver will get raw bytes and not know what to do.
 
-## Payload limits
+## Payload limits {#payload-limits}
 
 The default packet ceiling is **16 MiB**
 (`DEFAULT_MAX_PACKET_SIZE` in `netron/packet/index.ts`), overridable per
@@ -165,7 +167,7 @@ For larger transfers (file uploads, bulk data), use:
 - **Out-of-band transfer** — pass a URL or storage key over Netron;
   fetch/upload bytes via a separate HTTP path.
 
-## Round-trip type fidelity
+## Round-trip type fidelity {#round-trip-type-fidelity}
 
 Most types round-trip cleanly:
 
@@ -185,7 +187,7 @@ A few traps:
 - **Class methods.** Only data is sent. The receiver gets a plain
   object unless a custom codec reconstructs.
 
-## Performance
+## Performance {#performance}
 
 For typical service payloads (small objects with primitive fields),
 msgpack encode/decode is under 10 µs per call. For large nested
@@ -197,7 +199,7 @@ If serialisation is on your hot path, profile. Common wins:
 - **Trim payloads** — only include fields the client needs.
 - **Use streaming** for large collections.
 
-## Anti-patterns
+## Anti-patterns {#anti-patterns}
 
 - **Sending entire DB rows.** Repository fetch returns a row with
   every column; the client needs three of them. Project to a smaller

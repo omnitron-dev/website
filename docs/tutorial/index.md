@@ -1,4 +1,6 @@
 ---
+id: "tutorial/index"
+slug: "/docs/tutorial"
 sidebar_position: 1
 title: Overview
 description: A 6-step tutorial — from empty folder to deployed app.
@@ -15,7 +17,7 @@ By the end you'll have:
 - Tests across unit / integration / E2E.
 - A production-ready Docker deploy.
 
-## The steps
+## The steps {#the-steps}
 
 | Step | What you build | Time |
 | ---- | -------------- | ---- |
@@ -28,7 +30,7 @@ By the end you'll have:
 
 Total: ~2.5 hours from cold start.
 
-## Conventions
+## Conventions {#conventions}
 
 - Code blocks are runnable as-is. Copy and replace placeholders
   marked `<like this>`.
@@ -36,14 +38,14 @@ Total: ~2.5 hours from cold start.
 - The final code lives at `apps/api/` + `apps/web/` in your
   monorepo.
 
-## Prerequisites
+## Prerequisites {#prerequisites}
 
 - Node.js 22+
 - pnpm 9+
 - Docker (for the deploy step)
 - A code editor (VS Code recommended for TypeScript)
 
-## What this tutorial assumes you know
+## What this tutorial assumes you know {#what-this-tutorial-assumes-you-know}
 
 - TypeScript at the level of "I've shipped a real app".
 - React at the level of "useState + useEffect".
@@ -56,7 +58,7 @@ What you **don't** need:
 - RPC frameworks (Netron will explain itself).
 - Decorators (TypeScript-level, picked up by example).
 
-## When you're done
+## When you're done {#when-youre-done}
 
 You'll know how to:
 - Define a Titan service and expose it over Netron.

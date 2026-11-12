@@ -1,4 +1,6 @@
 ---
+id: "testing/index"
+slug: "/docs/testing"
 sidebar_position: 1
 title: Overview
 description: How to test apps built on this stack — unit, integration, cross-runtime, E2E.
@@ -10,7 +12,7 @@ A pragmatic guide to testing on this stack. Covers four
 levels — from unit tests of a single class to E2E tests
 driving a real React app through a real Netron client.
 
-## The pyramid
+## The pyramid {#the-pyramid}
 
 ```mermaid
 flowchart TB
@@ -34,7 +36,7 @@ flowchart TB
 | **Integration** | Real app, in-memory infra | Vitest + Titan testing utilities | 10s of ms | Cross-module flow |
 | **E2E** | Real daemon, real client | Vitest / Playwright | seconds | Full system |
 
-## Tooling
+## Tooling {#tooling}
 
 | Package | Role |
 | ------- | ---- |
@@ -49,7 +51,7 @@ PostgreSQL server and drop it after completion. `pnpm test:ci` owns the test
 services for the full workspace run. A missing test server is reported as a
 skip with a reason; it is not evidence that SQL behavior passed.
 
-## What lives where
+## What lives where {#what-lives-where}
 
 - **Unit + module tests** live next to the code: `src/foo.ts` +
   `src/__tests__/foo.test.ts`.
@@ -57,7 +59,7 @@ skip with a reason; it is not evidence that SQL behavior passed.
 - **E2E tests** live in `<app>/e2e/` (Playwright by convention).
 - **Performance + load** tests in `<package>/benchmark/`.
 
-## The four pages
+## The four pages {#the-four-pages}
 
 | Page | What it covers |
 | ---- | -------------- |
@@ -70,9 +72,9 @@ Plus the per-module testing reference:
 [Titan / Testing / Modules](../titan/testing/modules.md) —
 specific mock recipes for each of the 14 modules.
 
-## Quick reference — one test per level
+## Quick reference — one test per level {#quick-reference--one-test-per-level}
 
-### Unit
+### Unit {#unit}
 
 ```typescript
 import { describe, it, expect } from 'vitest';
@@ -91,7 +93,7 @@ describe('calculateInvoiceTotal', () => {
 No DI, no async, no mocks — just functions and their
 expectations.
 
-### Module
+### Module {#module}
 
 ```typescript
 import { describe, it, expect, vi } from 'vitest';
@@ -120,7 +122,7 @@ describe('UsersService', () => {
 The DI container is real; dependencies are mocks via the
 override mechanism.
 
-### Integration
+### Integration {#integration}
 
 ```typescript
 import { describe, it, expect } from 'vitest';
@@ -157,7 +159,7 @@ describe('user invite flow', () => {
 Real `Application`, real DI, real cross-module flow — only the
 outermost integration (mailer) is faked.
 
-### E2E
+### E2E {#e2e}
 
 ```typescript
 // e2e/sign-in.spec.ts (Playwright)
@@ -176,7 +178,7 @@ test('user signs in', async ({ page }) => {
 Real daemon, real React app, real browser. Slowest layer; run
 sparingly.
 
-## Per-module mocking
+## Per-module mocking {#per-module-mocking}
 
 For each of the 14 Titan modules, the cheapest path to a mock
 is in [Titan / Testing / Modules](../titan/testing/modules.md).
@@ -195,7 +197,7 @@ Some quick links:
 
 Each module ships a "Smallest mock" snippet on its page.
 
-## Best practices
+## Best practices {#best-practices}
 
 - **Test at the lowest level that proves the behaviour.** A unit
   test beats a module test beats an integration test for the
@@ -213,7 +215,7 @@ Each module ships a "Smallest mock" snippet on its page.
 - **Run tests in parallel.** Vitest does this by default — keep
   tests independent (no shared module state, no shared DB rows).
 
-## Anti-patterns
+## Anti-patterns {#anti-patterns}
 
 - **Mocking the framework.** Mocking `Application` or
   `Container` means you're not testing your code — you're
@@ -225,7 +227,7 @@ Each module ships a "Smallest mock" snippet on its page.
 - **Test files alongside `dist/`.** Tests should run from
   source; compiled tests drift.
 
-## See also
+## See also {#see-also}
 
 - [Testing package reference](./testing-package.md) — `@omnitron-dev/testing` API
 - [Titan / Testing](../titan/testing/overview.md) — framework-level guide

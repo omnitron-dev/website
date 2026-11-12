@@ -1,4 +1,6 @@
 ---
+id: "foundations/architecture"
+slug: "/docs/foundations/architecture"
 sidebar_position: 2
 title: Architecture
 ---
@@ -7,7 +9,7 @@ title: Architecture
 
 How an Omnitron-based system composes at runtime.
 
-## The layers
+## The layers {#the-layers}
 
 ```mermaid
 flowchart TB
@@ -52,7 +54,7 @@ Three observations:
    that the CLI and the web console call. The "operator API" is a
    first-class part of the runtime.
 
-## A request, end to end
+## A request, end to end {#a-request-end-to-end}
 
 1. **Browser** — a React component renders, gets the typed
    service with `const users = useService<UsersService>('users')`,
@@ -77,7 +79,7 @@ Three observations:
 End to end, the type of `data` in the React component is **the return
 type of the service method**. No translation step.
 
-## Where each package lives in this picture
+## Where each package lives in this picture {#where-each-package-lives-in-this-picture}
 
 | Package                   | Responsibility                                                                     |
 | ------------------------- | ---------------------------------------------------------------------------------- |
@@ -89,7 +91,7 @@ type of the service method**. No translation step.
 | `titan-*` modules   | Optional Titan modules: auth, cache, db, discovery, events, etc.                   |
 | `@omnitron-dev/common`, `cuid`, `eventemitter`, `msgpack`, `testing` | Shared primitives                       |
 
-## Cross-cutting concerns
+## Cross-cutting concerns {#cross-cutting-concerns}
 
 - **Configuration** — `ConfigModule` validates against a Zod schema at
   boot. Misconfiguration is a startup error, not a 3 AM runtime crash.

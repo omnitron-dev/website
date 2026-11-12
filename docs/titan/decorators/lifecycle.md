@@ -1,4 +1,6 @@
 ---
+id: "titan/decorators/lifecycle"
+slug: "/docs/titan/decorators/lifecycle"
 sidebar_position: 2
 title: Lifecycle Decorators
 description: PostConstruct, PreDestroy — and when to prefer interfaces.
@@ -12,7 +14,7 @@ decorating methods with `@PostConstruct` / `@PreDestroy`.
 
 The framework treats them identically. Choose by intent.
 
-## `@PostConstruct()`
+## `@PostConstruct()` {#postconstruct}
 
 Runs after the container constructs the instance, in the dependency-
 ordered `onInit` phase. Equivalent to implementing
@@ -33,7 +35,7 @@ class UsersService {
 Multiple `@PostConstruct` methods on one class run in declaration
 order.
 
-## `@PreDestroy()`
+## `@PreDestroy()` {#predestroy}
 
 Runs during shutdown, in the `onDestroy` phase. Equivalent to
 implementing `OnDestroy.onDestroy()`.
@@ -55,7 +57,7 @@ Multiple `@PreDestroy` methods on one class run in declaration order.
 dependents are torn down before their dependencies — not the multiple
 `@PreDestroy` methods within a single class.)
 
-## When to prefer the interface form
+## When to prefer the interface form {#when-to-prefer-the-interface-form}
 
 The interface form (`implements OnInit`) is recommended for:
 
@@ -76,7 +78,7 @@ class UsersService implements OnInit, OnDestroy {
 }
 ```
 
-## When to prefer decorators
+## When to prefer decorators {#when-to-prefer-decorators}
 
 The decorator form is useful when:
 
@@ -94,7 +96,7 @@ The decorator form is useful when:
 - **Mixin patterns** — a base class wants lifecycle behaviour
   without forcing subclasses to implement an interface.
 
-## Mapping to lifecycle phases
+## Mapping to lifecycle phases {#mapping-to-lifecycle-phases}
 
 | Decorator         | Equivalent interface | Phase       |
 | ----------------- | -------------------- | ----------- |
@@ -110,7 +112,7 @@ phase, and the interface forces the choice.
 
 For `onStart` / `onStop` work, implement the interface.
 
-## Anti-patterns
+## Anti-patterns {#anti-patterns}
 
 - **Mixing decorators and interfaces on the same class.** For the
   init phase the two are *not* additive: if a class has any

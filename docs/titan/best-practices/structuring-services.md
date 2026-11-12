@@ -1,4 +1,6 @@
 ---
+id: "titan/best-practices/structuring-services"
+slug: "/docs/titan/best-practices/structuring-services"
 sidebar_position: 1
 title: Structuring Services
 description: How to size, organise, and compose services as the codebase grows.
@@ -10,7 +12,7 @@ A service is the unit of behaviour. A module is the unit of
 composition. Get the sizes right and the codebase scales; get them
 wrong and it doesn't.
 
-## Size a service by its bounded context
+## Size a service by its bounded context {#size-a-service-by-its-bounded-context}
 
 A service should map to one *bounded context* — one cohesive area of
 business meaning. Not one database table, not one HTTP endpoint, not
@@ -29,13 +31,13 @@ and refactor.
 Rule of thumb: 5–15 `@Public` methods is healthy. Past 20, start
 splitting.
 
-## Calls across applications
+## Calls across applications {#calls-across-applications}
 
 Within one process, inject the service. Across Titan applications, expose a versioned Netron service and call its typed interface through the Netron client. Give the service method its authorization policy once. The service evaluates the same policy for browser, CLI and service callers. Grant access according to each caller’s authenticated identity.
 
 Use a Netron transport suited to the connection. For example, a browser can use HTTP for a request and WebSocket for a subscription. Netron owns the handshake, method invocation and event framing on those connections. When integrating a provider with its own wire protocol, keep that client in the provider adapter and expose the application operation through Netron. [Netron transports](../netron/transports.md)
 
-## Group services into modules by domain, not by layer
+## Group services into modules by domain, not by layer {#group-services-into-modules-by-domain-not-by-layer}
 
 **Wrong** — by layer:
 
@@ -63,7 +65,7 @@ class OrdersModule {}
 Now `UsersModule` is self-contained. Refactoring it doesn't touch
 unrelated code.
 
-## Keep `@Public` methods small
+## Keep `@Public` methods small {#keep-public-methods-small}
 
 A `@Public` method is a wire contract. It should:
 
@@ -91,7 +93,7 @@ private async validateOwnership(userId: string, cartId: string) { /* … */ }
 Reading the `@Public` method gives the reader the wire contract and
 the high-level flow. Helpers fill in the details.
 
-## Avoid service-to-service calls in the same process when you can
+## Avoid service-to-service calls in the same process when you can {#avoid-service-to-service-calls-in-the-same-process-when-you-can}
 
 Two services in the same process can call each other directly via
 DI. This is fine — but it can mask coupling. Two patterns to prefer:
@@ -106,7 +108,7 @@ DI. This is fine — but it can mask coupling. Two patterns to prefer:
 These reduce direct service-to-service dependencies and make
 splitting into separate processes (later) easier.
 
-## Use module-private providers liberally
+## Use module-private providers liberally {#use-module-private-providers-liberally}
 
 A provider in `providers` but not `exports` is invisible to other
 modules. Use this for:
@@ -118,7 +120,7 @@ modules. Use this for:
 
 Smaller export surfaces mean less coupling.
 
-## Avoid the "service sub-classes service" pattern
+## Avoid the "service sub-classes service" pattern {#avoid-the-service-sub-classes-service-pattern}
 
 ```typescript
 class BaseService { /* shared methods */ }
@@ -150,7 +152,7 @@ class UsersService {
 }
 ```
 
-## Anti-patterns
+## Anti-patterns {#anti-patterns}
 
 - **God services.** One `AppService` with 30 methods spanning every
   domain. Always splittable.

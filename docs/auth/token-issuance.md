@@ -1,4 +1,6 @@
 ---
+id: "auth/token-issuance"
+slug: "/docs/auth/token-issuance"
 title: Token issuance & transports
 sidebar_position: 8
 ---
@@ -17,7 +19,7 @@ Service code says *what* to issue; the configured `ITokenTransport` decides
 import { issueTokens, clearTokens, readRequestCookie } from '@omnitron-dev/titan/netron/auth';
 ```
 
-## Issuing
+## Issuing {#issuing}
 
 ```typescript
 @Public()
@@ -36,7 +38,7 @@ cannot be switched to cookies.
 
 `issueTokens` is idempotent: the last call in a request wins.
 
-## Clearing
+## Clearing {#clearing}
 
 ```typescript
 @Public()
@@ -49,7 +51,7 @@ async signout() {
 Cookie mode emits `Max-Age=0` for every registered cookie. Bearer mode is a
 no-op — the client clears its own storage.
 
-## Reading a cookie back
+## Reading a cookie back {#reading-a-cookie-back}
 
 `readRequestCookie(name)` reads from the **current request's `Cookie` header**
 and returns `null` when the header, or that cookie, is absent. It is the only
@@ -63,7 +65,7 @@ That fallback order is deliberate. An explicit body value wins so the same
 handler serves a bearer client; the cookie answers for a cookie-mode client
 whose body carries nothing.
 
-## How the context is found
+## How the context is found {#how-the-context-is-found}
 
 Both helpers use `AsyncLocalStorage` to reach the current request's metadata,
 so a `@Public` method does **not** have to accept a framework context argument.
@@ -81,7 +83,7 @@ Calling either with no ambient frame and no explicit context **throws**, naming
 the two ways out. It does not silently do nothing, which for a sign-out would
 mean a session the user believes is closed.
 
-## The transports
+## The transports {#the-transports}
 
 `Netron.tokenTransport` defaults to `BearerTokenTransport`.
 
@@ -101,7 +103,7 @@ declaring it would therefore turn off both protections in silence.
 one. It reports `usesCookies` true if any member does, so the CSRF check stays
 on for the whole window rather than for the half that needs it.
 
-## CSRF is two pieces, and both are optional
+## CSRF is two pieces, and both are optional {#csrf-is-two-pieces-and-both-are-optional}
 
 Cookie mode does not turn CSRF protection on by itself. Two things have to be
 configured, and each defaults to absent:
@@ -131,7 +133,7 @@ exempt list (sign-in, refresh, sign-out — the calls that have no cookie yet),
 and requests arriving with no access cookie at all, which are bearer or
 anonymous.
 
-## What each mode assumes of the client
+## What each mode assumes of the client {#what-each-mode-assumes-of-the-client}
 
 Cookie mode means the browser holds credentials the JavaScript cannot read — no
 token in `localStorage` to steal, and no token for the app to attach by hand.

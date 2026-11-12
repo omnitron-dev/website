@@ -1,10 +1,11 @@
 ---
+id: "titan/modules/errors-catalog"
+slug: "/docs/titan/modules/errors-catalog"
 sidebar_position: 8
 title: Errors catalog
 description: What every module throws, error codes, and handling patterns.
 ---
 
-import ModuleBadge from '@site/src/components/ModuleBadge';
 
 # Errors catalog
 
@@ -17,7 +18,7 @@ All claims here are verified against module source (greps in
 `packages/titan-*/src` for `Errors.X(`, `throw new XError`, and
 class declarations).
 
-## Two flavours of error
+## Two flavours of error {#two-flavours-of-error}
 
 | Source                              | Shape                                                     | Wire-friendly |
 | ----------------------------------- | --------------------------------------------------------- | :-----------: |
@@ -30,7 +31,7 @@ preserved. Bespoke subclasses are reserved for cases where the
 extra fields (e.g., `retryAfter` on `RateLimitExceededError`) make
 the API clearer.
 
-## `ErrorCode` cheat sheet
+## `ErrorCode` cheat sheet {#errorcode-cheat-sheet}
 
 The most commonly thrown codes across all modules:
 
@@ -51,11 +52,11 @@ The most commonly thrown codes across all modules:
 These behave like HTTP status codes on the wire but are
 transport-agnostic — the same codes ride TCP / Unix / WS / HTTP.
 
-## Aggregate count per module
+## Aggregate count per module {#aggregate-count-per-module}
 
 What each module raises most often:
 
-<ModuleBadge origin="official" pkg="@omnitron-dev/titan-*" />
+<span class="module-badge">official · @omnitron-dev/titan-*</span>
 
 | Module                | Top errors raised                                       | Count* |
 | --------------------- | ------------------------------------------------------- | :----: |
@@ -77,14 +78,14 @@ What each module raises most often:
 *Counts are static `throw Errors.X(...)` callsites in source; per-
 request error rate depends entirely on input.
 
-## Bespoke error classes per module
+## Bespoke error classes per module {#bespoke-error-classes-per-module}
 
 Some modules export dedicated `Error` subclasses for cases where
 extra fields aid programmatic handling.
 
-### `titan-auth`
+### `titan-auth` {#titan-auth}
 
-<ModuleBadge origin="official" pkg="@omnitron-dev/titan-auth" />
+<span class="module-badge">official · @omnitron-dev/titan-auth</span>
 
 | Class                          | Parent            | When thrown                                              |
 | ------------------------------ | ----------------- | -------------------------------------------------------- |
@@ -111,9 +112,9 @@ try {
 }
 ```
 
-### `titan-database`
+### `titan-database` {#titan-database}
 
-<ModuleBadge origin="official" pkg="@omnitron-dev/titan-database" />
+<span class="module-badge">official · @omnitron-dev/titan-database</span>
 
 | Class                          | When thrown                                                       |
 | ------------------------------ | ----------------------------------------------------------------- |
@@ -123,9 +124,9 @@ try {
 Both signal "don't proceed with the deploy" — the operator must
 investigate before retry.
 
-### `titan-pm`
+### `titan-pm` {#titan-pm}
 
-<ModuleBadge origin="official" pkg="@omnitron-dev/titan-pm" />
+<span class="module-badge">official · @omnitron-dev/titan-pm</span>
 
 | Class                          | When thrown                                                       |
 | ------------------------------ | ----------------------------------------------------------------- |
@@ -148,9 +149,9 @@ try {
 }
 ```
 
-### `titan-ratelimit`
+### `titan-ratelimit` {#titan-ratelimit}
 
-<ModuleBadge origin="official" pkg="@omnitron-dev/titan-ratelimit" />
+<span class="module-badge">official · @omnitron-dev/titan-ratelimit</span>
 
 | Class                          | When thrown                                                       |
 | ------------------------------ | ----------------------------------------------------------------- |
@@ -169,9 +170,9 @@ are nested under `error.result`, not on the error directly):
 Surface this to clients as a 429 with a `Retry-After` header
 (`error.result.retryAfter`).
 
-## Common patterns per error kind
+## Common patterns per error kind {#common-patterns-per-error-kind}
 
-### `notFound` (404 / `NOT_FOUND`)
+### `notFound` (404 / `NOT_FOUND`) {#notfound-404--not_found}
 
 The most-thrown family. Typical handlers:
 
@@ -195,7 +196,7 @@ health` (indicator name missing), `titan-discovery` (node id),
 `titan-events` (history entry), `titan-notifications`
 (template / channel).
 
-### `conflict` (409 / `CONFLICT`)
+### `conflict` (409 / `CONFLICT`) {#conflict-409--conflict}
 
 State-change refused because something already exists or is in an
 incompatible state. Not retryable without resolving the conflict.
@@ -206,7 +207,7 @@ DiscoveryService`), `titan-health` (indicator name collision),
 `titan-scheduler` (job already registered), `titan-redis` (named
 client already exists).
 
-### `timeout` (408 / `REQUEST_TIMEOUT`)
+### `timeout` (408 / `REQUEST_TIMEOUT`) {#timeout-408--request_timeout}
 
 Operation exceeded its configured timeout. **Sometimes retryable**
 (if the work is idempotent) — usually surface to caller.
@@ -215,21 +216,21 @@ Sources: `titan-pm` (`exec()` timeout, health-check timeout),
 `titan-events` (handler timeout), `titan-scheduler` (job timeout),
 `titan-redis` (script timeout).
 
-### `unavailable` (503 / `SERVICE_UNAVAILABLE`)
+### `unavailable` (503 / `SERVICE_UNAVAILABLE`) {#unavailable-503--service_unavailable}
 
 Transient dependency failure. Retry with exponential backoff.
 
 Sources: `titan-database` (pool exhausted / connection lost),
 `titan-pm` (worker pool empty for class).
 
-### `tooManyRequests` (429 / `TOO_MANY_REQUESTS`)
+### `tooManyRequests` (429 / `TOO_MANY_REQUESTS`) {#toomanyrequests-429--too_many_requests}
 
 Rate / quota exceeded. Always honour `retryAfter` if provided.
 
 Sources: `titan-events` (subscription quota), `titan-redis`
 (connection backoff).
 
-### `internal` (500 / `INTERNAL_ERROR`)
+### `internal` (500 / `INTERNAL_ERROR`) {#internal-500--internal_error}
 
 Unexpected — usually a bug or environmental anomaly. Log loudly,
 surface as 500.
@@ -238,7 +239,7 @@ Sources: `titan-health` (indicator output parsing — e.g., `df` /
 `wmic` output), `titan-pm` (supervisor internal state),
 `titan-events` (handler dispatch internal failure).
 
-### `badRequest` (400 / `BAD_REQUEST`)
+### `badRequest` (400 / `BAD_REQUEST`) {#badrequest-400--bad_request}
 
 Caller-side mistake. Never retry; fix the caller.
 
@@ -246,7 +247,7 @@ Sources: every module — most commonly `titan-database` (invalid
 dialect, bad schema name), `titan-pm` (bad spawn options), `titan-
 scheduler` (invalid cron expression).
 
-## Handling errors generically
+## Handling errors generically {#handling-errors-generically}
 
 The `TitanError` class is the unifying shape:
 
@@ -280,7 +281,7 @@ catch (e) {
 }
 ```
 
-## Throwing your own
+## Throwing your own {#throwing-your-own}
 
 In your own services, prefer the `Errors` namespace over bespoke
 subclasses unless you need extra fields:
@@ -296,7 +297,7 @@ if (input.amount <= 0) throw Errors.badRequest('amount must be > 0');
 Cross-the-wire serialisation, class identity, and code-based
 routing all work out of the box.
 
-## Retryability matrix
+## Retryability matrix {#retryability-matrix}
 
 A field guide for your retry middleware:
 
@@ -320,7 +321,7 @@ A field guide for your retry middleware:
 (`retry()`, `CircuitBreaker`, `withTimeout()`) that already encode
 this matrix — wire one of those rather than hand-rolling.
 
-## Anti-patterns
+## Anti-patterns {#anti-patterns}
 
 - **Catching `Error` and swallowing.** Loses the typed error
   identity. Always narrow to `TitanError` and inspect `code`.
@@ -334,7 +335,7 @@ this matrix — wire one of those rather than hand-rolling.
 - **Treating `MigrationLockError` as transient.** It usually means
   another deploy is mid-flight; resolve manually, don't retry.
 
-## See also
+## See also {#see-also}
 
 - [Errors / Overview](../errors/overview.md) — framework-level guide
 - [Errors / Hierarchy](../errors/hierarchy.md) — the class graph

@@ -1,4 +1,6 @@
 ---
+id: "auth/overrides"
+slug: "/docs/auth/overrides"
 title: Per-User Overrides
 sidebar_position: 2
 ---
@@ -20,7 +22,7 @@ role rather than negating an individual entry. This keeps the
 "resolve" path a single set-union with no surprise subtraction
 semantics.
 
-## Why overrides exist
+## Why overrides exist {#why-overrides-exist}
 
 Without overrides, the only way to grant one moderator a
 single extra capability — say `admin.security.alerts` — would
@@ -28,7 +30,7 @@ be to promote them to the `security` tier, which carries the
 full `admin.security.*` bag. Overrides express the narrower
 intent without the side effects.
 
-## Two scopes, identical shape
+## Two scopes, identical shape {#two-scopes-identical-shape}
 
 | Scope    | Storage column                              | Service                                  |
 |----------|---------------------------------------------|------------------------------------------|
@@ -54,7 +56,7 @@ Every mutation does three things atomically:
    access token they hold becomes stale on the next request
    and the refresh flow re-mints with the updated set.
 
-## Resolution
+## Resolution {#resolution}
 
 `auth.service.signin` / `refresh` reads both the role-derived
 set and the overrides and bakes the union into the JWT:
@@ -73,7 +75,7 @@ const accessToken = await createAccessToken(user.id, user.platformRole, effectiv
 The same shape applies in the org scope via
 `DynamicPolicyService.loadPermissions`.
 
-## Live propagation
+## Live propagation {#live-propagation}
 
 A grant or revoke fires `AuthService.bumpPermissionVersion(userId)`
 which increments the `omni:perm-v:{userId}` counter in Redis.
@@ -89,7 +91,7 @@ the JWT's `pv` claim against the live counter:
 
 The propagation window is bounded by one RPC round-trip.
 
-## Admin RPC surface
+## Admin RPC surface {#admin-rpc-surface}
 
 The platform-side endpoints live on `UsersService` and are
 gated on `admin.users.permissions` (declared `critical` in the
@@ -114,7 +116,7 @@ revokeEmployeePermission({ employeeId, permission })
 setEmployeePermissions({ employeeId, permissions: string[] })
 ```
 
-## See also
+## See also {#see-also}
 
 - [Permissions](./permissions.md) — registry, grammar, matcher.
 - [RLS bridge](./rls-bridge.md) — permVer counter + invocation

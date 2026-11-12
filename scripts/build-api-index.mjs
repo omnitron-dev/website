@@ -93,14 +93,13 @@ function readDocs(dir) {
 readDocs(join(root, 'docs'));
 const namedInProse = new Set(corpus.join('\n').match(/[A-Za-z_$][\w$]*/g));
 function docRoute(guide) {
-  const text = readFileSync(join(root, 'docs', guide), 'utf8');
-  const id = text.match(/^id:\s*(.+)$/m)?.[1];
-  const parts = guide.replace(/\.mdx?$/, '').split('/');
-  if (id) parts[parts.length - 1] = id.trim();
-  else parts[parts.length - 1] = parts.at(-1).replace(/^\d+-/, '');
-  if (parts.at(-1) === 'index') parts.pop();
-  return `/docs/${parts.join('/')}`;
+  const source = readFileSync(join(root, 'docs', guide), 'utf8');
+  const frontmatter = source.startsWith('---\n') ? source.split('---', 3)[1] : '';
+  const slug = frontmatter.match(/^slug:\s*(.+)$/m)?.[1].trim();
+  if (!slug) throw new Error(`Missing public route for ${guide}`);
+  return slug.startsWith('"') ? JSON.parse(slug) : slug.replace(/^'|'$/g, '');
 }
+
 for (const entry of modules) {
   const source = program.getSourceFile(entry.source);
   const module = source && checker.getSymbolAtLocation(source);

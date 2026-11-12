@@ -1,4 +1,6 @@
 ---
+id: "auth/permissions"
+slug: "/docs/auth/permissions"
 title: Permissions
 sidebar_position: 1
 ---
@@ -11,7 +13,7 @@ can choose **hierarchical** matching, the default of `access/permissions`.
 The examples on this page describe transport gates and application catalogs;
 the supervisor's operator roles remain a separate policy.
 
-## Grammar
+## Grammar {#grammar}
 
 ```
 <scope>.<resource>[.<action>][.<sub>]
@@ -36,7 +38,7 @@ org.shops.create
 org.employees.invite
 ```
 
-## Wildcards
+## Wildcards {#wildcards}
 
 Granting a wildcard authorises every key matching the prefix.
 
@@ -53,7 +55,7 @@ the exact key `admin.users` — it does not implicitly grant the
 keys below it. Spell out the `.*` when you mean "everything under
 here".
 
-## Composition
+## Composition {#composition}
 
 A method that lists two permissions in `@Auth({permissions})`
 requires *both* by default:
@@ -81,7 +83,7 @@ policyEngine.registerPolicy(
 See [ABAC conditions](./abac-conditions.md) for richer
 composition (and / or / not, time-of-day, MFA gates).
 
-## Matcher
+## Matcher {#matcher}
 
 `permissionMatches(granted, required)` returns true when:
 
@@ -105,7 +107,7 @@ applies it across a granted set (true when any granted entry
 covers `required`). `@Auth({ permissions })` requires **all** of
 the listed permissions, each resolved through this matcher.
 
-## Scopes
+## Scopes {#scopes}
 
 Two scopes ship out of the box; both share the matcher, the
 registry shape, and the override mechanism — they only differ in
@@ -126,7 +128,7 @@ call's args:
 @RequireOrgPermission('org.disputes.respond', (args) => args[0].dispute.organizationId)
 ```
 
-## Validation
+## Validation {#validation}
 
 Every permission key referenced in a role definition is
 validated against the registry at write time:
@@ -141,7 +143,7 @@ isValidPermissionKey('admin.users.lban', PLATFORM_PERMISSIONS) // false — typo
 unknown key — the registry is the source of truth and typos
 never make it to the persistence layer.
 
-## See also
+## See also {#see-also}
 
 - [Per-user overrides](./overrides.md) — additive grants on a
   single user without bumping their role.

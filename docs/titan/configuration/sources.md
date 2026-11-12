@@ -1,4 +1,6 @@
 ---
+id: "titan/configuration/sources"
+slug: "/docs/titan/configuration/sources"
 sidebar_position: 2
 title: Configuration Sources
 description: Files, env vars, argv, objects, remote — every way to get config in.
@@ -21,9 +23,9 @@ type ConfigSource =
   | IRemoteConfigSource;
 ```
 
-## Five built-in source types
+## Five built-in source types {#five-built-in-source-types}
 
-### File — JSON / YAML / TOML / INI / .env
+### File — JSON / YAML / TOML / INI / .env {#file--json--yaml--toml--ini--env}
 
 ```typescript
 {
@@ -44,7 +46,7 @@ Reads a file on startup. Format is auto-detected from extension if
 > `properties` — passing `toml`/`ini` throws at load time. Use one
 > of the supported formats until loader support lands.
 
-#### What `optional` forgives
+#### What `optional` forgives {#what-optional-forgives}
 
 `optional: true` means the file may be ABSENT. It does not mean the file may
 be WRONG.
@@ -64,7 +66,7 @@ The two cases are told apart in code — the loader marks the error `malformed`
 — rather than by matching the text of a message, so this does not change if the
 wording does.
 
-### Environment variables
+### Environment variables {#environment-variables}
 
 ```typescript
 {
@@ -78,7 +80,7 @@ wording does.
 Env vars matching `prefix` become config keys. `APP_DATABASE__URL`
 becomes `database.url` when `separator: '__'`.
 
-### Argv
+### Argv {#argv}
 
 ```typescript
 {
@@ -89,7 +91,7 @@ becomes `database.url` when `separator: '__'`.
 
 Reads command-line flags.
 
-### Inline object
+### Inline object {#inline-object}
 
 ```typescript
 {
@@ -101,7 +103,7 @@ Reads command-line flags.
 Note `data` (not `value`). A literal object; useful for defaults
 that don't warrant a file.
 
-### Remote HTTP
+### Remote HTTP {#remote-http}
 
 ```typescript
 {
@@ -117,7 +119,7 @@ Fetches config from a URL. Periodic re-fetch is implementation-
 defined; check the `ConfigLoaderService` source for current
 behaviour.
 
-## Source ordering
+## Source ordering {#source-ordering}
 
 ```mermaid
 flowchart LR
@@ -144,7 +146,7 @@ sources: [
 You can also assign explicit `priority` on the base `IConfigSource`
 when natural order is awkward.
 
-## Conventional source layout
+## Conventional source layout {#conventional-source-layout}
 
 A common pattern:
 
@@ -167,14 +169,14 @@ Environment-specific files (`production.yaml`, etc.) can be loaded
 by adding an extra source whose `path` is computed at startup from
 your app's environment detection.
 
-## Custom sources
+## Custom sources {#custom-sources}
 
 Provide your own loader by extending `ConfigLoaderService` or
 implementing `IConfigSource` plus a registration shim. The source
 interface and loader are in
 `@omnitron-dev/titan/module/config/config-loader.service.ts`.
 
-## Anti-patterns
+## Anti-patterns {#anti-patterns}
 
 - **Secrets in files committed to git.** `config/default.yaml`
   should not contain production secrets. Use env vars or a secret

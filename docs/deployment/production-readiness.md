@@ -1,4 +1,6 @@
 ---
+id: "deployment/production-readiness"
+slug: "/docs/deployment/production-readiness"
 title: Production readiness
 description: A practical acceptance checklist for deployment, observability, access control, and recovery.
 ---
@@ -9,7 +11,7 @@ A process that starts is only the first check. Before admitting production
 traffic, verify the application contract, its dependencies, the deployment
 artifact and the recovery path.
 
-## Define what is ready
+## Define what is ready {#define-what-is-ready}
 
 | Gate | Evidence to collect | Reference |
 | --- | --- | --- |
@@ -24,7 +26,7 @@ artifact and the recovery path.
 Treat these as acceptance criteria for your own workload. Module presence
 alone does not prove any gate.
 
-## Set the access boundary
+## Set the access boundary {#set-the-access-boundary}
 
 Bind local control endpoints to loopback or a restricted network. Terminate
 TLS at a trusted proxy where appropriate. Configure authentication and
@@ -38,7 +40,7 @@ controls browser behaviour, not server-to-server access.
 See [module security](../titan/modules/security-checklist.mdx) and
 [operator authentication](../omnitron/auth-rbac.md).
 
-## Observe the right signals
+## Observe the right signals {#observe-the-right-signals}
 
 Track request errors, latency, process restarts, resource saturation and the
 dependencies required by each application. Give each alert an owner and a
@@ -53,7 +55,7 @@ A liveness check answers whether the process should be restarted. A
 readiness check answers whether it should receive traffic. A dependency
 outage should not automatically create an endless restart cycle.
 
-## Rehearse a release
+## Rehearse a release {#rehearse-a-release}
 
 1. Build from a clean checkout and retain the source revision and artifact.
 2. Run database migrations with the intended credentials and locking policy.
@@ -68,7 +70,7 @@ When using the supervisor, follow its
 [operational practices](../omnitron/best-practices.md). When running Titan
 directly, your process manager owns restart and rollout policy.
 
-## Coordinate independently supervised processes
+## Coordinate independently supervised processes {#coordinate-independently-supervised-processes}
 
 Record the backend, guardian and execution-owner artifacts separately, together
 with the application inventory, enabled stacks, watch state and native service
@@ -90,7 +92,7 @@ Validate online SQLite backups through SQLite's backup API and integrity checks.
 Reading a database dump successfully proves archive readability, not a successful
 database restore; record which verification actually ran.
 
-## Keep rollback and restore separate
+## Keep rollback and restore separate {#keep-rollback-and-restore-separate}
 
 Rolling back code does not undo a schema or data change. Prefer additive
 migrations when old and new versions must coexist. Take backups appropriate
@@ -101,7 +103,7 @@ takes. Store backup credentials separately from application credentials.
 Avoid discovering during an incident that the backup depends on the same
 failed host.
 
-## Diagnose a failure
+## Diagnose a failure {#diagnose-a-failure}
 
 | Symptom | First checks |
 | --- | --- |

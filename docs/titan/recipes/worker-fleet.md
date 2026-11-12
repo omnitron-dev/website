@@ -1,4 +1,6 @@
 ---
+id: "titan/recipes/worker-fleet"
+slug: "/docs/titan/recipes/worker-fleet"
 sidebar_position: 3
 title: Worker fleet
 description: Background-job processing across pods — process manager, distributed lock, scheduler, metrics.
@@ -11,7 +13,7 @@ jobs that should run exactly-once across a fleet, CPU-bound work
 isolated from the main event loop, and per-job retry / circuit-
 breaking / metrics — all coordinated through Redis.
 
-## Shape
+## Shape {#shape}
 
 - **Scheduled jobs.** Cron and intervals via `titan-scheduler`,
   auto-discovered by decorator.
@@ -25,7 +27,7 @@ breaking / metrics — all coordinated through Redis.
 - **Metrics + health.** Per-job execution counts, durations,
   failures.
 
-## Architecture
+## Architecture {#architecture}
 
 ```mermaid
 flowchart TB
@@ -51,7 +53,7 @@ flowchart TB
   Health[titan-health] -.indicators.-> Redis
 ```
 
-## `AppModule`
+## `AppModule` {#appmodule}
 
 ```typescript
 import { Module } from '@omnitron-dev/titan';
@@ -187,7 +189,7 @@ const WorkerConfigSchema = z.object({
 export class AppModule {}
 ```
 
-## A scheduled task (exactly-once)
+## A scheduled task (exactly-once) {#a-scheduled-task-exactly-once}
 
 ```typescript
 import { Injectable, Inject } from '@omnitron-dev/titan';
@@ -222,7 +224,7 @@ class CleanupTasks {
 }
 ```
 
-## A CPU-bound worker pool
+## A CPU-bound worker pool {#a-cpu-bound-worker-pool}
 
 ```typescript
 import {
@@ -264,7 +266,7 @@ class MediaService {
 }
 ```
 
-## Cross-module wiring notes
+## Cross-module wiring notes {#cross-module-wiring-notes}
 
 | Concern                        | Wiring detail                                                                                          |
 | ------------------------------ | ------------------------------------------------------------------------------------------------------ |
@@ -276,7 +278,7 @@ class MediaService {
 | Worker resource limits         | `resources.maxMemory` + `resources.maxCpu` enforce limits; without them, runaway workers can starve peers |
 | Liveness sweep                 | PM's defense-in-depth — even if a worker dies without exit signal, the sweep notices and restarts       |
 
-## Production checklist
+## Production checklist {#production-checklist}
 
 - [ ] `SchedulerModule.persistence.enabled: true` — without it, jobs lost on restart
 - [ ] Every scheduled job that mutates shared state uses `@WithDistributedLock`
@@ -289,7 +291,7 @@ class MediaService {
 - [ ] Kubernetes worker pods use `terminationGracePeriodSeconds` ≥ `shutdownTimeout`
 - [ ] Scheduler `shutdownTimeout` ≥ longest job's expected duration
 
-## See also
+## See also {#see-also}
 
 - [`titan-scheduler`](../modules/scheduler.mdx) — full scheduler reference
 - [`titan-lock`](../modules/lock.mdx) — distributed lock semantics

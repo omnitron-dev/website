@@ -1,4 +1,6 @@
 ---
+id: "frontend/netron/browser"
+slug: "/docs/frontend/netron/browser"
 sidebar_position: 3
 title: netron-browser
 description: Browser-optimized Netron RPC client — HTTP / WebSocket / multi-backend.
@@ -31,7 +33,7 @@ Verified against `packages/netron-browser/src/`.
 pnpm add @omnitron-dev/netron-browser
 ```
 
-## Architecture
+## Architecture {#architecture}
 
 ```mermaid
 flowchart TB
@@ -67,7 +69,7 @@ flowchart TB
 > interface](#fluent-http-interface--caching-retry-circuit-breaking)
 > reached via `peer.queryFluentInterface(...)`.
 
-## Quick start
+## Quick start {#quick-start}
 
 ```typescript
 import { createClient, WebSocketClient } from '@omnitron-dev/netron-browser';
@@ -101,7 +103,7 @@ try {
 }
 ```
 
-## Client options
+## Client options {#client-options}
 
 ```typescript
 interface NetronClientOptions {
@@ -123,7 +125,7 @@ interface NetronClientOptions {
 }
 ```
 
-## Transports
+## Transports {#transports}
 
 `createClient` selects HTTP by default. Choose `'websocket'` for a binary
 Netron listener. Supply an absolute base URL in either case.
@@ -153,7 +155,7 @@ See [Transports](./transports.md) for the wire format, handshake, reconnect
 events and retry policies. For per-read caching and deduplication see the
 [fluent HTTP interface](#fluent-http-interface--caching-retry-circuit-breaking).
 
-## Service proxies — typed RPC
+## Service proxies — typed RPC {#service-proxies--typed-rpc}
 
 ```typescript
 interface UserService {
@@ -177,7 +179,7 @@ The proxy is a `Proxy` that resolves any property access into an
 RPC call against the named service. No code generation required —
 your shared `.d.ts` is enough.
 
-### Service descriptor
+### Service descriptor {#service-descriptor}
 
 ```typescript
 const desc = await client.getServiceDescriptor('users');
@@ -187,7 +189,7 @@ const desc = await client.getServiceDescriptor('users');
 Useful for building generic UIs that inspect a service at
 runtime.
 
-## Middleware pipeline
+## Middleware pipeline {#middleware-pipeline}
 
 Middleware runs around every invocation. Three stages:
 
@@ -204,7 +206,7 @@ flowchart LR
 Each middleware has a `priority` — lower runs first within its
 stage.
 
-### Built-in middleware
+### Built-in middleware {#built-in-middleware}
 
 All built-in middleware are **factory functions** (`create*`):
 
@@ -232,7 +234,7 @@ client.use(createAuthMiddleware({ tokenProvider: { getToken: () => localStorage.
 client.use(createLoggingMiddleware({ logRequestPayload: false }));
 ```
 
-### Custom middleware
+### Custom middleware {#custom-middleware}
 
 A middleware is a plain `(ctx, next) => Promise<void>` function;
 register it with `client.use(fn, config?, stage?)`:
@@ -258,7 +260,7 @@ client.use(timingMiddleware, { name: 'timing', priority: 100 }, MiddlewareStage.
 See [Middleware](./middleware.md) for the full context shape,
 stages, and registration rules.
 
-## Fluent HTTP interface — caching, retry, circuit breaking
+## Fluent HTTP interface — caching, retry, circuit breaking {#fluent-http-interface--caching-retry-circuit-breaking}
 
 For HTTP-transport calls you can opt into a **fluent interface**
 that adds per-call caching, retry, deduplication, timeout, and
@@ -291,7 +293,7 @@ applies to that one call.
 > `CacheOptions`, `RetryOptions`) are re-exported from the package
 > root and shared with `@omnitron-dev/netron-http-core`.
 
-### Caching
+### Caching {#caching}
 
 Caching is provided by the fluent interface's `HttpCacheManager`,
 not by a middleware. Configure it per call with `.cache(...)`:
@@ -336,7 +338,7 @@ cache.invalidate(['user:u_42']);     // invalidate everything tagged user:u_42
 general-purpose bounded cache utility — not a request cache
 middleware.
 
-### Retry & circuit breaking
+### Retry & circuit breaking {#retry--circuit-breaking}
 
 The fluent `.retry(...)` takes a `RetryOptions`:
 
@@ -382,7 +384,7 @@ cooldown one probe runs and success closes the breaker. There is
 no `CircuitOpenError` class — check `e.code ===
 ErrorCode.SERVICE_UNAVAILABLE`.
 
-## Authentication
+## Authentication {#authentication}
 
 The real class is **`AuthenticationClient`** (from
 `@omnitron-dev/netron-browser`) — there is no `AuthManager`.
@@ -431,7 +433,7 @@ Read the current token with `auth.getToken()` (synchronous,
 backends, token transports, cookie mode — see
 [Auth](./auth.md).
 
-## Multi-backend client
+## Multi-backend client {#multi-backend-client}
 
 When the app talks to multiple Netron servers — e.g., one for
 identity, one for media, one for analytics — wrap each in a
@@ -468,7 +470,7 @@ A string pattern matches by prefix, not as a glob; a `RegExp`
 covers anything more. A call matching no rule goes to
 `defaultBackend` rather than throwing.
 
-### Health checks
+### Health checks {#health-checks}
 
 `enableHealthChecks` (off by default) and `healthCheckInterval`
 (30s) make the pool poll its backends. Nothing re-routes away
@@ -479,7 +481,7 @@ any other call.
 → [Multi-backend](./multi-backend.md) for routing, per-backend
 auth, and the React provider.
 
-## Errors
+## Errors {#errors}
 
 Server-side `TitanError` subclasses arrive as the same class on
 the client — wire format preserves the constructor name and
@@ -505,7 +507,7 @@ try {
 → See [Titan / Errors catalog](../../titan/modules/errors-catalog.mdx)
 for the full code reference.
 
-## Subpaths
+## Subpaths {#subpaths}
 
 | Subpath | Contents |
 | ------- | -------- |
@@ -524,7 +526,7 @@ rows described a layout the package does not have, and an import following any
 of them fails to resolve. What they named is in the root or under `/client`.
 `AuthenticationClient` is likewise at the root, not under an `/auth` subpath.
 
-## Performance characteristics
+## Performance characteristics {#performance-characteristics}
 
 | Operation | Cost |
 | --------- | ---- |
@@ -538,7 +540,7 @@ of them fails to resolve. What they named is in the root or under `/client`.
 Bundle: ~20–30 kB gzipped for the root import. Subpath imports
 can ship just the transport you use (HTTP-only: ~12 kB).
 
-## Examples
+## Examples {#examples}
 
 The package ships runnable examples at
 `packages/netron-browser/examples/` covering:
@@ -549,7 +551,7 @@ The package ships runnable examples at
 - Multi-backend routing
 - Custom middleware
 
-## Best practices
+## Best practices {#best-practices}
 
 - **Use service proxies, not raw `invoke`.** Types flow through;
   refactors stay safe.
@@ -569,7 +571,7 @@ The package ships runnable examples at
 - **Reconnect bounded.** `maxReconnectAttempts` prevents tabs
   from connecting forever after a permanent outage.
 
-## Anti-patterns
+## Anti-patterns {#anti-patterns}
 
 - **Storing tokens in cookies + localStorage.** Pick one. Cross-
   site contexts work better with HttpOnly cookies; same-site
@@ -584,7 +586,7 @@ The package ships runnable examples at
 - **`maxReconnectAttempts: Infinity`.** A genuinely-dead server
   has open connections from every tab forever.
 
-## See also
+## See also {#see-also}
 
 - [netron-react](./react.md) — React hooks built on this client
 - [Titan / Netron](../../titan/netron.md) — server side

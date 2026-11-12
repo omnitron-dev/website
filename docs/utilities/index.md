@@ -1,4 +1,6 @@
 ---
+id: "utilities/index"
+slug: "/docs/utilities"
 sidebar_position: 1
 title: Overview
 description: Five utility packages the rest of the stack is built on.
@@ -19,7 +21,7 @@ non-Omnitron projects.
 | [`@omnitron-dev/msgpack`](./msgpack.md) | Extensible MessagePack with native JS types + a custom type registry | ~8 kB gz |
 | [`@omnitron-dev/kb`](./kb.md) | Knowledge-base framework for code intelligence | server-side |
 
-## Where they're used
+## Where they're used {#where-theyre-used}
 
 - **`common`** — anywhere primitives are needed. `isPlainObject`,
   `delay`, `omit` show up in every module.
@@ -33,7 +35,7 @@ non-Omnitron projects.
 - **`kb`** — backs `omnitron kb mcp` MCP server + KB index used
   by AI agents.
 
-## Standalone use
+## Standalone use {#standalone-use}
 
 Each works without the rest of the stack:
 

@@ -1,4 +1,6 @@
 ---
+id: "reference/packages"
+slug: "/docs/reference/packages"
 sidebar_position: 1
 title: Package Index
 description: Every package shipped from the monorepo, grouped by role.
@@ -13,9 +15,9 @@ source; an installed registry release may expose fewer packages or entry points.
 See [source-workspace installation](../auth/access-policy.md)
 and [composition boundaries](../foundations/composition.md) when integrating unreleased APIs.
 
-## Server-side / Backend
+## Server-side / Backend {#server-side--backend}
 
-### Core framework
+### Core framework {#core-framework}
 
 | Package | What | Required? |
 | ------- | ---- | :-------: |
@@ -27,7 +29,7 @@ exports (`@omnitron-dev/titan/netron`,
 `@omnitron-dev/titan/netron/transport/{http,websocket,tcp,unix}`).
 No extra package is needed for the server.
 
-### Backend modules (opt-in)
+### Backend modules (opt-in) {#backend-modules-opt-in}
 
 Independently versioned. Add only what your app uses.
 
@@ -49,7 +51,7 @@ Independently versioned. Add only what your app uses.
 | [`@omnitron-dev/titan-scheduler`](../titan/modules/scheduler.mdx) | Cron / interval / timeout with persistence |
 | [`@omnitron-dev/titan-telemetry-relay`](../titan/modules/telemetry-relay.mdx) | Store-and-forward telemetry (WAL-backed) |
 
-## Browser-side / Frontend
+## Browser-side / Frontend {#browser-side--frontend}
 
 | Package | Framework | Required when |
 | ------- | --------- | ------------- |
@@ -70,13 +72,13 @@ Independently versioned. Add only what your app uses.
 | React 19 (Prism) | `netron-browser` + `netron-react` (+ optional `prism`) |
 | Web Worker | `netron-browser` only |
 
-## Supervisor (opt-in)
+## Supervisor (opt-in) {#supervisor-opt-in}
 
 | Package | What |
 | ------- | ---- |
 | [`@omnitron-dev/omnitron`](../omnitron/overview.md) | Application supervisor + CLI + web console + MCP server. Optional. See [Titan vs Omnitron](../foundations/titan-vs-omnitron.md). |
 
-## Shared utilities (framework-agnostic)
+## Shared utilities (framework-agnostic) {#shared-utilities-framework-agnostic}
 
 Focused packages. Used internally by everything
 above; reusable in non-Omnitron projects.
@@ -91,7 +93,7 @@ above; reusable in non-Omnitron projects.
 | [`@omnitron-dev/kb`](../utilities/kb.md) | Knowledge-base framework (backs `omnitron kb mcp`) |
 | [`@omnitron-dev/testing`](../testing/testing-package.md) | Cross-runtime testing utilities (Node + Bun + Deno) |
 
-### Shared internals
+### Shared internals {#shared-internals}
 
 Two more packages exist and are published, but you install
 neither: `titan` and `netron-browser` both depend on them, and
@@ -109,20 +111,20 @@ those, not these.
 See [Protocol and HTTP primitives](./protocol.md) for these packages and
 [API index](./api-index.mdx) for all declared entry points.
 
-## License
+## License {#license}
 
 MIT across every package.
 
-## Install matrices
+## Install matrices {#install-matrices}
 
-### Backend service only
+### Backend service only {#backend-service-only}
 
 ```bash
 pnpm add @omnitron-dev/titan
 # + any titan-* modules you need
 ```
 
-### Backend + browser client (any framework)
+### Backend + browser client (any framework) {#backend--browser-client-any-framework}
 
 ```bash
 # Backend (server Netron + 4 transports already inside):
@@ -132,7 +134,7 @@ pnpm add @omnitron-dev/titan
 pnpm add @omnitron-dev/netron-browser
 ```
 
-### Backend + React frontend
+### Backend + React frontend {#backend--react-frontend}
 
 ```bash
 # Backend:
@@ -142,7 +144,7 @@ pnpm add @omnitron-dev/titan
 pnpm add @omnitron-dev/netron-browser @omnitron-dev/netron-react @omnitron-dev/prism
 ```
 
-### Full Omnitron-supervised platform
+### Full Omnitron-supervised platform {#full-omnitron-supervised-platform}
 
 ```bash
 pnpm add @omnitron-dev/titan
@@ -150,7 +152,7 @@ pnpm add @omnitron-dev/netron-browser @omnitron-dev/netron-react
 pnpm add -g @omnitron-dev/omnitron
 ```
 
-## See also
+## See also {#see-also}
 
 - [Installation](../getting-started/installation.md) — detailed install paths + subpath imports
 - [Titan vs Omnitron](../foundations/titan-vs-omnitron.md) — what runs without Omnitron

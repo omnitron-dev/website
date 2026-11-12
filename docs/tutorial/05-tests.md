@@ -1,4 +1,6 @@
 ---
+id: "tutorial/tests"
+slug: "/docs/tutorial/tests"
 sidebar_position: 6
 title: 5. Tests
 description: Unit / module / integration / E2E coverage for the stack you built.
@@ -9,7 +11,7 @@ description: Unit / module / integration / E2E coverage for the stack you built.
 By the end: the app has tests at every level of the
 [testing pyramid](../testing/index.md).
 
-## Add Vitest
+## Add Vitest {#add-vitest}
 
 ```bash
 # In each app:
@@ -20,7 +22,7 @@ cd ../web
 pnpm add -D vitest @testing-library/react @testing-library/user-event @testing-library/jest-dom jsdom
 ```
 
-## Compile backend decorators
+## Compile backend decorators {#compile-backend-decorators}
 
 Titan's constructor injection needs emitted decorator metadata. Run the
 backend tests against TypeScript's compiled output rather than relying on
@@ -50,7 +52,7 @@ Set the API's test script to
 to `.gitignore`. Set `DATABASE_URL` to a disposable database before running
 repository or integration tests; the tests below do not roll back their writes.
 
-## Repository integration test (api)
+## Repository integration test (api) {#repository-integration-test-api}
 
 `apps/api/src/users/user.repo.test.ts`:
 
@@ -95,7 +97,7 @@ gives you `withTransaction`, so wrap the body and let it roll
 back, or point the test at a schema you drop afterwards —
 `app.addCleanup(fn)` runs teardown in `close()`.
 
-## Service test with mocks
+## Service test with mocks {#service-test-with-mocks}
 
 `apps/api/src/users/users.service.test.ts`:
 
@@ -127,7 +129,7 @@ describe('UsersService', () => {
 
 Pure DI test — no real DB, no real Application.
 
-## Integration test (real api over the wire)
+## Integration test (real api over the wire) {#integration-test-real-api-over-the-wire}
 
 This example exercises the public service from step 2. After adding
 authentication in step 3, sign in with a seeded test account and attach
@@ -186,7 +188,7 @@ describe('users service end-to-end', () => {
 Real wire format, real serialisation, real error round-trip.
 Catches a class of bugs unit tests miss.
 
-## Frontend component test
+## Frontend component test {#frontend-component-test}
 
 `apps/web/src/UsersPage.test.tsx`:
 
@@ -241,7 +243,7 @@ export default defineConfig({
 });
 ```
 
-## E2E test (Playwright)
+## E2E test (Playwright) {#e2e-test-playwright}
 
 ```bash
 cd apps/web
@@ -299,7 +301,7 @@ Run:
 pnpm exec playwright test
 ```
 
-## Cross-runtime test (a utility)
+## Cross-runtime test (a utility) {#cross-runtime-test-a-utility}
 
 If you publish a utility consumed by Bun / Deno users:
 
@@ -318,7 +320,7 @@ t.test('User type is structural', () => {
 
 Runs on Node + Bun + Deno via the adapter.
 
-## CI workflow
+## CI workflow {#ci-workflow}
 
 `.github/workflows/test.yml`:
 
@@ -360,7 +362,7 @@ jobs:
           JWT_SECRET:   test-secret
 ```
 
-## What we covered
+## What we covered {#what-we-covered}
 
 | Layer | What | Speed |
 | ----- | ---- | ----- |
@@ -378,19 +380,19 @@ pnpm -F api test           # just api
 pnpm -F web exec playwright test    # E2E
 ```
 
-## Commit
+## Commit {#commit}
 
 ```bash
 git add .
 git commit -m "step 5: tests across the pyramid"
 ```
 
-## Next
+## Next {#next}
 
 **[Step 6 — Deploy →](./06-deploy.md)** — package everything
 into Docker + ship to a server.
 
-## Troubleshooting
+## Troubleshooting {#troubleshooting}
 
 | Symptom | Fix |
 | ------- | --- |

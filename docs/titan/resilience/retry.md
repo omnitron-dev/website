@@ -1,4 +1,6 @@
 ---
+id: "titan/resilience/retry"
+slug: "/docs/titan/resilience/retry"
 sidebar_position: 2
 title: Retry
 description: The retry() function, the @Retry decorator, and the backoff helpers.
@@ -8,7 +10,7 @@ description: The retry() function, the @Retry decorator, and the backoff helpers
 
 Three retry surfaces, from simplest to most flexible.
 
-## The `@Retry` decorator (simplest)
+## The `@Retry` decorator (simplest) {#the-retry-decorator-simplest}
 
 Fixed-delay retry on a method. Three attempts by default, 1000 ms
 between them.
@@ -32,7 +34,7 @@ in the decorator. If you need to retry only on specific errors
 (transient), wrap the work yourself with the `retry()` function
 described below.
 
-## The `retry()` function (flexible)
+## The `retry()` function (flexible) {#the-retry-function-flexible}
 
 From `@omnitron-dev/titan/utils`:
 
@@ -67,7 +69,7 @@ knobs (note the exact field names):
 - `shouldRetry(error, attempt)` — classifier predicate; default retries everything.
 - `onRetry(error, attempt, delay)` — callback per attempt.
 
-## The `computeBackoff` helper
+## The `computeBackoff` helper {#the-computebackoff-helper}
 
 For custom retry loops where `retry()` doesn't fit:
 
@@ -95,7 +97,7 @@ while (true) {
 `IBackoffOptions` covers exponential backoff with jitter — the same
 math `retry()` uses internally.
 
-## Retry strategies registry
+## Retry strategies registry {#retry-strategies-registry}
 
 `utils/retry.ts` exposes a richer family of named strategies:
 
@@ -113,7 +115,7 @@ import {
 (exponential, linear, fixed, fibonacci, custom). Use when you want to
 plug a strategy by name from configuration.
 
-## When NOT to retry
+## When NOT to retry {#when-not-to-retry}
 
 - **Validation failures.** They will fail again on retry.
 - **Auth failures (401, 403).** They won't change with retry.
@@ -124,7 +126,7 @@ The default `shouldRetry: (e) => isOperationalError(e)` handles the
 first two. The third is your responsibility — wrap idempotency-
 sensitive calls with an idempotency key your backend honours.
 
-## Compose with a circuit breaker
+## Compose with a circuit breaker {#compose-with-a-circuit-breaker}
 
 A retry without a circuit breaker can hammer a failing backend:
 
@@ -141,7 +143,7 @@ await breaker.execute(() =>
 When the circuit is open, retries fail fast — they never call the
 backend, so no exponential pile-up.
 
-## Anti-patterns
+## Anti-patterns {#anti-patterns}
 
 - **Unlimited retries.** Always bound with `maxRetries`.
 - **Retry on every error.** Use a `shouldRetry` predicate

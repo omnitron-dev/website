@@ -1,4 +1,6 @@
 ---
+id: "titan/errors/classification"
+slug: "/docs/titan/errors/classification"
 sidebar_position: 4
 title: Error Classification
 description: Categorise errors for telemetry, retry, and alerting decisions.
@@ -10,7 +12,7 @@ Different kinds of failure deserve different responses. A 404 is not
 a 500. A timeout is not an auth failure. Titan provides classifier
 helpers in two places.
 
-## `ErrorCode`-driven classification
+## `ErrorCode`-driven classification {#errorcode-driven-classification}
 
 The fastest classification uses the error code itself. For a known
 `ErrorCode`:
@@ -41,7 +43,7 @@ These helpers operate on the code alone — no need for the full error
 instance. Useful in middleware and telemetry where you only have the
 code.
 
-## `ErrorCategory` enum
+## `ErrorCategory` enum {#errorcategory-enum}
 
 ```typescript
 import { ErrorCategory } from '@omnitron-dev/titan/errors';
@@ -59,7 +61,7 @@ The mapping from `ErrorCode` to `ErrorCategory` is the
 implementation's responsibility (`getErrorCategory(code)`); the
 enum is the vocabulary.
 
-## `isOperationalError(error)` — for retry decisions
+## `isOperationalError(error)` — for retry decisions {#isoperationalerrorerror--for-retry-decisions}
 
 Operational errors are those caused by external systems (network,
 disk, database, third-party API) — distinct from programming bugs.
@@ -87,7 +89,7 @@ You can extend the operational set with
 `createOperationalErrorRecorder` — see the source in
 `utils/error-classification.ts`.
 
-## Putting it together
+## Putting it together {#putting-it-together}
 
 A typical retry / telemetry pattern:
 
@@ -117,7 +119,7 @@ For ready-made resilience, use `retry()` and `CircuitBreaker` from
 `@omnitron-dev/titan/utils/resilience.ts` — see
 [Resilience](../resilience/overview.md).
 
-## Telemetry partitioning
+## Telemetry partitioning {#telemetry-partitioning}
 
 ```typescript
 catch (e) {
@@ -135,7 +137,7 @@ Now your dashboards can show "client errors" separately from "server
 errors" — the former are usually client bugs; the latter usually
 indicate something wrong on your side.
 
-## Alerting policy
+## Alerting policy {#alerting-policy}
 
 ```typescript
 app.on(ApplicationEvent.Error, ({ error }) => {
@@ -150,7 +152,7 @@ app.on(ApplicationEvent.Error, ({ error }) => {
 });
 ```
 
-## Anti-patterns
+## Anti-patterns {#anti-patterns}
 
 - **Retrying based on `instanceof Error`.** Catches everything,
   including programming bugs (which will fail again) and validation

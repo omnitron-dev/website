@@ -1,12 +1,13 @@
 ---
+id: "titan/modules/auth"
+slug: "/docs/titan/modules/auth"
 title: titan-auth
 ---
 
-import ModuleBadge from '@site/src/components/ModuleBadge';
 
 # titan-auth
 
-<ModuleBadge origin="official" pkg="@omnitron-dev/titan-auth" status="stable" />
+<span class="module-badge">official · @omnitron-dev/titan-auth · stable</span>
 
 :::info
 This page covers the JWT primitives (issuance, verification,
@@ -28,7 +29,7 @@ that issues, verifies, caches, and rotates.
 pnpm add @omnitron-dev/titan-auth
 ```
 
-## When you need it
+## When you need it {#when-you-need-it}
 
 - **Inbound API auth.** Validate Bearer tokens or API keys on every
   RPC call without re-decoding on the hot path.
@@ -39,9 +40,9 @@ pnpm add @omnitron-dev/titan-auth
 - **Zero-downtime key rotation.** Roll signing keys without forcing
   re-login via the `kid` header registry.
 
-## Quickstart
+## Quickstart {#quickstart}
 
-### HS256 (symmetric — simplest)
+### HS256 (symmetric — simplest) {#hs256-symmetric--simplest}
 
 ```typescript
 import { TitanAuthModule } from '@omnitron-dev/titan-auth';
@@ -62,7 +63,7 @@ import { TitanAuthModule } from '@omnitron-dev/titan-auth';
 class AppModule {}
 ```
 
-### RS256 / ES256 with JWKS (external IDP)
+### RS256 / ES256 with JWKS (external IDP) {#rs256--es256-with-jwks-external-idp}
 
 ```typescript
 TitanAuthModule.forRoot({
@@ -75,7 +76,7 @@ TitanAuthModule.forRoot({
 
 The JWKS is lazy-fetched on first verify and cached.
 
-### Async configuration
+### Async configuration {#async-configuration}
 
 ```typescript
 TitanAuthModule.forRootAsync({
@@ -89,7 +90,7 @@ TitanAuthModule.forRootAsync({
 })
 ```
 
-## `IAuthModuleOptions`
+## `IAuthModuleOptions` {#iauthmoduleoptions}
 
 | Option              | Type                                  | Default       |
 | ------------------- | ------------------------------------- | ------------- |
@@ -109,7 +110,7 @@ TitanAuthModule.forRootAsync({
 | `urlSigningKey`     | `string` (falls back to `jwtSecret`)  | —             |
 | `isGlobal`          | `boolean`                             | `false`       |
 
-## `JWTService`
+## `JWTService` {#jwtservice}
 
 The injected service for verification, context creation, and signed
 URL issuing.
@@ -128,7 +129,7 @@ class AdminService {
 }
 ```
 
-### Token verification
+### Token verification {#token-verification}
 
 | Method                          | Returns                             | Notes                                          |
 | ------------------------------- | ----------------------------------- | ---------------------------------------------- |
@@ -137,7 +138,7 @@ class AdminService {
 | `clearCache()`                  | `void`                              | Drop every cached token                        |
 | `getCacheStats()`               | `ITokenCacheStats`                  | `{ size, maxSize, hits, misses, hitRate }`     |
 
-### Signed URLs
+### Signed URLs {#signed-urls}
 
 | Method                                            | Returns               |
 | ------------------------------------------------- | --------------------- |
@@ -153,7 +154,7 @@ const token = await this.jwt.createSignedToken(
 const url = `https://api.example.com/files/${fileId}?token=${token}`;
 ```
 
-## `AuthMiddleware`
+## `AuthMiddleware` {#authmiddleware}
 
 Extracts credentials from an incoming request, validates them, and
 returns an `IAuthContext`.
@@ -187,7 +188,7 @@ class UsersService {
 The auth chain: Bearer token (JWT) → service-key API key → anon-key
 API key → anonymous context.
 
-## Decorators
+## Decorators {#decorators}
 
 ```typescript
 import {
@@ -199,7 +200,7 @@ import {
 } from '@omnitron-dev/titan-auth';
 ```
 
-### `@RequireAuth(options?)`
+### `@RequireAuth(options?)` {#requireauthoptions}
 
 ```typescript
 @Public()
@@ -219,7 +220,7 @@ The decorator looks up the middleware on the instance under
 `__authMiddleware__`; inject it there. After successful auth, the
 resolved context is stored on the instance as `__authContext__`.
 
-### Shorthands
+### Shorthands {#shorthands}
 
 | Decorator                 | Equivalent                                              |
 | ------------------------- | ------------------------------------------------------- |
@@ -228,7 +229,7 @@ resolved context is stored on the instance as `__authContext__`.
 | `@RequireRole(roles, msg?)` | `@RequireAuth({ roles, message: msg })`               |
 | `@Public()`               | Skip auth on this method or class                       |
 
-## Multi-key rotation (HS256)
+## Multi-key rotation (HS256) {#multi-key-rotation-hs256}
 
 Rotate signing secrets without forcing re-login by registering
 multiple keys keyed by `kid`:
@@ -256,7 +257,7 @@ Resolution order on verify:
 After every active token has expired, drop the retired key from
 `verificationKeys` to complete the rotation.
 
-## Auth flow
+## Auth flow {#auth-flow}
 
 ```mermaid
 flowchart LR
@@ -274,7 +275,7 @@ flowchart LR
   AnonFallback -- required --> Err1
 ```
 
-## Tokens
+## Tokens {#tokens}
 
 | Token                       | Purpose                                       |
 | --------------------------- | --------------------------------------------- |
@@ -283,13 +284,13 @@ flowchart LR
 | `SIGNED_URL_SERVICE_TOKEN`  | `JWTService` (same instance, narrower interface) |
 | `AUTH_OPTIONS_TOKEN`        | Resolved options bundle                       |
 
-## Lifecycle
+## Lifecycle {#lifecycle}
 
 Neither service implements explicit lifecycle hooks. JWKS is
 lazy-loaded; the token cache is in-memory and trims itself via LRU
 eviction.
 
-## Anti-patterns
+## Anti-patterns {#anti-patterns}
 
 - **Long `cacheTTL` with frequent token revocation.** Revocation
   bypasses the cache only after `cacheTTL` expires. For high-churn
@@ -302,7 +303,7 @@ eviction.
 - **Using `serviceKey` from a browser.** The service key bypasses
   user-scoped policies. Reserve it for trusted machine clients.
 
-## See also
+## See also {#see-also}
 
 - [Netron Authentication](../netron/authentication.md) — the policy
   framework (`BuiltInPolicies`, `PolicyEngine`) for fine-grained
@@ -310,13 +311,13 @@ eviction.
 - [`@RequireAuth`](#requireauthoptions) — vs `@Public({ auth: …  })`
   (the inline form on `@Public`)
 
-## Shared sessions across backends
+## Shared sessions across backends {#shared-sessions-across-backends}
 
 The shipped [shared-session preset](./shared-session.md) configures JWT claim
 validation, session-registry checks and an optional canonical-store fallback.
 Read it before composing a multi-backend authentication system.
 
-## Portable role and permission policy
+## Portable role and permission policy {#portable-role-and-permission-policy}
 
 Use [`@omnitron-dev/access`](../../auth/access-policy.md) for shared browser/server
 policy without installing JWT infrastructure. `titan-auth/access` remains a

@@ -1,4 +1,6 @@
 ---
+id: "titan/netron/multi-backend"
+slug: "/docs/titan/netron/multi-backend"
 sidebar_position: 6
 title: Multi-Backend
 description: One client, many servers — pools, failover, method-level routing.
@@ -39,7 +41,7 @@ Use when you have:
 - **Failover targets.** Healthy backends serve traffic; unhealthy
   ones drop out, then come back when probes succeed.
 
-## The minimal example
+## The minimal example {#the-minimal-example}
 
 Every backend needs a unique `id` and a `url`:
 
@@ -65,7 +67,7 @@ const user  = await users.findById('u_42');     // routed to one of the three
 If the call fails and `failover` is on (the default), the client
 retries on another backend (up to `maxFailoverAttempts`, default 2).
 
-## Strategies
+## Strategies {#strategies}
 
 The load-balancing strategy is a `LoadBalancingStrategy` (`LoadBalancingStrategy` in `types.ts`),
 set on a route (`router.routes[].strategy`) or as
@@ -85,7 +87,7 @@ is no `sticky`, `least-busy`, or `primary` strategy, and no
 expressed through a route's `backends` vs `fallback` lists
 (the route's `backends`/`fallback` handling in `ServiceRouter`), not a strategy name.
 
-## Service-level routing rules
+## Service-level routing rules {#service-level-routing-rules}
 
 Routing matches on the **service name** (with `*` wildcards) — not on
 method. Configure it under `router.routes`:
@@ -113,7 +115,7 @@ primary `backends` are unavailable. To split reads vs writes by
 method, expose them as separate services (e.g. `orders` and
 `orders-read`) and route per service.
 
-## Health monitoring
+## Health monitoring {#health-monitoring}
 
 Health-check options are **flat** top-level fields (`MultiBackendClientOptions` in `types.ts`),
 not a nested `health` object:
@@ -134,7 +136,7 @@ backend whose `health` is `'unhealthy'` before selecting
 rotation; the pool keeps polling them and they re-enter once the
 `healthyThreshold` of consecutive successes is met.
 
-## Failover
+## Failover {#failover}
 
 `failover` is a **boolean** (default `true`), not an options object,
 and `maxFailoverAttempts` (default 2) caps the retries:
@@ -174,7 +176,7 @@ history. So the breaker measures a failure *rate* — three failures a
 minute apart with a 60s window never coincide, and the circuit stays
 closed.
 
-## Connection model
+## Connection model {#connection-model}
 
 There is no sized connection pool. The `BackendPool` holds one
 `BackendClient` per backend id (`BackendPool`), and each
@@ -183,7 +185,7 @@ There is no sized connection pool. The `BackendPool` holds one
 (`BackendClient`), chosen by the backend's `transport` field.
 Per-backend `pool: { min, max, idleTimeoutMs }` is not a real option.
 
-## Observability
+## Observability {#observability}
 
 Track per-call latency and the chosen backend (the exact metric shape
 is up to your metrics layer — illustrative):
@@ -199,7 +201,7 @@ metrics.histogram('rpc.duration_ms', {
 Useful for catching imbalanced traffic, slow backends, or
 overlooked failover events.
 
-## When not to use MultiBackend
+## When not to use MultiBackend {#when-not-to-use-multibackend}
 
 - **One backend.** Connect a single peer
   (`netron.connect(url)` → `queryInterface`) — simpler.
@@ -210,7 +212,7 @@ overlooked failover events.
   A multi-backend client can re-route mid-session, which breaks
   state. For stateful sessions, pin to a backend.
 
-## Anti-patterns
+## Anti-patterns {#anti-patterns}
 
 - **Routing a whole hot service to one backend.** A route that pins a
   high-traffic service to a single backend id forfeits spreading. Give

@@ -1,4 +1,6 @@
 ---
+id: "titan/migrations/from-prom-client"
+slug: "/docs/titan/migrations/from-prom-client"
 sidebar_position: 4
 title: From prom-client
 description: Replacing prom-client with titan-metrics.
@@ -16,7 +18,7 @@ ship cross-pod aggregates without standing up Prometheus first.
 
 This page is the surgical recipe for moving from one to the other.
 
-## At a glance
+## At a glance {#at-a-glance}
 
 | `prom-client`                             | `titan-metrics`                                |
 | ----------------------------------------- | ---------------------------------------------- |
@@ -31,7 +33,7 @@ This page is the surgical recipe for moving from one to the other.
 | (manual cleanup)                          | `retention: { maxAge: '7d' }` (automatic)      |
 | (manual exposition route)                 | `MetricsRpcService` over Netron (or roll your own) |
 
-## A side-by-side concrete example
+## A side-by-side concrete example {#a-side-by-side-concrete-example}
 
 Suppose you currently instrument an HTTP handler like this:
 
@@ -130,9 +132,9 @@ const text = await metrics.getPrometheusText();
 // Serve from any HTTP route, or expose via the RPC service.
 ```
 
-## Step-by-step migration
+## Step-by-step migration {#step-by-step-migration}
 
-### 1. Install the module, keep `prom-client` for now
+### 1. Install the module, keep `prom-client` for now {#1-install-the-module-keep-prom-client-for-now}
 
 ```bash
 pnpm add @omnitron-dev/titan-metrics
@@ -140,7 +142,7 @@ pnpm add @omnitron-dev/titan-metrics
 
 Don't uninstall `prom-client` yet — you'll cut it last.
 
-### 2. Boot the module
+### 2. Boot the module {#2-boot-the-module}
 
 ```typescript
 TitanMetricsModule.forRoot({
@@ -154,7 +156,7 @@ TitanMetricsModule.forRoot({
 RSS, heap, CPU, uptime. (Event-loop lag is not built in; register
 a gauge yourself if you need it.)
 
-### 3. Migrate one metric at a time
+### 3. Migrate one metric at a time {#3-migrate-one-metric-at-a-time}
 
 For each existing counter / gauge / histogram, write the Titan
 equivalent:
@@ -175,7 +177,7 @@ metrics.recordTyped('counter', 'users_created_total', { source: 'web' }, 1);
 `recordTyped` is the canonical API — it keeps the Prometheus
 registry and storage backend synchronised in a single call.
 
-### 4. Migrate the exposition route
+### 4. Migrate the exposition route {#4-migrate-the-exposition-route}
 
 ```typescript
 // Before
@@ -194,7 +196,7 @@ app.get('/metrics', async (_req, res) => {
 // with the injected MetricsService.
 ```
 
-### 5. Drop `prom-client`
+### 5. Drop `prom-client` {#5-drop-prom-client}
 
 Once every `Counter` / `Gauge` / `Histogram` is gone:
 
@@ -202,7 +204,7 @@ Once every `Counter` / `Gauge` / `Histogram` is gone:
 pnpm remove prom-client
 ```
 
-## Naming conventions
+## Naming conventions {#naming-conventions}
 
 `prom-client` uses `snake_case`. **`titan-metrics` does not
 normalise metric names** — `getPrometheusText()` emits the name
@@ -221,7 +223,7 @@ Use `snake_case` at the call site:
 The built-in collectors already follow this (`rpc_requests_total`,
 `heap_used_bytes`, …); match it so your custom metrics scrape cleanly.
 
-## Labels
+## Labels {#labels}
 
 Same advice as `prom-client`: keep label cardinality small.
 
@@ -233,7 +235,7 @@ Same advice as `prom-client`: keep label cardinality small.
 your storage backend will fill up. Discipline lives in the call
 sites.
 
-## Histograms
+## Histograms {#histograms}
 
 `prom-client` lets you set buckets per-histogram. `titan-metrics`
 applies one **registry-wide** bucket set instead: `recordTyped('histogram',
@@ -244,7 +246,7 @@ there is no per-call bucket argument.
 Five-to-ten buckets is usually right. Each bucket is a separate
 time-series, so over-bucketing has real cost.
 
-## Default metrics
+## Default metrics {#default-metrics}
 
 | `prom-client`                  | `titan-metrics`                            |
 | ------------------------------ | ------------------------------------------ |
@@ -252,7 +254,7 @@ time-series, so over-bucketing has real cost.
 | `collectDefaultMetrics({ register })` | (registry is module-managed; nothing to pass) |
 | heap / RSS / CPU / uptime      | Included via `collection.process`; sample at `collection.interval` (default 5s). Event-loop lag / GC / FDs are not built in. |
 
-## Persistence — the bit `prom-client` doesn't do
+## Persistence — the bit `prom-client` doesn't do {#persistence--the-bit-prom-client-doesnt-do}
 
 `titan-metrics` flushes samples to the storage backend on a fixed
 5s cadence. This unlocks queries from inside your app:
@@ -278,7 +280,7 @@ free — the ring buffer caps RAM use, the exposition path is
 identical to a plain registry, and you keep the option of turning
 persistence on later.
 
-## What's different
+## What's different {#whats-different}
 
 - **No registry per-instance.** The container provides one
   `MetricsService` per app; multi-registry scenarios are rare and
@@ -291,7 +293,7 @@ persistence on later.
   `rpc_errors_total` set. It takes only an optional method-label
   string — for custom metrics you still use `recordTyped`.
 
-## See also
+## See also {#see-also}
 
 - [`titan-metrics`](../modules/metrics.mdx) — full reference
 - [Best Practices / Observability](../best-practices/observability.md)

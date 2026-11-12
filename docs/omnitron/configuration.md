@@ -1,4 +1,6 @@
 ---
+id: "omnitron/configuration"
+slug: "/docs/omnitron/configuration"
 sidebar_position: 7
 title: Configuration
 description: Every field of omnitron.config.ts, defineEcosystem(), defineSystem().
@@ -25,7 +27,7 @@ system definition. The ecosystem loader checks the selected project directory fo
 Verified against `apps/omnitron/src/config/` (types.ts, define-ecosystem.ts,
 define-system.ts, defaults.ts).
 
-## `defineEcosystem(config)` — `omnitron.config.ts`
+## `defineEcosystem(config)` — `omnitron.config.ts` {#defineecosystemconfig--omnitronconfigts}
 
 ```typescript
 import { defineEcosystem } from '@omnitron-dev/omnitron';
@@ -42,7 +44,7 @@ export default defineEcosystem({
 });
 ```
 
-### Factories and fresh configuration reads
+### Factories and fresh configuration reads {#factories-and-fresh-configuration-reads}
 
 An async factory can separate build inputs from runtime secrets:
 
@@ -98,7 +100,7 @@ parent disconnection ends a pending asynchronous read. Output is private and
 limited to 1 MiB; the returned data is limited to 16 MiB. Failures retain a bounded,
 credential-redacted reason and cause. Import output does not contaminate CLI JSON.
 
-### Top-level fields — `IEcosystemConfig`
+### Top-level fields — `IEcosystemConfig` {#top-level-fields--iecosystemconfig}
 
 | Field          | Type                                                       | Required | Default                              |
 | -------------- | ---------------------------------------------------------- | :------: | ------------------------------------ |
@@ -113,7 +115,7 @@ credential-redacted reason and cause. Import output does not contaminate CLI JSO
 
 `StackName` is `'dev' | 'test' | 'staging' | 'prod' | string`.
 
-### `IEcosystemAppEntry`
+### `IEcosystemAppEntry` {#iecosystemappentry}
 
 Each entry in `apps[]`:
 
@@ -150,7 +152,7 @@ interface IEcosystemAppEntry {
 | `startupTimeout`| Max ms for ready handshake before treated as failed                     |
 | `watch`         | Dev-mode file watching: string=directory; full config; or `false`        |
 
-### `AppReadinessConfig`
+### `AppReadinessConfig` {#appreadinessconfig}
 
 `probes` contains 1–16 uniquely named checks. `intervalMs` (1–300 seconds,
 default 5 seconds) bounds result reuse; `timeoutMs` (100 ms–10 seconds, default
@@ -161,7 +163,7 @@ and `maxAgeMs` (1 second–24 hours). Combine multiple domain checks in that rep
 Bootstrap applications report completed work through `hooks.onHealthCheck`.
 See [readiness and heartbeat examples](./diagnostics.md#classic-services-and-completed-work).
 
-### `IWatchConfig`
+### `IWatchConfig` {#iwatchconfig}
 
 ```typescript
 interface IWatchConfig {
@@ -199,7 +201,7 @@ Stopping and resuming an installed stack retains its verified release independen
 of this watch policy. These guarantees require an updated execution owner; updating
 only the controller cannot change the watcher already loaded in an older owner.
 
-### `IStackConfig`
+### `IStackConfig` {#istackconfig}
 
 A stack scopes an environment within a project. Boot and automatic recovery
 admit enabled stacks independently: local Docker availability does not gate
@@ -238,7 +240,7 @@ interface IStackConfig {
 
 Non-owning modes apply only to local application allocations. They retain explicit application connection settings, reject stack-level infrastructure declarations and `serviceOverrides`, and ignore ecosystem infrastructure defaults that may belong to other stacks. Requirement discovery does not authorize a node to create replacement services or run their migrations. See [infrastructure ownership](./infrastructure.md#infrastructure-ownership).
 
-### `IStackNode`
+### `IStackNode` {#istacknode}
 
 ```typescript
 interface IStackNode {
@@ -255,7 +257,7 @@ Each remote node runs its own omnitron daemon (typically as a
 **slave**). The master daemon coordinates state replication via
 the `OmnitronSync` service.
 
-### `IStackSettings`
+### `IStackSettings` {#istacksettings}
 
 ```typescript
 interface IStackSettings {
@@ -277,7 +279,7 @@ stacks: {
 }
 ```
 
-### `supervision` — restart policy
+### `supervision` — restart policy {#supervision--restart-policy}
 
 ```typescript
 supervision: {
@@ -297,7 +299,7 @@ supervision: {
 Defaults: `one_for_one` / `5` restarts / `60 000` ms window /
 exponential backoff `{ initial: 1 000, max: 30 000, factor: 2 }`.
 
-### `monitoring`
+### `monitoring` {#monitoring}
 
 ```typescript
 monitoring: {
@@ -314,7 +316,7 @@ monitoring: {
 | `metrics.historyMaxAge`   | Persistent history duration (`7d` by default); Titan validates the duration |
 | `metrics.retention`       | Legacy numeric setting; does not control the persistent store |
 
-### `logging`
+### `logging` {#logging}
 
 ```typescript
 logging: {
@@ -348,7 +350,7 @@ above; one assembled by hand does not.
 Per-app overrides live in `IAppDefinition.observability.logging`
 (see `defineSystem` below).
 
-### `gateway`
+### `gateway` {#gateway}
 
 ```typescript
 gateway: {
@@ -362,7 +364,7 @@ When configured, Omnitron provisions an OpenResty/Lua gateway
 container per stack — reverse proxy, maintenance mode (driven
 from Redis), rate limiting, future PoW captcha.
 
-## `defineSystem(definition)` — per-app `bootstrap.ts`
+## `defineSystem(definition)` — per-app `bootstrap.ts` {#definesystemdefinition--per-app-bootstrapts}
 
 ```typescript
 import { defineSystem } from '@omnitron-dev/omnitron';
@@ -388,7 +390,7 @@ export default defineSystem({
 });
 ```
 
-### Top-level fields — `IAppDefinition`
+### Top-level fields — `IAppDefinition` {#top-level-fields--iappdefinition}
 
 | Field            | Type                                                                                                                                | Required |
 | ---------------- | ----------------------------------------------------------------------------------------------------------------------------------- | :------: |
@@ -405,7 +407,7 @@ export default defineSystem({
 | `cwd`            | `string`                                                                                                                            |          |
 | `observability`  | `{ metrics?, tracing?, logging? }`                                                                                                  |          |
 
-### `IProcessEntry` — the heart of `defineSystem`
+### `IProcessEntry` — the heart of `defineSystem` {#iprocessentry--the-heart-of-definesystem}
 
 Each entry becomes exactly one fork (or a pool of N forks when
 `instances > 1`).
@@ -430,7 +432,7 @@ interface IProcessEntry {
 }
 ```
 
-#### Topology — cross-process service mesh
+#### Topology — cross-process service mesh {#topology--cross-process-service-mesh}
 
 ```typescript
 processes: [
@@ -460,7 +462,7 @@ startup. See [application service isolation](./topology.md#application-service-i
 its private service namespace. It does not create OS isolation or per-method
 authorization between those siblings.
 
-#### Transports
+#### Transports {#transports}
 
 ```typescript
 interface IHttpTransportConfig {
@@ -481,7 +483,7 @@ interface IWebSocketTransportConfig {
 Set `transports.http.port` or `.websocket.port` to expose Netron
 on those protocols from this specific process.
 
-#### Scaling (pool mode, `instances > 1`)
+#### Scaling (pool mode, `instances > 1`) {#scaling-pool-mode-instances--1}
 
 ```typescript
 scaling: {
@@ -498,7 +500,7 @@ scaling: {
 adds / removes workers based on the targets. `fixed` keeps the
 declared `instances` count regardless of load.
 
-#### Per-process auth
+#### Per-process auth {#per-process-auth}
 
 ```typescript
 processes: [
@@ -515,7 +517,7 @@ processes: [
 `auth: false` explicitly disables; omitted inherits the app's
 auth.
 
-### `OmnitronAppConfig` — declarative infrastructure (per-app `config/default.json`)
+### `OmnitronAppConfig` — declarative infrastructure (per-app `config/default.json`) {#omnitronappconfig--declarative-infrastructure-per-app-configdefaultjson}
 
 Lives in `config/default.json` under the `omnitron` key (not in
 `bootstrap.ts`):
@@ -570,7 +572,7 @@ infrastructure addresses.
 
 → Full reference: [Infrastructure](./infrastructure.md).
 
-### Lifecycle hooks
+### Lifecycle hooks {#lifecycle-hooks}
 
 App- and process-level `hooks` carry the same shape:
 
@@ -596,7 +598,7 @@ schema sanity checks, `afterStart` for cache priming,
 are not part of the process health contract. The daemon preserves check names
 and messages for both CLI and Console. See [domain readiness](./diagnostics.md#domain-readiness).
 
-### Custom routes
+### Custom routes {#custom-routes}
 
 ```typescript
 processes: [{
@@ -615,7 +617,7 @@ processes: [{
 Custom routes sit alongside the Netron-exposed services on the
 same HTTP transport.
 
-## Daemon config — `IDaemonConfig` (not project-config)
+## Daemon config — `IDaemonConfig` (not project-config) {#daemon-config--idaemonconfig-not-project-config}
 
 The daemon's own config — paths, ports, role, cluster, secrets,
 health-monitor — is **not** in `omnitron.config.ts`. Defaults
@@ -642,12 +644,12 @@ interface IDaemonConfig {
 }
 ```
 
-## Runtime DTOs (returned by RPC)
+## Runtime DTOs (returned by RPC) {#runtime-dtos-returned-by-rpc}
 
 These shapes appear in `omnitron status` JSON output and in
 webapp data.
 
-### `ProcessInfoDto`
+### `ProcessInfoDto` {#processinfodto}
 
 ```typescript
 interface ProcessInfoDto {
@@ -666,7 +668,7 @@ interface ProcessInfoDto {
 }
 ```
 
-### `DaemonStatusDto`
+### `DaemonStatusDto` {#daemonstatusdto}
 
 ```typescript
 interface DaemonStatusDto {
@@ -679,13 +681,13 @@ interface DaemonStatusDto {
 }
 ```
 
-### `AggregatedMetricsDto`, `AggregatedHealthDto`, `LogEntryDto`, `AppDiagnosticsDto`
+### `AggregatedMetricsDto`, `AggregatedHealthDto`, `LogEntryDto`, `AppDiagnosticsDto` {#aggregatedmetricsdto-aggregatedhealthdto-logentrydto-appdiagnosticsdto}
 
 Defined in `src/config/types.ts` — refer there for exact field
 shapes. The CLI and webapp consume them directly through the
 typed `DaemonClient`.
 
-## Validation
+## Validation {#validation}
 
 `defineSystem()` validates synchronously at module load:
 
@@ -702,7 +704,7 @@ typed `DaemonClient`.
 Invalid configs fail at `import('bootstrap.js')` — the daemon
 surfaces the error and marks the app `errored`.
 
-## Loader behaviour
+## Loader behaviour {#loader-behaviour}
 
 `loader.ts` auto-detects `omnitron.config.ts` from CWD upward
 when the CLI runs. Resolution order:
@@ -716,7 +718,7 @@ the config that declared the app — relative paths inside the app
 entry resolve against the project root, not the daemon's working
 directory. Manual override is rarely needed.
 
-## Recommended layout
+## Recommended layout {#recommended-layout}
 
 ```text
 my-monorepo/
@@ -735,7 +737,7 @@ my-monorepo/
 └── package.json
 ```
 
-## Anti-patterns
+## Anti-patterns {#anti-patterns}
 
 - **Putting secrets in `omnitron.config.ts`.** The file is
   committed. Use `omnitron secret set` and read via `process.env`
@@ -755,7 +757,7 @@ my-monorepo/
   instead of using `OmnitronAppConfig`. The schema is
   validated — declarative is the right path.
 
-## See also
+## See also {#see-also}
 
 - [Architecture](./architecture.md) — what these configs drive
 - [Daemon](./daemon.md) — own config and lifecycle
@@ -764,11 +766,11 @@ my-monorepo/
 - [Infrastructure](./infrastructure.md) — `OmnitronAppConfig` deep dive
 - [CLI](./cli.md) — commands that read this config
 
-## Interactive SSH policy
+## Interactive SSH policy {#interactive-ssh-policy}
 
 `daemon.terminal` accepts `enabled`, `maxSessions`, `maxSessionsPerOwner`, `idleTimeoutMs`, `absoluteTimeoutMs` and `disconnectTimeoutMs`. See the [SSH policy table and example](./terminal.md#session-lifetime-and-limits). This is startup policy enforced by the daemon, independent of browser settings.
 
 
-## File workspace exports
+## File workspace exports {#file-workspace-exports}
 
 `files` in `~/.omnitron/config.json` configures administrator file access per node; it is not a project ecosystem setting. Omission exposes the `/` filesystem within daemon OS permissions. Set `enabled: false` or `roots: []` to disable exports. An explicit `roots` array replaces the default with `{ id, label, path, readOnly? }` entries. See [File workspace](./files.md#configure-access-per-node) for configuration examples and boundaries.

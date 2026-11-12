@@ -1,4 +1,6 @@
 ---
+id: "titan/logging/transports"
+slug: "/docs/titan/logging/transports"
 sidebar_position: 2
 title: Log Transports
 description: Where log records go — async stdout, extra destination streams, and the async ITransport sink.
@@ -21,7 +23,7 @@ have **two** ways to fan records elsewhere:
 Both are functional. This page covers the write path, then `destinations`,
 then `transports`, and finally when to use which.
 
-## The real write path: async Pino streams
+## The real write path: async Pino streams {#the-real-write-path-async-pino-streams}
 
 When the module starts (`LoggerModule.forRoot(...)`), `LoggerService`
 builds the root Pino logger in one of these shapes:
@@ -44,7 +46,7 @@ Source: the stream-selection branch in `LoggerService.initialize`
 (`packages/titan/src/modules/logger/logger.service.ts`) and the
 `wrapAsyncStream` forwarder in the same file.
 
-### Fanning out to extra streams with `destinations`
+### Fanning out to extra streams with `destinations` {#fanning-out-to-extra-streams-with-destinations}
 
 `destinations` is the raw-stream way to send the same JSON log lines to
 somewhere besides stdout — a file, a socket, a second sink. Each entry
@@ -66,7 +68,7 @@ are added alongside it. Use `pino.destination()` or
 `fs.createWriteStream()` for file targets. The option is typed on
 `ILoggerModuleOptions.destinations` (`ILoggerModuleOptions.destinations` in `logger.types.ts`).
 
-### Async stdout and shutdown
+### Async stdout and shutdown {#async-stdout-and-shutdown}
 
 When stdout is the async destination, buffered lines can be lost if the
 process is hard-killed. To recover what it can on a clean exit,
@@ -80,7 +82,7 @@ The flush hook is installed **once per process** and tracks every
 initialisations (tests, hot-reload) neither skip flushing nor
 double-flush.
 
-## The `ITransport` interface
+## The `ITransport` interface {#the-itransport-interface}
 
 ```typescript
 interface ITransport {
@@ -94,7 +96,7 @@ Only `name` and `write` are required; `flush` is optional. There is no
 `dispose()` method, no `filter` hook, and no `bufferSize`/`flushEveryMs`
 options. (Definition: the `ITransport` interface in `logger.types.ts`.)
 
-### How `write()` is driven
+### How `write()` is driven {#how-write-is-driven}
 
 A registered transport's `write()` **is called for every log line**,
 with these guarantees (`LoggerService.createTransportFanout`):
@@ -143,13 +145,13 @@ LoggerModule.forRoot({
 })
 ```
 
-### `flush()`
+### `flush()` {#flush}
 
 `LoggerService.flush()` awaits `flush()` across every registered
 transport that defines one (`LoggerService.flush`). Call it on
 shutdown to drain anything a transport has buffered.
 
-### Caveat: configure transports at `forRoot`
+### Caveat: configure transports at `forRoot` {#caveat-configure-transports-at-forroot}
 
 The fan-out stream that drives transports is created **at init**, and
 only when at least one transport was registered at that point — it is
@@ -167,9 +169,9 @@ Consequences:
   its `flush()` still runs) but its `write()` won't receive records.
   When in doubt, register transports up front.
 
-## Built-in transport
+## Built-in transport {#built-in-transport}
 
-### `ConsoleTransport`
+### `ConsoleTransport` {#consoletransport}
 
 The one bundled example transport. Its constructor takes an
 **optional** `ILogger` (positional — there is no options object, and no
@@ -191,7 +193,7 @@ and `destinations` covers extra raw streams). There is **no
 rotating write stream, or (the common production choice) write JSON to
 stdout and let an OS-level shipper handle files and rotation.
 
-## `destinations` vs `transports`: which to use
+## `destinations` vs `transports`: which to use {#destinations-vs-transports-which-to-use}
 
 Both fan records out; they differ in what they receive and how they run:
 
@@ -211,7 +213,7 @@ bytes on a stream (file rotation, a socket, an OS shipper); reach for
 isolated from the hot path and from sibling sinks, or need a `flush()`
 lifecycle hook.
 
-## Anti-patterns
+## Anti-patterns {#anti-patterns}
 
 - **Adding the first transport after init.** With zero transports at
   `forRoot`, no fan-out stream exists, so a later `addTransport()`

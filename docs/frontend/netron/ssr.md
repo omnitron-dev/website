@@ -1,4 +1,6 @@
 ---
+id: "frontend/netron/ssr"
+slug: "/docs/frontend/netron/ssr"
 sidebar_position: 11
 title: SSR
 description: Server-side rendering — dehydrate / hydrate, hydration safety.
@@ -9,7 +11,7 @@ description: Server-side rendering — dehydrate / hydrate, hydration safety.
 netron-react supports server-side rendering by serialising the
 QueryCache on the server and rehydrating on the client.
 
-## Pattern — Next.js / Remix style
+## Pattern — Next.js / Remix style {#pattern--nextjs--remix-style}
 
 ```tsx
 // server-side route loader:
@@ -55,7 +57,7 @@ The server's `dehydrate()` returns a plain-object snapshot of
 the cache (synchronously — no `await`). The client's `hydrate()`
 method populates the fresh client's cache from that snapshot.
 
-## Hydration semantics
+## Hydration semantics {#hydration-semantics}
 
 After hydration:
 - Cached queries from the server **don't** refetch on mount
@@ -71,7 +73,7 @@ useQuery(['users','list', { filter: 'active' }], {
 });
 ```
 
-## `useHydration`
+## `useHydration` {#usehydration}
 
 When client-side rendering needs to **branch** on whether
 hydration has completed:
@@ -96,7 +98,7 @@ Useful for any UI that depends on browser-only state (localStorage,
 `window.matchMedia`, etc.) — render `null` until hydrated to
 avoid SSR/client divergence.
 
-## Streaming SSR
+## Streaming SSR {#streaming-ssr}
 
 ```tsx
 // Next.js 13+ / React 19 server components:
@@ -111,7 +113,7 @@ For streaming, prefer `<Suspense>` boundaries around data-bound
 sections; pass `{ suspense: true }` to `useQuery` and it
 integrates cleanly.
 
-## Per-user dehydration
+## Per-user dehydration {#per-user-dehydration}
 
 Use a request-scoped cache for authenticated data. For an upstream service
 that accepts bearer credentials, put the token on the HTTP client that makes
@@ -142,7 +144,7 @@ async function prefetchWorkspace(apiUrl: string, accessToken: string) {
 
 Only include data the requesting user may receive in the page.
 
-## Excluding queries from dehydration
+## Excluding queries from dehydration {#excluding-queries-from-dehydration}
 
 `dehydrate()` takes no arguments — it automatically dehydrates
 only **successful** queries. Errored / in-flight queries are
@@ -158,13 +160,13 @@ client.removeQueries({ queryKey: ['tokens'] });
 const dehydratedState = client.dehydrate();
 ```
 
-## Bundle size considerations
+## Bundle size considerations {#bundle-size-considerations}
 
 The browser and SSR use the same package entry point. Selecting
 `transport: 'http'` runs the HTTP path and avoids opening a socket on the server.
 Bundle size depends on the imports and bundler output.
 
-## Caveats
+## Caveats {#caveats}
 
 - **Subscriptions don't persist.** Server-side they aren't
   initiated; client takes over.
@@ -174,7 +176,7 @@ Bundle size depends on the imports and bundler output.
   `suppressHydrationWarning` on the wrapper element or
   `useHydration`-gated rendering.
 
-## Best practices
+## Best practices {#best-practices}
 
 - **Prefetch above-the-fold data.** Don't dehydrate the whole
   app — pick the queries that fill the initial render.
@@ -185,7 +187,7 @@ Bundle size depends on the imports and bundler output.
 - **`useHydration` for browser-only UI.** Theme toggle, geolocation,
   feature flags — gate them.
 
-## Anti-patterns
+## Anti-patterns {#anti-patterns}
 
 - **Sharing a dehydrated cache across users.** Leaks data.
 - **Streaming WebSocket on the server.** WS doesn't work
@@ -194,7 +196,7 @@ Bundle size depends on the imports and bundler output.
 - **`client.hydrate()` without a matching server prefetch.** The
   cache is empty; you've added complexity for nothing.
 
-## See also
+## See also {#see-also}
 
 - [Caching](./caching.md) — `dehydrate` / `prefetchQuery`
 - [netron-react](./react.md) — `useQuery` SSR semantics

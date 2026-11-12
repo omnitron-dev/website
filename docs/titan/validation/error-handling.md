@@ -1,4 +1,6 @@
 ---
+id: "titan/validation/error-handling"
+slug: "/docs/titan/validation/error-handling"
 sidebar_position: 3
 title: Validation Error Handling
 description: What clients see when validation fails — and how to shape it.
@@ -11,7 +13,7 @@ client receives the same class with the same payload over the wire.
 This page covers what's in the error and how to customise the
 client-facing shape.
 
-## Default error shape
+## Default error shape {#default-error-shape}
 
 The canonical `ValidationError` (from `@omnitron-dev/titan/errors`)
 extends `TitanError`, so it carries `code` / `httpStatus` / `details`
@@ -45,7 +47,7 @@ Status code `422` follows REST convention for "syntactically valid but
 semantically wrong". For requests that fail to parse at all (malformed
 msgpack, unknown service), the framework uses `400`.
 
-## On the client side
+## On the client side {#on-the-client-side}
 
 ```typescript
 import { ValidationError } from '@omnitron-dev/titan/errors';
@@ -66,7 +68,7 @@ The error is preserved across the wire — Netron serialises the
 shared via `@omnitron-dev/netron-protocol`), so `code`, `httpStatus`,
 and `details` survive intact.
 
-## Structured field errors
+## Structured field errors {#structured-field-errors}
 
 Each entry in `validationErrors` (mirrored at `details.errors`):
 
@@ -91,7 +93,7 @@ catch (e) {
 }
 ```
 
-## Customising messages
+## Customising messages {#customising-messages}
 
 Per-field messages via Zod:
 
@@ -118,7 +120,7 @@ z.setErrorMap((issue) => {
 });
 ```
 
-## Translating to client formats
+## Translating to client formats {#translating-to-client-formats}
 
 The canonical `ValidationError` has helper methods for common
 formats and per-field queries:
@@ -139,7 +141,7 @@ e.getFieldErrors('email');  // [{ message, code }, …]
 (`getSimpleFormat` / `getDetailedFormat` are also the right things to
 put in an API response body.)
 
-## Validation vs domain errors
+## Validation vs domain errors {#validation-vs-domain-errors}
 
 Two error categories are easy to confuse:
 
@@ -164,7 +166,7 @@ async create(input: z.infer<typeof CreateUserSchema>) {
 }
 ```
 
-## Anti-patterns
+## Anti-patterns {#anti-patterns}
 
 - **Catching `ValidationError` and re-throwing as `Error`.** Strips
   the structured detail; the client sees an opaque 500.
@@ -177,7 +179,7 @@ async create(input: z.infer<typeof CreateUserSchema>) {
 
 → Back to [Validation Overview](./overview.md).
 
-## Rejected HTTP uploads
+## Rejected HTTP uploads {#rejected-http-uploads}
 
 The native Node HTTP transport returns a correlated `413` before invoking a
 service when either the declared length or the streamed body exceeds

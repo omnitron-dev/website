@@ -1,4 +1,6 @@
 ---
+id: "frontend/prism/maps"
+slug: "/docs/frontend/prism/maps"
 sidebar_position: 8
 title: Maps
 description: Self-hosted MapLibre maps, markers, a point picker and a coverage layer.
@@ -16,7 +18,7 @@ import { Map, MapMarker, MapPointPicker, MapCoverageLayer, MapPlaceSearch } from
 import '@omnitron-dev/prism/map.css';
 ```
 
-## The tile source is yours
+## The tile source is yours {#the-tile-source-is-yours}
 
 `<Map>` never falls back to a hosted tile provider. A style must come from one
 of two places:
@@ -33,7 +35,7 @@ A missing source is not represented as a working, empty map.
 PMTiles archive served over plain HTTP is a valid style source — which is the
 cheapest way to self-host, and works over Tor without a special case.
 
-## `<Map>`
+## `<Map>` {#map}
 
 | Prop | Type | Default | Effect |
 | ---- | ---- | ------- | ------ |
@@ -52,7 +54,7 @@ cheapest way to self-host, and works over Tor without a special case.
 The container is 400 px tall unless you say otherwise, and height goes in
 `style` rather than in a prop of its own.
 
-## `<MapMarker>`
+## `<MapMarker>` {#mapmarker}
 
 A pin at a coordinate, themed by default and replaceable wholesale.
 
@@ -65,7 +67,7 @@ A pin at a coordinate, themed by default and replaceable wholesale.
 | `anchor` | `'center' \| 'top' \| 'bottom' \| 'left' \| 'right'` | Default `bottom`, so the pin tip sits on the coordinate |
 | `onClick` | `() => void` | Click-through handler |
 
-## `<MapPointPicker>`
+## `<MapPointPicker>` {#mappointpicker}
 
 Controlled coordinate selection by map click, marker drag or the keyboard-accessible
 "Select map centre" action. `labels` localizes every picker label. `selectionZoom`
@@ -92,7 +94,7 @@ const [point, setPoint] = useState<MapPointPickerValue | null>(null);
 backend to ask, and deliberately so — the component would otherwise carry a
 dependency on one app's RPC client.
 
-## `<MapCoverageLayer>`
+## `<MapCoverageLayer>` {#mapcoveragelayer}
 
 Many typed points as one MapLibre symbol layer — the right choice when a
 marker per item would be hundreds of DOM nodes.
@@ -116,7 +118,7 @@ marker per item would be hundreds of DOM nodes.
 `active` / `pending` / `expired` / `disabled`, and `colorByStatus` replaces it
 with your own domain's semantics. `radius` defaults to 6 px and is zoom-stable.
 
-## `<MapPlaceSearch>`
+## `<MapPlaceSearch>` {#mapplacesearch}
 
 The host supplies a provider function, typically a Netron call. The component
 has no knowledge of authentication, provider credentials or public services.
@@ -138,7 +140,7 @@ preserve provider metadata. `labels`, `minLength`, `limit`, `debounceMs` and
 `disabled` configure the control. Failure, empty result and loading are distinct.
 The host should propagate aborts to its transport when supported.
 
-## Related
+## Related {#related}
 
 - [Components catalog](./components.md) — the rest of the widget set.
 - [Theme](./theme.md) — the palette these components read.

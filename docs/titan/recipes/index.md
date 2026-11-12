@@ -1,4 +1,6 @@
 ---
+id: "titan/recipes/index"
+slug: "/docs/titan/recipes"
 sidebar_position: 1
 title: Recipes
 description: End-to-end multi-module compositions for common backends.
@@ -14,7 +16,7 @@ wiring that makes them work together.
 Each recipe is read top to bottom: pick the one matching your
 workload, copy the `AppModule`, replace the env values, ship.
 
-## Recipes
+## Recipes {#recipes-1}
 
 | Recipe                                                                       | Use case                                                              |
 | ---------------------------------------------------------------------------- | --------------------------------------------------------------------- |
@@ -24,7 +26,7 @@ workload, copy the `AppModule`, replace the env values, ship.
 | [Notifications pipeline](./notifications-pipeline.md)                        | Producer → queue → worker → channels, with rate limit + preferences |
 | [Multi-tenant SaaS](./multi-tenant-saas.md)                                  | RLS-isolated database, contextual injection, tenant-scoped rate limits |
 
-## How to read a recipe
+## How to read a recipe {#how-to-read-a-recipe}
 
 Every recipe has the same shape:
 
@@ -37,7 +39,7 @@ Every recipe has the same shape:
    matters, what config values must agree.
 5. **Production checklist** — what to verify before shipping.
 
-## Module dependency map
+## Module dependency map {#module-dependency-map}
 
 ```mermaid
 flowchart LR

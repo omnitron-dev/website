@@ -1,4 +1,6 @@
 ---
+id: "omnitron/cluster"
+slug: "/docs/omnitron/cluster"
 sidebar_position: 9
 title: Cluster + Fleet
 description: Multi-node Omnitron — leader election, state replication, fleet operations.
@@ -17,7 +19,7 @@ registered.
 Verified against `apps/omnitron/src/cluster/` and
 `apps/omnitron/src/services/{fleet,sync,node-manager}.rpc-service.ts`.
 
-## Two roles, two layers
+## Two roles, two layers {#two-roles-two-layers}
 
 | Layer | Concept | Service id |
 | ----- | ------- | ---------- |
@@ -30,7 +32,7 @@ A daemon in `role: master` is the control plane. A daemon in
 `OmnitronSync`. Optional cluster coordination observes the current database lease holder via
 `OmnitronCluster`; it does not automatically transfer application ownership.
 
-## When to use what
+## When to use what {#when-to-use-what}
 
 | Setup | Use |
 | ----- | --- |
@@ -39,7 +41,7 @@ A daemon in `role: master` is the control plane. A daemon in
 | Multiple controllers requiring a shared authority observation | Optional PostgreSQL lease coordination; external effects still require recipient fencing |
 | Multi-region with autonomous edges syncing to a central master | Fleet + master-slave role pattern (no cluster needed) |
 
-## PostgreSQL-authoritative coordination
+## PostgreSQL-authoritative coordination {#postgresql-authoritative-coordination}
 
 `LeaderElection` now uses the optional
 `@omnitron-dev/titan-database/coordination` provider. A row in
@@ -66,7 +68,7 @@ All contenders must use the same writable database. Its recovery/failover policy
 must preserve committed epochs. This is database-backed coordination, not an
 independent Raft quorum or a replicated Omnitron command log.
 
-### Authority and effect fencing
+### Authority and effect fencing {#authority-and-effect-fencing}
 
 A worker admits a managed stack stop only after verifying the controller's Ed25519
 signature and reading the current lease on the writable PostgreSQL primary. The
@@ -94,7 +96,7 @@ cannot start a new full lifetime. Database failure, lost renewal or expired
 confirmation makes the controller a follower. Pending requests cannot revive it
 after shutdown or an operator-requested step-down.
 
-### Enroll a controller or worker
+### Enroll a controller or worker {#enroll-a-controller-or-worker}
 
 Apply Omnitron migration `016_cluster_lease` to the shared authority database.
 Configure the daemon service environment with `OMNITRON_CLUSTER_DATABASE_URL`.
@@ -125,7 +127,7 @@ intervals. Controllers also need a local fleet identity for election. A worker's
 durable enrollment rejects a missing configuration or a different identity on restart.
 Ordinary single-controller fleets can use the default disabled mode.
 
-## `OmnitronCluster` RPC service
+## `OmnitronCluster` RPC service {#omnitroncluster-rpc-service}
 
 | Method | Auth | Effect |
 | --- | --- | --- |
@@ -155,7 +157,7 @@ controller remains demoted and the database lease expires normally. It never
 claims that another controller has already taken over. Process shutdown also
 invalidates pending acquisition/renewal results before releasing authority.
 
-### Upgrade boundary
+### Upgrade boundary {#upgrade-boundary}
 
 Prepare the additive schema expansion and retain a verified rollback artifact
 before replacing a backend. Existing master/slave processes do not need cluster
@@ -164,14 +166,14 @@ controllers in an enabled control plane: disable the legacy election on all of
 its participants before admitting the new coordination mode. This change alone
 neither transfers running workloads nor proves a stateful failover safe.
 
-## Config sync — `ConfigSyncService`
+## Config sync — `ConfigSyncService` {#config-sync--configsyncservice}
 
 The daemon creates a configuration hash tracker when cluster startup succeeds on a controller.
 The tracker exposes comparison and synchronization helpers. Automatic distribution
 of ecosystem files between controllers is not wired into daemon startup. Provision
 reviewed declarations on every controller independently.
 
-## `OmnitronFleet` RPC service — node inventory
+## `OmnitronFleet` RPC service — node inventory {#omnitronfleet-rpc-service--node-inventory}
 
 Distinct from clusters. A fleet is any set of registered nodes;
 they don't need leader election.
@@ -186,7 +188,7 @@ they don't need leader election.
 | `setRole({nodeId, role})` | operator | Promote / demote |
 | `drainNode({nodeId})` | operator | Drain workloads off this node |
 
-### `FleetNode`
+### `FleetNode` {#fleetnode}
 
 ```typescript
 interface FleetNode {
@@ -200,7 +202,7 @@ interface FleetNode {
 }
 ```
 
-### Fleet liveness
+### Fleet liveness {#fleet-liveness}
 
 The master scheduler updates its own registered row at the configured health-check interval. Remote health and connectivity come from checks against registered nodes and authenticated mesh observations. A caller cannot update an arbitrary node’s liveness by supplying its ID.
 
@@ -208,7 +210,7 @@ The fleet's offline-detection threshold is driven by
 `DEFAULT_DAEMON_CONFIG.healthMonitor.offlineTimeoutMs`
 (`90_000 ms` default).
 
-## `OmnitronNodes` — extended node management
+## `OmnitronNodes` — extended node management {#omnitronnodes--extended-node-management}
 
 The fleet service holds the live registry; `OmnitronNodes` holds
 the **registered inventory** (declared nodes, SSH credentials,
@@ -226,7 +228,7 @@ Key method categories:
 - **Check config**: `getCheckConfig`, `setCheckConfig`
   (ping/SSH/omnitron timeouts).
 
-### Uptime bars
+### Uptime bars {#uptime-bars}
 
 `getUptimeBar({nodeId, bucketCount?, intervalMs?})` returns
 historical health bucketed into time segments. The webapp uses
@@ -243,7 +245,7 @@ retention window — `retentionDays: 90`, `uptimeIntervalMs:
 86_400_000` — but those govern check storage, not this method's
 default windowing.)
 
-## State sync — `OmnitronSync` service
+## State sync — `OmnitronSync` service {#state-sync--omnitronsync-service}
 
 The master-slave replication mechanism. Slaves locally collect
 metrics, logs, traces and alert events. The master pulls batches over the
@@ -256,7 +258,7 @@ the accepted, duplicate or explicitly discarded IDs. Failed entries remain pendi
 | `ackDrained({ids, receipt?})` | Atomically release IDs and record their committed, discarded or unverified outcome |
 | `getSyncStatus()` | Measured queue bytes/age, durable receipt history, contiguous progress and recorded losses |
 
-### Connection credentials
+### Connection credentials {#connection-credentials}
 
 For registered nodes, the controller always opens an Xec SSH tunnel to the daemon and presents its bearer token only to the numeric loopback listener. A reachable public TCP port alone permits a liveness probe. The built-in mesh dialer mints a five-minute `service_role` credential for each node. It renews that credential on the same Netron peer 30 seconds before expiry, coalescing concurrent calls and heartbeat reads. The SSH tunnel and running operations remain in place. The node independently checks the signed identity and its expiry on every invocation.
 
@@ -270,7 +272,7 @@ Stack deployments use the same registered daemon host, port and optional node ID
 
 For SSH bootstrap, compare the observed host fingerprint with an independently trusted copy before approving it. Automation uses the registered pin for the exact host, SSH port and user. Without a pin, Xec requires an existing matching entry in the controller account's `known_hosts`. A new machine needs an explicit trust decision before it can receive credentials. [Inspect and approve a host key.](./terminal.md#verify-the-host-before-connecting)
 
-### Sync config — `ISyncConfig`
+### Sync config — `ISyncConfig` {#sync-config--isyncconfig}
 
 ```typescript
 interface ISyncConfig {
@@ -287,7 +289,7 @@ Designed for **eventually consistent** replication:
 - Conflict resolution: master timestamp wins for config; slave
   data is append-only.
 
-### Sync flow
+### Sync flow {#sync-flow}
 
 ```mermaid
 sequenceDiagram
@@ -316,7 +318,7 @@ If the master is offline, slave applications continue independently. Replication
 retains data up to the configured buffer budget. When the master returns, pending
 data drains on subsequent sweeps; the status also preserves evidence of any loss.
 
-### Reading connection, backlog and delivery separately
+### Reading connection, backlog and delivery separately {#reading-connection-backlog-and-delivery-separately}
 
 `omnitron node check <id>` and the Console node details use the same interpretation.
 A connected RPC channel proves reachability, not replication. A fresh status is
@@ -376,7 +378,7 @@ samples. Older nodes can receive new durable receipts immediately, but need thei
 own backend update to gain the atomic local outbox. Buffer limits and known loss
 counters continue to apply; see [metrics persistence diagnostics](./observability.md#metric-persistence-and-confirmation).
 
-### Reconcile historical metric receipts
+### Reconcile historical metric receipts {#reconcile-historical-metric-receipts}
 
 Use `omnitron --json node reconcile <node>` to inspect retained, released metric
 entries. Add `--restore` when repairing the identified history is intended.
@@ -423,7 +425,7 @@ advances beyond that uncertainty only when all gaps are settled and no known los
 remains. CLI and Console distinguish verified/restored counts from unresolved
 history; an unreadable proof journal remains an explicit diagnostic error.
 
-### History before delivery receipts
+### History before delivery receipts {#history-before-delivery-receipts}
 
 Data before `firstTrackedId` has no original durable delivery proof. The ordinary
 `node reconcile` command deliberately stays inside the tracked frontier. A
@@ -502,7 +504,7 @@ particular time, not permanent retention of every payload. Database backups can
 independently prove existing log UUIDs and their full content without creating a
 second copy in the live table.
 
-### Reproducible native node bundles
+### Reproducible native node bundles {#reproducible-native-node-bundles}
 
 Prepare native daemon updates beside the running version. A bundle that includes `package-lock.json` is installed with `npm ci --omit=dev`; the installer refuses any change to that lock before publishing the candidate directory. Older bundles without a lock retain their installation path, but their transitive dependency versions are not frozen. Include and validate a lock when preparing a repeatable fleet rollout.
 
@@ -516,7 +518,7 @@ A declaration read does not import every worker module. Before switching an isol
 
 Update one node at a time. Verify every previously running application's health, RPC authentication and replication progress before moving to the next node. A running daemon alone does not satisfy this check. The [backend handoff workflow](./backend-handoff.md) becomes available only after a separately prepared resident-owner transition; a normal bundle upgrade does not silently change process ownership or the system account.
 
-### Rolling upgrades and database replacement
+### Rolling upgrades and database replacement {#rolling-upgrades-and-database-replacement}
 
 Upgrade the master and nodes independently. New masters attach a versioned receipt
 with `committedIds` and `discardedIds`; old nodes ignore the extra field. New nodes
@@ -541,14 +543,14 @@ marks historical outcomes unverified because previous discards cannot be inferre
 reliably. The deduplication ledger has a retention window; it is not an unlimited
 exactly-once archive.
 
-## Multi-region patterns
+## Multi-region patterns {#multi-region-patterns}
 
 Use a distinct cluster ID and authority database per independent region. A
 single cross-region control plane requires every participant to reach the same
 writable primary within its lease budget. Independently administered nodes can
 use fleet inventory and replication without enrolling in a cluster.
 
-## Connectivity loss and database failover
+## Connectivity loss and database failover {#connectivity-loss-and-database-failover}
 
 A partitioned controller loses its usable authority when renewal fails or the
 local deadline passes. A worker that cannot read the authoritative primary
@@ -558,7 +560,7 @@ accepted by recipients. An older epoch or a conflicting incarnation at the same
 epoch requires reconciliation. Keep the existing application owners and inspect
 the node receipts before retrying a partial operation.
 
-## Operations
+## Operations {#operations}
 
 | Goal | Command |
 | ---- | ------- |
@@ -572,7 +574,7 @@ the node receipts before retrying a partial operation.
 | Fleet health | `omnitron fleet health` |
 | Fleet metrics | `omnitron fleet metrics` |
 
-## Anti-patterns
+## Anti-patterns {#anti-patterns}
 
 - **Treating an observed leader as authorization for a later effect.** Require
   a current epoch at the database transaction or remote recipient.
@@ -592,7 +594,7 @@ the node receipts before retrying a partial operation.
   Slaves are downstream of master config. Edits get overwritten on
   next sync.
 
-## See also
+## See also {#see-also}
 
 - [Architecture](./architecture.md#cluster-subsystem) — where
   cluster fits

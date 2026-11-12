@@ -1,4 +1,6 @@
 ---
+id: "testing/react"
+slug: "/docs/testing/react"
 sidebar_position: 5
 title: React testing
 description: Testing React components that call Netron — TestNetronProvider patterns.
@@ -10,7 +12,7 @@ Components built on `netron-react` need RPC mocks; Prism
 components need a `<PrismProvider>`. This page covers both with
 patterns that scale.
 
-## TestNetronProvider + multi-backend
+## TestNetronProvider + multi-backend {#testnetronprovider--multi-backend}
 
 | Provider | When |
 | -------- | ---- |
@@ -21,7 +23,7 @@ patterns that scale.
 (via `createTestClient`) that intercepts RPC calls and returns
 the canned data from its `mocks`.
 
-## Single-backend mock
+## Single-backend mock {#single-backend-mock}
 
 ```tsx
 import { describe, it, expect } from 'vitest';
@@ -61,7 +63,7 @@ To branch on call arguments, build a service object with
 **`createMockService<T>(implementations)`** (async methods, any
 subset of the interface) and inject it as the client's service.
 
-## Multi-backend mock
+## Multi-backend mock {#multi-backend-mock}
 
 ```tsx
 import { MultiBackendProvider } from '@omnitron-dev/netron-react';
@@ -77,7 +79,7 @@ Uses the production `<MultiBackendProvider>` directly — supply a
 mock multi-backend client that satisfies the same routing
 contract.
 
-## With Prism components
+## With Prism components {#with-prism-components}
 
 Prism components need a `<PrismProvider>` for theme + snackbar
 host. Wrap once at the test boundary:
@@ -114,7 +116,7 @@ render(
 For tests that use blocks (`<DataGridBlock>`, `<AuthBlock>`, …),
 this wrapper is mandatory.
 
-## Loading + error states
+## Loading + error states {#loading--error-states}
 
 ```tsx
 it('shows skeleton while loading', async () => {
@@ -152,7 +154,7 @@ it('shows error on NOT_FOUND', async () => {
 });
 ```
 
-## Mutation assertions
+## Mutation assertions {#mutation-assertions}
 
 ```tsx
 import { createTestClient, createMockService } from '@omnitron-dev/netron-react/test';
@@ -183,7 +185,7 @@ it('calls invite on submit', async () => {
 `useMutation` exposes `isLoading` while in flight (not
 `isPending`), plus `isSuccess` / `isError` / `data`.
 
-## Subscriptions
+## Subscriptions {#subscriptions}
 
 For streaming RPCs consumed by `useSubscription`, build a
 service whose method returns an async iterable with
@@ -217,7 +219,7 @@ it('updates on stream events', async () => {
 The generator yields each item in order — components using
 `useSubscription` see them as they arrive.
 
-## Suspense + error boundary
+## Suspense + error boundary {#suspense--error-boundary}
 
 Suspense is the `suspense: true` option on `useQuery` (there is
 no separate `useSuspenseQuery` hook) — it throws the in-flight
@@ -248,7 +250,7 @@ it('catches render error via boundary', async () => {
 Suspense + error boundary tests verify the "graceful degradation"
 path that production needs.
 
-## Cache control
+## Cache control {#cache-control}
 
 ```tsx
 import { createTestClient } from '@omnitron-dev/netron-react/test';
@@ -269,7 +271,7 @@ render(
 With `staleTime: 0`, every mount refetches — useful for
 asserting "fetched N times" without cache surprises.
 
-## Form testing pattern
+## Form testing pattern {#form-testing-pattern}
 
 For forms built with `<Field>` + `SchemaProvider`:
 
@@ -304,7 +306,7 @@ it('submits on Enter', async () => {
 `@testing-library/user-event` simulates real keyboard / mouse
 input — far more reliable than `fireEvent`.
 
-## Routing tests
+## Routing tests {#routing-tests}
 
 For components that use `react-router-dom`:
 
@@ -325,7 +327,7 @@ render(
 `MemoryRouter` lets you set the initial URL and inspect the
 history without a real browser.
 
-## E2E with Playwright
+## E2E with Playwright {#e2e-with-playwright}
 
 For browser-driven tests:
 
@@ -348,7 +350,7 @@ test('signs in', async ({ page }) => {
 
 Playwright E2E suites live at `packages/prism/tests/e2e/` and `packages/netron-browser/tests/e2e/`.
 
-## Best practices
+## Best practices {#best-practices}
 
 - **Wrap once at the top.** Build a `TestProviders` component
   with all your providers (Prism + Netron mocks + Router) and
@@ -363,7 +365,7 @@ Playwright E2E suites live at `packages/prism/tests/e2e/` and `packages/netron-b
 - **One test per behaviour.** If a test has two `expect`s
   asserting two different intents, split it.
 
-## Anti-patterns
+## Anti-patterns {#anti-patterns}
 
 - **Mocking `useService` directly.** Use `TestNetronProvider` —
   it preserves the full hook contract (loading, error, refetch,
@@ -374,7 +376,7 @@ Playwright E2E suites live at `packages/prism/tests/e2e/` and `packages/netron-b
 - **Shared mock state across tests.** `mockClear()` in `beforeEach`
   or recreate.
 
-## See also
+## See also {#see-also}
 
 - [Testing overview](./index.md)
 - [Testing package](./testing-package.md)

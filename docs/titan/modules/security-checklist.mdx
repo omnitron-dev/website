@@ -1,10 +1,11 @@
 ---
+id: "titan/modules/security-checklist"
+slug: "/docs/titan/modules/security-checklist"
 sidebar_position: 7
 title: Security checklist
 description: Per-module hardening guidance for production deployments.
 ---
 
-import ModuleBadge from '@site/src/components/ModuleBadge';
 
 # Security checklist
 
@@ -17,7 +18,7 @@ The checklist below treats each module as independently hostile —
 the box ticks the same whether you're securing a single API pod
 or a 50-pod fleet.
 
-## Surface-area overview
+## Surface-area overview {#surface-area-overview}
 
 | Module                     | External attack surface                              | Primary risk                                   |
 | -------------------------- | ---------------------------------------------------- | ---------------------------------------------- |
@@ -38,11 +39,11 @@ or a 50-pod fleet.
 | `config` (built-in)        | Config sources                                       | Secrets in committed defaults                  |
 | `logger` (built-in)        | Log sinks                                            | PII in structured logs                         |
 
-## Per-module hardening
+## Per-module hardening {#per-module-hardening}
 
-### `titan-auth`
+### `titan-auth` {#titan-auth}
 
-<ModuleBadge origin="official" pkg="@omnitron-dev/titan-auth" />
+<span class="module-badge">official · @omnitron-dev/titan-auth</span>
 
 - [ ] **Algorithm pinned explicitly.** Never accept whatever the
   incoming JWT declares; configure `algorithm: 'RS256'` (or
@@ -73,9 +74,9 @@ or a 50-pod fleet.
 - [ ] **No JWT in URLs.** Use the `Authorization: Bearer` header.
   URLs end up in proxy logs, browser history, referer headers.
 
-### `titan-cache`
+### `titan-cache` {#titan-cache}
 
-<ModuleBadge origin="official" pkg="@omnitron-dev/titan-cache" />
+<span class="module-badge">official · @omnitron-dev/titan-cache</span>
 
 - [ ] **Don't cache sensitive payloads in L2.** L2 is Redis;
   Redis persistence means caches survive process restart and may
@@ -89,9 +90,9 @@ or a 50-pod fleet.
 - [ ] **No cache-key from user input without hashing/length cap.**
   Multi-MB keys are a DOS vector against the cache itself.
 
-### `titan-database`
+### `titan-database` {#titan-database}
 
-<ModuleBadge origin="official" pkg="@omnitron-dev/titan-database" />
+<span class="module-badge">official · @omnitron-dev/titan-database</span>
 
 - [ ] **Parameterised queries only.** Kysely query builder is
   parameterised by default. If you reach for `sql.raw()`,
@@ -112,9 +113,9 @@ or a 50-pod fleet.
 - [ ] **Backup encryption.** Out of scope here but: rotated
   encryption keys, off-site copies, restore drills.
 
-### `titan-discovery`
+### `titan-discovery` {#titan-discovery}
 
-<ModuleBadge origin="official" pkg="@omnitron-dev/titan-discovery" />
+<span class="module-badge">official · @omnitron-dev/titan-discovery</span>
 
 - [ ] **Redis ACL on the discovery prefix.** The pod's Redis user
   has `HSET`/`EXPIRE`/`PUBLISH` on `titan:discovery:*` only — no
@@ -129,9 +130,9 @@ or a 50-pod fleet.
 - [ ] **Don't expose `discovery@…` over public RPC.** Internal
   topology is sensitive information.
 
-### `titan-events`
+### `titan-events` {#titan-events}
 
-<ModuleBadge origin="official" pkg="@omnitron-dev/titan-events" />
+<span class="module-badge">official · @omnitron-dev/titan-events</span>
 
 - [ ] **Schema validation on every event channel.** Untyped
   payloads from one service to another are a wide attack surface.
@@ -143,9 +144,9 @@ or a 50-pod fleet.
 - [ ] **History TTL bounded.** `enableHistory: true` with no TTL
   is an unbounded memory growth path.
 
-### `titan-health`
+### `titan-health` {#titan-health}
 
-<ModuleBadge origin="official" pkg="@omnitron-dev/titan-health" />
+<span class="module-badge">official · @omnitron-dev/titan-health</span>
 
 - [ ] **`/healthz` and `/readyz` exposed; full JSON gated.** The
   detailed `check()` output reveals component names, error
@@ -157,9 +158,9 @@ or a 50-pod fleet.
 - [ ] **No secrets in indicator messages.** Don't return the DSN
   in a "database unhealthy" message.
 
-### `titan-lock`
+### `titan-lock` {#titan-lock}
 
-<ModuleBadge origin="official" pkg="@omnitron-dev/titan-lock" />
+<span class="module-badge">official · @omnitron-dev/titan-lock</span>
 
 - [ ] **TTL always set.** A crashed holder shouldn't pin the lock
   forever. Set TTL to the longest credible work time + margin.
@@ -175,9 +176,9 @@ or a 50-pod fleet.
 - [ ] **Lock granularity.** A single global lock per resource is
   cleaner than a hierarchy; deep lock chains invite deadlocks.
 
-### `titan-metrics`
+### `titan-metrics` {#titan-metrics}
 
-<ModuleBadge origin="official" pkg="@omnitron-dev/titan-metrics" />
+<span class="module-badge">official · @omnitron-dev/titan-metrics</span>
 
 - [ ] **`/metrics` endpoint authenticated.** Prometheus exposition
   reveals throughput, error rates, internal endpoints — gate
@@ -190,9 +191,9 @@ or a 50-pod fleet.
 - [ ] **Storage backend access controlled.** Postgres-backed
   metrics give whoever has DB access full historical visibility.
 
-### `titan-notifications`
+### `titan-notifications` {#titan-notifications}
 
-<ModuleBadge origin="official" pkg="@omnitron-dev/titan-notifications" />
+<span class="module-badge">official · @omnitron-dev/titan-notifications</span>
 
 - [ ] **Webhook signature secret rotated.** Configure
   `webhookConfig.signatureSecret` and verify on the receiver.
@@ -211,9 +212,9 @@ or a 50-pod fleet.
 - [ ] **DLQ access controlled.** `subscribeToDLQ()` /
   `requeueFromDLQ()` expose undelivered payloads — operator-only.
 
-### `titan-pm`
+### `titan-pm` {#titan-pm}
 
-<ModuleBadge origin="official" pkg="@omnitron-dev/titan-pm" />
+<span class="module-badge">official · @omnitron-dev/titan-pm</span>
 
 - [ ] **Secrets via env, not argv.** Process arguments appear in
   `ps`, `/proc/<pid>/cmdline`, and crash dumps. Pass secrets via
@@ -236,9 +237,9 @@ or a 50-pod fleet.
 - [ ] **Audit `pm@1.0.0` if exposed.** PM control = code
   execution. Admin role minimum, mutual TLS preferred.
 
-### `titan-ratelimit`
+### `titan-ratelimit` {#titan-ratelimit}
 
-<ModuleBadge origin="official" pkg="@omnitron-dev/titan-ratelimit" />
+<span class="module-badge">official · @omnitron-dev/titan-ratelimit</span>
 
 - [ ] **Per-IP keys behind trusted proxy.** Use the
   proxy-supplied client IP (e.g., `X-Forwarded-For` parsed by a
@@ -252,9 +253,9 @@ or a 50-pod fleet.
 - [ ] **Distinct keyspaces per app.** Configure `keyPrefix` so
   different services don't share counters.
 
-### `titan-redis`
+### `titan-redis` {#titan-redis}
 
-<ModuleBadge origin="official" pkg="@omnitron-dev/titan-redis" />
+<span class="module-badge">official · @omnitron-dev/titan-redis</span>
 
 - [ ] **TLS to managed Redis.** Configure `tls: {}` in the client
   options; verify the certificate.
@@ -275,9 +276,9 @@ or a 50-pod fleet.
   for `FLUSHALL`, `FLUSHDB`, `KEYS`, `CONFIG` in shared
   environments.
 
-### `titan-scheduler`
+### `titan-scheduler` {#titan-scheduler}
 
-<ModuleBadge origin="official" pkg="@omnitron-dev/titan-scheduler" />
+<span class="module-badge">official · @omnitron-dev/titan-scheduler</span>
 
 - [ ] **No user-supplied cron expressions.** `@Cron` strings are
   developer-authored. If you accept schedules from users (multi-
@@ -290,9 +291,9 @@ or a 50-pod fleet.
 - [ ] **`@Cron` handlers idempotent.** Missed-fire replay
   semantics make some jobs run twice; design for it.
 
-### `titan-telemetry-relay`
+### `titan-telemetry-relay` {#titan-telemetry-relay}
 
-<ModuleBadge origin="official" pkg="@omnitron-dev/titan-telemetry-relay" />
+<span class="module-badge">official · @omnitron-dev/titan-telemetry-relay</span>
 
 - [ ] **WAL file permissions `0600`.** WAL contains buffered
   metric / log payloads — readable WAL = readable observability.
@@ -302,9 +303,9 @@ or a 50-pod fleet.
 - [ ] **Aggregator access controlled.** Whoever can read the
   aggregator's storage can read everyone's telemetry.
 
-### `config` (built-in)
+### `config` (built-in) {#config-built-in}
 
-<ModuleBadge origin="built-in" pkg="@omnitron-dev/titan/module/config" />
+<span class="module-badge">built-in · @omnitron-dev/titan/module/config</span>
 
 - [ ] **No secrets in committed files.** `config/default.yaml` is
   defaults; `config/local.yaml` is git-ignored; secrets come from
@@ -317,9 +318,9 @@ or a 50-pod fleet.
 - [ ] **Read through `ConfigService`, never `process.env`
   directly.** Bypasses layered sources and breaks tests.
 
-### `logger` (built-in)
+### `logger` (built-in) {#logger-built-in}
 
-<ModuleBadge origin="built-in" pkg="@omnitron-dev/titan/module/logger" />
+<span class="module-badge">built-in · @omnitron-dev/titan/module/logger</span>
 
 - [ ] **PII redaction processor enabled.** Configure the
   redaction processor for fields that may carry email / phone /
@@ -332,16 +333,16 @@ or a 50-pod fleet.
 - [ ] **Sink configured for tamper-evident transport.** Append-only,
   signed transports for compliance scenarios.
 
-## Cross-cutting
+## Cross-cutting {#cross-cutting}
 
-### Transport / network
+### Transport / network {#transport--network}
 
 - [ ] **Netron port not publicly exposed** without auth + TLS.
 - [ ] **Cluster-internal services pinned to private VPC.**
 - [ ] **Egress controlled.** Outbound webhooks / JWKS fetches
   whitelisted.
 
-### Secrets management
+### Secrets management {#secrets-management}
 
 - [ ] **All secrets via secret manager** (AWS Secrets Manager,
   Vault, etc.). Not in env vars at rest in container images.
@@ -349,7 +350,7 @@ or a 50-pod fleet.
   downtime requires the multi-key support of `titan-auth`,
   `titan-redis` ACL renaming, and `ConfigService` reload.
 
-### Audit logging
+### Audit logging {#audit-logging}
 
 - [ ] **Admin actions logged with actor + outcome.** Lock force-
   release, PM admin RPC, manual notification sends, scheduler
@@ -357,14 +358,14 @@ or a 50-pod fleet.
 - [ ] **Logs ship to an append-only sink.** Local files alone are
   insufficient for compliance.
 
-### Dependency hygiene
+### Dependency hygiene {#dependency-hygiene}
 
 - [ ] **`pnpm audit` clean.** Known CVEs in transitive deps
   patched within SLA.
 - [ ] **Modules pinned to known versions.** `^` ranges are fine
   for dev; freeze on lockfile in CI.
 
-## See also
+## See also {#see-also}
 
 - [Best Practices / Observability](../best-practices/observability.md) — pairs with this checklist
 - [Tokens & RPC reference](./tokens-reference.mdx#hardening-checklist) — RPC surface specifics

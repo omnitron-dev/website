@@ -1,4 +1,6 @@
 ---
+id: "titan/concepts/architecture"
+slug: "/docs/titan/concepts/architecture"
 sidebar_position: 2
 title: Architecture
 description: Subsystems, boundaries, and what owns what at runtime.
@@ -11,7 +13,7 @@ has one responsibility, one entry point, and a typed contract with the
 others. Understanding the boundaries makes the framework significantly
 easier to reason about.
 
-## The nine subsystems
+## The nine subsystems {#the-nine-subsystems}
 
 ```mermaid
 flowchart TB
@@ -54,9 +56,9 @@ Each block in the diagram is a real type with a documented public
 interface. None of them know about each other except through the
 contracts declared in `src/types/`.
 
-## Subsystem responsibilities
+## Subsystem responsibilities {#subsystem-responsibilities}
 
-### Bootstrap (`Application.create`, `.start`, `.stop`)
+### Bootstrap (`Application.create`, `.start`, `.stop`) {#bootstrap-applicationcreate-start-stop}
 
 The bootstrap layer is the single entry point. It does three things and
 nothing else:
@@ -72,7 +74,7 @@ through a small public surface (`use`, `resolve`, `on`, `emit`,
 
 → Reference: [Application Bootstrap](../application/bootstrap.md)
 
-### Lifecycle state machine
+### Lifecycle state machine {#lifecycle-state-machine}
 
 Drives transitions between states (`created → starting → started →
 stopping → stopped`) and fires hooks in **dependency order** at each
@@ -99,7 +101,7 @@ A separate, finer-grained **`LifecycleState`** enum (`created`,
 
 → Reference: [Lifecycle](../application/lifecycle.md), [Shutdown](../application/shutdown.md)
 
-### Event Bus
+### Event Bus {#event-bus}
 
 Broadcasts framework events (`module:registered`, `config:changed`,
 `lifecycle:phase`, `shutdown:complete`, etc.) to subscribers registered
@@ -109,7 +111,7 @@ for the full list and the payload each one carries.
 
 → Reference: [Application Events](../application/events.md)
 
-### Module Registry
+### Module Registry {#module-registry}
 
 Knows about every module loaded into the application. Computes the
 dependency graph between modules. Detects circular imports. Drives
@@ -128,7 +130,7 @@ export class UsersModule {}
 
 → Reference: [Modules](../modules-system/defining-modules.md), [Dynamic Modules](../modules-system/dynamic-modules.md)
 
-### Config Store
+### Config Store {#config-store}
 
 A typed, layered, hot-reloadable configuration source. Multiple sources
 are merged with deep-merge semantics; the last source wins per key.
@@ -136,7 +138,7 @@ Validators are applied per source or globally.
 
 → Reference: [Configuration](../configuration/overview.md)
 
-### Health Aggregator
+### Health Aggregator {#health-aggregator}
 
 Aggregates health probes from registered indicators (database, redis,
 disk space, custom). Surfaces a single `IHealthStatus` (`healthy |
@@ -145,7 +147,7 @@ load balancers, and the Omnitron orchestrator.
 
 → Reference: [Health](../application/health.md)
 
-### Shutdown Coordinator
+### Shutdown Coordinator {#shutdown-coordinator}
 
 Phased graceful shutdown. Tasks declare a priority, a timeout, and a
 critical flag; the priority is bucketed into one of three phases
@@ -155,14 +157,14 @@ the last phase.
 
 → Reference: [Shutdown](../application/shutdown.md)
 
-### Process Host
+### Process Host {#process-host}
 
 Binds OS signals (`SIGTERM`, `SIGINT`, `SIGHUP`), sets up uncaught
 exception / unhandled rejection handlers, and exposes runtime metrics
 (`uptime`, `memoryUsage`, `cpuUsage`, `pid`). Disable with
 `disableGracefulShutdown: true` if you embed Titan in a larger process.
 
-### Service Exposer
+### Service Exposer {#service-exposer}
 
 The bridge between the DI container and Netron. When a `@Service`-marked
 provider is resolved, the Service Exposer registers it with the running
@@ -171,7 +173,7 @@ wire.
 
 → Reference: [Netron Services](../netron/services.md)
 
-## The two RPC layers
+## The two RPC layers {#the-two-rpc-layers}
 
 Netron has two layers of middleware that are easy to confuse:
 
@@ -188,7 +190,7 @@ depending on what it needs.
 
 → Reference: [DI Middleware](../di/middleware.md), [RPC Middleware](../netron/middleware.md)
 
-## What lives where
+## What lives where {#what-lives-where}
 
 | Concern                             | Subpath                                   |
 | ----------------------------------- | ----------------------------------------- |
@@ -216,7 +218,7 @@ eighteen decorators available only from `@omnitron-dev/titan/decorators`;
 for the subpath first: it is where the symbol actually lives, and it
 keeps the bundle tighter.
 
-## Boundaries between subsystems
+## Boundaries between subsystems {#boundaries-between-subsystems}
 
 The boundaries are not just architectural diagrams — they are concrete
 rules the framework enforces:

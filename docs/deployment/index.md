@@ -1,4 +1,6 @@
 ---
+id: "deployment/index"
+slug: "/docs/deployment"
 sidebar_position: 1
 title: Overview
 description: How to deploy Omnitron-supervised apps — Docker, k8s, PaaS, bare-metal.
@@ -9,7 +11,7 @@ description: How to deploy Omnitron-supervised apps — Docker, k8s, PaaS, bare-
 How to take a Titan app from `pnpm dev` to production. Four
 paths covered in detail, plus the cross-cutting concerns.
 
-## Choose your path
+## Choose your path {#choose-your-path}
 
 | Where | Use |
 | ----- | --- |
@@ -22,9 +24,9 @@ For dev / staging / prod parity, run the same `omnitron.config.ts`
 across environments. Only secrets + scale parameters change per
 deploy target.
 
-## Cross-cutting concerns
+## Cross-cutting concerns {#cross-cutting-concerns}
 
-### What you ship
+### What you ship {#what-you-ship}
 
 A production deployment carries:
 
@@ -37,7 +39,7 @@ A production deployment carries:
 That's it. No generated client code, no schema sync artefacts,
 no shipped node_modules.
 
-### What you provide at the target
+### What you provide at the target {#what-you-provide-at-the-target}
 
 - **Node.js 22+**.
 - **PostgreSQL** (managed or self-hosted) — connection string in
@@ -47,7 +49,7 @@ no shipped node_modules.
 - **Secrets manager** (optional) — Omnitron's encrypted store
   works standalone; for prod prefer a real secret manager.
 
-### Environment variables — the canonical set
+### Environment variables — the canonical set {#environment-variables--the-canonical-set}
 
 | Variable | Purpose |
 | -------- | ------- |
@@ -68,7 +70,7 @@ Per-environment values flow in through each app's
 `config.sources` / `config.envPrefix` (Titan's config module) —
 favour env over config files for per-environment values.
 
-### Logs and metrics
+### Logs and metrics {#logs-and-metrics}
 
 - **Logs** stream to stdout (pino JSON) — ingest with your log
   aggregator's stdin-tail or sidecar.
@@ -82,7 +84,7 @@ favour env over config files for per-environment values.
   `ready()` methods) — `omnitron health` surfaces it. There are no
   `/healthz` / `/readyz` HTTP routes on the app transport ports.
 
-### Secrets
+### Secrets {#secrets}
 
 Three options, in order of preference:
 
@@ -97,7 +99,7 @@ Three options, in order of preference:
 Never commit secrets to `omnitron.config.ts` or
 `config/default.json`.
 
-### Migrations
+### Migrations {#migrations}
 
 ```bash
 # In the deploy script, before starting the daemon:
@@ -109,7 +111,7 @@ omnitron infra migrate api
 Migrations run inside a Postgres advisory lock — concurrent
 deploys are safe; only one will run, others wait.
 
-### Backups
+### Backups {#backups}
 
 ```bash
 # Manual (defaults to the 'omnitron' database; pass a name for others):
@@ -128,7 +130,7 @@ driving `omnitron backup create` is the alternative when the
 backup must run whether or not the daemon is up — see the
 [bare-metal guide](./bare-metal.md#backups).
 
-### Zero-downtime deploys
+### Zero-downtime deploys {#zero-downtime-deploys}
 
 The `reload` command cycles workers one-by-one:
 
@@ -144,7 +146,7 @@ For blue/green or canary, [`omnitron deploy app <app>`](./../omnitron/cli.md#dep
 takes `--strategy <rolling|all-at-once|blue-green|canary>`
 (default `all-at-once`).
 
-### Multi-region
+### Multi-region {#multi-region}
 
 | Strategy | Pattern |
 | -------- | ------- |
@@ -154,7 +156,7 @@ takes `--strategy <rolling|all-at-once|blue-green|canary>`
 
 See [Cluster + Fleet / Multi-region patterns](./../omnitron/cluster.md#multi-region-patterns).
 
-### Observability checklist
+### Observability checklist {#observability-checklist}
 
 - [ ] Logs → SIEM / log aggregator.
 - [ ] Metrics → Prometheus / managed metrics backend.
@@ -164,7 +166,7 @@ See [Cluster + Fleet / Multi-region patterns](./../omnitron/cluster.md#multi-reg
 - [ ] Error reporting → Sentry via netron-browser middleware.
 - [ ] Alerts → `OmnitronAlerts` with delivery webhooks.
 
-### Security checklist (deploy time)
+### Security checklist (deploy time) {#security-checklist-deploy-time}
 
 - [ ] TLS terminated at the gateway / load balancer (not the app).
 - [ ] Strong `JWT_SECRET`, rotated quarterly.
@@ -178,7 +180,7 @@ See [Cluster + Fleet / Multi-region patterns](./../omnitron/cluster.md#multi-reg
 See [Auth & RBAC](./../omnitron/auth-rbac.md) and the per-module
 [Security checklist](./../titan/modules/security-checklist.mdx).
 
-### Rollback
+### Rollback {#rollback}
 
 ```bash
 # Roll back an app on a target server (alias or tag):
@@ -196,14 +198,14 @@ are versioned tarballs under `<projectRoot>/.omnitron/artifacts/`
 > has no `--version` flag. Artefact retention is handled by the
 > builder, not declarative config.
 
-## Read the per-target guides
+## Read the per-target guides {#read-the-per-target-guides}
 
 - [Docker Compose](./docker.md) — single-host development + staging
 - [Kubernetes](./kubernetes.md) — production at scale
 - [PaaS](./paas.md) — Fly.io / Railway / Render quickstart
 - [Bare-metal / systemd](./bare-metal.md) — own-server deploys
 
-## See also
+## See also {#see-also}
 
 - [Best practices](./../omnitron/best-practices.md) — production patterns
 - [Recipes](./../omnitron/recipes.md) — concrete topologies

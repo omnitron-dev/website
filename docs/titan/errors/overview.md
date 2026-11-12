@@ -1,4 +1,6 @@
 ---
+id: "titan/errors/overview"
+slug: "/docs/titan/errors/overview"
 sidebar_position: 1
 title: Errors
 description: A typed error system built on TitanError, HTTP status codes, and ErrorCode-driven factories.
@@ -19,7 +21,7 @@ This page is the entry point. Detail in:
 - [Classification](./classification.md) — partitioning errors for
   telemetry and resilience.
 
-## The base class — `TitanError`
+## The base class — `TitanError` {#the-base-class--titanerror}
 
 ```typescript
 class TitanError extends Error {
@@ -56,7 +58,7 @@ throw new TitanError({
 });
 ```
 
-## `ErrorCode` — the universal vocabulary
+## `ErrorCode` — the universal vocabulary {#errorcode--the-universal-vocabulary}
 
 `ErrorCode` is the enum the framework uses to classify errors. Each
 code maps to:
@@ -81,7 +83,7 @@ ErrorCode.SERVICE_UNAVAILABLE  // 503
 // …more
 ```
 
-## Throwing the right error
+## Throwing the right error {#throwing-the-right-error}
 
 The idiomatic way to throw is through the `Errors` namespace —
 short factory methods that produce a properly-typed `TitanError`:
@@ -131,14 +133,14 @@ Other namespaces:
 
 See [Factories](./factories.md) for the full surface.
 
-## The HTTP status code is universal
+## The HTTP status code is universal {#the-http-status-code-is-universal}
 
 Status codes are the bridge between every transport and every
 framework. Even if you serve over WebSocket, your error carries an
 HTTP-style status code so the client (or any middleware) can route
 on it.
 
-## On the client
+## On the client {#on-the-client}
 
 Netron preserves the error code, status, and details across the
 wire. The client receives a `TitanError` (or matching subclass) with
@@ -161,7 +163,7 @@ classes (`HttpError`, `AuthError`, `PermissionError`,
 `RateLimitError`, `AggregateError`, `DomainError`) — see
 [Hierarchy](./hierarchy.md).
 
-## Internal vs domain errors
+## Internal vs domain errors {#internal-vs-domain-errors}
 
 Two categories the framework distinguishes:
 
@@ -178,7 +180,7 @@ Two categories the framework distinguishes:
 failures.** Plain `throw new Error('user not found')` becomes a 500
 to the caller, with no structure they can act on.
 
-## Errors in lifecycle hooks
+## Errors in lifecycle hooks {#errors-in-lifecycle-hooks}
 
 A lifecycle hook that throws aborts the corresponding phase. The
 error is logged with the failing provider's name and re-thrown from
@@ -189,7 +191,7 @@ For retryable conditions in `onStart`, use the `computeBackoff`
 helper in `@omnitron-dev/titan/utils/backoff` with your own retry
 loop. Do not let a transient failure crash the whole boot.
 
-## Helper functions
+## Helper functions {#helper-functions}
 
 - `createError(options)` — build a `TitanError` from
   `{ code, message, details, ... }`.

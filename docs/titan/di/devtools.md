@@ -1,4 +1,6 @@
 ---
+id: "titan/di/devtools"
+slug: "/docs/titan/di/devtools"
 sidebar_position: 9
 title: DevTools
 description: Inspect the container at runtime — dependency graph, performance, state snapshots.
@@ -19,14 +21,14 @@ You can still introspect a running container: which providers are
 registered, what depends on what, how long resolutions take, what the
 in-memory graph looks like.
 
-## Two things you can inspect
+## Two things you can inspect {#two-things-you-can-inspect}
 
 1. **The dependency graph** — `Container.exportGraph()` returns the
    provider/dependency graph, renderable as DOT, Mermaid, or JSON.
 2. **Lifecycle events** — the observer system surfaces resolution
    timings, memory, and an audit trail.
 
-## The dependency graph — `Container.exportGraph()`
+## The dependency graph — `Container.exportGraph()` {#the-dependency-graph--containerexportgraph}
 
 The container exposes `exportGraph(options?)` directly. It walks the
 container's registrations and returns a stable `DependencyGraph`
@@ -52,7 +54,7 @@ formatters (`exportToDot` / `exportToMermaid` / `exportToJson`) are
 exported from the nexus barrel, so you can render the graph with
 Graphviz, Mermaid, or pipe the JSON anywhere.
 
-## Observers
+## Observers {#observers}
 
 DevTools build on Nexus's lifecycle observation system. Three
 built-in observers ship in `nexus/lifecycle.ts`:
@@ -90,7 +92,7 @@ The resolution events are `BeforeResolve` (`'resolve:before'`),
 `src/nexus/lifecycle.ts` for container, instance, module, cache,
 scope, and middleware events.
 
-## Production guidance
+## Production guidance {#production-guidance}
 
 Enable observers only when:
 
@@ -104,7 +106,7 @@ overhead is non-zero. Long-running production processes with verbose
 observers attached will slowly accumulate memory — attach them for a
 bounded window, then remove them.
 
-## Anti-patterns
+## Anti-patterns {#anti-patterns}
 
 - **Leaving verbose observers on in production by default.**
   Diagnostic tooling, not a runtime requirement.

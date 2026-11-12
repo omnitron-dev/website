@@ -1,9 +1,12 @@
 ---
-slug: welcome
-title: Welcome to Omnitron
-authors: omnitron-team
-tags: [release, intro]
+id: "page:/blog/welcome"
+slug: "/blog/welcome"
+title: "Welcome to Omnitron"
 ---
+
+# Welcome to Omnitron
+
+Published 15 May 2026 · Omnitron team
 
 The Omnitron documentation site goes live today at
 [omnitron.dev](https://omnitron.dev). This is the v0.1 public preview of
@@ -12,7 +15,7 @@ supervisor — collected in one place.
 
 <!-- truncate -->
 
-## What's in v0.1
+## What's in v0.1 {#whats-in-v01}
 
 - **Titan core** — DI container, modules, lifecycle, validation.
 - **Netron** — RPC plane over HTTP, WebSocket, TCP, Unix.
@@ -22,7 +25,7 @@ supervisor — collected in one place.
 - **Frontend trio** — netron-browser, netron-react, prism.
 - **Omnitron app** — supervisor, CLI, web console.
 
-## What's next
+## What's next {#whats-next}
 
 - More cookbook examples per module.
 - Tutorials for common end-to-end patterns.

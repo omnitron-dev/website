@@ -1,12 +1,13 @@
 ---
+id: "titan/modules/cache"
+slug: "/docs/titan/modules/cache"
 title: titan-cache
 ---
 
-import ModuleBadge from '@site/src/components/ModuleBadge';
 
 # titan-cache
 
-<ModuleBadge origin="official" pkg="@omnitron-dev/titan-cache" status="stable" />
+<span class="module-badge">official · @omnitron-dev/titan-cache · stable</span>
 
 Multi-tier (L1/L2) caching with multiple eviction strategies, tag-based
 invalidation, optional compression, atomic `getOrSet`, partition views,
@@ -17,7 +18,7 @@ and warming strategies. Single-tier in-memory by default; pluggable L2
 pnpm add @omnitron-dev/titan-cache
 ```
 
-## When you need it
+## When you need it {#when-you-need-it}
 
 Three workloads it solves cleanly:
 
@@ -30,9 +31,9 @@ Three workloads it solves cleanly:
    perspective; a thundering herd of identical requests collapses to
    one factory invocation.
 
-## Quickstart
+## Quickstart {#quickstart}
 
-### Single-tier in-memory
+### Single-tier in-memory {#single-tier-in-memory}
 
 ```typescript
 import { TitanCacheModule } from '@omnitron-dev/titan-cache';
@@ -50,7 +51,7 @@ import { TitanCacheModule } from '@omnitron-dev/titan-cache';
 class AppModule {}
 ```
 
-### Multi-tier (L1 in-memory + L2 Redis)
+### Multi-tier (L1 in-memory + L2 Redis) {#multi-tier-l1-in-memory--l2-redis}
 
 ```typescript
 @Module({
@@ -69,7 +70,7 @@ class AppModule {}
 A read hits L1; a miss falls through to L2 and backfills L1. A write
 populates both tiers. Tag-based invalidation propagates through L2.
 
-### Async configuration
+### Async configuration {#async-configuration}
 
 ```typescript
 TitanCacheModule.forRootAsync({
@@ -82,7 +83,7 @@ TitanCacheModule.forRootAsync({
 })
 ```
 
-## `ICacheModuleOptions`
+## `ICacheModuleOptions` {#icachemoduleoptions}
 
 | Option                  | Type                                                                        | Default       |
 | ----------------------- | --------------------------------------------------------------------------- | ------------- |
@@ -105,7 +106,7 @@ TitanCacheModule.forRootAsync({
 | `backgroundRefresh`     | `boolean`                                                                   | —             |
 | `isGlobal`              | `boolean`                                                                   | `false`       |
 
-## `CacheService`
+## `CacheService` {#cacheservice}
 
 The top-level service exposed via DI. Resolves named caches; creates
 ad-hoc ones at runtime; emits / observes lifecycle events.
@@ -130,7 +131,7 @@ class UsersService {
 | `on(event, listener)` / `off(event, listener)`          | Subscribe / unsubscribe                          |
 | `dispose()`                                             | Async cleanup of all caches                      |
 
-## `ICache<T>` — the per-cache surface
+## `ICache<T>` — the per-cache surface {#icachet--the-per-cache-surface}
 
 ```typescript
 const users = this.cache.getCache<User>('users');
@@ -154,7 +155,7 @@ const user  = await users.getOrSet(`u:${id}`, () => this.repo.findById(id), { tt
 | `partition(name)`                                   | Get a partition view (isolated key namespace)                 |
 | `dispose()`                                         | Async per-cache cleanup                                       |
 
-### TOCTOU note on `has()`
+### TOCTOU note on `has()` {#toctou-note-on-has}
 
 From the source:
 
@@ -165,7 +166,7 @@ From the source:
 > (atomic from the caller's perspective). Reserve `has()` for fast-path
 > cardinality checks where the value isn't read afterwards.
 
-## Multi-tier API — `IMultiTierCache<T>` extends `ICache<T>`
+## Multi-tier API — `IMultiTierCache<T>` extends `ICache<T>` {#multi-tier-api--imultitiercachet-extends-icachet}
 
 ```mermaid
 flowchart LR
@@ -187,9 +188,9 @@ Additional methods on a multi-tier cache:
 | `sync()`                     | Pull recently-changed L2 entries into L1     |
 | `getTierStats(tier)`         | Stats per tier — useful for hit-ratio tuning |
 
-## Decorators
+## Decorators {#decorators}
 
-### `@Cacheable(options)` — read-through cache
+### `@Cacheable(options)` — read-through cache {#cacheableoptions--read-through-cache}
 
 ```typescript
 import { Cacheable, CacheKey } from '@omnitron-dev/titan-cache';
@@ -212,7 +213,7 @@ async findById(@CacheKey() id: string): Promise<User> {
 | `unless?`      | `(result) => boolean` — don't cache certain results   |
 | `compress?`    | `boolean` — force compression regardless of size      |
 
-### `@CacheInvalidate(options)` — bust on mutation
+### `@CacheInvalidate(options)` — bust on mutation {#cacheinvalidateoptions--bust-on-mutation}
 
 ```typescript
 @CacheInvalidate({ cacheName: 'users', tags: ['users'] })
@@ -228,26 +229,26 @@ async update(id: string, patch: Partial<User>): Promise<User> { /* … */ }
 | `beforeInvocation?` | `boolean` — invalidate before the method (default: after) |
 | `keyGenerator?`   | `(...args) => string[]`                                    |
 
-### `@CachePut(options)` — write-through cache
+### `@CachePut(options)` — write-through cache {#cacheputoptions--write-through-cache}
 
 Extends `@Cacheable` options; runs the method first and writes the
 returned value into the cache. Used when the method itself is the
 canonical source.
 
-### `@CacheKey()` — parameter marker
+### `@CacheKey()` — parameter marker {#cachekey--parameter-marker}
 
 When **any** parameter is marked `@CacheKey()`, only marked parameters
 contribute to the auto-generated key. Useful when the method has
 auxiliary args (logger, span) you don't want in the key.
 
-### Property injection helpers
+### Property injection helpers {#property-injection-helpers}
 
 | Decorator                  | Effect                                                    |
 | -------------------------- | --------------------------------------------------------- |
 | `@InjectCacheService()`    | Property decorator — marks the property as the cache service for decorator discovery |
 | `@InjectCacheLogger()`     | Property decorator — marks the property as logger for error reporting |
 
-## Tags-based invalidation
+## Tags-based invalidation {#tags-based-invalidation}
 
 Tags are the right primitive for "drop everything related to user `u_42`":
 
@@ -263,7 +264,7 @@ async updateProfile(id: string, patch: ProfilePatch) { /* … */ }
 `user:u_42` regardless of key. In multi-tier deployments, tag
 invalidation goes through L2 and reaches every pod.
 
-## Compression
+## Compression {#compression}
 
 For payloads above `compressionThreshold` (default 1 KB), the cache
 optionally compresses with the configured `compressionAlgorithm`.
@@ -280,7 +281,7 @@ TitanCacheModule.forRoot({
 Set `compress: true` on a specific `@Cacheable` to force compression
 regardless of size.
 
-## Warming
+## Warming {#warming}
 
 Pre-populate hot keys at boot, on schedule, or on demand:
 
@@ -296,7 +297,7 @@ TitanCacheModule.forRoot({
 await this.cache.getCache('users').warm();
 ```
 
-## Partitions
+## Partitions {#partitions}
 
 Slice one cache into namespaced views — useful for per-tenant
 isolation without separate caches:
@@ -307,7 +308,7 @@ const tenantUsers = users.partition(tenantId);
 await tenantUsers.get('u_42');     // isolated from other tenants
 ```
 
-## Stats
+## Stats {#stats}
 
 ```typescript
 const stats = users.getStats();
@@ -317,7 +318,7 @@ const stats = users.getStats();
 Per-cache and global. Reset with `resetStats()` after a warmup or
 deployment.
 
-## Anti-patterns
+## Anti-patterns {#anti-patterns}
 
 - **Caching everything.** Adds invalidation surface for no benefit on
   cold paths. Cache only what you've measured to be hot.
@@ -330,7 +331,7 @@ deployment.
   eviction policy kicks in. Always set a TTL appropriate to your
   data's volatility.
 
-## Tokens
+## Tokens {#tokens}
 
 | Token                          | Purpose                                          |
 | ------------------------------ | ------------------------------------------------ |
@@ -339,14 +340,14 @@ deployment.
 | `CACHE_OPTIONS_TOKEN`          | Resolved options bundle                          |
 | `getCacheToken(name)`          | Token for a named cache (advanced injection)     |
 
-## Lifecycle
+## Lifecycle {#lifecycle}
 
 `CacheService` does not implement explicit `OnInit` / `OnDestroy` —
 cleanup runs through its async `dispose()`, which the framework calls
 during container teardown. If you create caches dynamically, call
 `deleteCache(name)` when done.
 
-## Inter-module dependencies
+## Inter-module dependencies {#inter-module-dependencies}
 
 - Uses `@omnitron-dev/eventemitter` for cache lifecycle events.
 - Optional L2 typically uses an adapter built on
@@ -354,7 +355,7 @@ during container teardown. If you create caches dynamically, call
   hard-depend on Redis.
 - Compresses with Node's `zlib` (built-in) or a pluggable adapter.
 
-## See also
+## See also {#see-also}
 
 - [`titan-redis`](./redis.mdx) — typical L2 backing
 - [`titan-lock`](./lock.mdx) — prevent thundering-herd writes outside `getOrSet`

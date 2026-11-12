@@ -1,4 +1,6 @@
 ---
+id: "auth/index"
+slug: "/docs/auth"
 title: Authentication & Authorisation
 sidebar_position: 0
 ---
@@ -27,7 +29,7 @@ should be picked by what you're trying to do.
 | Understand how the four layers fit together                    | [Mental model](./mental-model.md)         |
 | Migrate from `@RequireRole(...)` to permission strings         | [Migration: auth v1 → v2](../titan/migrations/auth-1-to-2.md) |
 
-## Reading order for first-time integrators
+## Reading order for first-time integrators {#reading-order-for-first-time-integrators}
 
 1. **[Mental model](./mental-model.md)** — one page, one diagram,
    how roles / permissions / conditions / RLS combine.

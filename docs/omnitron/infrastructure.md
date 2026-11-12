@@ -1,4 +1,6 @@
 ---
+id: "omnitron/infrastructure"
+slug: "/docs/omnitron/infrastructure"
 sidebar_position: 8
 title: Infrastructure
 description: Declarative provisioning of Postgres / Redis / S3 / custom containers.
@@ -36,7 +38,7 @@ infrastructure/
 └── types.ts                    — public types
 ```
 
-## Two layers of declaration
+## Two layers of declaration {#two-layers-of-declaration}
 
 | Layer | What you declare | Where |
 | ----- | ---------------- | ----- |
@@ -48,7 +50,7 @@ databases"; the app layer says "I need access to the `main`
 database with these env vars". The resolver wires the two
 together.
 
-## Infrastructure ownership
+## Infrastructure ownership {#infrastructure-ownership}
 
 Dependency discovery answers what an application needs. It does not grant every
 node permission to provision that dependency or run its migrations. A stack's
@@ -98,7 +100,7 @@ closed until migrated. An older unbound generated configuration cannot be identi
 from its name; it needs an audited source binding and compatible runtime. The new
 generator does not retroactively fix running nodes.
 
-## Readiness includes required service setup
+## Readiness includes required service setup {#readiness-includes-required-service-setup}
 
 A running container, a successful native health probe, and completed service setup
 are separate facts. Omnitron retains all three. A preset with `postProvision` must
@@ -134,7 +136,7 @@ The native regression check `node test/runtime/preset-readiness.mjs dist` (from
 It creates only private containers with no network or published ports, bounded
 CPU/memory and memory-backed data, and removes those exact containers afterward.
 
-## Ecosystem layer — `InfrastructureConfig`
+## Ecosystem layer — `InfrastructureConfig` {#ecosystem-layer--infrastructureconfig}
 
 ```typescript
 // omnitron.config.ts
@@ -158,7 +160,7 @@ Two forms supported per entry:
 - **Full requirement** — direct `IServiceRequirement` object for
   custom services.
 
-### Built-in presets
+### Built-in presets {#built-in-presets}
 
 | Preset | Type | Default ports | Notes |
 | ------ | ---- | ------------- | ----- |
@@ -171,7 +173,7 @@ Two forms supported per entry:
 Presets are versioned: bumping the omnitron version may change
 preset defaults, but each project pins its own ecosystem config.
 
-### Legacy shape
+### Legacy shape {#legacy-shape}
 
 ```typescript
 infrastructure: {
@@ -187,7 +189,7 @@ infrastructure: {
 Still works for backward compatibility, but the unified
 `services: { ... }` map is the canonical form going forward.
 
-## App layer — `OmnitronAppConfig`
+## App layer — `OmnitronAppConfig` {#app-layer--omnitronappconfig}
 
 In each app's `config/default.json`:
 
@@ -216,7 +218,7 @@ In each app's `config/default.json`:
 The resolver merges this with the ecosystem-level declaration
 and produces the per-app env injection.
 
-### Shorthand booleans
+### Shorthand booleans {#shorthand-booleans}
 
 | Declaration | Effect |
 | ----------- | ------ |
@@ -228,12 +230,12 @@ and produces the per-app env injection.
 | `"s3": true` | Default bucket on the shared MinIO |
 | `"s3": { "bucket": "X", "quota": "10gb" }` | Named bucket with quota |
 
-### Custom infrastructure
+### Custom infrastructure {#custom-infrastructure}
 
 For apps that need infrastructure beyond the presets, declare a
 full `IServiceRequirement` under `infrastructure: { <name>: {...} }`.
 
-## `IServiceRequirement` — the universal shape
+## `IServiceRequirement` — the universal shape {#iservicerequirement--the-universal-shape}
 
 ```typescript
 interface IServiceRequirement {
@@ -268,7 +270,7 @@ interface IServiceRequirement {
 }
 ```
 
-### Env variable templating
+### Env variable templating {#env-variable-templating}
 
 The `env` values support three template placeholders:
 
@@ -299,7 +301,7 @@ Example:
 The app receives a literal `SEARCH_URL=http://localhost:9200` and
 `SEARCH_API_KEY=<decrypted value>` at startup.
 
-### Network modes
+### Network modes {#network-modes}
 
 `networkMode` lets one declaration provision differently per
 environment:
@@ -324,7 +326,7 @@ environment:
 Set `networkMode` at the stack level or via env var; the
 resolver picks the matching variant.
 
-## Provisioning flow
+## Provisioning flow {#provisioning-flow}
 
 ```mermaid
 sequenceDiagram
@@ -357,7 +359,7 @@ The **infrastructure gate** (`infrastructure-gate.ts`) blocks app
 start until every `critical: true` service is healthy. Non-critical
 services are best-effort.
 
-## Stack-level overrides
+## Stack-level overrides {#stack-level-overrides}
 
 ```typescript
 stacks: {
@@ -396,7 +398,7 @@ serviceOverrides: {
 }
 ```
 
-## Docker provider
+## Docker provider {#docker-provider}
 
 Docker is the default for `dev` / `test` stacks. The provider:
 
@@ -410,7 +412,7 @@ Container lifecycle is reconciled — the provider periodically
 verifies declared services match running containers. Drifted
 containers are restarted; orphaned ones are removed.
 
-### `IDockerServiceConfig`
+### `IDockerServiceConfig` {#idockerserviceconfig}
 
 ```typescript
 interface IDockerServiceConfig {
@@ -438,7 +440,7 @@ Note `volumes` is a **map** (`name → path | spec`), not an array,
 and container env is `environment` (not `env`). There is no
 `privileged` / `capabilities` field.
 
-### Container resource limits
+### Container resource limits {#container-resource-limits}
 
 `docker.resources` applies to service containers and Docker applications through
 the same allocator:
@@ -473,7 +475,7 @@ handoff must reject mismatched infrastructure instead of silently accepting it;
 replacement container IDs are expected when recreation is required. Existing
 named volumes are reused, but container replacement interrupts the service.
 
-### `IVolumeMount`
+### `IVolumeMount` {#ivolumemount}
 
 ```typescript
 interface IVolumeMount {
@@ -486,7 +488,7 @@ interface IVolumeMount {
 Named volumes are created on demand and survive container
 restarts. Bind mounts read from host paths verbatim.
 
-## Bare-metal provider
+## Bare-metal provider {#bare-metal-provider}
 
 For `prod` stacks (or wherever you don't want Docker), declare
 bare-metal provisioning hints. These tell Omnitron how to
@@ -513,7 +515,7 @@ For an external host you don't manage, prefer a stack
 `serviceOverride` with `external: { host, ports }` (see below) —
 that disables provisioning and just wires up the connection.
 
-### `IBareMetalServiceConfig`
+### `IBareMetalServiceConfig` {#ibaremetalserviceconfig}
 
 ```typescript
 interface IBareMetalServiceConfig {
@@ -534,7 +536,7 @@ There is no service-discovery layer here (no `consul` / `k8s`
 provider) — bare-metal config describes install + on-disk layout.
 Live external endpoints are wired via `serviceOverrides.external`.
 
-### Tracking host packages
+### Tracking host packages {#tracking-host-packages}
 
 Declare host dependencies under the bare-metal variant that consumes them. For example, a service that uses a system Tor proxy can track the stable release for the host distribution.
 
@@ -553,7 +555,7 @@ The optional HTTPS repository selects its `<VERSION_CODENAME>/main` binary chann
 
 The Docker `tor` preset has a separate package lifecycle. Its Alpine 3.24 entrypoint resolves Tor from the stable branch at startup, including when the container already has a package installed. Running processes keep their current binaries until restarted. Inspect the system proxy and the onion gateway independently.
 
-## Container state
+## Container state {#container-state}
 
 The `OmnitronInfra` RPC service exposes:
 
@@ -585,7 +587,7 @@ Docker's saved probe from its previous run is not reused as a current verdict.
 Exit failures, OOM kills and their reasons remain available in `error`. The same
 reading feeds CLI, Console and topology.
 
-## Reconcile loop
+## Reconcile loop {#reconcile-loop}
 
 A periodic reconciler runs inside the daemon:
 
@@ -616,7 +618,7 @@ flowchart LR
 The reconciler runs every 30 s, plus on demand (`omnitron infra up` /
 `infra down`).
 
-### Applying changed declarations
+### Applying changed declarations {#applying-changed-declarations}
 
 After rereading a project's configuration, starting its stopped or failed stack
 resolves the current infrastructure declaration again. The local manager and
@@ -650,7 +652,7 @@ retry and reviewed stop/start with a retained volume sentinel. The fixture uses
 two isolated containers from cached `alpine:3.24`, publishes no ports, and removes
 only its own containers and temporary volume after verification.
 
-### A container you stopped comes back
+### A container you stopped comes back {#a-container-you-stopped-comes-back}
 
 This is the branch operators meet first and it is easy to mistake for
 something else. **A declared service that is not running is started again
@@ -665,7 +667,7 @@ tell this apart from a Docker restart policy. To hold a service down, stop it
 through `omnitron infra down` (which is a declared intent, not a drift the
 reconciler corrects), or run a throwaway container the daemon does not manage.
 
-### When it stops trying
+### When it stops trying {#when-it-stops-trying}
 
 A failed restart enters exponential backoff: 30 seconds, doubling to a ceiling
 of 15 minutes. Recovery of a running **unhealthy** container uses the same delay
@@ -705,7 +707,7 @@ building. It uses a cached `alpine:3.24` image in one disposable container with
 0.25 CPU, 32 MiB memory, no network, ports or volumes. It observes actual failure
 and recovery for at least 60 seconds, then removes only its own container.
 
-## Phantom endpoint janitor
+## Phantom endpoint janitor {#phantom-endpoint-janitor}
 
 Apps that crash or are removed leave behind stale env injections
 in the state store. The phantom janitor sweeps these:
@@ -716,7 +718,7 @@ in the state store. The phantom janitor sweeps these:
 - Underlying Docker containers are not removed unless explicitly
   requested (operator might want to keep data around).
 
-## Secrets in infrastructure
+## Secrets in infrastructure {#secrets-in-infrastructure}
 
 Declared via `secrets` per service:
 
@@ -738,7 +740,7 @@ The string before `:` is the logical name used in templates; the
 secret store (`omnitron secret set X ...`). Secrets are resolved
 **at injection time** — never written to disk.
 
-## Health checks per service
+## Health checks per service {#health-checks-per-service}
 
 A health check is a single discriminated `{ type, target }` pair,
 not a set of nested probe blocks:
@@ -765,7 +767,7 @@ Four probe types — `http`, `tcp`, `command`, and `jsonrpc` (the
 last for blockchain daemons). The infrastructure gate uses these
 to decide when to release the start gate for dependent apps.
 
-## API gateway integration
+## API gateway integration {#api-gateway-integration}
 
 When `gateway` is configured (preset or custom), Omnitron
 materialises an OpenResty config from your `configDir` plus
@@ -786,7 +788,7 @@ This means your app process can move ports and the operator-
 written nginx config doesn't change — the generated upstream map
 always points at the current location.
 
-## CLI surface
+## CLI surface {#cli-surface}
 
 | Command | Effect |
 | ------- | ------ |
@@ -808,7 +810,7 @@ omnitron infra redis-cli --stack sample/dev --db 3 XLEN orders
 
 → Full reference: [CLI / Infrastructure](./cli.md#infrastructure).
 
-## Failure modes
+## Failure modes {#failure-modes}
 
 | Symptom | Cause | Fix |
 | ------- | ----- | --- |
@@ -818,7 +820,7 @@ omnitron infra redis-cli --stack sample/dev --db 3 XLEN orders
 | Phantom env vars in app | Old service declaration not cleaned | Phantom janitor handles automatically; rerun after retention window |
 | Health check passes but app can't connect | Network firewall / Docker network mismatch | Verify the container is on the right network; check `omnitron infra logs <service>` |
 
-## Anti-patterns
+## Anti-patterns {#anti-patterns}
 
 - **Hardcoding `DATABASE_URL` in app code.** The whole point of
   the subsystem is to inject it. Read `process.env.DATABASE_URL`.
@@ -834,14 +836,14 @@ omnitron infra redis-cli --stack sample/dev --db 3 XLEN orders
 - **Bypassing the resolver to write Docker compose by hand.**
   Drifts from `omnitron.config.ts` cause reconciler thrashing.
 
-## See also
+## See also {#see-also}
 
 - [Configuration](./configuration.md) — where `infrastructure: { ... }` lives
 - [CLI](./cli.md#infrastructure) — `omnitron infra ...`
 - [Services reference](./services-reference.md) — `OmnitronInfra` methods
 - [Architecture](./architecture.md#infrastructure-subsystem) — where this fits
 
-## Readiness before provisioning
+## Readiness before provisioning {#readiness-before-provisioning}
 
 Use `omnitron stack diagnose <project> <stack>` or **Stacks → Diagnose** before
 starting an environment. This is an observation, not a dry-run execution of

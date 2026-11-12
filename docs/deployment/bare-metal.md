@@ -1,4 +1,6 @@
 ---
+id: "deployment/bare-metal"
+slug: "/docs/deployment/bare-metal"
 sidebar_position: 5
 title: Bare-metal / systemd
 description: Run Omnitron as a systemd service on your own server.
@@ -10,7 +12,7 @@ For when you own the server — bare-metal hardware, VPS, or a
 VM you SSH into. systemd as the supervisor of the Omnitron
 daemon; Omnitron supervises the Titan apps.
 
-## Topology
+## Topology {#topology}
 
 ```mermaid
 flowchart TB
@@ -24,7 +26,7 @@ flowchart TB
 systemd = OS-level supervisor. Omnitron = app-level
 supervisor. Each does its job.
 
-## Prerequisites
+## Prerequisites {#prerequisites}
 
 ```bash
 # Node.js 22+ (via nvm or apt):
@@ -42,7 +44,7 @@ sudo useradd -r -m -s /bin/bash omnitron
 sudo -u omnitron mkdir -p /home/omnitron/.omnitron
 ```
 
-## Ship the build
+## Ship the build {#ship-the-build}
 
 ```bash
 # On the build host:
@@ -63,7 +65,7 @@ For mature shops, replace with a real deploy pipeline
 to `<projectRoot>/.omnitron/artifacts/<app>-<version>.tar.gz` —
 plus scp + atomic symlink swap).
 
-## systemd unit
+## systemd unit {#systemd-unit}
 
 Create `/etc/systemd/system/omnitron.service`:
 
@@ -136,7 +138,7 @@ sudo chmod 0600 /etc/omnitron/env
 sudo chown omnitron:omnitron /etc/omnitron/env
 ```
 
-## Enable + start
+## Enable + start {#enable--start}
 
 ```bash
 sudo systemctl daemon-reload
@@ -152,7 +154,7 @@ The Omnitron daemon writes its own log to
 `~/.omnitron/logs/omnitron.error.log`); journald captures
 stdout/stderr as a backup.
 
-## Database setup
+## Database setup {#database-setup}
 
 ```bash
 sudo -u postgres psql <<'SQL'
@@ -168,7 +170,7 @@ sudo -u omnitron bash -c 'cd /home/omnitron/platform && pnpm omnitron infra migr
 For better security, use Postgres' `pg_hba.conf` to restrict
 auth method per source.
 
-## Reverse proxy (nginx)
+## Reverse proxy (nginx) {#reverse-proxy-nginx}
 
 The `webapp_backend` below assumes the Omnitron Console is
 running on `:9800`. That port is served by the `omnitron-nginx`
@@ -238,7 +240,7 @@ sudo ln -sf /etc/nginx/sites-available/platform /etc/nginx/sites-enabled/
 sudo nginx -t && sudo systemctl reload nginx
 ```
 
-## TLS via Let's Encrypt
+## TLS via Let's Encrypt {#tls-via-lets-encrypt}
 
 ```bash
 sudo apt install -y certbot python3-certbot-nginx
@@ -247,7 +249,7 @@ sudo certbot --nginx -d api.example.com -d app.example.com
 
 Cert auto-renews via certbot's timer.
 
-## Updating
+## Updating {#updating}
 
 ```bash
 # Atomic deploy via symlink swap:
@@ -274,7 +276,7 @@ sudo systemctl reload omnitron      # if unit declares ExecReload
 sudo -u omnitron pnpm omnitron reload
 ```
 
-## Backups
+## Backups {#backups}
 
 Daily Postgres backup via cron:
 
@@ -310,7 +312,7 @@ the SQLite store at `~/.omnitron/data/daemon-state.db`) is
 regenerable — back it up if you want history (uptime bars,
 secrets store).
 
-## Multi-server fleet
+## Multi-server fleet {#multi-server-fleet}
 
 Omnitron supports a fleet of daemons addressable by alias:
 
@@ -344,7 +346,7 @@ Inspect/manage it with `omnitron cluster status` and
 
 See [Cluster + Fleet](./../omnitron/cluster.md).
 
-## Monitoring
+## Monitoring {#monitoring}
 
 - **Application metrics** — Prometheus scrapes the daemon's
   dedicated metrics port `:9803/metrics` (loopback by default;
@@ -356,7 +358,7 @@ See [Cluster + Fleet](./../omnitron/cluster.md).
 - **Alerts** — Prometheus AlertManager + Omnitron's own
   `OmnitronAlerts`.
 
-## Firewall
+## Firewall {#firewall}
 
 ```bash
 # UFW recipe:
@@ -372,7 +374,7 @@ sudo ufw enable
 Public exposure of 9700 = full operator surface on the
 internet. Never.
 
-## Hardening checklist
+## Hardening checklist {#hardening-checklist}
 
 - [ ] Run as a non-root user (`omnitron` in examples above).
 - [ ] systemd hardening directives (above).
@@ -385,7 +387,7 @@ internet. Never.
 - [ ] Auto-security-updates for the OS (`unattended-upgrades`).
 - [ ] Periodic vulnerability scan (`pnpm audit`).
 
-## When bare-metal beats Docker/k8s
+## When bare-metal beats Docker/k8s {#when-bare-metal-beats-dockerk8s}
 
 - **Predictable latency** — no container abstraction overhead.
 - **Direct hardware access** — GPUs, custom NICs, NVMe.
@@ -398,7 +400,7 @@ When it doesn't:
 - **Crash recovery** — no automatic node replacement.
 - **Multi-region** — need to roll your own DNS / failover.
 
-## See also
+## See also {#see-also}
 
 - [Deployment overview](./index.md)
 - [Docker Compose](./docker.md) — containerised alternative

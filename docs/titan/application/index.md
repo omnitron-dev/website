@@ -1,4 +1,6 @@
 ---
+id: "titan/application/index"
+slug: "/docs/titan/application"
 sidebar_position: 1
 title: Application
 description: The Titan application kernel — what it owns, what it exposes, how to use it.
@@ -10,7 +12,7 @@ The `Application` object is the runtime kernel. It owns the container,
 the lifecycle, the module registry, and the event bus. Every Titan
 process has exactly one.
 
-## Public surface
+## Public surface {#public-surface}
 
 ```typescript
 import {
@@ -35,7 +37,7 @@ import {
 | `IApplicationOptions`   | Constructor options                                      |
 | `ApplicationToken`      | DI token to inject the application into a provider       |
 
-## The minimal app
+## The minimal app {#the-minimal-app}
 
 ```typescript
 import { Application, Module, Injectable, Service } from '@omnitron-dev/titan';
@@ -73,7 +75,7 @@ Three things happen, in order:
 > that constructs `Netron` and registers a transport). See
 > [Netron RPC](../netron.md) for the transport-binding patterns.
 
-## `Application.create` — two overloads
+## `Application.create` — two overloads {#applicationcreate--two-overloads}
 
 ```typescript
 // Form 1: module-first.
@@ -113,7 +115,7 @@ const app = await Application.create({
 All fields are optional. The framework picks sane defaults — a
 no-args call returns a usable (if empty) application.
 
-## Core modules
+## Core modules {#core-modules}
 
 When `disableCoreModules` is `false` (the default), the framework
 auto-loads two modules:
@@ -126,7 +128,7 @@ auto-loads two modules:
 Pass `disableCoreModules: true` if you provide your own config and
 logger sources.
 
-## The application as a DI participant
+## The application as a DI participant {#the-application-as-a-di-participant}
 
 The application registers itself in the container under
 `ApplicationToken`. Inject it where you need access to its public
@@ -153,7 +155,7 @@ on the specific service you need (`LoggerService`, `ConfigService`).
 Reach for `ApplicationToken` only when you need the kernel itself
 (lifecycle control, event subscription, runtime metrics).
 
-## What the kernel exposes
+## What the kernel exposes {#what-the-kernel-exposes}
 
 Read the per-page reference for each capability:
 
@@ -165,7 +167,7 @@ Read the per-page reference for each capability:
 | Health            | [Health](./health.md)                                 |
 | Events            | [Events](./events.md)                                 |
 
-## Conventions
+## Conventions {#conventions}
 
 - **One Application per process.** A second `Application.create()`
   in the same process is supported but rarely useful — the

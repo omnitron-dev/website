@@ -1,4 +1,6 @@
 ---
+id: "foundations/monorepo"
+slug: "/docs/foundations/monorepo"
 sidebar_position: 3
 title: Monorepo Layout
 ---
@@ -42,7 +44,7 @@ omni/
 └── package.json
 ```
 
-## Workspace boundaries
+## Workspace boundaries {#workspace-boundaries}
 
 `pnpm-workspace.yaml` declares three workspace globs:
 
@@ -56,7 +58,7 @@ packages:
 The web console is registered explicitly because it lives inside the
 `omnitron` app's tree but is its own workspace.
 
-## Build orchestration
+## Build orchestration {#build-orchestration}
 
 `turbo.json` declares the dependency graph between package builds. A
 typical command:
@@ -67,7 +69,7 @@ pnpm test        # turbo test
 pnpm lint        # eslint across apps/ + packages/
 ```
 
-## Package independence
+## Package independence {#package-independence}
 
 Every package in `packages/` ships independently. A consumer pulls in
 only what they need; nothing in `@omnitron-dev/titan` imports

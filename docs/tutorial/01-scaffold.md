@@ -1,4 +1,6 @@
 ---
+id: "tutorial/scaffold"
+slug: "/docs/tutorial/scaffold"
 sidebar_position: 2
 title: 1. Scaffold
 description: Empty folder → working monorepo → "hello world" Titan app.
@@ -9,7 +11,7 @@ description: Empty folder → working monorepo → "hello world" Titan app.
 By the end of this step: an empty folder turns into a pnpm
 workspace with one Titan app saying hello.
 
-## Create the monorepo
+## Create the monorepo {#create-the-monorepo}
 
 ```bash
 mkdir my-platform && cd my-platform
@@ -73,7 +75,7 @@ Create a root `tsconfig.json`:
 
 The decorator flags are mandatory for Titan.
 
-## Create the first app
+## Create the first app {#create-the-first-app}
 
 ```bash
 mkdir -p apps/api/src
@@ -116,7 +118,7 @@ cd apps/api
 }
 ```
 
-## The first Titan app
+## The first Titan app {#the-first-titan-app}
 
 `apps/api/src/main.ts`:
 
@@ -170,7 +172,7 @@ The development command compiles decorators with their metadata before
 starting Node. In a second terminal, run `pnpm -F api exec tsc --watch`
 to recompile edits; Node restarts when the emitted JavaScript changes.
 
-## Verify
+## Verify {#verify}
 
 In another terminal, from the workspace root:
 
@@ -198,7 +200,7 @@ The service signature flowed through: the server `hello(name:
 string): Promise<string>` is callable from anywhere that can
 reach `:3001`.
 
-## What just happened
+## What just happened {#what-just-happened}
 
 The startup sequence has four explicit responsibilities:
 
@@ -216,19 +218,19 @@ The setup provides:
 - ✓ Lifecycle management
 - ✓ Graceful shutdown wiring
 
-## Commit
+## Commit {#commit}
 
 ```bash
 git add .
 git commit -m "step 1: scaffold pnpm workspace + first Titan app"
 ```
 
-## Next
+## Next {#next}
 
 **[Step 2 — Service →](./02-service.md)** — replace the hello
 service with a real one backed by a database.
 
-## Troubleshooting
+## Troubleshooting {#troubleshooting}
 
 | Symptom | Fix |
 | ------- | --- |

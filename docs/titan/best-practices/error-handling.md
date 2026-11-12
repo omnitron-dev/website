@@ -1,4 +1,6 @@
 ---
+id: "titan/best-practices/error-handling"
+slug: "/docs/titan/best-practices/error-handling"
 sidebar_position: 2
 title: Error Handling
 description: Throwing the right error, in the right place, for the right caller.
@@ -8,7 +10,7 @@ description: Throwing the right error, in the right place, for the right caller.
 
 Three rules and several patterns.
 
-## Rule 1 — Throw typed errors at the boundary
+## Rule 1 — Throw typed errors at the boundary {#rule-1--throw-typed-errors-at-the-boundary}
 
 Every `@Public` method should throw a `TitanError` (via the `Errors`
 namespace or its subclasses) for client-visible failures. Native
@@ -29,7 +31,7 @@ The framework preserves the code, status, and details across the
 wire. Clients can `instanceof TitanError && e.code === ErrorCode.NOT_FOUND`
 and act on the typed error.
 
-## Rule 2 — Don't catch what you can't handle
+## Rule 2 — Don't catch what you can't handle {#rule-2--dont-catch-what-you-cant-handle}
 
 ```typescript
 // Wrong — catches and silences.
@@ -68,7 +70,7 @@ try {
 
 Catch what you can handle. Re-throw what you can't.
 
-## Rule 3 — Failure modes should be explicit
+## Rule 3 — Failure modes should be explicit {#rule-3--failure-modes-should-be-explicit}
 
 A method that can fail in different ways should signal them with
 different `ErrorCode` values. Callers branch on the code, not on
@@ -116,9 +118,9 @@ The client checks the error code (or uses
 `isDomainCode(e, BillingCodes, 'INSUFFICIENT_FUNDS')`) to
 discriminate.
 
-## Patterns
+## Patterns {#patterns}
 
-### Wrap third-party errors
+### Wrap third-party errors {#wrap-third-party-errors}
 
 External libraries throw their own error classes. Wrap them at the
 boundary so the rest of your code (and your clients) sees Titan
@@ -139,7 +141,7 @@ async findById(id: string) {
 }
 ```
 
-### Use the cause field
+### Use the cause field {#use-the-cause-field}
 
 Modern JavaScript errors support `cause`. `Errors.internal` takes the
 original error as its second argument, so you can chain failures
@@ -153,7 +155,7 @@ try {
 }
 ```
 
-### Differentiate validation from business errors
+### Differentiate validation from business errors {#differentiate-validation-from-business-errors}
 
 ```typescript
 // Schema validation — input is malformed (422).
@@ -170,7 +172,7 @@ if (input.endDate < input.startDate) {
 
 Both look like "user error" but mean different things.
 
-### Centralise domain errors
+### Centralise domain errors {#centralise-domain-errors}
 
 Per-module error definitions reduce repetition:
 
@@ -191,7 +193,7 @@ Throw from anywhere:
 throw usersErrors.notFound(id);
 ```
 
-## Logging errors
+## Logging errors {#logging-errors}
 
 Log errors at the boundary where you decide what to do with them —
 not at every level of the call stack.
@@ -227,7 +229,7 @@ class ErrorLoggingInterceptor {
 Log once per error. Multiple log lines per error muddy the
 investigation.
 
-## Anti-patterns (consolidated)
+## Anti-patterns (consolidated) {#anti-patterns-consolidated}
 
 - **Generic `Error`.** No code, no status, no structure — becomes
   a 500. Always use the `Errors` namespace.

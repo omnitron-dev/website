@@ -1,57 +1,69 @@
 # Omnitron documentation
 
-Public documentation for [Omnitron](https://github.com/omnitron-dev/omni),
-built with Docusaurus. The site is maintained in its own repository.
+The public manual and reference Lumen site. Documentation and application code
+live in separate repositories; Lumen owns parsing, route checks, rendering,
+client compilation, search and static output publication.
+
+Use Node 24 and the pnpm version declared in `package.json`.
 
 ```bash
 pnpm install --frozen-lockfile
 pnpm start
 ```
 
-Use the pnpm version declared in `package.json` (`packageManager`). CI and Pages
-read the same field through `pnpm/action-setup`; do not add a separate `version`
-input to the workflows.
-
-Before submitting:
+The development preview rebuilds content and client sources. Restart after
+changing the configuration. Build and inspect the production output before
+submitting a change:
 
 ```bash
 pnpm check:content
 pnpm typecheck
 pnpm build
+pnpm serve --host 127.0.0.1 --port 4173
+pnpm test:browser
 ```
 
-To compare documentation inventories with a sibling source checkout:
+`build` runs through Xec, then checks all generated internal links, assets and
+fragments. `migration/url-contract.json` records the previous site's 236 built
+routes and 2,855 content anchors. The initial 3,092-anchor comparison included
+236 `theme-svg-external-link` icon IDs and one `__blog-post-container` wrapper;
+these 237 renderer IDs have no content target. The contract records all 3,566
+original HTML IDs and the full list of 711 excluded structural IDs, including
+the old renderer root, skip-link target and base-URL diagnostic banner. The new
+site has its own working skip link. Keep public content URLs stable when editing prose.
+Lumen replaces only output directories with its own generation inventory;
+use an empty directory for the first build after migrating from another tool.
+
+On the development Mac, set `LUMEN_OUT_DIR` to a project directory on the mounted
+AGI development disk. Build artifacts and new dependency caches belong there.
+The initial migration uses an explicitly qualified local SDK candidate until
+its package versions are published; local links do not establish registry
+install reproducibility. Use the canonical Omnitron SDK workflow for ordinary
+source development and pin released versions for distribution.
+
+## Content and ownership
+
+- `docs/`: Markdown and literal-widget MDX documents; no executable MDX imports.
+- `pages/`: home, project, category and search routes.
+- `src/site/`: the trusted SSR layout, shared Prism identity and client islands.
+- `src/data/sidebars.json`: task-oriented navigation with explicit document IDs.
+- `static/`: self-hosted fonts and public assets.
+
+Pages should state an outcome, prerequisites, complete import paths, defaults,
+failure behavior, ownership and cleanup. Label proposals as Design RFC.
+Keep examples neutral and publicly reproducible. Do not publish private project
+names, credentials or local filesystem paths.
+
+## Source verification
 
 ```bash
 pnpm check:source ../omni
+pnpm docs:api ../omni
 node scripts/check-doc-examples.mjs ../omni docs
 ```
 
-The source check rejects a numeric default that contradicts the declarations in its
-module guide. It also reports ambiguous prose for review.
-
-The example checker reports possible API mismatches in fragments for review;
-it is not an end-to-end test. Run the complete examples you edit. The public
-content check rejects private project references and local-only paths.
-The build rejects broken internal links and anchors.
-
-Use `pnpm serve` to inspect the production build, including local search.
-Check narrow and wide viewports, both themes, keyboard focus and reduced
-motion. Fonts are self-hosted; their licenses are in `static/fonts/`.
-
-Pages should state an outcome, prerequisites, complete import paths, defaults,
-failure behaviour and useful next steps. Keep examples neutral and publicly
-reproducible. Label architectural proposals as Design RFC.
-
-## Public API inventory
-
-`pnpm docs:api ../omni` rebuilds the searchable API index from public package
-manifests and TypeScript re-exports. `scripts/api-guides.mjs` maps each entry
-point to a guide. New packages or entry points fail the source check until
-that mapping is reviewed. The check detects stale inventory data; it does
-not establish that every behaviour has a complete prose example.
-
-For new guides, document setup, ownership and teardown, failure behaviour,
-and a representative verification step. Keep architectural proposals
-labelled separately from implemented APIs. Link the guide from the sidebar
-and the relevant task in the developer map.
+The API inventory comes from public package manifests and TypeScript exports.
+Each entry point needs an explicit guide in `scripts/api-guides.mjs`. Inventory
+coverage does not prove every behavior has a complete example. Run the complete
+examples you change, and inspect static pages, search and API filtering with a
+keyboard at narrow and wide widths in both themes.

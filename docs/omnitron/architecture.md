@@ -1,4 +1,6 @@
 ---
+id: "omnitron/architecture"
+slug: "/docs/omnitron/architecture"
 sidebar_position: 2
 title: Architecture
 description: Components, planes, and data flows inside the Omnitron supervisor.
@@ -17,7 +19,7 @@ See the [resilient control-plane design](./resilient-control-plane.md) for the t
 contracts for environment promotion, placement, recovery and scaling. Its capability
 gates distinguish implemented behavior from planned autonomous operations.
 
-## Component map
+## Component map {#component-map}
 
 ```mermaid
 flowchart TB
@@ -119,12 +121,12 @@ flowchart TB
   Cluster --> RemoteDaemons[Other omnitron daemons]
 ```
 
-## The three planes
+## The three planes {#the-three-planes}
 
 Omnitron exposes three independent transports — same Netron RPC
 surface, different network shape.
 
-### 1. Management plane — `unix://~/.omnitron/daemon.sock`
+### 1. Management plane — `unix://~/.omnitron/daemon.sock` {#1-management-plane--unixomnitrondaemonsock}
 
 Unix domain socket, file mode `0o600` (owner-only). The **trust
 boundary**: if you can open the socket, you've already passed the
@@ -137,7 +139,7 @@ socket for ergonomics.
 | The `OmnitronDaemon` service  | Webapp dev (when running locally)        |
 | MCP server requests           | Agent processes spawned by the CLI       |
 
-### 2. Public TCP plane — `tcp://0.0.0.0:9700`
+### 2. Public TCP plane — `tcp://0.0.0.0:9700` {#2-public-tcp-plane--tcp00009700}
 
 Opt-in. Disabled by default; enable when:
 - You run a fleet (other daemons connect for cluster membership).
@@ -147,7 +149,7 @@ Opt-in. Disabled by default; enable when:
 JWT is **required** on this plane. RBAC roles
 (`viewer` / `operator` / `admin`) gate every method.
 
-### 3. HTTP / WS plane — `http://0.0.0.0:9800`
+### 3. HTTP / WS plane — `http://0.0.0.0:9800` {#3-http--ws-plane--http00009800}
 
 Opt-in. The daemon's HTTP plane is the **Netron HTTP + WebSocket
 bridge** that browser clients use. With the default `httpPort`
@@ -161,7 +163,7 @@ JWT is required for RPC, except for static asset routes (served
 by nginx) and the unauthenticated `signIn` / `validateToken` /
 `refreshSession` methods.
 
-## Daemon lifecycle
+## Daemon lifecycle {#daemon-lifecycle}
 
 ```mermaid
 sequenceDiagram
@@ -197,7 +199,7 @@ The state-store is the **persistent intent** — what should be
 running. On crash + restart, the daemon reads `state.json` and
 relaunches anything that was alive at last write.
 
-## State store — `state.json`
+## State store — `state.json` {#state-store--statejson}
 
 A single JSON file capturing:
 
@@ -225,7 +227,7 @@ Persisted on every status transition, atomic-rename style
 boot, the daemon starts fresh — empty apps map — and logs a
 warning.
 
-## PID manager
+## PID manager {#pid-manager}
 
 Owns `~/.omnitron/daemon.pid`. Responsibilities:
 
@@ -239,7 +241,7 @@ Owns `~/.omnitron/daemon.pid`. Responsibilities:
 Child process PIDs are owned by the orchestrator (per `IAppHandle`),
 not the PID manager.
 
-## Daemon scheduler
+## Daemon scheduler {#daemon-scheduler}
 
 A small in-process scheduler bound to the daemon's lifecycle.
 Runs periodic tasks:
@@ -256,7 +258,7 @@ Runs periodic tasks:
 All scheduler timers are `.unref()`-ed so they don't block
 shutdown.
 
-## Orchestrator subsystem
+## Orchestrator subsystem {#orchestrator-subsystem}
 
 Owns the per-app launch pipeline. One `AppHandle` per running
 app:
@@ -288,7 +290,7 @@ Two launch modes:
 
 → Full pipeline: [Orchestrator](./orchestrator.md).
 
-## Built-in RPC services
+## Built-in RPC services {#built-in-rpc-services}
 
 A daemon exposes services according to its configured role. A worker registers a reduced core set —
 the PostgreSQL-backed services (`OmnitronAuth`, `OmnitronAlerts`,
@@ -327,7 +329,7 @@ clients resolve, e.g. `daemon.OmnitronAuth.signIn(...)`).
 
 → Full reference: [Services reference](./services-reference.md).
 
-## Infrastructure subsystem
+## Infrastructure subsystem {#infrastructure-subsystem}
 
 When an app's `omnitronConfig.infrastructure` declares a
 requirement, the daemon's infrastructure subsystem:
@@ -357,7 +359,7 @@ flowchart LR
 → Reference: `omnitron infra status` shows current containers;
 the [Infra CLI section](./cli.md#infrastructure) covers commands.
 
-## Cluster subsystem
+## Cluster subsystem {#cluster-subsystem}
 
 Optional programmatic `cluster.enabled: true` uses the same writable PostgreSQL
 as the fleet registry to arbitrate controller leases. The store commits owner,
@@ -378,7 +380,7 @@ transaction; remote effects need durable recipient-side fencing. Normal master/s
 fleet operation is independent of this optional mode. See [cluster coordination](./cluster.md)
 and the [release delivery gates](./release-readiness.md) for implemented boundaries.
 
-## Webapp host
+## Webapp host {#webapp-host}
 
 The React console is served by a dedicated `omnitron-nginx`
 container — **not** by the daemon process itself. The daemon's
@@ -398,7 +400,7 @@ the same daemon ports, so the browser asks for `/netron/*` and `/ws`
 on its own origin either way and the client hard-codes neither. See
 [Console](./console.md) for the full port map.
 
-## Auth model — three roles
+## Auth model — three roles {#auth-model--three-roles}
 
 The `OmnitronDaemon` service and others use role-based access:
 
@@ -412,7 +414,7 @@ The local Unix socket bypasses auth — local CLI calls run as the
 implicit `admin` (OS-level trust). TCP/HTTP planes always require
 JWT.
 
-## Data flow — log shipping
+## Data flow — log shipping {#data-flow--log-shipping}
 
 ```mermaid
 sequenceDiagram
@@ -435,7 +437,7 @@ Logs flow through the daemon — no separate log shipper. The
 ring buffer means `omnitron logs --follow` returns recent entries
 immediately even if the file has been rotated.
 
-## Data flow — metrics aggregation
+## Data flow — metrics aggregation {#data-flow--metrics-aggregation}
 
 ```mermaid
 sequenceDiagram
@@ -453,7 +455,7 @@ sequenceDiagram
 
 The controller stores its own samples directly through Titan's PostgreSQL adapter. Each source retains unacknowledged worker entries. See [replication and receipts](./cluster.md).
 
-## Data flow — leader election (cluster mode)
+## Data flow — leader election (cluster mode) {#data-flow--leader-election-cluster-mode}
 
 ```mermaid
 sequenceDiagram
@@ -472,7 +474,7 @@ sequenceDiagram
 
 An administrator can request a transfer with `omnitron cluster step-down`. The current controller demotes and releases its epoch. A successor reports leadership after PostgreSQL confirms its grant.
 
-## Database and diagnostics boundaries
+## Database and diagnostics boundaries {#database-and-diagnostics-boundaries}
 
 Kysera implements reusable database mechanisms. Titan supplies module lifecycle,
 connection and transaction context. Omnitron exposes application-facing migration
@@ -482,7 +484,7 @@ and domain policies; Console displays the same health data as CLI.
 See [migrations](./migrations.md) for adopting existing journals and
 [diagnostics](./diagnostics.md) for error capture and notification adapters.
 
-## Putting it together
+## Putting it together {#putting-it-together}
 
 Read these in order for a complete picture:
 

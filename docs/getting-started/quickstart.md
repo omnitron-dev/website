@@ -1,4 +1,6 @@
 ---
+id: "getting-started/quickstart"
+slug: "/docs/getting-started/quickstart"
 sidebar_position: 2
 title: Quickstart
 description: Compile a Titan service, bind an HTTP transport, and call it from a typed client.
@@ -10,7 +12,7 @@ Build a small service that reports its status, expose it over HTTP, and call
 it from a separate process. You need **Node.js 22+** and a package manager.
 No database, Docker or supervisor is required.
 
-## 1. Create the project
+## 1. Create the project {#1-create-the-project}
 
 ```bash
 mkdir signal-service
@@ -45,7 +47,7 @@ lockfile. Create this compiler configuration:
 Compile with `tsc` so legacy decorators and their metadata are emitted.
 Node's built-in TypeScript stripping does not compile those decorators.
 
-## 2. Declare the service
+## 2. Declare the service {#2-declare-the-service}
 
 ```typescript title="src/signals.service.ts"
 import { Service, Public } from '@omnitron-dev/titan/decorators';
@@ -63,7 +65,7 @@ export class SignalsService {
 method to RPC callers. This example has no authentication and accepts no
 arguments; it is intended to run on your local machine.
 
-## 3. Register the module and transport
+## 3. Register the module and transport {#3-register-the-module-and-transport}
 
 ```typescript title="src/main.ts"
 import { Application, Module } from '@omnitron-dev/titan';
@@ -101,7 +103,7 @@ node dist/main.js
 Keep this terminal running. The readiness message appears after startup
 completes. Stop the process with Ctrl+C when finished.
 
-## 4. Make a typed call
+## 4. Make a typed call {#4-make-a-typed-call}
 
 ```typescript title="src/client.ts"
 import { createClient } from '@omnitron-dev/netron-browser';
@@ -133,7 +135,7 @@ Expected output:
 The client imports only the service **type**; the backend implementation is
 not included in the client at runtime.
 
-## If it fails
+## If it fails {#if-it-fails}
 
 | Symptom | Check |
 | --- | --- |
@@ -143,7 +145,7 @@ not included in the client at runtime.
 | Decorator compilation error | Use the configuration above and compile with `tsc`. |
 | `Netron is unavailable` | Keep Titan's core modules enabled for this example. |
 
-## Extend the service
+## Extend the service {#extend-the-service}
 
 Add [validation](../titan/validation/overview.md) before accepting untrusted
 inputs and [authentication](../titan/netron/authentication.md) before exposing

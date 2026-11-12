@@ -1,4 +1,6 @@
 ---
+id: "omnitron/auth-rbac"
+slug: "/docs/omnitron/auth-rbac"
 sidebar_position: 14
 title: Auth & RBAC
 description: Authentication, sessions, JWT, RBAC roles, RLS context propagation.
@@ -16,7 +18,7 @@ trail), start at [Authentication & Authorisation](../auth/index.md).
 
 Omnitron authenticates human operators and machine identities on the control plane. [Console access](./access.md) documents the implemented account-management flow shared by webapp and CLI. Examples about end-user identity below are application integration patterns; they are not additional Console login methods.
 
-## Three identity surfaces
+## Three identity surfaces {#three-identity-surfaces}
 
 | Surface | Trust source | Auth flow |
 | ------- | ------------ | --------- |
@@ -32,7 +34,7 @@ pattern (used by the production reference) is:
 | ------------ | ------------ | --------- |
 | End-user HTTP / WS calls | JWT issued by *your* identity app | Same JWT verified by every app in the fan-out |
 
-## Three RBAC roles
+## Three RBAC roles {#three-rbac-roles}
 
 | Role | Inherits | What they can do |
 | ---- | -------- | ---------------- |
@@ -66,7 +68,7 @@ async ping() { /* ... */ }
 → See [Daemon / RPC surface](./daemon.md#rpc-surface--omnitrondaemon-service)
 for the full method-by-method role map.
 
-## Shared JWT across fan-out apps
+## Shared JWT across fan-out apps {#shared-jwt-across-fan-out-apps}
 
 One identity owner issues user tokens; each backend verifies their signature
 and asks the owner for the current session and grants. Signature validity alone
@@ -89,7 +91,7 @@ sequenceDiagram
   App-->>U: Response
 ```
 
-## Shared auth factory pattern
+## Shared auth factory pattern {#shared-auth-factory-pattern}
 
 Use the shipped [shared-session preset](../titan/modules/shared-session.md)
 and provide an application-owned `sessionAuthority(sessionId, userId)` adapter.
@@ -102,7 +104,7 @@ never restores cache entries automatically. Cache restoration and revocation
 must share a serialization protocol. A Redis hit does not prove that a newer
 database revocation or permission edit was propagated.
 
-## Application authority without duplicate policy engines
+## Application authority without duplicate policy engines {#application-authority-without-duplicate-policy-engines}
 
 Keep three responsibilities separate:
 
@@ -135,7 +137,7 @@ commit, and keep them out of authorization decisions.
 These are application integration requirements. The shared-session preset does
 not create an application's role-assignment schema, refresh-token store or editor.
 
-## Activate an authorization update
+## Activate an authorization update {#activate-an-authorization-update}
 
 Treat the controller, resident execution owner and application runtimes as
 separate artifacts. A successful backend handoff updates the controller; it does
@@ -164,7 +166,7 @@ session restrictions are used, an older artifact that ignores them is not a safe
 rollback target even if it can read the schema. Check both data compatibility and
 authorization semantics before restoring it.
 
-## Token cache
+## Token cache {#token-cache}
 
 The shared-session preset and Omnitron daemon disable authentication-result
 caching. Signature verification can be cached independently. Netron revalidates
@@ -176,7 +178,7 @@ Authority-store failures remain 503. They do not permit stale authorization.
 In-flight operations retain the context they were admitted with; critical
 mutations must additionally use transaction-level ownership and authority checks.
 
-## Token binding via `cnf.fp`
+## Token binding via `cnf.fp` {#token-binding-via-cnffp}
 
 Standard JWT auth has one weakness: a stolen short-lived token
 works until it expires. **`cnf.fp` binds the JWT to a refresh
@@ -208,7 +210,7 @@ createJwtAuthManager({
 The HMAC secret is conventionally the same as the JWT signing
 key — one rotation surface handled by the `kid` mechanism.
 
-## Refresh token rotation
+## Refresh token rotation {#refresh-token-rotation}
 
 ```mermaid
 sequenceDiagram
@@ -234,7 +236,7 @@ Refresh tokens are **one-use** — using `rtid_N` invalidates it
 and produces `rtid_N+1`. Reuse of an old refresh token is a
 strong signal of token theft.
 
-## Multi-key JWT verification (rotation without downtime)
+## Multi-key JWT verification (rotation without downtime) {#multi-key-jwt-verification-rotation-without-downtime}
 
 ```typescript
 JwtModule.forRoot({
@@ -258,7 +260,7 @@ pick the matching key by `kid`. Rotate by:
 
 Zero downtime, zero forced sign-outs.
 
-## RLS context propagation
+## RLS context propagation {#rls-context-propagation}
 
 The Netron auth manager populates `authContext` in invocation
 metadata; the **invocation wrapper** maps that into a kysera RLS
@@ -309,7 +311,7 @@ realtime page that was simply empty, which is why it lasted: the
 wrong answer looked like no data rather than an error.
 :::
 
-## Role hierarchy patterns for end-user RBAC
+## Role hierarchy patterns for end-user RBAC {#role-hierarchy-patterns-for-end-user-rbac}
 
 For your application's own role system (separate from the
 operator roles above), declare a hierarchy and let library
@@ -348,7 +350,7 @@ Centralised hierarchy = no per-feature ad-hoc checks. Tiered
 visibility (search results, profile views) and tiered moderation
 (who can ban whom) compose from these primitives.
 
-## Anonymous and service-to-service endpoints
+## Anonymous and service-to-service endpoints {#anonymous-and-service-to-service-endpoints}
 
 Three auth shapes per method:
 
@@ -370,7 +372,7 @@ The master-to-node path is implemented in `cluster/mesh-link.ts` and `cluster/sl
 
 Machine identity is outside the human role hierarchy. It does not grant account administration or interactive SSH. Do not create a human account with `service_role`, reuse a Console session as a machine credential, or infer machine access from a role rank.
 
-## API key pattern (for headless integrations)
+## API key pattern (for headless integrations) {#api-key-pattern-for-headless-integrations}
 
 For CI agents, partner integrations, or scripted clients that
 shouldn't go through interactive sign-in:
@@ -408,7 +410,7 @@ return verifyJwt(token);
 API keys carry their own scope list — narrower than JWT roles —
 so a compromised key only opens the doors you've granted it.
 
-## TOTP / WebAuthn second factor
+## TOTP / WebAuthn second factor {#totp--webauthn-second-factor}
 
 For human users (especially admins), require a second factor on
 sign-in:
@@ -432,7 +434,7 @@ WebAuthn / passkeys are stronger; same flow shape.
 
 Console currently has no MFA enrollment or verification flow. The stored `totpEnabled` / `pgpEnabled` fields do not implement one. `requiresMfa` is not an enforced Titan RPC option. A future second-factor gate must verify proof server-side, bind it to the current session and enforce it in the shared authorization path before a UI can advertise it.
 
-## Auth in WebSockets
+## Auth in WebSockets {#auth-in-websockets}
 
 WS auth is verified on the **upgrade request** only:
 
@@ -455,7 +457,7 @@ a `token.expiring-soon` push, refreshes the token via HTTP, and
 reconnects WS. The application may also use an explicitly enabled authentication task;
 HTTP cookie-only applications should retain their established refresh flow.
 
-## Private runtime storage
+## Private runtime storage {#private-runtime-storage}
 
 On POSIX systems, runtime directories are sealed to `0700` and state, backup and
 journal files to `0600`. Sealing opens the target without following a leaf symlink,
@@ -469,7 +471,7 @@ private runtime files. These checks are POSIX-specific; Windows deployments need
 an equivalent owner-only ACL policy. They do not turn a writable parent directory
 into a sandbox against a privileged local process.
 
-## Audit logging
+## Audit logging {#audit-logging}
 
 The daemon stores control-plane events through `AuditService`. The current wire fields are `action`, `resourceType`, `resourceId` and `details`; actor identity comes from the request context. Read events through Console's **Audit** page or `omnitron audit`.
 
@@ -477,7 +479,7 @@ Account creation, role changes and session revocation write their audit rows in 
 
 Tokens, passwords, SSH keys, commands and terminal transcripts are excluded from the new account/terminal audit details. The database trail is not a tamper-evident external archive; deployments requiring that property need a separately controlled audit sink.
 
-## Anti-patterns
+## Anti-patterns {#anti-patterns}
 
 - **Auth check in custom HTTP routes that's weaker than the RPC
   surface.** Always call the same access predicate (`assertAccess`,
@@ -501,7 +503,7 @@ Tokens, passwords, SSH keys, commands and terminal transcripts are excluded from
   read-only auto-discovery is fine, but anything that writes
   state should require auth.
 
-## See also
+## See also {#see-also}
 
 - [Daemon / Auth flow](./daemon.md#auth-flow) — the daemon's own auth
 - [Console access](./access.md) — account management and effective permissions

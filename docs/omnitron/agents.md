@@ -1,4 +1,6 @@
 ---
+id: "omnitron/agents"
+slug: "/docs/omnitron/agents"
 title: Agents and delegated operations
 description: Architecture and acceptance criteria for provider adapters, delegated RBAC, monitoring evidence and controlled automation.
 ---
@@ -9,7 +11,7 @@ This document specifies the next agent integration. **Embedded provider sessions
 
 Start with the [current access model](./access.md), [Xec automation](./automation.md) and [monitoring interfaces](./observability.md). Keep provider integration optional: installing Omnitron must not require an agent SDK, provider account or inference service.
 
-## Boundaries and ownership
+## Boundaries and ownership {#boundaries-and-ownership}
 
 | Layer | Responsibility |
 | --- | --- |
@@ -22,7 +24,7 @@ Start with the [current access model](./access.md), [Xec automation](./automatio
 
 Do not add another role hierarchy to an agent plugin. Human, service and agent principals share the policy engine while retaining distinct identity types. A provider login authenticates the model session; it does not grant infrastructure rights.
 
-## Codex provider
+## Codex provider {#codex-provider}
 
 OpenAI provides both a [TypeScript Codex SDK](https://learn.chatgpt.com/docs/codex-sdk) and [Codex app-server](https://learn.chatgpt.com/docs/app-server). The SDK fits programmatic thread execution. App-server is the intended adapter for an interactive Console integration requiring streaming sessions, interruptions and approval events. Generate and pin its protocol types with a tested provider version; do not couple core Omnitron DTOs to experimental protocol fields.
 
@@ -34,7 +36,7 @@ Offer API credentials as a distinct, explicit connection. Never silently fall ba
 
 The adapter owns token refresh and reconnect/resume behavior. Store credentials in the server vault, scope them to a connection and owner, and keep them out of browser storage, URLs, process arguments, scripts, telemetry and exported support bundles. Disconnect must revoke or delete local credentials as supported by the provider and terminate affected sessions. Provider-side revocation limitations must remain visible.
 
-## Delegation in the existing role system
+## Delegation in the existing role system {#delegation-in-the-existing-role-system}
 
 An agent principal has an immutable agent ID, owner ID, delegation ID and expiry. A run adds its own run ID and grant. It does not inherit the administrator's Unix-socket identity, JWT or `service_role`.
 
@@ -50,7 +52,7 @@ An explicit deny wins. A missing policy, unavailable authority store, unrecogniz
 
 Resource constraints use server-resolved project, stack, node and application IDs, not a UI filter or a caller-supplied path prefix. A compound request is rejected if any requested resource is outside scope; silently returning a subset can mislead analysis. Recheck authority at admission and each privileged broker call. Revoke active streams and queued operations when the owner, binding or delegation changes. A running external operation needs a documented cancellation or containment policy; revocation does not undo completed effects.
 
-### Permission families
+### Permission families {#permission-families}
 
 These are proposed semantic permissions, to be mapped centrally to RPC methods rather than implemented as a provider-specific allowlist:
 
@@ -66,7 +68,7 @@ These are proposed semantic permissions, to be mapped centrally to RPC methods r
 
 Reading logs does not permit reading vault values. Drafting a script does not permit executing it. Receiving an alert does not authorize remediation. Do not bundle unrestricted SSH, arbitrary shell or secret resolution into a monitoring role. Treat shell access as the full OS authority of its target identity, not as a narrowly constrained action merely because the launch method has a role check.
 
-## Worker and broker isolation
+## Worker and broker isolation {#worker-and-broker-isolation}
 
 Run the model/provider adapter in a dedicated worker with a restricted filesystem, bounded CPU/memory/runtime, controlled egress and a short-lived broker credential. Do not mount the daemon's Unix socket, Docker socket, host SSH directory, vault, production database credentials or the user's full home directory. A normal child process is not sufficient isolation.
 
@@ -74,7 +76,7 @@ Only the broker resolves infrastructure credentials and invokes Omnitron operati
 
 Provider events and tool calls carry provider-session, agent-run and operation correlation IDs. Enforce one active dispatcher per run, bounded queues and event sizes, and replay-safe sequence handling. A reconnect restores conversation state, not permission to replay a completed mutation. On uncertain delivery, query the operation ID before retrying.
 
-## Review artifacts and approvals
+## Review artifacts and approvals {#review-artifacts-and-approvals}
 
 An execution proposal is an immutable artifact containing source revision/hash, target IDs, resolved execution profile, parameter digest, allowed effects, timeout, maximum attempts and rollback instructions where meaningful. Do not expose secret parameter values in the approval view.
 
@@ -82,7 +84,7 @@ Bind a single-use approval to that artifact, requester, approver, expiry and non
 
 Console presents a compact proposal with expandable code, targets, privileges, estimated query/execution cost and the recovery procedure. CLI receives the same artifact and decision endpoints. No browser-only checks or provider-text interpretation may authorize execution.
 
-## Monitoring as evidence
+## Monitoring as evidence {#monitoring-as-evidence}
 
 An agent's analysis should cite retrievable evidence: the query, resource scope, time window, source/collector identity, sample or event timestamps, collection time, result completeness and correlation IDs. Distinguish an observed value from an inference. A healthy process does not prove successful email delivery or business correctness.
 
@@ -98,7 +100,7 @@ The next shared query contract must expose:
 
 Unknown, stale, sampled, truncated and absent are distinct states. Never convert failed queries to zero errors or no alerts. A sampled error count is not an exact population count; a missing metric is not zero. Alert summaries must reveal evaluation freshness, not only the last persisted firing state.
 
-### Efficiency and scale
+### Efficiency and scale {#efficiency-and-scale}
 
 Reuse Titan's storage and query abstractions. Do not build a second analytics database in the agent adapter. Apply allowlisted dimensions, metric-series cardinality budgets, bounded batches, backpressure and retention/rollups at the owning layer. Never use raw URLs, user input, tokens, run IDs or source text as unbounded metric labels.
 
@@ -106,7 +108,7 @@ Admit queries with explicit resource and time scope, row/byte/series bounds, dea
 
 Use subscriptions with cursor-based resumption and bounded queues for alert/event delivery. Slow consumers receive an explicit gap and recover through a bounded historical read. Do not run a full health probe or archive count on every dashboard refresh. Cache only under the effective scope and policy version; invalidation must not reveal another principal's data.
 
-## Alerts and notifications
+## Alerts and notifications {#alerts-and-notifications}
 
 Keep evaluation, incident state and delivery separate. An alert's lifecycle includes pending, firing and resolved, with timestamps and rule revision. Acknowledgement records operator ownership; it does not resolve the underlying condition. Silence is scoped, expiring and audited. Dedupe keys and grouping must prevent a flapping service from producing an unbounded notification storm.
 
@@ -114,13 +116,13 @@ Use the existing Titan notification adapter/outbox boundary for future messenger
 
 A delivery adapter receives a redacted event with stable IDs and a link to the authorized Console view. Routing, recipients and secret references remain server policy. Messenger payloads, responses and logs cannot change roles, approve scripts or grant access. No messenger provider is enabled by this design document.
 
-## Untrusted input and remediation
+## Untrusted input and remediation {#untrusted-input-and-remediation}
 
 Application logs, issue text, repository content, tool results and notification bodies are untrusted data. Instructions embedded in them never change system policy. Keep them visibly separated from trusted instructions and pass only the evidence needed for the current analysis. Redact before provider egress, and require explicit policy for exporting sensitive operational data.
 
 Begin with observation and proposals. Automatic remediation must select a reviewed, versioned playbook with bounded targets, rate limits, cooldown, idempotency, health criteria and a stop condition. A log message must never become a shell command. Canary changes and rollback require evidence; repeated failed remediation escalates to a human instead of looping.
 
-## Delivery and acceptance
+## Delivery and acceptance {#delivery-and-acceptance}
 
 Implement in independently testable stages: scoped read-only broker and principal propagation; provider connection and resumable observation; draft/review artifacts; isolated approved execution; bounded remediation. The current administrator pipeline is not a shortcut around those stages.
 

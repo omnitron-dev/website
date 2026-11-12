@@ -1,4 +1,6 @@
 ---
+id: "titan/netron/services"
+slug: "/docs/titan/netron/services"
 sidebar_position: 1
 title: Services
 description: "@Service, @Public, service descriptors, and peers."
@@ -9,7 +11,7 @@ description: "@Service, @Public, service descriptors, and peers."
 A Netron service is a TypeScript class that the framework binds to a
 named, versioned identifier on the wire.
 
-## `@Service('name@version')`
+## `@Service('name@version')` {#servicenameversion}
 
 ```typescript
 @Service('users@1.0.0')
@@ -42,7 +44,7 @@ This is the canonical way to do API versioning. Clients pin to the
 version they were written for; servers can run multiple versions
 side-by-side until clients migrate.
 
-## `@Public()` — opt-in exposure
+## `@Public()` — opt-in exposure {#public--opt-in-exposure}
 
 Methods are private to the process by default. `@Public()` marks one
 as RPC-callable.
@@ -67,7 +69,7 @@ that look fine inside the process can be dangerous when exposed
 deprecated routes). `@Public()` requires an explicit decision per
 method.
 
-## Service descriptors
+## Service descriptors {#service-descriptors}
 
 When you register a `@Service` class, Netron extracts *service
 metadata* — a record built from `reflect-metadata` design types:
@@ -107,7 +109,7 @@ const names = peer?.getServiceNames();      // qualified names of exposed servic
 The Omnitron console exposes the same metadata via the operator
 service.
 
-## Selecting a service version
+## Selecting a service version {#selecting-a-service-version}
 
 HTTP and persistent Netron transports resolve names identically. An exact
 unversioned publication such as `orders` takes precedence over `orders@2.0.0`
@@ -118,7 +120,7 @@ to another version. Registration order does not change this decision.
 Removing one publication leaves the other versions available. Use explicit
 versions when an application depends on a specific wire contract.
 
-## Peers
+## Peers {#peers}
 
 Netron's runtime model has two peer types:
 
@@ -135,7 +137,7 @@ the framework wires services on its behalf.
 returns one; you get the typed proxy via its
 `queryInterface<T>('name@version')`.
 
-## Local vs remote calls — the same code
+## Local vs remote calls — the same code {#local-vs-remote-calls--the-same-code}
 
 A service in the same process is callable as a normal method —
 no RPC involved:
@@ -161,7 +163,7 @@ same code from outside the process goes through the wire.
 This means **you write services the same way regardless of where they
 are called from**. The wire-vs-local optimisation is invisible.
 
-## Multiple services per class? No.
+## Multiple services per class? No. {#multiple-services-per-class-no}
 
 One class = one service = one identifier. If a class has methods that
 belong to different services, split it into two classes.
@@ -169,7 +171,7 @@ belong to different services, split it into two classes.
 This is intentional. Lumping unrelated methods into one service makes
 the wire contract less coherent and complicates versioning.
 
-## Service-level decorators
+## Service-level decorators {#service-level-decorators}
 
 In addition to method-level decorators, you can apply `@Auth` at the
 **class** level — it then covers every `@Public` method on the class:
@@ -197,7 +199,7 @@ finer control). To allow anonymous access on one method, declare
 > level. `@RateLimit`, `@Cache`, and `@Public`'s other options are
 > method-level only.
 
-## Anti-patterns
+## Anti-patterns {#anti-patterns}
 
 - **Mutable service state.** Singleton services are shared across
   calls. State stored in `this` is shared state, with all the

@@ -1,4 +1,6 @@
 ---
+id: "titan/identifiers"
+slug: "/docs/titan/identifiers"
 sidebar_position: 6
 title: Identifiers
 description: Which ID generator to reach for, and why the default is time-ordered.
@@ -13,7 +15,7 @@ guarantee, and the differences matter most where the ID becomes a database key.
 import { generateUuidV7 } from '@omnitron-dev/titan/utils';
 ```
 
-## `generateUuidV7()` — the default for stored rows
+## `generateUuidV7()` — the default for stored rows {#generateuuidv7--the-default-for-stored-rows}
 
 An RFC 9562 UUIDv7: a 48-bit millisecond timestamp, then a 12-bit counter, then
 74 bits of randomness. Two properties follow, and both are worth having.
@@ -37,7 +39,7 @@ every ~64 IDs, so a burst pays one syscall rather than sixty-four.
 `generateUuid()` is an alias for this one. Prefer the explicit name — `Uuid`
 alone reads as "v4" to most people, and the version is the whole point.
 
-## The rest
+## The rest {#the-rest}
 
 | Function                    | Shape                          | For                                   |
 | --------------------------- | ------------------------------ | ------------------------------------- |
@@ -56,7 +58,7 @@ of the header.
 value is compared for equality when releasing — the point is that nobody can
 guess or reconstruct it, and ordering would be an invitation to try.
 
-## Choosing
+## Choosing {#choosing}
 
 Use `generateUuidV7()` for anything that lands in a table. Use a prefixed hex ID
 for things that live in memory or in a log line, where a human reading it

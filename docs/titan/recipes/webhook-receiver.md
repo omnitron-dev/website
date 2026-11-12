@@ -1,4 +1,6 @@
 ---
+id: "titan/recipes/webhook-receiver"
+slug: "/docs/titan/recipes/webhook-receiver"
 sidebar_position: 7
 title: Webhook receiver
 description: Validate signatures, enforce idempotency, route to handlers, isolate flaky downstream work.
@@ -12,7 +14,7 @@ that go wrong in production: signatures, replay protection,
 idempotency, and isolating slow downstream work from the
 acknowledgement window.
 
-## Shape
+## Shape {#shape}
 
 - **Signature verification.** Reject anything not signed by the
   expected sender — usually HMAC with a shared secret.
@@ -23,7 +25,7 @@ acknowledgement window.
 - **Dead-letter on failure.** Failures persist somewhere for
   inspection / manual retry — not lost.
 
-## Architecture
+## Architecture {#architecture}
 
 ```mermaid
 flowchart LR
@@ -42,7 +44,7 @@ flowchart LR
   Worker -- failure --> DLQ[(DLQ)]
 ```
 
-## Setup
+## Setup {#setup}
 
 ```typescript
 import { Module } from '@omnitron-dev/titan';
@@ -74,7 +76,7 @@ import { TitanMetricsModule } from '@omnitron-dev/titan-metrics';
 export class AppModule {}
 ```
 
-## Handler — verify, deduplicate, enqueue
+## Handler — verify, deduplicate, enqueue {#handler--verify-deduplicate-enqueue}
 
 ```typescript
 import { Service, Inject } from '@omnitron-dev/titan';
@@ -148,7 +150,7 @@ class WebhooksService {
 > `JSON.parse → JSON.stringify` can change a single byte and break
 > the HMAC.
 
-## Handler — async processing
+## Handler — async processing {#handler--async-processing}
 
 ```typescript
 import { Injectable } from '@omnitron-dev/titan';
@@ -171,7 +173,7 @@ class StripePaymentHandler {
 }
 ```
 
-## Cross-module wiring notes
+## Cross-module wiring notes {#cross-module-wiring-notes}
 
 | Concern                  | Wiring detail                                                                                       |
 | ------------------------ | --------------------------------------------------------------------------------------------------- |
@@ -183,7 +185,7 @@ class StripePaymentHandler {
 | DLQ                      | If using `titan-notifications` worker mode, failed deliveries auto-route to the Rotif DLQ           |
 | Metric per event-type    | `metrics.recordTyped('counter', 'webhook.received.total', { type: eventType, status }, 1)`         |
 
-## Production checklist
+## Production checklist {#production-checklist}
 
 - [ ] **Raw body** captured before JSON parse — required for HMAC
 - [ ] **Constant-time signature comparison** (`timingSafeEqual`) — never `===` on secrets
@@ -197,7 +199,7 @@ class StripePaymentHandler {
 - [ ] **Metrics on every step**: received, deduplicated, accepted, processed, failed
 - [ ] **Replay test in staging** — re-send the same event, assert it's deduplicated
 
-## See also
+## See also {#see-also}
 
 - [`titan-events`](../modules/events.mdx) — async dispatch
 - [`titan-notifications`](../modules/notifications.mdx) — for cross-pod queueing + DLQ

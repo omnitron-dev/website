@@ -1,4 +1,6 @@
 ---
+id: "omnitron/orchestrator"
+slug: "/docs/omnitron/orchestrator"
 sidebar_position: 5
 title: Orchestrator
 description: The per-app launch pipeline — bootstrap, fork, watch, hand-off.
@@ -31,13 +33,13 @@ orchestrator/
 └── build-service.ts                 — production bundle / tarball
 ```
 
-## Two launch modes
+## Two launch modes {#two-launch-modes}
 
 The orchestrator supports two distinct app-launch shapes. The
 mode is determined by the app's `defineSystem(...)` shape and the
 `bootstrap.{js,ts}` exports.
 
-### Classic mode
+### Classic mode {#classic-mode}
 
 A single child process runs the app's `bootstrap.{js,ts}` end-to-
 end. The bootstrap is responsible for creating every
@@ -52,7 +54,7 @@ management.
 | Use case                       | Legacy apps, monolith-style services               |
 | Crash semantics                | App-wide; whole bootstrap dies, daemon restarts it |
 
-### Module-worker mode (default for new apps)
+### Module-worker mode (default for new apps) {#module-worker-mode-default-for-new-apps}
 
 One child process per `IProcessEntry` declared in
 `defineSystem({processes: [...]})`. Each child imports **only**
@@ -71,7 +73,7 @@ The orchestrator auto-selects the mode based on whether the
 bootstrap exports a `defineSystem()` result with `processes: [...]`
 (module-worker mode) or a classic single-app module (classic mode).
 
-## App handle
+## App handle {#app-handle}
 
 `AppHandle` is the per-app supervisor record kept inside the
 orchestrator. It carries:
@@ -98,7 +100,7 @@ One `AppHandle` per app. The handle survives restarts; the
 `childProcess` / `supervisor` reference is replaced on each
 relaunch.
 
-## Launch pipeline
+## Launch pipeline {#launch-pipeline}
 
 ```mermaid
 sequenceDiagram
@@ -142,7 +144,7 @@ sequenceDiagram
 The ready handshake is mandatory — the daemon does not consider
 an app "running" until at least one child reports ready.
 
-## Bootstrap loader — `bootstrap-loader.ts`
+## Bootstrap loader — `bootstrap-loader.ts` {#bootstrap-loader--bootstrap-loaderts}
 
 Locates and loads the app's bootstrap module. Resolution order:
 
@@ -154,7 +156,7 @@ When the source is TypeScript, it routes through the embedded
 TS compiler. When the source is already compiled JS, it `import`s
 directly.
 
-## TS compiler — `ts-compiler.ts`
+## TS compiler — `ts-compiler.ts` {#ts-compiler--ts-compilerts}
 
 The declaration reader compiles TypeScript bootstrap definitions with esbuild so
 plain Node can inspect fresh topology before starting workers. Declaration reads,
@@ -187,7 +189,7 @@ watch. This checks the same compilation policy used by the resident owner.
 | Source maps                        | Not emitted (`sourcemap: false`)              |
 | Output location                    | Next to the source as `<name>.omnitron-compiled.mjs` (gitignored), unlinked after import in the daemon path — no global cache dir |
 
-## Dependency resolver — `dependency-resolver.ts`
+## Dependency resolver — `dependency-resolver.ts` {#dependency-resolver--dependency-resolverts}
 
 Reads the topology graph implied by each process's `topology`
 declarations (`expose` / `access`). Computes a startup order such
@@ -206,7 +208,7 @@ waits for the process declaring `topology: { expose: true }` on
 `SomeService` to be ready. Cycles are detected and reported as
 configuration errors at boot.
 
-## Service router — `service-router.ts`
+## Service router — `service-router.ts` {#service-router--service-routerts}
 
 Routes RPC calls between the orchestrator and individual app
 processes. When the daemon's `exec({name, service, method,
@@ -222,7 +224,7 @@ For pool-mode (`instances > 1`), the router dispatches through
 the PM pool's `execute()`, which load-balances across instances
 using a power-of-two-choices (P2C) policy.
 
-## File watcher — `file-watcher.ts`
+## File watcher — `file-watcher.ts` {#file-watcher--file-watcherts}
 
 In dev mode (or when an app's `watch` is enabled), the
 orchestrator runs a per-app `FileWatcher` built on Node's native
@@ -252,7 +254,7 @@ The default debounce is **300 ms**, overridable per app via the
 `watch` config; editor saves often produce multiple events, so
 the watcher collapses a burst to a single restart per window.
 
-## Classic launcher — `classic-launcher.ts`
+## Classic launcher — `classic-launcher.ts` {#classic-launcher--classic-launcherts}
 
 Forks `bootstrap-process.js` (a thin wrapper) and waits for ready
 handshake. Manages:
@@ -262,7 +264,7 @@ handshake. Manages:
 - Crash detection via exit-code observation.
 - Per-app crash-restart backoff timer.
 
-## Module-worker entrypoint — `module-worker-process.ts`
+## Module-worker entrypoint — `module-worker-process.ts` {#module-worker-entrypoint--module-worker-processts}
 
 The generic `@Process`-compatible class the PM worker-runtime
 instantiates for each module-based topology entry (one per
@@ -286,7 +288,7 @@ A key invariant: the child imports the **single module file**
 declared in `IProcessEntry.module` — not the entire bootstrap —
 so an app with 10 processes loads 10 disjoint subsets of code.
 
-## Titan identity and installed application paths
+## Titan identity and installed application paths {#titan-identity-and-installed-application-paths}
 
 The application and its bootstrap adapter must resolve the same physical Titan installation. Two copies of the same version export different `Container` classes. If dependency injection reports an identity mismatch, check both paths in the startup diagnostic and restore the application's frozen installation.
 
@@ -300,7 +302,7 @@ For a development SDK update, pause only the affected source watchers and applic
 
 For an installed application, keep each code revision and its dependencies in a distinct physical directory. Preserve the project's registration and state paths. Verify the new launch through the existing owner, repeat the ordinary application start, and test the return to the previous installation. Check job commands separately when a scheduled job launches its own interpreter. An ordinary local development stack runs its working tree.
 
-## Process janitor — `process-janitor.ts`
+## Process janitor — `process-janitor.ts` {#process-janitor--process-janitorts}
 
 Background sweep that reaps:
 
@@ -313,7 +315,7 @@ Runs periodically; never aggressive enough to kill legitimate
 children. The janitor's existence means a daemon restart doesn't
 leave a leak of orphaned child PIDs.
 
-## Build service — `build-service.ts`
+## Build service — `build-service.ts` {#build-service--build-servicets}
 
 Pre-bundles each process entry point (via esbuild) into the
 app's `.omnitron-build/` directory so the daemon imports a single
@@ -328,7 +330,7 @@ import-graph watcher used for bootstrap-mode hot reload.
 > `<projectRoot>/.omnitron/artifacts/<app>-<version>.tar.gz`. The
 > CLI reports the artifact path, version, size, and checksum.
 
-## Reload semantics
+## Reload semantics {#reload-semantics}
 
 `omnitron reload <app>` triggers a **graceful** restart:
 
@@ -342,7 +344,7 @@ Reload differs from restart: restart stops everything first,
 incurring a downtime window; reload keeps capacity online
 throughout.
 
-## Watch control (operator API)
+## Watch control (operator API) {#watch-control-operator-api}
 
 The `OmnitronDaemon` service exposes:
 
@@ -355,7 +357,7 @@ The `OmnitronDaemon` service exposes:
 The CLI surfaces these implicitly through the `--no-watch` flag
 on `omnitron up` — at runtime, you can toggle without restart.
 
-## Per-app observability
+## Per-app observability {#per-app-observability}
 
 Each launched app reports:
 
@@ -368,7 +370,7 @@ The orchestrator instruments every fork so these signals are
 automatic — apps don't have to wire anything explicitly beyond
 loading `titan-health` / `titan-metrics` modules.
 
-## Failure recovery
+## Failure recovery {#failure-recovery}
 
 | Symptom                            | Orchestrator response                                          |
 | ---------------------------------- | -------------------------------------------------------------- |
@@ -379,7 +381,7 @@ loading `titan-health` / `titan-metrics` modules.
 | Bootstrap module not found         | Mark `crashed`; surface error from the loader                  |
 | Janitor finds orphan               | `SIGKILL` the orphan; log                                      |
 
-## Anti-patterns
+## Anti-patterns {#anti-patterns}
 
 - **Single huge bootstrap with many `@Module`s in classic mode.**
   Loads everything in one process. Prefer module-worker mode with
@@ -397,7 +399,7 @@ loading `titan-health` / `titan-metrics` modules.
   orchestrator can run both modes side-by-side, but only across
   apps — within one app, the mode is global.
 
-## See also
+## See also {#see-also}
 
 - [Daemon](./daemon.md) — what invokes the orchestrator
 - [Architecture](./architecture.md) — where the orchestrator fits
@@ -407,7 +409,7 @@ loading `titan-health` / `titan-metrics` modules.
   routes through the service router
 - [CLI](./cli.md) — `start`, `stop`, `reload`, `restart`, `scale`
 
-## Stop acknowledgements
+## Stop acknowledgements {#stop-acknowledgements}
 
 An application is marked `stopped` only after its supervisor, classic process group
 and topology pools confirm termination. Failed pools retain their handles for

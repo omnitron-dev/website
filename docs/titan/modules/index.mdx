@@ -1,9 +1,10 @@
 ---
+id: "titan/modules/index"
+slug: "/docs/titan/modules"
 sidebar_position: 1
 title: Modules
 ---
 
-import ModuleBadge from '@site/src/components/ModuleBadge';
 
 # Titan Modules
 
@@ -17,16 +18,16 @@ from and what its guarantees are.
 | **Official** | Official    | `packages/titan-*` in the `omnitron-dev` monorepo | Maintained by the Omnitron team; independent versions |
 | **Community**| Community     | Third-party npm packages                      | Audit before adopting; no maintenance commitment    |
 
-Every module page in this section starts with a `<ModuleBadge ... />`
+Every module page in this section starts with a `<span class="module-badge"></span>`
 chip that reflects its tier.
 
 > Want a bird's-eye view of how the 16 modules interlock — who
 > depends on whom, which combinations form common stacks, when to
 > prefer one over a similar one? Read the **[Module map](./module-map.mdx)**.
 
-## Built-in modules
+## Built-in modules {#built-in-modules}
 
-<ModuleBadge origin="built-in" pkg="@omnitron-dev/titan" subpath="/module/*" />
+<span class="module-badge">built-in · @omnitron-dev/titan · /module/*</span>
 
 Config and Logger ship inside `@omnitron-dev/titan` and are **auto-loaded**
 unless you pass `disableCoreModules: true`. RLS guards are imported explicitly.
@@ -38,9 +39,9 @@ No extra Titan package is needed for these entry points.
 | [`LoggerModule`](./logger.mdx) | `/module/logger`         | Structured pino-based logging with transports + processors             |
 | [RLS guards](./rls.md) | `/module/rls` | Context guard decorators; no module registration |
 
-## Official modules (`titan-*` packages)
+## Official modules (`titan-*` packages) {#official-modules-titan--packages}
 
-<ModuleBadge origin="official" pkg="@omnitron-dev/titan-*" />
+<span class="module-badge">official · @omnitron-dev/titan-*</span>
 
 Fourteen independent packages in the `omnitron-dev` monorepo. Each is
 versioned separately; adopting one does not pin you to others.
@@ -62,15 +63,15 @@ versioned separately; adopting one does not pin you to others.
 | [`SchedulerModule`](./scheduler.mdx)             | `@omnitron-dev/titan-scheduler`      | Cron + interval + timeout with persistence                       |
 | [`TelemetryRelayService`](./telemetry-relay.mdx) | `@omnitron-dev/titan-telemetry-relay` | Store-and-forward telemetry pipeline (no module)                |
 
-## Community modules
+## Community modules {#community-modules}
 
-<ModuleBadge origin="community" pkg="@your-scope/titan-*" />
+<span class="module-badge">community · @your-scope/titan-*</span>
 
 No third-party modules registered yet. See [Community
 Modules](./community.mdx) for what counts, how to adopt safely, and
 how to publish your own.
 
-## Composition
+## Composition {#composition}
 
 Modules compose through the standard `imports` chain — order does
 not matter, the container resolves the dependency graph:
@@ -95,7 +96,7 @@ not matter, the container resolves the dependency graph:
 export class AppModule {}
 ```
 
-## Redis dependency among official modules
+## Redis dependency among official modules {#redis-dependency-among-official-modules}
 
 Five official modules depend on a Redis client provided by
 `TitanRedisModule`:
@@ -110,7 +111,7 @@ Five official modules depend on a Redis client provided by
 Register `TitanRedisModule.forRoot(...)` first; the rest pick up the
 shared client automatically.
 
-## Choosing modules
+## Choosing modules {#choosing-modules}
 
 Most backends start with a small set:
 

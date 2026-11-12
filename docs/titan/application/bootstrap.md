@@ -1,4 +1,6 @@
 ---
+id: "titan/application/bootstrap"
+slug: "/docs/titan/application/bootstrap"
 sidebar_position: 1
 title: Bootstrap
 description: How Application.create + start actually run.
@@ -33,7 +35,7 @@ sequenceDiagram
   App-->>Code: state: Started
 ```
 
-## Step 1 — `Application.create(...)`
+## Step 1 — `Application.create(...)` {#step-1--applicationcreate}
 
 Two overloads:
 
@@ -89,7 +91,7 @@ What happens inside `create`:
 After `create` returns, the container is fully wired but **no
 lifecycle hook has fired**. The state is `Created`.
 
-## Step 2 — `app.start()`
+## Step 2 — `app.start()` {#step-2--appstart}
 
 ```typescript
 await app.start();
@@ -125,7 +127,7 @@ reached `onStart` (in reverse order) via their `onStop`, disposes the
 container, transitions to `Failed`, and rejects with the original
 error.
 
-## Step 3 — running
+## Step 3 — running {#step-3--running}
 
 Between `start` and `stop`, the application does almost nothing
 itself. The kernel waits, listening for:
@@ -137,9 +139,9 @@ itself. The kernel waits, listening for:
 When one of these fires, the kernel transitions to `Stopping` and
 runs the shutdown coordinator (see [Shutdown](./shutdown.md)).
 
-## Useful variants
+## Useful variants {#useful-variants}
 
-### `createAndStartApp` — when you want both calls together
+### `createAndStartApp` — when you want both calls together {#createandstartapp--when-you-want-both-calls-together}
 
 ```typescript
 import { createAndStartApp } from '@omnitron-dev/titan';
@@ -166,7 +168,7 @@ The function calls `createApp(...)`, registers any modules in the
 list via `app.use()`, then awaits `app.start()`. Use when you don't
 need the intermediate `Created` state.
 
-### `titan()` — the simplest entry point
+### `titan()` — the simplest entry point {#titan--the-simplest-entry-point}
 
 The Simple API in `@omnitron-dev/titan/application` (re-exported as
 the default export of the package) wraps everything:
@@ -186,13 +188,13 @@ shutdown enabled, scan paths set. Use for prototypes and small apps;
 for production stacks, use `Application.create` explicitly so the
 configuration is visible.
 
-## Bootstrap diagnostics
+## Bootstrap diagnostics {#bootstrap-diagnostics}
 
 Set `debug: true` or `logging: { level: 'debug' }` to see each phase
 in the structured log. Look for `phase` and `provider` fields to
 trace lifecycle ordering.
 
-## Anti-patterns
+## Anti-patterns {#anti-patterns}
 
 - **Calling `start` twice.** It is a no-op after the first
   successful start, but a reliance on idempotency hides bugs.

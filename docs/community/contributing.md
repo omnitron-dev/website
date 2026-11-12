@@ -1,4 +1,6 @@
 ---
+id: "community/contributing"
+slug: "/docs/community/contributing"
 sidebar_position: 1
 title: Contributing
 description: Set up the source or documentation repository and verify a focused change.
@@ -16,7 +18,7 @@ Omnitron maintains two public repositories:
 Each repository has its own package manifest and lockfile. Clone them as
 sibling directories when working on documentation that needs source checks.
 
-## Work on the runtime
+## Work on the runtime {#work-on-the-runtime}
 
 Install Node.js 22+ and the pnpm version declared in `package.json`.
 Docker is needed for tests that use external services.
@@ -62,7 +64,7 @@ unit-only mode; unavailable Redis does not silently select it. Read
 [Testing](../testing/index.md) for the distinctions between unit,
 integration and cross-runtime tests.
 
-## Update dependencies together
+## Update dependencies together {#update-dependencies-together}
 
 Update manifests and the lockfile in an isolated checkout, then build and test
 before changing a running deployment. Use the package manager version pinned in
@@ -136,7 +138,7 @@ checks that every framework link resolves into the selected clone. pnpm 12
 lockfiles contain separate YAML documents for tooling and application packages;
 release tooling reads the application importer graph across those documents.
 
-## Work on the documentation
+## Work on the documentation {#work-on-the-documentation}
 
 From the parent directory of your source checkout:
 
@@ -169,7 +171,7 @@ These checks compare inventories, CLI commands, package subpaths, defaults,
 service names and catalog coverage with source. They do not establish that
 every documentation example runs; execute the examples you change.
 
-## Write a useful page
+## Write a useful page {#write-a-useful-page}
 
 State the outcome and prerequisites first. Use complete file names for
 runnable examples and label excerpts as excerpts. Explain configuration
@@ -181,9 +183,9 @@ they affect the reader.
 - Use neutral example names and reserved example domains.
 - Link to public source paths that a fresh checkout can resolve.
 - Mark proposals **Design RFC** and distinguish them from shipped APIs.
-- Add a page to `sidebars.ts` so readers can discover it.
+- Add a page to `src/data/sidebars.json` so readers can discover it.
 
-## Change the code
+## Change the code {#change-the-code}
 
 Follow the package's existing conventions. Preserve public API compatibility
 unless the change deliberately introduces a documented migration. For a bug
@@ -192,7 +194,7 @@ fix, add a regression test that exercises the failed behaviour.
 Keep type-only imports explicit and use `.js` extensions for relative ESM
 imports. Use the repository's lint and formatting configuration.
 
-## Submit a change
+## Submit a change {#submit-a-change}
 
 Open a focused pull request in the repository you changed. Describe the
 problem, the resulting behaviour and the checks you actually ran. Link a
@@ -202,7 +204,7 @@ Use a descriptive conventional commit title, such as
 `fix(titan-cache): invalidate tagged entries` or
 `docs(netron): explain HTTP startup`.
 
-## Release process
+## Release process {#release-process}
 
 The repository uses Xec as its scripting engine. Run the checked-in recipes through
 the pinned CLI installed by `pnpm install --frozen-lockfile`; `pnpm release` is the
@@ -275,7 +277,7 @@ If npm reports an expired session, run
 `npm whoami --registry=https://registry.npmjs.org/`. Credentials remain in
 npm's normal configuration; qualification receipts contain no tokens.
 
-### Browser approval and recovery
+### Browser approval and recovery {#browser-approval-for-a-package-batch}
 
 Complete the npm challenge in the browser. If npm offers temporary approval for
 the current IP and token, it can cover subsequent uploads during that period.
@@ -351,7 +353,7 @@ lost dispatch responses, resumed builds and incomplete evidence. Update tests
 verify that planning cannot activate a backend and that uncertain activation is
 not repeated.
 
-## Report a problem
+## Report a problem {#report-a-problem}
 
 Include package versions, Node.js version, operating system, expected
 behaviour, observed behaviour and a minimal reproduction in a

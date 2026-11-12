@@ -1,4 +1,6 @@
 ---
+id: "titan/configuration/hot-reload"
+slug: "/docs/titan/configuration/hot-reload"
 sidebar_position: 4
 title: Configuration Hot Reload
 description: Change config without restarting — when, how, and the gotchas.
@@ -25,7 +27,7 @@ The rest of this page walks through each of those in detail, with
 source references into
 [`packages/titan/src/modules/config/`](https://github.com/omnitron-dev/omni/tree/main/packages/titan/src/modules/config).
 
-## When hot reload is the right tool
+## When hot reload is the right tool {#when-hot-reload-is-the-right-tool}
 
 It saves a restart cycle. Useful for:
 
@@ -45,7 +47,7 @@ It is the **wrong** tool for:
 
 For "wrong tool" cases, restart the process.
 
-## Enabling
+## Enabling {#enabling}
 
 File watching is **opt-in**. Turn it on with `watchForChanges`:
 
@@ -65,7 +67,7 @@ handler is what calls `reload()` (the watcher wiring in `ConfigService.initializ
 filters the source list to `type === 'file'` and ignores the rest
 (`ConfigWatcherService.watch`).
 
-## Subscribing to changes
+## Subscribing to changes {#subscribing-to-changes}
 
 Register a listener with `ConfigService.onChange()`. It adds the
 listener to an internal `Set` and returns an unsubscribe function that
@@ -112,7 +114,7 @@ interface IConfigChangeEvent {
 }
 ```
 
-## What gets emitted
+## What gets emitted {#what-gets-emitted}
 
 A file change triggers a full `reload()`, which fires **one** event
 with `path: ''`, `source: 'reload'`, and `oldValue` / `newValue`
@@ -127,7 +129,7 @@ So inside an `onChange` handler, branch on `event.source` (or on
 `ConfigService` rather than relying on a per-key payload from a file
 reload.
 
-## Validation on reload
+## Validation on reload {#validation-on-reload}
 
 `reload()` only re-validates when `validateOnStartup` is set and a
 schema is present (`validateOnStartup` in `ConfigService`). In that case a reload
@@ -146,14 +148,14 @@ applies.
 > the new config unconditionally. Enable `validateOnStartup` if you
 > want bad reloads rejected.
 
-## Atomicity
+## Atomicity {#atomicity}
 
 `reload()` re-loads and merges the *whole config*, runs validation,
 then swaps the result in atomically. There is no intermediate state
 where half the keys are updated and half are not. A single
 whole-config `onChange` event fires after the swap.
 
-## Watch mechanism
+## Watch mechanism {#watch-mechanism}
 
 The watcher resolves each file source's path and opens a Node
 `fs.watch` on it, de-duplicating already-watched paths
@@ -167,7 +169,7 @@ calls it on both `onStop` and `onDestroy`. On filesystems where
 `fs.watch` is unreliable (some NFS mounts), prefer a restart-on-change
 deployment or a `remote` source instead.
 
-## Multi-pod considerations
+## Multi-pod considerations {#multi-pod-considerations}
 
 Hot reload changes config **only on the pod where the file was
 modified**. For multi-pod deployments:
@@ -180,7 +182,7 @@ modified**. For multi-pod deployments:
 The `remote` source type (experimental) is built for the
 push-to-all-pods case; it polls a central server.
 
-## Anti-patterns
+## Anti-patterns {#anti-patterns}
 
 - **Treating the `onChange` callback as transactional.** If your
   handler fails partway, you have inconsistent state. Make handlers

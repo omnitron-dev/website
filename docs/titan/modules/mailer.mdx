@@ -1,17 +1,18 @@
 ---
+id: "titan/modules/mailer"
+slug: "/docs/titan/modules/mailer"
 title: titan-mailer
 ---
 
-import ModuleBadge from '@site/src/components/ModuleBadge';
 
 # titan-mailer
 
-<ModuleBadge origin="official" pkg="@omnitron-dev/titan-mailer" status="stable" />
+<span class="module-badge">official · @omnitron-dev/titan-mailer · stable</span>
 
 Transactional email for Titan: lifecycle-managed Nodemailer SMTP pools, typed templates,
 a concrete email notification channel, and a durable outbox consumer using Titan Notifications.
 
-## Application module
+## Application module {#application-module}
 
 ```ts
 import { MailerModule, MailerService } from '@omnitron-dev/titan-mailer';
@@ -43,7 +44,7 @@ Public errors contain a classification, never credentials, server transcripts or
 `MailDeliveryError.retryable` distinguishes temporary failures from invalid/configuration/
 permanent failures. Nodemailer's hidden pool requeue is disabled: one queue owns retries.
 
-## Templates
+## Templates {#templates}
 
 ```ts
 import { MailTemplates, escapeMailHtml } from '@omnitron-dev/titan-mailer';
@@ -62,7 +63,7 @@ The registry is renderer-independent: Handlebars, MJML or a function may return 
 result in the application's business transaction. Rendering never makes a network request.
 Plaintext is required; the module does not invent it by stripping arbitrary scientific HTML.
 
-## Redis notification workers
+## Redis notification workers {#redis-notification-workers}
 
 Use `NotificationsModule.forRoot({ redis })`, inject `NOTIFICATIONS_TRANSPORT`, and create
 `MailDeliveryWorker` from `@omnitron-dev/titan-mailer/notifications` with that bus,
@@ -83,7 +84,7 @@ trimmed wake-ups; it is bounded by `batchSize`, `intervalMs` and `maxConcurrent`
 consumers share a group. Worker health covers transport connectivity and failed reconciliation/
 delivery. Failed delivery policy and administrative re-drive remain in the durable store.
 
-### PostgreSQL delivery store
+### PostgreSQL delivery store {#postgresql-delivery-store}
 
 `@omnitron-dev/titan-mailer/postgres` exports `PostgresMailOutbox`, the database port,
 and `POSTGRES_MAIL_OUTBOX_SCHEMA`. Apply the schema in your application migration and
@@ -122,7 +123,7 @@ Use a dedicated Redis database/ACL, bounded streams and retention for durable de
 It shares, and does not close, its injected MailerService. Critical security messages use
 the durable outbox path, not optional marketing notification preferences.
 
-## Delivery diagnostics
+## Delivery diagnostics {#delivery-diagnostics}
 
 Use the `PostgresMailOutbox` option `onDelivery` to forward committed outcomes to
 Titan Logger and therefore Omnitron's Console and CLI:
@@ -162,7 +163,7 @@ subject reference for operator correlation, not a raw email or unkeyed email has
 An unknown account produces no mail; `queued` means SQL committed; `accepted` means
 SMTP accepted the message; none of these establishes arrival in the recipient's inbox.
 
-## Verification
+## Verification {#verification}
 
 `pnpm test` uses a real local SMTP server and independent MIME parser, tests STARTTLS
 refusal, reply/header injection, mixed content, rejected recipients, queue capacity and

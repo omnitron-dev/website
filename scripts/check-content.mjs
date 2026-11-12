@@ -27,7 +27,7 @@ function walk(dir) {
     if (/\.(mdx?|tsx?)$/.test(file) && privatePath.test(readFileSync(file, 'utf8'))) failures.push(`${relative(root, file)}: local-only path in public content`);
   }
 }
-for (const dir of ['docs', 'blog', 'src', 'scripts', 'static']) walk(join(root, dir));
+for (const dir of ['docs', 'pages', 'src', 'scripts', 'static']) walk(join(root, dir));
 if (!count) throw new Error('No public content was scanned');
 for (const failure of failures) console.error(failure);
 console.log(`${count} public files scanned; ${failures.length} boundary violations`);

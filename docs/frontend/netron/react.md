@@ -1,4 +1,6 @@
 ---
+id: "frontend/netron/react"
+slug: "/docs/frontend/netron/react"
 sidebar_position: 4
 title: netron-react
 description: Production-grade React bindings for Netron RPC — type-safe hooks, multi-backend, auth.
@@ -38,7 +40,7 @@ pnpm add @omnitron-dev/netron-react @omnitron-dev/netron-browser
 
 `netron-browser` is a peer dependency — install both.
 
-## Provider
+## Provider {#provider}
 
 ```tsx
 import { NetronReactClient, NetronProvider } from '@omnitron-dev/netron-react';
@@ -81,7 +83,7 @@ initializing HTTP. See [transport selection](./transports.md#react-transport-sel
 > retryCondition? }`) — there is no `maxAttempts`. `defaults` is a
 > flat object, not `{ queryOptions: … }`.
 
-## Hooks at a glance
+## Hooks at a glance {#hooks-at-a-glance}
 
 | Hook | Form | Purpose |
 | ---- | ---- | ------- |
@@ -109,7 +111,7 @@ Plus context hooks:
 > them directly and build the `queryKey` / `queryFn` (or `event`)
 > yourself.
 
-## `useQuery` — the workhorse
+## `useQuery` — the workhorse {#usequery--the-workhorse}
 
 Through the typed proxy (recommended — pass a positional args
 array, options omit `queryKey`/`queryFn` because the proxy
@@ -167,7 +169,7 @@ interface QueryResult<TData, TError = NetronError> {
 }
 ```
 
-### Query options
+### Query options {#query-options}
 
 ```tsx
 users.getUser.useQuery([userId], {
@@ -203,14 +205,14 @@ interface RetryConfig {
 }
 ```
 
-### Cache key
+### Cache key {#cache-key}
 
 In the proxy form the key is `[service, method, ...args]`. Two
 components calling the same query share data; one invalidation
 refreshes both. In the standalone form you provide the `queryKey`
 directly.
 
-### `keepPreviousData`
+### `keepPreviousData` {#keeppreviousdata}
 
 When the `queryKey` changes (paging, filtering, switching
 selection), keep showing the previous key's data while the new
@@ -236,7 +238,7 @@ function UserPager({ id }: { id: string }) {
 Supported on `useQuery`, `useInfiniteQuery` and per-query in
 `useQueries`.
 
-## `useMutation` — for writes
+## `useMutation` — for writes {#usemutation--for-writes}
 
 Through the proxy (the `mutationFn` is supplied automatically;
 `mutate`'s argument is the method's argument):
@@ -280,7 +282,7 @@ context)`, `onSettled(data, error, variables, context)`, `retry`,
 `retryDelay`, and `invalidateQueries: QueryKey[]` (invalidated on
 success).
 
-### Optimistic updates
+### Optimistic updates {#optimistic-updates}
 
 The cache is reached through `client.getQueryCache()` for direct
 reads/writes (`get` / `set`), and the client itself exposes the
@@ -307,7 +309,7 @@ const updateProfile = users.updateProfile.useMutation({
 });
 ```
 
-## `useSubscription` — live data
+## `useSubscription` — live data {#usesubscription--live-data}
 
 `useSubscription` is a **standalone, event-based** hook (it is not
 a method on the service proxy). Subscribe to a named server event
@@ -341,7 +343,7 @@ timeout, strategy }`), `enabled`, `onData`, `onError`, `onConnect`,
 `onDisconnect`. The React subscription manager re-registers events after the WebSocket reconnects.
 Recover missed events from the service's cursor or a fresh snapshot.
 
-## `useInfiniteQuery` — pagination
+## `useInfiniteQuery` — pagination {#useinfinitequery--pagination}
 
 Standalone hook. Supply `queryKey`, a `queryFn` that receives the
 typed `pageParam`, `getNextPageParam`, and `initialPageParam`:
@@ -393,7 +395,7 @@ return (
 > `InfiniteQueryFunctionContext`) are exported from the package
 > root.
 
-## `useQueries` — parallel reads
+## `useQueries` — parallel reads {#usequeries--parallel-reads}
 
 Standalone hook. Each entry is a **full query config** (`queryKey`
 + `queryFn`, plus any per-query options) — not a
@@ -432,7 +434,7 @@ Each entry is a `QueryObserverResult<T>` (the same shape as
 parallel. `suspense`, `useErrorBoundary` and `keepPreviousData`
 are honoured **per query**.
 
-## Suspense + error boundaries
+## Suspense + error boundaries {#suspense--error-boundaries}
 
 There is **no** `useSuspenseQuery` hook. Suspense is an **option**
 on the existing hooks — `suspense: true` makes the hook throw the
@@ -469,7 +471,7 @@ Both `suspense` and `useErrorBoundary` are supported on `useQuery`,
 `useInfiniteQuery` and per-query in `useQueries`. (When `suspense`
 is on, query errors escalate to the error boundary automatically.)
 
-## `useService` — typed proxy
+## `useService` — typed proxy {#useservice--typed-proxy}
 
 The recommended entry point. Returns a proxy where every method
 exposes `.call`, `.useQuery` and `.useMutation`:
@@ -486,7 +488,7 @@ Types flow from the imported interface — no schema sync,
 no codegen, no shape drift. (`useInfiniteQuery`, `useQueries` and
 `useSubscription` are standalone — see their sections.)
 
-### Custom service hook
+### Custom service hook {#custom-service-hook}
 
 ```tsx
 import { createServiceHook } from '@omnitron-dev/netron-react';
@@ -503,7 +505,7 @@ function Component() {
 with a service name — useful when many components hit the same
 service.
 
-## Authentication
+## Authentication {#authentication}
 
 `@omnitron-dev/netron-react/auth` provides an auth context + route
 guards. Configure the provider with a `config` block and an
@@ -554,7 +556,7 @@ refresh, getAuthHeaders, hasRole, hasPermission, hasAnyRole,
 hasAllRoles }`. (`useUser`, `useIsAuthenticated` and
 `useAuthRequired` are convenience selectors.)
 
-### Guards
+### Guards {#guards}
 
 ```tsx
 // Render children only when authenticated; otherwise show `fallback`
@@ -584,7 +586,7 @@ hasAllRoles }`. (`useUser`, `useIsAuthenticated` and
 Exported guards: `AuthGuard`, `GuestGuard`, `RoleGuard`,
 `PermissionGuard`, `Show`, `Hide`.
 
-## Multi-backend support
+## Multi-backend support {#multi-backend-support}
 
 When the app talks to several Netron servers — e.g., one for
 identity, one for media, one for analytics — use
@@ -634,7 +636,7 @@ function Component() {
 `shared` block (timeout / headers / auth applied to all backends);
 `routing` supports `patterns` and explicit `services` maps.
 
-### Backend-aware hooks
+### Backend-aware hooks {#backend-aware-hooks}
 
 | Hook | Purpose |
 | ---- | ------- |
@@ -646,7 +648,7 @@ function Component() {
 | `useAllBackendsConnected()` | True iff all backends connected |
 | `useAnyBackendConnected()` | True iff at least one connected |
 
-### Backend-aware components
+### Backend-aware components {#backend-aware-components}
 
 ```tsx
 // Only render children when this backend is connected:
@@ -677,7 +679,7 @@ function Component() {
 <BackendStatus backend="analytics" />
 ```
 
-## Connection-aware rendering (single backend)
+## Connection-aware rendering (single backend) {#connection-aware-rendering-single-backend}
 
 ```tsx
 import { ConnectionAware, RequireConnection } from '@omnitron-dev/netron-react';
@@ -695,7 +697,7 @@ import { ConnectionAware, RequireConnection } from '@omnitron-dev/netron-react';
 </RequireConnection>
 ```
 
-## Cache management
+## Cache management {#cache-management}
 
 The **client** exposes the broad-stroke cache operations; the
 `QueryCache` (via `client.getQueryCache()`) exposes per-key
@@ -759,7 +761,7 @@ client.invalidateQueries({ queryKey: ['users', 'getUser', id], exact: true }); /
 client.invalidateQueries({ stale: true });                               // every stale query
 ```
 
-## SSR support
+## SSR support {#ssr-support}
 
 ```tsx
 // On the server, after running your queries:
@@ -775,7 +777,7 @@ config for SSR mode. `useHydration()` exposes the hydration flag
 for components that must avoid a hydration mismatch on first
 render.
 
-## State management
+## State management {#state-management}
 
 `netron-react` does **not** ship a general-purpose state library.
 (An earlier unexported `state/` atom module was removed — there is
@@ -786,7 +788,7 @@ use React's own primitives; for app-level stores prefer Prism's
 belongs in the query cache, not a
 separate store.
 
-## Devtools
+## Devtools {#devtools}
 
 ```tsx
 import { NetronDevtools } from '@omnitron-dev/netron-react/devtools';
@@ -799,7 +801,7 @@ import { NetronDevtools } from '@omnitron-dev/netron-react/devtools';
 > `DevToolsConfig` type. Don't rely on a visual devtools panel
 > yet.
 
-## Testing
+## Testing {#testing}
 
 `@omnitron-dev/netron-react/test` ships an in-memory test
 provider + mock helpers (no real WebSocket / fetch):
@@ -847,7 +849,7 @@ Also exported: `createTestClient`, the query helpers
 `expectLoading` / `expectSuccess` / `expectError`, and timer
 utilities `advanceTimersAndFlush` / `nextTick`.
 
-## Subpaths
+## Subpaths {#subpaths}
 
 The package exposes exactly these entry points:
 
@@ -864,7 +866,7 @@ The package exposes exactly these entry points:
 hooks and `useService` are all on the **root** entry — there is no
 `/core`, `/service`, `/multi-backend` or `/state` subpath.
 
-## Best practices
+## Best practices {#best-practices}
 
 - **Prefer `useService` over raw `useQuery`.** Types flow from
   the interface; refactors are safe.
@@ -882,7 +884,7 @@ hooks and `useService` are all on the **root** entry — there is no
 - **`enabled: false`** for conditional queries — better than an
   early return from the component (preserves cache + hook order).
 
-## Anti-patterns
+## Anti-patterns {#anti-patterns}
 
 - **Calling `useQuery` inside loops/conditionals.** React hooks
   rules — use `useQueries` for a dynamic set.
@@ -899,7 +901,7 @@ hooks and `useService` are all on the **root** entry — there is no
 - **Polling instead of `useSubscription`** when the server emits
   the event. Subscriptions are cheaper and more responsive.
 
-## See also
+## See also {#see-also}
 
 - [netron-browser](./browser.md) — the underlying transport
 - [Caching](./caching.md) — cache internals + invalidation

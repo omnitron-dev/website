@@ -1,4 +1,6 @@
 ---
+id: "titan/di/providers"
+slug: "/docs/titan/di/providers"
 sidebar_position: 2
 title: Providers
 description: The provider types Nexus understands and the helpers that build them.
@@ -25,7 +27,7 @@ import {
 } from '@omnitron-dev/titan/nexus';
 ```
 
-## 1. ClassProvider — `useClass`
+## 1. ClassProvider — `useClass` {#1-classprovider--useclass}
 
 The default. The container calls `new` on the class, resolving its
 constructor dependencies first.
@@ -53,7 +55,7 @@ becomes. The bare-class form is shorthand:
 Use when: the value is a class you control and the container can
 construct it.
 
-## 2. ValueProvider — `useValue`
+## 2. ValueProvider — `useValue` {#2-valueprovider--usevalue}
 
 A pre-built value. The container hands out the same value every time.
 
@@ -72,7 +74,7 @@ container.register(token, provider);
 
 Use when: the value is data, an external object, or a constant.
 
-## 3. FactoryProvider — `useFactory`
+## 3. FactoryProvider — `useFactory` {#3-factoryprovider--usefactory}
 
 A function called once (per scope) to produce the value. The factory
 can declare its own dependencies via `inject`.
@@ -111,7 +113,7 @@ const redis = await container.resolveAsync(REDIS_CLIENT);
 Use when: the value requires async setup, complex construction
 logic, or a runtime decision.
 
-## 4. TokenProvider — `useToken`
+## 4. TokenProvider — `useToken` {#4-tokenprovider--usetoken}
 
 Aliases one token to another. Resolving the alias returns whatever
 the other token resolves to.
@@ -131,7 +133,7 @@ Use when: you want two tokens to refer to the same object —
 feature flags that gate which implementation, abstraction wrappers,
 gradual migration between two interfaces.
 
-## 5. MultiProvider — `multi: true` (or `createMultiProvider`)
+## 5. MultiProvider — `multi: true` (or `createMultiProvider`) {#5-multiprovider--multi-true-or-createmultiprovider}
 
 Multiple providers register against the same multi-token. Resolving
 returns an array.
@@ -149,7 +151,7 @@ const validators = container.resolve(VALIDATORS);  // IValidator[]
 
 See [Multi-injection](./multi-injection.md) for the full pattern.
 
-## Conditional providers — `createConditionalProvider`
+## Conditional providers — `createConditionalProvider` {#conditional-providers--createconditionalprovider}
 
 ```typescript
 import { createConditionalProvider } from '@omnitron-dev/titan/nexus';
@@ -171,7 +173,7 @@ The `condition` predicate runs at resolution time against the
 used. (`condition` and `fallback` are first-class fields on every
 provider shape — see `types.ts`.)
 
-## Provider options summary
+## Provider options summary {#provider-options-summary}
 
 | Option       | Default              | Effect                                                      |
 | ------------ | -------------------- | ----------------------------------------------------------- |
@@ -182,7 +184,7 @@ provider shape — see `types.ts`.)
 | `condition`  | —                    | Context predicate; falls back to `fallback` when false      |
 | `fallback`   | —                    | Provider used when `condition` returns false                |
 
-## Provider predicates
+## Provider predicates {#provider-predicates}
 
 Helper predicates for introspection:
 
@@ -193,7 +195,7 @@ Helper predicates for introspection:
 | `isMultiProvider(provider)`    | Is it registered as `multi: true`?          |
 | `hasScope(provider)`           | Does the provider have an explicit scope?   |
 
-## Choosing between provider types
+## Choosing between provider types {#choosing-between-provider-types}
 
 | If you have …                                                | Use                              |
 | ------------------------------------------------------------ | -------------------------------- |
@@ -204,7 +206,7 @@ Helper predicates for introspection:
 | Multiple independent contributions to one consumer           | `multi: true`                    |
 | Conditional based on context / config                        | `createConditionalProvider`      |
 
-## Anti-patterns
+## Anti-patterns {#anti-patterns}
 
 - **`useFactory` for trivial construction.** If the factory is just
   `() => new MyClass()`, use `useClass`.

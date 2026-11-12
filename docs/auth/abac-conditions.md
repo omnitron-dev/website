@@ -1,4 +1,6 @@
 ---
+id: "auth/abac-conditions"
+slug: "/docs/auth/abac-conditions"
 title: ABAC Conditions
 sidebar_position: 3
 ---
@@ -32,7 +34,7 @@ interface PolicyDecision {
 }
 ```
 
-## Built-in policies
+## Built-in policies {#built-in-policies}
 
 `BuiltInPolicies` ships the common shapes:
 
@@ -53,7 +55,7 @@ interface PolicyDecision {
 | `requireEnvironment(env)`                         | Only allow in a specific deploy environment                     |
 | `requireFeatureFlag(flag, enabled?)`              | Gate behind a feature flag                                       |
 
-## Custom policies
+## Custom policies {#custom-policies}
 
 A custom policy is a plain object — register it on the
 PolicyEngine and reference it by name from `@Auth`:
@@ -85,7 +87,7 @@ policyEngine.registerPolicy(requireRecentMfa(300));
 async transferLargeAmount(...) { … }
 ```
 
-## Composition
+## Composition {#composition}
 
 ```ts
 // AND (default)
@@ -112,7 +114,7 @@ The engine short-circuits on the first decisive branch — AND
 fails as soon as one leaf denies, OR succeeds as soon as one
 allows.
 
-## Failure semantics
+## Failure semantics {#failure-semantics}
 
 `PolicyDecision.reason` is captured into the audit-log alongside
 the `false` decision so the operator sees which gate denied and
@@ -120,7 +122,7 @@ why. Surface the reason to admins via the same audit-log UI
 (see [Audit trail](./audit-trail.md)); never echo it back to
 the caller — it's an information leak.
 
-## Per-call configuration
+## Per-call configuration {#per-call-configuration}
 
 A few of the built-ins take parameters specific to the gate.
 `@Auth({ policies })` resolves **policy name strings** against the
@@ -150,7 +152,7 @@ Each factory derives its `name` deterministically from its
 arguments (see the `BuiltInPolicies` source), so the registered
 instance and the `@Auth` reference stay in sync.
 
-## See also
+## See also {#see-also}
 
 - [Permissions](./permissions.md) — the simpler permission-only
   gate that covers ~80% of cases.

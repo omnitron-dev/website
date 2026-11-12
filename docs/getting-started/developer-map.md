@@ -1,4 +1,6 @@
 ---
+id: "getting-started/developer-map"
+slug: "/docs/getting-started/developer-map"
 title: Developer map
 description: Direct routes from a development task to the guide, API reference and verification step.
 ---
@@ -8,7 +10,7 @@ description: Direct routes from a development task to the guide, API reference a
 Choose the task you are doing now. Each route connects a working guide to
 the reference needed when the application becomes more complex.
 
-## Build a backend
+## Build a backend {#build-a-backend}
 
 | Task | Guide | Verify |
 | --- | --- | --- |
@@ -20,7 +22,7 @@ the reference needed when the application becomes more complex.
 | Coordinate work | [Locks](../titan/modules/lock.mdx) · [Scheduler](../titan/modules/scheduler.mdx) | Test lock loss, overlapping jobs and shutdown |
 | Recover from dependencies | [Resilience](../titan/resilience/overview.md) | Exercise timeout, exhaustion and recovery |
 
-## Build an interface
+## Build an interface {#build-an-interface}
 
 | Task | Guide | Verify |
 | --- | --- | --- |
@@ -33,7 +35,7 @@ the reference needed when the application becomes more complex.
 | Adapt component source | [Prism CLI](../frontend/prism/cli.md) | Review copied code and registry diff |
 | Validate accessibility | [Accessibility](../frontend/prism/accessibility.md) | Focus, labels, both themes and zoom |
 
-## Test and operate
+## Test and operate {#test-and-operate}
 
 | Task | Guide | Verify |
 | --- | --- | --- |
@@ -43,7 +45,7 @@ the reference needed when the application becomes more complex.
 | Diagnose a deployment | [CLI](../omnitron/cli.md) · [Observability](../omnitron/observability.md) | Inspect the actual runtime and its diagnostic findings |
 | Prepare production | [Readiness](../deployment/production-readiness.md) | Exercise failure and recovery procedures |
 
-## Find the exact API
+## Find the exact API {#find-the-exact-api}
 
 Use the [package index](../reference/packages.md) to choose a dependency
 and the [API index](../reference/api-index.mdx) to find an export or import

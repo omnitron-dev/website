@@ -1,12 +1,13 @@
 ---
+id: "titan/modules/lock"
+slug: "/docs/titan/modules/lock"
 title: titan-lock
 ---
 
-import ModuleBadge from '@site/src/components/ModuleBadge';
 
 # titan-lock
 
-<ModuleBadge origin="official" pkg="@omnitron-dev/titan-lock" status="stable" />
+<span class="module-badge">official · @omnitron-dev/titan-lock · stable</span>
 
 Distributed locks over Redis with UUIDv7 ownership, Lua-script-based
 atomic compare-and-delete release, TTL leasing with auto-extend,
@@ -19,7 +20,7 @@ Requires [`titan-redis`](./redis.mdx) (peer dependency).
 pnpm add @omnitron-dev/titan-lock @omnitron-dev/titan-redis
 ```
 
-## When you need it
+## When you need it {#when-you-need-it}
 
 - **Exactly-once jobs across a fleet** — multiple pods running the
   same scheduler; only one should execute a given run.
@@ -27,7 +28,7 @@ pnpm add @omnitron-dev/titan-lock @omnitron-dev/titan-redis
   queue, allocate a unique resource.
 - **Coordinated migrations** — only one pod runs the schema upgrade.
 
-## Quickstart
+## Quickstart {#quickstart}
 
 ```typescript
 import { TitanLockModule } from '@omnitron-dev/titan-lock';
@@ -60,7 +61,7 @@ TitanLockModule.forRootAsync({
 })
 ```
 
-## `ILockModuleOptions`
+## `ILockModuleOptions` {#ilockmoduleoptions}
 
 | Option              | Type       | Default     |
 | ------------------- | ---------- | ----------- |
@@ -71,7 +72,7 @@ TitanLockModule.forRootAsync({
 | `redisClientName`   | `string`   | —           |
 | `isGlobal`          | `boolean`  | `false`     |
 
-## `DistributedLockService` — the API
+## `DistributedLockService` — the API {#distributedlockservice--the-api}
 
 ```typescript
 import { DistributedLockService, LOCK_SERVICE_TOKEN } from '@omnitron-dev/titan-lock';
@@ -89,7 +90,7 @@ class BillingService {
 }
 ```
 
-### Low-level — explicit acquire / release
+### Low-level — explicit acquire / release {#low-level--explicit-acquire--release}
 
 | Method                                              | Returns               | Purpose                                         |
 | --------------------------------------------------- | --------------------- | ----------------------------------------------- |
@@ -115,7 +116,7 @@ try {
 }
 ```
 
-### High-level — `withLock`
+### High-level — `withLock` {#high-level--withlock}
 
 ```typescript
 async withLock<T>(
@@ -152,7 +153,7 @@ that outlives its TTL cannot let the lock expire and be re-acquired
 by another node mid-execution. If a renewal ever finds the lock no
 longer owned, it logs an error and stops renewing.
 
-## `@WithDistributedLock` decorator
+## `@WithDistributedLock` decorator {#withdistributedlock-decorator}
 
 Wraps a method with auto acquire / release. Returns `undefined` if
 another instance holds the lock — perfect for scheduled jobs that
@@ -184,7 +185,7 @@ class ScheduledTasksService {
 
 `Lock` is exported as an alias for `WithDistributedLock`.
 
-## Lock semantics
+## Lock semantics {#lock-semantics}
 
 ```mermaid
 sequenceDiagram
@@ -203,7 +204,7 @@ sequenceDiagram
   R-->>B: OK   (acquired)
 ```
 
-### Embedded Lua scripts
+### Embedded Lua scripts {#embedded-lua-scripts}
 
 `releaseLock` and `extendLock` use Lua to make the
 "check-then-delete" / "check-then-extend" atomic:
@@ -230,7 +231,7 @@ The lock ID is a UUIDv7 generated per acquire. Ownership cannot be
 forged. If a holder dies before releasing, the TTL expires the key
 and another acquirer takes over.
 
-## Failure tracking
+## Failure tracking {#failure-tracking}
 
 Each operation has its own `FailureTracker` (one for `acquireLock`,
 one for `releaseLock`, one for `extendLock`, and one shared by the
@@ -241,7 +242,7 @@ recovery) and only logs at the matching level. Outcome: a single
 noisy lock under contention does not flood your logs with thousands
 of identical warnings.
 
-## Tokens
+## Tokens {#tokens}
 
 | Token                           |
 | ------------------------------- |
@@ -249,7 +250,7 @@ of identical warnings.
 | `LOCK_OPTIONS_TOKEN`            |
 | `DEFAULT_LOCK_PREFIX` (= `'lock'`) |
 
-## Anti-patterns
+## Anti-patterns {#anti-patterns}
 
 - **Using locks where idempotency would do.** A lock is coordination
   state. If your work is idempotent (write with a unique constraint,
@@ -266,7 +267,7 @@ of identical warnings.
 - **TTL too long.** A crashed holder leaves work blocked until the
   TTL expires. Keep TTL small; extend on heartbeat.
 
-## See also
+## See also {#see-also}
 
 - [`titan-scheduler`](./scheduler.mdx) — pair with `@WithDistributedLock`
 - [`titan-redis`](./redis.mdx) — the underlying client

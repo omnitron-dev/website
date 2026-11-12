@@ -1,4 +1,6 @@
 ---
+id: "testing/testing-package"
+slug: "/docs/testing/testing-package"
 sidebar_position: 2
 title: '@omnitron-dev/testing'
 description: Cross-runtime testing utilities — async helpers, runtime adapters, mock types.
@@ -17,7 +19,7 @@ test glue.
 
 Verified against `packages/testing/src/`.
 
-## What's inside
+## What's inside {#whats-inside}
 
 ```text
 packages/testing/src/
@@ -32,7 +34,7 @@ packages/testing/src/
 └── globals.d.ts   # Vitest / Jest globals (no import)
 ```
 
-## Runtime detection
+## Runtime detection {#runtime-detection}
 
 ```typescript
 import { RUNTIME, loadRuntimeAdapter } from '@omnitron-dev/testing';
@@ -52,7 +54,7 @@ package fails if the three adapters drift apart.
 **Mocking is the exception**: it is `vi` on Node and Bun, `mockFn` on
 Deno. If your test mocks, that part is not portable as written.
 
-## Typed mock function
+## Typed mock function {#typed-mock-function}
 
 ```typescript
 import type { MockFunction } from '@omnitron-dev/testing';
@@ -70,11 +72,11 @@ expect(fetchMock.mock.lastCall()).toEqual(['/api/foo']);
 `MockFunction<T>` preserves `T`'s type so `mock.calls[0]` is the
 inferred parameter tuple, not `any[]`.
 
-## Async helpers — `@omnitron-dev/testing/async`
+## Async helpers — `@omnitron-dev/testing/async` {#async-helpers--omnitron-devtestingasync}
 
 Also re-exported from the package root.
 
-### `waitFor(condition, options?)` / `waitForCondition(condition, timeout?, interval?)`
+### `waitFor(condition, options?)` / `waitForCondition(condition, timeout?, interval?)` {#waitforcondition-options--waitforconditioncondition-timeout-interval}
 
 Poll until a predicate is true, or throw at the deadline:
 
@@ -92,7 +94,7 @@ Defaults: 5 s timeout, 50 ms interval, message `'Condition not met'`.
 `waitForCondition(fn, timeout, interval)` is the same check with
 positional arguments.
 
-### `waitForEvents(target, events, timeout?)`
+### `waitForEvents(target, events, timeout?)` {#waitforeventstarget-events-timeout}
 
 Wait for several events on an emitter at once, resolving with their
 payloads in the order requested:
@@ -104,7 +106,7 @@ const [created, indexed] = await waitForEvents(bus, ['user.created', 'user.index
 expect(created.email).toBe('a@b.c');
 ```
 
-### `createEventSpy(target, event)` and `EventCollector`
+### `createEventSpy(target, event)` and `EventCollector` {#createeventspytarget-event-and-eventcollector}
 
 `createEventSpy` records every payload for one event and hands back
 `{ events, clear }`. `EventCollector` does the same for several events
@@ -125,7 +127,7 @@ collector.assertNotEmitted('user.deleted');
 collector.stop();
 ```
 
-### `EventListenerTracker`
+### `EventListenerTracker` {#eventlistenertracker}
 
 Registers listeners and removes all of them in one call — the usual
 cause of a leaking test suite is a listener nobody detached:
@@ -136,7 +138,7 @@ tracker.on(emitter, 'data', handler);
 afterEach(() => tracker.cleanup());
 ```
 
-### `flushPromises()`
+### `flushPromises()` {#flushpromises}
 
 ```typescript
 import { flushPromises } from '@omnitron-dev/testing';
@@ -146,7 +148,7 @@ await flushPromises();             // microtask queue drained
 expect(someState).toBe(/* … */);
 ```
 
-### `withTimeout(promise, ms)` / `retry(fn, options?)` / `delay(ms)` / `nextTick()`
+### `withTimeout(promise, ms)` / `retry(fn, options?)` / `delay(ms)` / `nextTick()` {#withtimeoutpromise-ms--retryfn-options--delayms--nexttick}
 
 ```typescript
 const result = await withTimeout(longRunning(), 3_000);  // throws TimeoutError
@@ -161,7 +163,7 @@ times and looks like it worked — this page previously documented
 `onRetry(error, attempt)` fires between attempts, which is the hook to use when
 a flaky test needs to say WHY it retried rather than only that it passed.
 
-### `createDeferred()` / `defer()` — a promise resolved from outside
+### `createDeferred()` / `defer()` — a promise resolved from outside {#createdeferred--defer--a-promise-resolved-from-outside}
 
 Two shapes of the same idea, and the difference is what you get back:
 
@@ -190,17 +192,17 @@ signals, and the wrong answer when a condition can simply be polled —
 `waitFor` exists for that and does not leave a promise dangling if the event
 never arrives.
 
-### `collectEvents(target, event, condition, timeout?)`
+### `collectEvents(target, event, condition, timeout?)` {#collecteventstarget-event-condition-timeout}
 
 Gathers emissions of one event until `condition(events)` returns true, then
 resolves with them. `waitForEvents` above waits for one of EACH named event;
 this waits for as many of ONE as the condition asks for.
 
-### `createMockTimer()` / `MockTimerController`
+### `createMockTimer()` / `MockTimerController` {#createmocktimer--mocktimercontroller}
 
 Drive time forward deterministically instead of sleeping.
 
-## Errors — `errors.ts`
+## Errors — `errors.ts` {#errors--errorsts}
 
 The package exports its own error types, thrown by the helpers above:
 
@@ -222,7 +224,7 @@ await assertRejects(service.load('missing'), NotFoundError);
 
 It accepts a string, a RegExp, or an error constructor.
 
-## Generic helpers — `@omnitron-dev/testing/helpers`
+## Generic helpers — `@omnitron-dev/testing/helpers` {#generic-helpers--omnitron-devtestinghelpers}
 
 ```typescript
 import { createTempDir, cleanupTempDir, suppressConsole, withFixture } from '@omnitron-dev/testing/helpers';
@@ -236,9 +238,9 @@ restore();
 await withFixture(myFixture, async (instance) => { /* … */ });
 ```
 
-## Titan-specific glue — `@omnitron-dev/testing/titan`
+## Titan-specific glue — `@omnitron-dev/testing/titan` {#titan-specific-glue--omnitron-devtestingtitan}
 
-### `createTestModule(options)` / `testModule()`
+### `createTestModule(options)` / `testModule()` {#createtestmoduleoptions--testmodule}
 
 Builds a container with your modules, providers and mocks, and can
 create an `Application` from it:
@@ -284,7 +286,7 @@ const mod = testModule()
   .build();
 ```
 
-### `TestApplication`
+### `TestApplication` {#testapplication}
 
 A thinner wrapper when you want the Application itself:
 
@@ -298,13 +300,13 @@ const users = app.get(UsersService);
 await app.close();
 ```
 
-### Fixtures
+### Fixtures {#fixtures}
 
 `TestSchemas`, `TestConfigs`, `TestRedisConfigs`, `TestModules`,
 `TestData` and `TestTiming` are ready-made fixtures for the common
 shapes — see `packages/testing/src/titan/test-fixtures.ts`.
 
-## Docker helpers — `@omnitron-dev/testing/docker`
+## Docker helpers — `@omnitron-dev/testing/docker` {#docker-helpers--omnitron-devtestingdocker}
 
 Use the database and Redis helpers when an integration test needs a real service. Each factory returns a `DockerContainer` with its assigned ports and a `cleanup()` method.
 
@@ -343,7 +345,7 @@ checks. If cluster creation fails, the helper waits for every attempted creation
 cleans all returned nodes, and removes its own network. Startup and cleanup
 failures remain visible together.
 
-## Performance helpers — `@omnitron-dev/testing/performance`
+## Performance helpers — `@omnitron-dev/testing/performance` {#performance-helpers--omnitron-devtestingperformance}
 
 ```typescript
 import { PerfTimer, MemoryLeakDetector } from '@omnitron-dev/testing/performance';
@@ -361,7 +363,7 @@ A percentile over repeated runs is the useful shape here: a single
 wall-clock measurement compared against a flat millisecond bound
 measures the machine as much as the code.
 
-## Env helpers — `@omnitron-dev/testing/env`
+## Env helpers — `@omnitron-dev/testing/env` {#env-helpers--omnitron-devtestingenv}
 
 The shared endpoints for the test stack. Ports deliberately differ from
 the defaults so a test run cannot reach a developer's own Redis or
@@ -396,7 +398,7 @@ processes and affect their cache keys. Docker connection settings and temporary
 directories pass through explicitly. A custom test port therefore selects the
 same endpoint in a direct package test and in the full workspace command.
 
-## Vitest configuration baseline
+## Vitest configuration baseline {#vitest-configuration-baseline}
 
 ```typescript
 // vitest.config.ts
@@ -424,7 +426,7 @@ include assumes one layout. Omnitron shares these options through
 `tsconfig.vitest.json`. Keep the test `tsBuildInfoFile` separate from the build
 cache so incremental checks cannot reuse diagnostics from a different file set.
 
-## Cross-runtime tests — Node + Bun + Deno
+## Cross-runtime tests — Node + Bun + Deno {#cross-runtime-tests--node--bun--deno}
 
 ```typescript
 // test/cross.test.ts (same file)
@@ -447,7 +449,7 @@ deno test test/cross.test.ts             # Deno
 
 Same source, three runtimes, identical assertions.
 
-## Best practices
+## Best practices {#best-practices}
 
 - **Use `createTestApp`** for any test that touches multiple
   modules — it does the lifecycle right.
@@ -461,7 +463,7 @@ Same source, three runtimes, identical assertions.
 - **Use `expectThrowsAsync`** instead of `try/catch + expect.fail` —
   more readable, captures more info.
 
-## Anti-patterns
+## Anti-patterns {#anti-patterns}
 
 - **Sleeping for promises to resolve.** Use `flushPromises` or
   `eventually`.
@@ -472,7 +474,7 @@ Same source, three runtimes, identical assertions.
 - **Tests that depend on order.** Vitest parallelises; an
   order-dependent test is a future flake.
 
-## See also
+## See also {#see-also}
 
 - [Testing overview](./index.md) — the pyramid + when to use what
 - [Integration patterns](./integration.md) — `Application.create` recipes

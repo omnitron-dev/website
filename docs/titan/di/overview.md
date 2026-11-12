@@ -1,4 +1,6 @@
 ---
+id: "titan/di/overview"
+slug: "/docs/titan/di/overview"
 sidebar_position: 1
 title: Dependency Injection
 description: Nexus — the IoC container that owns every Titan-managed object.
@@ -16,7 +18,7 @@ import { Container, createContainer } from '@omnitron-dev/titan/nexus';
 
 This page is the entry point. Mechanics in the per-page references.
 
-## What a DI container does
+## What a DI container does {#what-a-di-container-does}
 
 Three jobs:
 
@@ -44,7 +46,7 @@ export class UsersService {
 }
 ```
 
-## What Nexus brings beyond a basic DI container
+## What Nexus brings beyond a basic DI container {#what-nexus-brings-beyond-a-basic-di-container}
 
 ```mermaid
 flowchart LR
@@ -95,7 +97,7 @@ You do not need to learn a new mental model — Nexus is "DI like you
 already know" — but the deeper pages cover the parts that go beyond
 the basics.
 
-## A complete example
+## A complete example {#a-complete-example}
 
 ```typescript
 import {
@@ -141,7 +143,7 @@ In a Titan app, you do not write `container.register` calls —
 `@Module`, `@Service`, and `@Injectable` translate to the same
 registrations behind the scenes.
 
-## What the container guarantees
+## What the container guarantees {#what-the-container-guarantees}
 
 | Guarantee                                     | Explanation                                                    |
 | --------------------------------------------- | -------------------------------------------------------------- |
@@ -152,7 +154,7 @@ registrations behind the scenes.
 | **Type safety**                               | Tokens are typed; `resolve(LOGGER)` returns `ILogger`          |
 | **Async resolution**                          | `resolveAsync<T>(token)` for async providers                   |
 
-## Error types exposed
+## Error types exposed {#error-types-exposed}
 
 The Nexus error hierarchy (`NexusError` → specialised subclasses):
 
@@ -173,7 +175,7 @@ The Nexus error hierarchy (`NexusError` → specialised subclasses):
 | `NexusAggregateError`             | Multiple errors batched (e.g. parallel disposal)  |
 | `ModuleError`                     | Module-level configuration error                  |
 
-## Read the deep pages
+## Read the deep pages {#read-the-deep-pages}
 
 | Topic                                         | When to read                                              |
 | --------------------------------------------- | --------------------------------------------------------- |

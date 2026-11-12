@@ -2,55 +2,38 @@
   "name": "omnitron-docs",
   "version": "0.1.0",
   "private": true,
-  "description": "Omnitron \u2014 official documentation site",
+  "description": "Omnitron documentation and reference Lumen site",
   "scripts": {
-    "docusaurus": "docusaurus",
-    "start": "docusaurus start",
-    "build": "docusaurus build",
-    "swizzle": "docusaurus swizzle",
-    "deploy": "docusaurus deploy",
-    "clear": "docusaurus clear",
-    "serve": "docusaurus serve",
-    "write-translations": "docusaurus write-translations",
-    "write-heading-ids": "docusaurus write-heading-ids",
-    "typecheck": "tsc",
+    "start": "lumen dev",
+    "build": "xec run scripts/build.js",
+    "serve": "lumen serve",
+    "typecheck": "tsc --noEmit",
     "check:content": "node scripts/check-content.mjs",
     "check:source": "node scripts/check-source.mjs",
+    "check:routes": "node scripts/check-routes.js",
     "docs:api": "node scripts/build-api-index.mjs",
-    "check:api": "node scripts/build-api-index.mjs --check"
+    "check:api": "node scripts/build-api-index.mjs --check",
+    "test:browser": "playwright test tests/site.spec.js --workers=1"
   },
   "dependencies": {
-    "@docusaurus/core": "3.10.2",
-    "@docusaurus/faster": "^3.10.2",
-    "@docusaurus/plugin-content-blog": "3.10.2",
-    "@docusaurus/plugin-content-docs": "3.10.2",
-    "@docusaurus/plugin-content-pages": "3.10.2",
-    "@docusaurus/plugin-css-cascade-layers": "3.10.2",
-    "@docusaurus/plugin-debug": "3.10.2",
-    "@docusaurus/plugin-sitemap": "3.10.2",
-    "@docusaurus/theme-classic": "3.10.2",
-    "@docusaurus/theme-mermaid": "3.10.2",
-    "@easyops-cn/docusaurus-search-local": "0.55.3",
-    "@mdx-js/react": "3.1.1",
-    "@mermaid-js/layout-elk": "^1.0.1",
-    "clsx": "^2.1.1",
-    "prism-react-renderer": "2.4.1",
-    "react": "^19.3.1",
-    "react-dom": "^19.3.1"
+    "@omnitron-dev/lumen": "0.3.5",
+    "@omnitron-dev/lumen-ui": "0.3.5",
+    "@omnitron-dev/prism": "0.3.5",
+    "react": "19.3.1",
+    "react-dom": "19.3.1"
   },
   "devDependencies": {
-    "@docusaurus/module-type-aliases": "3.10.2",
-    "@docusaurus/theme-common": "3.10.2",
-    "@docusaurus/types": "3.10.2",
-    "@types/node": "^26.6.6",
+    "@types/node": "26.6.6",
     "@types/react": "^19.3.0",
     "@types/react-dom": "^19.3.0",
-    "@typescript/native": "npm:typescript@^7.0.2",
-    "typescript": "npm:@typescript/typescript6@^6.0.2"
+    "@xec-sh/cli": "0.11.4",
+    "typescript": "npm:@typescript/typescript6@^6.0.2",
+    "@playwright/test": "1.64.1"
   },
   "engines": {
-    "node": ">=20.0",
+    "node": ">=22.12.0",
     "pnpm": ">=12.16.1"
   },
-  "packageManager": "pnpm@12.16.1"
+  "packageManager": "pnpm@12.16.1",
+  "type": "module"
 }

@@ -1,4 +1,6 @@
 ---
+id: "titan/testing/di-overrides"
+slug: "/docs/titan/testing/di-overrides"
 sidebar_position: 2
 title: DI Overrides
 description: Replacing providers for tests — fakes, stubs, in-memory implementations.
@@ -13,7 +15,7 @@ provider in a Titan test — at the container level, at the
 `Application.create` level, and with the `@omnitron-dev/testing/titan`
 helpers.
 
-## How overriding works
+## How overriding works {#how-overriding-works}
 
 A Nexus container keys registrations by token, and **the last
 registration for a token wins**. Overriding is therefore just
@@ -46,7 +48,7 @@ container.register(DATABASE, { useClass: FakeDatabase }, { override: true });
 `Application` exposes the same surface as `app.register(token,
 provider, { override: true })`.
 
-## Overriding through `Application.create`
+## Overriding through `Application.create` {#overriding-through-applicationcreate}
 
 When you boot a full app for an integration test, pass the
 `providers` option — an array of `[token, providerDefinition]`
@@ -93,7 +95,7 @@ After all modules and providers are registered, `create()` calls
 providers — including your fakes — are constructed before `create()`
 resolves.
 
-## Fake vs mock vs stub
+## Fake vs mock vs stub {#fake-vs-mock-vs-stub}
 
 Three styles, all valid:
 
@@ -105,7 +107,7 @@ Three styles, all valid:
   logic.
 - **Stub** — a hard-coded response, no programming.
 
-## A canonical fake
+## A canonical fake {#a-canonical-fake}
 
 ```typescript
 import type { Database, User, NewUser } from './types.js';
@@ -151,7 +153,7 @@ beforeEach(() => {
 
 The same fake works at every test level — unit, integration, e2e.
 
-## The `@omnitron-dev/testing/titan` helpers
+## The `@omnitron-dev/testing/titan` helpers {#the-omnitron-devtestingtitan-helpers}
 
 The testing package ships container-level test helpers under the
 **`@omnitron-dev/testing/titan`** subpath (the `"./titan"` entry in the
@@ -170,7 +172,7 @@ These wrap a `TestContainer` (a `Container` subclass), not a booted
 `Application`. Use them when you want fine-grained mocking, spying,
 and interaction recording without standing up the full lifecycle.
 
-### `createTestModule` / `TestModule`
+### `createTestModule` / `TestModule` {#createtestmodule--testmodule}
 
 `createTestModule(options)` returns a `TestModule`
 (`createTestModule` in `packages/testing/src/titan/test-module.ts`). Its options
@@ -226,7 +228,7 @@ Method reference (`TestModuleBuilder.mock`–159):
 > `Application.create({ ..., providers: [...] })` and call
 > `app.start()` yourself (see [Integration](./integration.md)).
 
-### `MockProvider` and `createMockProvider`
+### `MockProvider` and `createMockProvider` {#mockprovider-and-createmockprovider}
 
 Two distinct helpers (`packages/testing/src/titan/nexus/mock-provider.ts`):
 
@@ -277,7 +279,7 @@ With `autoMock: true` (and no `value`/`factory`), the provider is a
 proxy that lazily returns a `vi.fn()` for every accessed property —
 handy for a dependency you must satisfy but never call.
 
-## Module-level overrides
+## Module-level overrides {#module-level-overrides}
 
 Sometimes you want to override a whole *module*, not a single
 provider. Define a test variant and import it instead of the real one:
@@ -308,7 +310,7 @@ test-friendly implementations across many tests. Note this uses the
 module-decorator `{ provide, useClass }` shape, distinct from the
 `create({ providers: [[token, def]] })` tuple shape.
 
-## Spying without replacing
+## Spying without replacing {#spying-without-replacing}
 
 Sometimes you want to observe calls without changing behaviour:
 
@@ -326,7 +328,7 @@ The spy wraps the implementation; it doesn't replace it. The
 `TestModule.spy(token, method)` helper does the same against the test
 container.
 
-## The "two real, one fake" pattern
+## The "two real, one fake" pattern {#the-two-real-one-fake-pattern}
 
 A common integration setup — real logger, real config, fake database,
 real services:
@@ -341,7 +343,7 @@ const app = await Application.create({
 
 Catches wiring bugs without paying for a real database.
 
-## Anti-patterns
+## Anti-patterns {#anti-patterns}
 
 - **Overriding too much.** A test where every provider is mocked is
   testing the test, not the code. Override only what you need to

@@ -1,4 +1,6 @@
 ---
+id: "tutorial/auth"
+slug: "/docs/tutorial/auth"
 sidebar_position: 4
 title: 3. Auth
 description: JWT sign-in, sessions, role-gated methods.
@@ -9,7 +11,7 @@ description: JWT sign-in, sessions, role-gated methods.
 By the end: users can sign in, get a JWT, and the `UsersService.list`
 method is admin-only.
 
-## Add the auth module + Redis
+## Add the auth module + Redis {#add-the-auth-module--redis}
 
 ```bash
 cd apps/api
@@ -17,7 +19,7 @@ pnpm add @omnitron-dev/titan-auth
 docker run -d --name redis -p 6379:6379 redis:7-alpine
 ```
 
-## Schema additions
+## Schema additions {#schema-additions}
 
 `apps/api/migrations/002_auth.sql`:
 
@@ -68,7 +70,7 @@ export interface Database {
 }
 ```
 
-## Auth service
+## Auth service {#auth-service}
 
 `apps/api/src/auth/auth.service.ts`:
 
@@ -136,7 +138,7 @@ export class AuthService {
 }
 ```
 
-## Wire the module
+## Wire the module {#wire-the-module}
 
 Update `apps/api/src/app.module.ts`:
 
@@ -176,7 +178,7 @@ import { AuthService }  from './auth/auth.service.js';
 export class AppModule {}
 ```
 
-## Gate UsersService.list to admins
+## Gate UsersService.list to admins {#gate-usersservicelist-to-admins}
 
 Update `apps/api/src/users/users.service.ts`:
 
@@ -204,7 +206,7 @@ export class UsersService {
 }
 ```
 
-## Seed an admin user
+## Seed an admin user {#seed-an-admin-user}
 
 ```bash
 node -e "
@@ -225,7 +227,7 @@ const { cuid } = require('@omnitron-dev/cuid');
 "
 ```
 
-## Verify
+## Verify {#verify}
 
 ```bash
 JWT_SECRET=dev-secret-do-not-use-in-prod pnpm dev
@@ -268,7 +270,7 @@ const { createClient } = require('@omnitron-dev/netron-browser');
 "
 ```
 
-## What's new
+## What's new {#whats-new}
 
 | Piece | What it does |
 | ----- | ------------ |
@@ -282,19 +284,19 @@ For multi-app fan-out (one identity app + N specialists sharing
 the same JWT + Redis session registry), see
 [Best practices / Shared auth](../omnitron/best-practices.md#shared-authentication-across-apps).
 
-## Commit
+## Commit {#commit}
 
 ```bash
 git add .
 git commit -m "step 3: JWT auth + role-gated methods"
 ```
 
-## Next
+## Next {#next}
 
 **[Step 4 — Frontend →](./04-frontend.md)** — build a React UI
 that calls this service.
 
-## Troubleshooting
+## Troubleshooting {#troubleshooting}
 
 | Symptom | Fix |
 | ------- | --- |

@@ -1,4 +1,6 @@
 ---
+id: "frontend/prism/blocks"
+slug: "/docs/frontend/prism/blocks"
 sidebar_position: 3
 title: Blocks
 description: Full-page composites — drop one in, fill the slots, ship a screen.
@@ -47,7 +49,7 @@ function SignInPage() {
 }
 ```
 
-### The forms
+### The forms {#the-forms}
 
 | Member (namespace) | Standalone export | Submit payload |
 | ------------------ | ----------------- | -------------- |
@@ -57,7 +59,7 @@ function SignInPage() {
 | `AuthBlock.ResetPassword` | `ResetPasswordForm` | `ResetPasswordFormData` |
 | `AuthBlock.VerifyCode` | `VerifyCodeForm` | `{ code }` |
 
-### Common form props
+### Common form props {#common-form-props}
 
 | Prop | Type | Notes |
 | ---- | ---- | ----- |
@@ -87,7 +89,7 @@ file path, or a leaked credential value. It matches the *value*, so
 "Password must contain at least 2 digits" and "Reset token expired"
 reach the user; `password=hunter2` and a JWT do not.
 
-### Per-form props
+### Per-form props {#per-form-props}
 
 | Form | Prop | Notes |
 | ---- | ---- | ----- |
@@ -104,7 +106,7 @@ still open, so a double-click sends one code rather than two — which
 matters on a rate-limited endpoint, where the second attempt is what
 locks the user out of the flow they are finishing.
 
-### Route guards
+### Route guards {#route-guards}
 
 The block also exports composable route guards (each takes a
 `useAuth` hook so you can plug in your own auth store):
@@ -130,7 +132,7 @@ import { AuthGuard, GuestGuard, RoleBasedGuard }
 `hasRole` / `hasPermission` / `createConditionalRender` helpers
 are exported for inline checks.
 
-## `<DashboardBlock>` — collapsible content panel
+## `<DashboardBlock>` — collapsible content panel {#dashboardblock--collapsible-content-panel}
 
 `<DashboardBlock>` is a flexible **panel/card** primitive — a
 titled, optionally-collapsible container with header, content,
@@ -202,7 +204,7 @@ function ActivityPanel() {
 External controls can use the hook's `actions.expand()`, `actions.collapse()` and
 `actions.toggleCollapse()` to update that same controlled state.
 
-## `<DataGridBlock>` — filterable / sortable / paginated table
+## `<DataGridBlock>` — filterable / sortable / paginated table {#datagridblock--filterable--sortable--paginated-table}
 
 The most-used block. It wraps **MUI X DataGrid** and adds a
 toolbar, row actions, selection, and empty/error states behind
@@ -250,7 +252,7 @@ function UsersPage({ users, loading }) {
 }
 ```
 
-### Columns
+### Columns {#columns}
 
 Columns are standard MUI X `GridColDef`s — `field`, `headerName`,
 `flex` / `width`, `sortable`, `renderCell`, `valueGetter`, etc.
@@ -258,7 +260,7 @@ Columns are standard MUI X `GridColDef`s — `field`, `headerName`,
 `columnVisibilityModel` / `onColumnVisibilityChange`, or the
 toolbar's `columnVisibility` toggler.
 
-### Row actions
+### Row actions {#row-actions}
 
 `rowActions` render in a per-row menu — each is keyed and gets
 the row + event:
@@ -279,7 +281,7 @@ Actions support `disabled` / `hidden` (boolean or `(row) =>
 boolean`), `color`, and a `divider`. (There is no built-in
 `confirm` field — open your own `<ConfirmDialog>` from `onClick`.)
 
-### Selection & bulk operations
+### Selection & bulk operations {#selection--bulk-operations}
 
 ```tsx
 <DataGridBlock
@@ -292,7 +294,7 @@ boolean`), `color`, and a `divider`. (There is no built-in
 `onSelectionChange` reports the MUI `GridRowSelectionModel`; drive
 your own bulk-action bar from that selection.
 
-### Toolbar config
+### Toolbar config {#toolbar-config}
 
 ```typescript
 interface DataGridToolbarConfig {
@@ -307,7 +309,7 @@ interface DataGridToolbarConfig {
 }
 ```
 
-### Server-side data — `useDataGridBlock`
+### Server-side data — `useDataGridBlock` {#server-side-data--usedatagridblock}
 
 For server-driven paging/sorting/filtering, use the
 `useDataGridBlock` hook: pass a `fetcher` and spread its return
@@ -354,7 +356,7 @@ The hook also returns `refresh()` and `reset()`. For client-side
 data, just pass the full `rows` array and use the default
 (`'client'`) pagination mode.
 
-## When to use a block vs compose your own
+## When to use a block vs compose your own {#when-to-use-a-block-vs-compose-your-own}
 
 | Reach for a block when… | Compose components when… |
 | ----------------------- | ------------------------ |
@@ -368,7 +370,7 @@ dropping out is cheap. If you outgrow `<DataGridBlock>`, drop to
 MUI X `<DataGrid>` directly (or `<FilterToolbar>` + the Prism
 `<Table>`) without changing the rest of your page.
 
-## Subpath imports
+## Subpath imports {#subpath-imports}
 
 ```tsx
 import { AuthBlock      } from '@omnitron-dev/prism/blocks';
@@ -376,14 +378,14 @@ import { DashboardBlock } from '@omnitron-dev/prism/blocks';
 import { DataGridBlock  } from '@omnitron-dev/prism/blocks';
 ```
 
-## See also
+## See also {#see-also}
 
 - [Components catalog](./components.md) — what blocks are
   composed of
 - [Layouts](./layouts.md) — shells that hold blocks
 - [Forms](./forms.md) — `<AuthBlock>` uses these primitives
 
-## Guard-only entry point
+## Guard-only entry point {#guard-only-entry-point}
 
 Use `@omnitron-dev/prism/auth` when you need guards without forms or layout dependencies:
 

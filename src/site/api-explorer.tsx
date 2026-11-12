@@ -1,7 +1,6 @@
 import React, {useMemo, useState} from 'react';
-import Link from '@docusaurus/Link';
-import data from '@site/src/data/api-index.json';
-import styles from './styles.module.css';
+import data from '../data/api-index.json';
+import styles from '../components/ApiExplorer/styles.module.css';
 
 const pageSize = 40;
 
@@ -64,7 +63,7 @@ export default function ApiExplorer() {
                 {row.imports.map(item => (
                   <div key={item.path}>
                     <code>{item.path}</code>
-                    <Link to={item.guide}>Guide →</Link>
+                    <a href={item.guide}>Guide →</a>
                   </div>
                 ))}
               </div>
@@ -83,7 +82,7 @@ export default function ApiExplorer() {
         <summary>Browse all package entry points</summary>
         <ul>
           {data.entryPoints.map(entry => (
-            <li key={entry.path}><Link to={entry.guide}><code>{entry.path}</code></Link>
+            <li key={entry.path}><a href={entry.guide}><code>{entry.path}</code></a>
               {'kind' in entry && <> · {entry.kind} · <a href={entry.source}>Source ↗</a></>}
             </li>
           ))}

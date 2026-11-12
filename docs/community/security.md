@@ -1,4 +1,6 @@
 ---
+id: "community/security"
+slug: "/docs/community/security"
 sidebar_position: 2
 title: Security policy
 description: How to report vulnerabilities + supported versions + disclosure SLA.
@@ -6,7 +8,7 @@ description: How to report vulnerabilities + supported versions + disclosure SLA
 
 # Security policy
 
-## Supported versions
+## Supported versions {#supported-versions}
 
 | Version | Supported |
 | ------- | :-------: |
@@ -19,7 +21,7 @@ Once stable releases begin, support windows will be:
 - **Previous major** — security fixes only for 12 months after
   the next major's release.
 
-## Reporting a vulnerability
+## Reporting a vulnerability {#reporting-a-vulnerability}
 
 **Do not open public GitHub issues** for security reports.
 
@@ -41,7 +43,7 @@ details:
 [PGP key fingerprint published at omnitron.dev/.well-known/security.txt]
 ```
 
-## What happens next
+## What happens next {#what-happens-next}
 
 | Timeline | What we do |
 | -------- | ---------- |
@@ -55,7 +57,7 @@ For exceptionally severe issues (active exploitation, mass
 impact), the timeline compresses — we coordinate with you on
 a faster track.
 
-## Severity classification
+## Severity classification {#severity-classification}
 
 We use CVSS v3.1 base scores:
 
@@ -66,7 +68,7 @@ We use CVSS v3.1 base scores:
 | 4.0 – 6.9  | **Medium** | Patch in next regular release (≤ 30 days) |
 | 0.1 – 3.9  | **Low** | Patch in next regular release (≤ 60 days) |
 
-## Disclosure
+## Disclosure {#disclosure}
 
 When a fix is released:
 
@@ -78,7 +80,7 @@ When a fix is released:
    - GitHub Security Advisories.
    - The `@omnitron-dev/titan` npm package security advisory.
 
-## Scope
+## Scope {#scope}
 
 In-scope: every npm package under `@omnitron-dev/*` shipped from
 the [omni](https://github.com/omnitron-dev/omni) repository.
@@ -92,7 +94,7 @@ Out-of-scope:
 - Issues in upstream dependencies — report to those projects
   first; we'll coordinate downstream patching.
 
-## What we look at first
+## What we look at first {#what-we-look-at-first}
 
 Highest-risk areas:
 
@@ -106,14 +108,14 @@ Highest-risk areas:
 5. **Infrastructure provisioning** — Docker container config,
    bare-metal SSH execution.
 
-## Hall of fame
+## Hall of fame {#hall-of-fame}
 
 Researchers who responsibly disclosed vulnerabilities (with
 permission to be named):
 
 *None yet — the platform is too young for a list. Be the first.*
 
-## Hardening guidance
+## Hardening guidance {#hardening-guidance}
 
 Production deployment checklists per module:
 [Security checklist](../titan/modules/security-checklist.mdx).
@@ -122,13 +124,13 @@ Operator-side hardening:
 [Omnitron Auth & RBAC](../omnitron/auth-rbac.md) and
 [Best practices](../omnitron/best-practices.md).
 
-## Past advisories
+## Past advisories {#past-advisories}
 
 None published. When a security advisory is published, it
 will be linked here with the CVE, severity, affected versions,
 and fix version.
 
-## Contact
+## Contact {#contact}
 
 - **Vulnerability reports**: security@omnitron.dev (PGP optional)
 - **General security questions**: discuss in GitHub Discussions

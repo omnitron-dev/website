@@ -1,12 +1,13 @@
 ---
+id: "titan/modules/logger"
+slug: "/docs/titan/modules/logger"
 title: LoggerModule
 ---
 
-import ModuleBadge from '@site/src/components/ModuleBadge';
 
 # LoggerModule
 
-<ModuleBadge origin="built-in" pkg="@omnitron-dev/titan" subpath="/module/logger" status="stable" />
+<span class="module-badge">built-in · @omnitron-dev/titan · /module/logger · stable</span>
 
 Structured pino-based logging with six levels, child loggers with
 bound context, a processor pipeline (transform / drop), pino-native
@@ -23,7 +24,7 @@ plus any extra `destinations`/`transports` you supply). Set
 on [pino](https://getpino.io); its JSON is what log shippers (Loki,
 ELK, Datadog) expect.
 
-## When you need it
+## When you need it {#when-you-need-it}
 
 - **Every backend service.** A structured logger is non-negotiable
   for production.
@@ -40,7 +41,7 @@ ELK, Datadog) expect.
 - **Pretty dev output.** `prettyPrint` for colorised human-readable
   lines locally; structured JSON in production.
 
-## Quickstart
+## Quickstart {#quickstart}
 
 ```typescript
 import { createWriteStream } from 'node:fs';
@@ -79,7 +80,7 @@ class AppModule {}
 > pino-optimised. See [Processors](#redaction-and-enrichment) and
 > [Extra sinks](#extra-sinks-destinations-and-transports) below.
 
-## The `ILogger` interface
+## The `ILogger` interface {#the-ilogger-interface}
 
 Pino-style, **object-first** signatures (the bound object comes first,
 then an optional message). Six levels, plus level introspection and a
@@ -121,7 +122,7 @@ interface ILogger {
 > `logger.error({ err, userId }, 'repo failed')`. The single-arg
 > string form `logger.info('done')` also works.
 
-## Usage in a service
+## Usage in a service {#usage-in-a-service}
 
 Inject the **`ILogger`** via `LOGGER_TOKEN` (the convenient alias the
 module derives from the root logger) — or use the `@Logger()` property
@@ -156,7 +157,7 @@ For a per-service tag, bind it with a child logger
 (`this.logger.child({ service: 'UsersService' })`) — there is no
 automatic class-name binding.
 
-## Per-request child loggers
+## Per-request child loggers {#per-request-child-loggers}
 
 For request-scoped context (trace IDs, user IDs):
 
@@ -177,13 +178,13 @@ async findById(id: string, @Context() ctx: NetronContext) {
 → See [Logging / Child Loggers](../logging/child-loggers.md) for
 the full reference.
 
-## Decorators
+## Decorators {#decorators}
 
 ```typescript
 import { Logger, Log, Monitor } from '@omnitron-dev/titan/module/logger';
 ```
 
-### `@Logger()` — property injection
+### `@Logger()` — property injection {#logger--property-injection}
 
 ```typescript
 @Service({ name: 'users' })
@@ -197,7 +198,7 @@ class UsersService {
 }
 ```
 
-### `@Log()` — method auto-logging
+### `@Log()` — method auto-logging {#log--method-auto-logging}
 
 ```typescript
 @Public()
@@ -214,7 +215,7 @@ Options: `level` (`'trace'|'debug'|'info'|'warn'|'error'`),
 expose a logger (a `logger` / `_logger` / `log` property) or the
 decorator silently no-ops.
 
-### `@Monitor()` — performance instrumentation
+### `@Monitor()` — performance instrumentation {#monitor--performance-instrumentation}
 
 ```typescript
 @Public()
@@ -222,7 +223,7 @@ decorator silently no-ops.
 async heavyComputation(input: Input) { /* … */ }
 ```
 
-## Services and helpers
+## Services and helpers {#services-and-helpers}
 
 | Symbol                | Purpose                                                |
 | --------------------- | ------------------------------------------------------ |
@@ -232,7 +233,7 @@ async heavyComputation(input: Input) { /* … */ }
 | `createNullLogger()`  | Returns an `ILogger` that discards everything (tests) |
 | `isLogger(value)`     | Type guard                                            |
 
-## Extra sinks: `destinations` and `transports`
+## Extra sinks: `destinations` and `transports` {#extra-sinks-destinations-and-transports}
 
 Two complementary ways to fan records out beyond stdout.
 
@@ -308,7 +309,7 @@ hot-path isolation, or a `flush()` lifecycle. There is **no
 
 → See [Logging / Transports](../logging/transports.md).
 
-## Delivery failures and bounded output
+## Delivery failures and bounded output {#delivery-failures-and-bounded-output}
 
 Every raw destination, including stdout, has an independent failure boundary.
 An `ENOSPC`, synchronous write exception, callback error or emitted stream error
@@ -338,7 +339,7 @@ fails. Inspect delivery evidence and await `flush()` where confirmation is
 required. Shutdown code must not interpret a rejected flush as successful
 durability.
 
-## Redaction and enrichment
+## Redaction and enrichment {#redaction-and-enrichment}
 
 Redaction has two working paths. For **plain path redaction**, prefer
 **pino's native `redact` option** — `LoggerService` forwards it straight
@@ -387,7 +388,7 @@ For the other shaping needs:
 
 → See [Logging / Processors](../logging/processors.md).
 
-## Pipeline
+## Pipeline {#pipeline}
 
 ```mermaid
 flowchart LR
@@ -409,7 +410,7 @@ pino's `multistream` over stdout — JSON, or pino-pretty when
 stream that drives `ITransport` sinks off the hot path. Redaction
 happens inside pino's serialisation (`redact`) and/or as a processor.
 
-## Tokens
+## Tokens {#tokens}
 
 | Token                       | Purpose                              |
 | --------------------------- | ------------------------------------ |
@@ -419,7 +420,7 @@ happens inside pino's serialisation (`redact`) and/or as a processor.
 | `LOGGER_TRANSPORTS_TOKEN`   | Registered transports                |
 | `LOGGER_PROCESSORS_TOKEN`   | Registered processors                |
 
-## Setting the level from config / at runtime
+## Setting the level from config / at runtime {#setting-the-level-from-config--at-runtime}
 
 When ConfigModule is loaded, the logger reads its initial settings from
 the `logger.*` namespace **once at construction** — `logger.level`,
@@ -440,7 +441,7 @@ the level on a running process, call `setLevel()` imperatively on the
 loggerService.setLevel('debug');   // or: logger.setLevel('debug')
 ```
 
-## Anti-patterns
+## Anti-patterns {#anti-patterns}
 
 - **`console.log` in services.** Bypasses the framework — no
   per-service context, no level, no JSON formatting. Always use
@@ -462,7 +463,7 @@ loggerService.setLevel('debug');   // or: logger.setLevel('debug')
   user stream is async-wrapped, but a stream that does a blocking
   syscall in `_write` still stalls; keep extra sinks async / non-blocking.
 
-## See also
+## See also {#see-also}
 
 - [Logging / Overview](../logging/overview.md) — conceptual guide
 - [Logging / Transports](../logging/transports.md) — async stdout, `destinations`, `ITransport` sinks

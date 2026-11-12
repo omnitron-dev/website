@@ -1,4 +1,6 @@
 ---
+id: "auth/rls-bridge"
+slug: "/docs/auth/rls-bridge"
 title: RLS Bridge
 sidebar_position: 4
 ---
@@ -18,7 +20,7 @@ This page covers the wrapper, the policy authoring shape, and
 the per-request permission-version (`permVer`) enforcement that
 shares the wrapper's hot path.
 
-## The shared wrapper
+## The shared wrapper {#the-shared-wrapper}
 
 Every backend in the fleet (e.g. `main`, `accounting`, `storage`,
 `messaging`, `analytics`) wires the SAME
@@ -76,7 +78,7 @@ once Redis is resolvable from the DI container; the same
 underlying client doubles as both the permVer lookup and the
 activity-touch sink.
 
-### User activity
+### User activity {#user-activity}
 
 The `touchUserActivity` helper performs an atomic
 `SET omni:activity:dirty:{userId} <iso-now> NX EX 60` — at most
@@ -92,7 +94,7 @@ advances" is `windowSeconds + flushIntervalMs` ≈ 90 seconds.
 No new inter-backend RPC traffic — each backend writes to the
 shared Redis namespace; only `main` reads.
 
-## RLS policies
+## RLS policies {#rls-policies}
 
 A policy is a per-table allow/deny/filter that runs inside the
 plugin BEFORE every SELECT / INSERT / UPDATE / DELETE. The
@@ -129,7 +131,7 @@ export const platformRLSSchema = defineRLSSchema<Database>({
 bridge populates it from the application's `AuthContext` so the
 DB layer sees the same identity the call-side gates check.
 
-## STRICT vs PERMISSIVE plugin tiers
+## STRICT vs PERMISSIVE plugin tiers {#strict-vs-permissive-plugin-tiers}
 
 A single plugin instance with `allowUnfilteredQueries: true`
 historically reduces RLS to an advisory hint. The
@@ -164,7 +166,7 @@ A `'system'` skipFor is built into every policy as the legitimate
 escape for migrations, background workers, and explicit
 service-layer transactions.
 
-## permVer counter
+## permVer counter {#permver-counter}
 
 The `perm-v:{userId}` Redis key is bumped by any code path
 that mutates a user's effective permission set:
@@ -188,14 +190,14 @@ invocation wrapper consults the live counter on every call —
 mismatch ⇒ `PERMISSION_VERSION_STALE` (401) ⇒ client refresh
 mints a fresh JWT with the up-to-date set.
 
-## Redis fail-open
+## Redis fail-open {#redis-fail-open}
 
 The permVer check is best-effort: a Redis outage on GET falls
 open with an `auth.permver.fail_open` log tag, mirroring
 `auth.session.fail_open` (MED-2). The DB-side session-revoke
 path remains the authoritative kill switch.
 
-## See also
+## See also {#see-also}
 
 - [Per-user overrides](./overrides.md) — what triggers a bump.
 - [Audit trail](./audit-trail.md) — every bump is audit-logged

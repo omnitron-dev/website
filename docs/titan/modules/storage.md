@@ -1,4 +1,6 @@
 ---
+id: "titan/modules/storage"
+slug: "/docs/titan/modules/storage"
 title: titan-storage
 description: Local and S3 object storage behind one streaming adapter contract.
 ---
@@ -23,7 +25,7 @@ the local backend avoids initializing an S3 client, but does not remove those
 packages from installation. Both adapters implement the same server-side
 streaming interface; this is not a browser upload client.
 
-## Configuration and lifecycle
+## Configuration and lifecycle {#configuration-and-lifecycle}
 
 | Backend | Configuration |
 | --- | --- |
@@ -48,7 +50,7 @@ and corrupt metadata remain errors. Usage calculation fails on unreadable
 directories rather than returning an apparently complete partial total.
 Keep persistent data outside sealed application and execution-owner runtimes.
 
-## Operations
+## Operations {#operations}
 
 | Surface | Methods |
 | --- | --- |
@@ -82,7 +84,7 @@ and is lost on process restart; use a durable backend when that constraint is
 unacceptable. The local adapter's signed URL behavior also needs an application
 HTTP delivery route. S3 usage reporting is cached; it is not an atomic quota gate.
 
-## Application boundary
+## Application boundary {#application-boundary}
 
 Resolve a permitted object key before calling the adapter. Enforce resource
 ownership, access policy, upload limits and transactional metadata changes in

@@ -1,4 +1,6 @@
 ---
+id: "omnitron/console"
+slug: "/docs/omnitron/console"
 sidebar_position: 11
 title: Web console
 description: The Omnitron webapp — React + Vite + Prism, every page, every plane.
@@ -14,7 +16,7 @@ the CLI uses.
 
 Verified against `apps/omnitron/webapp/src/`.
 
-## Workspace and stack scope
+## Workspace and stack scope {#workspace-and-stack-scope}
 
 The header selects a project and an explicit **All stacks** or **Stack: name**
 filter. The compact menu supports keyboard selection and stays bounded when a
@@ -36,7 +38,7 @@ selection whose stack was removed or renamed. Failed reads keep the last choice
 and mark cached menu state as stale; they never invent an empty inventory or
 silently switch to another stack.
 
-## Consistent action placement
+## Consistent action placement {#consistent-action-placement}
 
 Horizontal card and row controls put removal at the leading edge, with extra
 spacing before ordinary commands. Card footers keep those ordinary commands
@@ -49,7 +51,7 @@ order and Escape returns to its trigger. Confirmation dialogs keep Cancel
 before the explicit destructive confirmation. Reordering controls never removes
 role checks, ownership restrictions, disabled states or confirmation steps.
 
-## One keyboard model
+## One keyboard model {#one-keyboard-model}
 
 Console uses three levels of focus: **Console → workspace region → control**.
 The visible focus ring marks the active control; file selection is independent of
@@ -93,7 +95,7 @@ register context actions with `useConsoleActions`, enabled only while visible.
 Avoid installing another global keydown listener. Keep each command's callback
 shared with its pointer control, and recheck permissions at the RPC boundary.
 
-## Dependency evidence in topology
+## Dependency evidence in topology {#dependency-evidence-in-topology}
 
 Topology combines measured process/container status with configured relationships.
 `OmnitronProject.getTopology` uses the same application definitions, infrastructure
@@ -140,7 +142,7 @@ a textual representation. The control plane appears once as the system workspace
 not as an empty application project. Package identity distinguishes it from a user
 application that happens to be named `omnitron`.
 
-## Tech stack
+## Tech stack {#tech-stack}
 
 | Layer | Choice |
 | ----- | ------ |
@@ -154,7 +156,7 @@ application that happens to be named `omnitron`.
 | State | `zustand` stores in `src/stores/` |
 | Code splitting | Per-page `React.lazy()`; xterm loads with SSH; Prism components use explicit subpaths |
 
-## Filesystem layout
+## Filesystem layout {#filesystem-layout}
 
 ```text
 webapp/
@@ -178,7 +180,7 @@ webapp/
     └── stubs/                # fs/path stubs for Node builtins pulled in by Prism
 ```
 
-## Route map
+## Route map {#route-map}
 
 All routes other than `/auth/sign-in` are gated by `AuthGuard`.
 A session-keyed access provider retrieves effective RPC permissions, gates page entry and hides unavailable actions. See [Console access](./access.md).
@@ -212,9 +214,9 @@ sidebar.
 | `/dashboard-builder` | `DashboardBuilderPage` | both | scoped application inventory, retained metric series and controller alerts |
 | `*` | redirect to `/` | — | — |
 
-## Page-by-page
+## Page-by-page {#page-by-page}
 
-### Dashboard
+### Dashboard {#dashboard}
 
 The landing page shows the selected project's deployments, including remote stacks,
 or this daemon's applications when no project is selected. It provides:
@@ -238,7 +240,7 @@ Pages fetch through the typed Netron client directly (the
 `zustand` realtime store (`src/stores/realtime.store.ts`) for
 live pushes. There is no TanStack/React Query layer.
 
-### Apps list & detail
+### Apps list & detail {#apps-list--detail}
 
 `/apps` — table view of every managed app: status, instances,
 CPU, memory, restart count, mode (classic vs bootstrap),
@@ -258,7 +260,7 @@ complete inventory. Wide tables scroll inside their own keyboard-focusable regio
 - Action buttons: Start / Stop / Restart / Reload / Scale.
 - Inspect button → drills into `OmnitronDaemon.inspect`.
 
-### Stacks
+### Stacks {#stacks}
 
 `/stacks` — projects' stacks side-by-side with status, app count,
 runtime (Docker container count).
@@ -327,7 +329,7 @@ selected ID alone cannot establish that every running process loaded that releas
 See [Pin a local stack](./releases.md#pin-a-local-stack) for the CLI and data
 recovery boundaries.
 
-### Logs
+### Logs {#logs}
 
 The global viewer includes local and replicated application logs. Select one exact
 application handle and, optionally, a registered remote node. The default remains
@@ -362,7 +364,7 @@ The copy control provides `omnitron logs '<project>/<stack>/<app>' --node '<id>'
 for the selected application/node scope. Search, level and time filters are not
 included in that base command; CLI `--grep` is a regular expression.
 
-### Metrics
+### Metrics {#metrics}
 
 `/metrics` uses Prism charts for CPU and resident memory, with 5-minute,
 15-minute and 1-hour windows. Buckets are 10-second, 30-second and 1-minute
@@ -391,7 +393,7 @@ must not be added to the parent totals.
 Use [Dashboard Builder](#dashboard-builder) in either workspace to compose panels.
 Its CPU and memory charts use the same retained observations as `/metrics`.
 
-### Topology
+### Topology {#topology}
 
 The **Workspace** action opens the [target editor](./topology.md): versioned drafts,
 placement validation, connection evidence and reviewed acceptance. Accepted targets
@@ -442,7 +444,7 @@ scope clears the old selection. Unknown host capacity is not rendered as a gauge
 Local lifecycle controls follow Console permissions; remote applications remain
 managed through their owning stack.
 
-### Containers
+### Containers {#containers}
 
 `/containers` reads the Docker engine attached to this controller through
 `OmnitronInfra`. **Local node** and **Local total** explicitly describe that scope;
@@ -470,7 +472,7 @@ error; inspect the current state before retrying. Other failures retain their
 reported reason. Lifecycle actions still obey roles and ownership. A **Read only** indicator
 explains cluster or platform restrictions; focus it to inspect the reason.
 
-### Deployments
+### Deployments {#deployments}
 
 `/deployments` follows transfer observations and recorded stack starts in the
 selected workspace. **Releases** selects a build and its target stack;
@@ -492,7 +494,7 @@ Earlier controllers can return unattributed observations, which have a separate
 expandable list. The page requests only the views permitted for the current user.
 The CLI exposes the same observations through `omnitron stack progress`.
 
-### Alerts
+### Alerts {#alerts}
 
 Open **Alerts** in the global navigation to view alerts across all workspaces.
 When the status bar shows a firing count, select it to go directly to **Active
@@ -512,18 +514,18 @@ until it resolves. If the alerts clear before you open the link, the section
 shows that there are no active alerts. Acknowledging an alert and editing its
 rule each require the corresponding permission.
 
-### Pipelines
+### Pipelines {#pipelines}
 
 `/pipelines` — CI/CD pipeline list, definition editor, run
 history, live run view.
 
-### Traces
+### Traces {#traces}
 
 `/traces` — distributed trace viewer. Trace list with filters,
 single-trace waterfall, service-map view. Backed by
 `OmnitronTraces`.
 
-### Nodes
+### Nodes {#nodes}
 
 `/nodes` — fleet node inventory. Per-node:
 - Status, hostname, last-seen timestamp.
@@ -542,12 +544,12 @@ progress. Review each server's candidate, owner and rollback target before choos
 where execution stopped. See [fleet handoff](./backend-handoff.md#upgrade-a-fleet-of-managed-backends)
 for artifact staging, CLI commands and recovery.
 
-### Projects
+### Projects {#projects}
 
 `/projects` — registered project list. Add / scan / remove
 projects. Project switcher in sidebar mirrors this.
 
-### System
+### System {#system}
 
 Open `/system` to inspect the host that runs a daemon. **Host** selects the connected daemon or a registered mesh node when your role permits remote reads. The selected node and detail tab are in the URL. Each reading identifies the reporting host, collection time and duration. **Live** polls every five seconds while the tab is visible. Pause it to compare numbers or use **Refresh system snapshot** for one observation.
 
@@ -557,7 +559,7 @@ CPU load, committed memory, the fullest mount and network throughput share a com
 
 A partial snapshot names each missing collector and its reason. An unavailable peer keeps its own last observation with a warning. Switching hosts clears the previous reading. A snapshot over 15 seconds old is marked stale. A remote clock more than 15 seconds ahead is reported separately. CLI and agents can obtain the same snapshot with `omnitron --json system --node <id>`.
 
-### Dashboard Builder
+### Dashboard Builder {#dashboard-builder}
 
 Open `/dashboard-builder`, select a dashboard, then choose **Edit layout**. **Add panel** lets you choose application counts and resource totals, retained CPU or memory history, failures and restarts, controller runtime, or firing alerts. Set the title, width and optional exact application name. An application panel follows the selected project and stack. Controller panels identify their scope explicitly.
 
@@ -567,12 +569,12 @@ With **Live** paused, selecting another data source or history window reads it o
 
 **Dashboard options → Settings** changes the name, refresh interval and history window. **New dashboard** starts an empty board. **Duplicate** creates an independent layout. **Export layout** and **Import layout** transfer versioned JSON between browsers. Imports validate the layout and create a separate dashboard. Layout edits are saved in this browser. If storage refuses a write, export the session layout before closing. The document contains panel definitions and filters. Measurements and permissions come from the receiving Console.
 
-### Settings
+### Settings {#settings}
 
 `/settings` — current account, change-password, system
 preferences.
 
-## Auth flow
+## Auth flow {#auth-flow}
 
 ```mermaid
 sequenceDiagram
@@ -602,7 +604,7 @@ The access token is held in `sessionStorage` under the key
 clears it and calls `OmnitronAuth.signOut({ sessionId })`. The
 `signIn`, `validateToken`, `validateSession`, `refreshSession` and `signOut` methods declare anonymous transport access. Session IDs remain bearer credentials; authenticated sign-out additionally checks ownership.
 
-## RBAC in the UI
+## RBAC in the UI {#rbac-in-the-ui}
 
 The webapp uses the daemon's three human roles (`viewer`, `operator`, `admin`) through `OmnitronAccess.describe()`. The response is built from the active RPC decorators and authorization rules. There is no independently maintained role matrix in the browser.
 
@@ -616,7 +618,7 @@ The webapp uses the daemon's three human roles (`viewer`, `operator`, `admin`) t
 
 `useAccess()` and `Can` consume typed `service.method` capabilities; `AccessBoundary` uses Prism's guard-only auth entry. Missing or failed verification grants nothing. The daemon independently enforces every request. See [Console access](./access.md) for limits and extension points.
 
-## Real-time event flow
+## Real-time event flow {#real-time-event-flow}
 
 The webapp uses `OmnitronEvents` for live updates:
 
@@ -651,9 +653,9 @@ Releasing the last consumer resets connection state immediately; a previously
 connected page cannot leave a stale Live indicator behind. Sign-out and revoked
 sessions close their subscriptions. These rules apply to every authorized role.
 
-## Build / run modes
+## Build / run modes {#build--run-modes}
 
-### Dev mode
+### Dev mode {#dev-mode}
 
 ```bash
 cd apps/omnitron/webapp
@@ -674,7 +676,7 @@ production build — the `001_initial_schema` migration seeds a single
 `admin` user with password `admin` on first daemon start, and the
 password must be changed through Settings → Security before external exposure. Console startup falls back to loopback while this seed remains in use. A master refuses public TCP/HTTP/WebSocket registration until the credential check confirms the seed is no longer accepted; an unavailable check also refuses publication.
 
-### Production build
+### Production build {#production-build}
 
 ```bash
 cd apps/omnitron/webapp
@@ -722,7 +724,7 @@ session revocation and an independently verified SSH connection. Verify that
 trust changes and terminal lifecycle events appear in Audit. Remove temporary
 test accounts and close test shells after verification.
 
-### Open the webapp
+### Open the webapp {#open-the-webapp}
 
 | Command | Effect |
 | ------- | ------ |
@@ -739,14 +741,14 @@ Use `omnitron --json webapp status` to inspect the observed container state;
 see [CLI output and lifecycle outcomes](./cli.md#webapp-console-ui).
 
 
-## Project switcher
+## Project switcher {#project-switcher}
 
 The sidebar carries a project dropdown — switching projects
 re-scopes every project-scoped page to that project's apps /
 stacks / etc. Stored in the auth context; persists across
 sessions.
 
-## Empty / error states
+## Empty / error states {#empty--error-states}
 
 Every page is built around three states:
 
@@ -757,7 +759,7 @@ Every page is built around three states:
 - **Error** — error card with retry button + JSON of the underlying
   error (operators love seeing the actual error).
 
-## Performance characteristics
+## Performance characteristics {#performance-characteristics}
 
 - **Code-splitting** — each page is `React.lazy`'d.
 - **HMR** — Vite + SWC; instant in dev.
@@ -767,7 +769,7 @@ Every page is built around three states:
 - **WebSocket** for `OmnitronEvents` subscribers — one
   `DaemonWsClient` socket per tab.
 
-## Adding a new page
+## Adding a new page {#adding-a-new-page}
 
 The pattern is mechanical:
 
@@ -785,7 +787,7 @@ The pattern is mechanical:
 No separate API layer to wire — the daemon already exposes
 everything as typed Netron services.
 
-## Anti-patterns
+## Anti-patterns {#anti-patterns}
 
 - **Storing secrets in `localStorage`.** Use the auth token only;
   for actual secrets, the daemon's `OmnitronSecrets` is the right
@@ -800,7 +802,7 @@ everything as typed Netron services.
   service proxies from `src/netron/client.ts` — they carry the
   bearer token and give you end-to-end types from the daemon DTOs.
 
-## See also
+## See also {#see-also}
 
 - [CLI](./cli.md) — the same operator surface from the terminal
 - [Services reference](./services-reference.md) — every RPC the
@@ -812,13 +814,13 @@ everything as typed Netron services.
 - [netron-browser](../frontend/netron/browser.md) — the underlying
   browser RPC transport that Prism's netron client builds on
 
-## SSH and role administration
+## SSH and role administration {#ssh-and-role-administration}
 
 [SSH workspace](./terminal.md) provides independent terminal tabs, split view, search, paste review and a shared CLI/backend lifecycle through Xec. It is lazily loaded and stays mounted across navigation after first use.
 
 [Access](./access.md) shows the running daemon’s policy to every human role. Administrators can create accounts, change roles and revoke sessions. Account changes and their audit rows commit together; account directory queries never return password hashes or second-factor secrets.
 
-## Compact navigation and scrolling
+## Compact navigation and scrolling {#compact-navigation-and-scrolling}
 
 Console pages use a single breadcrumb trail for location and navigation. A hidden level-one heading and the browser tab title retain the page name for accessibility. Parent crumbs use client-side routing, so navigating between sections preserves mounted workspaces and their SSH sessions. Page actions remain beside the trail; content headings still identify cards and subsections.
 
@@ -829,7 +831,7 @@ checks and links back to Overview when no project is selected.
 The application shell occupies the available viewport. Its header, navigation and status bar stay within the window, while ordinary pages scroll in the main region. SSH panes and the topology canvas own their internal scrolling. The status bar progressively hides secondary details on narrow screens while retaining connection and application health. Prism theme tokens supply terminal background, text, cursor and selection colors.
 
 
-### Feedback for operations
+### Feedback for operations {#feedback-for-operations}
 
 User-triggered work responds immediately at its point of action. Console's shared
 `OperationStatus` shows the operation name, relevant context and elapsed waiting
@@ -862,7 +864,7 @@ Console. In HTTP RPC, stable numeric errors distinguish denied access (403), los
 identity (401), conflicts (409) and unavailable authority (503). Neither a spinner
 nor an English error string is an automation contract.
 
-### Reading an expanded log event
+### Reading an expanded log event {#reading-an-expanded-log-event}
 
 An expanded event continues the selected row on one surface, with a narrow level
 accent and aligned context separated by thin dividers. Multiline messages retain
@@ -876,7 +878,7 @@ source stream, trace and labels remain readable without opening a JSON card.
 and receipt metadata. **Copy JSON** copies that record and reports clipboard
 failure with a selectable-text fallback.
 
-### Tables, filters and overlays
+### Tables, filters and overlays {#tables-filters-and-overlays}
 
 The shared Prism `Table` and `AdminDataTable` contain horizontal scrolling inside
 `TableViewport`. Focus a named table region to scroll with the keyboard; rows with
@@ -934,13 +936,13 @@ as the package suite, including real topology node connection points.
 being reimplemented in each page. For frontend-only changes, rebuild the Console
 assets and reload the browser; a daemon or application restart is unnecessary.
 
-## Automation workspace
+## Automation workspace {#automation-workspace}
 
 The [Pipelines workspace](./automation.md) uses Prism tabs and data tables with responsive MUI editors and a run-details drawer. Step controls include local/registered-node selection, working directory, dependencies, timeout and advanced retry/environment settings. Execution requires review of the displayed source and targets. Run history loads summaries; step output is fetched only for the opened run, with stale-data and truncation indicators.
 
 This workspace is restricted to administrators because its scripts execute with infrastructure privileges. Embedded provider sessions and delegated agent controls are specified in the [agent architecture](./agents.md); they are not live Console features yet.
 
-## Watch configuration
+## Watch configuration {#watch-configuration}
 
 Re-enabling watch uses the daemon’s last accepted boot or reload configuration, including a configuration selected from a registered project. It does not rediscover an unrelated configuration from the caller’s working directory. Build watchers for registered applications appear in the same watch status as classic file watchers.
 
@@ -951,16 +953,16 @@ under the same resolution policy; installed packages retain their runtime
 dependency identity.
 
 
-## File workspace
+## File workspace {#file-workspace}
 
 [Files](./files.md) provides two independent, tabbed node locations, version-checked text editing and durable cross-node copies. Prism tabs and table viewports share the Console shell; CodeMirror loads only when a document is opened. Narrow windows retain both panels behind an A/B switch. The default export is `/`, limited by administrator authorization and the daemon OS account; node configuration can restrict roots, make them read only or disable access. Selecting one directory exposes explicit archive-file and pack-and-restore modes, with formats probed on the chosen nodes. Transfer progress distinguishes snapshots, encoding, network bytes, restoration and incomplete publication; cleanup failures retain a dedicated retry action.
 
 
-## Shared API contracts
+## Shared API contracts {#shared-api-contracts}
 
 Console and CLI share the wire contracts exported by `@omnitron-dev/omnitron/dto/services`. Backup coverage, audit queries, node health, rollout progress and release build progress are declared in the common DTO layer; the daemon implementations consume the same definitions. Existing service type exports remain available for compatibility. Console typechecking does not load daemon, database or service implementations, and a compiler-graph regression test enforces that boundary.
 
-## Publishing Console updates
+## Publishing Console updates {#publishing-console-updates}
 
 From a source checkout, `pnpm --filter @omnitron/console build` typechecks and
 builds into a temporary directory before publishing. `omnitron webapp build`
@@ -1017,7 +1019,7 @@ The publisher regression suite includes interrupted HTML replacement, existing
 open-tab assets, immutable URL conflicts and bounded retention. Run it with
 `pnpm --filter @omnitron-dev/omnitron test:console-publication`.
 
-### Historical coverage in node diagnostics
+### Historical coverage in node diagnostics {#historical-coverage-in-node-diagnostics}
 
 The replication reading separates a healthy current queue from coverage before
 durable receipts existed. Expand **History before receipts · coverage and gaps**
@@ -1031,7 +1033,7 @@ verification time and separate proof source. The original audit remains availabl
 no unresolved warning is cleared by a successful current queue reading.
 
 
-### Live log tail and complete history
+### Live log tail and complete history {#live-log-tail-and-complete-history}
 
 The live tail polls at two-second intervals with a bounded window of up to 50
 matching events per poll and retains up to 2,000 rows in the browser. A filled
@@ -1043,7 +1045,7 @@ this bounded display. A healthy ingestion indicator is not a claim that every
 stored row is currently on screen.
 
 
-### Releases and current deployments
+### Releases and current deployments {#releases-and-current-deployments}
 
 The **Deployment state** view on Releases and stack details combines the existing
 project inventory with deployment history. It shows each stack's actual

@@ -1,12 +1,13 @@
 ---
+id: "titan/modules/ratelimit"
+slug: "/docs/titan/modules/ratelimit"
 title: titan-ratelimit
 ---
 
-import ModuleBadge from '@site/src/components/ModuleBadge';
 
 # titan-ratelimit
 
-<ModuleBadge origin="official" pkg="@omnitron-dev/titan-ratelimit" status="stable" />
+<span class="module-badge">official · @omnitron-dev/titan-ratelimit · stable</span>
 
 Unified rate limiting with three algorithms (sliding-window,
 fixed-window, token-bucket), pluggable storage (in-memory or Redis),
@@ -18,7 +19,7 @@ statistics tracking with per-tier breakdown.
 pnpm add @omnitron-dev/titan-ratelimit
 ```
 
-## Algorithms
+## Algorithms {#algorithms}
 
 | Strategy            | Behaviour                                                                  | Best for                          |
 | ------------------- | -------------------------------------------------------------------------- | --------------------------------- |
@@ -26,7 +27,7 @@ pnpm add @omnitron-dev/titan-ratelimit
 | `'fixed-window'`    | Hard-reset at window boundary; simpler / cheaper                           | Per-hour quotas, accounting       |
 | `'token-bucket'`    | Tokens refill at a rate; can burst up to bucket size                       | Bursty workloads with smooth refill |
 
-### Fairness comparison
+### Fairness comparison {#fairness-comparison}
 
 ```mermaid
 flowchart LR
@@ -51,9 +52,9 @@ flowchart LR
   the bucket size — best for "usually quiet, sometimes spikes"
   workloads.
 
-## Quickstart
+## Quickstart {#quickstart}
 
-### In-memory (single-pod)
+### In-memory (single-pod) {#in-memory-single-pod}
 
 ```typescript
 import { TitanRateLimitModule } from '@omnitron-dev/titan-ratelimit';
@@ -72,7 +73,7 @@ import { TitanRateLimitModule } from '@omnitron-dev/titan-ratelimit';
 class AppModule {}
 ```
 
-### Redis-backed (multi-pod)
+### Redis-backed (multi-pod) {#redis-backed-multi-pod}
 
 ```typescript
 TitanRateLimitModule.forRoot({
@@ -96,7 +97,7 @@ TitanRateLimitModule.forRoot({
 
 Async config via `forRootAsync({ useFactory, inject?, imports?, isGlobal? })`.
 
-## `IRateLimitModuleOptions`
+## `IRateLimitModuleOptions` {#iratelimitmoduleoptions}
 
 | Option              | Type                                                              | Default               |
 | ------------------- | ----------------------------------------------------------------- | --------------------- |
@@ -115,7 +116,7 @@ Async config via `forRootAsync({ useFactory, inject?, imports?, isGlobal? })`.
 | `defaultTier`       | `IRateLimitTier`                                                  | —                     |
 | `isGlobal`          | `boolean`                                                         | `false`               |
 
-## `IRateLimitTier`
+## `IRateLimitTier` {#iratelimittier}
 
 ```typescript
 interface IRateLimitTier {
@@ -130,7 +131,7 @@ interface IRateLimitTier {
 The effective limit for a check is `tier.limit + (tier.burst ??
 options.burstLimit)`.
 
-## `RateLimitService` — the API
+## `RateLimitService` — the API {#ratelimitservice--the-api}
 
 ```typescript
 import { RATE_LIMIT_SERVICE_TOKEN, type IRateLimitService }
@@ -170,7 +171,7 @@ Prefer `consume()` when you want to handle the rate-limit case
 with a custom response shape; prefer `enforce()` when you want a
 single line that "just blocks".
 
-## `IRateLimitResult`
+## `IRateLimitResult` {#iratelimitresult}
 
 ```typescript
 interface IRateLimitResult {
@@ -196,9 +197,9 @@ if (!result.allowed) {
 }
 ```
 
-## Decorators
+## Decorators {#decorators}
 
-### `@RateLimit(options?)`
+### `@RateLimit(options?)` {#ratelimitoptions}
 
 ```typescript
 import { RateLimit } from '@omnitron-dev/titan-ratelimit';
@@ -227,7 +228,7 @@ from `@omnitron-dev/titan-ratelimit` — wraps the method and enforces, and take
 Netron's authorization layer to read, and takes `window`. The import path is
 the whole difference, and the field names are the tell.
 
-### `@Throttle(rps)` — convenience
+### `@Throttle(rps)` — convenience {#throttlerps--convenience}
 
 ```typescript
 import { Throttle } from '@omnitron-dev/titan-ratelimit';
@@ -240,14 +241,14 @@ async search(q: string) { /* … */ }
 `@Throttle(rps)` is equivalent to `@RateLimit({ limit: rps,
 windowMs: 1_000 })`.
 
-## Storage backends
+## Storage backends {#storage-backends}
 
 | Backend       | Class                          | When                                                    |
 | ------------- | ------------------------------ | ------------------------------------------------------- |
 | `'memory'`    | `MemoryRateLimitStorage`       | Single-pod; lower latency; counts lost on restart       |
 | `'redis'`     | `RedisRateLimitStorage`        | Multi-pod; persisted across restarts; cluster-aware     |
 
-### `IRateLimitStorage` interface
+### `IRateLimitStorage` interface {#iratelimitstorage-interface}
 
 Custom backends implement:
 
@@ -269,7 +270,7 @@ The Redis backend uses Lua scripts for the
 sliding/fixed-window counters (atomic increment + TTL set) and
 `INCR`/`EXPIRE` for token bucket — single-roundtrip per check.
 
-## Tiered plans
+## Tiered plans {#tiered-plans}
 
 ```typescript
 TitanRateLimitModule.forRoot({
@@ -298,7 +299,7 @@ const stats = rate.getStats();
 // stats.byTier?.get('pro') === { checks, allowed, denied }
 ```
 
-## Queueing
+## Queueing {#queueing}
 
 When `queueEnabled: true`, excess requests **wait** in a queue
 instead of immediately rejecting — useful when latency variance is
@@ -326,7 +327,7 @@ Queueing semantics:
 > starve legitimate requests. Use queueing only inside trust
 > boundaries (after auth).
 
-## Per-algorithm distributed coordination
+## Per-algorithm distributed coordination {#per-algorithm-distributed-coordination}
 
 When `storageType: 'redis'` and multi-pod, each algorithm uses a
 slightly different Redis primitive set:
@@ -341,9 +342,9 @@ All Lua scripts touch one key, so cluster-mode hash slots are not
 an issue for a single check. Across keys (different users) there's
 no cross-key coordination — desired for rate limiting.
 
-## Recipes
+## Recipes {#recipes}
 
-### Per-IP throttle (behind trusted proxy)
+### Per-IP throttle (behind trusted proxy) {#per-ip-throttle-behind-trusted-proxy}
 
 ```typescript
 @Public()
@@ -360,7 +361,7 @@ async search(q: string, @Context() ctx: RequestContext) {
 > Otherwise an attacker spoofs `X-Forwarded-For` and bypasses
 > per-IP limits.
 
-### Per-user, tier-aware
+### Per-user, tier-aware {#per-user-tier-aware}
 
 ```typescript
 async getReport(@Auth() user: AuthContext) {
@@ -377,7 +378,7 @@ async getReport(@Auth() user: AuthContext) {
 }
 ```
 
-### Per-API-key, burst-tolerant
+### Per-API-key, burst-tolerant {#per-api-key-burst-tolerant}
 
 ```typescript
 TitanRateLimitModule.forRoot({
@@ -394,7 +395,7 @@ await this.rate.enforce(`api-key:${apiKey}`);
 Bursts up to 150 succeed; sustained rate above 100/min refills
 slower than consumption and starts rejecting.
 
-### Per-endpoint compound key
+### Per-endpoint compound key {#per-endpoint-compound-key}
 
 ```typescript
 @RateLimit({ limit: 5, windowMs: 60_000 })
@@ -404,7 +405,7 @@ async resetPassword(@Auth() user: AuthContext) {
 }
 ```
 
-## Performance notes
+## Performance notes {#performance-notes}
 
 | Cost dimension                       | Memory backend     | Redis backend                       |
 | ------------------------------------ | ------------------ | ----------------------------------- |
@@ -420,7 +421,7 @@ For most workloads:
 - **Multi-pod, smooth fairness:** Redis + sliding-window.
 - **Multi-pod, bursty traffic:** Redis + token-bucket.
 
-## Tokens
+## Tokens {#tokens}
 
 | Token                          | Type                          |
 | ------------------------------ | ----------------------------- |
@@ -428,7 +429,7 @@ For most workloads:
 | `RATE_LIMIT_OPTIONS_TOKEN`     | `IRateLimitModuleOptions`     |
 | `RATE_LIMIT_STORAGE_TOKEN`     | `IRateLimitStorage`           |
 
-## Lifecycle
+## Lifecycle {#lifecycle}
 
 The service uses periodic cleanup intervals on the in-memory
 storage (sweeping expired keys); no explicit lifecycle hooks
@@ -436,7 +437,7 @@ beyond the standard ones. On module shutdown, `destroy()` clears
 the cleanup timer and closes the Redis storage client where
 applicable.
 
-## Algorithm selection — what to pick
+## Algorithm selection — what to pick {#algorithm-selection--what-to-pick}
 
 ```mermaid
 flowchart LR
@@ -454,7 +455,7 @@ flowchart LR
 - **Fixed window** — for accounting-style quotas ("100 requests per
   hour" with hard reset on the hour).
 
-## Integration with `titan-notifications`
+## Integration with `titan-notifications` {#integration-with-titan-notifications}
 
 `titan-notifications` ships its own per-channel rate limiter
 (`NOTIFICATIONS_RATE_LIMITER` / `NOTIFICATIONS_REDIS_RATE_LIMITER`)
@@ -471,7 +472,7 @@ NotificationsModule.forRoot({
 The default is independent per-channel limits with their own
 counters — fine for most setups.
 
-## Anti-patterns
+## Anti-patterns {#anti-patterns}
 
 - **`@RateLimit` per method without auth context.** Without a per-
   user key, all callers share one bucket. Use a key template that
@@ -493,7 +494,7 @@ counters — fine for most setups.
 - **Storing PII / unbounded values in `keyPrefix`.** The key prefix
   is constant per process. Don't templatise it with per-user data.
 
-## See also
+## See also {#see-also}
 
 - [Resilience / overview](../resilience/overview.md) — pair with
   retry/backoff on the caller side

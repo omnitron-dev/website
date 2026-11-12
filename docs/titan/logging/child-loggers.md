@@ -1,4 +1,6 @@
 ---
+id: "titan/logging/child-loggers"
+slug: "/docs/titan/logging/child-loggers"
 sidebar_position: 4
 title: Child Loggers
 description: Bind context to a logger instance — service, request, trace.
@@ -12,7 +14,7 @@ line written through the child carries the bound fields automatically.
 This is the right way to add per-call or per-request fields without
 repeating them at every call site.
 
-## Creating a child
+## Creating a child {#creating-a-child}
 
 ```typescript
 const child = this.logger.child({ requestId: 'r_42', userId: 'u_91' });
@@ -29,7 +31,7 @@ The child carries the bound fields forever. Pass it down to
 helpers, into other services, into queue handlers — every log line
 through it has the same context.
 
-## Per-service binding (automatic)
+## Per-service binding (automatic) {#per-service-binding-automatic}
 
 Every `LoggerService` injected into a `@Service` class is
 automatically a child bound to `service: <ClassName>`:
@@ -44,7 +46,7 @@ class UsersService {
 
 You don't need to set this; the framework wires it.
 
-## Per-call binding via context
+## Per-call binding via context {#per-call-binding-via-context}
 
 For Netron calls, a request-scoped logger is available in the
 `NetronContext`. It is already bound to:
@@ -71,7 +73,7 @@ async findById(id: string, @Context() ctx: NetronContext) {
 Every log line from this method carries the request context — no
 manual passing.
 
-## Across async boundaries
+## Across async boundaries {#across-async-boundaries}
 
 Child loggers cross async boundaries by *passing the reference*. They
 do not propagate via `AsyncLocalStorage` automatically (unlike trace
@@ -95,7 +97,7 @@ For propagation through deep call chains where passing is awkward,
 use the trace integration — log lines automatically carry `traceId`
 and `spanId` from the active trace context.
 
-## Don't pass the parent logger
+## Don't pass the parent logger {#dont-pass-the-parent-logger}
 
 A common mistake:
 
@@ -110,7 +112,7 @@ async findById(id: string) {
 Inject `@Context()` and use `ctx.logger` instead. The parent
 `this.logger` has no per-call context.
 
-## Performance
+## Performance {#performance}
 
 Creating a child is cheap (it's a shallow clone of the parent's
 bound fields). Logging through a child is the same cost as logging
@@ -129,7 +131,7 @@ for (const item of items) {
 
 The child is created once; each log is normal cost.
 
-## Anti-patterns
+## Anti-patterns {#anti-patterns}
 
 - **Recreating the same child per call.** If you find yourself
   writing `this.logger.child({ service: 'X' })` everywhere, that's

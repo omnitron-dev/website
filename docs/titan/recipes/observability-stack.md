@@ -1,4 +1,6 @@
 ---
+id: "titan/recipes/observability-stack"
+slug: "/docs/titan/recipes/observability-stack"
 sidebar_position: 4
 title: Observability stack
 description: Logs, metrics, traces, health — collected and shipped via the telemetry relay.
@@ -12,7 +14,7 @@ W3C trace propagation across RPC calls, and a store-and-forward
 relay that ships everything to your sink even through network
 outages.
 
-## Shape
+## Shape {#shape}
 
 - **Logs.** Structured JSON via `LoggerModule`, with `traceId` /
   `spanId` attached automatically.
@@ -25,7 +27,7 @@ outages.
   `titan-telemetry-relay` — survives collector outages without
   data loss.
 
-## Architecture
+## Architecture {#architecture}
 
 ```mermaid
 flowchart LR
@@ -53,7 +55,7 @@ flowchart LR
   Health --> Probe[Kubernetes probes]
 ```
 
-## `AppModule` — producer side
+## `AppModule` — producer side {#appmodule--producer-side}
 
 ```typescript
 import { Module } from '@omnitron-dev/titan';
@@ -130,7 +132,7 @@ const TraceContextProcessor: ILogProcessor = {
 export class AppModule {}
 ```
 
-## Wiring the telemetry relay
+## Wiring the telemetry relay {#wiring-the-telemetry-relay}
 
 The relay is **not** a Titan module — instantiate it in your
 bootstrap and wire it as a clientModule or via your DI container:
@@ -163,7 +165,7 @@ process.on('SIGTERM', async () => {
 });
 ```
 
-## Aggregator pod
+## Aggregator pod {#aggregator-pod}
 
 ```typescript
 const relay = new TelemetryRelayService({
@@ -192,7 +194,7 @@ const app = await Application.create({ modules: [AggregatorModule] });
 await app.start();
 ```
 
-## Trace propagation in your code
+## Trace propagation in your code {#trace-propagation-in-your-code}
 
 ```typescript
 import { startSpan, withTrace } from '@omnitron-dev/titan';
@@ -210,7 +212,7 @@ Netron propagates the `traceparent` across RPC calls automatically;
 log lines inside `withTrace` automatically carry `traceId` / `spanId`
 through the `TraceContextProcessor` above.
 
-## A typical instrumented service
+## A typical instrumented service {#a-typical-instrumented-service}
 
 ```typescript
 import { Service, startSpan, withTrace } from '@omnitron-dev/titan';
@@ -233,7 +235,7 @@ class UsersService {
 }
 ```
 
-## Cross-module wiring notes
+## Cross-module wiring notes {#cross-module-wiring-notes}
 
 | Concern                       | Wiring detail                                                                                       |
 | ----------------------------- | --------------------------------------------------------------------------------------------------- |
@@ -244,7 +246,7 @@ class UsersService {
 | WAL crash safety              | Provide a `wal` config object (omit or `wal: false` to disable); buffer overflow spills to disk and replays on next start |
 | Metrics retention             | `retention.maxAge` is the in-storage window; ship metrics to long-term backend before that elapses   |
 
-## Production checklist
+## Production checklist {#production-checklist}
 
 - [ ] **Logs**: `RedactionProcessor` includes every sensitive header / field
 - [ ] **Logs**: `TraceContextProcessor` (or equivalent) attached — without it, trace correlation breaks
@@ -258,7 +260,7 @@ class UsersService {
 - [ ] **Relay**: aggregator's `write()` is idempotent (handles retries from buffer re-enqueue)
 - [ ] **K8s**: `terminationGracePeriodSeconds` ≥ relay's flush interval + buffer drain time
 
-## See also
+## See also {#see-also}
 
 - [Logging / Overview](../logging/overview.md) and per-page references
 - [Tracing](../tracing.md) — full tracing primitive reference

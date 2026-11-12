@@ -1,4 +1,6 @@
 ---
+id: "titan/concepts/mental-model"
+slug: "/docs/titan/concepts/mental-model"
 sidebar_position: 3
 title: Mental Model
 description: How to think about a running Titan app.
@@ -8,7 +10,7 @@ description: How to think about a running Titan app.
 
 A picture of a running Titan app, from three viewpoints:
 
-## Viewpoint 1 — From outside the process
+## Viewpoint 1 — From outside the process {#viewpoint-1--from-outside-the-process}
 
 A Titan service, viewed from the network, is **a set of named methods
 behind a versioned identifier**. The identifier is `name@semver`, the
@@ -27,7 +29,7 @@ which module declared it, or which lifecycle phase is running. It cares
 about the wire contract. **The wire contract is the TypeScript
 interface.**
 
-## Viewpoint 2 — From inside a service method
+## Viewpoint 2 — From inside a service method {#viewpoint-2--from-inside-a-service-method}
 
 Inside a method body, your service is an ordinary TypeScript class:
 
@@ -75,7 +77,7 @@ What is *not* visible from the method body — but is real:
 You write the method as if these were not there. The framework wires
 them in.
 
-## Viewpoint 3 — From the lifecycle's perspective
+## Viewpoint 3 — From the lifecycle's perspective {#viewpoint-3--from-the-lifecycles-perspective}
 
 The lifecycle state machine sees the application as **a topologically
 ordered set of providers**:
@@ -112,9 +114,9 @@ provide. The lifecycle state implementation is available in the
 +That source file is not a supported package import; use the public
 +[application and lifecycle APIs](../../reference/api-index.mdx).
 
-## Three things to internalise
+## Three things to internalise {#three-things-to-internalise}
 
-### 1. The container is the world
+### 1. The container is the world {#1-the-container-is-the-world}
 
 When you wonder "where does X come from?", the answer is "the
 container resolved it from a provider declared in some module." Always.
@@ -122,7 +124,7 @@ There are no globals. There are no singletons stored on `Object` or
 imported from a `state.ts` file. If you find yourself reaching for
 module-level state, you are stepping outside Titan's model.
 
-### 2. Methods are just methods
+### 2. Methods are just methods {#2-methods-are-just-methods}
 
 A `@Public` method is no different from a private method except that
 Netron can dispatch to it. You can call `this.findById(...)` from
@@ -136,7 +138,7 @@ This is why testing Titan services is easy: instantiate the class with
 mock dependencies, call the methods directly. No "test client" needed
 unless you are testing the wire layer itself.
 
-### 3. The framework gets out of the way
+### 3. The framework gets out of the way {#3-the-framework-gets-out-of-the-way}
 
 Once an `Application` has started, the framework does almost nothing
 during a request. Netron decodes a packet, looks up a service in a
@@ -148,7 +150,7 @@ consulted (it has finished `onStart` and is waiting for `onStop`).
 You are running a TypeScript method on a Node.js process. The
 framework is the surrounding scaffolding, not a per-call interpreter.
 
-## What this means for performance
+## What this means for performance {#what-this-means-for-performance}
 
 The hot path of a Titan service is:
 

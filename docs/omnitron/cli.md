@@ -1,4 +1,6 @@
 ---
+id: "omnitron/cli"
+slug: "/docs/omnitron/cli"
 sidebar_position: 3
 title: CLI reference
 description: Every command, every flag, every command group.
@@ -13,7 +15,7 @@ running daemon.
 
 Verified against `src/cli/omnitron.ts` and `src/commands/*`.
 
-## Global options
+## Global options {#global-options}
 
 | Option / Env                              | Effect                                                 |
 | ----------------------------------------- | ------------------------------------------------------ |
@@ -35,7 +37,7 @@ completed: inspect state before retrying. Finite commands validate their output
 and drain stdout and stderr before exiting, so large log exports remain complete
 when piped into another process. Check both the JSON result and the exit status.
 
-## Command index
+## Command index {#command-index}
 
 | Group | Commands |
 | ----- | -------- |
@@ -69,7 +71,7 @@ when piped into another process. Check both the JSON result and the exit status.
 | **Tor** | `tor` |
 | **Knowledge base** | `kb mcp`, `kb index`, `kb status`, `kb query` |
 
-## Topology workspace
+## Topology workspace {#topology-workspace}
 
 `omnitron topology refresh <project> [stack]` explicitly captures bootstrap dependency
 declarations in private SQLite without starting applications. It requires admin,
@@ -84,7 +86,7 @@ revision-protected draft; `plan` validates it; `apply <project> <stack> <plan-id
 accepts that target. Acceptance does not change executable configuration or run a
 migration. See [topology review, permissions and limits](./topology.md).
 
-## Database migrations
+## Database migrations {#database-migrations}
 
 `omnitron migrate [status|verify|up|down]` uses `omnitron.migrations.ts` by
 default. `--config` selects a configuration; `--daemon` explicitly selects the
@@ -92,7 +94,7 @@ daemon database. `up --dry-run` previews, `up --to NAME` selects a prefix, and
 `down --steps N` rolls back a suffix. `verify` exits with 2 when integrity is
 unknown or mismatched. Direct `up` and `down` require a standalone installation. For a clustered controller schema change, use the reviewed backend schema workflow. See [migration configuration and recovery](./migrations.md).
 
-## Backend replacement
+## Backend replacement {#backend-replacement}
 
 `backend status --json` reports whether the running daemon supports resident
 execution. `backend upgrade <sealed-dist> --check` validates a candidate and
@@ -116,7 +118,7 @@ For supported independent services, `omnitron backend guardian prepare <sealed-r
 
 Use the candidate's CLI for `backend upgrade --check`. It checks the owner's declared lifecycle contracts before draining or delegating; an incompatible owner requires a planned owner transition. `backend status --json` includes `execution.ownerCapabilities` when the backend reports them.
 
-### Recover after an execution-owner crash
+### Recover after an execution-owner crash {#recover-after-an-execution-owner-crash}
 
 An unclean owner exit can leave application processes alive. A new owner cannot
 adopt their native process handles, and ordinary startup refuses a same-boot
@@ -175,9 +177,9 @@ implemented.
 
 See [requirements, first transition and recovery](./backend-handoff.md).
 
-## Daemon lifecycle
+## Daemon lifecycle {#daemon-lifecycle}
 
-### `omnitron up`
+### `omnitron up` {#omnitron-up}
 
 Start the daemon in the background. Auto-detects
 `omnitron.config.ts` at the current working directory or any
@@ -196,7 +198,7 @@ ancestor.
 
 Foreground startup returns control to the daemon lifecycle, not to the CLI exit handler. The process continues serving RPC after initialization; Titan handles its shutdown. If the daemon is already running, another `up --foreground` reports that state and returns without starting a second controller.
 
-### `omnitron down`
+### `omnitron down` {#omnitron-down}
 
 Stop the daemon — gracefully stops every project, stack, and
 infrastructure container.
@@ -205,33 +207,33 @@ infrastructure container.
 
 Inspect tool availability, the configured builder capacity, active and queued jobs, and support for shared-store publication. Use `--json` in a pipeline.
 
-### `omnitron release builds`
+### `omnitron release builds` {#omnitron-release-builds}
 
 List controller jobs, optionally restricted to one project. Use `--json` in an agent or CI client.
 
-### `omnitron release job`
+### `omnitron release job` {#omnitron-release-job}
 
 Read a single job by ID. Use `--follow` to observe phases until it settles.
 
-### `omnitron release stop-build`
+### `omnitron release stop-build` {#omnitron-release-stop-build}
 
 Cancel the specified queued or executing job. Other projects retain their slots.
 
-### `omnitron stack check-release`
+### `omnitron stack check-release` {#omnitron-stack-check-release}
 
 Check admission for a specified project, stack and release ID. This uses the same read-only method as the Console deployment dialog. The exit status is nonzero on refusal.
 
-### `omnitron ping`
+### `omnitron ping` {#omnitron-ping}
 
 Probe whether the daemon is alive. Exit code `0` = up, non-zero =
 down.
 
-### `omnitron kill`
+### `omnitron kill` {#omnitron-kill}
 
 Force-kill the daemon process. Use only when `down` doesn't
 respond.
 
-### `omnitron service install|uninstall|status`
+### `omnitron service install|uninstall|status` {#omnitron-service-installuninstallstatus}
 
 Register the platform's processes with the operating system. In resident mode,
 the owner keeps applications running while the independent guardian supervises
@@ -278,7 +280,7 @@ forks — one daemon codepath with two launchers — and that entry
 point holds a single-instance pid guard, so the two can never both
 bind.
 
-## Development SDK
+## Development SDK {#development-sdk}
 
 | Command | Result |
 | --- | --- |
@@ -290,7 +292,7 @@ bind.
 Each command accepts `--project-dir <path>`. The developer selection is machine-local.
 See [local SDK development and registry deployments](./releases.md#local-sdk-development-and-registry-deployments).
 
-## Project management
+## Project management {#project-management}
 
 A *project* is one repository with many named stacks. Register the repository
 once; subdirectory configurations contribute stacks to that owner. See
@@ -309,7 +311,7 @@ once; subdirectory configurations contribute stacks to that owner. See
 
 Aliases: `omnitron proj` works the same as `omnitron project`.
 
-## Stack management
+## Stack management {#stack-management}
 
 A *stack* is a named environment within a project (typical
 values: `dev`, `staging`, `prod`). Stacks scope deployments and
@@ -357,7 +359,7 @@ Remote target-host checks remain explicitly incomplete; `infra inspect` and
 `node check` provide complementary evidence. Project configuration is the daemon's
 loaded configuration; reload it after editing project configuration files.
 
-## App lifecycle
+## App lifecycle {#app-lifecycle}
 
 These commands accept an `[app]` argument. With no app, they
 operate on **all** managed apps.
@@ -381,7 +383,7 @@ for excluding one application while its siblings remain active. The
 lower-level fence, but the public per-application lifecycle does not yet expose
 that guarantee.
 
-## Information
+## Information {#information}
 
 | Command | Effect |
 | ------- | ------ |
@@ -410,7 +412,7 @@ looking identical.
 not the app's. A child that restarted an hour ago under an app that
 has been up for a week reads one hour.
 
-### `omnitron system`
+### `omnitron system` {#omnitron-system}
 
 ```sh
 omnitron system
@@ -421,11 +423,11 @@ The command uses the same bounded collectors as Console **System**. A named node
 
 A stack start also exposes its outcome in JSON. `outcome: "confirmed"` requires a running stack, every reported application online and no missing infrastructure or nodes. A partial reply includes the affected resources and sets exit code 1. A transport timeout leaves the result unconfirmed. Inspect the stack and deployment history before repeating the request.
 
-## Monitoring
+## Monitoring {#monitoring}
 
 Resident mode uses independent owner and backend guardian services. See [backend replacement](./backend-handoff.md#independent-os-supervision) for preparation, crash recovery, system scope and owner-failure boundaries.
 
-### `omnitron logs [app]`
+### `omnitron logs [app]` {#omnitron-logs-app}
 
 Tail logs. Omit `[app]` to read the daemon's own log.
 
@@ -451,20 +453,20 @@ the same `OmnitronLogs.streamLogs` contract as Console. `--node` and `--file`
 are mutually exclusive. Omit `--node` for the local machine. JSON output records
 the source and node; an empty result does not establish that no request occurred.
 
-### `omnitron monit`
+### `omnitron monit` {#omnitron-monit}
 
 Live TUI dashboard — terminal app showing per-process CPU /
 RSS / restart counts in real time. Quit with `q`.
 
-### `omnitron health [app]`
+### `omnitron health [app]` {#omnitron-health-app}
 
 Composite health report from `titan-health` indicators.
 
-### `omnitron metrics [app]`
+### `omnitron metrics [app]` {#omnitron-metrics-app}
 
 Snapshot of current CPU / memory / latency / RPC counters.
 
-### `omnitron health-check [app]`
+### `omnitron health-check [app]` {#omnitron-health-check-app}
 
 Checks application-reported health, declared readiness and HTTP/TCP availability.
 A live process or HTTP 200 cannot override a failed application check. Without an
@@ -474,15 +476,15 @@ Use `omnitron --json health-check [app]` for the same structured report. Both
 human and JSON modes exit with status 1 when any check is degraded or unhealthy;
 JSON output retains the individual checks and their reasons.
 
-### `omnitron discover`
+### `omnitron discover` {#omnitron-discover}
 
 Scan Docker + SSH on known hosts for Omnitron-managed processes
 not yet in the registry. Useful when migrating in an existing
 fleet.
 
-## Scaling
+## Scaling {#scaling}
 
-### `omnitron scale <app> <count> --process <name>`
+### `omnitron scale <app> <count> --process <name>` {#omnitron-scale-app-count---process-name}
 
 Resize one declared process pool in a running bootstrap application. The process
 name is required; classic applications and singleton processes cannot be resized.
@@ -502,9 +504,9 @@ The owner must advertise `processPoolResize@1`. An older owner refuses the reque
 without changing the application. Updating only the backend does not add this
 capability to a running owner.
 
-## Diagnostics
+## Diagnostics {#diagnostics}
 
-### `omnitron doctor`
+### `omnitron doctor` {#omnitron-doctor}
 
 One pass over the whole installation, reporting problems with the
 evidence that identifies them and the command that fixes them.
@@ -585,7 +587,7 @@ check reads the files rather than asking the daemon, because a
 daemon holding a config it loaded hours ago cannot tell you the
 file has been edited since.
 
-### `omnitron inspect <app>`
+### `omnitron inspect <app>` {#omnitron-inspect-app}
 
 Deep diagnostics for an app — services exposed, memory
 breakdown, pending requests.
@@ -597,7 +599,7 @@ breakdown, pending requests.
 | `--focus <token>` | Restrict the graph to one token + its closure |
 | `--direction <ancestors|descendants|both>` | Closure direction (default `both`) |
 
-### `omnitron exec <app> <service> <method> [args...]`
+### `omnitron exec <app> <service> <method> [args...]` {#omnitron-exec-app-service-method-args}
 
 Invoke an RPC method on a managed app:
 
@@ -608,12 +610,12 @@ omnitron exec api users findById u_42
 Arguments are parsed as JSON when they look like JSON, otherwise
 strings.
 
-### `omnitron env <app>`
+### `omnitron env <app>` {#omnitron-env-app}
 
 Show resolved environment variables for an app (after merging
 project / stack / per-app overrides).
 
-## Remote daemons
+## Remote daemons {#remote-daemons}
 
 Register remote daemons as named aliases and address them via
 `omnitron remote <alias>`.
@@ -625,7 +627,7 @@ Register remote daemons as named aliases and address them via
 | `omnitron remote list` | List registered remotes |
 | `omnitron remote status <alias>` | Check connectivity |
 
-## Fleet operations
+## Fleet operations {#fleet-operations}
 
 Aggregate across all remotes (and the local daemon).
 
@@ -635,7 +637,7 @@ Aggregate across all remotes (and the local daemon).
 | `omnitron fleet health` | Health across the fleet |
 | `omnitron fleet metrics` | Aggregated metrics across the fleet |
 
-## Cluster (leader election)
+## Cluster (leader election) {#cluster-leader-election}
 
 | Command | Effect |
 | ------- | ------ |
@@ -645,7 +647,7 @@ Aggregate across all remotes (and the local daemon).
 Cluster operations require `cluster.enabled: true` in the
 daemon config.
 
-## Secrets (encrypted at rest)
+## Secrets (encrypted at rest) {#secrets-encrypted-at-rest}
 
 | Command | Effect |
 | ------- | ------ |
@@ -681,9 +683,9 @@ uses the common diagnostic redactor, but applications must still avoid printing
 secret values themselves. Failed or interrupted migrations are not automatically
 retried: inspect their ledger before deciding whether to run them again.
 
-## Deployment
+## Deployment {#deployment}
 
-### Stack deployment and rollback
+### Stack deployment and rollback {#stack-deployment-and-rollback}
 
 Deploy a built release with `omnitron stack start <project> <stack> --release <id>`.
 Returning to a previous release uses that same workflow with the reviewed previous
@@ -696,19 +698,19 @@ artifact. The corresponding RPC mutations refuse before database or process
 changes as well. No rolling, blue-green or canary rollout is implied by accepting
 a strategy label in a historical record.
 
-### `omnitron deploy build <app>`
+### `omnitron deploy build <app>` {#omnitron-deploy-build-app}
 
 Build an application artifact without shipping or starting it. To build a release
 with source commits, manifests and gates, use `omnitron release build`.
 
-## Tor
+## Tor {#tor}
 
-### `omnitron tor`
+### `omnitron tor` {#omnitron-tor}
 
 Show the Tor hidden-service onion addresses for the running
 stack. Top-level command; no flags.
 
-## Infrastructure
+## Infrastructure {#infrastructure}
 
 Manage infrastructure containers (Postgres / Redis / MinIO /
 custom) provisioned per app's `omnitronConfig.infrastructure`.
@@ -726,7 +728,7 @@ custom) provisioned per app's `omnitronConfig.infrastructure`.
 
 Direct infrastructure mutations require a standalone installation. For projects declaring named stacks, use the project and stack lifecycle to provision or remove containers. An enrolled node requires admission through the cluster lifecycle protocol. Direct container operations verify ownership and use the observed Docker ID before removal.
 
-## Pipelines (Xec automation)
+## Pipelines (Xec automation) {#pipelines-xec-automation}
 
 | Command | Effect |
 | ------- | ------ |
@@ -738,7 +740,7 @@ Direct infrastructure mutations require a standalone installation. For projects 
 
 All pipeline RPC methods require `admin`. Parameters are data, not source substitutions. Failed, cancelled and interrupted runs produce a nonzero status-command exit code. See [Xec automation](./automation.md) for definitions, limits and recovery behavior.
 
-## Backups
+## Backups {#backups}
 
 | Command | Effect |
 | ------- | ------ |
@@ -793,14 +795,14 @@ Schedules persist across daemon restarts; they do not run while the daemon is do
 Active capture, restore and scheduled retention block backend handoff. Preparation
 pauses schedule admission, and an aborted handoff re-arms persisted schedules.
 
-## Kubernetes
+## Kubernetes {#kubernetes}
 
 | Command | Effect |
 | ------- | ------ |
 | `omnitron k8s pods [namespace]` | List Kubernetes pods |
 | `omnitron k8s deploy scale <name> <replicas> [-n namespace]` | Scale a deployment |
 
-## Nodes (infrastructure machines)
+## Nodes (infrastructure machines) {#nodes-infrastructure-machines}
 
 Register physical / virtual machines for fleet operations and
 remote deploys. Different from `remote daemons` — nodes are SSH
@@ -841,7 +843,7 @@ unverified entries answers as a no-op. For an older node with gaps, prepare a
 compatible update or a reviewed maintenance worker; the command does not silently
 execute SSH code. See [historical reconciliation](./cluster.md#reconcile-historical-metric-receipts).
 
-### `omnitron node add` flags
+### `omnitron node add` flags {#omnitron-node-add-flags}
 
 | Flag | Required | Default |
 | ---- | -------- | ------- |
@@ -871,7 +873,7 @@ On `node update`, the secret belongs to the node's registered authentication met
 `--ssh-auth` explicitly changes it. Thus an existing key-authenticated node receives a key
 passphrase without needing to repeat `--ssh-auth key`.
 
-## Webapp (console UI)
+## Webapp (console UI) {#webapp-console-ui}
 
 | Command | Effect |
 | ------- | ------ |
@@ -895,7 +897,7 @@ such as saving autostart preference or opening a browser, failed). An applied
 outcome is not a rollback. Inspect `omnitron --json webapp status` before retrying.
 
 
-## Knowledge base (MCP)
+## Knowledge base (MCP) {#knowledge-base-mcp}
 
 | Command | Effect |
 | ------- | ------ |
@@ -904,7 +906,7 @@ outcome is not a rollback. Inspect `omnitron --json webapp status` before retryi
 | `omnitron kb status` | KB index health and statistics |
 | `omnitron kb query <question>` | Test a query against the KB |
 
-## Exit codes
+## Exit codes {#exit-codes}
 
 | Code | Meaning |
 | ---- | ------- |
@@ -916,7 +918,7 @@ outcome is not a rollback. Inspect `omnitron --json webapp status` before retryi
 Combined with `--json` output, this is enough to drive any CI or
 agent pipeline.
 
-## Tips
+## Tips {#tips}
 
 - **`omnitron --json status | jq ...`** — pipe to jq for any
   scriptable check.
@@ -929,7 +931,7 @@ agent pipeline.
 - **`omnitron --json`** in agent workflows — never parse the
   styled output; it's not stable.
 
-## See also
+## See also {#see-also}
 
 - [Architecture](./architecture.md) — what each component does
 - [Daemon](./daemon.md) — what `up` / `down` actually do
@@ -937,7 +939,7 @@ agent pipeline.
   CLI command targets
 - [Console](./console.md) — the GUI equivalent
 
-## Releases
+## Releases {#releases}
 
 `omnitron release` builds and verifies artifacts from project and runtime
 commits. See [Releases and verification](./releases.md) for build, attestation,
@@ -959,7 +961,7 @@ results in `installed`, separate from verified launch receipts and audit history
 A matching bootstrap is a partial check, not proof of all installed or loaded code.
 The operation is available to viewers and bounded by node, archive and time limits.
 
-## Additional operational commands
+## Additional operational commands {#additional-operational-commands}
 
 | Command | Behaviour and important options |
 | --- | --- |
@@ -984,7 +986,7 @@ census, `--leftovers rehearse` previews removal in rolled-back transactions,
 and `--leftovers apply` requests committed removal. Inspect the census and
 project policy before applying cleanup.
 
-## Fleet recovery and host ingress
+## Fleet recovery and host ingress {#fleet-recovery-and-host-ingress}
 
 `omnitron fleet recover <node> <receipt>` asks the selected node to recover a
 bundle activation from its receipt. Use the receipt produced by the relevant
@@ -1006,7 +1008,7 @@ routes. Retain the previous generation and maintenance owner revision for
 Restoring ingress changes routing, not application processes or data. Maintenance
 persists across daemon restarts until an explicit publication or restoration.
 
-## Console access and interactive SSH
+## Console access and interactive SSH {#console-access-and-interactive-ssh}
 
 `omnitron access` and `omnitron terminal` use the same services and policy as Console.
 
@@ -1036,7 +1038,7 @@ See [Console access](./access.md) for password input, account pagination and ato
 | `omnitron terminal list` | List sessions owned by this caller |
 | `omnitron terminal close` | Close an owned terminal |
 
-## File workspace
+## File workspace {#file-workspace}
 
 `omnitron files` shares the audited Console file service. Commands include `roots`, `archive-formats`, `list`, `stat`, `read`, `save`, `mkdir`, `rename`, `trash`, `trash-list`, `restore`, `copy`, `transfers`, `pause`, `resume`, `cancel`, `upload`, `download`, `upload-status`, `upload-finish` and `upload-abort`. All support `--json`; checked mutations use an observed `--version`. For one directory, `copy --archive-format <format> --archive-output archive|directory --archive-name <name>` chooses an archive file or restored folder explicitly; `archive-formats --node <source> --to-node <destination>` probes the node pair. See [File workspace](./files.md) for flags, examples, ownership, limits and recovery.
 

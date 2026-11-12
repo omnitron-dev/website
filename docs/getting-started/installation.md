@@ -1,4 +1,6 @@
 ---
+id: "getting-started/installation"
+slug: "/docs/getting-started/installation"
 sidebar_position: 1
 title: Installation
 description: Install only what you need. Server-side Netron ships inside Titan; the browser client is a separate package.
@@ -24,7 +26,7 @@ the `@omnitron-dev/` scope. Install only the layers you need.
 >   `netron-browser` and adds React-specific hooks / providers /
 >   cache integration. Install it **only** if you use React.
 
-## Prerequisites
+## Prerequisites {#prerequisites}
 
 | Tool | Version | Why |
 | ---- | ------- | --- |
@@ -35,7 +37,7 @@ the `@omnitron-dev/` scope. Install only the layers you need.
 | **Deno** (optional) | 2.x | Titan apps may run on Deno; Omnitron daemon needs Node |
 | **Docker** (optional) | latest | Required for `omnitron infra` provisioning |
 
-## Backend — `@omnitron-dev/titan`
+## Backend — `@omnitron-dev/titan` {#backend--omnitron-devtitan}
 
 The backend framework. **This is the only package required to
 build a Titan service.** Server-side Netron — including every
@@ -108,7 +110,6 @@ Full subpath list (from `titan/package.json` exports):
 | `@omnitron-dev/titan/lifecycle` | The lifecycle *machinery*: `LifecycleController`, `LifecycleTimeoutError`, `bucketOf`, `LifecyclePhase`. The interfaces you implement are in `/application` |
 | `@omnitron-dev/titan/decorators` | All core decorators (`@Service`, `@Public`, `@Validate`, `@Memoize`, etc.) |
 | `@omnitron-dev/titan/netron` | **Server Netron API** — peers, services, descriptors |
-| `@omnitron-dev/titan/netron/service-descriptor` | Service metadata types |
 | `@omnitron-dev/titan/netron/transport/http` | HTTP server transport |
 | `@omnitron-dev/titan/netron/transport/websocket` | WebSocket server transport |
 | `@omnitron-dev/titan/netron/transport/tcp` | TCP server transport |
@@ -129,7 +130,7 @@ Full subpath list (from `titan/package.json` exports):
 Tree-shaking works on every subpath. Production bundles import
 the smallest scope they need.
 
-## Backend modules (optional, 14 packages)
+## Backend modules (optional, 14 packages) {#backend-modules-optional-14-packages}
 
 Independently versioned. Add only the ones your app uses.
 
@@ -153,7 +154,7 @@ pnpm add @omnitron-dev/titan-telemetry-relay  # store-and-forward telemetry
 
 → Full module reference: [Titan modules](../titan/modules).
 
-## Browser client — `@omnitron-dev/netron-browser`
+## Browser client — `@omnitron-dev/netron-browser` {#browser-client--omnitron-devnetron-browser}
 
 **Framework-agnostic RPC client for the browser.** Works with
 any frontend — vanilla JS, React, Vue, Svelte, Solid, Angular,
@@ -201,13 +202,13 @@ Subpaths:
 
 → Full reference: [netron-browser](../frontend/netron/browser.md).
 
-### When you'd skip this
+### When you'd skip this {#when-youd-skip-this}
 
 - Your client isn't a browser. Inside another Titan app (Node /
   Bun / Deno), use `@omnitron-dev/titan/netron` directly —
   server and Node-client APIs share the same shape.
 
-## React bindings — `@omnitron-dev/netron-react` (only for React apps)
+## React bindings — `@omnitron-dev/netron-react` (only for React apps) {#react-bindings--omnitron-devnetron-react-only-for-react-apps}
 
 **React hooks, providers, and cache integration on top of
 `netron-browser`.** Install **only** if your frontend uses
@@ -248,7 +249,7 @@ Provides:
 
 → Full reference: [netron-react](../frontend/netron/react.md).
 
-### For Vue / Svelte / Solid / Angular / Lit
+### For Vue / Svelte / Solid / Angular / Lit {#for-vue--svelte--solid--angular--lit}
 
 Use `@omnitron-dev/netron-browser` directly. The client object
 has identical methods regardless of framework — wrap them in
@@ -259,7 +260,7 @@ Community `netron-vue` / `netron-svelte` packages could mirror
 `netron-react`'s API exactly. Until they ship, the direct API
 from `netron-browser` works in any framework.
 
-## Design system — `@omnitron-dev/prism` (optional, React)
+## Design system — `@omnitron-dev/prism` (optional, React) {#design-system--omnitron-devprism-optional-react}
 
 50+ MUI v9 components, schema-aware forms, theme. **React-only**
 because MUI v9 is React.
@@ -270,7 +271,7 @@ pnpm add @omnitron-dev/prism
 
 → Full reference: [Prism](../frontend/prism).
 
-## Utilities (optional)
+## Utilities (optional) {#utilities-optional}
 
 Five framework-agnostic packages used internally and reusable:
 
@@ -284,7 +285,7 @@ pnpm add @omnitron-dev/kb             # knowledge-base framework (server-side)
 
 → Full reference: [Utilities](../utilities).
 
-## Testing utilities (dev-only)
+## Testing utilities (dev-only) {#testing-utilities-dev-only}
 
 ```bash
 pnpm add -D @omnitron-dev/testing
@@ -293,7 +294,7 @@ pnpm add -D @omnitron-dev/testing
 Cross-runtime testing primitives — Node + Bun + Deno from one
 source. → [Testing](../testing).
 
-## Supervisor (opt-in) — `@omnitron-dev/omnitron`
+## Supervisor (opt-in) — `@omnitron-dev/omnitron` {#supervisor-opt-in--omnitron-devomnitron}
 
 The application supervisor + CLI + web console + MCP server.
 **Optional.** Install only when you outgrow a single Titan
@@ -315,9 +316,9 @@ pnpm omnitron up
 
 → Full reference: [Omnitron](../omnitron/overview.md).
 
-## Install matrices — common setups
+## Install matrices — common setups {#install-matrices--common-setups}
 
-### Backend-only service (RPC server, no frontend)
+### Backend-only service (RPC server, no frontend) {#backend-only-service-rpc-server-no-frontend}
 
 ```bash
 pnpm add @omnitron-dev/titan @omnitron-dev/titan-database @omnitron-dev/titan-auth
@@ -326,7 +327,7 @@ pnpm add @omnitron-dev/titan @omnitron-dev/titan-database @omnitron-dev/titan-au
 Server-side Netron with HTTP + WS + TCP + Unix transports is
 already inside `titan` — no extra install.
 
-### Backend + browser client (any frontend framework)
+### Backend + browser client (any frontend framework) {#backend--browser-client-any-frontend-framework}
 
 ```bash
 # Backend:
@@ -336,7 +337,7 @@ pnpm add @omnitron-dev/titan @omnitron-dev/titan-database @omnitron-dev/titan-au
 pnpm add @omnitron-dev/netron-browser
 ```
 
-### Backend + React frontend
+### Backend + React frontend {#backend--react-frontend}
 
 ```bash
 # Backend:
@@ -346,14 +347,14 @@ pnpm add @omnitron-dev/titan @omnitron-dev/titan-database @omnitron-dev/titan-au
 pnpm add @omnitron-dev/netron-browser @omnitron-dev/netron-react @omnitron-dev/prism
 ```
 
-### Full operator-supervised platform
+### Full operator-supervised platform {#full-operator-supervised-platform}
 
 ```bash
 # Everything above PLUS:
 pnpm add -g @omnitron-dev/omnitron
 ```
 
-### Service-to-service (one Titan app calling another)
+### Service-to-service (one Titan app calling another) {#service-to-service-one-titan-app-calling-another}
 
 No client package needed. Use `@omnitron-dev/titan/netron`
 directly in the caller — same API:
@@ -368,7 +369,7 @@ const peer   = await netron.connect('tcp://other-service:4001');
 const users  = await peer.queryInterface<UsersService>('users@1.0.0');
 ```
 
-## Verify
+## Verify {#verify}
 
 ```bash
 node -e "console.log(require('@omnitron-dev/titan/package.json').version)"
@@ -381,7 +382,7 @@ omnitron --version
 omnitron ping
 ```
 
-## Next
+## Next {#next}
 
 → [Quickstart](./quickstart.md) — write your first Titan
 service and call it from a browser, end-to-end in five minutes.

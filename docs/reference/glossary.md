@@ -1,4 +1,6 @@
 ---
+id: "reference/glossary"
+slug: "/docs/reference/glossary"
 sidebar_position: 2
 title: Glossary
 description: Every term used across the stack, with cross-references.
@@ -9,7 +11,7 @@ description: Every term used across the stack, with cross-references.
 Terms used across the stack. Cross-referenced; click through to
 the deeper page.
 
-## A
+## A {#a}
 
 **Application** — The root Titan object created by
 `Application.create(module, options)`. Owns the DI container,
@@ -29,7 +31,7 @@ auto-refreshes, syncs across tabs.
 Adjusts `instances` based on CPU / queue depth / memory.
 → [titan-pm](../titan/modules/pm.mdx)
 
-## B
+## B {#b}
 
 **Backoff** — Exponential delay between retry attempts.
 `computeBackoff()` is the shared primitive.
@@ -47,7 +49,7 @@ different Netron servers by service-name pattern.
 about an app's process topology.
 → [Configuration](../omnitron/configuration.md)
 
-## C
+## C {#c}
 
 **Cache key** — `[service, method, args]` for `useQuery`.
 Args are deep-equal compared.
@@ -89,7 +91,7 @@ selected per request context (multi-tenant, multi-environment).
 **Contract** — The TypeScript service interface. The contract
 between server and client.
 
-## D
+## D {#d}
 
 **Daemon** — The long-running Omnitron supervisor process.
 Always-on; everything else (CLI, webapp) is transient.
@@ -118,7 +120,7 @@ manual inspection.
 **DTO** — Data Transfer Object. A typed shape returned by an
 RPC method.
 
-## E
+## E {#e}
 
 **Ecosystem** — Top-level project configuration (`omnitron.config.ts`).
 Lists apps, stacks, supervision, infrastructure.
@@ -131,7 +133,7 @@ daemon (Node-only).
 ships an in-process bus; `titan-notifications` adds cross-process
 durable delivery.
 
-## F
+## F {#f}
 
 **Fan-out architecture** — Production shape: one identity app
 + N specialist apps sharing JWT + Redis session registry.
@@ -152,14 +154,14 @@ Top-level module factory. Sync vs async configuration.
 **`forWorker(...)`** — `titan-notifications`-specific factory for
 the worker pod (vs producer pod).
 
-## G
+## G {#g}
 
 **Gateway** — OpenResty/Lua reverse proxy bundled with Omnitron.
 Provisioned per stack; supports Lua maintenance mode.
 
 **Glossary** — This page.
 
-## H
+## H {#h}
 
 **Health probe** — Live/Ready check returning the service's
 status. Powered by `titan-health` indicators.
@@ -168,7 +170,7 @@ status. Powered by `titan-health` indicators.
 `onHealthCheck`, etc.) declared on `IAppDefinition` /
 `IProcessEntry`.
 
-## I
+## I {#i}
 
 **Infrastructure subsystem** — Omnitron's declarative
 provisioner for Postgres / Redis / S3 / custom containers.
@@ -183,14 +185,14 @@ DI-instantiable.
 **`IProcessEntry`** — Per-process spec in `defineSystem`.
 Becomes exactly one fork (or N if `instances > 1`).
 
-## J
+## J {#j}
 
 **JWKS** — JSON Web Key Set. Public keys used to verify RS256
 JWTs; rotated by URL.
 
 **JWT** — JSON Web Token. The default auth credential.
 
-## K
+## K {#k}
 
 **Kb** — Knowledge-base framework powering `omnitron kb mcp`.
 → [kb](../utilities/kb.md)
@@ -198,7 +200,7 @@ JWTs; rotated by URL.
 **Kysera** — Kysely + plugins shipping in `titan-database` —
 RLS, soft-delete, timestamps, audit.
 
-## L
+## L {#l}
 
 **L1 / L2 cache** — Two-tier cache: L1 in-process (LRU/LFU),
 L2 in Redis (durable).
@@ -214,7 +216,7 @@ fired in dependency order.
 **Lua maintenance flag** — Gateway-level toggle in Redis; flip
 to return 503 with maintenance page without restart.
 
-## M
+## M {#m}
 
 **MCP** — Model Context Protocol. Standard for AI agents to
 discover and call tools. Omnitron's MCP server exposes ~40 tools.
@@ -235,7 +237,7 @@ Declares providers + imports + exports.
 `IProcessEntry` is a separate fork importing only that
 process's module file. Compare with **classic mode**.
 
-## N
+## N {#n}
 
 **Nexus** — The custom DI container Titan uses. Class-token-
 based; supports contextual injection.
@@ -249,7 +251,7 @@ Disambiguated by context.
 **`NodeInfo`** — Discovery's per-node metadata: ID, address,
 services, timestamp.
 
-## O
+## O {#o}
 
 **`OmnitronDaemon`** — The daemon's primary RPC service.
 26 methods: start/stop/restart/scale/inspect/etc.
@@ -263,7 +265,7 @@ per-app launch (bootstrap loader, ts-compiler, file-watcher,
 dependency-resolver, …).
 → [Orchestrator](../omnitron/orchestrator.md)
 
-## P
+## P {#p}
 
 **P2C** — Power-of-two-choices load balancing. Pick 2 random
 workers; dispatch to the less loaded. Near-optimal balance.
@@ -286,12 +288,12 @@ Prism, Omnitron.
 **`<PrismProvider>`** — Root provider for Prism components;
 sets up MUI theme, snackbar, etc.
 
-## Q
+## Q {#q}
 
 **Query cache** — netron-react's React-aware cache built on
 QueryCache. Powers `useQuery` / `useMutation`.
 
-## R
+## R {#r}
 
 **RBAC** — Role-Based Access Control. Three built-in roles:
 viewer, operator, admin.
@@ -306,7 +308,7 @@ Kysera plugin enforces tenant isolation at the SQL layer.
 **Route** — In RPC: nothing (services own methods, not URLs).
 In webapp: react-router-dom path.
 
-## S
+## S {#s}
 
 **Sandbox** — Per-context isolated DI scope. Used for
 multi-tenant request handling.
@@ -330,7 +332,7 @@ prod). Each may have its own infra overrides.
 **Stale-while-revalidate** — Cache strategy: serve stale data,
 refresh in background.
 
-## T
+## T {#t}
 
 **TTL** — Time-to-live. Used for cache entries, session
 records, discovery heartbeats.
@@ -347,7 +349,7 @@ Unix.
 **Tutorial** — The 6-step walkthrough.
 → [Tutorial](../tutorial)
 
-## U
+## U {#u}
 
 **Unix socket** — Local IPC mechanism. Omnitron daemon's
 default management plane (`~/.omnitron/daemon.sock`).
@@ -355,7 +357,7 @@ default management plane (`~/.omnitron/daemon.sock`).
 **Uptime bar** — 90-day green/yellow/red visualisation per node
 in the webapp.
 
-## V
+## V {#v}
 
 **`@Validate(schema)`** — Decorator running a zod schema before
 the method body. Bad input throws `Errors.validation`.
@@ -363,7 +365,7 @@ the method body. Bad input throws `Errors.validation`.
 **Viewer** — Lowest RBAC role. Read-only: list / inspect /
 status / metrics / health / logs.
 
-## W
+## W {#w}
 
 **WAL** — Write-Ahead Log. Used by `titan-telemetry-relay` for
 durable buffering.
@@ -371,7 +373,7 @@ durable buffering.
 **Worker pool** — Multi-instance process group with P2C load
 balancing; managed by `titan-pm`.
 
-## Z
+## Z {#z}
 
 **Zod** — Schema library. Used throughout for validation,
 configuration, contract types. Re-exported from
@@ -381,7 +383,7 @@ configuration, contract types. Re-exported from
 generated code between server and client; TypeScript compiler
 is the only source of truth.
 
-## See also
+## See also {#see-also}
 
 - [Packages reference](./packages.md) — every npm package
 - [Architecture](../foundations/architecture.md) — what fits where

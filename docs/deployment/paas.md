@@ -1,4 +1,6 @@
 ---
+id: "deployment/paas"
+slug: "/docs/deployment/paas"
 sidebar_position: 4
 title: PaaS (Fly.io / Railway / Render)
 description: Opinionated PaaS deploys for fast time-to-prod.
@@ -14,7 +16,7 @@ Three popular options covered below. All share the same shape:
 3. Provision managed Postgres + Redis from the same provider.
 4. Done.
 
-## Fly.io
+## Fly.io {#flyio}
 
 `fly.toml`:
 
@@ -84,7 +86,7 @@ Each region's machine sees the local Postgres/Redis (Fly
 replicates them). For Omnitron cluster mode, set `cluster.peers`
 to the Fly internal DNS names.
 
-## Railway
+## Railway {#railway}
 
 `railway.json`:
 
@@ -128,7 +130,7 @@ For persistent volumes (Omnitron state), add a Volume in the
 dashboard, mount it at `/var/lib/omnitron`, and set `HOME` to the
 same path so the daemon writes its `~/.omnitron` state there.
 
-## Render
+## Render {#render}
 
 `render.yaml`:
 
@@ -171,9 +173,9 @@ databases:
 Render handles the rest. `generateValue: true` mints a JWT
 secret on first deploy.
 
-## Common patterns across PaaS
+## Common patterns across PaaS {#common-patterns-across-paas}
 
-### Boot command
+### Boot command {#boot-command}
 
 Always:
 
@@ -184,7 +186,7 @@ pnpm omnitron up --foreground
 `--foreground` keeps Node attached so the PaaS supervisor sees a
 running process; the daemon takes over signal handling.
 
-### Health check path
+### Health check path {#health-check-path}
 
 For a check against the **published app port**, use `/health` —
 the Titan HTTP transport returns `200` `{"status":"online"}`
@@ -195,7 +197,7 @@ Neither `/readyz` nor an HTTP readiness route exists out of the
 box — see the [k8s note](./kubernetes.md#per-app-deployment) for
 adding one via `customRoutes`.
 
-### Persistent volume
+### Persistent volume {#persistent-volume}
 
 Mount a volume at, e.g., `/var/lib/omnitron` and set `HOME` to
 the same path so the daemon's `~/.omnitron` (PID, SQLite state,
@@ -203,12 +205,12 @@ secrets store) persists. Without it, every deploy is a fresh
 daemon — fine for stateless workloads, loses uptime history +
 secrets on restart.
 
-### Secrets
+### Secrets {#secrets}
 
 Always via the PaaS secret manager. Never in `omnitron.config.ts`
 or `config/default.json`.
 
-### Database migrations
+### Database migrations {#database-migrations}
 
 Most PaaS support a "pre-deploy" or "release" command:
 
@@ -223,7 +225,7 @@ Most PaaS support a "pre-deploy" or "release" command:
 
 Runs once per deploy, before the new image takes traffic.
 
-### Scaling
+### Scaling {#scaling}
 
 | PaaS | How |
 | ---- | --- |
@@ -237,7 +239,7 @@ in `defineSystem` — set `instances` on a process and give it a
 `scaling` block (`{ strategy, maxInstances, targetCPU, ... }`).
 There is no app-level `scaling` block.
 
-### Logs
+### Logs {#logs}
 
 Each PaaS aggregates container stdout. For production:
 
@@ -249,7 +251,7 @@ Each PaaS aggregates container stdout. For production:
 Set `logging.level` to `'info'` in production; `'debug'` only
 for time-bounded investigations.
 
-## Multi-app on one PaaS service
+## Multi-app on one PaaS service {#multi-app-on-one-paas-service}
 
 A single Omnitron daemon can supervise multiple Titan apps in
 one container. Configure in `omnitron.config.ts`:
@@ -271,7 +273,7 @@ multiple services (Railway).
 Single-container deployment is cheaper but losses isolation —
 all apps share the container's resources.
 
-## PaaS limitations
+## PaaS limitations {#paas-limitations}
 
 - **Filesystem ephemerality** — without explicit volumes,
   `~/.omnitron/` is reset on every deploy. Volumes are mandatory
@@ -289,7 +291,7 @@ all apps share the container's resources.
 For more control, see [Kubernetes](./kubernetes.md) or
 [Docker Compose on a VM](./docker.md).
 
-## Cost rough-order
+## Cost rough-order {#cost-rough-order}
 
 Roughly per month for a small production setup:
 
@@ -302,7 +304,7 @@ Roughly per month for a small production setup:
 Numbers vary widely by traffic. PaaS shines for $0–$300/mo
 range; beyond that, Kubernetes catches up on cost.
 
-## See also
+## See also {#see-also}
 
 - [Docker Compose](./docker.md) — single-host alternative
 - [Kubernetes](./kubernetes.md) — when you outgrow PaaS

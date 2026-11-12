@@ -1,4 +1,6 @@
 ---
+id: "titan/netron/transports"
+slug: "/docs/titan/netron/transports"
 sidebar_position: 2
 title: Transports
 description: HTTP, WebSocket, TCP, Unix — how to choose and how to configure.
@@ -11,7 +13,7 @@ each is opt-in. The same `@Service` class is reachable over any
 transport you bind, with the same calling convention and the same
 middleware stack.
 
-## The four transports
+## The four transports {#the-four-transports}
 
 | Transport  | Best for                                            | Latency | Throughput | Streaming |
 | ---------- | --------------------------------------------------- | ------- | ---------- | --------- |
@@ -20,7 +22,7 @@ middleware stack.
 | TCP        | Service-to-service inside a cluster                 | Lowest  | Highest    | Yes       |
 | Unix       | Sidecars, CLI ↔ daemon, low-overhead local IPC     | Lowest  | Highest    | Yes       |
 
-## Configuring transports
+## Configuring transports {#configuring-transports}
 
 Register transports on the application's `Netron` instance **before
 startup**. `registerTransportServer` stores a server configuration;
@@ -80,9 +82,9 @@ widen them; definitions from older publishers without these fields remain
 unrestricted by transport. Remote forwarding also requires an explicit
 [gateway ACL](./authentication.md#forwarding-through-a-gateway).
 
-## When to choose what
+## When to choose what {#when-to-choose-what}
 
-### HTTP
+### HTTP {#http}
 
 Choose HTTP when:
 
@@ -96,7 +98,7 @@ Choose HTTP when:
 Cost: per-call HTTP framing overhead (~50–200 µs). Negligible for
 human-driven traffic; significant for service-to-service hot paths.
 
-### WebSocket
+### WebSocket {#websocket}
 
 Choose WebSocket when:
 
@@ -108,7 +110,7 @@ Choose WebSocket when:
 Cost: connection state on the server. WebSocket is stateful; a
 per-pod connection limit applies.
 
-### TCP
+### TCP {#tcp}
 
 Choose TCP when:
 
@@ -120,7 +122,7 @@ Choose TCP when:
 Cost: one persistent TCP connection per peer pair. RPC calls are multiplexed on
 that connection; an additional connection pool is not required.
 
-### Unix sockets
+### Unix sockets {#unix-sockets}
 
 Choose Unix when:
 
@@ -132,7 +134,7 @@ Choose Unix when:
 Limitation: same-host only. The Omnitron CLI uses Unix sockets to
 talk to local supervisors.
 
-## Transport options — common
+## Transport options — common {#transport-options--common}
 
 All transports extend a shared `TransportOptions` base
 (`netron/transport/types.ts`). The most-used fields:
@@ -161,7 +163,7 @@ There is **no** unified `maxPayloadBytes` / `keepAliveMs` /
 `connectionTimeoutMs` option — those names do not exist; use the real
 ones above.
 
-## Share a request budget across HTTP and WebSocket
+## Share a request budget across HTTP and WebSocket {#share-a-request-budget-across-http-and-websocket}
 
 Create one limiter per process and pass the same object to the listeners that serve the same clients. A client key has one fixed window across both transports. The limiter also has a fixed window for all clients. Each window starts on its first accepted request and resets after `windowMs`.
 
@@ -183,7 +185,7 @@ HTTP reserves one unit before reading the body. A batch of N calls requires anot
 
 The default key is the remote socket address. Enable `trustProxy` only on a listener reachable exclusively through a trusted proxy that overwrites the forwarding headers on ordinary requests and upgrades. An exhausted HTTP request or upgrade receives `429` and `Retry-After` in seconds. On an established WebSocket the caller receives a Netron rate-limit error. A stream that cannot deliver its next frame, or a peer that keeps sending while its refusal is still pending, closes with WebSocket code 1013. Handle that close with bounded reconnect backoff. A key on the optional `whitelist` bypasses both ceilings. Separate daemon processes maintain independent windows. Method authorization still applies after transport admission.
 
-## Connection limits and lifecycle
+## Connection limits and lifecycle {#connection-limits-and-lifecycle}
 
 `Netron` enforces `maxTotalConnections` (default **100**) and
 `maxConnectionsPerPeer` (default **10**) through one connection manager. Pending
@@ -235,7 +237,7 @@ and pool heartbeat options apply to unleased spare connections managed directly
 through `connectionManager`; they neither create additional RPC sockets nor evict
 an otherwise idle persistent peer. Transport keepalive owns its liveness.
 
-## TLS
+## TLS {#tls}
 
 The Netron transports do not currently expose a built-in TLS/`tls`
 option. Terminate TLS at the load balancer, ingress, or reverse proxy
@@ -245,7 +247,7 @@ For TCP between hosts, run it over a private network or a tunnel.
 Unix sockets need no transport encryption; their access control is
 filesystem permissions.
 
-## Same service, multiple transports — what changes?
+## Same service, multiple transports — what changes? {#same-service-multiple-transports--what-changes}
 
 Nothing in the service code. Same dispatch logic, same middleware
 stack, same error mapping. The transport is invisible to the method
@@ -260,7 +262,7 @@ A few client-side differences:
   revalidated before each invocation; revocation and role changes are not frozen
   at connection time. HTTP authenticates per request.
 
-## The transport registry
+## The transport registry {#the-transport-registry}
 
 Transports are pluggable. **Every `Netron` instance owns its own
 registry** (`new TransportRegistry()` in the constructor), which
@@ -322,7 +324,7 @@ and `/unix`, but not `./netron/transport` itself. Use the instance
 method — it is what every call site in this monorepo uses.
 :::
 
-## Cross-runtime transport availability
+## Cross-runtime transport availability {#cross-runtime-transport-availability}
 
 | Runtime | HTTP | WebSocket | TCP | Unix |
 | ------- | ---- | --------- | --- | ---- |

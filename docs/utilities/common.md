@@ -1,4 +1,6 @@
 ---
+id: "utilities/common"
+slug: "/docs/utilities/common"
 sidebar_position: 2
 title: common
 description: Type predicates, promise helpers, object tools, data structures.
@@ -16,7 +18,7 @@ small high-performance data structures. Works in Node.js and Bun.
 
 Verified against `packages/common/src/`.
 
-## Modules
+## Modules {#modules}
 
 | Module | Surface |
 | ------ | ------- |
@@ -30,7 +32,7 @@ Verified against `packages/common/src/`.
 | `p-limit` | Promise concurrency limiter |
 | `decimal` | Lossless decimal arithmetic |
 
-## Type predicates
+## Type predicates {#type-predicates}
 
 50+ predicates with proper `is X` return types that narrow:
 
@@ -59,9 +61,9 @@ if (darwin && isNodejs) {
 }
 ```
 
-## Promise helpers
+## Promise helpers {#promise-helpers}
 
-### `delay(ms, value?, opts?)`
+### `delay(ms, value?, opts?)` {#delayms-value-opts}
 
 ```typescript
 await delay(1_000);                                  // sleep 1s
@@ -69,7 +71,7 @@ const result = await delay(500, 'hello');           // sleep 500ms then resolve 
 await delay(60_000, undefined, { unref: true });    // doesn't block event loop
 ```
 
-### `defer()` — externally-controlled promise
+### `defer()` — externally-controlled promise {#defer--externally-controlled-promise}
 
 ```typescript
 import { defer } from '@omnitron-dev/common';
@@ -88,7 +90,7 @@ const user = await d.promise;
 Useful when you need to expose `.resolve` / `.reject` to code
 that isn't inside the promise's executor.
 
-### `timeout(promise, ms, opts?)`
+### `timeout(promise, ms, opts?)` {#timeoutpromise-ms-opts}
 
 ```typescript
 import { timeout } from '@omnitron-dev/common';
@@ -105,7 +107,7 @@ if it doesn't settle in time. Options are `{ unref?, signal? }` —
 `signal` lets external code abort early (rejects with
 `Error('Timeout aborted')`).
 
-### `retry(callback, opts | max)`
+### `retry(callback, opts | max)` {#retrycallback-opts--max}
 
 ```typescript
 import { retry } from '@omnitron-dev/common';
@@ -132,7 +134,7 @@ optional per-attempt `timeout`, and `match` to restrict which
 errors trigger a retry (strings, RegExps, or error classes). Pass a
 bare number to set `max` with defaults for the rest.
 
-### `props(obj)`
+### `props(obj)` {#propsobj}
 
 ```typescript
 const result = await props({
@@ -145,7 +147,7 @@ const result = await props({
 
 `Promise.all` for objects — preserves keys.
 
-### `promisify(fn)` / `callbackify(fn)`
+### `promisify(fn)` / `callbackify(fn)` {#promisifyfn--callbackifyfn}
 
 Bridge Node-style callbacks ↔ promises.
 
@@ -157,9 +159,9 @@ const execAsync = promisify(exec);
 const { stdout } = await execAsync('git log');
 ```
 
-## Object tools
+## Object tools {#object-tools}
 
-### `omit(obj, keys | predicate | regex | string, opts?)`
+### `omit(obj, keys | predicate | regex | string, opts?)` {#omitobj-keys--predicate--regex--string-opts}
 
 ```typescript
 import { omit } from '@omnitron-dev/common';
@@ -174,7 +176,7 @@ The predicate receives `(key, value, object)`. Dotted-path removal
 requires the third-arg flag `{ path: true }`; without it a string is
 treated as an exact key name.
 
-### `entries(obj, opts?)` / `keys(obj, opts?)` / `values(obj, opts?)`
+### `entries(obj, opts?)` / `keys(obj, opts?)` / `values(obj, opts?)` {#entriesobj-opts--keysobj-opts--valuesobj-opts}
 
 ```typescript
 import { entries, keys } from '@omnitron-dev/common';
@@ -188,9 +190,9 @@ Options are `{ enumOnly = true, followProto = false, all = false }`.
 These operate on plain objects (own/prototype string keys) — they do
 **not** iterate `Map`/`Set` entries.
 
-## Data structures
+## Data structures {#data-structures}
 
-### `ListBuffer<T>` — O(1) FIFO queue
+### `ListBuffer<T>` — O(1) FIFO queue {#listbuffert--o1-fifo-queue}
 
 ```typescript
 import { ListBuffer } from '@omnitron-dev/common';
@@ -206,7 +208,7 @@ Backed by a singly-linked list — no array reallocation. It is an
 **unbounded** queue: there is no capacity argument and no automatic
 eviction; size it by `shift()`-ing as you consume.
 
-### `TimedMap<K, V>` — auto-expiring map
+### `TimedMap<K, V>` — auto-expiring map {#timedmapk-v--auto-expiring-map}
 
 ```typescript
 import { TimedMap } from '@omnitron-dev/common';
@@ -222,7 +224,7 @@ key is deleted (or `callback(key)` runs if provided). Each entry has
 its own `setTimeout` — there is no shared GC sweep and no `.dispose()`.
 Pass a per-key `(callback, timeout)` to `set()` to override the default.
 
-### `pLimit(n)` — concurrency limiter
+### `pLimit(n)` — concurrency limiter {#plimitn--concurrency-limiter}
 
 ```typescript
 import { pLimit } from '@omnitron-dev/common';
@@ -234,7 +236,7 @@ const results = await Promise.all(
 // At most 5 fetches in flight at any moment.
 ```
 
-### `Decimal` — lossless decimal arithmetic
+### `Decimal` — lossless decimal arithmetic {#decimal--lossless-decimal-arithmetic}
 
 ```typescript
 import { Decimal } from '@omnitron-dev/common';
@@ -254,7 +256,7 @@ and `toString` / `toNumber` / `toBigInt`.
 
 For money / currency. Never trust `Number` for those.
 
-#### The standalone helpers
+#### The standalone helpers {#the-standalone-helpers}
 
 The module also exports 31 string-in / string-out functions for fixed-precision
 maths. They are the whole surface, listed rather than sampled, because an
@@ -313,7 +315,7 @@ They return `bigint` in the atomic direction on purpose: satoshis and piconeros
 exceed `Number.MAX_SAFE_INTEGER` for large amounts, so a `number` there is the
 same lossy trap `Decimal` exists to avoid.
 
-## Primitives
+## Primitives {#primitives}
 
 ```typescript
 import { noop, identity, truly, falsely, arrify } from '@omnitron-dev/common';
@@ -330,7 +332,7 @@ arrify([1, 2]);                          // [1, 2]
 `arrify` is the one you'll reach for most — coalescing
 "single-or-many" args into a consistent array.
 
-## Use across the stack
+## Use across the stack {#use-across-the-stack}
 
 - Titan's lifecycle hooks use `delay` for graceful drain.
 - Netron's middleware uses `retry` for transient errors.
@@ -339,7 +341,7 @@ arrify([1, 2]);                          // [1, 2]
   auxiliary structures.
 - `titan-events` uses `defer` for the request/response pattern.
 
-## See also
+## See also {#see-also}
 
 - [eventemitter](./eventemitter.md) — sibling utility, async emission patterns
 - [cuid](./cuid.md) — ID generation

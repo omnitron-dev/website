@@ -1,17 +1,18 @@
 ---
+id: "titan/modules/community"
+slug: "/docs/titan/modules/community"
 title: Community Modules
 ---
 
-import ModuleBadge from '@site/src/components/ModuleBadge';
 
 # Community Modules
 
-<ModuleBadge origin="community" pkg="@your-scope/titan-yourmodule" />
+<span class="module-badge">community · @your-scope/titan-yourmodule</span>
 
 No community-maintained Titan modules are registered yet. This page
 is the canonical home for them as the ecosystem grows.
 
-## What counts as a community module
+## What counts as a community module {#what-counts-as-a-community-module}
 
 A community module is a third-party package that:
 
@@ -22,7 +23,7 @@ A community module is a third-party package that:
 3. Is published to a public registry (npm, GitHub Packages, etc.).
 4. Is maintained outside the `omnitron-dev` organisation.
 
-## Adopting a community module — what to check
+## Adopting a community module — what to check {#adopting-a-community-module--what-to-check}
 
 ```mermaid
 flowchart LR
@@ -58,7 +59,7 @@ Specifically:
 - **Maintenance.** When was the last commit? Does the maintainer
   respond to issues?
 
-## Publishing your own
+## Publishing your own {#publishing-your-own}
 
 Quick summary:
 
@@ -80,10 +81,10 @@ options + tokens + service + module class + barrel + README, plus
 the conventions checklist that distinguishes a polished module
 from a thrown-together one.
 
-## Future entries
+## Future entries {#future-entries}
 
 Once community modules are registered, each gets its own page in
-this section with a `<ModuleBadge origin="community" ... />`
+this section with a `<span class="module-badge">community</span>`
 chip. The reader knows at a glance the module is third-party and
 should be audited before adoption.
 

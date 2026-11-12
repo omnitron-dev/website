@@ -1,4 +1,6 @@
 ---
+id: "reference/protocol"
+slug: "/docs/reference/protocol"
 title: Protocol and HTTP primitives
 description: Shared wire contracts and HTTP machinery used by the server and browser clients.
 ---
@@ -11,7 +13,7 @@ Most applications use the higher-level
 APIs. These packages matter when building an adapter, inspecting the wire
 contract or diagnosing compatibility.
 
-## `@omnitron-dev/netron-protocol`
+## `@omnitron-dev/netron-protocol` {#omnitron-devnetron-protocol}
 
 | Export family | Purpose |
 | --- | --- |
@@ -35,7 +37,7 @@ business payload. Keep those concerns at their documented boundaries.
 Do not assign private meanings to an existing operation code; both peers
 must agree on any protocol extension.
 
-## `@omnitron-dev/netron-http-core`
+## `@omnitron-dev/netron-http-core` {#omnitron-devnetron-http-core}
 
 | Export | Responsibility |
 | --- | --- |
@@ -56,7 +58,7 @@ unless you are implementing an executor. Define ownership for cache
 invalidation, cancellation and disposal. Retry a side-effecting request
 only when the operation's idempotency contract permits it.
 
-## Upgrade server and client deliberately
+## Upgrade server and client deliberately {#upgrade-server-and-client-deliberately}
 
 Pin application dependencies and preserve the lockfile. Compile against
 the intended contract, then exercise a real call and an error round trip.

@@ -1,10 +1,11 @@
 ---
+id: "titan/modules/lifecycle-reference"
+slug: "/docs/titan/modules/lifecycle-reference"
 sidebar_position: 5
 title: Lifecycle reference
 description: What every module does in onInit / onStart / onStop / onDestroy.
 ---
 
-import ModuleBadge from '@site/src/components/ModuleBadge';
 
 # Lifecycle reference
 
@@ -14,7 +15,7 @@ buffer. This page documents the lifecycle behaviour of every
 official module — verified against source — so you can predict
 where a `console.log('foo')` in your `onStart` will run.
 
-## The four phases
+## The four phases {#the-four-phases}
 
 Recap of [Application lifecycle](../application/lifecycle.md):
 
@@ -29,11 +30,11 @@ Modules are not obliged to implement all four — most use just one
 or two. The table below shows what each official module actually
 does.
 
-## Lifecycle behaviour by module
+## Lifecycle behaviour by module {#lifecycle-behaviour-by-module}
 
-<ModuleBadge origin="official" pkg="@omnitron-dev/titan-*" />
+<span class="module-badge">official · @omnitron-dev/titan-*</span>
 
-### `titan-auth`
+### `titan-auth` {#titan-auth}
 
 | Hook         | What it does                                                |
 | ------------ | ----------------------------------------------------------- |
@@ -46,7 +47,7 @@ does.
 long-lived resources to set up or tear down beyond the JWKS HTTP
 client it opens lazily on first use.
 
-### `titan-cache`
+### `titan-cache` {#titan-cache}
 
 | Hook         | What it does                                                |
 | ------------ | ----------------------------------------------------------- |
@@ -58,7 +59,7 @@ client it opens lazily on first use.
 L1 (in-memory LRU/LFU) lives in JS heap. L2 (Redis) is owned by
 `titan-redis` and shuts down with that module.
 
-### `titan-database`
+### `titan-database` {#titan-database}
 
 | Hook         | What it does                                                |
 | ------------ | ----------------------------------------------------------- |
@@ -70,7 +71,7 @@ L1 (in-memory LRU/LFU) lives in JS heap. L2 (Redis) is owned by
 The `onStop` matters: a clean drain prevents in-flight queries
 from being killed mid-transaction.
 
-### `titan-discovery`
+### `titan-discovery` {#titan-discovery}
 
 Implemented on both the module and the service.
 
@@ -84,7 +85,7 @@ Implemented on both the module and the service.
 In `clientMode: true`, registration is skipped but pub/sub still
 opens on `onStart` so the node receives events.
 
-### `titan-events`
+### `titan-events` {#titan-events}
 
 Each sub-service has its own `onInit` / `onDestroy`; the
 orchestrator `EventsService` adds `onStart` / `onStop`.
@@ -96,7 +97,7 @@ orchestrator `EventsService` adds `onStart` / `onStop`.
 | `onStop`     | Drain in-flight emissions; flush history                    |
 | `onDestroy`  | Release all listener references                             |
 
-### `titan-health`
+### `titan-health` {#titan-health}
 
 | Hook         | What it does                                                |
 | ------------ | ----------------------------------------------------------- |
@@ -110,7 +111,7 @@ indicators eagerly at config time (inside `forRoot` / `forFeature`),
 not in a lifecycle hook. Checks are *pull-driven* — Kubernetes probes
 invoke `check()` on demand. No background loop runs.
 
-### `titan-lock`
+### `titan-lock` {#titan-lock}
 
 | Hook         | What it does                                                |
 | ------------ | ----------------------------------------------------------- |
@@ -123,7 +124,7 @@ invoke `check()` on demand. No background loop runs.
 > may already be in a degraded state. Always set a lock TTL so
 > abandoned locks self-expire.
 
-### `titan-metrics`
+### `titan-metrics` {#titan-metrics}
 
 Uses **explicit** `start()` / `stop()` methods rather than the
 lifecycle interface, called from module setup.
@@ -136,7 +137,7 @@ lifecycle interface, called from module setup.
 The module calls `start()` during initialisation and `stop()`
 during shutdown — you don't have to wire it up by hand.
 
-### `titan-notifications`
+### `titan-notifications` {#titan-notifications}
 
 | Hook         | What it does                                                |
 | ------------ | ----------------------------------------------------------- |
@@ -149,7 +150,7 @@ during shutdown — you don't have to wire it up by hand.
 on `onStart` — the producer (registered via `forRoot`) opens its
 publisher connection in the same phase.
 
-### `titan-pm`
+### `titan-pm` {#titan-pm}
 
 | Hook         | What it does                                                |
 | ------------ | ----------------------------------------------------------- |
@@ -162,7 +163,7 @@ Crash-supervised children stop in the **opposite** order they
 started — gives you a chance to drain a worker before its
 dependencies disappear.
 
-### `titan-ratelimit`
+### `titan-ratelimit` {#titan-ratelimit}
 
 Uses an explicit `destroy()` method called during module shutdown.
 
@@ -170,7 +171,7 @@ Uses an explicit `destroy()` method called during module shutdown.
 | ------------ | ----------------------------------------------------------- |
 | `destroy()`  | Stops the periodic cleanup timer on in-memory storage; closes Redis storage client |
 
-### `titan-redis`
+### `titan-redis` {#titan-redis}
 
 | Hook            | What it does                                                |
 | --------------- | ----------------------------------------------------------- |
@@ -182,7 +183,7 @@ Uses an explicit `destroy()` method called during module shutdown.
 in newer modules. There is no `onStop` hook; cleanup runs in
 `onModuleDestroy`.
 
-### `titan-scheduler`
+### `titan-scheduler` {#titan-scheduler}
 
 | Hook         | What it does                                                |
 | ------------ | ----------------------------------------------------------- |
@@ -195,7 +196,7 @@ The split matters: `onInit` rebuilds the *registry*, `onStart`
 actually *arms* the timers. Don't expect jobs to fire between
 those two.
 
-### `titan-telemetry-relay`
+### `titan-telemetry-relay` {#titan-telemetry-relay}
 
 Not a module — instantiated directly. Lifecycle is manual:
 
@@ -216,11 +217,11 @@ class TelemetryRelayAdapter implements OnStart, OnStop {
 }
 ```
 
-## Built-in modules
+## Built-in modules {#built-in-modules}
 
-<ModuleBadge origin="built-in" pkg="@omnitron-dev/titan" subpath="config + logger" />
+<span class="module-badge">built-in · @omnitron-dev/titan · config + logger</span>
 
-### `config`
+### `config` {#config}
 
 | Hook         | What it does                                                |
 | ------------ | ----------------------------------------------------------- |
@@ -232,7 +233,7 @@ class TelemetryRelayAdapter implements OnStart, OnStop {
 If validation fails in `onInit`, the app aborts boot with the
 underlying Zod error — no partial start.
 
-### `logger`
+### `logger` {#logger}
 
 | Hook         | What it does                                                |
 | ------------ | ----------------------------------------------------------- |
@@ -245,7 +246,7 @@ The flush in `onStop` is why graceful shutdown matters for
 observability — `SIGKILL` skips it and you lose the last few
 seconds of logs.
 
-## Putting it together — full boot/shutdown timeline
+## Putting it together — full boot/shutdown timeline {#putting-it-together--full-bootshutdown-timeline}
 
 ```mermaid
 sequenceDiagram
@@ -306,7 +307,7 @@ sequenceDiagram
   App->>Config: onDestroy
 ```
 
-## Practical rules
+## Practical rules {#practical-rules}
 
 - **Long-running background work belongs in `onStart`, not
   `onInit`.** Hooks at `onInit` should be fast — they block every
@@ -324,7 +325,7 @@ sequenceDiagram
   precompute, do it in a background task started from `onStart`
   and gate readiness on a separate flag.
 
-## See also
+## See also {#see-also}
 
 - [Application / Lifecycle](../application/lifecycle.md) — framework-level explanation
 - [Application / Shutdown](../application/shutdown.md) — signals, timeouts, graceful drain

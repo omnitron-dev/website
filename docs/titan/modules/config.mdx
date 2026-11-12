@@ -1,18 +1,19 @@
 ---
+id: "titan/modules/config"
+slug: "/docs/titan/modules/config"
 title: ConfigModule
 ---
 
-import ModuleBadge from '@site/src/components/ModuleBadge';
 
 # ConfigModule
 
-<ModuleBadge origin="built-in" pkg="@omnitron-dev/titan" subpath="/module/config" status="stable" />
+<span class="module-badge">built-in · @omnitron-dev/titan · /module/config · stable</span>
 
 Layered, validated, hot-reloadable configuration. **Auto-loaded** as
 a core module by every Titan application (unless `disableCoreModules:
 true`). No extra install required — ships inside `@omnitron-dev/titan`.
 
-## When you need it
+## When you need it {#when-you-need-it}
 
 Every non-trivial backend has configuration that varies by
 environment, secret, deploy target. ConfigModule provides:
@@ -28,7 +29,7 @@ environment, secret, deploy target. ConfigModule provides:
 - **Atomic reload** — if reload's validation fails, the old config
   stays in place; no half-updated state.
 
-## Quickstart
+## Quickstart {#quickstart}
 
 ```typescript
 import { z } from '@omnitron-dev/titan/validation';
@@ -57,7 +58,7 @@ const AppConfigSchema = z.object({
 class AppModule {}
 ```
 
-## `IConfigModuleOptions`
+## `IConfigModuleOptions` {#iconfigmoduleoptions}
 
 | Option              | Type                                                |
 | ------------------- | --------------------------------------------------- |
@@ -76,7 +77,7 @@ class AppModule {}
 > committed defaults first, dev overrides second, environment-
 > sourced secrets last.
 
-## `ConfigSource` union
+## `ConfigSource` union {#configsource-union}
 
 The five source types each have an explicit shape:
 
@@ -96,7 +97,7 @@ Files auto-detect format by extension (`json`, `yaml`, `toml`,
 → See [Configuration / Sources](../configuration/sources.md) for
 the full per-source reference.
 
-## Services
+## Services {#services}
 
 | Class                       | Purpose                                                |
 | --------------------------- | ------------------------------------------------------ |
@@ -105,7 +106,7 @@ the full per-source reference.
 | `ConfigValidatorService`    | Runs the schema(s)                                     |
 | `ConfigWatcherService`      | Hot-reload watcher (when `watchForChanges: true`)      |
 
-### `ConfigService` API
+### `ConfigService` API {#configservice-api}
 
 ```typescript
 import { Inject, Service } from '@omnitron-dev/titan';
@@ -136,7 +137,7 @@ class UsersService {
 | `getMetadata()`                 | Source attribution, loaded-at timestamps                 |
 | `environment` (getter)          | The configured environment string                        |
 
-## Decorators
+## Decorators {#decorators}
 
 ```typescript
 import {
@@ -171,7 +172,7 @@ class UsersService {
 }
 ```
 
-### Bound configuration class
+### Bound configuration class {#bound-configuration-class}
 
 ```typescript
 @Configuration('cache')
@@ -188,7 +189,7 @@ constructor(private readonly cache: CacheConfig) {}
 needs many config values — the typed class doubles as documentation
 of what config it consumes.
 
-## Tokens
+## Tokens {#tokens}
 
 | Token                              | Purpose                              |
 | ---------------------------------- | ------------------------------------ |
@@ -199,7 +200,7 @@ of what config it consumes.
 | `CONFIG_OPTIONS_TOKEN`             | Resolved options bundle              |
 | `CONFIG_SCHEMA_TOKEN`              | Global schema                        |
 
-## Source merge + validation pipeline
+## Source merge + validation pipeline {#source-merge--validation-pipeline}
 
 ```mermaid
 flowchart LR
@@ -217,7 +218,7 @@ flowchart LR
   Reload -- invalid --> Rollback[restore previous config<br/>throw badRequest]
 ```
 
-### Atomic reload semantics
+### Atomic reload semantics {#atomic-reload-semantics}
 
 `reload()` is **atomic**: when validation fails after a reload, the
 service rolls back to the previous config snapshot and throws. You
@@ -233,7 +234,7 @@ try {
 }
 ```
 
-## Multi-environment scaffold
+## Multi-environment scaffold {#multi-environment-scaffold}
 
 A common production layout for layered config:
 
@@ -270,7 +271,7 @@ Priority (low → high): defaults → env-specific → local-dev →
 process env → CLI argv. Secrets always come from `env` or `argv`,
 never from any committed file.
 
-## Remote config source
+## Remote config source {#remote-config-source}
 
 The `'remote'` source fetches from an HTTP endpoint at boot:
 
@@ -316,7 +317,7 @@ boot continues with file defaults only.
 absent, but a file that exists and cannot be parsed or read still throws. See
 [what `optional` forgives](../configuration/sources.md#what-optional-forgives).
 
-## Validation error UX
+## Validation error UX {#validation-error-ux}
 
 Schema failure on boot raises `Errors.badRequest('Configuration
 validation failed', { errors: [...] })` where each error is:
@@ -348,7 +349,7 @@ try {
 }
 ```
 
-## Deep-merge edge cases
+## Deep-merge edge cases {#deep-merge-edge-cases}
 
 The merger is recursive but predictable:
 
@@ -365,7 +366,7 @@ The forbidden-key guard is non-configurable; the keys are
 `__proto__`, `constructor`, `prototype`. Any source that tries to
 set them is ignored.
 
-## Cache semantics
+## Cache semantics {#cache-semantics}
 
 ```typescript
 ConfigModule.forRoot({
@@ -383,7 +384,7 @@ Skip the cache for paths that change often via `set()` — the
 clear-on-write hits the entire cache, not just the changed path,
 so per-write thrashing can defeat the optimisation.
 
-## Strict mode
+## Strict mode {#strict-mode}
 
 ```typescript
 ConfigModule.forRoot({ strict: true });
@@ -394,7 +395,7 @@ on a missing path instead of returning `undefined`. Combines well
 with `validateOnStartup: true` to make every missing required value
 loud at boot rather than silent at first-use.
 
-## Conventional layout
+## Conventional layout {#conventional-layout}
 
 ```typescript
 ConfigModule.forRoot({
@@ -409,7 +410,7 @@ ConfigModule.forRoot({
 })
 ```
 
-## Watcher cascade
+## Watcher cascade {#watcher-cascade}
 
 When `watchForChanges: true`, the `ConfigWatcherService` opens an
 fs-watch on every file source. On change:
@@ -437,7 +438,7 @@ sequenceDiagram
 Watch is debounced internally — a burst of changes (e.g., editor
 save with multiple write events) coalesces to one reload.
 
-## Lifecycle
+## Lifecycle {#lifecycle}
 
 | Hook        | What it does                                                |
 | ----------- | ----------------------------------------------------------- |
@@ -449,7 +450,7 @@ save with multiple write events) coalesces to one reload.
 If validation fails in `onInit`, the app aborts boot with the
 underlying error wrapped — no partial start.
 
-## Anti-patterns
+## Anti-patterns {#anti-patterns}
 
 - **Secrets in committed files.** `default.yaml` should not
   contain production secrets. Use env vars or a secret manager.
@@ -473,7 +474,7 @@ underlying error wrapped — no partial start.
   config only. The next `reload()` reverts it. For persistent
   changes, edit the source file.
 
-## See also
+## See also {#see-also}
 
 - [Configuration / Overview](../configuration/overview.md) —
   conceptual guide

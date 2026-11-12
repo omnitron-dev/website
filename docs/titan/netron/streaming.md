@@ -1,4 +1,6 @@
 ---
+id: "titan/netron/streaming"
+slug: "/docs/titan/netron/streaming"
 sidebar_position: 5
 title: Streaming
 description: AsyncIterable methods, server-push, backpressure.
@@ -59,7 +61,7 @@ the partial results collected so far rather than failing the whole
 request. So over HTTP you get a bounded batch, not a live stream — use
 WS/TCP/Unix for true streaming, or paginate.
 
-## Defining a streaming method
+## Defining a streaming method {#defining-a-streaming-method}
 
 ```typescript
 @Service('orders@1.0.0')
@@ -76,7 +78,7 @@ class OrdersService {
 The method is an async generator (`async *`). Each `yield` becomes a
 value sent to the client.
 
-## Consuming a stream
+## Consuming a stream {#consuming-a-stream}
 
 ```typescript
 const orders = await client.queryInterface<OrdersService>('orders@1.0.0');
@@ -90,7 +92,7 @@ The `for await` loop runs as long as the server yields. When the
 server's generator returns, the loop ends. If the server throws,
 the loop throws.
 
-## Backpressure
+## Backpressure {#backpressure}
 
 Backpressure is real. The producer is wrapped in a `NetronWritableStream`,
 which uses the standard `write()` → `await once('drain')` loop; because
@@ -121,7 +123,7 @@ async *watchAll(): AsyncIterable<Order> {
 }
 ```
 
-## Cancellation
+## Cancellation {#cancellation}
 
 Cancellation is **one-directional on the wire**, and the direction
 matters.
@@ -170,7 +172,7 @@ For deterministic cancellation, give the client an explicit
 "unsubscribe"/"stop" method on the service rather than relying on
 iterator teardown.
 
-## Reconnection
+## Reconnection {#reconnection}
 
 WebSocket reconnects automatically (configurable via the client). On
 reconnect, **streams do not resume** — the client must re-subscribe.
@@ -208,7 +210,7 @@ while (true) {
 }
 ```
 
-## Bidirectional streaming
+## Bidirectional streaming {#bidirectional-streaming}
 
 There is no single-method *duplex* sugar — a method doesn't return one
 two-way channel. But the primitives for full duplex exist: a
@@ -221,7 +223,7 @@ So for full-duplex protocols (collaborative editing, multi-party
 games) you compose unidirectional streams: return a server→client
 stream and/or pass a client→server stream as an argument.
 
-## Performance
+## Performance {#performance}
 
 Each stream has:
 
@@ -232,7 +234,7 @@ Each stream has:
 The cost per yield is the same as a unary call — msgpack encode +
 write. Throughput is bounded by the transport.
 
-## Anti-patterns
+## Anti-patterns {#anti-patterns}
 
 - **Returning a stream of trivial values.** A stream of strings,
   one per yield, is wasteful — the per-message overhead exceeds

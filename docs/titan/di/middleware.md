@@ -1,4 +1,6 @@
 ---
+id: "titan/di/middleware"
+slug: "/docs/titan/di/middleware"
 sidebar_position: 7
 title: DI Middleware
 description: Wrap container resolution itself — retry, caching, rate-limit, circuit-breaker, logging, validation, transactions.
@@ -34,7 +36,7 @@ import {
 > the resolution of providers. For wrapping per-call RPC dispatch,
 > see [Netron Middleware](../netron/middleware.md).
 
-## The `Middleware` interface
+## The `Middleware` interface {#the-middleware-interface}
 
 ```typescript
 interface Middleware<T = unknown> {
@@ -56,7 +58,7 @@ interface Middleware<T = unknown> {
 `next()` resolves the provider; call exactly once and return the
 value.
 
-## Built-in middleware
+## Built-in middleware {#built-in-middleware}
 
 ```mermaid
 flowchart LR
@@ -85,7 +87,7 @@ are **pre-built middleware objects** (`export const … = createMiddleware(…)`
 `RateLimitMiddleware` are **classes** you instantiate with `new`
 (e.g. `new RateLimitMiddleware(100, 60000)`).
 
-## Applying middleware
+## Applying middleware {#applying-middleware}
 
 Middleware is added one at a time via `container.addMiddleware()`,
 which returns the container for chaining:
@@ -104,7 +106,7 @@ Execution order is governed by each middleware's `priority` field
 is no array-position ordering — set `priority` explicitly when order
 matters.
 
-## Custom middleware via `createMiddleware`
+## Custom middleware via `createMiddleware` {#custom-middleware-via-createmiddleware}
 
 ```typescript
 import { createMiddleware, getTokenName } from '@omnitron-dev/titan/nexus';
@@ -130,7 +132,7 @@ const InstrumentationMiddleware = createMiddleware({
 container.addMiddleware(InstrumentationMiddleware);
 ```
 
-## Composing middleware
+## Composing middleware {#composing-middleware}
 
 `composeMiddleware(...middlewares)` takes middleware as rest arguments
 and produces a single middleware that chains them. Useful for grouping
@@ -141,7 +143,7 @@ related middleware as a single unit, then adding the composite with one
 container creates one internally, but you can construct one
 yourself if you need to test middleware in isolation.
 
-## Conditional execution
+## Conditional execution {#conditional-execution}
 
 Middleware can opt out per resolution via `condition`:
 
@@ -156,14 +158,14 @@ const ExpensiveMiddleware: Middleware = {
 When `condition(ctx)` returns false the middleware is skipped for that
 resolution and `next()` runs directly.
 
-## Per-token middleware
+## Per-token middleware {#per-token-middleware}
 
 Some middleware suites support per-token application. Check the
 specific built-in for whether it accepts a `tokens` filter, and the
 provider definition for a `middleware:` field. The exact surface
 varies and is documented in the source for each middleware.
 
-## When to write DI middleware
+## When to write DI middleware {#when-to-write-di-middleware}
 
 Custom DI middleware is *rare*. The built-ins cover most cases.
 Write your own when you need:
@@ -178,7 +180,7 @@ Write your own when you need:
 
 Most application code does not need DI middleware at all.
 
-## Anti-patterns
+## Anti-patterns {#anti-patterns}
 
 - **Putting business logic in DI middleware.** It runs at
   construction time, not per call. Method-call concerns belong in

@@ -1,4 +1,6 @@
 ---
+id: "titan/di/circular-dependencies"
+slug: "/docs/titan/di/circular-dependencies"
 sidebar_position: 8
 title: Circular Dependencies
 description: Detect, diagnose, and break cycles in the DI graph.
@@ -15,7 +17,7 @@ detects this and throws `CircularDependencyError`.
 import { CircularDependencyError, forwardRef } from '@omnitron-dev/titan/nexus';
 ```
 
-## What you see
+## What you see {#what-you-see}
 
 ```
 CircularDependencyError: Circular dependency detected: UsersService
@@ -28,7 +30,7 @@ node in the cycle, in order, and lists fixes — extract a shared
 service, use lazy injection, switch to property injection, or
 `forwardRef()`.
 
-## Why cycles are bad
+## Why cycles are bad {#why-cycles-are-bad}
 
 Beyond "the container cannot do its job":
 
@@ -41,9 +43,9 @@ Beyond "the container cannot do its job":
   usually have a shared concept they both need to know about.
   Extracting it is almost always the right move.
 
-## Three ways to break a cycle
+## Three ways to break a cycle {#three-ways-to-break-a-cycle}
 
-### 1. Extract the shared concept
+### 1. Extract the shared concept {#1-extract-the-shared-concept}
 
 Most cycles hide a third concept that should be its own module.
 
@@ -63,7 +65,7 @@ class AuthService  { constructor(private dir: UsersDirectory) {} }
 This is the cleanest fix. The third concept is usually a
 "directory", "registry", "context", or "core" of the domain.
 
-### 2. Invert the dependency
+### 2. Invert the dependency {#2-invert-the-dependency}
 
 If A and B genuinely need each other at runtime, restructure so the
 constructor dependency goes one way:
@@ -88,7 +90,7 @@ class B {
 }
 ```
 
-### 3. Lazy resolution with `forwardRef`
+### 3. Lazy resolution with `forwardRef` {#3-lazy-resolution-with-forwardref}
 
 `forwardRef` defers reference resolution until first use, breaking
 the construction-time cycle:
@@ -112,7 +114,7 @@ graph.
 Lazy tokens (`createLazyToken`) serve the same purpose with a
 different API.
 
-## Cycles between modules vs cycles between providers
+## Cycles between modules vs cycles between providers {#cycles-between-modules-vs-cycles-between-providers}
 
 | Error                        | Where                          | Detection                              |
 | ---------------------------- | ------------------------------ | -------------------------------------- |
@@ -122,9 +124,9 @@ different API.
 Both throw at boot. Both name the cycle. Both have the same three
 fixes.
 
-## Avoiding cycles in design
+## Avoiding cycles in design {#avoiding-cycles-in-design}
 
-### Layer your modules
+### Layer your modules {#layer-your-modules}
 
 Sort modules into layers: core (no domain deps), domain (depends
 on core), feature (depends on domain). A cycle implies a layer
@@ -138,14 +140,14 @@ violation.
 
 Lower layers can be imported by higher layers, never the reverse.
 
-### Domain types in their own module
+### Domain types in their own module {#domain-types-in-their-own-module}
 
 If both `UsersModule` and `OrdersModule` need a `User` type, put
 the type in a `UsersTypesModule` (or a shared `domain/users.types`
 file that exports types but no providers). Both modules import the
 types without depending on the implementation.
 
-## Diagnosing a cycle in a large graph
+## Diagnosing a cycle in a large graph {#diagnosing-a-cycle-in-a-large-graph}
 
 When the cycle path is long, use [DevTools](./devtools.md) to
 render the full container graph and visually locate the cycle.

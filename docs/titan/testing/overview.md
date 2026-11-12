@@ -1,4 +1,6 @@
 ---
+id: "titan/testing/overview"
+slug: "/docs/titan/testing/overview"
 sidebar_position: 1
 title: Testing
 description: Unit, integration, end-to-end — patterns that scale.
@@ -24,7 +26,7 @@ This page is the entry point. Detail in:
 - [Integration](./integration.md) — partial app boots, real
   ConfigModule and LoggerModule, fake everything else.
 
-## The unit test pattern
+## The unit test pattern {#the-unit-test-pattern}
 
 A `@Service` is just a class. Test it like one:
 
@@ -58,7 +60,7 @@ dependencies.
 This is the right level for **business logic** tests. They run in
 microseconds. You can have thousands.
 
-## When to use the container
+## When to use the container {#when-to-use-the-container}
 
 Use the container (and a real `Application`) when:
 
@@ -72,7 +74,7 @@ Use the container (and a real `Application`) when:
 For all of these, see [DI Overrides](./di-overrides.md) and
 [Integration](./integration.md).
 
-## When to go end-to-end
+## When to go end-to-end {#when-to-go-end-to-end}
 
 End-to-end tests boot a real `Application`, bind a real transport, and
 drive it with a second `Netron` acting as the client. Use them
@@ -142,7 +144,7 @@ Two details worth knowing before you debug them:
   Netron, so a transport registered afterwards is never bound and
   `netron.start()` reports `Netron already started`.
 
-## The right ratio
+## The right ratio {#the-right-ratio}
 
 A typical Titan service ends up with:
 

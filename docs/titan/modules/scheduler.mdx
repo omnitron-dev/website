@@ -1,12 +1,13 @@
 ---
+id: "titan/modules/scheduler"
+slug: "/docs/titan/modules/scheduler"
 title: titan-scheduler
 ---
 
-import ModuleBadge from '@site/src/components/ModuleBadge';
 
 # titan-scheduler
 
-<ModuleBadge origin="official" pkg="@omnitron-dev/titan-scheduler" status="stable" />
+<span class="module-badge">official · @omnitron-dev/titan-scheduler · stable</span>
 
 Cron, interval, and timeout job scheduling with auto-discovery of
 decorated methods, pluggable persistence (memory / Redis / database),
@@ -17,7 +18,7 @@ limits, listener pattern, and lifecycle-aware graceful shutdown.
 pnpm add @omnitron-dev/titan-scheduler
 ```
 
-## When you need it
+## When you need it {#when-you-need-it}
 
 - **Periodic background work.** Cron-style cleanup, hourly reports,
   nightly aggregations.
@@ -28,7 +29,7 @@ pnpm add @omnitron-dev/titan-scheduler
   is required (pair with [`titan-lock`](./lock.mdx) or built-in
   distributed coordination).
 
-## Quickstart
+## Quickstart {#quickstart}
 
 ```typescript
 import { SchedulerModule } from '@omnitron-dev/titan-scheduler';
@@ -49,7 +50,7 @@ import { SchedulerModule } from '@omnitron-dev/titan-scheduler';
 class AppModule {}
 ```
 
-### Decorate methods
+### Decorate methods {#decorate-methods}
 
 ```typescript
 import {
@@ -76,7 +77,7 @@ class TasksService {
 The discovery service finds decorated methods at `onInit` and
 registers them with the scheduler.
 
-### Async configuration
+### Async configuration {#async-configuration}
 
 ```typescript
 SchedulerModule.forRootAsync({
@@ -93,7 +94,7 @@ SchedulerModule.forRootAsync({
 For distributed (multi-node) scheduling, also supply a `lockProvider` —
 see [Distributed coordination](#distributed-coordination) below.
 
-## `ISchedulerModuleOptions`
+## `ISchedulerModuleOptions` {#ischedulermoduleoptions}
 
 | Option              | Type                                                                          | Default       |
 | ------------------- | ----------------------------------------------------------------------------- | ------------- |
@@ -120,9 +121,9 @@ Choose zero for immediate return. A handler that ignores cancellation may
 still be executing when that deadline expires. Both `maxConcurrent` and
 `queueSize` bound admission; a full queue rejects new work.
 
-## Decorators
+## Decorators {#decorators}
 
-### `@Cron(expression, options?)`
+### `@Cron(expression, options?)` {#cronexpression-options}
 
 ```typescript
 @Cron('0 3 * * *', { timezone: 'UTC', immediate: false })
@@ -143,27 +144,27 @@ Options:
 | `immediate?`    | `boolean` — run once at start     |
 | (and `IBaseJobOptions` — see below) | |
 
-### `@Interval(ms, options?)`
+### `@Interval(ms, options?)` {#intervalms-options}
 
 ```typescript
 @Interval(60_000, { immediate: true })
 async heartbeat() { /* runs immediately then every 60s */ }
 ```
 
-### `@Timeout(ms, options?)`
+### `@Timeout(ms, options?)` {#timeoutms-options}
 
 ```typescript
 @Timeout(10_000)
 async runOnceAfterBoot() { /* fires 10s after registration */ }
 ```
 
-### `@Schedulable()`
+### `@Schedulable()` {#schedulable}
 
 Class-level marker; optional but recommended for clarity. The
 discovery service finds `@Cron`/`@Interval`/`@Timeout` methods on
 any `@Injectable()` class.
 
-### `IBaseJobOptions` — shared across all job types
+### `IBaseJobOptions` — shared across all job types {#ibasejoboptions--shared-across-all-job-types}
 
 | Field             | Type                                                                  |
 | ----------------- | --------------------------------------------------------------------- |
@@ -178,7 +179,7 @@ any `@Injectable()` class.
 | `metadata?`       | `Record<string, any>`                                                 |
 | `preventOverlap?` | `boolean` — reject concurrent executions of the same job              |
 
-### A job that fails to register stops the boot
+### A job that fails to register stops the boot {#a-job-that-fails-to-register-stops-the-boot}
 
 `disabled: true` is the only way a job is silently absent, and it is silent
 because you asked for it.
@@ -195,7 +196,7 @@ This matches what the module already does elsewhere with configuration that
 would otherwise be silently wrong: `onStart` refuses distributed mode without a
 lock provider rather than let every instance fire every job.
 
-## `CronExpression` enum
+## `CronExpression` enum {#cronexpression-enum}
 
 ```typescript
 import { CronExpression } from '@omnitron-dev/titan-scheduler';
@@ -210,7 +211,7 @@ CronExpression.EVERY_DAY_AT_1AM      // '0 1 * * *'
 // …through EVERY_YEAR = '0 0 1 1 *'
 ```
 
-## `SchedulerService`
+## `SchedulerService` {#schedulerservice}
 
 Most jobs are registered declaratively with the decorators above. To
 register a job **dynamically** at runtime, inject the service and use
@@ -254,7 +255,7 @@ class JobsService {
 > `onStart` / `onStop`) is driven by the framework — you rarely call
 > these methods yourself for decorator-defined jobs.
 
-## Persistence providers
+## Persistence providers {#persistence-providers}
 
 | Provider class                  | Persistence                                  |
 | ------------------------------- | -------------------------------------------- |
@@ -276,11 +277,11 @@ interface IPersistenceProvider {
 }
 ```
 
-## Distributed coordination
+## Distributed coordination {#distributed-coordination}
 
 For multi-pod deployments, two paths:
 
-### A) Module-level distributed config (SC-1)
+### A) Module-level distributed config (SC-1) {#a-module-level-distributed-config-sc-1}
 
 When `distributed.enabled` is `true`, before each scheduled fire the
 scheduler acquires a per-fire-window lock so a given fire runs on
@@ -319,7 +320,7 @@ scheduler holds each per-fire lock for its full `lockTTL` and does not
 release it early (so a clock-skewed-late node can't re-run the same
 fire).
 
-### B) Per-job `@WithDistributedLock`
+### B) Per-job `@WithDistributedLock` {#b-per-job-withdistributedlock}
 
 ```typescript
 import { WithDistributedLock } from '@omnitron-dev/titan-lock';
@@ -334,7 +335,7 @@ coordinated, and it releases the lock as soon as the method returns);
 module-level coordination (A) covers **every** job at once and holds
 each fire's lock for the full `lockTTL`.
 
-## Listeners
+## Listeners {#listeners}
 
 ```typescript
 const auditListener: IJobListener = {
@@ -351,7 +352,7 @@ SchedulerModule.forRoot({ listeners: [auditListener] });
 Use for unified observability (metrics, alerting, audit trails)
 without coupling each job's body to telemetry concerns.
 
-## Status / priority enums
+## Status / priority enums {#status--priority-enums}
 
 ```typescript
 // JobStatus is a const-object string union:
@@ -370,7 +371,7 @@ enum JobPriority {
 }
 ```
 
-## Lifecycle
+## Lifecycle {#lifecycle}
 
 `SchedulerService` implements:
 
@@ -396,7 +397,7 @@ stateDiagram-v2
   FAILED --> PENDING: startJob()
 ```
 
-## Tokens
+## Tokens {#tokens}
 
 | Token                                 |
 | ------------------------------------- |
@@ -410,7 +411,7 @@ stateDiagram-v2
 | `SCHEDULER_LISTENERS_TOKEN`           |
 | `SCHEDULER_LOCK_TOKEN`                |
 
-## Anti-patterns
+## Anti-patterns {#anti-patterns}
 
 - **Long-running jobs with short intervals.** `@Interval(1_000)`
   with a 5s body queues up. Set `preventOverlap: true` or shorten
@@ -425,7 +426,7 @@ stateDiagram-v2
   exceed the job's worst-case duration, or another pod picks it up
   mid-execution.
 
-## See also
+## See also {#see-also}
 
 - [`titan-lock`](./lock.mdx) — pair with `@WithDistributedLock` per job
 - [`titan-metrics`](./metrics.mdx) — picks up scheduler metrics if both modules loaded

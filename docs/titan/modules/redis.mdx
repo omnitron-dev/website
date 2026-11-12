@@ -1,12 +1,13 @@
 ---
+id: "titan/modules/redis"
+slug: "/docs/titan/modules/redis"
 title: titan-redis
 ---
 
-import ModuleBadge from '@site/src/components/ModuleBadge';
 
 # titan-redis
 
-<ModuleBadge origin="official" pkg="@omnitron-dev/titan-redis" status="stable" />
+<span class="module-badge">official · @omnitron-dev/titan-redis · stable</span>
 
 Redis connection management with clustering, Sentinel, TLS, multiple
 named instances, pluggable Lua scripts, and the underlying foundation
@@ -17,9 +18,9 @@ for `titan-cache` (L2), `titan-lock`, `titan-discovery`,
 pnpm add @omnitron-dev/titan-redis
 ```
 
-## Quickstart
+## Quickstart {#quickstart}
 
-### Single client
+### Single client {#single-client}
 
 ```typescript
 import { RedisModule } from '@omnitron-dev/titan-redis';
@@ -34,7 +35,7 @@ import { RedisModule } from '@omnitron-dev/titan-redis';
 class AppModule {}
 ```
 
-### Multiple named clients
+### Multiple named clients {#multiple-named-clients}
 
 ```typescript
 RedisModule.forRoot({
@@ -47,7 +48,7 @@ RedisModule.forRoot({
 })
 ```
 
-### Cluster
+### Cluster {#cluster}
 
 ```typescript
 RedisModule.forRoot({
@@ -66,7 +67,7 @@ RedisModule.forRoot({
 })
 ```
 
-### Sentinel
+### Sentinel {#sentinel}
 
 ```typescript
 RedisModule.forRoot({
@@ -78,7 +79,7 @@ RedisModule.forRoot({
 })
 ```
 
-### TLS
+### TLS {#tls}
 
 ```typescript
 RedisModule.forRoot({
@@ -90,7 +91,7 @@ RedisModule.forRoot({
 })
 ```
 
-### Async configuration
+### Async configuration {#async-configuration}
 
 ```typescript
 RedisModule.forRootAsync({
@@ -104,7 +105,7 @@ RedisModule.forRootAsync({
 })
 ```
 
-## `RedisModuleOptions`
+## `RedisModuleOptions` {#redismoduleoptions}
 
 | Option            | Type                                                              |
 | ----------------- | ----------------------------------------------------------------- |
@@ -124,7 +125,7 @@ RedisModule.forRootAsync({
 | `pool`            | `{ min?, max?, acquireTimeoutMillis?, idleTimeoutMillis? }`       |
 | `isGlobal`        | `boolean`                                                         |
 
-## `IRedisClientOptions`
+## `IRedisClientOptions` {#iredisclientoptions}
 
 | Option                  | Type                                                              | Default       |
 | ----------------------- | ----------------------------------------------------------------- | ------------- |
@@ -149,7 +150,7 @@ RedisModule.forRootAsync({
 | `sentinelName`          | `string`                                                          | —             |
 | `tls`                   | `IRedisTlsOptions`                                                | —             |
 
-## `RedisService` — the high-level API
+## `RedisService` — the high-level API {#redisservice--the-high-level-api}
 
 The injected default service for one-line ops without managing clients.
 
@@ -167,7 +168,7 @@ class CartService {
 }
 ```
 
-### Connection helpers
+### Connection helpers {#connection-helpers}
 
 | Method                                              | Purpose                                          |
 | --------------------------------------------------- | ------------------------------------------------ |
@@ -180,7 +181,7 @@ class CartService {
 | `createSubscriber(namespace?)`                      | Dup client for pub/sub                           |
 | `publish(channel, message, namespace?)`             | Publish to channel                               |
 
-### Strings, counters, expiry
+### Strings, counters, expiry {#strings-counters-expiry}
 
 ```typescript
 await this.redis.set('user:42:tier', 'premium', 3600);   // 3600s TTL
@@ -190,7 +191,7 @@ await this.redis.expire('cart:42', 600);
 const ttl = await this.redis.ttl('cart:42');             // -1 no expiry, -2 not exists
 ```
 
-### Hashes / sets / lists / sorted sets / streams
+### Hashes / sets / lists / sorted sets / streams {#hashes--sets--lists--sorted-sets--streams}
 
 `RedisService` proxies every common ioredis method directly: `hget`,
 `hset`, `hgetall`, `hdel`, `hexists`, `hincrby`, `hlen`, `hkeys`,
@@ -201,7 +202,7 @@ const ttl = await this.redis.ttl('cart:42');             // -1 no expiry, -2 not
 `xrange`, `xread`, `xtrim`. Each accepts an optional trailing
 `namespace?` argument to target a non-default client.
 
-### Lua scripts
+### Lua scripts {#lua-scripts}
 
 ```typescript
 const sha = await this.redis.loadScript(
@@ -215,7 +216,7 @@ Scripts declared in `RedisModule.forRoot({ scripts: [...] })` are
 preloaded at startup; `runScript()` re-loads automatically if Redis
 evicts the SHA (NOSCRIPT error).
 
-## `RedisManager` — low-level API
+## `RedisManager` — low-level API {#redismanager--low-level-api}
 
 Injected via `@Inject(REDIS_MANAGER)` for cases that need the raw
 ioredis client (advanced commands not in `RedisService`'s typed
@@ -246,9 +247,9 @@ class AnalyticsService {
 | `healthCheck()`                                     | All clients' health + latency                    |
 | `runScript<T>(scriptName, keys, args, namespace?)`  | Execute named Lua script                         |
 
-## Decorators
+## Decorators {#decorators}
 
-### `@InjectRedis(namespace?)` — parameter
+### `@InjectRedis(namespace?)` — parameter {#injectredisnamespace--parameter}
 
 ```typescript
 @Service({ name: 'cart' })
@@ -262,11 +263,11 @@ class SessionsService {
 }
 ```
 
-### `@InjectRedisManager()` — parameter
+### `@InjectRedisManager()` — parameter {#injectredismanager--parameter}
 
 Inject the `RedisManager` directly.
 
-### `@RedisCache(options?)` — method
+### `@RedisCache(options?)` — method {#rediscacheoptions--method}
 
 ```typescript
 @Public()
@@ -278,7 +279,7 @@ Options: `ttl` (seconds), `namespace`, `key` (string or function),
 `keyFn` (alias), `condition` (skip if false), `refresh` (always
 re-compute, bypass read).
 
-### `@RedisLock(options?)` — method
+### `@RedisLock(options?)` — method {#redislockoptions--method}
 
 Lightweight inline lock for simple cases. For full distributed lock
 semantics use [`titan-lock`](./lock.mdx).
@@ -289,7 +290,7 @@ semantics use [`titan-lock`](./lock.mdx).
 async charge(id: string) { /* … */ }
 ```
 
-### `@RedisRateLimit(options)` — method
+### `@RedisRateLimit(options)` — method {#redisratelimitoptions--method}
 
 ```typescript
 @Public()
@@ -300,7 +301,7 @@ async search(q: string) { /* … */ }
 For tier-based / sliding-window strategies use
 [`titan-ratelimit`](./ratelimit.mdx).
 
-## Tokens
+## Tokens {#tokens}
 
 | Token                                  | Purpose                                       |
 | -------------------------------------- | --------------------------------------------- |
@@ -309,7 +310,7 @@ For tier-based / sliding-window strategies use
 | `REDIS_DEFAULT_NAMESPACE`              | Default namespace constant (`'default'`)      |
 | `getRedisClientToken(namespace?)`      | Token for a named client                      |
 
-## Lifecycle
+## Lifecycle {#lifecycle}
 
 The module's provider factory calls `RedisManager.init()` before consumers
 receive the manager. It initializes non-lazy clients and preloads declared Lua
@@ -333,7 +334,7 @@ to close every owned client and logs individual failures. With
 close them explicitly. Set `shutdownTimeout: 0` only when immediate disconnect
 is intended; otherwise use a finite non-negative integer up to `2147483647`.
 
-## DB-index isolation pattern
+## DB-index isolation pattern {#db-index-isolation-pattern}
 
 When you co-locate multiple subsystems on the same Redis instance,
 isolate them by DB index per named client instead of sharing one
@@ -351,7 +352,7 @@ Use named clients with an explicit `db` per namespace rather than
 swapping `SELECT` at runtime — runtime `SELECT` is per-connection
 and hard to reason about under connection-pool churn.
 
-## Anti-patterns
+## Anti-patterns {#anti-patterns}
 
 - **Cross-slot ops in cluster `multi()`.** Cluster mode forbids
   multi-slot transactions. Pin keys to one slot via `{hashtag}` or
@@ -367,7 +368,7 @@ and hard to reason about under connection-pool churn.
   convenience wrapper. For Lua-safe ownership and TTL extension, use
   [`titan-lock`](./lock.mdx).
 
-## See also
+## See also {#see-also}
 
 - [`titan-cache`](./cache.mdx) — L2 backing via this module
 - [`titan-lock`](./lock.mdx) — robust distributed locks

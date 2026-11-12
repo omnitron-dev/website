@@ -1,4 +1,6 @@
 ---
+id: "titan/decorators/index"
+slug: "/docs/titan/decorators"
 sidebar_position: 1
 title: Decorators
 description: Every decorator Titan ships — what it does, when to use it, what to import.
@@ -16,9 +18,9 @@ Titan's decorators come from two locations:
 For day-to-day code, import the core set from the main entry. Reach
 for the `/decorators` subpath when you need the extras.
 
-## Class-level
+## Class-level {#class-level}
 
-### `@Module(options)`
+### `@Module(options)` {#moduleoptions}
 
 Marks a class as a module. Without it, the class is invisible to the
 module registry.
@@ -34,7 +36,7 @@ export class UsersModule {}
 
 → [Defining Modules](../modules-system/defining-modules.md)
 
-### `@Injectable(options?)`
+### `@Injectable(options?)` {#injectableoptions}
 
 Marks a class as DI-resolvable. The container can construct it; its
 constructor parameters are resolved as dependencies.
@@ -51,7 +53,7 @@ non-service helpers (repositories, mappers, internal utilities).
 
 → [Providers](../di/providers.md)
 
-### `@Service(options?)`
+### `@Service(options?)` {#serviceoptions}
 
 Marks a class as a Netron RPC service.
 
@@ -82,7 +84,7 @@ if provided.
 
 → [Netron Services](../netron/services.md)
 
-### Scope shorthands
+### Scope shorthands {#scope-shorthands}
 
 ```typescript
 import { Singleton, Transient, Scoped, Request } from '@omnitron-dev/titan/decorators';
@@ -102,7 +104,7 @@ class RequestContext {}
 
 → [Scopes](../di/scopes.md)
 
-### `@Global()`
+### `@Global()` {#global}
 
 Marks a module as global — its exports are visible to every module
 in the application without explicit imports.
@@ -118,9 +120,9 @@ class LoggerModule {}
 
 Use sparingly. Reserved for framework infrastructure.
 
-## Method-level — RPC
+## Method-level — RPC {#method-level--rpc}
 
-### `@Public(options?)`
+### `@Public(options?)` {#publicoptions}
 
 Exposes a method (or property) over Netron. The options object can
 carry `auth`, `rateLimit`, `cache`, `audit`, `prefetch`, `transports`,
@@ -158,7 +160,7 @@ rule covers methods and properties, HTTP and persistent transports. See
 `@Public({ transports: [...] })` and a separate `@Auth(...)` compose in either
 decorator order; transport options never erase the authorization requirements.
 
-### `@Auth(config)`
+### `@Auth(config)` {#authconfig}
 
 Configures authentication and authorisation for a method. Use
 alongside `@Public()` for cleaner separation of concerns. The shape
@@ -185,7 +187,7 @@ The policy framework (see `BuiltInPolicies` in
 
 → [Netron Authentication](../netron/authentication.md)
 
-### `@RateLimit(config)`
+### `@RateLimit(config)` {#ratelimitconfig}
 
 Configures rate limiting. The basic shape:
 
@@ -219,7 +221,7 @@ other than what it reads like.
 
 → [titan-ratelimit](../modules/ratelimit.mdx)
 
-### `@Cache(config)`
+### `@Cache(config)` {#cacheconfig}
 
 Caches the method result. The shape:
 
@@ -236,7 +238,7 @@ async findById(id: string) { /* … */ }
 
 → [titan-cache](../modules/cache.mdx)
 
-### `@Validate(schema, options?)` and `@Contract(contract)`
+### `@Validate(schema, options?)` and `@Contract(contract)` {#validateschema-options-and-contractcontract}
 
 Validate input (and optionally output) against Zod schemas.
 
@@ -269,9 +271,9 @@ Other validation decorators: `ValidateInput`, `ValidateOutput`,
 
 → [Validation](../validation/overview.md)
 
-## Method-level — utilities
+## Method-level — utilities {#method-level--utilities}
 
-### `@Memoize()`
+### `@Memoize()` {#memoize}
 
 Per-instance memoisation of method results, keyed by `JSON.stringify`
 of arguments. In-memory only; lives as long as the instance.
@@ -281,7 +283,7 @@ of arguments. In-memory only; lives as long as the instance.
 private computeHash(input: string) { /* … */ }
 ```
 
-### `@Retry({ attempts?, delay? })`
+### `@Retry({ attempts?, delay? })` {#retry-attempts-delay-}
 
 Retries the method on failure with a **fixed** delay between
 attempts. `attempts` defaults to 3, `delay` to 1000 ms.
@@ -295,7 +297,7 @@ For exponential backoff and classifier-driven decisions, use the
 `computeBackoff` helper in `@omnitron-dev/titan/utils` with your own
 retry loop. See [Resilience / Retry](../resilience/retry.md).
 
-### `@Deprecated({ message?, version? })`
+### `@Deprecated({ message?, version? })` {#deprecated-message-version-}
 
 Marks the method as deprecated. Metadata only; the framework does
 not log warnings.
@@ -305,15 +307,15 @@ not log warnings.
 async getUser(id: string) { /* … */ }
 ```
 
-### `@Timeout({ ms })`, `@Retryable(...)`, `@Log({...})`, `@Monitor({...})`
+### `@Timeout({ ms })`, `@Retryable(...)`, `@Log({...})`, `@Monitor({...})` {#timeout-ms--retryable-log-monitor}
 
 Additional utility interceptors in
 `@omnitron-dev/titan/decorators/utility.ts`. Less commonly used; see
 the source for current signatures.
 
-## Parameter-level
+## Parameter-level {#parameter-level}
 
-### `@Inject(token)`
+### `@Inject(token)` {#injecttoken}
 
 Specifies the DI token for this parameter. Required for symbol
 tokens and multi-tokens; optional for class tokens (auto-detected
@@ -326,7 +328,7 @@ constructor(
 ) {}
 ```
 
-### `@Optional()`
+### `@Optional()` {#optional}
 
 Makes the dependency optional. If no provider is registered, the
 parameter receives `undefined`.
@@ -337,26 +339,26 @@ constructor(
 ) {}
 ```
 
-### `@InjectAll(token)`, `@InjectMany(token)`
+### `@InjectAll(token)`, `@InjectMany(token)` {#injectalltoken-injectmanytoken}
 
 Inject all providers registered against a multi-token.
 
-### `@Value(path, default?)`, `@InjectEnv(key, default?)`, `@InjectConfig(path)`
+### `@Value(path, default?)`, `@InjectEnv(key, default?)`, `@InjectConfig(path)` {#valuepath-default-injectenvkey-default-injectconfigpath}
 
 Inject from configuration sources. `@Value` resolves through a
 config tree; `@InjectEnv` reads `process.env`; `@InjectConfig` reads
 through `ConfigService` (see [Configuration](../configuration/overview.md)).
 
-### `@Lazy(tokenFactory)`
+### `@Lazy(tokenFactory)` {#lazytokenfactory}
 
 Inject a token resolved lazily on first use. Used to break circular
 dependencies.
 
 → [Circular Dependencies](../di/circular-dependencies.md)
 
-## Lifecycle decorators
+## Lifecycle decorators {#lifecycle-decorators}
 
-### `@PostConstruct()`, `@PreDestroy()`
+### `@PostConstruct()`, `@PreDestroy()` {#postconstruct-predestroy}
 
 Mark methods that run during the `onInit` / `onDestroy` lifecycle
 phases.
@@ -372,7 +374,7 @@ async drain() { /* … */ }
 Equivalent to implementing `OnInit` / `OnDestroy` interfaces. See
 [Lifecycle Decorators](./lifecycle.md).
 
-## Decorator order
+## Decorator order {#decorator-order}
 
 When stacking decorators, **outermost-first** in declaration order;
 execution at call time is **inside-out**:
@@ -387,7 +389,7 @@ async dangerousOp(input: Input) { /* … */ }
 
 → See [Method Traits](./method-traits.md) for stacking guidance.
 
-## Anti-patterns
+## Anti-patterns {#anti-patterns}
 
 - **Decorating private methods with `@Public`.** Private methods
   are not meant to be called from outside; making them RPC-callable

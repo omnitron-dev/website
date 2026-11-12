@@ -1,4 +1,6 @@
 ---
+id: "frontend/prism/research"
+slug: "/docs/frontend/prism/research"
 sidebar_position: 12
 title: Research workspaces
 description: Scientific documents, block editing and typed knowledge graphs with a shared MUI theme.
@@ -25,7 +27,7 @@ equation renderer. The reader and editor render through Prism's declared KaTeX
 dependency; the Markdown tokenizer ships with Prism. Consumers do not need to
 override a second renderer version.
 
-## One visual system
+## One visual system {#one-visual-system}
 
 Colours come from `theme.palette`; editor and graph radii come from
 `theme.shape.borderRadius`. Override these through the
@@ -49,7 +51,7 @@ configurable; pass a `labels` object to localize their controls. A graph's
 `renderDetails` slot can contain application-specific revision and verification
 information without coupling Prism to that application's backend.
 
-## Keep document and knowledge semantics separate
+## Keep document and knowledge semantics separate {#keep-document-and-knowledge-semantics-separate}
 
 `ResearchEditor` accepts `initialSource`. Its `onChange` callback delivers a
 `ResearchSnapshot`; call `getSource()` to obtain the exact current source.
@@ -80,7 +82,7 @@ A visual selection or rendered equation is not a proof certificate. Supply
 verified status and diagnostics from the host through `renderDetails` and
 ordinary Prism components.
 
-## Equations in place
+## Equations in place {#equations-in-place}
 
 Inline and display equations open inside the document. Click an equation, or
 enter an adjacent inline equation with an arrow key. `Ctrl/Command + Shift + M`
@@ -135,7 +137,7 @@ validate a proof or grant a certificate; those operations belong to the host's
 verification service. Length limits do not establish a time bound for arbitrary
 LaTeX or trusted user-defined macros.
 
-### Observation badges in knowledge graphs
+### Observation badges in knowledge graphs {#observation-badges-in-knowledge-graphs}
 
 `KnowledgeEntity` and `KnowledgeRelation` accept optional `badges: readonly KnowledgeBadge[]`.
 Each badge has a `label` and an optional MUI `tone` (`default`, `info`, `success`, `warning`, `error`).

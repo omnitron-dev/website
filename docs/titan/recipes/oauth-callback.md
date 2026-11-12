@@ -1,4 +1,6 @@
 ---
+id: "titan/recipes/oauth-callback"
+slug: "/docs/titan/recipes/oauth-callback"
 sidebar_position: 8
 title: OAuth callback
 description: PKCE-protected authorisation-code flow with state validation and signed-URL session bootstrap.
@@ -12,7 +14,7 @@ storage, and bootstrapping the user's session. This recipe shows
 the canonical shape using `titan-auth`, `titan-cache` (for the
 short-lived state), and the rest of the standard stack.
 
-## Shape
+## Shape {#shape}
 
 - **PKCE.** The initiating page generates `code_verifier` +
   `code_challenge` (SHA-256). The callback validates against the
@@ -24,7 +26,7 @@ short-lived state), and the rest of the standard stack.
 - **Signed session bootstrap.** Issue a signed URL with a JWT
   pointing back to your app's session endpoint.
 
-## Architecture
+## Architecture {#architecture}
 
 ```mermaid
 sequenceDiagram
@@ -46,7 +48,7 @@ sequenceDiagram
   App-->>U: Redirect to /session/bootstrap?token=...
 ```
 
-## Setup
+## Setup {#setup}
 
 ```typescript
 import { Module } from '@omnitron-dev/titan';
@@ -93,7 +95,7 @@ import { TitanRateLimitModule } from '@omnitron-dev/titan-ratelimit';
 export class AppModule {}
 ```
 
-## Implementation
+## Implementation {#implementation}
 
 ```typescript
 import { Service, Inject } from '@omnitron-dev/titan';
@@ -199,7 +201,7 @@ class AuthFlowService {
 }
 ```
 
-## Cross-module wiring notes
+## Cross-module wiring notes {#cross-module-wiring-notes}
 
 | Concern                          | Wiring detail                                                                                  |
 | -------------------------------- | ---------------------------------------------------------------------------------------------- |
@@ -213,7 +215,7 @@ class AuthFlowService {
 | Signed bootstrap URL             | Short TTL (≤ 2 min) and single-use; check + reject reuse on the bootstrap endpoint              |
 | Tokens never reach the browser   | Access + refresh tokens stay server-side; only your session JWT goes to the client              |
 
-## Production checklist
+## Production checklist {#production-checklist}
 
 - [ ] **PKCE enabled** — `code_challenge_method: 'S256'`, never `'plain'`
 - [ ] **State validated atomically** — `get` then `delete`; no race window
@@ -228,7 +230,7 @@ class AuthFlowService {
 - [ ] **Detect and reject reused authorisation codes** — the provider should also do this; defense in depth
 - [ ] **Detect impossible-time-window flows** (state created seconds ago coming back from a different IP)
 
-## See also
+## See also {#see-also}
 
 - [`titan-auth`](../modules/auth.mdx) — JWT + signed URLs
 - [`titan-cache`](../modules/cache.mdx) — state storage

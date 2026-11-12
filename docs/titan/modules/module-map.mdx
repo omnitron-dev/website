@@ -1,10 +1,11 @@
 ---
+id: "titan/modules/module-map"
+slug: "/docs/titan/modules/module-map"
 sidebar_position: 2
 title: Module map
 description: How the 16 modules relate, depend on one another, and combine.
 ---
 
-import ModuleBadge from '@site/src/components/ModuleBadge';
 
 # Module map
 
@@ -12,7 +13,7 @@ A bird's-eye view of every module in the Titan ecosystem — who
 depends on whom, who can substitute for whom, and which
 combinations show up in real backends.
 
-## Dependency graph
+## Dependency graph {#dependency-graph}
 
 ```mermaid
 flowchart TB
@@ -80,7 +81,7 @@ dependent module without the foundation. Dotted arrows are
 **soft / optional** — feature flagged at config time
 (`storageType: 'redis'`, `multiTier: true`, `enableDatabaseIndicator: true`).
 
-## Install footprint
+## Install footprint {#install-footprint}
 
 The numbers below count peer modules a typical adoption pulls in
 (transitive Redis client, postgres driver, etc. are omitted):
@@ -105,12 +106,12 @@ The numbers below count peer modules a typical adoption pulls in
 The framework deliberately keeps modules independently versionable —
 you only pull in what you actually use.
 
-## Common stacks
+## Common stacks {#common-stacks}
 
-### Web API service
+### Web API service {#web-api-service}
 
-<ModuleBadge origin="built-in" pkg="@omnitron-dev/titan" subpath="config + logger" />
-<ModuleBadge origin="official" pkg="titan-redis + titan-database + titan-cache + titan-auth + titan-health + titan-metrics" />
+<span class="module-badge">built-in · @omnitron-dev/titan · config + logger</span>
+<span class="module-badge">official · titan-redis + titan-database + titan-cache + titan-auth + titan-health + titan-metrics</span>
 
 ```mermaid
 flowchart LR
@@ -124,10 +125,10 @@ flowchart LR
 
 Common starting set for any REST / RPC backend.
 
-### Worker fleet
+### Worker fleet {#worker-fleet}
 
-<ModuleBadge origin="built-in" pkg="@omnitron-dev/titan" subpath="config + logger" />
-<ModuleBadge origin="official" pkg="titan-redis + titan-database + titan-lock + titan-scheduler + titan-metrics + titan-health" />
+<span class="module-badge">built-in · @omnitron-dev/titan · config + logger</span>
+<span class="module-badge">official · titan-redis + titan-database + titan-lock + titan-scheduler + titan-metrics + titan-health</span>
 
 ```mermaid
 flowchart LR
@@ -140,10 +141,10 @@ flowchart LR
 
 `titan-lock` is what stops two workers running the same job.
 
-### Notification gateway
+### Notification gateway {#notification-gateway}
 
-<ModuleBadge origin="built-in" pkg="@omnitron-dev/titan" subpath="config + logger" />
-<ModuleBadge origin="official" pkg="titan-redis + titan-notifications + titan-ratelimit + titan-metrics" />
+<span class="module-badge">built-in · @omnitron-dev/titan · config + logger</span>
+<span class="module-badge">official · titan-redis + titan-notifications + titan-ratelimit + titan-metrics</span>
 
 ```mermaid
 flowchart LR
@@ -156,20 +157,20 @@ flowchart LR
 `titan-ratelimit` shields the upstream provider; `titan-metrics`
 records throughput / failures by channel.
 
-### Multi-instance app
+### Multi-instance app {#multi-instance-app}
 
 Add **`titan-discovery`** to any of the above when you have more
 than one pod and want to address services without hard-coded URLs.
 
-### Edge / offline node
+### Edge / offline node {#edge--offline-node}
 
-<ModuleBadge origin="official" pkg="titan-telemetry-relay" status="stable" />
+<span class="module-badge">official · titan-telemetry-relay · stable</span>
 
 Add `titan-telemetry-relay` when the node may be disconnected from
 the central metrics endpoint — it buffers samples to SQLite and
 flushes when connectivity returns.
 
-## Similar modules — when which?
+## Similar modules — when which? {#similar-modules--when-which}
 
 | Need                                | Reach for                                     | Why                                                        |
 | ----------------------------------- | --------------------------------------------- | ---------------------------------------------------------- |
@@ -190,7 +191,7 @@ flushes when connectivity returns.
 | Validated config                    | [`config`](./config.mdx) (built-in)           | Layered, validated, hot-reloadable                         |
 | Structured logging                  | [`logger`](./logger.mdx) (built-in)           | pino under the hood; transports + processors               |
 
-## Replacement / overlap matrix
+## Replacement / overlap matrix {#replacement--overlap-matrix}
 
 | Module                       | Closest overlap                                  | When to prefer                                        |
 | ---------------------------- | ------------------------------------------------ | ----------------------------------------------------- |
@@ -205,7 +206,7 @@ flushes when connectivity returns.
 | `titan-health`               | rolling-your-own `/healthz`                      | Standard k8s probe shapes + indicator registry        |
 | `titan-auth`                 | manual JWT verification                          | JWKS rotation, token cache, RBAC primitives           |
 
-## Where Redis sits
+## Where Redis sits {#where-redis-sits}
 
 Five official modules use Redis as their primary backend. They
 share the same `Redis` client provided by `titan-redis`:
@@ -252,7 +253,7 @@ options, or by registering multiple named Redis clients via
 `TitanRedisModule.forFeature(['cache', 'queue', …])` (or the
 `clients: [...]` option on `forRoot`).
 
-## Lifecycle order — first to last
+## Lifecycle order — first to last {#lifecycle-order--first-to-last}
 
 The container resolves lifecycle in dependency order:
 
@@ -285,7 +286,7 @@ first, then surface modules, then foundations, then logger / config
 last. The exact reverse ensures dependants always stop before
 their dependencies.
 
-## Picking the right tier
+## Picking the right tier {#picking-the-right-tier}
 
 | Question                                       | Tier         |
 | ---------------------------------------------- | ------------ |
@@ -294,7 +295,7 @@ their dependencies.
 | Niche need, no official equivalent yet?        | **Community** (audit first) |
 | Want to publish your own?                      | [Authoring a module](../modules-system/authoring-modules.md) |
 
-## See also
+## See also {#see-also}
 
 - [Modules index](./index.mdx) — flat list by tier
 - [Authoring a module](../modules-system/authoring-modules.md) —

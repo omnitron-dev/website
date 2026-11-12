@@ -1,4 +1,6 @@
 ---
+id: "titan/application/shutdown"
+slug: "/docs/titan/application/shutdown"
 sidebar_position: 3
 title: Graceful Shutdown
 description: Phased shutdown with hard-exit guarantees.
@@ -16,7 +18,7 @@ Titan handles all three with a phased shutdown coordinator that
 guarantees a hard exit within `gracefulShutdownTimeout`, regardless
 of in-flight work.
 
-## Hook-driven shutdown
+## Hook-driven shutdown {#hook-driven-shutdown}
 
 For most providers, you do not register shutdown tasks directly —
 you implement `OnStop` and/or `OnDestroy`:
@@ -33,7 +35,7 @@ The shutdown coordinator runs `onStop` in reverse dependency order,
 then `onDestroy` in the same order, then issues a final hard-exit
 guarantee.
 
-## Triggering shutdown
+## Triggering shutdown {#triggering-shutdown}
 
 | Source                     | Effect                                                      |
 | -------------------------- | ----------------------------------------------------------- |
@@ -48,7 +50,7 @@ Reasons (from `ShutdownReason` enum): `Manual`, `SIGTERM`, `SIGINT`,
 `SIGHUP`, `Signal`, `UncaughtException`, `UnhandledRejection`,
 `Timeout`, `Error`, `Reload`, `Upgrade`, `Maintenance`.
 
-## `app.stop()` options
+## `app.stop()` options {#appstop-options}
 
 `IShutdownOptions` is `{ timeout?, force?, graceful?, signal? }`:
 
@@ -66,7 +68,7 @@ variants (`SIGTERM`, `Maintenance`, …) come from the signal/programmatic
 path that calls the internal `shutdown(reason)` entry, not from a
 `reason` field on `stop()`.
 
-## Draining Netron work
+## Draining Netron work {#draining-netron-work}
 
 Before provider teardown, the inbound gate refuses new calls, property reads/writes and Netron tasks with `SHUTTING_DOWN`. Already admitted work stays counted until its result or error has been written to the transport. The drain has a deadline; it cannot promise completion of an operation that outlives shutdown.
 
@@ -74,7 +76,7 @@ If a connection disappears first, pending callers receive `TransportLostError` w
 
 Stopping Netron also cancels unfinished handshakes and reconnect timers. Long-lived streams and event subscriptions belong to their original connection and must be reopened explicitly; use a durable journal or outbox when messages must survive that connection.
 
-## Custom shutdown tasks
+## Custom shutdown tasks {#custom-shutdown-tasks}
 
 For tasks that don't belong to any single provider, register them
 directly with the application:
@@ -101,7 +103,7 @@ app.unregisterShutdownTask('audit.flush');
 `Normal (50)`, `BelowNormal (70)`, `Low (80)`, `VeryLow (90)`,
 `Last (100)`.
 
-## The hard-exit guarantee
+## The hard-exit guarantee {#the-hard-exit-guarantee}
 
 The coordinator runs a watchdog timer for the whole shutdown:
 
@@ -120,7 +122,7 @@ alive forever.
 > strictly better: a forced exit is recoverable, an indefinite hang
 > is not.
 
-## Disabling auto-binding
+## Disabling auto-binding {#disabling-auto-binding}
 
 If you embed Titan inside a larger Node.js process (test harness,
 another framework, an Electron renderer), set
@@ -134,7 +136,7 @@ const app = await Application.create({
 });
 ```
 
-## Observability
+## Observability {#observability}
 
 The shutdown coordinator emits these events through the Application
 event bus:
@@ -158,7 +160,7 @@ app.on(ApplicationEvent.ShutdownComplete, ({ reason, success }) => {
 });
 ```
 
-## Anti-patterns
+## Anti-patterns {#anti-patterns}
 
 - **Long-running work outside `onStop`/`onDestroy`.** Anything that
   needs to clean up at shutdown should be hooked in via the lifecycle

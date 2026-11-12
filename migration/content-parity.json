@@ -1,0 +1,32 @@
+{
+  "sourceCommit": "829cb5d02cd74943b01ef729883c45be905172e5",
+  "retainedDocuments": 212,
+  "missingDocuments": [],
+  "modifiedCodeFences": [],
+  "blogBodySha256": "4a6efd36da0ca66eab9fc2b51d482b392770f6e87121aa024ee190a887d30b2c",
+  "blogBodyPreserved": true,
+  "replacedFiles": {
+    "docusaurus.config.ts": "lumen.config.ts",
+    "sidebars.ts": "src/data/sidebars.json",
+    "src/pages/index.tsx": "src/site/home.tsx",
+    "src/pages/index.module.css": "src/site/site.css",
+    "src/css/custom.css": "src/site/site.css",
+    "src/clientModules/chunk-error-handler.ts": "src/site/client.ts",
+    "src/components/ApiExplorer/index.tsx": "src/site/api-explorer.tsx",
+    "src/components/ModuleBadge/index.tsx": "docs/titan/modules/index.mdx",
+    "src/components/ModuleBadge/styles.module.css": "src/site/site.css",
+    "blog/2026-05-15-welcome.md": "pages/blog/welcome.md",
+    "blog/authors.yml": "pages/blog/authors/omnitron-team.md"
+  },
+  "originalRoutes": 236,
+  "originalContentAnchors": 2855,
+  "originalHtmlIds": 3566,
+  "excludedStructuralIds": {
+    "__blog-post-container": 1,
+    "__docusaurus": 236,
+    "__docusaurus-base-url-issue-banner": 1,
+    "__docusaurus-base-url-issue-banner-suggestion-container": 1,
+    "__docusaurus_skipToContent_fallback": 236,
+    "theme-svg-external-link": 236
+  }
+}

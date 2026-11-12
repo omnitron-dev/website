@@ -1,10 +1,11 @@
 ---
+id: "titan/modules/options-patterns"
+slug: "/docs/titan/modules/options-patterns"
 sidebar_position: 4
 title: Options patterns
 description: forRoot / forRootAsync / forFeature / forWorker across every module.
 ---
 
-import ModuleBadge from '@site/src/components/ModuleBadge';
 
 # Options patterns
 
@@ -15,9 +16,9 @@ the next. This page gives you the canonical examples plus a
 support matrix so you know which factory each module actually
 implements.
 
-## Support matrix
+## Support matrix {#support-matrix}
 
-<ModuleBadge origin="official" pkg="@omnitron-dev/titan-*" />
+<span class="module-badge">official · @omnitron-dev/titan-*</span>
 
 | Module                        | `forRoot` | `forRootAsync` | `forFeature` | `forWorker` |
 | ----------------------------- | :-------: | :------------: | :----------: | :---------: |
@@ -40,7 +41,7 @@ implements.
 > `new TelemetryRelayService(options)` directly and wire it via a
 > `useValue` provider when DI integration is wanted.
 
-<ModuleBadge origin="built-in" pkg="@omnitron-dev/titan" subpath="config + logger" />
+<span class="module-badge">built-in · @omnitron-dev/titan · config + logger</span>
 
 Built-in modules follow the same pattern:
 
@@ -49,7 +50,7 @@ Built-in modules follow the same pattern:
 | `config`   |     ✓     |       ✓        |       —      |
 | `logger`   |     ✓     |       ✓        |       —      |
 
-## `forRoot(options)` — synchronous configuration
+## `forRoot(options)` — synchronous configuration {#forrootoptions--synchronous-configuration}
 
 The simplest form. Options are known at boot time.
 
@@ -72,7 +73,7 @@ Use when:
 - Options come from a literal object or `process.env` read.
 - No other module's services need to compute the options.
 
-## `forRootAsync({ useFactory, inject?, imports? })` — DI-driven
+## `forRootAsync({ useFactory, inject?, imports? })` — DI-driven {#forrootasync-usefactory-inject-imports---di-driven}
 
 When the options depend on another module's service — most often
 `ConfigService` — use the async variant.
@@ -104,7 +105,7 @@ The factory:
 - Returns the same `options` shape as `forRoot()`.
 - May be sync or async (`async (config) => {...}` is fine).
 
-### Importing extra modules into the factory scope
+### Importing extra modules into the factory scope {#importing-extra-modules-into-the-factory-scope}
 
 If your factory depends on services that aren't globally exported,
 import their host module:
@@ -119,7 +120,7 @@ TitanCacheModule.forRootAsync({
 }),
 ```
 
-### `useClass` / `useExisting` variants
+### `useClass` / `useExisting` variants {#useclass--useexisting-variants}
 
 Some modules also accept class-based provider variants:
 
@@ -138,12 +139,12 @@ Refer to per-module pages — `useClass` and `useExisting` are
 supported by `titan-notifications` but not uniformly by all
 modules.
 
-## `forFeature(...)` — register additional resources
+## `forFeature(...)` — register additional resources {#forfeature--register-additional-resources}
 
 `forFeature` is for *adding* per-feature configuration **after**
 the global module has been bound. Shape varies per module.
 
-### `titan-database.forFeature(repositories)`
+### `titan-database.forFeature(repositories)` {#titan-databaseforfeaturerepositories}
 
 ```typescript
 @Module({
@@ -161,7 +162,7 @@ Each repository becomes injectable by class reference; the
 underlying `Database` connection is the one registered by the
 global `TitanDatabaseModule.forRoot(...)`.
 
-### `titan-cache.forFeature(caches)`
+### `titan-cache.forFeature(caches)` {#titan-cacheforfeaturecaches}
 
 ```typescript
 @Module({
@@ -178,12 +179,12 @@ class CacheLayerModule {}
 Multiple named caches share the same backing store but have
 independent TTLs and namespacing.
 
-### `titan-events.forFeature(emitters)`
+### `titan-events.forFeature(emitters)` {#titan-eventsforfeatureemitters}
 
 Adds event metadata / discovery for additional event-emitting
 services. See [`titan-events`](./events.mdx).
 
-### `titan-health.forFeature(indicators)`
+### `titan-health.forFeature(indicators)` {#titan-healthforfeatureindicators}
 
 Registers additional `IHealthIndicator` classes after `forRoot`:
 
@@ -199,7 +200,7 @@ Registers additional `IHealthIndicator` classes after `forRoot`:
 class FeatureModule {}
 ```
 
-### `titan-redis.forFeature(clients)`
+### `titan-redis.forFeature(clients)` {#titan-redisforfeatureclients}
 
 Adds named Redis clients:
 
@@ -223,12 +224,12 @@ constructor(
 ) {}
 ```
 
-### `titan-scheduler.forFeature(providers)`
+### `titan-scheduler.forFeature(providers)` {#titan-schedulerforfeatureproviders}
 
 Registers additional providers that own `@Cron` / `@Interval` /
 `@Timeout` methods, ensuring the scheduler discovers them.
 
-## `forWorker(...)` — separate runtime
+## `forWorker(...)` — separate runtime {#forworker--separate-runtime}
 
 `titan-notifications` ships this fourth factory specifically for
 the **worker** pod — the one that consumes the messaging
@@ -258,7 +259,7 @@ class NotificationsWorkerModule {}
 This separation lets you scale producers (web pods) independently
 from workers (delivery pods).
 
-## Global vs scoped modules
+## Global vs scoped modules {#global-vs-scoped-modules}
 
 Most modules accept `isGlobal: true` (or `global: true` on the
 returned `DynamicModule`) — when set, the module's exports are
@@ -274,7 +275,7 @@ TitanRedisModule.forRoot({ config, isGlobal: true });
 | Feature modules (your business logic)             | leave scoped                    |
 | Test environments                                 | scoped — easier to override     |
 
-## Async lifecycle of `forRootAsync`
+## Async lifecycle of `forRootAsync` {#async-lifecycle-of-forrootasync}
 
 ```mermaid
 sequenceDiagram
@@ -296,7 +297,7 @@ The factory is called **once** per app boot, after its declared
 `inject:` dependencies are resolved. The resolved options are then
 used to instantiate the module's services.
 
-## Common gotchas
+## Common gotchas {#common-gotchas}
 
 - **`inject:` order must match factory arguments.** A misordered
   array silently passes the wrong service to the wrong parameter.
@@ -325,7 +326,7 @@ used to instantiate the module's services.
   for resolution failures). Don't log-and-swallow; let it crash so
   the operator sees the configuration mistake.
 
-## Migration tip — sync to async
+## Migration tip — sync to async {#migration-tip--sync-to-async}
 
 Start with `forRoot({...})`. The moment you need a value from
 `ConfigService` (or any other service), switch the call to
@@ -343,7 +344,7 @@ TitanRedisModule.forRootAsync({
 })
 ```
 
-## See also
+## See also {#see-also}
 
 - [Module map](./module-map.mdx) — visual dependency graph
 - [Tokens & RPC reference](./tokens-reference.mdx) — what to put

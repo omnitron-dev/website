@@ -1,4 +1,6 @@
 ---
+id: "omnitron/access"
+slug: "/docs/omnitron/access"
 title: Console access
 description: Human roles, effective RPC permissions, account administration and revocation shared by Console and CLI.
 ---
@@ -7,7 +9,7 @@ description: Human roles, effective RPC permissions, account administration and 
 
 The **Access** page (`/access`) shows the permissions of the current account. Administrators can create accounts, change roles and revoke sessions. `omnitron access` calls the same `OmnitronAccess` service. The service runs on a master with PostgreSQL and an audit service.
 
-## One policy across interfaces
+## One policy across interfaces {#one-policy-across-interfaces}
 
 The daemon publishes methods with Titan `@Public({ auth: … })` metadata. `OmnitronAccess.describe()` reads that metadata from the services actually registered in Netron and evaluates it with Titan's access validator and authorization manager. The browser receives a catalog of `service.method` capabilities; it does not maintain a second role-to-action matrix.
 
@@ -28,7 +30,7 @@ Prism's narrow `@omnitron-dev/prism/auth` entry supplies guards without importin
 
 A catalog grant describes a method-level rule. Resource ownership, live sessions and other checks still apply during invocation. Dynamic policies that need call arguments are marked **Conditional**, and the UI does not grant them speculatively. A hidden control never replaces server authorization.
 
-## Manage accounts
+## Manage accounts {#manage-accounts}
 
 In **Access → Console accounts**, create a named account with the least powerful suitable role. Creation defaults to viewer. Usernames allow 1–128 letters, digits and `. _ @ + -`, beginning with a letter or digit. The initial password and later password changes use the same validation: at least 15 Unicode characters and at most 256 UTF-8 bytes. Secrets are never included in account listings or audit details.
 
@@ -43,11 +45,11 @@ On a terminal, `--password-stdin` opens a hidden prompt. A pipe is read until EO
 
 Account lists contain at most 100 entries and a continuation cursor. Use `omnitron access users --after <id>` for the next page. Global `--json` is supported.
 
-### Concurrent sign-ins
+### Concurrent sign-ins {#concurrent-sign-ins}
 
 Failed password checks for the same account accumulate in PostgreSQL even when several requests arrive together. Once locked, the account rejects new sign-ins until the recorded deadline. A successful sign-in rechecks the current password record, lockout and role, then creates the session and resets the counter in a single transaction. A database failure rolls back both writes. The same policy applies when a Console request reaches the service through HTTP or WebSocket.
 
-## Change roles and revoke sessions
+## Change roles and revoke sessions {#change-roles-and-revoke-sessions}
 
 Review the current role first, then submit it as the expected previous value:
 
@@ -70,13 +72,13 @@ Event subscriptions recheck authority before each delivery. Each peer has one in
 
 Revocation ends sessions; it does not disable an account or change its password. The owner can sign in again. Changing one's password preserves the caller's session and revokes the others. Sign-out also invalidates cached authority for the affected session.
 
-## Scope and extension points
+## Scope and extension points {#scope-and-extension-points}
 
 Console roles govern infrastructure administration. Application users, organization memberships and tenant-specific policies belong to the application's access layer; see [Authentication and authorization](../auth/index.md). Selecting a project in Console filters the workspace and is **not** a tenant security boundary.
 
 This release manages the three fixed daemon roles. It does not add custom role editing, per-project grants, invitations, account suspension, SSO, passkeys or MFA enrollment. The database's second-factor fields alone do not enable those flows. Add such features through the shared access policy and server authorization before exposing controls in Console.
 
-## Activation
+## Activation {#activation}
 
 Update the master backend and Console as one release. Before switching the
 served frontend, verify `omnitron access show` against the restarted master.
@@ -85,7 +87,7 @@ the new UI then denies access instead of inventing grants. See the
 [Console build workflow](./console.md#production-build) for staging validation
 assets without replacing a running frontend.
 
-## Implementation and validation
+## Implementation and validation {#implementation-and-validation}
 
 The implementation is in `apps/omnitron/src/services/access.rpc-service.ts`, `shared/roles.ts`, `shared/dto/access.ts` and `webapp/src/auth/access.tsx`. New public methods appear automatically in the catalog; new UI actions must use their typed RPC permission.
 
@@ -93,7 +95,7 @@ Integration tests exercise real PostgreSQL transactions and HTTP authorization: 
 ingest spans or batches, and that rejected calls never reach the collector.
 Browser tests cover pending grants, failed refresh, account changes and viewer isolation. See [SSH workspace](./terminal.md) for terminal-specific ownership and limits.
 
-## Automation and future agents
+## Automation and future agents {#automation-and-future-agents}
 
 Xec pipeline methods require `admin`, including definition and run-history reads. A run revalidates the human session and requires a durable audit intent and the reviewed definition revision. An operator's application lifecycle rights do not grant arbitrary shell execution. See [Xec automation](./automation.md).
 

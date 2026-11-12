@@ -1,4 +1,6 @@
 ---
+id: "tutorial/deploy"
+slug: "/docs/tutorial/deploy"
 sidebar_position: 7
 title: 6. Deploy
 description: Package everything into Docker; ship to a server.
@@ -9,7 +11,7 @@ description: Package everything into Docker; ship to a server.
 By the end: a `docker-compose.yml` running the api + webapp +
 Postgres + Redis on a single server, with TLS via nginx.
 
-## Build the api
+## Build the api {#build-the-api}
 
 `apps/api/Dockerfile`:
 
@@ -41,7 +43,7 @@ ENTRYPOINT ['/sbin/tini', '--']
 CMD ['node', '/app/apps/api/dist/main.js']
 ```
 
-## Build the webapp
+## Build the webapp {#build-the-webapp}
 
 `apps/web/Dockerfile`:
 
@@ -85,7 +87,7 @@ server {
 }
 ```
 
-## docker-compose.yml
+## docker-compose.yml {#docker-composeyml}
 
 ```yaml
 version: '3.9'
@@ -175,7 +177,7 @@ volumes:
   caddy-config:
 ```
 
-## Caddyfile (TLS auto-provisioned)
+## Caddyfile (TLS auto-provisioned) {#caddyfile-tls-auto-provisioned}
 
 ```
 api.example.com {
@@ -192,14 +194,14 @@ app.example.com {
 Caddy auto-provisions Let's Encrypt certs on first start —
 no certbot setup needed.
 
-## .env (gitignored)
+## .env (gitignored) {#env-gitignored}
 
 ```bash
 DB_PASS=$(openssl rand -hex 32)
 JWT_SECRET=$(openssl rand -hex 48)
 ```
 
-## Deploy script
+## Deploy script {#deploy-script}
 
 ```bash
 #!/bin/bash
@@ -238,13 +240,13 @@ chmod +x deploy.sh
 ./deploy.sh admin@your-server.example.com
 ```
 
-## DNS
+## DNS {#dns}
 
 Point `api.example.com` and `app.example.com` to your server's
 IP. Caddy will auto-provision Let's Encrypt certificates on
 first request.
 
-## Verify
+## Verify {#verify}
 
 After ~1 minute (TLS cert acquisition):
 
@@ -256,7 +258,7 @@ open https://app.example.com
 # Webapp loads; sign in works.
 ```
 
-## Updates
+## Updates {#updates}
 
 ```bash
 ./deploy.sh admin@your-server.example.com
@@ -274,7 +276,7 @@ ssh admin@your-server.example.com 'cd /srv/platform && docker compose exec api k
 If your api had multiple workers (via `instances > 1`), they'd
 cycle one-by-one without dropping traffic.
 
-## Backups
+## Backups {#backups}
 
 Daily Postgres dump:
 
@@ -286,7 +288,7 @@ Daily Postgres dump:
 For object storage of backups, push to S3 (or any S3-compatible)
 in a follow-up step.
 
-## Monitoring
+## Monitoring {#monitoring}
 
 - **Logs** — `docker compose logs -f --tail 100`. For real
   aggregation, ship to Loki via the docker logging driver.
@@ -294,7 +296,7 @@ in a follow-up step.
   container.
 - **Uptime** — external ping of `/healthz`.
 
-## What you've shipped
+## What you've shipped {#what-youve-shipped}
 
 | Layer | Implementation |
 | ----- | -------------- |
@@ -307,7 +309,7 @@ in a follow-up step.
 | Tests | Unit + integration + E2E with Vitest + Playwright |
 | Deploy | One-command shell script |
 
-## Where to go from here
+## Where to go from here {#where-to-go-from-here}
 
 | Want | Where |
 | ---- | ----- |
@@ -318,7 +320,7 @@ in a follow-up step.
 | More modules | [Module catalogue](../titan/modules) |
 | Production patterns | [Best practices](../omnitron/best-practices.md) + [Recipes](../omnitron/recipes.md) |
 
-## Commit
+## Commit {#commit}
 
 ```bash
 git add .
@@ -326,7 +328,7 @@ git commit -m "step 6: docker deploy + caddy TLS"
 git tag v0.1.0
 ```
 
-## Congratulations
+## Congratulations {#congratulations}
 
 Six steps, ~2.5 hours, full-stack production-shaped TypeScript
 app with zero codegen. Now go build something real with it.

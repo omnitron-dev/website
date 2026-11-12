@@ -1,4 +1,6 @@
 ---
+id: "titan/migrations/index"
+slug: "/docs/titan/migrations"
 sidebar_position: 1
 title: Migration guides
 description: Move an existing service onto Titan — one concern at a time.
@@ -22,7 +24,7 @@ with one of:
   `Application.create`; keep your existing services as
   `@Injectable` providers.
 
-## Guides
+## Guides {#guides}
 
 | Source                                        | What you keep, what you replace                                |
 | --------------------------------------------- | -------------------------------------------------------------- |
@@ -30,9 +32,9 @@ with one of:
 | [From plain Express / Fastify](./from-express.md) | Add structure: module system, DI container, lifecycle, typed RPC |
 | [From prom-client](./from-prom-client.md)    | Replace the metrics layer alone — keep everything else        |
 
-## Common patterns regardless of source
+## Common patterns regardless of source {#common-patterns-regardless-of-source}
 
-### Strangler fig — module by module
+### Strangler fig — module by module {#strangler-fig--module-by-module}
 
 The safest migration strategy is the **strangler fig** pattern:
 
@@ -71,7 +73,7 @@ flowchart LR
 
 At every checkpoint, the app boots, tests pass, prod stays up.
 
-### Boot-time bridging
+### Boot-time bridging {#boot-time-bridging}
 
 If your legacy app has its own bootstrap, wrap it with Titan's
 `Application.create({ providers: [...] })`:
@@ -95,7 +97,7 @@ await app.start();
 Legacy code keeps working; new Titan modules can `@Inject` into
 it; you migrate at your own pace.
 
-### Two-way bridges
+### Two-way bridges {#two-way-bridges}
 
 A Titan service can call a legacy function; a legacy function can
 call a Titan service via the container. Use this to migrate
@@ -110,7 +112,7 @@ const titanService = container.resolve(NewService);
 await titanService.doSomething();
 ```
 
-## Testing during migration
+## Testing during migration {#testing-during-migration}
 
 Run the new code under the same integration tests as the legacy
 code. If you can substitute implementations in DI, you can:
@@ -122,7 +124,7 @@ code. If you can substitute implementations in DI, you can:
 
 This catches behavioural drift immediately.
 
-## See also
+## See also {#see-also}
 
 - [Best Practices / Structuring services](../best-practices/structuring-services.md) — where Titan-style services land
 - [Modules system / Defining modules](../modules-system/defining-modules.md) — the new unit of composition

@@ -1,4 +1,6 @@
 ---
+id: "titan/recipes/multi-tenant-saas"
+slug: "/docs/titan/recipes/multi-tenant-saas"
 sidebar_position: 6
 title: Multi-tenant SaaS
 description: Tenant-isolated database (RLS), contextual injection per tenant, tenant-scoped rate limits.
@@ -22,7 +24,7 @@ This recipe extends the [API service stack](./api-service.md) —
 read that first; the differences here are tenant-isolation
 patterns layered on top.
 
-## Shape
+## Shape {#shape}
 
 - **Identity → tenant.** JWT carries `tenantId`; auth middleware
   sets it on the request context.
@@ -35,7 +37,7 @@ patterns layered on top.
 - **Per-tenant cache keys.** Cache keys include the tenant prefix
   so reads never cross tenants.
 
-## Architecture
+## Architecture {#architecture}
 
 ```mermaid
 flowchart LR
@@ -52,7 +54,7 @@ flowchart LR
   RL --> Redis
 ```
 
-## Setting the tenant context
+## Setting the tenant context {#setting-the-tenant-context}
 
 Custom auth-middleware step that, after JWT verify, stamps the
 `tenantId` onto the request context:
@@ -92,7 +94,7 @@ class TenantContextMiddleware {
 Wire as a Netron middleware (or in your transport adapter), so it
 runs before every `@Service` method.
 
-## Per-tenant DI — contextual providers
+## Per-tenant DI — contextual providers {#per-tenant-di--contextual-providers}
 
 The intent: a single `STORAGE` token resolves to S3 for enterprise
 tenants and local disk for the free tier — same service code, different
@@ -137,7 +139,7 @@ tenant's backend for everyone). See
 contextual-provider model, `@InjectContext`, and writing a custom
 `ResolutionStrategy`.
 
-## RLS on every repository
+## RLS on every repository {#rls-on-every-repository}
 
 ```typescript
 import { BaseRepository, Repository, Policy, Filter, BypassRLS }
@@ -187,7 +189,7 @@ audited.
 > connection (add it to `kysera.plugins`). The `@Policy`/`@Filter`/
 > `@Allow`/`@Deny` decorators declare the rules; the plugin enforces them.
 
-## Tenant-scoped cache keys
+## Tenant-scoped cache keys {#tenant-scoped-cache-keys}
 
 `@Cacheable`'s `keyGenerator`/`tags` callbacks receive the **method
 arguments** (`(...args)`), not an ambient context. So the `tenantId`
@@ -226,7 +228,7 @@ tenant from the request context instead of a parameter, read it from
 the nexus `ContextManager` inside the method body and build the key
 with `keyPrefix` + a per-call cache handle rather than `keyGenerator`.)
 
-## Tenant-tier rate limits
+## Tenant-tier rate limits {#tenant-tier-rate-limits}
 
 ```typescript
 TitanRateLimitModule.forRoot({
@@ -258,7 +260,7 @@ async create(tenantId: string, input: CreateInput) { /* … */ }
 > (`@Inject(RATE_LIMIT_SERVICE_TOKEN)`) — see the API service stack — or it
 > silently allows every request.
 
-## Cross-module wiring notes
+## Cross-module wiring notes {#cross-module-wiring-notes}
 
 | Concern                          | Wiring detail                                                                                       |
 | -------------------------------- | --------------------------------------------------------------------------------------------------- |
@@ -270,7 +272,7 @@ async create(tenantId: string, input: CreateInput) { /* … */ }
 | JWT claims                       | `tenantId` and `tier` must be signed claims on the JWT — they cannot be supplied by the client      |
 | Strategy purity                  | A `ResolutionStrategy`'s `applies`/`select` (and a provider's `provide`) must be pure functions of the context — side effects make them untestable and order-dependent |
 
-## Production checklist
+## Production checklist {#production-checklist}
 
 - [ ] **JWT carries `tenantId` and `tier` as signed claims** (not header-supplied)
 - [ ] **Every repository has `@Filter` for tenant scope** OR `@BypassRLS` justified
@@ -281,7 +283,7 @@ async create(tenantId: string, input: CreateInput) { /* … */ }
 - [ ] **`TENANT_ID` and `USER_TIER` context keys defined in one place** and imported everywhere — typos in keys silently break isolation
 - [ ] **Integration tests cover cross-tenant attempts** — assert leakage attempts get empty results, not access
 
-## Anti-patterns specific to multi-tenant
+## Anti-patterns specific to multi-tenant {#anti-patterns-specific-to-multi-tenant}
 
 - **Caching without tenant prefix.** Cache hit for tenant A returned
   to tenant B. Easy to miss in code review; catch with a lint rule
@@ -296,7 +298,7 @@ async create(tenantId: string, input: CreateInput) { /* … */ }
 - **`tenantId` from a header.** Easily spoofed. Always derive from
   signed JWT claims.
 
-## See also
+## See also {#see-also}
 
 - [API service stack](./api-service.md) — the base this recipe extends
 - [DI / Contextual Injection](../di/contextual-injection.md) — the underlying pattern

@@ -1,4 +1,6 @@
 ---
+id: "titan/application/lifecycle"
+slug: "/docs/titan/application/lifecycle"
 sidebar_position: 2
 title: Lifecycle
 description: OnInit, OnStart, OnStop, OnDestroy — when each fires, in what order, what to put in each.
@@ -10,7 +12,7 @@ Every provider in the container has the option to participate in the
 application lifecycle. Four hook interfaces, fired in dependency
 order, with typed contracts.
 
-## The four hooks
+## The four hooks {#the-four-hooks}
 
 | Interface     | Method            | Fires when                                                              |
 | ------------- | ----------------- | ----------------------------------------------------------------------- |
@@ -44,7 +46,7 @@ import type { OnInit, OnStart, OnStop, OnDestroy } from '@omnitron-dev/titan/app
 Implement only the ones you need. A provider with no hooks is fine —
 it is constructed and used; no lifecycle code runs for it.
 
-## When to use which
+## When to use which {#when-to-use-which}
 
 - **`onInit`** — work that produces state your *constructor's
   consumers* depend on. Cache warming, schema validation, decoder
@@ -58,7 +60,7 @@ it is constructed and used; no lifecycle code runs for it.
 - **`onDestroy`** — final cleanup. Flush buffers. Write last-state
   to disk. **Do not start new work here.**
 
-## Hook signatures
+## Hook signatures {#hook-signatures}
 
 ```typescript
 import { Service } from '@omnitron-dev/titan';
@@ -90,7 +92,7 @@ export class UsersService
 All four methods may be `async`. The framework awaits each. The
 signatures are `() => void | Promise<void>`.
 
-## Decorator-marked hooks
+## Decorator-marked hooks {#decorator-marked-hooks}
 
 The decorator equivalents to `OnInit` and `OnDestroy` are
 `@PostConstruct` and `@PreDestroy`:
@@ -114,7 +116,7 @@ implement the interface form — there are no decorator equivalents,
 which is deliberate (the start/stop boundary is semantically
 distinct and the interface forces the choice).
 
-## Dependency-order guarantees
+## Dependency-order guarantees {#dependency-order-guarantees}
 
 Given:
 
@@ -139,7 +141,7 @@ your constructor depends on has finished `onInit`. Your `onStop` will
 be called before any provider your constructor depends on has its
 `onStop` called.
 
-## Failure semantics
+## Failure semantics {#failure-semantics}
 
 - **Failure in `onInit` or `onStart`** — startup is aborted. Modules
   that already completed `onStart` are rolled back via their `onStop`
@@ -154,7 +156,7 @@ be called before any provider your constructor depends on has its
   shutdown has a hard timeout regardless; see
   [Shutdown](./shutdown.md).
 
-## Application-level lifecycle hooks
+## Application-level lifecycle hooks {#application-level-lifecycle-hooks}
 
 The `IApplication` interface also exposes simple registration
 methods for ad-hoc hooks (not tied to a provider):
@@ -168,7 +170,7 @@ app.onError((err) => { /* observe lifecycle errors */ });
 These are useful for app-level setup that does not belong to any
 single module (e.g. binding a third-party SDK).
 
-## Anti-patterns
+## Anti-patterns {#anti-patterns}
 
 - **Sleep loops in lifecycle hooks.** If you find yourself writing
   `while (!this.ready) await sleep(100)`, you are inverting the

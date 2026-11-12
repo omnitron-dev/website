@@ -1,10 +1,11 @@
 ---
+id: "titan/modules/decorators-catalog"
+slug: "/docs/titan/modules/decorators-catalog"
 sidebar_position: 9
 title: Decorators catalog
 description: Every decorator exported by every module — what it does, where it comes from.
 ---
 
-import ModuleBadge from '@site/src/components/ModuleBadge';
 
 # Decorators catalog
 
@@ -25,7 +26,7 @@ It exits non-zero if this page names a decorator no package exports, or
 if the set the root re-exports stops being exactly the nine listed
 above.
 
-## Quick lookup by purpose
+## Quick lookup by purpose {#quick-lookup-by-purpose}
 
 | You want to…                                  | Reach for                                                |
 | --------------------------------------------- | -------------------------------------------------------- |
@@ -52,9 +53,9 @@ above.
 | Auto-add `created_at`/`updated_at`            | `@Timestamps()` *(titan-database)*                       |
 | Audit row changes                             | `@Audit()` *(titan-database)*                            |
 
-## Core decorators
+## Core decorators {#core-decorators}
 
-<ModuleBadge origin="built-in" pkg="@omnitron-dev/titan" />
+<span class="module-badge">built-in · @omnitron-dev/titan</span>
 
 Imported from `@omnitron-dev/titan/decorators`, which exports all of
 them. The package **root** re-exports exactly nine — `Service`,
@@ -64,7 +65,7 @@ them. The package **root** re-exports exactly nine — `Service`,
 rest below must be imported from `@omnitron-dev/titan/decorators`.
 Use that subpath consistently in application code.
 
-### DI
+### DI {#di}
 
 | Decorator                  | Targets               | Effect                                                       |
 | -------------------------- | --------------------- | ------------------------------------------------------------ |
@@ -74,7 +75,7 @@ Use that subpath consistently in application code.
 | `@Optional()`              | parameter / property  | Allow undefined if the token isn't registered                |
 | `@Global()`                | class (on Module)     | Makes the module's exports visible everywhere                |
 
-### RPC surface
+### RPC surface {#rpc-surface}
 
 | Decorator                  | Targets               | Effect                                                       |
 | -------------------------- | --------------------- | ------------------------------------------------------------ |
@@ -105,7 +106,7 @@ modules read, rather than implementing the behaviour themselves:
 > (`titan-ratelimit.@RateLimit`, `titan-pm.@Cache`, etc.). The core
 > ones are bare metadata annotations; see the collision table below.
 
-### Lifecycle
+### Lifecycle {#lifecycle}
 
 | Decorator             | Targets    | Effect                                          |
 | --------------------- | ---------- | ----------------------------------------------- |
@@ -116,7 +117,7 @@ For full hooks (`onInit`, `onStart`, `onStop`, `onDestroy`)
 implement the interfaces instead — they're more discoverable than
 decorators. See [Lifecycle reference](./lifecycle-reference.mdx).
 
-### Method utilities
+### Method utilities {#method-utilities}
 
 Most utility decorators are method interceptors that compose
 freely with other decorators.
@@ -135,11 +136,11 @@ freely with other decorators.
 > distinguish by import path (`@omnitron-dev/titan/decorators` vs
 > `@omnitron-dev/titan-scheduler`).
 
-## Built-in module decorators
+## Built-in module decorators {#built-in-module-decorators}
 
-### `config`
+### `config` {#config}
 
-<ModuleBadge origin="built-in" pkg="@omnitron-dev/titan/module/config" />
+<span class="module-badge">built-in · @omnitron-dev/titan/module/config</span>
 
 | Decorator                  | Targets               | Effect                                                       |
 | -------------------------- | --------------------- | ------------------------------------------------------------ |
@@ -159,19 +160,19 @@ class CacheConfig {
 }
 ```
 
-### `logger`
+### `logger` {#logger}
 
-<ModuleBadge origin="built-in" pkg="@omnitron-dev/titan/module/logger" />
+<span class="module-badge">built-in · @omnitron-dev/titan/module/logger</span>
 
 The logger module exports no decorators — instances are injected
 via token / interface (`LOGGER_SERVICE_TOKEN`, `LOGGER_TOKEN`).
 See [`logger`](./logger.mdx).
 
-## Official module decorators
+## Official module decorators {#official-module-decorators}
 
-### `titan-auth`
+### `titan-auth` {#titan-auth}
 
-<ModuleBadge origin="official" pkg="@omnitron-dev/titan-auth" />
+<span class="module-badge">official · @omnitron-dev/titan-auth</span>
 
 | Decorator                          | Targets         | Effect                                                       |
 | ---------------------------------- | --------------- | ------------------------------------------------------------ |
@@ -186,9 +187,9 @@ See [`logger`](./logger.mdx).
 > Import path determines which: `@omnitron-dev/titan/decorators`
 > (expose) vs `@omnitron-dev/titan-auth` (auth bypass).
 
-### `titan-cache`
+### `titan-cache` {#titan-cache}
 
-<ModuleBadge origin="official" pkg="@omnitron-dev/titan-cache" />
+<span class="module-badge">official · @omnitron-dev/titan-cache</span>
 
 | Decorator                          | Targets             | Effect                                                       |
 | ---------------------------------- | ------------------- | ------------------------------------------------------------ |
@@ -199,9 +200,9 @@ See [`logger`](./logger.mdx).
 | `@InjectCacheService()`            | property            | Inject the `ICacheService` directly                          |
 | `@InjectCacheLogger()`             | property            | Inject the cache-scoped logger                               |
 
-### `titan-database`
+### `titan-database` {#titan-database}
 
-<ModuleBadge origin="official" pkg="@omnitron-dev/titan-database" />
+<span class="module-badge">official · @omnitron-dev/titan-database</span>
 
 | Decorator                                       | Targets         | Effect                                                       |
 | ----------------------------------------------- | --------------- | ------------------------------------------------------------ |
@@ -217,17 +218,17 @@ See [`logger`](./logger.mdx).
 | `@BypassRLS()`                                  | method          | Skip RLS for an admin-only operation                         |
 | `@AutoTransactional(opts?)`                     | method          | Run the method in a transaction; commit on success           |
 
-### `titan-discovery`
+### `titan-discovery` {#titan-discovery}
 
-<ModuleBadge origin="official" pkg="@omnitron-dev/titan-discovery" />
+<span class="module-badge">official · @omnitron-dev/titan-discovery</span>
 
 `titan-discovery` does not export decorators — it integrates
 transparently with Netron via the module's `enableNetronIntegration`
 option. Service announce / lookup is automatic.
 
-### `titan-events`
+### `titan-events` {#titan-events}
 
-<ModuleBadge origin="official" pkg="@omnitron-dev/titan-events" />
+<span class="module-badge">official · @omnitron-dev/titan-events</span>
 
 | Decorator                                  | Targets   | Effect                                                       |
 | ------------------------------------------ | --------- | ------------------------------------------------------------ |
@@ -240,16 +241,16 @@ option. Service announce / lookup is automatic.
 | `@BatchEvents(event, opts?)`               | method    | Batch handler — invoked once per batch                       |
 | `@EventEmitter(opts?)`                     | class     | Marks the class as a typed event source                      |
 
-### `titan-health`
+### `titan-health` {#titan-health}
 
-<ModuleBadge origin="official" pkg="@omnitron-dev/titan-health" />
+<span class="module-badge">official · @omnitron-dev/titan-health</span>
 
 `titan-health` doesn't export decorators — indicators are
 registered as classes via `forFeature([...])`.
 
-### `titan-lock`
+### `titan-lock` {#titan-lock}
 
-<ModuleBadge origin="official" pkg="@omnitron-dev/titan-lock" />
+<span class="module-badge">official · @omnitron-dev/titan-lock</span>
 
 | Decorator                                       | Targets   | Effect                                                       |
 | ----------------------------------------------- | --------- | ------------------------------------------------------------ |
@@ -258,25 +259,25 @@ registered as classes via `forFeature([...])`.
 
 The decorator releases the lock in `finally` — even on throw.
 
-### `titan-metrics`
+### `titan-metrics` {#titan-metrics}
 
-<ModuleBadge origin="official" pkg="@omnitron-dev/titan-metrics" />
+<span class="module-badge">official · @omnitron-dev/titan-metrics</span>
 
 | Decorator                                                       | Targets | Effect                                                  |
 | --------------------------------------------------------------- | ------- | ------------------------------------------------------- |
 | `@Metrics(metricName?)`                                         | method  | Auto-track `rpc_requests_total`, `rpc_request_duration_seconds`, `rpc_errors_total` around the call (optional name prefix) |
 
-### `titan-notifications`
+### `titan-notifications` {#titan-notifications}
 
-<ModuleBadge origin="official" pkg="@omnitron-dev/titan-notifications" />
+<span class="module-badge">official · @omnitron-dev/titan-notifications</span>
 
 | Decorator                                | Targets | Effect                                                       |
 | ---------------------------------------- | ------- | ------------------------------------------------------------ |
 | `@OnNotification(pattern, opts?)`        | method  | Worker-side handler for notifications matching a pattern     |
 
-### `titan-pm`
+### `titan-pm` {#titan-pm}
 
-<ModuleBadge origin="official" pkg="@omnitron-dev/titan-pm" />
+<span class="module-badge">official · @omnitron-dev/titan-pm</span>
 
 | Decorator                                | Targets         | Effect                                                       |
 | ---------------------------------------- | --------------- | ------------------------------------------------------------ |
@@ -308,18 +309,18 @@ The decorator releases the lock in `finally` — even on throw.
 > Self-healing configuration is currently unimplemented. Use the documented
 > restart policy for automatic process recovery.
 
-### `titan-ratelimit`
+### `titan-ratelimit` {#titan-ratelimit}
 
-<ModuleBadge origin="official" pkg="@omnitron-dev/titan-ratelimit" />
+<span class="module-badge">official · @omnitron-dev/titan-ratelimit</span>
 
 | Decorator                                | Targets | Effect                                                       |
 | ---------------------------------------- | ------- | ------------------------------------------------------------ |
 | `@RateLimit(opts?)`                      | method  | Apply rate limit to the method (uses key derived from opts)  |
 | `@Throttle(rps)`                         | method  | Convenience for "N requests per second"                      |
 
-### `titan-redis`
+### `titan-redis` {#titan-redis}
 
-<ModuleBadge origin="official" pkg="@omnitron-dev/titan-redis" />
+<span class="module-badge">official · @omnitron-dev/titan-redis</span>
 
 `titan-redis` ships only injection decorators — `@InjectRedis()`
 for the default client and `@InjectRedisManager()` for the manager
@@ -327,9 +328,9 @@ for the default client and `@InjectRedisManager()` for the manager
 token-based injection use `REDIS_MANAGER` or
 `getRedisClientToken(name)`. See [`titan-redis`](./redis.mdx).
 
-### `titan-scheduler`
+### `titan-scheduler` {#titan-scheduler}
 
-<ModuleBadge origin="official" pkg="@omnitron-dev/titan-scheduler" />
+<span class="module-badge">official · @omnitron-dev/titan-scheduler</span>
 
 | Decorator                                | Targets | Effect                                                       |
 | ---------------------------------------- | ------- | ------------------------------------------------------------ |
@@ -342,14 +343,14 @@ token-based injection use `REDIS_MANAGER` or
 > Core `@Timeout` *aborts* a method if it doesn't return in time.
 > Different decorators with the same name — distinguish by import.
 
-### `titan-telemetry-relay`
+### `titan-telemetry-relay` {#titan-telemetry-relay}
 
-<ModuleBadge origin="official" pkg="@omnitron-dev/titan-telemetry-relay" />
+<span class="module-badge">official · @omnitron-dev/titan-telemetry-relay</span>
 
 No decorators — instantiate `TelemetryRelayService` and wire it
 in directly.
 
-## Name collisions — which one to import
+## Name collisions — which one to import {#name-collisions--which-one-to-import}
 
 When the same decorator name lives in multiple packages, import
 path resolves the ambiguity. Quick table:
@@ -364,7 +365,7 @@ path resolves the ambiguity. Quick table:
 
 When in doubt, the import path is authoritative.
 
-## Composability rules
+## Composability rules {#composability-rules}
 
 Decorators apply **outside-in** — outermost runs last. The framework
 order normally arranges:
@@ -389,7 +390,7 @@ This is the *only* order that makes sense:
 - Rate limit before validate (cheaper to reject early).
 - Metrics around the lock (so you measure lock contention).
 
-## Anti-patterns
+## Anti-patterns {#anti-patterns}
 
 - **`@Cacheable` on a non-idempotent method.** Cache returns the
   same value forever; the side-effect runs once. Use `@CachePut`
@@ -407,7 +408,7 @@ This is the *only* order that makes sense:
   noise. Pick one (the one you import explicitly) or import a
   re-export alias.
 
-## See also
+## See also {#see-also}
 
 - [Decorators / Index](../decorators/index.md) — framework-level guide
 - [Decorators / Lifecycle](../decorators/lifecycle.md)

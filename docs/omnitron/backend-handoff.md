@@ -1,4 +1,6 @@
 ---
+id: "omnitron/backend-handoff"
+slug: "/docs/omnitron/backend-handoff"
 title: Backend replacement
 description: Replace a control plane while a resident owner retains application processes.
 ---
@@ -9,7 +11,7 @@ Resident execution separates the backend from the process that owns applications
 
 Resident execution is opt-in on POSIX. It supports unmanaged operation and separate OS services for the execution owner and backend guardian. A legacy single-service layout is refused: detaching a child does not establish independent service ownership. Replacing the owner or its Node runtime still requires an application maintenance window.
 
-## Choose the update mechanism
+## Choose the update mechanism {#choose-the-update-mechanism}
 
 | Purpose | Entry point | Boundary |
 | --- | --- | --- |
@@ -22,7 +24,7 @@ The first transition from a coupled daemon to an independent owner still require
 an application maintenance window. Neither a fleet plan nor a guardian update
 transfers application ownership to a new owner process.
 
-## Owner compatibility
+## Owner compatibility {#owner-compatibility}
 
 A compatible RPC envelope does not imply compatible lifecycle behavior. A sealed
 backend declares the owner contracts it requires; the owner advertises the
@@ -83,7 +85,7 @@ keep the current backend running and prepare a controlled owner transition with
 application inventory, readiness budgets and rollback. Never bypass the refusal
 by replacing the active files or changing an advertised capability.
 
-## First transition
+## First transition {#first-transition}
 
 Run `omnitron backend status --json` before planning an update. `mode: coupled` means the backend directly owns its workers. Those live forks and threads cannot be transferred to another parent without changing their lifecycle. **The first transition requires one controlled application restart.** The upgrade command refuses a legacy daemon before draining or stopping anything.
 
@@ -102,7 +104,7 @@ The directory must belong to the daemon user, have mode `0700`, and be short eno
 
 Start from a sealed backend artifact and verify application health, readiness, child PIDs, pool membership and registered runtime integrity. Application bootstrap workers use their application's installed Omnitron adapter and Titan instance, preserving DI identity independently of the backend's dependency tree. An incompatible or missing adapter is refused with an explicit error.
 
-## Build and seal
+## Build and seal {#build-and-seal}
 
 Build and test in a separate checkout or staging directory. Never rebuild dependencies underneath a live application. The source tree must be clean and the backend must contain a valid `BUILD.json`.
 
@@ -121,7 +123,7 @@ Use the artifact's Node executable and CLI when starting that release:
   /absolute/releases/omnitron-current/packages/0/dist/cli/omnitron.js up
 ```
 
-## Permanent installation and cold start
+## Permanent installation and cold start {#permanent-installation-and-cold-start}
 
 `backend upgrade` installs both the candidate and rollback into the instance's permanent store before draining the backend. Each directory is addressed by its complete SHA-256 under `$OMNITRON_HOME/runtime/releases/`. Copying never moves or rewrites a running release. The copied Node executable, backend and dependency closure are revalidated before publication and execution; an existing directory with different contents is refused.
 
@@ -151,7 +153,7 @@ The activation intent is durable before retirement; the selector commits only af
 
 `execution/active-backend.json` remains a diagnostic receipt. The installation database is the startup selector. There is no automatic release deletion: retain the selected, rollback and launcher releases, and every artifact still used by an owner or application. In particular, installing a permanent backend does not relocate an already-running owner from its original artifact.
 
-## Replace the backend
+## Replace the backend {#replace-the-backend}
 
 ```sh
 omnitron backend status --json
@@ -176,7 +178,7 @@ A failed candidate is stopped and the previous artifact is started under a fresh
 
 A service that failed before creating a container can transfer its failed state when native Docker inspection confirms that the container is absent. The checkpoint binds that absence separately from the desired service and its error; the candidate verifies it again and preserves the failure. An unavailable Docker daemon is not evidence of absence. A missing previously observed container, changed container identity/specification or legacy checkpoint without this evidence still refuses transfer. Handoff does not repair infrastructure or turn a failed service healthy.
 
-## Recovery after a backend crash
+## Recovery after a backend crash {#recovery-after-a-backend-crash}
 
 A sealed resident backend maintains a private recovery journal beside the owner socket, in `execution/recovery.db`. It reuses the daemon SQLite store with `synchronous=FULL`. Before changing ownership bookkeeping, it durably invalidates the previous certificate; a failed write refuses the mutation. The last snapshot remains available privately for diagnosis but is never accepted as a current recovery certificate.
 
@@ -188,7 +190,7 @@ A crash during a mutation can leave recovery uncertified. A changed process inve
 
 The journal does not itself install an OS supervisor or promise recovery from owner/host failure. The unmanaged mode still needs an operator or external controller to invoke recovery after proving the backend is dead.
 
-## Independent OS supervision
+## Independent OS supervision {#independent-os-supervision}
 
 With `executionHost.enabled`, `omnitron service install --prepare` writes a reviewable plan under `runtime/supervision-plan` without stopping processes or loading OS services. The plan contains the private runtime configuration and both service definitions. For a living backend, preparation requires its current recovery certificate and takes the environment from that process. It waits up to 15 seconds for a pending certificate, releasing the installation lease between attempts so the publisher can make progress. Every attempt repeats admission checks; the certificate must match both the current backend PID and selected runtime. An expired wait reports the concrete refusal and publishes no partial plan. This wait never stops processes or bypasses recovery validation. Installation retains the prepared environment across the pause instead of replacing it with the installing shell’s values. An active unmanaged owner cannot change OS service ownership in place: complete a controlled initial shutdown before `omnitron service install`. Installation refuses a running backend or owner instead of stopping them implicitly.
 
@@ -241,7 +243,7 @@ The owner service deliberately does not restart after a crash on the same host b
 
 For system scope, prepare as the non-root instance owner with `omnitron service install --scope system --prepare`, then have an administrator install the reviewed unit files at their reported paths. System units name that account explicitly. Do not prepare the application runtime as root or copy secrets into unit environment directives. The private supervision record retains required runtime environment values; unit definitions carry only the instance path.
 
-### Migrating an existing Linux node
+### Migrating an existing Linux node {#migrating-an-existing-linux-node}
 
 A coupled daemon owns its application processes. Its first transition to independent system services requires a controlled application restart. Subsequent **backend** replacements retain the owner, application PIDs and runtime dependency bindings. Replacing the owner itself still requires a maintenance window.
 
@@ -287,7 +289,7 @@ Rollback restores service ownership, configuration and the retained runtime. It 
 
 Remote application deployment recognizes a settled, sealed managed backend through its selected runtime, native guardian parent and separate owner/backend cgroups. A stale selection or mismatched process is refused. The coupled `fleet upgrade` workflow refuses an independently supervised node before stopping or rebinding any application. Use `fleet rollout` for registered remote managed backends and `backend upgrade <sealed-runtime>/packages/0/dist` for the local supervisor. Keep framework bundles still referenced by applications.
 
-## Checksum metadata on existing migrations
+## Checksum metadata on existing migrations {#checksum-metadata-on-existing-migrations}
 
 Adding a declared checksum to an existing procedural migration does not change
 its schema operation. The shared compatibility check used by cold selection and
@@ -314,7 +316,7 @@ recorded checksums from the database. That older runtime may be unable to verify
 those declarations; it must not be reported as fresh integrity proof. Changed
 SQL/schema still requires the separate schema plan below.
 
-## Compatible schema expansion
+## Compatible schema expansion {#compatible-schema-expansion}
 
 Schema changes and backend replacement are separate operations. `omnitron backend schema prepare` reads the running master’s database and saves a private plan; `omnitron backend schema apply` applies or resumes that plan under the same Kysera advisory lock as normal Omnitron migrations.
 
@@ -360,7 +362,7 @@ plan and receipt remain available for audit and rollback.
 
 This workflow currently covers master PostgreSQL expansions. Local node SQLite transitions, destructive schema changes, order changes and edits to deployed migration bodies need a separate rollout. No public Console endpoint can execute schema plans or local artifacts.
 
-## Updating the guardian
+## Updating the guardian {#updating-the-guardian}
 
 `omnitron backend guardian` manages the guardian independently of the backend selection and execution owner. For supported user services and qualified root-owned Linux system services, `omnitron backend guardian prepare` saves a plan and `omnitron backend guardian apply` applies or resumes it:
 
@@ -423,7 +425,7 @@ five-second period. A busy owner is never certified: controller generation,
 in-flight operations and ownership revision must still agree. Persistently busy
 state remains `pending`, and stopping the monitor cancels the scheduled retry.
 
-## Owner shutdown boundaries
+## Owner shutdown boundaries {#owner-shutdown-boundaries}
 
 An owner update is a separate maintenance operation from a backend handoff.
 Drain applications through the private owner control service, verify their PIDs
@@ -485,7 +487,7 @@ complete recorded cohort and independently audit the drain; incomplete native
 observations refuse recovery. Recovery never signals processes or adopts their
 handles. See the [CLI recovery procedure](./cli.md#recover-after-an-execution-owner-crash).
 
-## Changing owner log routing
+## Changing owner log routing {#changing-owner-log-routing}
 
 A launchd unit generated by current Omnitron retains structured stdout together
 with stderr; systemd uses the native journal. See
@@ -505,7 +507,7 @@ saved unit with the same pinned runtime. Preserve databases and experiment data;
 do not restore a stale database snapshot over new writes. An uncertain owner
 shutdown requires reconciliation, not an automatic second owner.
 
-## Long-lived RPC clients
+## Long-lived RPC clients {#long-lived-rpc-clients}
 
 The backend also reconnects to the resident execution owner after a broken private socket. Every connection rechecks socket ownership and permissions, then verifies the owner identity before sending retained event cursors, acknowledgments or mutations. A different owner is never adopted automatically. Observation polling uses its own transport with a four-second request deadline; a slow monitoring request cannot accumulate abandoned polls or interrupt a long-running application operation. An acknowledgment failure raises a separate diagnostic from an observation failure. Both resolve after the corresponding operation succeeds.
 
@@ -523,13 +525,13 @@ During an orderly handoff, new requests and tasks receive an explicit `SHUTTING_
 
 Update long-running consumers to this client before relying on backend replacement. Updating the backend cannot replace client code already loaded in another process; older consumers that retain a raw service proxy need a separate controlled restart with the updated dependency. Pin that dependency independently of the backend, especially for applications with registered runtime integrity checks.
 
-## Short-lived socket probes
+## Short-lived socket probes {#short-lived-socket-probes}
 
 Titan PM checks old Unix socket files before considering removal. A live connection remains open until the first server greeting, EOF or a bounded 250 ms deadline; only an explicit `ECONNREFUSED` on an old, unowned path permits removal. This avoids closing immediately before a retained application sends its greeting during backend startup.
 
 Netron also cancels an unsent greeting when the connection closes and observes the write result. An expected pre-handshake close is a debug event; a write failure on an open connection is an error with `connectionId`, transport and `phase: handshake`. Do not suppress all transport write errors: a failed application RPC requires its own delivery assessment.
 
-## Interrupted operation
+## Interrupted operation {#interrupted-operation}
 
 Check the original command's error and the private execution directory before taking action. Never print or publish checkpoint contents: they include resolved configuration and environment variables.
 
@@ -544,7 +546,7 @@ Check the original command's error and the private execution directory before ta
 
 Recovery checkpoints describe a particular replacement, not a continuously updated backup of project state. They must not be replayed after unrelated configuration or application changes.
 
-## Diagnostics and access
+## Diagnostics and access {#diagnostics-and-access}
 
 `omnitron status --json` includes `execution`; `omnitron backend status --json` reports the owner PID/identity, controller epoch, phase, observation age and blockers. A missing owner connection makes application state unknown. The backend does not infer that applications stopped from a control-channel failure. `execution.connection` reports `connected`, `unavailable` or `owner-changed`, the last successful observation timestamp and a concrete error. An observation older than five seconds is unavailable even before a failed request returns. `omnitron backend status` uses the independent control-status endpoint if application inventory cannot be read. Console Settings → General shows the same connection information and independent-supervision guardian PID; its status bar labels retained application counts as stale and checks backend reachability independently.
 
@@ -556,7 +558,7 @@ Local application topology stays in the owner. Public backend transports reconne
 
 `OMNITRON_HOME=/absolute/instance` selects an isolated daemon state directory for tests or a separately configured instance. Console containers have an instance-specific name and ownership label; the default instance retains `omnitron-nginx`. A legacy container must prove ownership through its configuration mount before it can be replaced or stopped. Shutdown of an instance without Console enabled never removes a Console container. Application paths and stack infrastructure are not remapped; distinct listeners and infrastructure configuration are still required. Do not change the shell's `HOME` to isolate a daemon.
 
-## Upgrade a fleet of managed backends
+## Upgrade a fleet of managed backends {#upgrade-a-fleet-of-managed-backends}
 
 A standalone controller can distribute and activate an Omnitron backend on up to
 128 registered remote Linux servers with independent systemd supervision. All
@@ -658,7 +660,7 @@ protocol. The first management runtime must be installed through a separately
 qualified native path, rather than asking an older guardian to perform an
 unsupported fleet handoff.
 
-### Publish the batch to the controller
+### Publish the batch to the controller {#publish-the-batch-to-the-controller}
 
 Build and qualify the same clean Git commit for each distinct Linux architecture
 and exact Node version in the fleet. Import the sealed directories under the
@@ -679,7 +681,7 @@ publisher can supply filesystem paths.
 
 The receiving node validates archive entries before extraction and restores each validated regular file's permissions before verifying the sealed runtime hash. Executable bits remain identical even when the service uses `umask 077`; the receiver does not change the process-wide mask. Special mode bits, group/other-writable entries, links outside the validated archive structure and ownership changes are refused. Distribution neither changes the selected runtime nor starts a backend.
 
-### Distribute, review and activate
+### Distribute, review and activate {#distribute-review-and-activate}
 
 For a canary followed by production, substitute the actual 40-character commit
 and registered node names. With no node arguments the controller selects all
@@ -732,7 +734,7 @@ activation happened or that rollback ran. After dispatch, inspect the original
 ID. Follow an operation that is still running and reconcile an uncertain outcome
 before creating another plan.
 
-### Reverse an accepted node
+### Reverse an accepted node {#reverse-an-accepted-node}
 
 Reverse a successfully accepted, healthy target with a new plan ID. Name exactly
 one node and use its previous full source commit. Its retained runtime is already
@@ -756,7 +758,7 @@ inventory. Reconcile an uncertain receipt first. Reconciliation observes the
 outcome without reversing it. A refused reverse plan requires a separately
 reviewed fenced recovery procedure.
 
-### Follow a batch or recover an interrupted handoff
+### Follow a batch or recover an interrupted handoff {#follow-a-batch-or-recover-an-interrupted-handoff}
 
 ```sh
 omnitron --json fleet rollout status <plan-id> --wait
@@ -795,7 +797,7 @@ owner, changing Node versions or applying schema changes each requires a
 separately qualified transition. The local Console container follows its
 controller's publication procedure.
 
-### Service unit file preservation
+### Service unit file preservation {#service-unit-file-preservation}
 
 Systemd recovery preserves the reviewed service file's owner and permission bits,
 including under a restrictive process umask. It writes an exclusive temporary

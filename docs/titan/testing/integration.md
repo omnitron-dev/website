@@ -1,4 +1,6 @@
 ---
+id: "titan/testing/integration"
+slug: "/docs/titan/testing/integration"
 sidebar_position: 3
 title: Integration Tests
 description: Boot a real Application with fake infrastructure.
@@ -16,7 +18,7 @@ registers after your modules, so they win over the modules' own
 providers. See [DI Overrides](./di-overrides.md) for the full
 mechanism.
 
-## The pattern
+## The pattern {#the-pattern}
 
 ```typescript
 import { Application } from '@omnitron-dev/titan';
@@ -54,7 +56,7 @@ describe('UsersModule (integration)', () => {
 });
 ```
 
-## What you get from a real Application
+## What you get from a real Application {#what-you-get-from-a-real-application}
 
 - **Lifecycle** runs. `onInit` and `onStart` for every provider.
   Catches "I forgot to await `connect()`" bugs.
@@ -73,11 +75,11 @@ What you skip:
 - Real backends (database, redis, third-party APIs). Fake those
   through the `providers` tuple array.
 
-## Fixture lifetime
+## Fixture lifetime {#fixture-lifetime}
 
 Three patterns:
 
-### Per-suite — fastest
+### Per-suite — fastest {#per-suite--fastest}
 
 ```typescript
 beforeAll(...);          // boot once
@@ -88,7 +90,7 @@ beforeEach(...);         // reset state per test
 Good when most tests share the same setup. Risk: state leaks
 between tests if you forget a `beforeEach` reset.
 
-### Per-test — safest
+### Per-test — safest {#per-test--safest}
 
 ```typescript
 beforeEach(async () => {
@@ -104,7 +106,7 @@ afterEach(async () => {
 Slower (boot per test), but no state leakage. Use when tests need
 distinct configurations.
 
-### Hybrid
+### Hybrid {#hybrid}
 
 ```typescript
 beforeAll(...);          // boot the heavy stuff (modules) once
@@ -113,7 +115,7 @@ beforeEach(...);         // reset light stuff (database, cache) per test
 
 The right balance for most suites.
 
-## Helpers
+## Helpers {#helpers}
 
 Common test setup deserves a helper. The `providers` option is typed
 as `Array<[InjectionToken<unknown>, Provider<unknown>]>`
@@ -153,7 +155,7 @@ without booting the full lifecycle, reach for the
 `MockProvider`, `createMockProvider`) documented in
 [DI Overrides](./di-overrides.md).
 
-## Testing lifecycle hooks
+## Testing lifecycle hooks {#testing-lifecycle-hooks}
 
 ```typescript
 it('calls onInit in dependency order', async () => {
@@ -181,7 +183,7 @@ it('calls onInit in dependency order', async () => {
 });
 ```
 
-## Testing async startup failures
+## Testing async startup failures {#testing-async-startup-failures}
 
 ```typescript
 it('aborts start when onInit throws', async () => {
@@ -202,7 +204,7 @@ it('aborts start when onInit throws', async () => {
 });
 ```
 
-## Anti-patterns
+## Anti-patterns {#anti-patterns}
 
 - **Sharing one app across all suites.** Test isolation breaks.
   Each suite gets its own; or use one and reset rigorously.

@@ -1,4 +1,6 @@
 ---
+id: "omnitron/topology"
+slug: "/docs/omnitron/topology"
 title: Topology workspace
 description: Inspect physical placements and configured connections, review target changes, and keep target intent separate from runtime execution.
 ---
@@ -20,7 +22,7 @@ are specified in the [resilient control-plane design](./resilient-control-plane.
 They are not enabled by saving a target.
 :::
 
-## Read the infrastructure map
+## Read the infrastructure map {#read-the-infrastructure-map}
 
 The global map combines this daemon's actual process/container inventory with
 remote stack observations across registered projects. A project or stack selection
@@ -49,7 +51,7 @@ Graph dragging changes the view layout only. Search, graph/list view, the connec
 inspector and [keyboard navigation](./console.md#topology) remain available without
 editing deployment intent.
 
-## Application service isolation
+## Application service isolation {#application-service-isolation}
 
 Process topology is the local RPC graph inside one application launch. Each
 application that declares `topology.expose` or `topology.access` receives its own
@@ -88,7 +90,7 @@ to the management socket. Unix directories use `0700` and sockets use `0600`;
 this separates routing namespaces, while OS accounts and containers provide
 isolation between mutually untrusted workloads.
 
-## Declaration coverage
+## Declaration coverage {#declaration-coverage}
 
 Open **Declarations** for the selected project to refresh the bootstrap metadata
 used by the map. This administrative action reads each unique bootstrap in a
@@ -132,7 +134,7 @@ Private declaration records stay in the daemon store; viewer responses contain
 sanitized endpoint identities, dependency evidence and coverage, never environment
 values or credentials.
 
-## Design a target
+## Design a target {#design-a-target}
 
 1. Select a project and stack, then open **Workspace**.
 2. In **Placement**, choose the enabled project applications and assign them to
@@ -159,7 +161,7 @@ locally; save and review again. It does not silently merge or apply a conflictin
 Closing a dirty editor asks before discarding local edits. Narrow windows use a
 full-height dialog with content contained inside its scroll region.
 
-## CLI parity
+## CLI parity {#cli-parity}
 
 | Command | Result |
 | --- | --- |
@@ -211,7 +213,7 @@ are rejected. A startup `dependsOn` remains local: it cannot become cross-host
 readiness merely by placing its target elsewhere. Node `port` is the daemon RPC
 port, not a database, Redis or gateway port.
 
-## Durability and limits
+## Durability and limits {#durability-and-limits}
 
 Drafts, accepted targets and the corresponding acceptance record use the local
 daemon SQLite store. Revision comparison and acceptance share an immediate

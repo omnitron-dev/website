@@ -1,4 +1,6 @@
 ---
+id: "titan/modules-system/authoring-modules"
+slug: "/docs/titan/modules-system/authoring-modules"
 sidebar_position: 4
 title: Authoring a module
 description: How to build, package, and publish a Titan module to share with the community.
@@ -15,7 +17,7 @@ typed `forRoot` options, lifecycle-aware services, exported tokens,
 documented in the same shape, ready to drop into an existing
 application without surprise.
 
-## What "a module" means in Titan
+## What "a module" means in Titan {#what-a-module-means-in-titan}
 
 A module is a class with a `@Module` decorator that:
 
@@ -28,7 +30,7 @@ A module is a class with a `@Module` decorator that:
 The pattern lets each Titan application compose its set of modules
 with the configuration it needs — same code, different bindings.
 
-## Package skeleton
+## Package skeleton {#package-skeleton}
 
 Start from this layout:
 
@@ -46,7 +48,7 @@ my-titan-foo/
 └── README.md
 ```
 
-### `package.json` essentials
+### `package.json` essentials {#packagejson-essentials}
 
 ```json
 {
@@ -71,7 +73,7 @@ my-titan-foo/
 never as a regular dependency. Otherwise the consumer ends up with
 two copies of the framework and DI breaks silently.
 
-## Step 1 — define the options interface
+## Step 1 — define the options interface {#step-1--define-the-options-interface}
 
 Every module's `forRoot` accepts a single options bag. Put the
 interface in `*.types.ts`:
@@ -108,7 +110,7 @@ Conventional naming:
 - Every field documented with JSDoc
 - Optionals end in `?`; required fields don't
 
-## Step 2 — define the DI tokens
+## Step 2 — define the DI tokens {#step-2--define-the-di-tokens}
 
 ```typescript
 // src/foo.tokens.ts
@@ -124,7 +126,7 @@ export const FOO_OPTIONS_TOKEN = createToken<IFooModuleOptions>('FooOptions');
 Tokens go in their own file so consumers can import them without
 pulling in the implementation.
 
-## Step 3 — write the service
+## Step 3 — write the service {#step-3--write-the-service}
 
 ```typescript
 // src/foo.service.ts
@@ -174,7 +176,7 @@ export class FooService {
 - Implement lifecycle interfaces (`OnInit`, `OnStart`, `OnStop`,
   `OnDestroy`) if your service holds resources.
 
-## Step 4 — write the module class
+## Step 4 — write the module class {#step-4--write-the-module-class}
 
 ```typescript
 // src/foo.module.ts
@@ -228,7 +230,7 @@ export class TitanFooModule {
 `forRoot`/`forRootAsync` methods produce a `DynamicModule` at call
 time that contains the actual provider list.
 
-## Step 5 — write the public barrel
+## Step 5 — write the public barrel {#step-5--write-the-public-barrel}
 
 ```typescript
 // src/index.ts
@@ -250,7 +252,7 @@ export {
 
 Only export what's truly public. Internal helpers stay un-exported.
 
-## Step 6 — write the consumer-facing README
+## Step 6 — write the consumer-facing README {#step-6--write-the-consumer-facing-readme}
 
 The README is the public contract. Use this skeleton (the same
 shape every official module uses):
@@ -299,12 +301,12 @@ class AppModule {}
 …
 ```
 
-## Optional — async-options patterns
+## Optional — async-options patterns {#optional--async-options-patterns}
 
 For modules whose options need to be loaded from `ConfigModule` or
 another async source, `forRootAsync` supports several factories:
 
-### `useFactory` (most common)
+### `useFactory` (most common) {#usefactory-most-common}
 
 ```typescript
 TitanFooModule.forRootAsync({
@@ -316,7 +318,7 @@ TitanFooModule.forRootAsync({
 })
 ```
 
-### `useClass` — for factories with their own dependencies
+### `useClass` — for factories with their own dependencies {#useclass--for-factories-with-their-own-dependencies}
 
 ```typescript
 @Injectable()
@@ -334,7 +336,7 @@ TitanFooModule.forRootAsync({
 })
 ```
 
-### `useExisting` — when the factory class is already provided
+### `useExisting` — when the factory class is already provided {#useexisting--when-the-factory-class-is-already-provided}
 
 ```typescript
 TitanFooModule.forRootAsync({
@@ -342,7 +344,7 @@ TitanFooModule.forRootAsync({
 })
 ```
 
-## Optional — decorators
+## Optional — decorators {#optional--decorators}
 
 If your module benefits from a decorator (e.g. `@FooCache`,
 `@FooLog`), put it in `src/foo.decorators.ts`:
@@ -359,7 +361,7 @@ export const InjectFoo = () => Inject(FOO_SERVICE_TOKEN);
 Or for method-level decorators, follow the `createMethodInterceptor`
 pattern from `@omnitron-dev/titan/decorators`.
 
-## Optional — health indicator
+## Optional — health indicator {#optional--health-indicator}
 
 If your module talks to an external dependency, ship a health
 indicator so consumers can register it with
@@ -391,7 +393,7 @@ export class FooHealthIndicator implements IHealthIndicator {
 
 Export it as `FooHealthIndicator` + `FOO_HEALTH_INDICATOR_TOKEN`.
 
-## Module conventions checklist
+## Module conventions checklist {#module-conventions-checklist}
 
 When your module is ready to share, verify:
 
@@ -411,7 +413,7 @@ When your module is ready to share, verify:
 - [ ] Health indicator exported if module owns an external dependency
 - [ ] Test suite covers happy path + lifecycle + error cases
 
-## Publishing
+## Publishing {#publishing}
 
 For npm publish:
 
@@ -427,7 +429,7 @@ For inclusion in the Titan documentation:
 2. Open a PR against `omnitron-dev/omni` referencing your repo,
    the maintenance commitment, and links to docs / tests.
 
-## Worked example — complete `titan-foo`
+## Worked example — complete `titan-foo` {#worked-example--complete-titan-foo}
 
 Putting it all together:
 
@@ -476,7 +478,7 @@ class MyService {
 A consumer using your module shouldn't be able to tell whether it's
 official or community. That's the bar.
 
-## See also
+## See also {#see-also}
 
 - [Modules system / Defining modules](./defining-modules.md) — module
   fundamentals

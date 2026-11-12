@@ -1,4 +1,6 @@
 ---
+id: "frontend/netron/middleware"
+slug: "/docs/frontend/netron/middleware"
 sidebar_position: 5
 title: Middleware
 description: Three-stage middleware pipeline, built-ins, custom middleware.
@@ -16,7 +18,7 @@ middleware classes. You register them on an `HttpClient` or
 `WebSocketClient` (not on `NetronClient` — see
 [Registering middleware](#registering-middleware)).
 
-## Three-stage pipeline
+## Three-stage pipeline {#three-stage-pipeline}
 
 ```mermaid
 flowchart LR
@@ -43,7 +45,7 @@ re-send of the request (see
 > Retry, caching, and circuit-breaking are **not** middleware in
 > this package — see [Not middleware](#not-middleware).
 
-## Middleware shape
+## Middleware shape {#middleware-shape}
 
 A middleware is a plain function: `(ctx, next) => …`. Call
 `await next()` to run the rest of the chain.
@@ -114,7 +116,7 @@ interface MiddlewareConfig {
 }
 ```
 
-## Registering middleware
+## Registering middleware {#registering-middleware}
 
 `client.use(middleware, config?, stage?)` registers a middleware
 and returns `this` (chainable). Available on `HttpClient` and
@@ -166,13 +168,13 @@ middleware option. To register middleware, construct an
 `HttpClient` or `WebSocketClient` directly and use `.use(...)` (or
 the `middleware` pipeline option above).
 
-## Built-in middleware
+## Built-in middleware {#built-in-middleware}
 
 Most factories are importable from the package root
 (`@omnitron-dev/netron-browser`). The two auth **error** helpers
 live only on the `/middleware` subpath — they are noted inline.
 
-### `createAuthMiddleware`
+### `createAuthMiddleware` {#createauthmiddleware}
 
 Attaches the auth token to outgoing requests in the **pre-request**
 stage. `tokenProvider` is required; everything else is optional.
@@ -212,7 +214,7 @@ Token-provider helpers:
 - `StorageTokenProvider(storage, key)` — read from
   `localStorage` / `sessionStorage`.
 
-### `createAuthErrorMiddleware`
+### `createAuthErrorMiddleware` {#createautherrormiddleware}
 
 > Import from the **`/middleware` subpath** —
 > `@omnitron-dev/netron-browser/middleware`. These two helpers are
@@ -269,7 +271,7 @@ client.use(
 );
 ```
 
-### `createLoggingMiddleware`
+### `createLoggingMiddleware` {#createloggingmiddleware}
 
 Logs requests, responses, and errors. Wraps all three stages
 around `next()`.
@@ -300,7 +302,7 @@ client.use(createLoggingMiddleware({
 Also exported: the `Logger` interface, `ConsoleLogger` class, and
 `LogLevel` type.
 
-### `createTimingMiddleware`
+### `createTimingMiddleware` {#createtimingmiddleware}
 
 Measures call duration via the `performance` API, records to a
 collector, and can flag slow calls.
@@ -338,7 +340,7 @@ Also exported: `MetricsCollector` / `PerformanceMetrics` types and
 which is exported only from the `/middleware` subpath
 (`@omnitron-dev/netron-browser/middleware`), not the package root.
 
-### `createErrorTransformMiddleware`
+### `createErrorTransformMiddleware` {#createerrortransformmiddleware}
 
 An **error**-stage middleware that normalises thrown errors into a
 consistent `NormalizedError` shape and (optionally) maps codes to
@@ -370,7 +372,7 @@ Also exported: `defaultErrorTransformer`, `CommonErrorMessages`,
 and the guards `isRetryableError`, `isClientError`,
 `isServerError`.
 
-### `createCsrfMiddleware`
+### `createCsrfMiddleware` {#createcsrfmiddleware}
 
 Pre-request middleware for cookie-mode auth (T#176). Reads the
 CSRF cookie and echoes it in the `X-CSRF-Token` header
@@ -396,7 +398,7 @@ client.use(createCsrfMiddleware({
 Register this alongside `createAuthMiddleware` when using the
 cookie token transport; bearer mode does not need it.
 
-## Custom middleware
+## Custom middleware {#custom-middleware}
 
 Any `(ctx, next)` function works. Read/write `ctx.request.headers`
 before `next()`; inspect `ctx.response` / `ctx.error` after.
@@ -414,7 +416,7 @@ const tenantMiddleware: MiddlewareFunction = async (ctx, next) => {
 client.use(tenantMiddleware, { name: 'tenant', priority: 50 });
 ```
 
-### Useful patterns
+### Useful patterns {#useful-patterns}
 
 **Skip transport on a cache hit** (set `skipRemaining` and
 populate `ctx.response`):
@@ -463,7 +465,7 @@ client.use(myMiddleware, {
 });
 ```
 
-## Ordering rules
+## Ordering rules {#ordering-rules}
 
 Within a stage, lower `priority` runs first (default `100`).
 Service- and method-scoped middleware are merged with global
@@ -482,13 +484,13 @@ ordering:
 | error | 100 | Error transform | Normalise the thrown error |
 | error | 200 | Sentry | Report, then re-throw |
 
-## Not middleware
+## Not middleware {#not-middleware}
 
 Some capabilities that *look* like middleware are configured
 elsewhere in this package — do not look for middleware factories
 for them.
 
-### Retry — an `HttpClient` option
+### Retry — an `HttpClient` option {#retry--an-httpclient-option}
 
 Request retry is **not** middleware. It is a built-in
 `HttpClient` option: set `retry: true` and `maxRetries`. Backoff
@@ -505,7 +507,7 @@ const client = new HttpClient({
 
 See [Browser client](./browser.md) for the full client options.
 
-### Circuit-breaking & caching — the fluent HTTP interface
+### Circuit-breaking & caching — the fluent HTTP interface {#circuit-breaking--caching--the-fluent-http-interface}
 
 Circuit-breaking and response caching live in the **advanced
 fluent HTTP interface** (`HttpRemotePeer` / `FluentInterface`,
@@ -526,7 +528,7 @@ These are exported from the package root for advanced use
 `CircuitBreakerOptions`, `CacheOptions`, `RetryOptions`). They are
 documented with the fluent interface, not here.
 
-## Best practices
+## Best practices {#best-practices}
 
 - **Always `await next()`.** Fire-and-forget breaks ordering and
   loses the response/error.
@@ -539,7 +541,7 @@ documented with the fluent interface, not here.
 - **Don't log payloads in production.** Keep `logRequestPayload`
   off, or use `skipServices` / `skipMethods` for sensitive calls.
 
-## See also
+## See also {#see-also}
 
 - [Browser client](./browser.md) — `HttpClient` options including `retry` / `maxRetries`
 - [Auth](./auth.md) — `AuthenticationClient`, token transports, cookie mode

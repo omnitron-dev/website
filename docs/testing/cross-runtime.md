@@ -1,4 +1,6 @@
 ---
+id: "testing/cross-runtime"
+slug: "/docs/testing/cross-runtime"
 sidebar_position: 4
 title: Cross-runtime testing
 description: One test source running unchanged on Node, Bun, and Deno.
@@ -18,7 +20,7 @@ The platform's utility packages (`common`, `cuid`, `eventemitter`,
 The same test source runs in all three when written through
 `@omnitron-dev/testing`'s runtime adapter.
 
-## Why bother
+## Why bother {#why-bother}
 
 | Why | When |
 | --- | ---- |
@@ -30,7 +32,7 @@ For application code (a Titan app running on Node only), one
 runtime is fine. For **libraries** consumed by all three, the
 cross-runtime test layer is the safety net.
 
-## The adapter
+## The adapter {#the-adapter}
 
 ```typescript
 import { loadRuntimeAdapter, RUNTIME } from '@omnitron-dev/testing';
@@ -71,7 +73,7 @@ t.test('uses correct platform API', () => {
 });
 ```
 
-## Running the suite
+## Running the suite {#running-the-suite}
 
 Same file, three commands:
 
@@ -99,9 +101,9 @@ matrix:
 
 A test that passes on all three is portable.
 
-## Common pitfalls
+## Common pitfalls {#common-pitfalls}
 
-### ESM resolution
+### ESM resolution {#esm-resolution}
 
 Node + Bun + Deno all support ESM, but with subtle differences:
 
@@ -121,7 +123,7 @@ import { readFile } from 'node:fs/promises';
 
 Avoid bare `'path'` — works on Node + Bun, fails on Deno.
 
-### File-system access
+### File-system access {#file-system-access}
 
 Deno requires explicit `--allow-read` / `--allow-write`. Tests
 that touch the FS need:
@@ -138,7 +140,7 @@ deno test --allow-read=./fixtures --allow-write=./tmp
 
 Node + Bun have no equivalent — they always allow.
 
-### Process / Environment
+### Process / Environment {#process--environment}
 
 ```typescript
 // Works on all three (when env access is allowed):
@@ -150,7 +152,7 @@ env.NODE_ENV ??= 'test';     // assignment works
 
 Deno needs `--allow-env` for `process.env` reads.
 
-### Performance APIs
+### Performance APIs {#performance-apis}
 
 `performance.now()` works on all three; `process.hrtime` is
 Node-only. Use `performance` for cross-runtime timing:
@@ -161,7 +163,7 @@ await work();
 const elapsed = performance.now() - start;
 ```
 
-### Crypto
+### Crypto {#crypto}
 
 ```typescript
 import { randomUUID } from 'node:crypto';     // ✓ all three
@@ -170,7 +172,7 @@ crypto.randomUUID();                            // also ✓ — global Web Crypt
 
 Web Crypto is the universal path.
 
-## Conditional skips
+## Conditional skips {#conditional-skips}
 
 When a test genuinely can't run on a runtime:
 
@@ -190,9 +192,9 @@ if (RUNTIME !== 'bun') t.test.skip('Bun-only feature', ...);
 
 Document **why** in a comment. Skips without explanation rot.
 
-## Suite-level configuration
+## Suite-level configuration {#suite-level-configuration}
 
-### Vitest
+### Vitest {#vitest}
 
 ```typescript
 // vitest.config.ts
@@ -207,7 +209,7 @@ export default defineConfig({
 });
 ```
 
-### Bun
+### Bun {#bun}
 
 ```toml
 # bunfig.toml
@@ -216,7 +218,7 @@ preload = ["./test/setup.ts"]
 timeout = 10000
 ```
 
-### Deno
+### Deno {#deno}
 
 ```jsonc
 // deno.json
@@ -227,7 +229,7 @@ timeout = 10000
 }
 ```
 
-## Benchmarks across runtimes
+## Benchmarks across runtimes {#benchmarks-across-runtimes}
 
 ```typescript
 import { PerfTimer } from '@omnitron-dev/testing/performance';
@@ -259,7 +261,7 @@ that is the difference between measuring the code and measuring the
 host. Run all three runtimes and compare — Bun usually wins raw JS
 work; Node wins ecosystem maturity; Deno wins startup time.
 
-## Where the platform itself uses this
+## Where the platform itself uses this {#where-the-platform-itself-uses-this}
 
 The utility packages (`common`, `cuid`, `eventemitter`,
 `msgpack`) have cross-runtime test suites — `test/cross/*.test.ts`
@@ -268,7 +270,7 @@ files run on all three CI matrices.
 Titan + Omnitron target Node only (Bun + Deno work for the
 runtime; the daemon assumes Node's child_process model).
 
-## Best practices
+## Best practices {#best-practices}
 
 - **Default to cross-runtime** for library packages.
 - **Node-only** for application code unless the app explicitly
@@ -278,7 +280,7 @@ runtime; the daemon assumes Node's child_process model).
   `URL`) over Node-specific APIs when both exist.
 - **Document skips** with `// skipIf bun: reason`.
 
-## Anti-patterns
+## Anti-patterns {#anti-patterns}
 
 - **`process.platform === 'darwin'`** checks in tests that
   should be portable. Push platform-specific logic to the
@@ -288,7 +290,7 @@ runtime; the daemon assumes Node's child_process model).
 - **`__dirname` / `__filename`.** Replace with
   `fileURLToPath(import.meta.url)`.
 
-## See also
+## See also {#see-also}
 
 - [Testing overview](./index.md)
 - [Testing package](./testing-package.md) — adapter API

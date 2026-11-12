@@ -1,4 +1,6 @@
 ---
+id: "frontend/netron/errors"
+slug: "/docs/frontend/netron/errors"
 sidebar_position: 9
 title: Error handling
 description: Typed errors across the wire, retry classification, recovery patterns.
@@ -10,7 +12,7 @@ Remote failures use `TitanError` and a stable numeric `code`. Binary RPC can
 restore a registered constructor; HTTP clients do not promise the original
 server-side subclass. Branch on `code`, not a constructor name or message.
 
-## TitanError
+## TitanError {#titanerror}
 
 `TitanError` and `ErrorCode` come from the `/errors` subpath, not
 the package root. The root exports the transport-level errors
@@ -44,7 +46,7 @@ The full `ErrorCode` enum mirrors HTTP status codes — see
 [Titan / Errors catalog](../../titan/modules/errors-catalog.mdx)
 for the complete reference.
 
-## HTTP error contract
+## HTTP error contract {#http-error-contract}
 
 Node and browser HTTP clients share the decoder in `netron-protocol`. Peer,
 connection and per-request-hint paths preserve numeric codes, decimal code strings
@@ -60,7 +62,7 @@ Do not repeat a denied mutation or interpret a timeout as proof of cancellation.
 The request deadline includes reading the body, not only receiving its headers;
 one expired request does not cancel another request on the same connection.
 
-## Transport-level errors
+## Transport-level errors {#transport-level-errors}
 
 Errors that don't come from the server's `TitanError` system:
 
@@ -103,7 +105,7 @@ try {
 }
 ```
 
-## Errors in `useQuery` / `useMutation`
+## Errors in `useQuery` / `useMutation` {#errors-in-usequery--usemutation}
 
 Errors land on `error`:
 
@@ -134,7 +136,7 @@ const invite = users.invite.useMutation({
 });
 ```
 
-## Server-side validation errors
+## Server-side validation errors {#server-side-validation-errors}
 
 When the server's `@Validate(schema)` rejects, the error
 carries field-level details:
@@ -169,7 +171,7 @@ catch (e) {
 The error appears under the matching `<Field>` exactly like
 client-side errors — no special UI path.
 
-## Retry classification
+## Retry classification {#retry-classification}
 
 The fluent HTTP interface's retry (`RetryOptions`, via
 `.retry({ ... })`) ships a default `shouldRetry` that classifies
@@ -210,7 +212,7 @@ await users
   .api.findById(id);
 ```
 
-## Circuit breaker integration
+## Circuit breaker integration {#circuit-breaker-integration}
 
 The circuit breaker is **not** a middleware — it lives on a
 `RetryManager` (the fluent HTTP interface) configured with
@@ -240,9 +242,9 @@ is open"`) without attempting the request. After `cooldownTime`
 one probe runs; success closes the breaker. There is no
 `CircuitOpenError` class — match on the code.
 
-## Error UI patterns
+## Error UI patterns {#error-ui-patterns}
 
-### Inline form errors (mutations)
+### Inline form errors (mutations) {#inline-form-errors-mutations}
 
 `FormAlert` takes the message as **children** — there is no
 `error` prop. The distinction matters more than it looks: the
@@ -265,7 +267,7 @@ announces as empty — silence where the failure should be.
 </form>
 ```
 
-### Page-level error (query failure)
+### Page-level error (query failure) {#page-level-error-query-failure}
 
 ```tsx
 if (error instanceof TitanError && error.code === ErrorCode.NOT_FOUND) {
@@ -287,7 +289,7 @@ if (error) {
 }
 ```
 
-### Toast (background failure)
+### Toast (background failure) {#toast-background-failure}
 
 ```tsx
 const save = useMutation({
@@ -301,7 +303,7 @@ Toasts for **background events** (autosave failed, webhook
 errored); page-level cards for primary content; inline alerts
 for form submissions.
 
-## Error boundaries
+## Error boundaries {#error-boundaries}
 
 For synchronous render errors (rare with proper data fetching):
 
@@ -326,7 +328,7 @@ import { ErrorBoundary } from '@omnitron-dev/prism';
 Boundary catches **render-time** errors only — async failures
 go through the standard `useQuery` `error` flow.
 
-## Global error handling
+## Global error handling {#global-error-handling}
 
 ```typescript
 client.on('error', (error, ctx) => {
@@ -342,7 +344,7 @@ client.on('error', (error, ctx) => {
 Use sparingly — most errors should be handled at the call site
 where the context is richer.
 
-## Reporting to Sentry
+## Reporting to Sentry {#reporting-to-sentry}
 
 ```typescript
 import {
@@ -367,7 +369,7 @@ client.use(sentryMiddleware, { name: 'sentry', priority: 200 }, MiddlewareStage.
 Filter noise — don't report `NOT_FOUND` or `UNAUTHORIZED`,
 they're not bugs.
 
-## Anti-patterns
+## Anti-patterns {#anti-patterns}
 
 - **Catching `Error` generically.** Loses the typed identity;
   always check `instanceof TitanError`.
@@ -384,7 +386,7 @@ they're not bugs.
 - **No error UI for `useQuery`.** Users see infinite spinner
   on backend failure; always handle `isError`.
 
-## Best practices
+## Best practices {#best-practices}
 
 - **Switch on `code`, not `message`.** Messages are
   human-readable; codes are stable.
@@ -402,7 +404,7 @@ they're not bugs.
   `RetryManager` reads it automatically; do it manually if you
   write your own retry loop.
 
-## See also
+## See also {#see-also}
 
 - [Titan / Errors catalog](../../titan/modules/errors-catalog.mdx) — full server-side error reference
 - [Browser client / Fluent HTTP interface](./browser.md#fluent-http-interface--caching-retry-circuit-breaking) — fluent retry & circuit breaking

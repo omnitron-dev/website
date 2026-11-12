@@ -1,4 +1,6 @@
 ---
+id: "frontend/prism/hooks-catalog"
+slug: "/docs/frontend/prism/hooks-catalog"
 sidebar_position: 6
 title: Hooks catalog
 description: The 48 React hooks exported from @omnitron-dev/prism/hooks.
@@ -14,9 +16,9 @@ components and exposed for your code. All SSR-safe via
 import { useArray, useAsync, useKeyboardShortcut } from '@omnitron-dev/prism/hooks';
 ```
 
-## State & data
+## State & data {#state--data}
 
-### `useArray<T>`
+### `useArray<T>` {#usearrayt}
 
 Reactive array operations without manual setState:
 
@@ -53,7 +55,7 @@ The current array is `value` (not `items`). Returns:
 Plus non-mutating helpers (`filter`, `find`, `findIndex`, `includes`) and
 computed reads (`length`, `isEmpty`, `first`, `last`).
 
-### `useAsync<T>`
+### `useAsync<T>` {#useasynct}
 
 Lifecycle-safe async state — handles unmount-during-fetch.
 
@@ -76,7 +78,7 @@ before resolve → state never updates (no leak warnings). For a
 fire-and-forget variant without data tracking, see `useAsyncFn`
 (`{ execute, loading, error }`).
 
-### `useUpdateEffect`
+### `useUpdateEffect` {#useupdateeffect}
 
 `useEffect` that skips the first render — useful for "react to
 prop change but not initial mount":
@@ -87,7 +89,7 @@ useUpdateEffect(() => {
 }, [filter]);
 ```
 
-### `useSessionStorage<T>` / `useCookies`
+### `useSessionStorage<T>` / `useCookies` {#usesessionstoraget--usecookies}
 
 Reactive storage mirrors. Both return an object (not a `[value, setValue]`
 tuple):
@@ -109,7 +111,7 @@ options)` returns `{ state, setState, setField, resetState }` — it manages
 a single cookie key, not a list. Pairs with `useLocalStorage` (re-exported
 from `@omnitron-dev/prism/hooks`).
 
-### `useConfigFromQuery`
+### `useConfigFromQuery` {#useconfigfromquery}
 
 Syncs **theme configuration** (preset / mode / primary / direction /
 density / contrast) with URL query params — for shareable demo/preview
@@ -141,9 +143,9 @@ Recognised params: `preset`, `mode`, `primary` (hex), `dir`, `density`,
 `contrast` (rename via the `paramNames` option). For arbitrary typed
 query-state, parse `URLSearchParams` yourself or use a router loader.
 
-## Timers & lifecycle
+## Timers & lifecycle {#timers--lifecycle}
 
-### `useCountdownDate` / `useCountdownSeconds`
+### `useCountdownDate` / `useCountdownSeconds` {#usecountdowndate--usecountdownseconds}
 
 ```tsx
 // Returns formatted, zero-padded strings (no isExpired flag).
@@ -158,7 +160,7 @@ timestamp, ticking every second and returning two-digit strings.
 `useCountdownSeconds(n)` is a manually-started countdown (ideal for OTP
 resend timers) — it stays at `n` until you call `start()`.
 
-### `useThrottle<T>`
+### `useThrottle<T>` {#usethrottlet}
 
 Throttle a fast-changing value to at most one update per `ms`:
 
@@ -169,7 +171,7 @@ const throttled = useThrottle(scrollY, 100);
 Differs from debounce — throttle emits the leading edge then at
 most one per window.
 
-### `useOnlineStatus`
+### `useOnlineStatus` {#useonlinestatus}
 
 Reactive `navigator.onLine`. Returns an object, not a bare boolean:
 
@@ -181,9 +183,9 @@ if (isOffline) return <OfflineBanner />;
 Listens to `online` + `offline` events (SSR-safe via
 `useSyncExternalStore`).
 
-## Layout & sizing
+## Layout & sizing {#layout--sizing}
 
-### `useClientRect`
+### `useClientRect` {#useclientrect}
 
 Bounding rect + scroll dimensions. The hook provides the ref:
 
@@ -195,7 +197,7 @@ const { elementRef, width, height, top, left } = useClientRect<HTMLDivElement>()
 
 Values default to `0` (never null) and update on resize / scroll.
 
-### `useWindowSize`
+### `useWindowSize` {#usewindowsize}
 
 ```tsx
 const { width, height, isMobile, isTablet, isDesktop } = useWindowSize();
@@ -204,7 +206,7 @@ const { width, height, isMobile, isTablet, isDesktop } = useWindowSize();
 Debounced internally (100 ms by default) to avoid render thrash, and
 exposes MUI-aligned breakpoint booleans.
 
-### `useScrollPosition` / `useScrollOffsetTop`
+### `useScrollPosition` / `useScrollOffsetTop` {#usescrollposition--usescrolloffsettop}
 
 ```tsx
 const { x, y, directionY, isScrolled, isAtBottom } = useScrollPosition();
@@ -218,7 +220,7 @@ plus direction + edge flags. `useScrollOffsetTop(defaultValue)` returns
 `{ offsetTop, elementRef }` — attach `elementRef` to track an element's
 offset instead of a fixed pixel value.
 
-### `useBackToTop`
+### `useBackToTop` {#usebacktotop}
 
 Returns visibility state + a scroll-to-top handler. The threshold is a
 positional arg — a `'NN%'` string (scroll progress) or a pixel number
@@ -229,16 +231,16 @@ const { isVisible, onBackToTop } = useBackToTop('90%');
 {isVisible && <Fab onClick={onBackToTop} />}
 ```
 
-### `useImageDimensions`
+### `useImageDimensions` {#useimagedimensions}
 
 ```tsx
 const { dimensions, loading, error } = useImageDimensions(src);
 // dimensions: { width, height, aspectRatio } | null
 ```
 
-## Visibility & focus
+## Visibility & focus {#visibility--focus}
 
-### `useIntersectionObserver`
+### `useIntersectionObserver` {#useintersectionobserver}
 
 The hook returns the `ref` callback to attach (it does not take a ref arg):
 
@@ -255,7 +257,7 @@ const { ref, isIntersecting } = useIntersectionObserver({
 Returns `{ ref, entry, isIntersecting, disconnect }`. Foundation for
 lazy-loading patterns.
 
-### `useInfiniteScroll`
+### `useInfiniteScroll` {#useinfinitescroll}
 
 Takes a page-fetch function (not a `hasMore`/`onLoadMore` config) and
 owns the paging state itself:
@@ -281,7 +283,7 @@ the hook flattens pages into `items` and auto-loads when `sentinelRef`
 intersects. Use sparingly — pagination is friendlier than infinite
 scroll for most apps.
 
-### `useFocusTrap`
+### `useFocusTrap` {#usefocustrap}
 
 The hook returns `{ ref, focusFirst, focusLast }` — destructure `ref`.
 The activation option is `enabled` (not `active`):
@@ -300,7 +302,7 @@ Traps Tab navigation inside the container (options: `enabled`,
 `autoFocus`, `restoreFocus`, `focusableSelector`). The modal / drawer /
 dialog components use this internally.
 
-### `useKeyboardShortcut`
+### `useKeyboardShortcut` {#usekeyboardshortcut}
 
 The shortcut is a descriptor object `{ key, ctrl?, shift?, alt?, meta? }`
 (one per call), not a `'cmd+k'` string or an array:
@@ -318,9 +320,9 @@ useKeyboardShortcut({ key: '?', shift: true }, () => helpDrawer.open());
 the shortcut while focus is in an input / textarea / contenteditable
 (off by default); `enabled` toggles the listener entirely.
 
-## Interaction
+## Interaction {#interaction}
 
-### `useDoubleClick`
+### `useDoubleClick` {#usedoubleclick}
 
 Distinguish single from double click (built-in delay so single
 clicks fire only after the double-click window). Options are `click`,
@@ -336,7 +338,7 @@ const handleClick = useDoubleClick({
 <div onClick={handleClick} />
 ```
 
-### `useLazyQuery`
+### `useLazyQuery` {#uselazyquery}
 
 Trigger a query on demand rather than on mount. Pass a query function;
 call `query(variables)` to run it:
@@ -358,7 +360,7 @@ Returns `{ data, error, isLoading, isSuccess, isError, isCalled,
 isFetching, isRefetching, query, refetch, reset, setData }` with optional
 `cacheTime` / `staleTime` / `retry`.
 
-### `useMutation` (Prism's)
+### `useMutation` (Prism's) {#usemutation-prisms}
 
 ```tsx
 // useMutation(mutationFn, options) — mutationFn is the first positional arg.
@@ -384,7 +386,7 @@ For RPC mutations, prefer `useMutation` from
 `@omnitron-dev/netron-react` — it integrates with the cache.
 The Prism version is for non-RPC operations.
 
-### `usePopoverHover`
+### `usePopoverHover` {#usepopoverhover}
 
 Hover-managed popover open state. Returns the trigger ref + open/close
 handlers + anchor element (no `triggerProps` / `popoverProps` bundles):
@@ -401,7 +403,7 @@ const { open, anchorEl, onOpen, onClose, elementRef } =
 </Popover>
 ```
 
-### `usePasswordVisibility`
+### `usePasswordVisibility` {#usepasswordvisibility}
 
 Returns `{ visible, toggle, show, hide, type }` (state + helpers, not a
 prebuilt button). Wire `type` and `toggle` into your own adornment:
@@ -423,9 +425,9 @@ const { type, visible, toggle } = usePasswordVisibility();
 />
 ```
 
-## SSR & isomorphism
+## SSR & isomorphism {#ssr--isomorphism}
 
-### `useIsomorphicLayoutEffect`
+### `useIsomorphicLayoutEffect` {#useisomorphiclayouteffect}
 
 `useLayoutEffect` on client; `useEffect` on server — avoids
 SSR warnings:
@@ -439,7 +441,7 @@ useIsomorphicLayoutEffect(() => {
 Use whenever your effect needs synchronous post-render execution
 and you SSR.
 
-## Hooks used internally by components
+## Hooks used internally by components {#hooks-used-internally-by-components}
 
 These are exposed but typically consumed via the matching
 component:
@@ -464,7 +466,7 @@ Dark mode is driven through `useSettingsStore` (`mode`, `setMode`,
 `toggleMode`) — there is no `useColorMode` hook. `<ConfirmDialog>` and
 `<CommandPalette>` are component-only (no companion `use*` hook).
 
-## Composition patterns
+## Composition patterns {#composition-patterns}
 
 Hooks compose freely:
 
@@ -492,7 +494,7 @@ function ProductGrid({ filters }: { filters: ProductFilters }) {
 }
 ```
 
-## See also
+## See also {#see-also}
 
 - [Components catalog](./components.md) — components paired
   with these hooks
@@ -501,14 +503,14 @@ function ProductGrid({ filters }: { filters: ProductFilters }) {
   (use those, not these, for data fetching from a Titan backend)
 
 
-## Also exported
+## Also exported {#also-exported}
 
 Twenty-one further hooks are exported from `@omnitron-dev/prism/hooks` and had
 no entry here. They are listed with their real signatures rather than written
 up with invented examples — the point of this section is that they exist and
 can be found, which is what was missing.
 
-### State
+### State {#state}
 
 | Hook | Signature | What it does |
 | ---- | --------- | ------------ |
@@ -518,7 +520,7 @@ can be found, which is what was missing.
 | `usePrevious` | `<T>(value: T): T \| undefined` | The value from the previous render |
 | `useCopyToClipboard` | `(options?: UseCopyToClipboardOptions)` | Copy with a `copied` flag that resets itself |
 
-### Timers and lifecycle
+### Timers and lifecycle {#timers-and-lifecycle}
 
 | Hook | Signature | What it does |
 | ---- | --------- | ------------ |
@@ -532,7 +534,7 @@ can be found, which is what was missing.
 | `useMounted` | `(): UseMountedReturn` | Whether the component is still mounted — for guarding async completions |
 | `useUpdateLayoutEffect` | `(effect: EffectCallback, deps?: DependencyList)` | `useLayoutEffect` that skips the first render |
 
-### Layout and sizing
+### Layout and sizing {#layout-and-sizing}
 
 | Hook | Signature | What it does |
 | ---- | --------- | ------------ |
@@ -545,7 +547,7 @@ can be found, which is what was missing.
 | `useScrollToTop` | `(options?: { threshold?: number })` | `scrollToTop` plus whether the button should show |
 | `useMultipleImageDimensions` | `(urls: (string \| null \| undefined)[], options?)` | Dimensions of several images at once |
 
-### Pointer and keyboard
+### Pointer and keyboard {#pointer-and-keyboard}
 
 | Hook | Signature | What it does |
 | ---- | --------- | ------------ |

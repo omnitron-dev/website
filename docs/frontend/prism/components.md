@@ -1,4 +1,6 @@
 ---
+id: "frontend/prism/components"
+slug: "/docs/frontend/prism/components"
 sidebar_position: 2
 title: Components catalog
 description: Per-component reference for the widgets in Prism.
@@ -14,9 +16,9 @@ integration concerns.
 For full-page composites see [Blocks](./blocks.md); for layouts
 see [Layouts](./layouts.md). For scientific documents, block editing and typed knowledge graphs, see [Research workspaces](./research.md).
 
-## Status & feedback
+## Status & feedback {#status--feedback}
 
-### `<Alert>` / `<FormAlert>`
+### `<Alert>` / `<FormAlert>` {#alert--formalert}
 
 ```tsx
 import { Alert, FormAlert } from '@omnitron-dev/prism';
@@ -56,7 +58,7 @@ const { formState, register } = useForm();
 </form>
 ```
 
-### `<Snackbar>`
+### `<Snackbar>` {#snackbar}
 
 Transient global notifications. Mounted once by `<PrismProvider>`;
 fire from anywhere:
@@ -90,7 +92,7 @@ function CopyButton({ text }: { text: string }) {
 `info` / `close` shortcuts. Max-stack is configured at the
 provider level (`maxSnackbars`).
 
-### `<ConfirmDialog>`
+### `<ConfirmDialog>` {#confirmdialog}
 
 `<ConfirmDialog>` is a controlled component — thread `open` /
 `onClose` / `onConfirm` (there is no `useConfirmDialog` hook):
@@ -122,7 +124,7 @@ function DeleteButton({ onDelete }: { onDelete: () => void }) {
 `onConfirm` may be async — pass `loading` to show a spinner
 while it resolves. A `<DeleteDialog>` preset is also exported.
 
-### `<Tooltip>`
+### `<Tooltip>` {#tooltip}
 
 ```tsx
 import { Tooltip } from '@omnitron-dev/prism';
@@ -137,7 +139,7 @@ import { Tooltip } from '@omnitron-dev/prism';
 Standard MUI tooltip with Prism theme integration. Wrap a
 single child element (not a fragment).
 
-### `<LoadingScreen>`
+### `<LoadingScreen>` {#loadingscreen}
 
 Full-viewport loading bar — typical use is the Suspense fallback:
 
@@ -154,7 +156,7 @@ progress indicator via `slots.progress` / `slotProps.progress`.
 `SplashScreen` (branded full-screen) and `Spinner` (inline) are
 also exported.
 
-### `<Skeleton>`
+### `<Skeleton>` {#skeleton}
 
 Animated placeholder while data loads.
 
@@ -169,7 +171,7 @@ import { Skeleton, CardSkeleton, TableSkeleton }
 `circular` / `rectangular`). For composite placeholders use the
 dedicated `<CardSkeleton>` and `<TableSkeleton>` exports.
 
-### `<EmptyContent>`
+### `<EmptyContent>` {#emptycontent}
 
 Friendly empty-state card. Use on every list that may be empty.
 
@@ -194,7 +196,7 @@ circular coloured wrapper; `illustration` is rendered as-is.
 `SearchEmptyContent` and `LoadingEmptyContent` are preset
 variants.
 
-### `<ErrorBoundary>`
+### `<ErrorBoundary>` {#errorboundary}
 
 `fallback` receives a single `FallbackProps` object
 (`{ error, errorInfo, parsedStack, resetErrorBoundary }`):
@@ -217,7 +219,7 @@ handler errors — those go through global window error handlers.
 Omit `fallback` to use the built-in error screen (with dev-mode
 stack details).
 
-### `<LinearProgress>` / `<CircularProgress>` / `<ProgressBar>` / `<CountdownRing>`
+### `<LinearProgress>` / `<CircularProgress>` / `<ProgressBar>` / `<CountdownRing>` {#linearprogress--circularprogress--progressbar--countdownring}
 
 ```tsx
 import { LinearProgress, CircularProgress, ProgressBar, CountdownRing }
@@ -240,9 +242,9 @@ backgrounded tab, both of which a duration timer gets wrong.
 it and the ring starts full. It switches to `warningColor` below
 `warningThresholdMs` and to `expiredColor` past the deadline.
 
-## Data display
+## Data display {#data-display}
 
-### `<Card>`
+### `<Card>` {#card}
 
 ```tsx
 import { Card, StatCard } from '@omnitron-dev/prism';
@@ -287,7 +289,7 @@ Card extends MUI's `Card`, so MUI props (`onClick`, `elevation`,
 exported. Cards are typically arranged in a `<Grid>` — `<Card>`
 itself doesn't handle layout.
 
-### `<Avatar>`
+### `<Avatar>` {#avatar}
 
 ```tsx
 import { Avatar, CustomAvatarGroup } from '@omnitron-dev/prism';
@@ -314,7 +316,7 @@ The fallback is **deterministic** — same name always produces
 the same colour + initials, so users are visually identifiable
 even without photos.
 
-### `<Badge>`
+### `<Badge>` {#badge}
 
 `<Badge>` wraps MUI Badge (use `badgeContent` / `variant="dot"`).
 For a count overlay, the `<CountBadge>` helper (with `count` /
@@ -343,7 +345,7 @@ import { Badge, CountBadge, StatusDot }
 `max` caps the display value with a `+` suffix (`99+`);
 `variant="dot"` shows a colour dot without a number.
 
-### `<Table>`
+### `<Table>` {#table}
 
 The low-level table. For most app tables, prefer
 [`<DataGridBlock>`](./blocks.md#datagridblock--filterable--sortable--paginated-table) or
@@ -393,7 +395,7 @@ import MuiTable from '@mui/material/Table';
 Keep pagination outside `TableViewport`. It supplies the scroll region, not row
 data, sorting or a second pagination implementation.
 
-### `<Chart>`
+### `<Chart>` {#chart}
 
 ApexCharts wrapper with theme-aware defaults.
 
@@ -434,7 +436,7 @@ Supported `type` values: `line`, `area`, `bar`, `pie`, `donut`,
 `boxPlot`, `radar`, `polarArea`, `rangeBar`, `rangeArea`,
 `treemap`. (There is no `column` type — use `bar`.)
 
-### `<Carousel>`
+### `<Carousel>` {#carousel}
 
 Slides are passed as **children** (not a `slides` array prop):
 
@@ -459,7 +461,7 @@ import { Carousel } from '@omnitron-dev/prism';
 | `spacing` | `number` (px) | — |
 | `responsive` | `CarouselBreakpoint[]` | — |
 
-### `<Lightbox>`
+### `<Lightbox>` {#lightbox}
 
 Drive open/index state with `useLightbox`, then spread
 `getLightboxProps()` onto `<Lightbox>` (which takes a `slides`
@@ -485,7 +487,7 @@ function Gallery({ images }: { images: string[] }) {
 Keyboard navigation (arrows, Esc), zoom controls, thumbnails,
 counter, optional download/share buttons.
 
-### `<Image>`
+### `<Image>` {#image}
 
 ```tsx
 import { Image } from '@omnitron-dev/prism';
@@ -505,7 +507,7 @@ lazy-load by default (disable with `disableLazy`), and an
 optional loading `placeholder`. (`ratio` is the prop name — not
 `aspectRatio`.)
 
-### `<TagCloud>`
+### `<TagCloud>` {#tagcloud}
 
 ```tsx
 import { TagCloud } from '@omnitron-dev/prism';
@@ -525,9 +527,9 @@ Each tag is `{ id, name, slug, postCount, … }`; the cloud sizes
 tags proportional to `postCount`. `variant="list"` renders a
 ranked list instead. `onTagClick` receives the full tag object.
 
-## Navigation
+## Navigation {#navigation}
 
-### `<Breadcrumbs>`
+### `<Breadcrumbs>` {#breadcrumbs}
 
 ```tsx
 import { Breadcrumbs } from '@omnitron-dev/prism';
@@ -554,7 +556,7 @@ import { Breadcrumbs } from '@omnitron-dev/prism';
 Pass `linkComponent` (e.g. react-router's `Link`) to keep
 breadcrumb links client-side.
 
-### `<Menu>`
+### `<Menu>` {#menu}
 
 Dropdown menu. Pairs with `<IconButton>` or any trigger:
 
@@ -587,7 +589,7 @@ function UserMenu() {
 Item shape: `{ key, label, icon?, onClick?, danger?, shortcut?, type? }`.
 A `<ContextMenu>` variant is also exported for right-click menus.
 
-### `<MegaMenu>`
+### `<MegaMenu>` {#megamenu}
 
 Multi-column dropdown for sites with deep navigation. It is
 config-driven — pass a `data` array (there is no `<MegaMenuColumn>`
@@ -618,7 +620,7 @@ import { MegaMenu } from '@omnitron-dev/prism';
 />
 ```
 
-### `<NavCard>` / `<NavCardGrid>`
+### `<NavCard>` / `<NavCardGrid>` {#navcard--navcardgrid}
 
 Compact cards for navigation hubs. `<NavCard>` navigates via
 `to` + `linkComponent` (not `href`); `icon` is a `ReactNode`.
@@ -635,7 +637,7 @@ import { Link as RouterLink } from 'react-router-dom';
 </NavCardGrid>
 ```
 
-### `<NavSection>`
+### `<NavSection>` {#navsection}
 
 Sidebar navigation builder. The `<DashboardLayout>` uses this
 internally; you can use it standalone:
@@ -669,7 +671,7 @@ derived from the router automatically):
 `NavSectionVertical` / `NavSectionHorizontal` / `NavSectionMini`
 are the explicit layout variants.
 
-### `<NavigationProgress>`
+### `<NavigationProgress>` {#navigationprogress}
 
 Top-of-page loading bar — shows during route transitions. Feed
 it the current `pathname` (and optionally `search`) from the
@@ -686,7 +688,7 @@ const { pathname, search } = useLocation();
 
 `delay` (default 100ms) avoids flashing on fast transitions.
 
-### `<Stepper>`
+### `<Stepper>` {#stepper}
 
 `<Stepper>` is config-driven — pass a `steps` array (there is no
 separate `<Step>` component):
@@ -711,7 +713,7 @@ Horizontal by default; pass `orientation="vertical"` for a side
 stepper. `StepperActions` + `useStepper` cover next/back/reset
 wiring.
 
-### `<Tabs>` / `<TabPanel>`
+### `<Tabs>` / `<TabPanel>` {#tabs--tabpanel}
 
 There is no separate `<Tab>` component. Either pass a `tabs`
 array of `{ value, label, content }`, or compose `<TabPanel>`
@@ -774,7 +776,7 @@ import { Tabs } from '@omnitron-dev/prism/components/tabs';
 />
 ```
 
-### `<ScrollSpy>` / `<ScrollSpyProvider>`
+### `<ScrollSpy>` / `<ScrollSpyProvider>` {#scrollspy--scrollspyprovider}
 
 Wrap content in `<ScrollSpyProvider>`, mark each tracked region
 with `<ScrollSpySection id="…">`, and read the in-view section
@@ -809,7 +811,7 @@ function Toc() {
 Tracks which section is in view via `activeId`. Used by docs
 pages.
 
-### `<ScrollToTop>`
+### `<ScrollToTop>` {#scrolltotop}
 
 Scrolls the window back to the top whenever the route changes —
 pass the current `pathname` from the router:
@@ -824,7 +826,7 @@ import { useLocation } from 'react-router-dom';
 (This resets scroll on navigation — it is not a floating
 "scroll to top" button. For that, see the `useBackToTop` hook.)
 
-### `<Scrollbar>`
+### `<Scrollbar>` {#scrollbar}
 
 ```tsx
 import { Scrollbar } from '@omnitron-dev/prism';
@@ -843,7 +845,7 @@ mode keep native controls discoverable.
 `hideScrollbar` still explicitly hides the bar while preserving scrolling.
 The shared CSS baseline gives nested overflow regions the same behaviour.
 
-## Input & form
+## Input & form {#input--form}
 
 ### `Field` (namespace: `Field.Text`, `Field.Select`, …) {#field}
 
@@ -888,7 +890,7 @@ When you wrap the form in [`<SchemaProvider>`](./forms.md), Zod
 schema messages flow into the fields (i18n-aware); `rules`
 overrides per field.
 
-### `<Label>`
+### `<Label>` {#label}
 
 A small status/category chip (not an HTML form `<label>`). Use
 `color` + `variant` for status pills; `StatusLabel` and
@@ -918,7 +920,7 @@ when changing the surface or text color, check the resulting contrast. Keep a
 written state alongside color and use legible text sizes inside scaled
 visualizations.
 
-### `<SearchInput>`
+### `<SearchInput>` {#searchinput}
 
 Debounced search input with a clear button:
 
@@ -940,7 +942,7 @@ wiring `useDebouncedValue` per call site. A clear button is
 built in. `aria-label` names the input independently of its placeholder;
 `clearTooltip` names the clear button.
 
-### `<DateRangePicker>`
+### `<DateRangePicker>` {#daterangepicker}
 
 `<DateRangePicker>` is a dialog driven by the
 `useDateRangePicker` hook — spread the hook's return onto it
@@ -965,7 +967,7 @@ function Filter() {
 `translations` to localise the dialog. A `<DateRangeInput>` (the
 two-field inline form) is also exported.
 
-### `<DurationPicker>`
+### `<DurationPicker>` {#durationpicker}
 
 For "how long" inputs (TTLs, timeouts). The value is a duration
 **in seconds** (`null` = permanent/indefinite):
@@ -980,7 +982,7 @@ For "how long" inputs (TTLs, timeouts). The value is a duration
 `onChange` receives a `number | null` (seconds). Pass `labels`
 to localise the unit strings.
 
-### `<CountrySelect>`
+### `<CountrySelect>` {#countryselect}
 
 ISO 3166 country dropdown with flags + search. It is
 **asset-free** — the consumer supplies the `options` list (and
@@ -998,7 +1000,7 @@ data:
 
 Value / change are the lowercase ISO 3166-1 alpha-2 code.
 
-### `<Editor>` + `<TipTapRenderer>`
+### `<Editor>` + `<TipTapRenderer>` {#editor--tiptaprenderer}
 
 TipTap-based rich-text editor and read-only renderer. The
 `toolbar` prop takes a **preset** (`'full' | 'standard' |
@@ -1028,7 +1030,7 @@ Storage format is TipTap's JSON document — portable across
 edit/view, indexable for full-text search, safer than raw HTML.
 (The renderer export is `TipTapRenderer` — note the capital T.)
 
-### `<ContentRenderer>`
+### `<ContentRenderer>` {#contentrenderer}
 
 Renders mixed content (TipTap JSON, markdown string, or HTML
 string) with consistent typography — it auto-detects the format
@@ -1042,7 +1044,7 @@ Props: `content`, `compact`, `className`, `sx`,
 `markdownComponents`, and `routerLinkComponent` (pass a
 router-aware `Link` to keep internal links client-side).
 
-### `<CommandPalette>`
+### `<CommandPalette>` {#commandpalette}
 
 `Cmd+K` style command palette. It self-manages open state via
 `triggerKey` (default `'k'` + the platform meta key) — just pass
@@ -1072,7 +1074,7 @@ shortcut?, onSelect }`. Fuzzy-matches by title + keywords; arrow
 keys + Enter; Esc closes. Pass `open` / `onOpenChange` for
 controlled mode.
 
-### `<FilterToolbar>`
+### `<FilterToolbar>` {#filtertoolbar}
 
 Filter toolbar above admin tables — `search`, `select`,
 `multi-select`, `date-range`, `boolean`, `number-range` filter
@@ -1112,9 +1114,9 @@ Date ranges store `<key>From` and `<key>To`; numeric ranges store `<key>Min` and
 other filter values. A partial range, including numeric zero, counts as active
 and can be reset. `onReset` lets the host restore its own defaults.
 
-## Layout & utility
+## Layout & utility {#layout--utility}
 
-### `<Drawer>`
+### `<Drawer>` {#drawer}
 
 Side panel — left, right, top, bottom:
 
@@ -1142,7 +1144,7 @@ Use `width` for left/right anchors and `height` for top/bottom
 - `persistent` — pushes content
 - `permanent` — always visible
 
-### `<PageContent>`
+### `<PageContent>` {#pagecontent}
 
 A vertical-stack content wrapper (consistent section `gap`,
 optional `fill`). It does **not** render a title/breadcrumb
@@ -1157,7 +1159,7 @@ component (above):
 </PageContent>
 ```
 
-### `<DocLayout>`
+### `<DocLayout>` {#doclayout}
 
 For documentation pages — collapsible sidebar + main +
 on-this-page nav. The right-rail "table of contents" is
@@ -1176,7 +1178,7 @@ import { DocLayout, DocSidebar, DocSectionNav }
 </DocLayout>
 ```
 
-### `<Accordion>`
+### `<Accordion>` {#accordion}
 
 `<Accordion>` is config-driven — pass an `items` array (there is
 no `<Accordion.Item>` child). Single-open by default; pass
@@ -1197,7 +1199,7 @@ import { Accordion } from '@omnitron-dev/prism';
 Item shape: `{ id, title, subtitle?, content, icon?, disabled? }`.
 A `<SimpleAccordion>` convenience wrapper is also exported.
 
-### `<AnimateBorder>` / `<MotionLazy>`
+### `<AnimateBorder>` / `<MotionLazy>` {#animateborder--motionlazy}
 
 The `animate` module exports `AnimateBorder` — a `Box` with an
 animated gradient border — and `MotionLazy`, a provider that
@@ -1219,7 +1221,7 @@ import { AnimateBorder, MotionLazy }
 </MotionLazy>
 ```
 
-### `<SvgColor>`
+### `<SvgColor>` {#svgcolor}
 
 Inlines an SVG and applies a colour via CSS mask (uses
 `currentColor` by default — pass any CSS colour, e.g. a theme
@@ -1231,7 +1233,7 @@ token via `sx`):
 
 Lets you tint icons without exporting per-colour copies.
 
-### Settings drawer — `<SettingsProvider>` / `<SettingsDrawer>`
+### Settings drawer — `<SettingsProvider>` / `<SettingsDrawer>` {#settings-drawer--settingsprovider--settingsdrawer}
 
 In-app settings drawer (theme mode, layout, colour preset).
 Wrap the app in `<SettingsProvider>`, mount `<SettingsDrawer>`
@@ -1256,7 +1258,7 @@ function Header() {
 State is backed by the Prism settings store (`useSettingsStore`
 from `@omnitron-dev/prism/state`) — persisted to localStorage.
 
-### Changelog — `<ChangelogTimeline>` / `<ChangelogEntry>`
+### Changelog — `<ChangelogTimeline>` / `<ChangelogEntry>` {#changelog--changelogtimeline--changelogentry}
 
 Renders a feed of changes (there is no single `<Changelog>`
 component — compose a `<ChangelogTimeline>` of
@@ -1276,7 +1278,7 @@ import { ChangelogTimeline, ChangelogEntry }
 </ChangelogTimeline>
 ```
 
-## Accessibility — across the catalog
+## Accessibility — across the catalog {#accessibility--across-the-catalog}
 
 Every interactive component:
 
@@ -1292,7 +1294,7 @@ Every interactive component:
 Buttons / inputs / selects inherit MUI v9's accessibility
 foundation, which is WCAG 2.1 AA-compliant out of the box.
 
-## Refs (React 19)
+## Refs (React 19) {#refs-react-19}
 
 Every prism component exposes its underlying DOM element through
 the standard `ref` prop. React 19 routes `ref` through props
@@ -1319,7 +1321,7 @@ type via a `ref?: Ref<HandleType>` field on their props interface
 — identical call-site ergonomics, no `useImperativeHandle`
 ceremony on the consumer side.
 
-## MUI v9 slot props
+## MUI v9 slot props {#mui-v9-slot-props}
 
 For slot-bearing components (`<TextField>`, `<Select>`,
 `<Autocomplete>`, …) prism re-exports MUI v9's `slotProps` API.
@@ -1349,7 +1351,7 @@ The same migration applies to Tabs (`TabIndicatorProps` →
 (`BackdropProps` → `slotProps.backdrop`), and Autocomplete
 (`componentsProps` → `slotProps`).
 
-## Per-component subpaths
+## Per-component subpaths {#per-component-subpaths}
 
 Each component is also importable from its own subpath:
 
@@ -1365,7 +1367,7 @@ import { Drawer } from '@omnitron-dev/prism';
 
 Use subpaths in production for the leanest payload.
 
-## See also
+## See also {#see-also}
 
 - [Blocks](./blocks.md) — full-page composites built from components
 - [Layouts](./layouts.md) — shell components
@@ -1374,13 +1376,13 @@ Use subpaths in production for the leanest payload.
 - [Theme](./theme.md) — colours, typography, dark mode
 
 
-## Also exported
+## Also exported {#also-exported}
 
 These are exported from `@omnitron-dev/prism/components` and had no entry
 here. Listed with their real signatures rather than invented examples — what
 was missing is that they exist.
 
-### Lists and layout
+### Lists and layout {#lists-and-layout}
 
 | Component | Signature | What it is |
 | --------- | --------- | ---------- |
@@ -1389,7 +1391,7 @@ was missing is that they exist.
 | `ContentRoot` | styled `div` | The typographic container the content renderer paints into |
 | `DocSidebar` | `{ items, activeId, onItemClick, title }` | Sidebar for a documentation-style layout |
 
-### Content
+### Content {#content}
 
 | Component | Signature | What it is |
 | --------- | --------- | ---------- |
@@ -1398,7 +1400,7 @@ was missing is that they exist.
 | `FlagIcon` | `{ code, … }` | Country flag, as used by `Field.CountrySelect` |
 | `ImageWithDefault` | `(props: ImageProps)` | `<Image>` that falls back to an icon when the source fails |
 
-### Feedback and overlays
+### Feedback and overlays {#feedback-and-overlays}
 
 | Component | Signature | What it is |
 | --------- | --------- | ---------- |
@@ -1407,14 +1409,14 @@ was missing is that they exist.
 | `CustomPopover` | `{ … }` | The popover `usePopover()` is built for |
 | `CustomAvatarGroup` | `{ avatars, size = 'sm', max = 4, sx }` | Overlapping avatars with an overflow count |
 
-### Charts
+### Charts {#charts}
 
 | Component | Signature | What it is |
 | --------- | --------- | ---------- |
 | `ChartLegends` | `{ … }` | Legend rows, usable apart from a chart |
 | `ChartLoading` | `{ sx, className, type }` | Chart-shaped skeleton |
 
-### Navigation internals
+### Navigation internals {#navigation-internals}
 
 `NavSection`, `NavSectionVertical`, `NavSectionHorizontal` and `NavSectionMini`
 are the navigation API and are documented above. The parts they are assembled
@@ -1424,12 +1426,12 @@ exported so a project can build a navigation shape the four presets do not
 cover. Reach for them only then; the presets carry the accessibility
 behaviour.
 
-### Elsewhere
+### Elsewhere {#elsewhere}
 
 `Map`, `MapMarker`, `MapPointPicker` and `MapCoverageLayer` have their own
 page: [Maps](./maps.md). The `Field.*` inputs are in [Forms](./forms.md).
 
-## Research documents
+## Research documents {#research-documents}
 
 `@omnitron-dev/prism/components/research` adds a source-preserving Markdown → typed document → React path. Import `@omnitron-dev/prism/components/research/styles.css` once. It supports GFM, stable Unicode heading anchors, admonitions, tabs, KaTeX and strict Mermaid diagrams. `parseResearchMarkdown(source, documentId)` returns the document tree, heading outline and diagnostics; node attributes retain source positions.
 
@@ -1450,7 +1452,7 @@ Use `$...$` / `$$...$$` for math, a `mermaid` fence for diagrams, and a `prism` 
 
 Raw HTML and unsupported constructs remain inert with source diagnostics. Unsupported diagram engines retain their source; Pintora is not interpreted as Mermaid. TeX runs with trust disabled and expansion/size limits. Mermaid source cannot change renderer configuration; rendered SVG is sanitized and displayed as an isolated SVG image, preserving the layout styles without inserting document-controlled CSS into the page. Active elements and links are removed; the browser image boundary disables scripting and external resources. Theme changes are serialized. Source/AST/block/edge limits bound accepted input, **not execution time**: Mermaid runs on the browser main thread. Host-owned widgets must independently obey the host's accessibility, resource, network and permission policies. This renderer provides presentation, not proof checking or Noesis semantics. The host owns immutable revision identity, digest verification, authorization and publication. Unknown or failing blocks preserve source rather than masquerading as successful verification.
 
-### `<ResearchEditor>`
+### `<ResearchEditor>` {#researcheditor}
 
 A block-oriented scientific editor using Tiptap/ProseMirror and the same
 Markdown, math, diagram and widget contract as `ResearchDocument`.
@@ -1530,7 +1532,7 @@ still have costs proportional to the document, and React node views have a
 cost. Measure browser input latency separately from parsing or serialization;
 no constant-time editing or arbitrary document-size guarantee is made.
 
-### `<KnowledgeGraph>`
+### `<KnowledgeGraph>` {#knowledgegraph}
 
 A configurable React Flow surface for typed knowledge relations. The data
 model is independent of React Flow node coordinates. A relation is a first-class
@@ -1603,7 +1605,7 @@ roles or change their placement. `visibleBudget` still limits the admitted
 incidence projection. Select a line to inspect its relation and its complete
 ordered port list; the searchable index remains a keyboard alternative.
 
-### Engine choices and scope
+### Engine choices and scope {#engine-choices-and-scope}
 
 The scientific editor extends the existing Tiptap/ProseMirror stack, avoiding
 a second incompatible document model. BlockNote provides a ready-made block
@@ -1634,7 +1636,7 @@ movement, narrow dark layouts, accessibility and exact serialized source snapsho
 A separate 2000-block typing sample records beforeinput-to-animation-frame timings;
 these are local diagnostic measurements, not field INP or a fastest-editor claim.
 
-## Opt-in component imports
+## Opt-in component imports {#opt-in-component-imports}
 
 Console imports its components through dedicated package entry points. Each entry has both JavaScript and declarations in the published build, so applications can use navigation, feedback and data tables without loading maps or rich-text editors.
 

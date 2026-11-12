@@ -1,4 +1,6 @@
 ---
+id: "omnitron/release-readiness"
+slug: "/docs/omnitron/release-readiness"
 title: Release readiness
 description: Ordered implementation and acceptance plan for the control plane, execution, security, Console and package integrations.
 ---
@@ -16,7 +18,7 @@ limitations. Do not silently defer an item by renaming it a roadmap feature. If 
 external dependency prevents completion, record the exact dependency and keep the
 capability unavailable or explicitly limited until its acceptance criteria pass.
 
-## Final npm qualification
+## Final npm qualification {#final-npm-qualification}
 
 Freeze one source commit for publication. Complete these three checks before
 preparing its npm archives:
@@ -52,7 +54,7 @@ It runs the ordinary frozen install and complete build in two independent checko
 
 Export from these verified archives. A clean Git status does not make an existing build directory canonical: Console publication intentionally retains older hashed assets so open tabs can continue loading their chunks. Those retained generations belong to the served directory, not to a new SDK archive. The ordinary `release --prepare` path also builds from a clean source export; do not replace its sealed archives with a later pack of a working checkout.
 
-## Invariants
+## Invariants {#invariants}
 
 - One project owns multiple environments/stacks; an allocation identifies its
   project, stack, workload, revision and node incarnation. Display names and network
@@ -70,7 +72,7 @@ Export from these verified archives. A clean Git status does not make an existin
 - Optional features remain independently importable. A basic daemon does not require
   an agent SDK, browser editor, cloud account or consensus service.
 
-## Ordered delivery gates
+## Ordered delivery gates {#ordered-delivery-gates}
 
 | Gate | Implementation and architectural boundary | Acceptance evidence | Depends on |
 | --- | --- | --- | --- |
@@ -100,7 +102,7 @@ including a development installation whose bootstrap path stays unchanged. Recor
 the owner capability `applicationRuntimeResolution: 1` separately from the backend
 version. Fresh-owner startup and fresh-shell imports do not qualify that transition.
 
-## Activation and rollback contract
+## Activation and rollback contract {#activation-and-rollback-contract}
 
 Each activation record names the current and candidate digests, affected processes,
 configuration/schema changes, exact commands, readiness deadline, acceptance probes,
@@ -118,7 +120,7 @@ unavailable evidence. It must not declare success from a green process indicator
 hide a warning by weakening its threshold, or infer that an unreachable process has
 stopped. Existing experiment identities and historical gaps remain intact.
 
-### Roll out a group of changes
+### Roll out a group of changes {#roll-out-a-group-of-changes}
 
 Select one clean source commit for the batch and wait for its CI run. Build for
 each target OS, architecture and Node runtime. Record the current backend,
@@ -134,7 +136,7 @@ feature requires a different owner or a Console restart, document its affected
 processes, stop criteria, rollback artifact and recovery budget before opening
 that window. Record the last accepted revision for each component and node.
 
-## Documentation contract
+## Documentation contract {#documentation-contract}
 
 Update the owning layer's documentation together with code: Xec for execution,
 Kysera for database primitives, Titan for reusable integration, Omnitron for
@@ -147,7 +149,7 @@ The detailed architecture remains in [Resilient control plane](./resilient-contr
 This plan supplies delivery order and acceptance gates, not a competing architecture.
 
 
-## Current implementation evidence
+## Current implementation evidence {#current-implementation-evidence}
 
 CI compares release artifacts from two independent checkouts. For the registry
 transition, all six Xec 0.11.2 and fourteen Kysera 0.10.2 tarballs were downloaded

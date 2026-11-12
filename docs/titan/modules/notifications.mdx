@@ -1,12 +1,13 @@
 ---
+id: "titan/modules/notifications"
+slug: "/docs/titan/modules/notifications"
 title: titan-notifications
 ---
 
-import ModuleBadge from '@site/src/components/ModuleBadge';
 
 # titan-notifications
 
-<ModuleBadge origin="official" pkg="@omnitron-dev/titan-notifications" status="stable" />
+<span class="module-badge">official · @omnitron-dev/titan-notifications · stable</span>
 
 Multi-channel notification delivery (in-app, webhook, plus extensible
 email / SMS / push abstractions) with a template engine, Redis-backed
@@ -24,7 +25,7 @@ module's Redis transport. Business-state changes and queued email are committed
 together; only opaque delivery IDs travel through Redis. SMTP acceptance is not
 an exactly-once or inbox-delivery guarantee.
 
-## When you need it
+## When you need it {#when-you-need-it}
 
 - **Multi-channel delivery.** Same payload, different channels per
   user (email + push for some, in-app only for others).
@@ -34,7 +35,7 @@ an exactly-once or inbox-delivery guarantee.
 - **Producer/worker split.** API pod publishes, worker pod consumes
   and delivers — `forRoot` and `forWorker` cover both ends.
 
-## Quickstart — producer (the app that emits notifications)
+## Quickstart — producer (the app that emits notifications) {#quickstart--producer-the-app-that-emits-notifications}
 
 ```typescript
 import { NotificationsModule } from '@omnitron-dev/titan-notifications';
@@ -58,7 +59,7 @@ import { NotificationsModule } from '@omnitron-dev/titan-notifications';
 class AppModule {}
 ```
 
-## Quickstart — worker (the pod that consumes and delivers)
+## Quickstart — worker (the pod that consumes and delivers) {#quickstart--worker-the-pod-that-consumes-and-delivers}
 
 ```typescript
 import { NotificationsModule } from '@omnitron-dev/titan-notifications';
@@ -87,7 +88,7 @@ The worker consumes events emitted by the producer (typically via
 Rotif), looks up channel targets, persists the notification, and
 signals realtime channels (WebSocket / SSE).
 
-## `NotificationsModuleOptions`
+## `NotificationsModuleOptions` {#notificationsmoduleoptions}
 
 | Option                    | Type                                                                                  |
 | ------------------------- | ------------------------------------------------------------------------------------- |
@@ -109,7 +110,7 @@ signals realtime channels (WebSocket / SSE).
 
 Also: `forRootAsync({ useFactory, inject?, useExisting?, useClass?, imports?, isGlobal? })`.
 
-## `NotificationsService` — the producer API
+## `NotificationsService` — the producer API {#notificationsservice--the-producer-api}
 
 ```typescript
 import { NotificationsService, NOTIFICATIONS_SERVICE }
@@ -148,7 +149,7 @@ The service:
 4. Hands off to the registered channel implementations.
 5. Records the send against the rate limiter.
 
-### Templates are opt-in and caller-driven
+### Templates are opt-in and caller-driven {#templates-are-opt-in-and-caller-driven}
 
 `send()` does not render templates. `TemplateEngine` is a separate
 service exported under `NOTIFICATIONS_TEMPLATE_ENGINE`; nothing inside
@@ -184,7 +185,7 @@ payload and stashes the full render under `data._rendered`. The
 `templates` block in the module options configures that engine
 (caching, TTL) — it does not switch on rendering inside `send()`.
 
-### `NotificationRecipient.id` is the only required field, and it is load-bearing
+### `NotificationRecipient.id` is the only required field, and it is load-bearing {#notificationrecipientid-is-the-only-required-field-and-it-is-load-bearing}
 
 ```typescript
 interface NotificationRecipient {
@@ -206,7 +207,7 @@ everything else is published to `notifications.welcome.undefined`,
 where no subscriber is listening. Nothing throws. TypeScript is the
 only thing that catches it, so do not widen this argument to `any`.
 
-## Channels
+## Channels {#channels}
 
 Out-of-the-box implementations + extensible bases:
 
@@ -222,7 +223,7 @@ Out-of-the-box implementations + extensible bases:
 A concrete channel typically implements just `deliver(recipient,
 rendered, options)` plus optional `validate()`.
 
-## Templates
+## Templates {#templates}
 
 ```typescript
 NotificationsModule.forRoot({
@@ -240,7 +241,7 @@ await this.notify.send(
 placeholders. Templates can be passed at boot or registered at
 runtime. `DEFAULT_TEMPLATES` is exported as a starting set.
 
-## Rate limiting and preferences
+## Rate limiting and preferences {#rate-limiting-and-preferences}
 
 `RedisRateLimiter` enforces per-minute / per-hour / per-day limits
 globally or per-channel; `RedisPreferenceStore` tracks per-user
@@ -258,7 +259,7 @@ preferenceStoreConfig: {
 }
 ```
 
-## Worker model
+## Worker model {#worker-model}
 
 ```mermaid
 flowchart LR
@@ -276,7 +277,7 @@ Producer/worker split lets you scale delivery independently from the
 request path and isolate flaky external providers (email, SMS) from
 the API tier.
 
-## `@OnNotification` decorator
+## `@OnNotification` decorator {#onnotification-decorator}
 
 ```typescript
 import { OnNotification } from '@omnitron-dev/titan-notifications';
@@ -302,7 +303,7 @@ exported as `NOTIFICATIONS_EVENTS` (e.g.
 Subscribe to delivery lifecycle events for observability, audit,
 metrics.
 
-## Health indicator
+## Health indicator {#health-indicator}
 
 `NotificationsHealthIndicator` is exported and registers
 automatically with [`titan-health`](./health.mdx) if both modules
@@ -314,7 +315,7 @@ An observer failure does not resend a notification that already reached its
 transport. Without an Events module, lifecycle emission is disabled and reported
 as such in the health details.
 
-## Operational diagnostics
+## Operational diagnostics {#operational-diagnostics}
 
 `@omnitron-dev/titan-notifications/diagnostics` provides
 `DiagnosticNotificationSink` and `DiagnosticNotificationsModule`. They use the
@@ -322,7 +323,7 @@ configured transport's queue, deduplication, retry and DLQ mechanisms. A missing
 consumer rejects delivery; broker acceptance is not recipient acknowledgement.
 See the [contract, module wiring and outbox bridge](../../omnitron/diagnostics.md).
 
-## Tokens (selection)
+## Tokens (selection) {#tokens-selection}
 
 | Token                                          |
 | ---------------------------------------------- |
@@ -340,13 +341,13 @@ See the [contract, module wiring and outbox bridge](../../omnitron/diagnostics.m
 | `NOTIFICATION_PERSISTER`                       |
 | `NOTIFICATION_REALTIME_SIGNALER`               |
 
-## Lifecycle
+## Lifecycle {#lifecycle}
 
 The service is registered as a Titan provider; standard lifecycle
 hooks apply. The worker mode (`forWorker`) starts a Rotif consumer
 during the application `onStart` phase and stops it on `onStop`.
 
-## Anti-patterns
+## Anti-patterns {#anti-patterns}
 
 - **Sending from the request path.** Heavy channels (SMS / email)
   can take seconds. Send via the worker pattern, not directly in
@@ -359,7 +360,7 @@ during the application `onStart` phase and stops it on `onStop`.
 - **No rate limits.** Without limits, a runaway loop can spam every
   user in your database in minutes.
 
-## See also
+## See also {#see-also}
 
 - [`titan-events`](./events.mdx) — in-process events; this module
   bridges them to multi-channel delivery

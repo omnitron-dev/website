@@ -1,4 +1,6 @@
 ---
+id: "titan/logging/overview"
+slug: "/docs/titan/logging/overview"
 sidebar_position: 1
 title: Logging
 description: Structured pino-based logging with child loggers, transports, and processors.
@@ -29,7 +31,7 @@ import {
 } from '@omnitron-dev/titan/module/logger';
 ```
 
-## The `ILogger` interface
+## The `ILogger` interface {#the-ilogger-interface}
 
 ```typescript
 interface ILogger {
@@ -67,7 +69,7 @@ interface ILogger {
 > data **first**, then the message: `logger.info({ userId }, 'login')`.
 > A bare-string call also works: `logger.info('login')`.
 
-## The minimal usage
+## The minimal usage {#the-minimal-usage}
 
 ```typescript
 import { LOGGER_TOKEN, type ILogger } from '@omnitron-dev/titan/module/logger';
@@ -93,7 +95,7 @@ Output (JSON, with pino formatting):
 {"level":"info","time":"2026-05-15T20:00:00.000Z","service":"users","msg":"findById","id":"u_42"}
 ```
 
-## Why a structured logger
+## Why a structured logger {#why-a-structured-logger}
 
 Three reasons:
 
@@ -106,7 +108,7 @@ Three reasons:
 3. **Performance.** Pino is asynchronous and avoids JSON
    serialisation in the hot path.
 
-## Setting the level
+## Setting the level {#setting-the-level}
 
 ```typescript
 LoggerModule.forRoot({
@@ -117,7 +119,7 @@ LoggerModule.forRoot({
 Per-context level overrides through child loggers (`child` accepts
 an options bag that includes `level` on pino).
 
-## Output format (JSON, or pretty in dev)
+## Output format (JSON, or pretty in dev) {#output-format-json-or-pretty-in-dev}
 
 By default the logger writes **structured JSON**, one record per line —
 what log shippers (Loki, ELK, Datadog) expect. Keep this in production.
@@ -151,7 +153,7 @@ You can still pipe JSON output through `pino-pretty` externally if you
 prefer (`node dist/main.js | npx pino-pretty`), since the logger's JSON
 is `pino-pretty`-compatible.
 
-## Decorators
+## Decorators {#decorators}
 
 ```typescript
 import { Logger, Log, Monitor } from '@omnitron-dev/titan/module/logger';
@@ -170,7 +172,7 @@ class UsersService {
 }
 ```
 
-## Integration with tracing
+## Integration with tracing {#integration-with-tracing}
 
 If a trace context is active, every log line in the same async
 scope can carry `traceId` and `spanId`. Wire this up via a
@@ -196,13 +198,13 @@ LoggerModule.forRoot({ processors: [TraceContextProcessor] });
 
 Correlate logs across services by `traceId` in your log aggregator.
 
-## Helpers
+## Helpers {#helpers}
 
 - `createNullLogger()` — returns an `ILogger` that discards
   everything. Useful in tests.
 - `isLogger(value)` — type guard.
 
-## Tokens
+## Tokens {#tokens}
 
 | Token                          | Purpose                              |
 | ------------------------------ | ------------------------------------ |
@@ -212,7 +214,7 @@ Correlate logs across services by `traceId` in your log aggregator.
 | `LOGGER_TRANSPORTS_TOKEN`      | Registered transports                |
 | `LOGGER_PROCESSORS_TOKEN`      | Registered processors                |
 
-## Read on
+## Read on {#read-on}
 
 - [Transports](./transports.md) — pluggable destinations.
 - [Processors](./processors.md) — transform / filter pipeline.

@@ -1,4 +1,6 @@
 ---
+id: "titan/modules/shared-session"
+slug: "/docs/titan/modules/shared-session"
 title: Shared-session authentication
 description: Live session authority, revocation and consistent grants across backends.
 ---
@@ -10,7 +12,7 @@ human credentials to a live session. The application owns sign-in, persistence,
 role vocabulary and session creation. Titan owns claim validation and transport
 enforcement. [Access](../../auth/access-policy.md) supplies the pure policy rules.
 
-## Canonical authority
+## Canonical authority {#canonical-authority}
 
 Use this mode when the next request must reflect committed changes to sessions,
 accounts or role permissions. Return the session and grants from one consistent
@@ -45,7 +47,7 @@ A database or RPC failure returns 503; it never becomes an authenticated request
 or a false assertion that the user signed out. Missing, expired or revoked
 sessions are rejected as 401. Keep tokens and signing material out of logs.
 
-## Cooperating backends
+## Cooperating backends {#cooperating-backends}
 
 `SessionAuthorityService` from
 `@omnitron-dev/titan-auth/preset/session-authority` adapts the lookup to Netron:
@@ -66,7 +68,7 @@ redundant owner instances and an appropriate database failover policy. The
 lookup is read-only; retries must remain bounded. This contract avoids a
 second copy of the account schema or permission engine in every backend.
 
-## Registry compatibility mode
+## Registry compatibility mode {#registry-compatibility-mode}
 
 Alternatively supply `sessionRedis`, with `get(key)` and an optional
 `sessionLookup(sessionId)` for a registry miss or outage. The lookup returns
@@ -78,7 +80,7 @@ can resurrect a concurrently revoked session. Restore entries only through an
 adapter serialized with revocation. Registry mode is only as current as that
 update protocol; use canonical mode for immediate committed-state enforcement.
 
-## Credentials and expiry
+## Credentials and expiry {#credentials-and-expiry}
 
 Human tokens require bounded string `sub` and `sid` claims and a finite,
 unexpired integer `exp`. A human session claiming `service_role` is rejected.
@@ -106,7 +108,7 @@ secret, a missing or changed active refresh-token ID rejects the credential.
 Legacy registry values without refresh-token IDs cannot provide that guarantee.
 Issuer and verifier must agree on the binding secret and rotation protocol.
 
-## Session conditions
+## Session conditions {#session-conditions}
 
 `evaluateSessionPolicy` from `@omnitron-dev/access/session-policy` provides a
 pure evaluator for `requireMfa`, absolute `maxSessionDuration` in minutes, and

@@ -1,4 +1,6 @@
 ---
+id: "frontend/prism/layouts"
+slug: "/docs/frontend/prism/layouts"
 sidebar_position: 4
 title: Layouts
 description: DashboardLayout + the three auth layouts + the core layout primitives.
@@ -55,7 +57,7 @@ There is **no** single `<AuthLayout>` component (only an
 `<CoreLayout>` — the minimal shell is composed from `LayoutSection` +
 `HeaderSection`, or you reach for `AuthSimpleLayout`.
 
-## Secondary navigation with `<PanelLayout>`
+## Secondary navigation with `<PanelLayout>` {#secondary-navigation-with-panellayout}
 
 Use one application `DashboardLayout` and place `PanelLayout` inside it for
 corpus contents, document navigation, graph indexes or administration tools.
@@ -108,7 +110,7 @@ actual router navigation; collapsed destinations retain accessible names and
 shells, rather than placing the full application inside a bounded marketing
 container.
 
-## `<DashboardLayout>`
+## `<DashboardLayout>` {#dashboardlayout}
 
 Admin / operator console shell. It wraps its children in a
 [`LayoutProvider`](#layoutprovider) and renders a header plus a
@@ -176,11 +178,11 @@ function ConsoleShell() {
 }
 ```
 
-### Bounded workspaces
+### Bounded workspaces {#bounded-workspaces}
 
 For terminals, editors and infrastructure consoles, set `contentMode="workspace"`. The shell uses `100dvh`, keeps its header and footer in the available height, and gives the main region `minHeight: 0` and hidden overflow. Children should use flex sizing with `minHeight: 0` and `minWidth: 0`; put scrolling on the panel that owns it. To scroll ordinary pages inside the same shell, use `slotProps={{ main: { sx: { overflowY: 'auto' } } }}`. Default `document` mode retains normal page scrolling for other applications.
 
-### Props
+### Props {#props}
 
 | Prop | Type | Default | Notes |
 | ---- | ---- | ------- | ----- |
@@ -210,7 +212,7 @@ toggles the mobile drawer). You don't need to add one yourself —
 anything you pass in `headerSlots.leftArea` renders **after** it.
 :::
 
-### `LayoutNavData`
+### `LayoutNavData` {#layoutnavdata}
 
 Navigation is a list of **sections**, each with an optional subheader
 and a list of items:
@@ -225,7 +227,7 @@ interface LayoutNavSection {
 }
 ```
 
-### `LayoutNavItem`
+### `LayoutNavItem` {#layoutnavitem}
 
 ```typescript
 interface LayoutNavItem {
@@ -262,7 +264,7 @@ Active-state rules (implemented in `isNavItemActive`):
 Items with `children` render as inline-expandable groups; a parent
 stays highlighted when one of its descendants is active.
 
-### Behaviour
+### Behaviour {#behaviour}
 
 - **Navigation type** — `initialConfig.navigationMenuType` selects
   `'sidenav'` (default), `'topnav'`, or `'combo'` (both). Sidenav and
@@ -282,7 +284,7 @@ stays highlighted when one of its descendants is active.
 - **Accessibility** — renders a `SkipLink` to `#main-content`, a
   `role="main"` landmark, and ARIA labels for the header / nav.
 
-### `DashboardContent`
+### `DashboardContent` {#dashboardcontent}
 
 Optional padded wrapper for content rendered inside the dashboard
 `<main>` (handy when you don't pass `slotProps.main`):
@@ -303,7 +305,7 @@ import { DashboardContent } from '@omnitron-dev/prism/layouts';
 | `maxWidth` | `Breakpoint \| false` | — |
 | `sx` | `SxProps<Theme>` | — |
 
-### Layout density
+### Layout density {#layout-density}
 
 Density is a setting on Prism's settings store, not a layout prop —
 read/write it with `useSettingsStore`:
@@ -327,12 +329,12 @@ function DensityToggle() {
 `ComponentDensity` is `'compact' | 'standard' | 'comfortable'`. Tables,
 lists, and forms respond to it via theme spacing tokens.
 
-## Auth layouts
+## Auth layouts {#auth-layouts}
 
 There are three auth shells. They share a help-link header pattern but
 differ in how the form is framed. None of them require a `LayoutProvider`.
 
-### `<AuthCenteredLayout>`
+### `<AuthCenteredLayout>` {#authcenteredlayout}
 
 Card-centered form on a subtle gradient — the default for sign-in /
 sign-up / reset / verify.
@@ -359,7 +361,7 @@ function SignInPage() {
 Companion: `AuthCenteredContent` — a standalone card wrapper
 (`children`, `maxWidth = 420`, `sx`) for composing your own centered shell.
 
-### `<AuthSplitLayout>`
+### `<AuthSplitLayout>` {#authsplitlayout}
 
 Split-screen: branded illustration pane on the left (hidden below `md`),
 form on the right. Includes a built-in help link in the header.
@@ -401,7 +403,7 @@ then takes the full width. Companions `AuthSplitIllustration`
 (`title` / `subtitle` / `illustration` / `sx`) and `AuthSplitContent`
 (`children` / `maxWidth` / `sx`) let you assemble a custom split.
 
-### `<AuthSimpleLayout>`
+### `<AuthSimpleLayout>` {#authsimplelayout}
 
 Minimal shell with just a help-link header — for error pages (404 /
 500), maintenance pages, or compact auth forms.
@@ -434,7 +436,7 @@ With `compact`, content is centered in a `448px` column; otherwise it
 fills a `<Container maxWidth={maxWidth}>`. Companion:
 `SimpleCompactContent` (`children` / `sx`) for the compact wrapper alone.
 
-## `<LayoutProvider>`
+## `<LayoutProvider>` {#layoutprovider}
 
 `DashboardLayout` mounts a `LayoutProvider` for you. Use it directly
 only when you build a custom dashboard-style shell from the primitives
@@ -459,7 +461,7 @@ import { LayoutProvider, useLayoutContext } from '@omnitron-dev/prism/layouts';
 `topnavVariant`, `navColor` (`'default' \| 'vibrant' \| 'integrate'`),
 `drawerOpen`, `drawerWidth`, and `compactLayout`.
 
-### Hooks
+### Hooks {#hooks}
 
 | Hook | Returns |
 | ---- | ------- |
@@ -482,7 +484,7 @@ function CollapseToggle() {
 }
 ```
 
-## Core primitives (custom shells)
+## Core primitives (custom shells) {#core-primitives-custom-shells}
 
 When none of the pre-built shells fit, compose your own from the core
 primitives. There is no `<CoreLayout>` — `LayoutSection` is the root
@@ -516,7 +518,7 @@ function CustomShell() {
 }
 ```
 
-### `LayoutSection`
+### `LayoutSection` {#layoutsection}
 
 | Prop | Type | Notes |
 | ---- | ---- | ----- |
@@ -529,7 +531,7 @@ function CustomShell() {
 
 `MainSection` takes just `children` + `sx` (padded `<main>` flex column).
 
-### `HeaderSection`
+### `HeaderSection` {#headersection}
 
 A sticky, slot-based `AppBar` with a scroll blur/elevation effect. Used
 internally by the dashboard and split/simple auth layouts; usable
@@ -549,7 +551,7 @@ standalone.
 Companion `HeaderToolbar` (`children` / `sx`) is the bare toolbar
 without the `AppBar` wrapper.
 
-### `UserMenu`
+### `UserMenu` {#usermenu}
 
 Avatar-trigger account dropdown, designed for the header `rightArea`.
 
@@ -579,7 +581,7 @@ import { UserMenu } from '@omnitron-dev/prism/layouts';
 
 Each `UserMenuItem` is `{ key, label, icon?, onClick?, destructive?, disabled?, dividerAfter? }`.
 
-## Mixing layouts in one app
+## Mixing layouts in one app {#mixing-layouts-in-one-app}
 
 Layouts are just route-element wrappers — react-router 7 handles the rest:
 
@@ -605,7 +607,7 @@ Layouts are just route-element wrappers — react-router 7 handles the rest:
 (`ConsoleShell` is the `DashboardLayout` wrapper shown at the top of
 this page; it renders `<Outlet />` for the matched child routes.)
 
-## See also
+## See also {#see-also}
 
 - [Blocks](./blocks.md) — composites that often sit inside layouts
 - [Components catalog](./components.md) — components used in custom layouts

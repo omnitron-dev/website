@@ -1,4 +1,6 @@
 ---
+id: "titan/validation/overview"
+slug: "/docs/titan/validation/overview"
 sidebar_position: 1
 title: Validation
 description: Schema-driven input validation at the service boundary.
@@ -11,7 +13,7 @@ needs to know the *shape* the inputs are supposed to have. Titan's
 validation system uses Zod schemas at the service boundary —
 declarative, fast, and type-safe.
 
-## What Titan validates
+## What Titan validates {#what-titan-validates}
 
 By default, **only what you ask it to**. Titan does not auto-validate
 every parameter — that would force every method to have a schema even
@@ -30,7 +32,7 @@ The general rule: validate at *trust boundaries*. A `@Public` method
 is the canonical trust boundary; what crosses the wire is untrusted
 until it has been parsed against a schema.
 
-## The minimal example
+## The minimal example {#the-minimal-example}
 
 ```typescript
 import { z } from '@omnitron-dev/titan/validation';
@@ -64,7 +66,7 @@ The body of `create` runs only if the input passes validation. If
 not, the caller receives a typed `ValidationError` with the schema's
 field-level error messages.
 
-## How validation runs
+## How validation runs {#how-validation-runs}
 
 ```mermaid
 flowchart LR
@@ -94,7 +96,7 @@ Netron call dispatch:
 The schema is **pre-compiled** at decorator time, not on every call.
 Validation overhead per call is microseconds for typical schemas.
 
-## What you can express
+## What you can express {#what-you-can-express}
 
 Zod gives you the full toolkit:
 
@@ -124,7 +126,7 @@ const OrderSchema = z.object({
 The TypeScript type `z.infer<typeof OrderSchema>` is the type your
 method body sees.
 
-## Validation result options
+## Validation result options {#validation-result-options}
 
 Behaviour is controlled by the contract's `options`
 (`ValidationOptions`). The `mode` field decides how unknown keys are
@@ -142,7 +144,7 @@ Other `ValidationOptions` include `abortEarly`, `coerce`,
 `z.object` strips unknown keys unless `.strict()`/`.passthrough()` is
 applied); for production APIs, be explicit.
 
-## Read on
+## Read on {#read-on}
 
 | Page                                              | When to read                                   |
 | ------------------------------------------------- | ---------------------------------------------- |

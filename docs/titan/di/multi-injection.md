@@ -1,4 +1,6 @@
 ---
+id: "titan/di/multi-injection"
+slug: "/docs/titan/di/multi-injection"
 sidebar_position: 5
 title: Multi-injection
 description: One token, many providers — the canonical pattern for plugins, validators, middleware chains.
@@ -10,7 +12,7 @@ Multi-injection is one token with many providers. Resolving the token
 returns an array of all of them. It is the foundation for every plugin
 or registry pattern in Titan.
 
-## The basic pattern
+## The basic pattern {#the-basic-pattern}
 
 ```typescript
 import { createToken } from '@omnitron-dev/titan/nexus';
@@ -72,7 +74,7 @@ slot in without changing the consumer.
 > bound to a token into an array — use it when you want the intent to
 > be unambiguous at the injection site.
 
-## Why this matters
+## Why this matters {#why-this-matters}
 
 The alternative — a registry the consumer maintains — couples consumer
 and contributor. Adding a new validator means editing the consumer.
@@ -91,7 +93,7 @@ This is the core of every extensibility seam in Titan:
 
 All of them use multi-injection underneath.
 
-## Cross-module multi-tokens
+## Cross-module multi-tokens {#cross-module-multi-tokens}
 
 Multi-tokens compose across modules. If module A registers two
 providers and module B registers one, a consumer that imports both
@@ -128,7 +130,7 @@ The accumulation is the runtime composition of `imports`. Drop
 `ExtraValidatorsModule` from the root, and `SignupService` sees only
 the core validators — no other code change required.
 
-## Order
+## Order {#order}
 
 Providers register in the order their modules are discovered, which
 follows the `imports` graph. Within a module, registration follows
@@ -150,7 +152,7 @@ class OrdersService {
 }
 ```
 
-## Optional empty arrays
+## Optional empty arrays {#optional-empty-arrays}
 
 If no provider is registered, resolving a multi-token returns an empty
 array — not `undefined`, not throws. This means consumers can write
@@ -161,7 +163,7 @@ const validators = container.resolve(VALIDATORS);   // [] if nothing registered
 for (const v of validators) v.validate(input);       // loop is a no-op
 ```
 
-## Mixing multi and single
+## Mixing multi and single {#mixing-multi-and-single}
 
 A token is either multi or single. You cannot register one provider
 without `multi: true` and another with `multi: true` against the same
@@ -171,7 +173,7 @@ If you need the "first one wins" pattern, use a regular single token
 plus `useExisting` to alias to the chosen impl. If you need the "all
 of them" pattern, use multi.
 
-## A real example — health indicators
+## A real example — health indicators {#a-real-example--health-indicators}
 
 The `titan-health` ecosystem module uses multi-injection so any
 module can contribute an indicator without changing the consumer:
@@ -204,7 +206,7 @@ No other code changes.
 The exact token name and shape are owned by `titan-health`; the
 pattern shown above is the general multi-injection recipe.
 
-## Anti-patterns
+## Anti-patterns {#anti-patterns}
 
 - **Forgetting `multi: true`.** Without it, the second registration
   overwrites the first. Symptom: only one provider shows up in the

@@ -1,4 +1,6 @@
 ---
+id: "omnitron/recipes"
+slug: "/docs/omnitron/recipes"
 sidebar_position: 13
 title: Recipes
 description: Step-by-step solutions for common multi-process patterns.
@@ -14,13 +16,13 @@ worth knowing.
 Generic example names throughout: substitute what fits your
 domain.
 
-## 1. Stream-based fan-in (ingest → aggregate → serve)
+## 1. Stream-based fan-in (ingest → aggregate → serve) {#1-stream-based-fan-in-ingest--aggregate--serve}
 
 **When to use:** real-time data flowing in from many external
 sources (exchange websockets, IoT sensors, partner APIs);
 needs aggregation before storage and serving.
 
-### Topology
+### Topology {#topology}
 
 ```mermaid
 flowchart LR
@@ -65,7 +67,7 @@ Four `IProcessEntry`s, each with a distinct job:
 - **`http`** — public read API + `@Cron` triggers that dispatch
   work to the ohlcv pool via `topology.access`.
 
-### `defineSystem`
+### `defineSystem` {#definesystem}
 
 ```typescript
 export default defineSystem({
@@ -105,7 +107,7 @@ Drains in reverse-dependency order: http stops accepting requests
 first, then ohlcv finishes in-flight candles, then aggregators
 drain the stream, then collector closes WS connections.
 
-### Why Redis streams (not pub/sub)?
+### Why Redis streams (not pub/sub)? {#why-redis-streams-not-pubsub}
 
 - **Durability** — XADD persists; subscribers can disconnect and
   resume from the last ack'd id.
@@ -117,7 +119,7 @@ drain the stream, then collector closes WS connections.
 Pub/sub is fire-and-forget — fine for cache invalidation, wrong
 for raw data you can't afford to lose.
 
-### Gotchas
+### Gotchas {#gotchas}
 
 - **Single collector process.** If you scale collector to `instances: 2`,
   both will dial the same exchange — you'll either trip rate limits
@@ -134,13 +136,13 @@ for raw data you can't afford to lose.
   individually addressable via env, which is another reason to
   keep stream consumers single-instance here.)
 
-## 2. CPU-bound worker pool with P2C balancing
+## 2. CPU-bound worker pool with P2C balancing {#2-cpu-bound-worker-pool-with-p2c-balancing}
 
 **When to use:** request paths that need expensive CPU work
 (image transforms, video transcoding, ZK proof generation,
 ML inference, candle aggregation).
 
-### Topology
+### Topology {#topology-1}
 
 ```mermaid
 flowchart LR
@@ -156,7 +158,7 @@ flowchart LR
   Compute --> HTTP
 ```
 
-### `defineSystem`
+### `defineSystem` {#definesystem-1}
 
 ```typescript
 processes: [
@@ -183,7 +185,7 @@ pick 2 random workers, dispatch to the less loaded one. Cheap to
 compute, near-optimal balance — beats round-robin under skewed
 load.
 
-### Calling the pool
+### Calling the pool {#calling-the-pool}
 
 ```typescript
 import { createToken } from '@omnitron-dev/titan/nexus';
@@ -200,7 +202,7 @@ class ImageService {
 }
 ```
 
-### Gotchas
+### Gotchas {#gotchas-1}
 
 - **Workers must be stateless across calls.** Pool dispatch
   picks any worker — if a request stores state in worker memory
@@ -213,12 +215,12 @@ class ImageService {
   silently falls back to in-process work and you wonder why
   the pool sits idle.
 
-## 3. Scheduler-triggered work dispatched to a pool
+## 3. Scheduler-triggered work dispatched to a pool {#3-scheduler-triggered-work-dispatched-to-a-pool}
 
 **When to use:** periodic CPU work (nightly candle generation,
 report rollups, cache prewarming).
 
-### Topology
+### Topology {#topology-2}
 
 The scheduler runs in the http process (or any always-on
 process); it dispatches work to a sibling pool via `topology`.
@@ -251,7 +253,7 @@ Pattern: **always-on processes hold the schedule; pools execute
 the work.** Keeps the http event loop responsive (it just
 dispatches) and the pool isolated from request traffic.
 
-### Gotcha — `instances > 1` on the scheduler host
+### Gotcha — `instances > 1` on the scheduler host {#gotcha--instances--1-on-the-scheduler-host}
 
 If the http process runs as a pool itself (`instances: 4`), the
 `@Cron` fires 4× per tick. Either:
@@ -260,12 +262,12 @@ If the http process runs as a pool itself (`instances: 4`), the
 - Use `titan-scheduler.persistence` with distributed lock so only
   one instance fires per tick.
 
-## 4. WebSocket realtime app alongside HTTP RPC
+## 4. WebSocket realtime app alongside HTTP RPC {#4-websocket-realtime-app-alongside-http-rpc}
 
 **When to use:** any app that serves both request/response RPC
 and live push (chat, notifications, dashboards).
 
-### `defineSystem`
+### `defineSystem` {#definesystem-2}
 
 ```typescript
 processes: [{
@@ -292,7 +294,7 @@ One process serves both transports; clients can use whichever
 suits their session pattern. The gateway routes `/api/realtime/`
 to `:3005` and `/ws/` to `:3006`.
 
-### Gateway snippet
+### Gateway snippet {#gateway-snippet}
 
 ```nginx
 upstream realtime_backend { server ${UPSTREAM_REALTIME_HOST}:${UPSTREAM_REALTIME_PORT}; }
@@ -314,7 +316,7 @@ location /ws/ {
 `proxy_read_timeout 7d` lets long-lived connections survive
 gateway idle.
 
-### Gotchas
+### Gotchas {#gotchas-2}
 
 - **Auth on WS** runs on the **upgrade request** only. Closing
   and reopening WS after token rotation is the safest pattern —
@@ -324,13 +326,13 @@ gateway idle.
 - **Don't share `realtime` and `http` ports across pods.** WS
   needs to land on the pod that holds the user's socket.
 
-## 5. Multi-step deposit / settlement pipeline
+## 5. Multi-step deposit / settlement pipeline {#5-multi-step-deposit--settlement-pipeline}
 
 **When to use:** workflows that span multiple processes /
 external systems (payment processing, supply-chain steps,
 multi-stage ML pipelines).
 
-### Topology
+### Topology {#topology-3}
 
 ```mermaid
 flowchart LR
@@ -344,7 +346,7 @@ flowchart LR
   Q --> NotifyWorker[notification consumer]
 ```
 
-### `defineSystem`
+### `defineSystem` {#definesystem-3}
 
 ```typescript
 processes: [
@@ -380,7 +382,7 @@ Worker is `critical: false` — its absence doesn't take down the
 daemon. Failed deposits surface via metrics and retry on next
 poll.
 
-### Why a separate worker process?
+### Why a separate worker process? {#why-a-separate-worker-process}
 
 - **Crash isolation.** A bad mempool entry kills the worker,
   not the http surface.
@@ -389,13 +391,13 @@ poll.
 - **Restart freedom.** `omnitron restart deposit-worker` cycles
   the worker without taking the API down.
 
-## 6. Object storage with image transforms
+## 6. Object storage with image transforms {#6-object-storage-with-image-transforms}
 
 **When to use:** any service that serves user-uploaded media,
 applies on-demand transforms (resize, format conversion,
 watermarking).
 
-### Topology
+### Topology {#topology-4}
 
 ```mermaid
 flowchart LR
@@ -410,7 +412,7 @@ flowchart LR
   CDN --> Browser
 ```
 
-### Custom route alongside RPC
+### Custom route alongside RPC {#custom-route-alongside-rpc}
 
 ```typescript
 processes: [{
@@ -456,7 +458,7 @@ processes: [{
 }]
 ```
 
-### Gotchas
+### Gotchas {#gotchas-3}
 
 - **Custom routes can bypass RPC auth.** The example above
   explicitly calls `assertAccess('read')`. Don't omit this —
@@ -467,13 +469,13 @@ processes: [{
 - **Stream the response.** Don't buffer transformed images into
   memory; pipe directly to `Response.body`.
 
-## 7. Per-tenant data isolation via RLS
+## 7. Per-tenant data isolation via RLS {#7-per-tenant-data-isolation-via-rls}
 
 **When to use:** multi-tenant SaaS where one Postgres instance
 holds data for many tenants and the application enforces
 isolation.
 
-### Pattern
+### Pattern {#pattern}
 
 ```typescript
 import { defineRLSSchema, filter } from '@kysera/rls';   // re-exported by @omnitron-dev/titan-database
@@ -512,7 +514,7 @@ Every backend in your fan-out uses the **same** invocation
 wrapper — so the policy enforces uniformly whether the call
 comes via http, websocket, or service-to-service.
 
-### Bypassing RLS for admin operations
+### Bypassing RLS for admin operations {#bypassing-rls-for-admin-operations}
 
 ```typescript
 @Public({ auth: { roles: ['admin'] } })
@@ -525,7 +527,7 @@ async listAllUsersAcrossTenants() {
 `@BypassRLS()` is loud by design — it appears in code review
 diffs. Search for it during audit.
 
-## 8. Hot-reloadable maintenance mode
+## 8. Hot-reloadable maintenance mode {#8-hot-reloadable-maintenance-mode}
 
 **When to use:** scheduled downtime, emergency response, or
 graceful degradation.
@@ -558,7 +560,7 @@ redis-cli DEL platform:maintenance
 
 No daemon restart, no LB reconfiguration, instant flip.
 
-## 9. Onion-routed operator console
+## 9. Onion-routed operator console {#9-onion-routed-operator-console}
 
 **When to use:** sensitive operator surfaces (admin webapp,
 incident dashboards) that should not have public DNS / TLS.
@@ -587,7 +589,7 @@ persistent volume; same address survives restart.
 Defence in depth — not a substitute for RBAC, but it removes
 the operator surface from public scanning entirely.
 
-## 10. Cross-app service mesh via topology
+## 10. Cross-app service mesh via topology {#10-cross-app-service-mesh-via-topology}
 
 **When to use:** apps that need to call services in other
 apps directly, not just via shared infrastructure (database,
@@ -617,7 +619,7 @@ load-balanced proxy injected via DI under
 
 No URLs, no service discovery code, no DNS — purely declarative.
 
-## 11. Per-app database with shared infrastructure
+## 11. Per-app database with shared infrastructure {#11-per-app-database-with-shared-infrastructure}
 
 **When to use:** apps that need data isolation without infra
 sprawl.
@@ -651,7 +653,7 @@ Each app reads its `DATABASE_URL` from env and has no idea the
 other exists. Backups can target one database without touching
 the other.
 
-## 12. Dev hot-reload with shared workspace deps
+## 12. Dev hot-reload with shared workspace deps {#12-dev-hot-reload-with-shared-workspace-deps}
 
 **When to use:** a monorepo whose applications and shared libraries are developed
 from source together.
@@ -704,7 +706,7 @@ resident owner can still use an incompatible definition compiler after a backend
 upgrade. Inspect `omnitron backend status` and qualify that owner's source path;
 replace it only through a reviewed transition that preserves the other workloads.
 
-## 13. Two-database deploy per stack
+## 13. Two-database deploy per stack {#13-two-database-deploy-per-stack}
 
 **When to use:** running dev + staging on the same host without
 collisions.
@@ -733,7 +735,7 @@ stacks: {
 Both stacks run side-by-side. `omnitron stack start <project> dev`
 runs the dev stack; same for staging. They share no state.
 
-## 14. Webhook receiver alongside RPC
+## 14. Webhook receiver alongside RPC {#14-webhook-receiver-alongside-rpc}
 
 **When to use:** integrating with third-party services that push
 events (payment providers, git platforms, SaaS notifications).
@@ -770,7 +772,7 @@ Pattern: **acknowledge fast, work async.** Third-party webhook
 senders timeout aggressively (often 5 s); responding `200 OK`
 within milliseconds keeps you off their retry list.
 
-## See also
+## See also {#see-also}
 
 - [Best practices](./best-practices.md) — patterns that appear
   across all recipes

@@ -1,4 +1,6 @@
 ---
+id: "foundations/principles"
+slug: "/docs/foundations/principles"
 sidebar_position: 1
 title: Principles
 description: Shared contracts, explicit composition, visible lifecycle, and operational accountability.
@@ -10,7 +12,7 @@ Omnitron brings application code and operations into one TypeScript
 toolchain. Its value depends on boundaries that a developer can inspect,
 test and change.
 
-## Share contracts
+## Share contracts {#share-contracts}
 
 Netron clients can compile against service interfaces without generating a
 client SDK. Keep those types in a shared package or use type-only imports.
@@ -21,7 +23,7 @@ A TypeScript signature is a compile-time constraint. At runtime, validate
 inputs, authenticate callers and authorise each protected operation.
 Serialization does not replace those checks.
 
-## Compose explicitly
+## Compose explicitly {#compose-explicitly}
 
 Declare providers, imports and exports in modules. Use injection tokens
 where implementations vary. Configuration and logging are registered as
@@ -34,7 +36,7 @@ database module needs a driver and a live connection. Read the
 Titan supports optional filesystem discovery, but explicit module
 registration makes startup dependencies easier to review.
 
-## Make lifecycle observable
+## Make lifecycle observable {#make-lifecycle-observable}
 
 Services acquire resources during initialization and startup, then release
 them during shutdown. Set timeouts and make shutdown safe for in-flight
@@ -43,7 +45,7 @@ work. Test failed startup and interrupted shutdown as well as the happy path.
 The [lifecycle reference](../titan/application/lifecycle.md) describes
 ordering. Avoid relying on the exact interleaving of unrelated providers.
 
-## Separate runtime from supervision
+## Separate runtime from supervision {#separate-runtime-from-supervision}
 
 A Titan application is a normal process. Use a process supervisor appropriate
 to your deployment. Add Omnitron when you need its project model,
@@ -53,7 +55,7 @@ The CLI and web console use the daemon's RPC services. Operational access
 has its own identity and permissions; sharing a transport does not grant
 the same authority to every caller.
 
-## Report what happened
+## Report what happened {#report-what-happened}
 
 Return typed errors, log enough context to diagnose failures, and keep
 sensitive details out of public responses. Readiness, successful process

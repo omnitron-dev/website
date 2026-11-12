@@ -1,4 +1,6 @@
 ---
+id: "titan/migrations/from-express"
+slug: "/docs/titan/migrations/from-express"
 sidebar_position: 3
 title: From Express
 description: Migrating a plain-Node Express service to Titan.
@@ -18,7 +20,7 @@ mapping** between what you wrote in Express and what its
 equivalent looks like in Titan, so you can decide whether the
 trade is worth it.
 
-## At a glance
+## At a glance {#at-a-glance}
 
 | Express                              | Titan                                                |
 | ------------------------------------ | ---------------------------------------------------- |
@@ -39,7 +41,7 @@ trade is worth it.
 | Manual `redis` connection            | `titan-redis` (clusters, sentinel, named instances)  |
 | Manual graceful shutdown handlers    | Built-in lifecycle (`OnStop` / `OnDestroy`)          |
 
-## A side-by-side concrete example
+## A side-by-side concrete example {#a-side-by-side-concrete-example}
 
 Suppose you have a small REST endpoint that creates a user.
 
@@ -113,9 +115,9 @@ Things you stop writing yourself:
 - **Listen / port management.** Configured declaratively on the
   Netron transport.
 
-## Mapping middleware
+## Mapping middleware {#mapping-middleware}
 
-### Authentication
+### Authentication {#authentication}
 
 ```typescript
 // Express
@@ -147,7 +149,7 @@ class UsersService {
 }
 ```
 
-### CORS / Helmet / Compression
+### CORS / Helmet / Compression {#cors--helmet--compression}
 
 These belong to the HTTP **transport**, not the service. Configure
 on the Netron HTTP transport directly:
@@ -166,7 +168,7 @@ netron.registerTransportServer('http', {
 });
 ```
 
-### Logging requests
+### Logging requests {#logging-requests}
 
 Express:
 
@@ -193,7 +195,7 @@ pipeline.use(requestLogging);
 → See [Netron / Middleware](../netron/middleware.md) for the
 full middleware contract.
 
-## Configuration
+## Configuration {#configuration}
 
 Replace ad-hoc `process.env` reads with a validated schema. You
 get type-safety and a single source of truth.
@@ -222,7 +224,7 @@ ConfigModule.forRoot({
 
 → [`ConfigModule`](../modules/config.mdx)
 
-## Logging
+## Logging {#logging}
 
 Drop `console.log` and `winston`:
 
@@ -246,7 +248,7 @@ class UsersService {
 
 → [`LoggerModule`](../modules/logger.mdx)
 
-## Graceful shutdown
+## Graceful shutdown {#graceful-shutdown}
 
 Express requires manual `SIGTERM` / `SIGINT` handlers and
 `server.close()` orchestration. Titan handles this automatically:
@@ -271,7 +273,7 @@ cleanly.
 
 → [Application / Shutdown](../application/shutdown.md)
 
-## Background work (cron, queues)
+## Background work (cron, queues) {#background-work-cron-queues}
 
 | Express setup                            | Titan equivalent                           |
 | ---------------------------------------- | ------------------------------------------ |
@@ -283,7 +285,7 @@ cleanly.
 → [`SchedulerModule`](../modules/scheduler.mdx)
 and [`NotificationsModule`](../modules/notifications.mdx).
 
-## Migration order — recommended
+## Migration order — recommended {#migration-order--recommended}
 
 1. **Bootstrap.** Wrap your `express()` app inside an Application
    shell that runs alongside it — gradually move endpoints over.
@@ -306,7 +308,7 @@ and [`NotificationsModule`](../modules/notifications.mdx).
 6. **Cut the cord.** Once endpoints are all converted, drop the
    Express proxy and use Netron HTTP transport directly.
 
-## What you gain
+## What you gain {#what-you-gain}
 
 - **Validation, errors, logging, metrics as first-class** — not
   bolted-on.
@@ -317,7 +319,7 @@ and [`NotificationsModule`](../modules/notifications.mdx).
 - **Operability.** Built-in graceful shutdown, health probes,
   metrics endpoint, traceable IDs.
 
-## What you give up
+## What you give up {#what-you-give-up}
 
 - **The "one file, one app" feeling.** Titan applications are
   structured. If your service is < 200 lines of Express, the
@@ -328,7 +330,7 @@ and [`NotificationsModule`](../modules/notifications.mdx).
 - **Decorator-heavy code style.** If your team is decorator-averse,
   Titan will feel heavy.
 
-## See also
+## See also {#see-also}
 
 - [Recipes / Webhook receiver](../recipes/webhook-receiver.md) —
   closest direct analogue to a small Express service

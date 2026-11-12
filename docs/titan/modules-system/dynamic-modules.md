@@ -1,4 +1,6 @@
 ---
+id: "titan/modules-system/dynamic-modules"
+slug: "/docs/titan/modules-system/dynamic-modules"
 sidebar_position: 2
 title: Dynamic Modules
 description: Modules that take configuration — forRoot, forFeature, async factories.
@@ -9,7 +11,7 @@ description: Modules that take configuration — forRoot, forFeature, async fact
 A dynamic module is a module produced by a function. Use them when
 the module's providers depend on configuration the caller supplies.
 
-## The shape
+## The shape {#the-shape}
 
 A dynamic module returns a `DynamicModule` descriptor:
 
@@ -36,7 +38,7 @@ A `DynamicModule` is a runtime value; the static `@Module({})`
 decorator on the class is only there so the class is recognised as a
 module.
 
-## `forRoot` vs `forFeature`
+## `forRoot` vs `forFeature` {#forroot-vs-forfeature}
 
 A widely-followed convention:
 
@@ -68,7 +70,7 @@ export class UsersModule {}
 Not every dynamic module needs both. `forRoot` alone is fine for most
 cases.
 
-## Async dynamic modules — `forRootAsync`
+## Async dynamic modules — `forRootAsync` {#async-dynamic-modules--forrootasync}
 
 Use when the configuration itself comes from async sources (a remote
 config service, a secret manager, an environment-specific file):
@@ -116,7 +118,7 @@ The `useFactory` is called once during bootstrap with the resolved
 `inject` dependencies. Whatever it returns becomes the value bound
 to `CACHE_OPTIONS`.
 
-## Global modules
+## Global modules {#global-modules}
 
 Setting `global: true` on a `DynamicModule` makes its exports visible
 to every module in the application, no `imports` required:
@@ -134,7 +136,7 @@ Use sparingly — global modules are framework infrastructure
 (`ConfigModule`, `LoggerModule`). Domain modules should require
 explicit imports.
 
-## Composing options across `forRoot` calls
+## Composing options across `forRoot` calls {#composing-options-across-forroot-calls}
 
 Some modules need composition (e.g. multiple JWT secrets, multiple
 database connections). The pattern is `forRoot` once, `forFeature`
@@ -154,7 +156,7 @@ The implementation usually:
 - `forFeature` registers an *additional* connection in the registry
   and exposes a feature-scoped service that uses it.
 
-## Authoring a dynamic module
+## Authoring a dynamic module {#authoring-a-dynamic-module}
 
 A canonical template:
 
@@ -217,7 +219,7 @@ export class MyService {
 This template scales: every ecosystem module in `@omnitron-dev/titan-*`
 is built from the same skeleton.
 
-## Anti-patterns
+## Anti-patterns {#anti-patterns}
 
 - **Configuration in module-level constants.** If your module reads
   `process.env.X` at file load time, you have lost the configurability

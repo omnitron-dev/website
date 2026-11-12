@@ -1,4 +1,6 @@
 ---
+id: "omnitron/automation"
+slug: "/docs/omnitron/automation"
 title: Xec automation
 description: Author, review, execute and inspect bounded Xec pipelines through Console and CLI.
 ---
@@ -9,7 +11,7 @@ Use **Pipelines** in Console to create an automation, review its source and targ
 
 This executor is for trusted administrators. A separate child process prevents a script from blocking the daemon's JavaScript event loop, but does **not** sandbox its filesystem, network or operating-system privileges. Do not give an untrusted agent the local daemon socket or this executor. See the [agent integration design](./agents.md).
 
-## First automation
+## First automation {#first-automation}
 
 Save this as `inspect.json`, replacing the working directory with an existing project directory:
 
@@ -50,7 +52,7 @@ omnitron pipeline save inspect.json --id <pipeline-id> --expected-revision <revi
 
 The update compares that revision inside a database transaction. If another editor changed the definition, the save fails without replacing their work. Console sends the revision loaded when its editor opened and keeps your draft on a conflict. Reopen the current definition and reconcile both edits before saving again. Prefer IDs when names are ambiguous.
 
-## Steps and targets
+## Steps and targets {#steps-and-targets}
 
 | Field | Meaning |
 | --- | --- |
@@ -71,7 +73,7 @@ Shell steps receive parameters as `OMNITRON_PARAMS` JSON. `{{parameter}}` source
 
 From Omnitron 0.3.5 with Xec Ops 0.11.4, SSH shell steps receive their declared environment and `OMNITRON_PARAMS`. Local callbacks can still read the controller environment. Configure credentials and paths on the node that owns them.
 
-## Review and authority
+## Review and authority {#review-and-authority}
 
 Every public pipeline method requires `admin`. Invocation revalidates the human session, including its current account role. Sensitive mutations must write an audit intent before taking effect; a failed audit write denies the operation. The owner-only Unix socket remains an OS-authorized administrative interface.
 
@@ -81,7 +83,7 @@ The definition carries a SHA-256 `revision`. Console submits the revision displa
 
 Per-step history records a digest of the admitted definition, target ID, actor, attempts, timing, outcome and bounded stdout/stderr. It does not yet keep a complete immutable source archive. Do not treat the digest alone as recoverable source.
 
-## Upgrading existing integrations
+## Upgrading existing integrations {#upgrading-existing-integrations}
 
 Review saved definitions and their callers when upgrading the pipeline contract:
 
@@ -94,7 +96,7 @@ Validate the updated definitions before enabling recurring dispatch. Re-register
 
 A pinned recurring application does not automatically pin the programs launched by its pipeline. Package one-shot entry points and delivery tools with the application, use the admitted executable paths in the saved definition, and keep mutable data directories separate. The dispatcher should require the exact reviewed command, target, environment and revision. Moving to another release requires an explicit conditional definition update; it must not silently accept a changed pipeline or compile a helper from a development checkout during a production run.
 
-## Progress and failure
+## Progress and failure {#progress-and-failure}
 
 Console shows individual step states, elapsed time, attempt counts, exit codes and output. Open a run for details; the history table fetches summaries without downloading every run's output. A failed refresh is displayed as stale data. On narrow windows, details use the full viewport and long code/output remains inside its scroll area.
 
@@ -102,7 +104,7 @@ Console shows individual step states, elapsed time, attempt counts, exit codes a
 
 Local process groups and Xec SSH channels participate in cancellation. A command that deliberately detaches a remote process can outlive its SSH channel; channel closure is not proof that every remote side effect stopped. Use managed Omnitron jobs or an explicitly reversible playbook for long-lived services.
 
-## SSH ownership and uncertain effects
+## SSH ownership and uncertain effects {#ssh-ownership-and-uncertain-effects}
 
 Omnitron owns authorization, trusted node identities, durable operation state,
 audit and presentation. Xec owns SSH authentication, host verification, connection
@@ -123,7 +125,7 @@ candidate from installed fleet behavior. Dependency publication and coordinated
 activation remain separate steps. Existing applications do not need a direct SSH
 transport dependency.
 
-## Resource bounds
+## Resource bounds {#resource-bounds}
 
 | Resource | Bound |
 | --- | --- |

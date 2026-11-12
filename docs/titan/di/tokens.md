@@ -1,4 +1,6 @@
 ---
+id: "titan/di/tokens"
+slug: "/docs/titan/di/tokens"
 sidebar_position: 4
 title: Tokens
 description: Class, symbol, multi-, lazy, async, optional, config, stream — the token family.
@@ -27,7 +29,7 @@ import {
 } from '@omnitron-dev/titan/nexus';
 ```
 
-## Token interface
+## Token interface {#token-interface}
 
 Every token implements:
 
@@ -45,9 +47,9 @@ The phantom `type?: T` carries the value type for compile-time
 checking; tokens are matched by reference equality at runtime
 (identity = `id` symbol).
 
-## Token kinds
+## Token kinds {#token-kinds}
 
-### Class token — the class itself
+### Class token — the class itself {#class-token--the-class-itself}
 
 ```typescript
 @Service({ name: 'users' })
@@ -59,7 +61,7 @@ container.resolve(UsersService);    // class is the token
 When you have a concrete class, the class **is** the token. This is
 the idiomatic form for service classes.
 
-### Symbol token — `createToken<T>(name)`
+### Symbol token — `createToken<T>(name)` {#symbol-token--createtokentname}
 
 ```typescript
 interface ILogger { info(msg: string): void; }
@@ -78,7 +80,7 @@ given name.
 
 Use for: interfaces, configuration bundles, third-party types.
 
-### Multi-token — `createMultiToken<T>(name)`
+### Multi-token — `createMultiToken<T>(name)` {#multi-token--createmultitokentname}
 
 ```typescript
 const VALIDATORS = createMultiToken<IValidator>('Validators');
@@ -92,7 +94,7 @@ container.resolve(VALIDATORS);  // IValidator[]
 Use for: plugin registration, middleware chains, validators. See
 [Multi-injection](./multi-injection.md).
 
-### Optional token — `createOptionalToken<T>(name)`
+### Optional token — `createOptionalToken<T>(name)` {#optional-token--createoptionaltokentname}
 
 ```typescript
 const METRICS = createOptionalToken<IMetrics>('Metrics');
@@ -106,7 +108,7 @@ class UsersService {
 
 `isOptionalToken(token)` distinguishes these at runtime.
 
-### Lazy token — `createLazyToken<T>(name, metadata?)`
+### Lazy token — `createLazyToken<T>(name, metadata?)` {#lazy-token--createlazytokentname-metadata}
 
 ```typescript
 const AUTH = createLazyToken<AuthService>('Auth');
@@ -117,7 +119,7 @@ Tags the token as lazy (`isLazy: true`); pair it with
 Useful for breaking circular import graphs. See
 [Circular Dependencies](./circular-dependencies.md).
 
-### Async token — `createAsyncToken<T>(name)`
+### Async token — `createAsyncToken<T>(name)` {#async-token--createasynctokentname}
 
 ```typescript
 const REMOTE = createAsyncToken<RemoteService>('Remote');
@@ -130,22 +132,22 @@ container.register(REMOTE, {
 const remote = await container.resolveAsync(REMOTE);
 ```
 
-### Config token — `createConfigToken<T>(name, { validate?, defaults? })`
+### Config token — `createConfigToken<T>(name, { validate?, defaults? })` {#config-token--createconfigtokentname--validate-defaults-}
 
 A typed token specifically for configuration bundles. The
 `@omnitron-dev/titan/module/config` module uses these internally.
 
-### Stream token — `createStreamToken<T>(name)`
+### Stream token — `createStreamToken<T>(name)` {#stream-token--createstreamtokentname}
 
 A token for streaming values (async iterables). Used in advanced
 patterns where the provider yields data continuously.
 
-### Scoped token — `createScopedToken<T>(name, scope)`
+### Scoped token — `createScopedToken<T>(name, scope)` {#scoped-token--createscopedtokentname-scope}
 
 Bake a default scope into the token; providers registered against it
 inherit the scope unless explicitly overridden.
 
-## Class → token helper
+## Class → token helper {#class--token-helper}
 
 ```typescript
 const token = tokenFromClass(UsersService);
@@ -156,7 +158,7 @@ const token = tokenFromClass(UsersService);
 Useful when you need to pass the token around (logs, error messages)
 without re-deriving it from the class.
 
-## Injecting tokens
+## Injecting tokens {#injecting-tokens}
 
 In a class, use `@Inject(TOKEN)` for non-class tokens:
 
@@ -177,7 +179,7 @@ Class tokens do not need `@Inject` — Titan uses TypeScript's emitted
 constructor metadata. Symbol-based tokens always need `@Inject`
 because TypeScript cannot emit them.
 
-## Token uniqueness
+## Token uniqueness {#token-uniqueness}
 
 Tokens are matched by `symbol` identity at runtime, and `createToken`
 backs that identity with a process-global, name-keyed registry: two
@@ -189,7 +191,7 @@ For clarity, still declare a shared token once in a shared module and
 import it everywhere rather than relying on the by-name registry to
 reconcile independently-created tokens.
 
-## Token naming conventions
+## Token naming conventions {#token-naming-conventions}
 
 | Convention          | Example                            |
 | ------------------- | ---------------------------------- |
@@ -201,7 +203,7 @@ reconcile independently-created tokens.
 Ecosystem modules (`titan-cache`, `titan-redis`, etc.) use the
 `_TOKEN` suffix consistently for their exported tokens.
 
-## Anti-patterns
+## Anti-patterns {#anti-patterns}
 
 - **String tokens.** Some DI frameworks accept `'logger'` as a
   token; Nexus does not. Use `createToken` for typed identity.

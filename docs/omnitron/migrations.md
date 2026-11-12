@@ -1,4 +1,6 @@
 ---
+id: "omnitron/migrations"
+slug: "/docs/omnitron/migrations"
 title: Database migrations
 ---
 
@@ -6,7 +8,7 @@ Use `@omnitron-dev/omnitron/migration` for migration definitions, execution and
 inspection. `omnitron migrate` uses that same API. Applications do not need a
 separate Kysera dependency or a second migration CLI.
 
-## Start with one configuration
+## Start with one configuration {#start-with-one-configuration}
 
 Install Omnitron and the driver your application uses. This PostgreSQL example
 borrows a pool through a narrow adapter; it does not initialize Titan DI or start
@@ -57,7 +59,7 @@ normal Omnitron `{ ok, data }` / `{ ok: false, error, diagnostic }` contract.
 
 Direct CLI migration writes require standalone lifecycle authority. On an enrolled controller, use the [backend schema plan](./cli.md#backend-replacement) for daemon schema changes. For a standalone ecosystem that provides package migration scripts, `omnitron infra migrate --dry-run` lists the resolved packages in dependency order.
 
-## Guarantees and limits
+## Guarantees and limits {#guarantees-and-limits}
 
 | Mechanism | Behavior |
 | --- | --- |
@@ -98,7 +100,7 @@ completion hooks run after the batch commits. `MigrationHookError.applied` means
 the database change committed even though its observer failed: do not rerun the
 migration body to repair an observer.
 
-## Adopt an existing application
+## Adopt an existing application {#adopt-an-existing-application}
 
 Preserve the deployed journal, version names, checksum encoding and lock
 identity. Do not create a second journal or infer execution from tables existing.
@@ -138,7 +140,7 @@ trust-on-first-use and rollback-drift behavior remain compatibility policies;
 new applications should use `createMigrationRunner`. Legacy error constructors
 are exported as `LegacyMigrationLockError` and `LegacyMigrationChecksumError`.
 
-## Stack-owned migrations
+## Stack-owned migrations {#stack-owned-migrations}
 
 A database dependency does not authorize schema changes. Declare one migration
 owner by its application alias; the database name and package directory can differ:
@@ -215,7 +217,7 @@ before consumers. Several owners spread over different nodes are refused before
 provisioning: the current deployment path has no global migration barrier. A replicated
 application is not silently reduced to an arbitrary migration owner.
 
-### Existing scripts
+### Existing scripts {#existing-scripts}
 
 `migrate: true` preserves the conventional `src/database/migrate.ts` →
 `dist/database/migrate.js` program, with the database name as its application alias.
@@ -231,7 +233,7 @@ from `DATABASE_URL` or the presence of a conventional script. Legacy boolean bin
 describe each node's local database; use an explicit owner for a shared database.
 Non-owning node allocations never provision or migrate their controller's services.
 
-### Preview and diagnosis
+### Preview and diagnosis {#preview-and-diagnosis}
 
 ```bash
 omnitron infra migrate --stack dev --dry-run
@@ -251,7 +253,7 @@ configs or opening a database connection. Database access, schema compatibility 
 migration completion remain separate evidence. Runtime workers should inspect their
 required schema through the read-only runner API instead of applying DDL at startup.
 
-## Programmatic use and responsibility boundaries
+## Programmatic use and responsibility boundaries {#programmatic-use-and-responsibility-boundaries}
 
 `executeMigrationOperation(config, options)` is the CLI's reusable operation
 layer. It owns connection cleanup and returns integrity information. Direct

@@ -1,4 +1,6 @@
 ---
+id: "getting-started/project-structure"
+slug: "/docs/getting-started/project-structure"
 sidebar_position: 3
 title: Project Structure
 ---
@@ -9,7 +11,7 @@ A reference layout for a Titan-based project. The Omnitron monorepo itself
 follows this shape; consumer projects do not need to be a monorepo to use
 the same conventions.
 
-## Single-app layout
+## Single-app layout {#single-app-layout}
 
 ```text
 my-app/
@@ -27,7 +29,7 @@ my-app/
 └── package.json
 ```
 
-## Monorepo layout
+## Monorepo layout {#monorepo-layout}
 
 For multi-service projects, mirror the Omnitron monorepo:
 
@@ -44,7 +46,7 @@ my-monorepo/
 └── turbo.json
 ```
 
-### `pnpm-workspace.yaml`
+### `pnpm-workspace.yaml` {#pnpm-workspaceyaml}
 
 ```yaml
 packages:
@@ -52,7 +54,7 @@ packages:
   - packages/*
 ```
 
-### Sharing service types
+### Sharing service types {#sharing-service-types}
 
 Service interfaces should live in a shared package so both the server
 implementation and the client `queryInterface<T>()` call see the same type:
@@ -68,7 +70,7 @@ packages/shared-types/
 The server class implements the contract; the client parameterises
 `queryInterface<UsersContract>()` against it.
 
-## Configuration
+## Configuration {#configuration}
 
 Titan's `ConfigModule` reads from any combination of files, env vars, and
 schema-validated overrides. A typical project:
@@ -86,7 +88,7 @@ my-app/
 See [Titan / Application & DI](../titan/application/) for the full
 config grammar.
 
-## Conventions
+## Conventions {#conventions}
 
 - **Module per bounded context.** Group services, repositories, and
   schemas by domain, not by layer.

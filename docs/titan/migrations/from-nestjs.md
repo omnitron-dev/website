@@ -1,4 +1,6 @@
 ---
+id: "titan/migrations/from-nestjs"
+slug: "/docs/titan/migrations/from-nestjs"
 sidebar_position: 2
 title: From NestJS
 description: Concept-by-concept mapping from NestJS to Titan.
@@ -11,7 +13,7 @@ approach — most concepts map directly. The genuine deltas are
 where Titan made different decisions; this page calls them out
 explicitly so you don't fight the framework.
 
-## At a glance
+## At a glance {#at-a-glance}
 
 | NestJS                              | Titan                                              | Note                                 |
 | ----------------------------------- | -------------------------------------------------- | ------------------------------------ |
@@ -41,7 +43,7 @@ explicitly so you don't fight the framework.
 | Pipes (`@UsePipes`)                 | `@Validate(schema)` / `@Contract(...)`             | Zod schemas, not class-validator     |
 | Filters (`@UseFilters`)             | Error class hierarchy + middleware                 | Errors are values, not events        |
 
-## The biggest delta — controllers vs services
+## The biggest delta — controllers vs services {#the-biggest-delta--controllers-vs-services}
 
 The largest mental shift: NestJS controllers are HTTP-aware (`@Get`,
 `@Post`, `@Param`, `@Body`). Titan's `@Service` is **transport-
@@ -79,7 +81,7 @@ is the framework's concern.
 → See [Netron / Services](../netron/services.md) for the full
 contract semantics.
 
-## Lifecycle hooks
+## Lifecycle hooks {#lifecycle-hooks}
 
 | NestJS interface             | Titan interface         | Fires when                              |
 | ---------------------------- | ----------------------- | --------------------------------------- |
@@ -96,7 +98,7 @@ details) => …)`, which receives it.
 
 → [Application / Lifecycle](../application/lifecycle.md)
 
-## Validation — class-validator → Zod
+## Validation — class-validator → Zod {#validation--class-validator--zod}
 
 NestJS commonly uses `class-validator` + `class-transformer`:
 
@@ -130,7 +132,7 @@ soup; the `z.infer` gives you exact compile-time types.
 
 → [Validation / Contracts](../validation/contracts.md)
 
-## Errors — exception filters → typed errors
+## Errors — exception filters → typed errors {#errors--exception-filters--typed-errors}
 
 NestJS catches via filters:
 
@@ -162,7 +164,7 @@ No filter classes needed. The error class is the wire contract.
 
 → [Errors](../errors/overview.md)
 
-## DI scopes
+## DI scopes {#di-scopes}
 
 | NestJS scope       | Titan equivalent (Nexus) |
 | ------------------ | ------------------------ |
@@ -176,7 +178,7 @@ one token, multiple providers, chosen per request context. This is
 the closest Titan has to NestJS's request-scoped providers but
 covers more (per-tenant, per-feature-flag, per-environment).
 
-## Guards / middleware
+## Guards / middleware {#guards--middleware}
 
 NestJS:
 
@@ -207,7 +209,7 @@ pipeline.use(rateLimitMiddlewareFn);
 → [Netron / Middleware](../netron/middleware.md) and
 [Netron / Authentication](../netron/authentication.md)
 
-## Module helpers
+## Module helpers {#module-helpers}
 
 NestJS has helpers like `Test.createTestingModule()` for tests.
 Titan overrides a provider by registering it **last** — pass the
@@ -231,7 +233,7 @@ const app = await Application.create({
 
 → [Testing / DI Overrides](../testing/di-overrides.md)
 
-## Migration order — recommended
+## Migration order — recommended {#migration-order--recommended}
 
 1. **Bootstrap.** Move the entry-point into `Application.create`;
    bridge legacy providers via `providers: [[TOKEN, { useValue: ... }]]`.
@@ -244,7 +246,7 @@ const app = await Application.create({
    built-in equivalents are auto-loaded.
 6. **Repeat module-by-module.** Strangler-fig — no big bang.
 
-## What you gain
+## What you gain {#what-you-gain}
 
 - **Transport-agnostic RPC.** Same service over HTTP / WS / TCP /
   Unix without duplicating handlers.
@@ -255,7 +257,7 @@ const app = await Application.create({
 - **Smaller dependency footprint.** Ecosystem modules are
   individually versioned; you install what you use.
 
-## What's different (not better-or-worse, just different)
+## What's different (not better-or-worse, just different) {#whats-different-not-better-or-worse-just-different}
 
 - **Validation is Zod, not class-validator.** If your codebase
   is heavily class-decorated DTOs, the rewrite is real work.
@@ -265,7 +267,7 @@ const app = await Application.create({
   the `ShutdownReason` is delivered to handlers registered via
   `app.onStop((reason, details) => …)`** — slightly different API.
 
-## See also
+## See also {#see-also}
 
 - [Concepts / Design Principles](../concepts/design-principles.md)
 - [Recipes / API service stack](../recipes/api-service.md) — the

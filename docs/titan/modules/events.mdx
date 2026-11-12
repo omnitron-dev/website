@@ -1,12 +1,13 @@
 ---
+id: "titan/modules/events"
+slug: "/docs/titan/modules/events"
 title: titan-events
 ---
 
-import ModuleBadge from '@site/src/components/ModuleBadge';
 
 # titan-events
 
-<ModuleBadge origin="official" pkg="@omnitron-dev/titan-events" status="stable" />
+<span class="module-badge">official · @omnitron-dev/titan-events · stable</span>
 
 Typed event bus with wildcard / namespaced patterns, decorator-based
 listeners, async / serial / reduce emit modes, event history with
@@ -17,7 +18,7 @@ events, and rich metrics.
 pnpm add @omnitron-dev/titan-events
 ```
 
-## When you need it
+## When you need it {#when-you-need-it}
 
 - **In-process domain events.** Decouple services that should react
   to each other (e.g., `user.created` → send welcome email →
@@ -32,7 +33,7 @@ pnpm add @omnitron-dev/titan-events
 > For cross-process delivery use [`titan-notifications`](./notifications.mdx)
 > over Rotif or a real message broker. `titan-events` is in-process.
 
-## Quickstart
+## Quickstart {#quickstart}
 
 ```typescript
 import { EventsModule } from '@omnitron-dev/titan-events';
@@ -77,7 +78,7 @@ class WelcomeMailer {
 }
 ```
 
-## `IEventsModuleOptions`
+## `IEventsModuleOptions` {#ieventsmoduleoptions}
 
 | Option              | Type                                                              | Default       |
 | ------------------- | ----------------------------------------------------------------- | ------------- |
@@ -94,9 +95,9 @@ class WelcomeMailer {
 
 Also exported: `forRootAsync({ useFactory, inject? })`.
 
-## `EventsService` — the API
+## `EventsService` — the API {#eventsservice--the-api}
 
-### Emit modes
+### Emit modes {#emit-modes}
 
 ```typescript
 // Sync — fire-and-forget; returns true if any listener accepted
@@ -124,7 +125,7 @@ synchronous throws. Multiple failed groups produce `AggregateError`. Handler
 error policies still apply. Await and handle this promise at the operation
 boundary; event delivery does not roll back committed domain effects.
 
-### Subscribe / unsubscribe
+### Subscribe / unsubscribe {#subscribe--unsubscribe}
 
 | Method                                                              | Returns                          |
 | ------------------------------------------------------------------- | -------------------------------- |
@@ -136,7 +137,7 @@ boundary; event delivery does not roll back committed domain effects.
 | `unsubscribeAll()`                                                  | `void`                           |
 | `waitFor<T>(event, timeout?, filter?)`                              | `Promise<T>`                     |
 
-### Introspection / patterns
+### Introspection / patterns {#introspection--patterns}
 
 | Method                                  | Purpose                                                 |
 | --------------------------------------- | ------------------------------------------------------- |
@@ -150,7 +151,7 @@ boundary; event delivery does not roll back committed domain effects.
 | `emitToPattern<T>(pattern, data?, options?)` | Emit to every event matching pattern               |
 | `removeListenersByPattern(pattern)`     | Bulk unsubscribe by pattern                             |
 
-### Transactions
+### Transactions {#transactions}
 
 ```typescript
 const tx = this.events.beginTransaction();
@@ -168,9 +169,9 @@ if (everythingOk) {
 Useful for "either all of these events fire or none" semantics
 within a single request scope.
 
-## Decorators
+## Decorators {#decorators}
 
-### `@OnEvent(options)`
+### `@OnEvent(options)` {#oneventoptions}
 
 ```typescript
 @OnEvent({
@@ -186,16 +187,16 @@ within a single request scope.
 async onUserChange(data: UserEvent) { /* … */ }
 ```
 
-### `@OnceEvent(options)` — fire once then unsubscribe
+### `@OnceEvent(options)` — fire once then unsubscribe {#onceeventoptions--fire-once-then-unsubscribe}
 
 ```typescript
 @OnceEvent({ event: 'app.ready' })
 async warmCaches() { /* … */ }
 ```
 
-### `@OnAnyEvent()` — wildcard catch-all
+### `@OnAnyEvent()` — wildcard catch-all {#onanyevent--wildcard-catch-all}
 
-### `@EmitEvent(options)` — emit when a method runs
+### `@EmitEvent(options)` — emit when a method runs {#emiteventoptions--emit-when-a-method-runs}
 
 ```typescript
 @EmitEvent({
@@ -224,7 +225,7 @@ that stores the emitter as `events`, for example, will not emit through
 this decorator. Expose it as `eventEmitter` or `__eventEmitter__`; the
 property name is part of the contract.
 
-### `@ScheduleEvent(options)`
+### `@ScheduleEvent(options)` {#scheduleeventoptions}
 
 ```typescript
 @ScheduleEvent({ event: 'user.welcome-followup', delay: 24 * 60 * 60 * 1000 })   // 24h delay
@@ -237,17 +238,17 @@ async dailyReport() { /* … */ }
 Options: `event` (required), plus one of `delay` (ms), `cron`, or
 `at` (a `Date`).
 
-### `@BatchEvents(options)`
+### `@BatchEvents(options)` {#batcheventsoptions}
 
 Coalesce many emits into one delivery — useful when a tight loop
 would otherwise fire thousands of identical events. Options: `event`,
 `maxSize`, and `maxWait` (ms) are all required.
 
-### `@OnModuleEvent({ event, filter? })` — listen to framework module events
+### `@OnModuleEvent({ event, filter? })` — listen to framework module events {#onmoduleevent-event-filter---listen-to-framework-module-events}
 
-### `@EventEmitter(namespace?)` — class-level emitter binding
+### `@EventEmitter(namespace?)` — class-level emitter binding {#eventemitternamespace--class-level-emitter-binding}
 
-## Wildcard semantics
+## Wildcard semantics {#wildcard-semantics}
 
 With `wildcard: true`:
 
@@ -260,7 +261,7 @@ With `wildcard: true`:
 Pattern resolution is cached, so wildcards are O(1) per emit at
 runtime.
 
-## Other services exposed
+## Other services exposed {#other-services-exposed}
 
 | Service                       | Token                                | Purpose                                |
 | ----------------------------- | ------------------------------------ | -------------------------------------- |
@@ -279,7 +280,7 @@ directly; the service adapts their parse results to its validation contract.
 `validateData(name, payload)` returns a boolean; `validate(name, payload)`
 returns the validation result, including field errors.
 
-## Lifecycle
+## Lifecycle {#lifecycle}
 
 `EventsService` implements `onInit`, `onStart`, `onStop`,
 `onDestroy`. The module honours them via the standard Titan lifecycle.
@@ -296,7 +297,7 @@ flowchart LR
   Bus --> Sched[EventSchedulerService<br/>for delayed/cron]
 ```
 
-## Anti-patterns
+## Anti-patterns {#anti-patterns}
 
 - **Treating in-process events as durable.** They aren't. Restart →
   in-flight handlers gone. For at-least-once delivery, use
@@ -311,7 +312,7 @@ flowchart LR
   process — easy to leave running and blow the listener budget.
   Prefer scoped patterns.
 
-## See also
+## See also {#see-also}
 
 - [`titan-notifications`](./notifications.mdx) — for cross-process
   durable delivery

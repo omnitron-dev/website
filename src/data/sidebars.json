@@ -1,0 +1,1021 @@
+{
+  "docs": [
+    {
+      "type": "doc",
+      "id": "intro"
+    },
+    {
+      "type": "doc",
+      "id": "comparison"
+    },
+    {
+      "type": "category",
+      "label": "Getting Started",
+      "items": [
+        {
+          "type": "doc",
+          "id": "getting-started/installation"
+        },
+        {
+          "type": "doc",
+          "id": "getting-started/quickstart"
+        },
+        {
+          "type": "doc",
+          "id": "getting-started/developer-map"
+        },
+        {
+          "type": "doc",
+          "id": "getting-started/project-structure"
+        }
+      ],
+      "href": "/docs/category/getting-started"
+    },
+    {
+      "type": "category",
+      "label": "Tutorial",
+      "items": [
+        {
+          "type": "doc",
+          "id": "tutorial/scaffold"
+        },
+        {
+          "type": "doc",
+          "id": "tutorial/service"
+        },
+        {
+          "type": "doc",
+          "id": "tutorial/auth"
+        },
+        {
+          "type": "doc",
+          "id": "tutorial/frontend"
+        },
+        {
+          "type": "doc",
+          "id": "tutorial/tests"
+        },
+        {
+          "type": "doc",
+          "id": "tutorial/deploy"
+        }
+      ],
+      "href": "/docs/tutorial"
+    },
+    {
+      "type": "category",
+      "label": "Foundations",
+      "items": [
+        {
+          "type": "doc",
+          "id": "foundations/principles"
+        },
+        {
+          "type": "doc",
+          "id": "foundations/architecture"
+        },
+        {
+          "type": "doc",
+          "id": "foundations/composition"
+        },
+        {
+          "type": "doc",
+          "id": "foundations/titan-vs-omnitron"
+        },
+        {
+          "type": "doc",
+          "id": "foundations/monorepo"
+        }
+      ],
+      "href": "/docs/category/foundations"
+    },
+    {
+      "type": "category",
+      "label": "Utilities",
+      "items": [
+        {
+          "type": "doc",
+          "id": "utilities/common"
+        },
+        {
+          "type": "doc",
+          "id": "utilities/cuid"
+        },
+        {
+          "type": "doc",
+          "id": "utilities/eventemitter"
+        },
+        {
+          "type": "doc",
+          "id": "utilities/msgpack"
+        },
+        {
+          "type": "doc",
+          "id": "utilities/kb"
+        }
+      ],
+      "href": "/docs/utilities"
+    },
+    {
+      "type": "category",
+      "label": "Testing",
+      "items": [
+        {
+          "type": "doc",
+          "id": "testing/testing-package"
+        },
+        {
+          "type": "doc",
+          "id": "testing/integration"
+        },
+        {
+          "type": "doc",
+          "id": "testing/cross-runtime"
+        },
+        {
+          "type": "doc",
+          "id": "testing/react"
+        }
+      ],
+      "href": "/docs/testing"
+    },
+    {
+      "type": "category",
+      "label": "Deployment",
+      "items": [
+        {
+          "type": "doc",
+          "id": "deployment/production-readiness"
+        },
+        {
+          "type": "doc",
+          "id": "deployment/docker"
+        },
+        {
+          "type": "doc",
+          "id": "deployment/kubernetes"
+        },
+        {
+          "type": "doc",
+          "id": "deployment/paas"
+        },
+        {
+          "type": "doc",
+          "id": "deployment/bare-metal"
+        }
+      ],
+      "href": "/docs/deployment"
+    },
+    {
+      "type": "category",
+      "label": "Authentication and Access",
+      "items": [
+        {
+          "type": "doc",
+          "id": "auth/access-policy"
+        },
+        {
+          "type": "doc",
+          "id": "auth/token-issuance"
+        },
+        {
+          "type": "doc",
+          "id": "auth/mental-model"
+        },
+        {
+          "type": "doc",
+          "id": "auth/permissions"
+        },
+        {
+          "type": "doc",
+          "id": "auth/overrides"
+        },
+        {
+          "type": "doc",
+          "id": "auth/abac-conditions"
+        },
+        {
+          "type": "doc",
+          "id": "auth/rls-bridge"
+        },
+        {
+          "type": "doc",
+          "id": "auth/audit-trail"
+        }
+      ],
+      "href": "/docs/auth"
+    },
+    {
+      "type": "doc",
+      "id": "troubleshooting"
+    },
+    {
+      "type": "category",
+      "label": "Community",
+      "items": [
+        {
+          "type": "doc",
+          "id": "community/contributing"
+        },
+        {
+          "type": "doc",
+          "id": "community/security"
+        },
+        {
+          "type": "doc",
+          "id": "community/changelog"
+        }
+      ],
+      "href": "/docs/category/community"
+    }
+  ],
+  "titan": [
+    {
+      "type": "doc",
+      "id": "titan/overview"
+    },
+    {
+      "type": "category",
+      "label": "Concepts",
+      "items": [
+        {
+          "type": "doc",
+          "id": "titan/concepts/design-principles"
+        },
+        {
+          "type": "doc",
+          "id": "titan/concepts/architecture"
+        },
+        {
+          "type": "doc",
+          "id": "titan/concepts/mental-model"
+        }
+      ],
+      "href": "/docs/titan/concepts"
+    },
+    {
+      "type": "category",
+      "label": "Application",
+      "items": [
+        {
+          "type": "doc",
+          "id": "titan/application/bootstrap"
+        },
+        {
+          "type": "doc",
+          "id": "titan/application/lifecycle"
+        },
+        {
+          "type": "doc",
+          "id": "titan/application/shutdown"
+        },
+        {
+          "type": "doc",
+          "id": "titan/application/health"
+        },
+        {
+          "type": "doc",
+          "id": "titan/application/events"
+        }
+      ],
+      "href": "/docs/titan/application"
+    },
+    {
+      "type": "category",
+      "label": "Module System",
+      "items": [
+        {
+          "type": "doc",
+          "id": "titan/modules-system/defining-modules"
+        },
+        {
+          "type": "doc",
+          "id": "titan/modules-system/dynamic-modules"
+        },
+        {
+          "type": "doc",
+          "id": "titan/modules-system/module-discovery"
+        },
+        {
+          "type": "doc",
+          "id": "titan/modules-system/authoring-modules"
+        }
+      ],
+      "href": "/docs/titan/modules-system"
+    },
+    {
+      "type": "category",
+      "label": "Dependency Injection",
+      "items": [
+        {
+          "type": "doc",
+          "id": "titan/di/overview"
+        },
+        {
+          "type": "doc",
+          "id": "titan/di/providers"
+        },
+        {
+          "type": "doc",
+          "id": "titan/di/scopes"
+        },
+        {
+          "type": "doc",
+          "id": "titan/di/tokens"
+        },
+        {
+          "type": "doc",
+          "id": "titan/di/multi-injection"
+        },
+        {
+          "type": "doc",
+          "id": "titan/di/contextual-injection"
+        },
+        {
+          "type": "doc",
+          "id": "titan/di/middleware"
+        },
+        {
+          "type": "doc",
+          "id": "titan/di/circular-dependencies"
+        },
+        {
+          "type": "doc",
+          "id": "titan/di/devtools"
+        }
+      ],
+      "href": "/docs/titan/di"
+    },
+    {
+      "type": "category",
+      "label": "Decorators",
+      "items": [
+        {
+          "type": "doc",
+          "id": "titan/decorators/lifecycle"
+        },
+        {
+          "type": "doc",
+          "id": "titan/decorators/method-traits"
+        }
+      ],
+      "href": "/docs/titan/decorators"
+    },
+    {
+      "type": "category",
+      "label": "Validation",
+      "items": [
+        {
+          "type": "doc",
+          "id": "titan/validation/overview"
+        },
+        {
+          "type": "doc",
+          "id": "titan/validation/contracts"
+        },
+        {
+          "type": "doc",
+          "id": "titan/validation/error-handling"
+        }
+      ],
+      "href": "/docs/titan/validation"
+    },
+    {
+      "type": "category",
+      "label": "Errors",
+      "items": [
+        {
+          "type": "doc",
+          "id": "titan/errors/overview"
+        },
+        {
+          "type": "doc",
+          "id": "titan/errors/hierarchy"
+        },
+        {
+          "type": "doc",
+          "id": "titan/errors/factories"
+        },
+        {
+          "type": "doc",
+          "id": "titan/errors/classification"
+        }
+      ],
+      "href": "/docs/titan/errors"
+    },
+    {
+      "type": "category",
+      "label": "Netron RPC",
+      "items": [
+        {
+          "type": "doc",
+          "id": "titan/netron/services"
+        },
+        {
+          "type": "doc",
+          "id": "titan/netron/transports"
+        },
+        {
+          "type": "doc",
+          "id": "titan/netron/middleware"
+        },
+        {
+          "type": "doc",
+          "id": "titan/netron/authentication"
+        },
+        {
+          "type": "doc",
+          "id": "titan/netron/streaming"
+        },
+        {
+          "type": "doc",
+          "id": "titan/netron/multi-backend"
+        },
+        {
+          "type": "doc",
+          "id": "titan/netron/serialization"
+        }
+      ],
+      "href": "/docs/titan/netron"
+    },
+    {
+      "type": "category",
+      "label": "Configuration",
+      "items": [
+        {
+          "type": "doc",
+          "id": "titan/configuration/overview"
+        },
+        {
+          "type": "doc",
+          "id": "titan/configuration/sources"
+        },
+        {
+          "type": "doc",
+          "id": "titan/configuration/validation"
+        },
+        {
+          "type": "doc",
+          "id": "titan/configuration/hot-reload"
+        }
+      ],
+      "href": "/docs/titan/configuration"
+    },
+    {
+      "type": "category",
+      "label": "Logging",
+      "items": [
+        {
+          "type": "doc",
+          "id": "titan/logging/overview"
+        },
+        {
+          "type": "doc",
+          "id": "titan/logging/transports"
+        },
+        {
+          "type": "doc",
+          "id": "titan/logging/processors"
+        },
+        {
+          "type": "doc",
+          "id": "titan/logging/child-loggers"
+        }
+      ],
+      "href": "/docs/titan/logging"
+    },
+    {
+      "type": "doc",
+      "id": "titan/tracing"
+    },
+    {
+      "type": "category",
+      "label": "Resilience",
+      "items": [
+        {
+          "type": "doc",
+          "id": "titan/resilience/overview"
+        },
+        {
+          "type": "doc",
+          "id": "titan/resilience/retry"
+        },
+        {
+          "type": "doc",
+          "id": "titan/resilience/circuit-breaker"
+        },
+        {
+          "type": "doc",
+          "id": "titan/resilience/timeout"
+        }
+      ],
+      "href": "/docs/titan/resilience"
+    },
+    {
+      "type": "category",
+      "label": "Testing",
+      "items": [
+        {
+          "type": "doc",
+          "id": "titan/testing/overview"
+        },
+        {
+          "type": "doc",
+          "id": "titan/testing/di-overrides"
+        },
+        {
+          "type": "doc",
+          "id": "titan/testing/integration"
+        },
+        {
+          "type": "doc",
+          "id": "titan/testing/modules"
+        }
+      ],
+      "href": "/docs/titan/testing"
+    },
+    {
+      "type": "category",
+      "label": "Best Practices",
+      "items": [
+        {
+          "type": "doc",
+          "id": "titan/best-practices/structuring-services"
+        },
+        {
+          "type": "doc",
+          "id": "titan/best-practices/error-handling"
+        },
+        {
+          "type": "doc",
+          "id": "titan/best-practices/observability"
+        },
+        {
+          "type": "doc",
+          "id": "titan/best-practices/performance"
+        }
+      ],
+      "href": "/docs/titan/best-practices"
+    },
+    {
+      "type": "category",
+      "label": "Recipes",
+      "items": [
+        {
+          "type": "doc",
+          "id": "titan/recipes/api-service"
+        },
+        {
+          "type": "doc",
+          "id": "titan/recipes/worker-fleet"
+        },
+        {
+          "type": "doc",
+          "id": "titan/recipes/observability-stack"
+        },
+        {
+          "type": "doc",
+          "id": "titan/recipes/notifications-pipeline"
+        },
+        {
+          "type": "doc",
+          "id": "titan/recipes/multi-tenant-saas"
+        },
+        {
+          "type": "doc",
+          "id": "titan/recipes/webhook-receiver"
+        },
+        {
+          "type": "doc",
+          "id": "titan/recipes/oauth-callback"
+        }
+      ],
+      "href": "/docs/titan/recipes"
+    },
+    {
+      "type": "category",
+      "label": "Module Catalogue",
+      "items": [
+        {
+          "type": "doc",
+          "id": "titan/modules/module-map"
+        },
+        {
+          "type": "doc",
+          "id": "titan/modules/options-patterns"
+        },
+        {
+          "type": "doc",
+          "id": "titan/modules/lifecycle-reference"
+        },
+        {
+          "type": "doc",
+          "id": "titan/modules/tokens-reference"
+        },
+        {
+          "type": "doc",
+          "id": "titan/modules/observability-matrix"
+        },
+        {
+          "type": "doc",
+          "id": "titan/modules/security-checklist"
+        },
+        {
+          "type": "doc",
+          "id": "titan/modules/errors-catalog"
+        },
+        {
+          "type": "doc",
+          "id": "titan/modules/decorators-catalog"
+        },
+        {
+          "type": "category",
+          "label": "Built-in",
+          "items": [
+            {
+              "type": "doc",
+              "id": "titan/modules/config"
+            },
+            {
+              "type": "doc",
+              "id": "titan/modules/logger"
+            },
+            {
+              "type": "doc",
+              "id": "titan/modules/rls"
+            }
+          ],
+          "collapsed": false
+        },
+        {
+          "type": "category",
+          "label": "Official",
+          "items": [
+            {
+              "type": "doc",
+              "id": "titan/modules/auth"
+            },
+            {
+              "type": "doc",
+              "id": "titan/modules/shared-session"
+            },
+            {
+              "type": "doc",
+              "id": "titan/modules/storage"
+            },
+            {
+              "type": "doc",
+              "id": "titan/modules/cache"
+            },
+            {
+              "type": "doc",
+              "id": "titan/modules/database"
+            },
+            {
+              "type": "doc",
+              "id": "titan/modules/discovery"
+            },
+            {
+              "type": "doc",
+              "id": "titan/modules/events"
+            },
+            {
+              "type": "doc",
+              "id": "titan/modules/health"
+            },
+            {
+              "type": "doc",
+              "id": "titan/modules/lock"
+            },
+            {
+              "type": "doc",
+              "id": "titan/modules/metrics"
+            },
+            {
+              "type": "doc",
+              "id": "titan/modules/mailer"
+            },
+            {
+              "type": "doc",
+              "id": "titan/modules/notifications"
+            },
+            {
+              "type": "doc",
+              "id": "titan/modules/pm"
+            },
+            {
+              "type": "doc",
+              "id": "titan/modules/ratelimit"
+            },
+            {
+              "type": "doc",
+              "id": "titan/modules/redis"
+            },
+            {
+              "type": "doc",
+              "id": "titan/modules/scheduler"
+            },
+            {
+              "type": "doc",
+              "id": "titan/modules/telemetry-relay"
+            }
+          ],
+          "collapsed": false
+        },
+        {
+          "type": "category",
+          "label": "Community",
+          "items": [
+            {
+              "type": "doc",
+              "id": "titan/modules/community"
+            }
+          ],
+          "collapsed": false
+        }
+      ],
+      "href": "/docs/titan/modules"
+    },
+    {
+      "type": "category",
+      "label": "Migrations",
+      "items": [
+        {
+          "type": "doc",
+          "id": "titan/migrations/from-nestjs"
+        },
+        {
+          "type": "doc",
+          "id": "titan/migrations/from-express"
+        },
+        {
+          "type": "doc",
+          "id": "titan/migrations/from-prom-client"
+        },
+        {
+          "type": "doc",
+          "id": "titan/migrations/auth-1-to-2"
+        }
+      ],
+      "href": "/docs/titan/migrations"
+    }
+  ],
+  "frontend": [
+    {
+      "type": "doc",
+      "id": "frontend/overview"
+    },
+    {
+      "type": "category",
+      "label": "Prism",
+      "items": [
+        {
+          "type": "doc",
+          "id": "frontend/prism/components"
+        },
+        {
+          "type": "doc",
+          "id": "frontend/prism/blocks"
+        },
+        {
+          "type": "doc",
+          "id": "frontend/prism/layouts"
+        },
+        {
+          "type": "doc",
+          "id": "frontend/prism/forms"
+        },
+        {
+          "type": "doc",
+          "id": "frontend/prism/hooks-catalog"
+        },
+        {
+          "type": "doc",
+          "id": "frontend/prism/theme"
+        },
+        {
+          "type": "doc",
+          "id": "frontend/prism/state"
+        },
+        {
+          "type": "doc",
+          "id": "frontend/prism/http"
+        },
+        {
+          "type": "doc",
+          "id": "frontend/prism/accessibility"
+        },
+        {
+          "type": "doc",
+          "id": "frontend/prism/cli"
+        },
+        {
+          "type": "doc",
+          "id": "frontend/prism/maps"
+        },
+        {
+          "type": "doc",
+          "id": "frontend/prism/research"
+        }
+      ],
+      "href": "/docs/frontend/prism"
+    },
+    {
+      "type": "category",
+      "label": "Netron",
+      "items": [
+        {
+          "type": "doc",
+          "id": "frontend/netron/browser"
+        },
+        {
+          "type": "doc",
+          "id": "frontend/netron/react"
+        },
+        {
+          "type": "doc",
+          "id": "frontend/netron/transports"
+        },
+        {
+          "type": "doc",
+          "id": "frontend/netron/middleware"
+        },
+        {
+          "type": "doc",
+          "id": "frontend/netron/caching"
+        },
+        {
+          "type": "doc",
+          "id": "frontend/netron/auth"
+        },
+        {
+          "type": "doc",
+          "id": "frontend/netron/multi-backend"
+        },
+        {
+          "type": "doc",
+          "id": "frontend/netron/errors"
+        },
+        {
+          "type": "doc",
+          "id": "frontend/netron/testing"
+        },
+        {
+          "type": "doc",
+          "id": "frontend/netron/ssr"
+        }
+      ],
+      "href": "/docs/frontend/netron"
+    }
+  ],
+  "omnitron": [
+    {
+      "type": "doc",
+      "id": "omnitron/overview"
+    },
+    {
+      "type": "doc",
+      "id": "omnitron/projects"
+    },
+    {
+      "type": "doc",
+      "id": "omnitron/architecture"
+    },
+    {
+      "type": "doc",
+      "id": "omnitron/resilient-control-plane"
+    },
+    {
+      "type": "doc",
+      "id": "omnitron/release-readiness"
+    },
+    {
+      "type": "doc",
+      "id": "omnitron/cli"
+    },
+    {
+      "type": "doc",
+      "id": "omnitron/daemon"
+    },
+    {
+      "type": "doc",
+      "id": "omnitron/backend-handoff"
+    },
+    {
+      "type": "doc",
+      "id": "omnitron/orchestrator"
+    },
+    {
+      "type": "doc",
+      "id": "omnitron/releases"
+    },
+    {
+      "type": "doc",
+      "id": "omnitron/services-reference"
+    },
+    {
+      "type": "doc",
+      "id": "omnitron/configuration"
+    },
+    {
+      "type": "doc",
+      "id": "omnitron/infrastructure"
+    },
+    {
+      "type": "doc",
+      "id": "omnitron/cluster"
+    },
+    {
+      "type": "doc",
+      "id": "omnitron/observability"
+    },
+    {
+      "type": "doc",
+      "id": "omnitron/diagnostics"
+    },
+    {
+      "type": "doc",
+      "id": "omnitron/migrations"
+    },
+    {
+      "type": "doc",
+      "id": "omnitron/console"
+    },
+    {
+      "type": "doc",
+      "id": "omnitron/topology"
+    },
+    {
+      "type": "doc",
+      "id": "omnitron/access"
+    },
+    {
+      "type": "doc",
+      "id": "omnitron/automation"
+    },
+    {
+      "type": "doc",
+      "id": "omnitron/agents"
+    },
+    {
+      "type": "doc",
+      "id": "omnitron/terminal"
+    },
+    {
+      "type": "doc",
+      "id": "omnitron/files"
+    },
+    {
+      "type": "doc",
+      "id": "omnitron/auth-rbac"
+    },
+    {
+      "type": "doc",
+      "id": "omnitron/mcp"
+    },
+    {
+      "type": "doc",
+      "id": "omnitron/best-practices"
+    },
+    {
+      "type": "doc",
+      "id": "omnitron/recipes"
+    }
+  ],
+  "reference": [
+    {
+      "type": "doc",
+      "id": "reference/packages"
+    },
+    {
+      "type": "doc",
+      "id": "reference/api-index"
+    },
+    {
+      "type": "doc",
+      "id": "reference/protocol"
+    },
+    {
+      "type": "doc",
+      "id": "reference/compatibility"
+    },
+    {
+      "type": "doc",
+      "id": "reference/glossary"
+    }
+  ],
+  "lumen": [
+    {
+      "type": "doc",
+      "id": "lumen/overview"
+    },
+    {
+      "type": "doc",
+      "id": "lumen/authoring"
+    },
+    {
+      "type": "doc",
+      "id": "lumen/this-site"
+    }
+  ]
+}

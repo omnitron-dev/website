@@ -1,4 +1,6 @@
 ---
+id: "titan/resilience/timeout"
+slug: "/docs/titan/resilience/timeout"
 sidebar_position: 4
 title: Timeout
 description: Bounded calls — every external dependency needs a deadline.
@@ -10,7 +12,7 @@ Every call to an external dependency should have a timeout. A call
 without one can hang forever, holding a request slot, a connection,
 a worker thread.
 
-## `withTimeout()` — the function
+## `withTimeout()` — the function {#withtimeout--the-function}
 
 ```typescript
 import { withTimeout } from '@omnitron-dev/titan/utils';
@@ -34,7 +36,7 @@ to check).
 The underlying operation is **not** automatically cancelled — see
 "Cancellation" below.
 
-## `@Timeout` — the decorator
+## `@Timeout` — the decorator {#timeout--the-decorator}
 
 `@omnitron-dev/titan/decorators` exports a `Timeout` method
 interceptor:
@@ -51,7 +53,7 @@ async fetchUpstream() {
 Wraps the method body in a timeout. Like `withTimeout`, does not
 cancel the underlying operation.
 
-## Cancellation
+## Cancellation {#cancellation}
 
 A timeout that doesn't cancel the underlying operation merely
 *ignores* the result — the operation keeps running, holding
@@ -78,7 +80,7 @@ For libraries without abort support, the operation runs to
 completion in the background. Your method returns the timeout error
 anyway.
 
-## Choosing a timeout
+## Choosing a timeout {#choosing-a-timeout}
 
 A timeout should be longer than the worst legitimate latency you
 expect, plus margin:
@@ -95,7 +97,7 @@ Too long → resource exhaustion when the dependency hangs.
 
 Measure first; pick a timeout at p99.9 × 2.
 
-## Cascading timeouts
+## Cascading timeouts {#cascading-timeouts}
 
 A timeout on a chain (your service → A → B → C) is the *minimum*
 along the chain. If the inner C has a 30 s timeout and your service
@@ -105,7 +107,7 @@ in the background.
 Pattern: pass deadlines down. Make the inner timeouts shorter than
 the outer, by some margin.
 
-## Detecting timeouts
+## Detecting timeouts {#detecting-timeouts}
 
 ```typescript
 import { isTimeoutError } from '@omnitron-dev/titan/utils';
@@ -117,7 +119,7 @@ catch (e) {
 }
 ```
 
-## Anti-patterns
+## Anti-patterns {#anti-patterns}
 
 - **No timeout on outbound calls.** The most common production bug
   in distributed systems.

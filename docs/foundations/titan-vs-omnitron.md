@@ -1,4 +1,6 @@
 ---
+id: "foundations/titan-vs-omnitron"
+slug: "/docs/foundations/titan-vs-omnitron"
 sidebar_position: 4
 title: Titan vs Omnitron
 description: Titan runs standalone. Omnitron is an opt-in higher-level platform built on top.
@@ -14,7 +16,7 @@ and operates many Titan apps together.
 This page draws the line precisely so you know what to install
 and what to skip.
 
-## At a glance
+## At a glance {#at-a-glance}
 
 ```mermaid
 flowchart TB
@@ -52,7 +54,7 @@ flowchart TB
 **Omnitron = the operator.** Supervise many backends, provide
 the operator UI / CLI / agent surface.
 
-## Titan alone (no Omnitron)
+## Titan alone (no Omnitron) {#titan-alone-no-omnitron}
 
 `@omnitron-dev/titan` is **a self-contained backend framework**.
 You can build a complete production service with just Titan +
@@ -132,7 +134,7 @@ You get **everything**:
 supervisor: PM2, systemd, Docker, Kubernetes, Fly, Railway,
 Render — Titan is just a Node process.
 
-## What Omnitron adds
+## What Omnitron adds {#what-omnitron-adds}
 
 `@omnitron-dev/omnitron` is **an optional higher-level
 platform** that **uses Titan internally** (it's itself a Titan
@@ -168,7 +170,7 @@ Adds, **on top of** what Titan already gives you:
 It's not "Titan with extras" — it's a separate platform that
 happens to *use* Titan as its runtime substrate.
 
-## When you need Omnitron
+## When you need Omnitron {#when-you-need-omnitron}
 
 Reach for Omnitron when **any** of these apply:
 
@@ -185,7 +187,7 @@ Reach for Omnitron when **any** of these apply:
 - **Operator-level RBAC** — three roles (viewer / operator /
   admin) on top of your app's user auth.
 
-## When you don't
+## When you don't {#when-you-dont}
 
 Omnitron is **overkill** for:
 
@@ -202,9 +204,9 @@ Omnitron is **overkill** for:
 - **Smaller projects (≤ 2 apps, single team)** — Titan + your
   preferred process manager is simpler.
 
-## Migration paths
+## Migration paths {#migration-paths}
 
-### Start with Titan alone
+### Start with Titan alone {#start-with-titan-alone}
 
 ```bash
 pnpm add @omnitron-dev/titan
@@ -212,7 +214,7 @@ pnpm add @omnitron-dev/titan
 node dist/main.js
 ```
 
-### Add Omnitron later
+### Add Omnitron later {#add-omnitron-later}
 
 The same Titan app **runs unchanged** under Omnitron. Just
 add the ecosystem config:
@@ -257,13 +259,13 @@ The Titan app's source — `@Service`, `@Module`, `@Public`,
 business logic, modules — **does not change**. The same Netron
 endpoints work; clients keep working without modification.
 
-### Drop Omnitron later
+### Drop Omnitron later {#drop-omnitron-later}
 
 Equally easy in reverse: replace `omnitron up` with `node
 dist/main.js` (using the original `main.ts`-style boot) or with
 your container orchestrator. Titan keeps running.
 
-## Cost comparison
+## Cost comparison {#cost-comparison}
 
 | Concern | Titan alone | Titan + Omnitron |
 | ------- | ----------- | ---------------- |
@@ -276,7 +278,7 @@ your container orchestrator. Titan keeps running.
 | Multi-app supervision | Your container orchestrator | Built-in |
 | Configuration management | `omnitron.config.ts` not needed | `omnitron.config.ts` declares the ecosystem |
 
-## What the docs cover for each
+## What the docs cover for each {#what-the-docs-cover-for-each}
 
 | Section | Layer |
 | ------- | ----- |
@@ -288,7 +290,7 @@ your container orchestrator. Titan keeps running.
 | [Deployment guides](../deployment) | Both layers — install paths for Titan-alone and Omnitron-supervised |
 | [Tutorial](../tutorial) | Builds with Titan; the last step adds Docker (no Omnitron) |
 
-## Real numbers
+## Real numbers {#real-numbers}
 
 A small project (one Titan app, single Postgres, two
 HTTP routes):
@@ -302,7 +304,7 @@ For 1 app: the ratio is bad. For 5 apps: same daemon, ~150 MB
 total vs 5 × 80 = 400 MB if each apps' supervision was
 duplicated.
 
-## TL;DR
+## TL;DR {#tldr}
 
 **Titan is the framework. You probably need it.**
 
@@ -317,7 +319,7 @@ duplicated.
 | Edge / serverless | Titan alone (Omnitron doesn't fit) |
 | Largest possible scale | Titan + Kubernetes (Omnitron optional inside k8s) |
 
-## See also
+## See also {#see-also}
 
 - [Architecture](./architecture.md) — how Titan composes
 - [Principles](./principles.md) — the rules behind both layers

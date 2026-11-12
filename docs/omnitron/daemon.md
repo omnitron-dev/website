@@ -1,4 +1,6 @@
 ---
+id: "omnitron/daemon"
+slug: "/docs/omnitron/daemon"
 sidebar_position: 4
 title: Daemon
 description: The long-running supervisor — its lifecycle, state, and RPC surface.
@@ -29,7 +31,7 @@ daemon/
 └── state-store.ts               — Persistent state on disk
 ```
 
-## Lifecycle
+## Lifecycle {#lifecycle}
 
 ```mermaid
 sequenceDiagram
@@ -64,7 +66,7 @@ sequenceDiagram
   Init->>Init: exit 0
 ```
 
-## Startup and node diagnostics
+## Startup and node diagnostics {#startup-and-node-diagnostics}
 
 A master prepares its control-plane database before Titan eagerly initializes
 providers. Foreground CLI, detached CLI and native supervision share this path.
@@ -89,7 +91,7 @@ live daemon readers as the CLI; remote requests use the authenticated mesh.
 `reachable: false` includes the failure reason and no answer. It is not a
 health verdict, and a remote failure never falls back to the local node's data.
 
-### Shutdown during startup
+### Shutdown during startup {#shutdown-during-startup}
 
 The daemon registers cleanup before Titan installs its signal handlers. If
 `SIGTERM` or `SIGINT` arrives during startup, it stops beginning new startup
@@ -106,7 +108,7 @@ continue running when only its backend terminates; explicit `omnitron down`
 still requests application shutdown. Event-loop monitoring and the reload
 signal handler are disposed with the backend.
 
-## PID manager — `pid-manager.ts`
+## PID manager — `pid-manager.ts` {#pid-manager--pid-managerts}
 
 Owns the daemon lock file `~/.omnitron/daemon.pid`. Responsibilities:
 
@@ -125,7 +127,7 @@ Owns the daemon lock file `~/.omnitron/daemon.pid`. Responsibilities:
 When `omnitron up` reports "daemon already running", this is the
 check that fired.
 
-## State store — `state-store.ts`
+## State store — `state-store.ts` {#state-store--state-storets}
 
 Persists daemon intent to a **SQLite-backed** key/value row
 (`DaemonStateStore`, `state_kv` key `orchestrator:persisted-state`)
@@ -156,7 +158,7 @@ crash, restart). A crash of the daemon itself leaves the row in a
 consistent state — on next boot, the daemon rehydrates and
 relaunches whatever was running.
 
-### File permissions and SQLite locks
+### File permissions and SQLite locks {#file-permissions-and-sqlite-locks}
 
 State, recovery certificates and the log journal use owner-only directories
 (`0700`) and files (`0600`) on POSIX systems. Permission checks on an open
@@ -179,7 +181,7 @@ durably readable certificate identifying the running backend and owner.
 writer exclusion, repeated readers, committed visibility and file permissions
 against the compiled runtime; the CI build runs it before accepting changes.
 
-## Daemon scheduler — `daemon-scheduler.ts`
+## Daemon scheduler — `daemon-scheduler.ts` {#daemon-scheduler--daemon-schedulerts}
 
 A small set of periodic jobs registered against `titan-scheduler`
 and tied to the daemon's lifecycle. `registerDaemonJobs()` wires:
@@ -195,7 +197,7 @@ and tied to the daemon's lifecycle. `registerDaemonJobs()` wires:
 The master-only jobs are skipped on a standalone single-node
 setup where the auth / alert / fleet services aren't wired.
 
-## Daemon configuration
+## Daemon configuration {#daemon-configuration}
 
 The daemon's own config (not project / ecosystem config) lives in
 the `DEFAULT_DAEMON_CONFIG` object — most operators never touch
@@ -227,13 +229,13 @@ Override via CLI flags on `omnitron up` or via the daemon
 configuration file (advanced — not part of the project ecosystem
 config).
 
-### Console request limits
+### Console request limits {#console-request-limits}
 
 The daemon shares one Netron limiter across HTTP and WebSocket. Configure `requestRateLimit` in the daemon settings. Its defaults are 3,000 requests per client and 6,000 total per 60-second window. Switching transport or opening another tab consumes the same allowance. The legacy `httpRateLimit` setting covers both listeners. If both settings exist, `requestRateLimit` takes precedence.
 
 The Console gateway overwrites `X-Forwarded-For` and `X-Real-IP` on HTTP and WebSocket. With the default `trustProxy: false`, clients behind the same proxy share its socket-address allowance. Set `trustProxy: true` only when access to the upstream listeners is restricted to that trusted proxy. The local administrative Unix socket has its own OS access boundary. [Netron request budgets](../titan/netron/transports.md#share-a-request-budget-across-http-and-websocket)
 
-## RPC surface — `OmnitronDaemon` service
+## RPC surface — `OmnitronDaemon` service {#rpc-surface--omnitrondaemon-service}
 
 The daemon registers `@Service({ name: 'OmnitronDaemon' })` on
 the Netron bus. Verified from
@@ -249,9 +251,9 @@ The daemon checks these roles for each request.
 | `admin`      | `admin` only                         | `shutdown`, `reloadConfig`, `setMetricsEnabled`, `exec`, `revealEnv` |
 | anonymous    | anyone with socket access            | `ping` (allowAnonymous) |
 
-### Methods, by intent
+### Methods, by intent {#methods-by-intent}
 
-#### App lifecycle (`operator`)
+#### App lifecycle (`operator`) {#app-lifecycle-operator}
 
 | Method                                                          | Returns                          |
 | --------------------------------------------------------------- | -------------------------------- |
@@ -272,7 +274,7 @@ configured bounds and must advertise `processPoolResize@1`; an older owner
 refuses before mutation. This optional capability does not prevent a backend
 update when the owner remains unchanged.
 
-#### Inspection (`viewer`)
+#### Inspection (`viewer`) {#inspection-viewer}
 
 | Method                                                          | Returns                          |
 | --------------------------------------------------------------- | -------------------------------- |
@@ -287,7 +289,7 @@ update when the owner remains unchanged.
 | `getDependencyGraph({ name })`                                  | Graph object                     |
 | `getWatchStatus()`                                              | `{ enabled, apps: [...] }`       |
 
-#### Owner and environment inspection
+#### Owner and environment inspection {#owner-and-environment-inspection}
 
 `attestApplicationOwner({ owner: { id, pid, startedAt }, epoch })` returns the
 clean build stamp of the observed owner. The node checks its active controller
@@ -299,14 +301,14 @@ See [application release admission](./releases.md#build-and-inspect).
 requires an administrator and releases the clear values only after the audit database
 confirms the write. A node without audit storage can still return redacted values.
 
-#### Watch control (`operator`)
+#### Watch control (`operator`) {#watch-control-operator}
 
 | Method                                                          | Returns                          |
 | --------------------------------------------------------------- | -------------------------------- |
 | `enableWatch({ apps? })`                                        | `{ watching: [...] }`            |
 | `disableWatch()`                                                | `{ success: boolean }`           |
 
-#### Admin (`admin`)
+#### Admin (`admin`) {#admin-admin}
 
 | Method                                                          | Returns                          |
 | --------------------------------------------------------------- | -------------------------------- |
@@ -314,13 +316,13 @@ confirms the write. A node without audit storage can still return redacted value
 | `reloadConfig()`                                                | `{ success: boolean }`           |
 | `setMetricsEnabled({ name?, enabled })`                         | `{ success: boolean }`           |
 
-#### Heartbeat (anonymous)
+#### Heartbeat (anonymous) {#heartbeat-anonymous}
 
 | Method                                                          | Returns                          |
 | --------------------------------------------------------------- | -------------------------------- |
 | `ping()`                                                        | `{ uptime, version, pid }`       |
 
-#### RPC plumbing (`admin`)
+#### RPC plumbing (`admin`) {#rpc-plumbing-admin}
 
 | Method                                                          | Returns                          |
 | --------------------------------------------------------------- | -------------------------------- |
@@ -330,7 +332,7 @@ confirms the write. A node without audit storage can still return redacted value
 through. It is **admin-gated** — invoking arbitrary methods on a
 managed app is a privileged operation.
 
-## Auth flow
+## Auth flow {#auth-flow}
 
 Authentication is intentionally split between transports:
 
@@ -355,7 +357,7 @@ means only the daemon's UID can open it. If the OS trusts you to
 write to the socket, the daemon trusts the request. TCP and HTTP
 always require JWT.
 
-## Daemon client — `daemon-client.ts`
+## Daemon client — `daemon-client.ts` {#daemon-client--daemon-clientts}
 
 The operator API exposes the typed local client through
 `@omnitron-dev/omnitron/operations`. It connects to the daemon owner's Unix
@@ -383,7 +385,7 @@ bounds. A lost in-flight reply rejects the call without replaying it. See
 [long-lived RPC clients](./backend-handoff.md#long-lived-rpc-clients) before
 upgrading an application that retains a client across backend replacements.
 
-## Auto-restart and backoff
+## Auto-restart and backoff {#auto-restart-and-backoff}
 
 Applications inherit the ecosystem's `supervision` settings. Override them for
 one app with `apps[].restartPolicy`. By default, up to five automatic restarts
@@ -403,7 +405,7 @@ launch. The app stays stopped until a new start is requested. When ready, run
 `omnitron start <app>`. For a stopped stack, use
 `omnitron stack start <project> <stack>` to restore its applications together.
 
-## Failure scenarios
+## Failure scenarios {#failure-scenarios}
 
 | Scenario                                  | What the daemon does                                              |
 | ----------------------------------------- | ----------------------------------------------------------------- |
@@ -417,7 +419,7 @@ launch. The app stays stopped until a new start is requested. When ready, run
 | Disk full                                 | State persistence + logs fail loudly                              |
 | Cluster split (cluster.enabled)           | Both sides may elect a leader; manual `step-down` resolves        |
 
-## Operating runbook
+## Operating runbook {#operating-runbook}
 
 | Goal                                  | Command                                          |
 | ------------------------------------- | ------------------------------------------------ |
@@ -429,7 +431,7 @@ launch. The app stays stopped until a new start is requested. When ready, run
 | Reset persisted process state cold    | `omnitron down` → delete `~/.omnitron/data/daemon-state.db` → `omnitron up` (note: this DB also holds the project / node / backup registries) |
 | Reset secret store from cold          | `omnitron down` → `rm ~/.omnitron/secrets.enc` → `omnitron up` |
 
-## Anti-patterns
+## Anti-patterns {#anti-patterns}
 
 - **Editing the daemon state DB by hand.** Persisted state lives
   in a SQLite DB (`~/.omnitron/data/daemon-state.db`), not a
@@ -448,7 +450,7 @@ launch. The app stays stopped until a new start is requested. When ready, run
 - **Removing the lock file while the daemon is running.** Causes
   inconsistent state where two daemons can subsequently start.
 
-## See also
+## See also {#see-also}
 
 - [Architecture](./architecture.md) — where the daemon fits in
   the broader picture
@@ -457,7 +459,7 @@ launch. The app stays stopped until a new start is requested. When ready, run
 - [CLI](./cli.md) — every command that talks to this daemon
 
 
-## Updating a source runtime
+## Updating a source runtime {#updating-a-source-runtime}
 
 In coupled mode the daemon directly supervises application processes. Replacing
 it requires a controlled maintenance window. A resident owner can retain running
@@ -491,7 +493,7 @@ unavailable. Recover the original environment or create a separately registered
 experiment; changing old hashes would invalidate its reproducibility.
 
 
-### Execution handoff: architecture boundary
+### Execution handoff: architecture boundary {#execution-handoff-architecture-boundary}
 
 In coupled mode the control daemon owns Titan PM supervisors, fork IPC
 channels, worker threads and application routing. Fork workers terminate on parent disconnect; the parent-death watchdog

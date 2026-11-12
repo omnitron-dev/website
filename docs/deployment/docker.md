@@ -1,4 +1,6 @@
 ---
+id: "deployment/docker"
+slug: "/docs/deployment/docker"
 sidebar_position: 2
 title: Docker Compose
 description: Deploy an Omnitron-supervised stack as a single docker-compose file.
@@ -10,7 +12,7 @@ The fastest path from `pnpm dev` to "running on a server".
 Suitable for staging, single-host production, demo
 environments, and dev parity.
 
-## The minimal compose file
+## The minimal compose file {#the-minimal-compose-file}
 
 ```yaml
 # docker-compose.yml
@@ -97,7 +99,7 @@ container's foreground so Docker's restart policy works.
 > `--no-infra` and front it with their own nginx (the `nginx`
 > service below).
 
-## The Dockerfile
+## The Dockerfile {#the-dockerfile}
 
 ```dockerfile
 # Dockerfile
@@ -151,7 +153,7 @@ Key choices:
 - **Non-root user**: standard hardening.
 - **No `npm install` at runtime**: predictable image.
 
-## `.env` file
+## `.env` file {#env-file}
 
 ```bash
 # .env (gitignored)
@@ -163,7 +165,7 @@ JWT_SECRET=$(openssl rand -hex 48)
 For real deploys, source from a secret manager and inject as
 env at container start.
 
-## Volumes
+## Volumes {#volumes}
 
 Three persistent volumes:
 
@@ -184,7 +186,7 @@ docker compose exec postgres pg_dumpall -U platform > backup.sql
 docker compose exec app omnitron backup create
 ```
 
-## Build + ship
+## Build + ship {#build--ship}
 
 ```bash
 # Build local:
@@ -198,7 +200,7 @@ docker push registry.example.com/platform:$(git rev-parse --short HEAD)
 ssh server "cd /srv/platform && docker compose pull && docker compose up -d"
 ```
 
-## Health checks
+## Health checks {#health-checks}
 
 The compose `healthcheck` for the app container:
 
@@ -215,7 +217,7 @@ services:
 
 `omnitron ping` returns 0 when the daemon is reachable.
 
-## Logging
+## Logging {#logging}
 
 App logs go to stdout (pino JSON); compose forwards to its
 logging driver:
@@ -242,7 +244,7 @@ services:
         loki-url: 'https://loki.example.com/loki/api/v1/push'
 ```
 
-## Resource limits
+## Resource limits {#resource-limits}
 
 ```yaml
 services:
@@ -260,7 +262,7 @@ services:
 `docker compose up` honours these as soft limits; `docker swarm
 deploy` enforces them.
 
-## Updating the stack
+## Updating the stack {#updating-the-stack}
 
 Zero-downtime rolling update on a single host:
 
@@ -282,7 +284,7 @@ docker compose exec app omnitron reload
 This works because reload cycles workers within the running
 daemon — no container restart.
 
-## Compose for dev
+## Compose for dev {#compose-for-dev}
 
 A separate `docker-compose.dev.yml`:
 
@@ -314,7 +316,7 @@ docker compose -f docker-compose.dev.yml up -d
 pnpm dev                                # app runs on host
 ```
 
-## What this doesn't give you
+## What this doesn't give you {#what-this-doesnt-give-you}
 
 - **Multi-host** — for that, `docker swarm deploy` or move to
   Kubernetes.
@@ -329,7 +331,7 @@ pnpm dev                                # app runs on host
 For those, see [Kubernetes](./kubernetes.md) or
 [Cluster + Fleet](./../omnitron/cluster.md).
 
-## See also
+## See also {#see-also}
 
 - [Deployment overview](./index.md)
 - [Best practices](./../omnitron/best-practices.md)

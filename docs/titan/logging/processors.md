@@ -1,4 +1,6 @@
 ---
+id: "titan/logging/processors"
+slug: "/docs/titan/logging/processors"
 sidebar_position: 3
 title: Log Processors
 description: The ILogProcessor pipeline (transform / drop, child-inherited) and how it relates to Pino's native redact.
@@ -15,7 +17,7 @@ all child loggers. Each processor either **transforms** the record
 `redact` option (recommended for simple path redaction) and a
 `RedactionProcessor` (for arbitrary transform/drop logic).
 
-## How the pipeline runs
+## How the pipeline runs {#how-the-pipeline-runs}
 
 `LoggerService` installs the pipeline as Pino's `logMethod` hook when it
 builds the root logger
@@ -78,7 +80,7 @@ const DropHealthChecks: ILogProcessor = {
 LoggerModule.forRoot({ processors: [RegionProcessor, DropHealthChecks] });
 ```
 
-## The `ILogProcessor` interface
+## The `ILogProcessor` interface {#the-ilogprocessor-interface}
 
 ```typescript
 interface ILogProcessor {
@@ -92,7 +94,7 @@ transformed log object, or `null`/`undefined` to drop the record
 first one to return `null`/`undefined` short-circuits the rest and
 emits nothing (`runProcessors`).
 
-## Redaction
+## Redaction {#redaction}
 
 Redaction has two working paths — pick by need:
 
@@ -105,7 +107,7 @@ Redaction has two working paths — pick by need:
   cross-field logic, computed values, or dropping. The bundled
   `RedactionProcessor` (below) is the simple case.
 
-### `redact` (Pino native)
+### `redact` (Pino native) {#redact-pino-native}
 
 Set the `redact` module option. `LoggerService` forwards it straight to
 Pino when it builds the root logger (`redact` in `LoggerService.initialize`):
@@ -137,7 +139,7 @@ project-specific.
 > a field that slips through; it is not a licence to log secrets.
 > Don't put credentials into a log call in the first place.
 
-### `RedactionProcessor`
+### `RedactionProcessor` {#redactionprocessor}
 
 `RedactionProcessor` is exported and implements `ILogProcessor`. Its
 constructor takes a **positional** `string[]` of dotted paths (not an
@@ -162,7 +164,7 @@ option for plain path redaction (it is pino-optimised and supports
 wildcards / custom censor); reach for the processor when you need the
 processor pipeline's extra power (conditional logic, drop).
 
-## Other shaping mechanisms
+## Other shaping mechanisms {#other-shaping-mechanisms}
 
 - **To enrich** every line with static fields, you can also use `base`
   (`forRoot({ base: { region, version } })`) or `setContext(...)`,
@@ -175,13 +177,13 @@ processor pipeline's extra power (conditional logic, drop).
   `setLevel`); Pino drops below-threshold records before serialising —
   cheaper than a dropping processor for a pure level cut.
 
-## Pretty output
+## Pretty output {#pretty-output}
 
 Human-readable dev output is a Pino concern, not a processor one. See
 [Logging Overview](./overview.md) for the module's pretty-print handling
 (via pino-pretty) and how JSON-vs-pretty is selected.
 
-## Anti-patterns
+## Anti-patterns {#anti-patterns}
 
 - **A dropping processor where a level cut would do.** To suppress a
   whole level, set `level` — Pino drops below-threshold records before

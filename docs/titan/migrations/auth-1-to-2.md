@@ -1,4 +1,6 @@
 ---
+id: "titan/migrations/auth-1-to-2"
+slug: "/docs/titan/migrations/auth-1-to-2"
 title: Auth v1 → v2 Migration
 sidebar_position: 50
 ---
@@ -17,7 +19,7 @@ claim (`pv`); everything else is back-compat or codemod-able.
 This page lists the call-site changes for an existing app
 upgrading from the pre-unification surface.
 
-## TL;DR
+## TL;DR {#tldr}
 
 | Before                                                          | After                                                                              |
 |-----------------------------------------------------------------|------------------------------------------------------------------------------------|
@@ -28,7 +30,7 @@ upgrading from the pre-unification surface.
 | Frontend `<RoleGuard roles={['admin','superadmin']}>`            | `<PermissionGuard anyOf={['admin.users.list', 'admin.audit.view', …]}>`             |
 | Inline `ADMIN_ROLES = ['admin','superadmin']` in three files     | `import { ADMIN_ROLES, isAdminRole } from 'src/auth/admin-roles'`                   |
 
-## Permission strings
+## Permission strings {#permission-strings}
 
 Permission keys did not change. The set GREW (new entries:
 `admin.users.permissions`, `admin.orgs.*`,
@@ -38,7 +40,7 @@ scopes — wildcards (`admin.*`) and hierarchical prefix grants
 (`admin.users` grants `admin.users.ban`) work identically on
 platform and org.
 
-## Decorator façades
+## Decorator façades {#decorator-façades}
 
 The `@RequirePlatformPermission` and `@RequireOrgPermission`
 decorators compile to:
@@ -57,7 +59,7 @@ Migration is mechanical. The pre-built codemod (in
 or just grep for `@Public({ auth: { ` and rewrite by hand;
 the platform variant is by far the most common.
 
-## `permVer` JWT claim
+## `permVer` JWT claim {#permver-jwt-claim}
 
 The access token gained one claim:
 
@@ -83,7 +85,7 @@ trigger the refresh flow, retry the call. The canonical
 implementation adds three lines to the existing refresh-on-401
 logic in your Netron RPC wrapper.
 
-## Per-user permission overrides
+## Per-user permission overrides {#per-user-permission-overrides}
 
 New surface; existing apps have no migration to do — adopting
 overrides is purely additive. The relevant pieces:
@@ -99,7 +101,7 @@ overrides is purely additive. The relevant pieces:
 See [Per-user overrides](../../auth/overrides.md) for the
 runtime story.
 
-## RLS plugin split
+## RLS plugin split {#rls-plugin-split}
 
 The pre-fix single `rlsPlugin({ allowUnfilteredQueries: true,
 requireContext: false })` is replaced by two plugin instances:
@@ -121,7 +123,7 @@ bypass via missing context is gone.
 See [RLS bridge](../../auth/rls-bridge.md) for the bridge
 contract and the `'system'` escape hatch.
 
-## Frontend
+## Frontend {#frontend}
 
 The presentational gates split into two primitives:
 
@@ -142,7 +144,7 @@ locked out `moderator` and `security`; now `PermissionGuard`
 with the common admin-perm any-of opens the section to every
 tier that holds at least one admin capability.
 
-## DTOs — removed actor fields
+## DTOs — removed actor fields {#dtos--removed-actor-fields}
 
 Every `admin*` RPC DTO had its `adminId: string` field removed.
 Same for `viewerId` on `getProfile` / `getProfileByUsername` /
@@ -153,7 +155,7 @@ way for a client to claim to be acting as a different admin.
 If your client sent these fields, the new DTOs reject them at
 the zod boundary; just delete the field from the call.
 
-## Quick sanity check
+## Quick sanity check {#quick-sanity-check}
 
 After upgrading, every backend should:
 

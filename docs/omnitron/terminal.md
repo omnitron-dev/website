@@ -1,4 +1,6 @@
 ---
+id: "omnitron/terminal"
+slug: "/docs/omnitron/terminal"
 title: SSH workspace
 description: Multiple SSH tabs through Xec, with pinned host keys, live authorization and bounded sessions shared with CLI.
 ---
@@ -9,7 +11,7 @@ Open **SSH workspace** from the sidebar, or **SSH** on a registered node. Each t
 
 The service runs on a master with PostgreSQL-backed authentication and audit. The daemon owns the SSH connection. Credentials stay on the server. The browser renders the terminal through lazily loaded xterm.js; the CLI uses the same `OmnitronTerminal` RPC service. SSH runs through Xec's existing `NodeSSH` implementation, exposed by `@xec-sh/core/ssh`.
 
-## Integration boundary
+## Integration boundary {#integration-boundary}
 
 The terminal service uses Xec's shell, host-key and connection-lifecycle APIs.
 It must not construct a separate SSH client or duplicate authentication and
@@ -19,7 +21,7 @@ SFTP types are exported by Xec itself. Existing terminal event subscriptions fit
 this boundary; new capabilities belong in Xec before Console or another application
 uses them. See the [release checklist](./release-readiness.md) for activation status.
 
-## Working with tabs
+## Working with tabs {#working-with-tabs}
 
 The breadcrumb trail identifies the workspace without a duplicate page title. The node selector and **New SSH tab** stay visible; **Workspace actions** contains host-key verification, the equivalent CLI command and the audit trail.
 
@@ -27,7 +29,7 @@ The layout control reads **1 pane** by default: only the selected tab is shown. 
 
 Each pane exposes input mode, search and a **Terminal actions** menu. **READ** disables local keyboard and paste input; it does not change the remote account's permissions. Search opens with the magnifying glass or **Ctrl/⌘ + Shift + F**. Use **Enter** for the next match, **Shift + Enter** for the previous match and **Escape** to return to the shell. The actions menu provides copy selection and text sizes from 10 to 24 px, with a 14 px reset. Every tab has its own close button. **Delete** on a focused tab requests the same action. A running session requires confirmation naming its target, including when its tab is inactive. A session already reported as closed is removed locally without another confirmation or RPC call. If the shell exits while confirmation is open, the pending action becomes local tab cleanup. Closing the active tab selects its neighbor; closing the last tab returns focus to **New SSH tab**. Tab numbers remain stable when another tab is removed.
 
-## Connection and closure feedback
+## Connection and closure feedback {#connection-and-closure-feedback}
 
 **New SSH tab** creates a pending tab immediately. It names the node and SSH
 identity, shows elapsed waiting time and stays responsive while the daemon opens
@@ -49,7 +51,7 @@ failed manual close keeps the tab and the confirmation dialog, with a visible
 reason and retry. Successful closure removes the tab. Read-only input mode does
 not override a closed session or an unavailable connection.
 
-## Verify the host before connecting
+## Verify the host before connecting {#verify-the-host-before-connecting}
 
 1. Register a node with its SSH hostname, port, user and credential using the [node commands](./cli.md#nodes-infrastructure-machines).
 2. Open **Workspace actions** (the ellipsis beside the node selector), then select **Verify host key**. The daemon observes the server's key in a handshake that does not authenticate.
@@ -69,7 +71,7 @@ When replacing a registered host, SSH port or account, provide or explicitly cle
 
 Pins are stored in the daemon's SQLite state store. Opening a terminal requires an exact pin match before authentication. Host-key probing and terminal opening use Xec's bounded connection and shell-request lifecycle. SSH adapter pools keep distinct host-key policies separate and preserve them during reconnect.
 
-## Equivalent CLI workflow
+## Equivalent CLI workflow {#equivalent-cli-workflow}
 
 ```bash
 omnitron node ssh-key edge-1
@@ -83,7 +85,7 @@ The node selector accepts a registered name or ID. `Ctrl+]` closes the CLI termi
 
 Terminal listing and closing are limited to the caller's owner identity. Local CLI sessions belong to the OS-authorized local daemon identity; browser sessions belong to the human account and its specific authenticated session. Another browser sign-in, even for the same account, cannot read or control an existing terminal.
 
-## Session lifetime and limits
+## Session lifetime and limits {#session-lifetime-and-limits}
 
 | Setting | Default |
 | --- | --- |
@@ -123,7 +125,7 @@ Closing a session is idempotent after its retained server state expires, so an
 old tab can still be removed. This operation still requires current administrator
 authority. A live session owned by another sign-in remains inaccessible.
 
-## Authorization and audit
+## Authorization and audit {#authorization-and-audit}
 
 SSH requires the administrator role and a current human session, or the trusted local Unix-socket identity. A machine `service_role` cannot open an interactive terminal. The daemon rechecks authorization and ownership on every method; its two-second sweep also closes revoked sessions, removed targets and expired shells.
 
@@ -131,7 +133,7 @@ Host trust and terminal opening require an audit write before proceeding. The au
 
 Use HTTPS outside loopback. xterm.js runs without automatic URL opening or OSC 52 clipboard writes. Multi-line/control-character paste requires review. **Read only** disables input for that pane; it is a local usability control, not a separate server permission. The remote shell still has the full OS rights of the registered SSH user.
 
-## What persists
+## What persists {#what-persists}
 
 Tabs and their output survive navigation inside the current Console. They do not survive a browser reload or daemon restart. Closing the browser ends the session after the disconnect timeout. No commands are automatically replayed and no shell is automatically reattached. Use a remote terminal multiplexer when the workload itself must outlive a connection.
 

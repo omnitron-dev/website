@@ -1,4 +1,6 @@
 ---
+id: "omnitron/projects"
+slug: "/docs/omnitron/projects"
 title: Projects and stacks
 description: One monorepo owns its applications and libraries; named stacks express deployment environments without duplicating projects.
 ---
@@ -22,7 +24,7 @@ Keep shared internal code in workspace packages. Fetch independently versioned l
 from the npm registry and lock their versions. A development checkout is an explicit
 local override, not a production dependency on another repository's filesystem.
 
-## Start with one configuration
+## Start with one configuration {#start-with-one-configuration}
 
 Define the applications once in the root `omnitron.config.ts`, and describe environments
 in its `stacks` map. Register the root, then use the same project identity everywhere:
@@ -37,7 +39,7 @@ omnitron topology show sample prod
 See [configuration](./configuration.md), [infrastructure overrides](./infrastructure.md#stack-level-overrides)
 and [release admission](./releases.md). Promoting a release does not create another project.
 
-## Compose configurations in a large repository
+## Compose configurations in a large repository {#compose-configurations-in-a-large-repository}
 
 An independently maintained configuration directory inside the same repository can
 contribute stacks to its owner. It remains a source of configuration, not another
@@ -59,7 +61,7 @@ A new `project add` for a directory already owned by a registered project is ref
 with guidance to import its stacks. Project settings show configuration sources;
 navigation remains **project → stack**.
 
-## Consolidate an older registration without interrupting applications
+## Consolidate an older registration without interrupting applications {#consolidate-an-older-registration-without-interrupting-applications}
 
 If a repository subdirectory was previously registered as `sample-research`, attach
 its existing runtime identity explicitly:
@@ -94,7 +96,7 @@ This restores the former standalone registration and preserves its runtime state
 Do not restore an old complete daemon database over newer telemetry to undo an import.
 An owner with imported configurations cannot be removed until they are detached.
 
-## Reuse a service across project boundaries
+## Reuse a service across project boundaries {#reuse-a-service-across-project-boundaries}
 
 A consuming project does not import the provider's configuration or share its lifecycle.
 Declare an external destination using a stack's `serviceOverrides.external`; bind
@@ -114,7 +116,7 @@ See the [topology workspace](./topology.md) and the
 between desired placement, observed state and admitted execution.
 
 
-## Verify a standalone stack start
+## Verify a standalone stack start {#verify-a-standalone-stack-start}
 
 To keep a local stack on reviewed code while the developer checkout changes,
 [prepare and select a local release](./releases.md#pin-a-local-stack). Record the
@@ -149,7 +151,7 @@ Standalone deployments use the ordinary start workflow. On an enrolled HA
 cluster, an operator recovering a previously stopped installation can
 [resume its verified release](#resume-installed-applications).
 
-## Confirmed stack stops
+## Confirmed stack stops {#confirmed-stack-stops}
 
 In Console, choose **Review stop…** on a stack card or its detail page. The same
 read-only inventory is available to viewers with
@@ -218,7 +220,7 @@ including after a page/backend reload. A failed stop retains the resources neede
 for reconciliation; complete it before starting a new deployment. Every user stop
 records success or failure in the audit trail.
 
-### Resume installed applications
+### Resume installed applications {#resume-installed-applications}
 
 After an operator confirms a signed stop, the elected controller can resume the same installed applications on their original nodes. Use **Resume installed apps** in Console or run:
 
@@ -235,7 +237,7 @@ Preparation checks every node before the first launch. Each owner resumes its ap
 
 Use stack status to inspect the persisted `resumeOperation` after a disconnect. An observation describes the applications at that instant. For current health, inspect the stack's live placements and application diagnostics. After a partial start, inspect the affected nodes, then review and complete a fresh stop before another recovery attempt. Recovery leaves the previously disabled automatic startup policy in place.
 
-### Existing allocations and rollout
+### Existing allocations and rollout {#existing-allocations-and-rollout}
 
 Generated node configurations carry `managedOrigin: { project, stack }` and
 `infrastructureOwnership: 'controller'`. The source stack owns provisioning and

@@ -1,4 +1,6 @@
 ---
+id: "titan/modules-system/module-discovery"
+slug: "/docs/titan/modules-system/module-discovery"
 sidebar_position: 3
 title: Module Discovery
 description: How modules are found, loaded, and ordered.
@@ -10,7 +12,7 @@ Module discovery is **explicit**. Titan does not scan the filesystem
 for modules at boot. Every module the application loads is reachable
 from the root module's `imports` graph.
 
-## The discovery walk
+## The discovery walk {#the-discovery-walk}
 
 When `Application.create(RootModule)` runs:
 
@@ -24,7 +26,7 @@ The result is a topologically sorted module list. Providers are
 registered with the container in this order so dependencies precede
 dependents.
 
-## Why this is explicit
+## Why this is explicit {#why-this-is-explicit}
 
 The alternative — automatic filesystem scanning — has three serious
 problems:
@@ -40,7 +42,7 @@ problems:
 The explicit graph is a few extra lines of `imports: [...]` in
 exchange for a runtime that is exactly what your code says.
 
-## The registered set
+## The registered set {#the-registered-set}
 
 After discovery, the registry holds:
 
@@ -57,7 +59,7 @@ After discovery, the registry holds:
 Inspect via the `module:registered` event or programmatically through
 `app.modules`.
 
-## Detecting cycles
+## Detecting cycles {#detecting-cycles}
 
 The discovery walk detects cycles between modules. A cycle throws at
 boot with the full cycle path:
@@ -74,7 +76,7 @@ The fix is structural — extract the shared piece into a third module,
 or invert one of the dependencies (often via a callback or interface).
 See [Circular Dependencies](../di/circular-dependencies.md).
 
-## Lazy loading
+## Lazy loading {#lazy-loading}
 
 Some applications want to load modules on demand (admin features that
 ship in production but should not run on every boot, optional

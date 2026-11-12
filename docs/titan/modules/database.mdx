@@ -1,12 +1,13 @@
 ---
+id: "titan/modules/database"
+slug: "/docs/titan/modules/database"
 title: titan-database
 ---
 
-import ModuleBadge from '@site/src/components/ModuleBadge';
 
 # titan-database
 
-<ModuleBadge origin="official" pkg="@omnitron-dev/titan-database" status="stable" />
+<span class="module-badge">official · @omnitron-dev/titan-database · stable</span>
 
 Kysely-based typed query builder with decorator-driven repository
 configuration, declarative migrations, row-level security, plugin
@@ -19,9 +20,9 @@ threading.
 pnpm add @omnitron-dev/titan-database
 ```
 
-## Quickstart
+## Quickstart {#quickstart}
 
-### Single connection
+### Single connection {#single-connection}
 
 ```typescript
 import { TitanDatabaseModule } from '@omnitron-dev/titan-database';
@@ -42,7 +43,7 @@ import { TitanDatabaseModule } from '@omnitron-dev/titan-database';
 class AppModule {}
 ```
 
-### SQLite
+### SQLite {#sqlite}
 
 Install the optional `better-sqlite3` peer when using the SQLite dialect.
 `DatabaseModule` opens SQLite on the first connection. For a dedicated local
@@ -66,7 +67,7 @@ durable state and logs. On an incompatible Node runtime, opening SQLite raises
 a JavaScript error before loading the binding. PostgreSQL and MySQL users can
 use their own drivers independently.
 
-### Multiple named connections
+### Multiple named connections {#multiple-named-connections}
 
 ```typescript
 TitanDatabaseModule.forRoot({
@@ -77,7 +78,7 @@ TitanDatabaseModule.forRoot({
 })
 ```
 
-### `forFeature` — repository registration
+### `forFeature` — repository registration {#forfeature--repository-registration}
 
 ```typescript
 @Module({
@@ -94,7 +95,7 @@ class UsersModule {}
 container under per-repo tokens, and ensures decorator-driven plugins
 (soft-delete, timestamps, audit) bind correctly at boot.
 
-### Async configuration
+### Async configuration {#async-configuration}
 
 ```typescript
 TitanDatabaseModule.forRootAsync({
@@ -110,7 +111,7 @@ TitanDatabaseModule.forRootAsync({
 })
 ```
 
-## Read-only component schema readiness
+## Read-only component schema readiness {#read-only-component-schema-readiness}
 
 Use `@omnitron-dev/titan-database/readiness` when a component must verify the
 PostgreSQL schema it consumes before accepting traffic. This optional entry
@@ -124,7 +125,7 @@ Omnitron applications can import the identical API through
 `@omnitron-dev/omnitron/readiness`; they do not need to depend on Kysera or reach
 into Titan internals. Choose the public entry for the layer your application uses.
 
-### Declare what this component requires
+### Declare what this component requires {#declare-what-this-component-requires}
 
 The application owns its driver and pool. This example uses `pg`; install that
 driver when it is not already an application dependency.
@@ -182,7 +183,7 @@ open. Avoid starting the component's own copy of a shared migration registry:
 a later, unrelated migration must not force an older compatible worker to become
 a schema writer.
 
-### Compatibility contract
+### Compatibility contract {#compatibility-contract}
 
 `PostgresSchemaRequirement` names a component, an optional schema and the tables
 and routines it needs. Without `schema`, PostgreSQL's `current_schema()` on the
@@ -217,7 +218,7 @@ See [PostgreSQL index metadata](https://www.postgresql.org/docs/current/catalog-
 These checks do not prove arbitrary check constraints, index performance, query
 permissions, row-level policies or every possible PostgreSQL invariant.
 
-### Routines and triggers
+### Routines and triggers {#routines-and-triggers}
 
 `routines` binds each ordinary scalar function to its exact ordered
 `argumentTypes` (no arguments by default), SHA-256 of `pg_proc.prosrc`, language
@@ -246,7 +247,7 @@ quoting. Other intentional settings must still be declared. This binds name
 resolution to the component's namespace without trusting a caller's mutable
 search path; it is not a general SQL-security proof.
 
-### Deadlines and failure reporting
+### Deadlines and failure reporting {#deadlines-and-failure-reporting}
 
 The optional third argument is `PostgresReadinessOptions`:
 
@@ -268,7 +269,7 @@ health/diagnostic path; do not translate an unavailable database into “schema 
 compatible.” The check applies no DDL, writes no migration journal and never
 repairs the schema automatically.
 
-## `DatabaseModuleOptions`
+## `DatabaseModuleOptions` {#databasemoduleoptions}
 
 | Option         | Type                                                                 |
 | -------------- | -------------------------------------------------------------------- |
@@ -277,7 +278,7 @@ repairs the schema automatically.
 | `kysera`       | `{ core?, repository?, plugins? }` — Kysera integration config       |
 | `plugins`      | `PluginsConfiguration` — global soft-delete / timestamps / audit     |
 
-## `DatabaseConnection`
+## `DatabaseConnection` {#databaseconnection}
 
 | Field             | Type                                                              |
 | ----------------- | ----------------------------------------------------------------- |
@@ -291,7 +292,7 @@ repairs the schema automatically.
 | `seedsPath?`      | `string`                                                          |
 | `coerceBigint?`   | `boolean` — parse PG `BIGINT` as JS `number` if safe (default `true` for PG) |
 
-## Repository pattern — `TransactionAwareRepository<DB, Table>`
+## Repository pattern — `TransactionAwareRepository<DB, Table>` {#repository-pattern--transactionawarerepositorydb-table}
 
 ```typescript
 import { Repository, SoftDelete, Timestamps, Audit } from '@omnitron-dev/titan-database';
@@ -315,7 +316,7 @@ export class UsersRepository extends TransactionAwareRepository<Database, 'users
 }
 ```
 
-### Inherited methods
+### Inherited methods {#inherited-methods}
 
 | Method                                          | Purpose                                       |
 | ----------------------------------------------- | --------------------------------------------- |
@@ -332,7 +333,7 @@ export class UsersRepository extends TransactionAwareRepository<Database, 'users
 | `exists(id)` / `count()`                        | Existence check / row count                   |
 | `upsert(data, options)` / `upsertMany(data[], options)` | Insert-or-update                      |
 
-### Protected accessors
+### Protected accessors {#protected-accessors}
 
 | Member                         | Purpose                                                |
 | ------------------------------ | ------------------------------------------------------ |
@@ -342,7 +343,7 @@ export class UsersRepository extends TransactionAwareRepository<Database, 'users
 | `hasSoftDelete`                | Plugin flag (set by `@SoftDelete`)                     |
 | `softDeleteColumn`             | Column name (default `'deletedAt'`)                    |
 
-## `DatabaseManager`
+## `DatabaseManager` {#databasemanager}
 
 ```typescript
 import { DATABASE_MANAGER, type IDatabaseManager, runInTransaction } from '@omnitron-dev/titan-database';
@@ -380,7 +381,7 @@ Transactions are run through the standalone `runInTransaction(conn, fn, options?
 helper (below), **not** a method on the manager — pass it a connection from
 `getConnection()`.
 
-## Transaction context
+## Transaction context {#transaction-context}
 
 The module uses `AsyncLocalStorage` to track the active transaction
 per request. Repository calls inside `runInTransaction` automatically
@@ -400,7 +401,7 @@ await runInTransaction(db, async () => {
 }, { name: 'signup' });
 ```
 
-### Helpers
+### Helpers {#helpers}
 
 | Function                                  | Purpose                                                 |
 | ----------------------------------------- | ------------------------------------------------------- |
@@ -410,9 +411,9 @@ await runInTransaction(db, async () => {
 | `isInTransactionContext()`                | Boolean check                                           |
 | `getTransactionContext()`                 | Full context: depth, started-at, name, connection name  |
 
-## Decorators
+## Decorators {#decorators}
 
-### Repository / plugins
+### Repository / plugins {#repository--plugins}
 
 ```typescript
 import { Repository, SoftDelete, Timestamps, Audit, Migration }
@@ -427,7 +428,7 @@ import { Repository, SoftDelete, Timestamps, Audit, Migration }
 | `@Audit({ table?, captureOldValues?, captureNewValues? })` | Row-level audit logging                  |
 | `@Migration({ version, description?, dependencies?, connection?, transactional?, timeout? })` | Mark a class as a migration |
 
-### Row-level security
+### Row-level security {#row-level-security}
 
 ```typescript
 import { Policy, Allow, Deny, Filter, BypassRLS } from '@omnitron-dev/titan-database';
@@ -459,7 +460,7 @@ class OrdersRepository extends TransactionAwareRepository<Database, 'orders'> {
 }
 ```
 
-### Injection
+### Injection {#injection}
 
 | Decorator                                | Effect                                  |
 | ---------------------------------------- | --------------------------------------- |
@@ -467,7 +468,7 @@ class OrdersRepository extends TransactionAwareRepository<Database, 'orders'> {
 | `@InjectDatabaseManager()`               | Inject the `DatabaseManager`            |
 | `@InjectRepository(RepoClass)`           | Inject a repository instance            |
 
-## Migrations
+## Migrations {#migrations}
 
 ```typescript
 import { Migration } from '@omnitron-dev/titan-database';
@@ -494,7 +495,7 @@ Choose an explicit registry and deployment command. Omnitron applications use
 [`@omnitron-dev/omnitron/migration`](../../omnitron/migrations.md); standalone
 Titan applications use `@omnitron-dev/titan-database/migration`.
 
-### One execution engine
+### One execution engine {#one-execution-engine}
 
 Kysera owns execution, connection pinning, locking, history and checksums.
 Titan's narrow migration entry point re-exports that engine and adds driver
@@ -514,7 +515,7 @@ SQL contents; `transactionMode: 'batch'` makes an entire operation atomic where
 the dialect supports it. Preserve existing history and lock identities when
 adopting the engine. See [guarantees and migration examples](../../omnitron/migrations.md).
 
-### Transaction context
+### Transaction context {#transaction-context-1}
 
 `runInTransaction` and `getExecutor` propagate only the transaction belonging to
 the requested database. Nested work uses Kysera DAL savepoints; a second database
@@ -522,7 +523,7 @@ gets an independent transaction. Whole-transaction retries use Kysera Infra and
 are opt-in. A failed rollback preserves both causes. Cross-database work is not
 a distributed transaction: callers must design compensation explicitly.
 
-## What comes through from `@kysera/*`
+## What comes through from `@kysera/*` {#what-comes-through-from-kysera}
 
 This package re-exports about sixty symbols from the `@kysera` family, so they
 are importable from `@omnitron-dev/titan-database` and a reader has no reason
@@ -549,7 +550,7 @@ that merely looks right, which is the intended outcome: those names belong to
 your application's own error hierarchy or to Titan's, and a database driver's
 version of them is a different type.
 
-## Plugin lifecycle ordering
+## Plugin lifecycle ordering {#plugin-lifecycle-ordering}
 
 ```mermaid
 flowchart LR
@@ -565,7 +566,7 @@ For deletes, soft-delete intercepts first: it issues an UPDATE that
 sets `deleted_at` instead of a DELETE; the audit plugin captures the
 before/after.
 
-## Tokens
+## Tokens {#tokens}
 
 | Token                                  | Purpose                                                |
 | -------------------------------------- | ------------------------------------------------------ |
@@ -576,7 +577,7 @@ before/after.
 | `getDatabaseConnectionToken(name?)`    | Token for a named connection                           |
 | `getRepositoryToken(RepoClass)`        | Token for a specific repository instance               |
 
-## Lifecycle
+## Lifecycle {#lifecycle}
 
 `TitanDatabaseModule` implements:
 
@@ -584,7 +585,7 @@ before/after.
   connection. Crucial during dev with file watchers — without this,
   rapid restarts exhaust PG connection slots.
 
-## Adding your own kysera plugins
+## Adding your own kysera plugins {#adding-your-own-kysera-plugins}
 
 Plugins go on the CONNECTION, through `kysera.plugins`. They are
 applied when the executor is built, so every query on that
@@ -619,7 +620,7 @@ following an older copy of this page, move the plugin list into
 the module options as above.
 :::
 
-## Anti-patterns
+## Anti-patterns {#anti-patterns}
 
 - **Manual transaction threading.** Don't pass `tx` as a parameter
   through every layer. Use `runInTransaction`; repository calls
@@ -635,7 +636,7 @@ the module options as above.
   and analytics traffic on one pool starves each other. Use
   multiple named connections.
 
-## Inter-module dependencies
+## Inter-module dependencies {#inter-module-dependencies}
 
 - Uses [`@kysera/*`](https://github.com/kysera) — core / repository
   / rls / soft-delete / timestamps / audit / executor / infra /
@@ -643,13 +644,13 @@ the module options as above.
 - Peer deps on the drivers you use: `pg`, `mysql2`, `better-sqlite3`.
 - Optional health indicator integrates with [`titan-health`](./health.mdx).
 
-## See also
+## See also {#see-also}
 
 - [`titan-health`](./health.mdx) — `DatabaseHealthIndicator` exported by this module
 - [Best Practices / Performance](../best-practices/performance.md) — N+1, projection, indexing
 
 
-## PostgreSQL coordination leases
+## PostgreSQL coordination leases {#postgresql-coordination-leases}
 
 The optional `@omnitron-dev/titan-database/coordination` entry point exports
 `PostgresLeaseStore`, `LeaseLostError`, `POSTGRES_LEASE_SCHEMA_V1`, `LeaseIdentity`,

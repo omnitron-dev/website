@@ -1,4 +1,6 @@
 ---
+id: "auth/mental-model"
+slug: "/docs/auth/mental-model"
 title: Mental Model
 sidebar_position: 6
 ---
@@ -44,7 +46,7 @@ Four layers. They share **one** identity (the JWT-resolved
 `hasPermission` in `netron/auth/utils.ts`), **one** counter
 (`perm-v:{userId}`), and **one** audit sink (`audit_logs`).
 
-## Layer 1 — Roles
+## Layer 1 — Roles {#layer-1--roles}
 
 A user has one or more roles. Each role names a default
 permission set. Roles are coarse — fewer than ten platform-
@@ -54,7 +56,7 @@ and are the only consumer of role-priority numbers; gates that
 care about specific capabilities check **permissions**, not
 roles.
 
-## Layer 2 — Permissions
+## Layer 2 — Permissions {#layer-2--permissions}
 
 Strings in the canonical registry, matched by `permissionMatches`,
 baked into the JWT at mint time. The `.*` wildcard expands to the
@@ -66,7 +68,7 @@ the platform and org scopes, on the server `@Auth` decorator,
 on the @kysera/rls policy ctx, and on the frontend
 `<PermissionGuard>` / `usePermission()`.
 
-## Layer 3 — ABAC conditions
+## Layer 3 — ABAC conditions {#layer-3--abac-conditions}
 
 When role + permission isn't enough, a `PolicyDefinition`
 attaches an attribute test: time window, recent step-up MFA,
@@ -74,7 +76,7 @@ request IP, feature flag, rate-limit. Built-in factories cover
 the common shapes; custom policies are plain objects registered
 on the `PolicyEngine`. Composition via `{and|or|not}`.
 
-## Layer 4 — RLS
+## Layer 4 — RLS {#layer-4--rls}
 
 @kysera/rls policies fire on every DB query and consume the
 SAME `AuthContext` that the application-side gates see. The
@@ -83,7 +85,7 @@ STRICT tier (`audit_logs`, `platform_roles`, `users`,
 missing auth context — raw SQL without context cannot leak
 through. Other tables run permissive for anonymous reads.
 
-## Live propagation
+## Live propagation {#live-propagation}
 
 Every mutation to a user's effective permission set bumps
 `perm-v:{userId}`. The invocation wrapper compares the
@@ -92,7 +94,7 @@ mismatch ⇒ refresh-token flow ⇒ new JWT with the updated set.
 The propagation window is bounded by one RPC round-trip —
 no re-sign-in.
 
-## Why one mental model?
+## Why one mental model? {#why-one-mental-model}
 
 Before the unification:
 
@@ -113,7 +115,7 @@ them by making the layers share substrate — there is exactly
 one place to look when something authorises (or doesn't)
 unexpectedly.
 
-## See also
+## See also {#see-also}
 
 - [Permissions](./permissions.md) — grammar, matcher, registry.
 - [Per-user overrides](./overrides.md) — additive grants and

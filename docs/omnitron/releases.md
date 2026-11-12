@@ -1,4 +1,6 @@
 ---
+id: "omnitron/releases"
+slug: "/docs/omnitron/releases"
 title: Releases and verification
 description: Build from pinned project and runtime commits, verify artifacts, attest on a stack, and retain a recovery path.
 ---
@@ -10,7 +12,7 @@ records the **project commit** and the **Omnitron commit** used to build its
 applications. The build runs in clean clones and stores its gates, artifacts
 and manifest.
 
-## Local SDK development and registry deployments
+## Local SDK development and registry deployments {#local-sdk-development-and-registry-deployments}
 
 Commit exact platform versions in your pnpm catalog and the resulting registry
 lockfile. With a local framework checkout, `omnitron sdk init` prepares a small
@@ -41,7 +43,7 @@ To enforce this input policy, set `omnitron.release.frameworkInput` to
 changed platform packages first, update their catalog and lockfile together in
 a registry checkout, then build and deploy the resulting project commit.
 
-## Rebuilding an artifact
+## Rebuilding an artifact {#rebuilding-an-artifact}
 
 A targeted build resolves the same stack names as the daemon. It reads
 `omnitron.stacks.json` from the registered directory in the clean checkout,
@@ -74,7 +76,7 @@ Equal archive hashes identify delivered bytes. They do not by themselves identif
 a running process, or prove that native dependencies built for macOS will run on
 Linux. Use the launch receipt and the destination's runtime when checking a stack.
 
-### Qualify a separate working copy
+### Qualify a separate working copy {#qualify-a-separate-working-copy}
 
 Install dependencies in each checkout using the Node target and the pnpm version
 pinned by the project. Keep `verifyDepsBeforeRun: error`. A symlink to another
@@ -134,7 +136,7 @@ the manifest records `not-run`; an artifact is not evidence that tests passed.
 `OMNITRON_HOME` isolates controller state, not test databases, application ports
 or external services. Configure those separately for the project's checks.
 
-### Keep package-manager resolution semantics
+### Keep package-manager resolution semantics {#keep-package-manager-resolution-semantics}
 
 A checked release preserves the production dependency graph installed from its
 frozen lockfile. Build reuse hashes the effective pnpm override rules, their
@@ -160,7 +162,7 @@ relax source, lockfile, archive or runtime admission checks. See the native
 [pnpm override semantics](https://pnpm.io/settings/dependency-resolution#overrides)
 and [npm bundle override semantics](https://docs.npmjs.com/cli/v11/configuring-npm/package-json#overrides).
 
-### Keep repository identity separate from credentials
+### Keep repository identity separate from credentials {#keep-repository-identity-separate-from-credentials}
 
 Repository addresses become public build provenance in CLI, Console and exported
 manifests. Use a Git credential helper or SSH agent for authentication. Release
@@ -175,7 +177,7 @@ Admission checks the same identities without changing their pinned bytes. Restor
 a verified original manifest or create a new release with a credential-free
 remote; editing a selected manifest invalidates its digest.
 
-### Independent project operations
+### Independent project operations {#independent-project-operations}
 
 A project team can submit a controller build from the CLI or **Releases → Build** in Console. Both submit to the same Netron service. The returned job ID identifies the work across clients. Closing the client leaves the job under controller supervision.
 
@@ -190,7 +192,7 @@ Run `omnitron --json release preflight` to inspect installed tools, build slots 
 
 Queued and running jobs appear in the project's **Releases** view. The global workspace shows active jobs across projects. Operators can cancel one job. Viewers can inspect its progress. Environment overrides require administrator access. Job history retains environment names and omits their values. After a controller restart, a final manifest recovers the result. An incomplete job is identified as interrupted and is available for inspection. Use a new submission to retry it.
 
-#### Deploy a qualified release
+#### Deploy a qualified release {#deploy-a-qualified-release}
 
 Build on a machine matching the execution target, including the Node executable, ABI and libc. The foreground `release build` entry point supports isolated CI builders without a working controller. A configured, shared S3-compatible release store carries qualified releases between a builder and a controller. The index is published after all bytes have arrived. Current writers address each payload by SHA-256 and commit a format 2 index using a conditional S3 PUT. Concurrent publishers with different builds under the same ID cannot overwrite the winning payload. Concurrent measurements of the same build merge against the current index. Readers verify each payload and the manifest before installing the release.
 
@@ -219,7 +221,7 @@ Build slots and deployment leases protect different resources. On disjoint nodes
 
 The control-plane design describes the ownership boundaries and failure scenarios for shared hosts. [Multi-project deployment audit and design](./resilient-control-plane.md#multi-project-deployment-audit-and-design)
 
-### Inspect migration provenance
+### Inspect migration provenance {#inspect-migration-provenance}
 
 An application artifact records its owning Git package in
 `artifacts[].packageSource`. The `migrations` map identifies tracked migration
@@ -241,7 +243,7 @@ bodies with database history. Imported applications retain the producer's
 records. Missing records in an older artifact mean **unknown**, and an empty
 migration-file map does not prove the absence of migration programs.
 
-### Inspect an archive without running it
+### Inspect an archive without running it {#inspect-an-archive-without-running-it}
 
 Use the public `@omnitron-dev/omnitron/release-archive` entry point when tooling
 needs to inspect compiled modules, native binaries or static assets offline:
@@ -280,7 +282,7 @@ without a recorded compiled launch, closure or target is refused. The shared
 loader verifies all archives in the selected release, so an absent or corrupt
 sibling artifact also refuses inspection.
 
-### Match the execution target
+### Match the execution target {#match-the-execution-target}
 
 A checked application archive contains its compiled code, production dependencies,
 installed optional packages and resolved peers. Build it with the target operating
@@ -324,7 +326,7 @@ be attested. After start, the owner verifies the application entry point, runtim
 installed file tree. The launch receipt lets CLI and Console distinguish delivery
 history from the release a process is actually running.
 
-### Pin a local stack
+### Pin a local stack {#pin-a-local-stack}
 
 A local stack can keep its application code separate from the developer checkout.
 Its selected release identifies the archive and manifest used for future starts.
@@ -400,7 +402,7 @@ working-tree static directory cannot use this release selection. An application
 relying on a script or symlink outside the archive must package that dependency
 before it can be pinned.
 
-### Changing a local stack's applications
+### Changing a local stack's applications {#changing-a-local-stacks-applications}
 
 Use the same release preparation, reviewed stop and explicit start when a local
 stack adds or removes applications. An unpinned development stack uses the same
@@ -437,7 +439,7 @@ one reviewed stop of all applications belonging to that old stack. This does not
 provide persistent public per-application stop or source selection, and does not
 make a whole-stack switch safe without reviewing the shared services it affects.
 
-### Development mode and a selected release
+### Development mode and a selected release {#development-mode-and-a-selected-release}
 
 A local stack can run either its registered working tree or a selected release.
 A local host, a project checkout used as `cwd`, and `watch: true` do not imply
@@ -459,7 +461,7 @@ controller interruption and retain the previous source for rollback. Until that
 contract is implemented and qualified, a stack containing shared scientific or
 production services must not be switched to development mode as a frontend fix.
 
-### Use an application from another project
+### Use an application from another project {#use-an-application-from-another-project}
 
 A consumer can pin one application from an independently built producer release.
 The producer release must already exist in the controller release store. Obtain
@@ -517,7 +519,7 @@ Older local owners may run the verified package while reporting no launch
 receipt. The selected release and inspected files remain useful evidence, but
 neither is presented as a confirmed current process identity.
 
-### Mount a release artifact in a local Docker service
+### Mount a release artifact in a local Docker service {#mount-a-release-artifact-in-a-local-docker-service}
 
 Use `infrastructure.artifactVolumes` when a service such as a gateway needs
 files shipped in an application artifact. For example, a gateway can serve the
@@ -546,7 +548,7 @@ Stack diagnosis in CLI and Console names the application, service and target
 still awaiting selection. Topology can show the declared service before its
 artifact is installed.
 
-### Read the executing application's origin
+### Read the executing application's origin {#read-the-executing-applications-origin}
 
 A packaged application can use the public `@omnitron-dev/omnitron/runtime` entry
 point to associate its durable output with the bytes admitted for its launch.
@@ -597,7 +599,7 @@ an external stream, and preserve that session identity through downstream proces
 Do not relabel historical rows or another producer's messages with the current
 aggregator's runtime. Keep absent historical evidence explicit.
 
-### Package a project-specific release
+### Package a project-specific release {#package-a-project-specific-release}
 
 Use the headless `@omnitron-dev/omnitron/release-archive` entry point when a
 project adds its own signed manifest or native artifacts. Populate a fresh staging
@@ -619,7 +621,7 @@ relative links for dependency graphs, sorts entries, preserves executable bits
 and removes filesystem timestamps. Exclusive creation protects an existing release
 when two builders finish at the same time.
 
-## Build and inspect
+## Build and inspect {#build-and-inspect}
 
 Register the project and commit its `pnpm-lock.yaml`. The selected project
 commit determines how the controller obtains the framework.
@@ -642,7 +644,7 @@ commit determines how the controller obtains the framework.
   single Omnitron checkout. The controller builds the linked packages from its
   clean clone. Mixing linked and registry framework packages fails the build.
 
-### Read the build result
+### Read the build result {#read-the-build-result}
 
 A retained manifest means packaging finished; it does not mean the release passed
 its checks. CLI and Console interpret the same recorded gate and artifact outcomes.
@@ -657,7 +659,7 @@ artifact reason, and retains its release ID, manifest, logs and individual resul
 for diagnosis. Successful build checks do not authorize deployment: destination,
 source, runtime, role and lifecycle admission still run when selecting the release.
 
-### Choose an SDK source
+### Choose an SDK source {#choose-an-sdk-source}
 
 Repository location and trust are separate concerns. Omnitron uses Git rather
 than a hosting provider's API to inspect source history. GitHub, GitLab, private
@@ -742,7 +744,7 @@ registry request that requires removing a key is refused before starting a
 worker rather than claiming isolation that the transport cannot provide. Git
 credential helpers and SSH configuration remain available.
 
-### Build from local sources
+### Build from local sources {#build-from-local-sources}
 
 The registered project's local Git checkout supplies its selected commit; a
 reachable project hosting service is not required to clone those local inputs.
@@ -827,7 +829,7 @@ Read the gate results and artifact list before deployment. The manifest
 describes what was built; the daemon's audit trail describes which release
 a stack took.
 
-## Understand what is built and what is running
+## Understand what is built and what is running {#understand-what-is-built-and-what-is-running}
 
 A project owns multiple stacks. A release is a stored build that can be deployed
 to several stacks; building or downloading it does not start any applications.
@@ -939,7 +941,7 @@ The browser-safe `@omnitron-dev/omnitron/release-reading` entry point exports
 `readSourcePublication` for other clients. It composes the existing stack and
 audit APIs without provisioning, starting, stopping or deploying anything.
 
-## Dependency identity
+## Dependency identity {#dependency-identity}
 
 For local SDK development, run `omnitron sdk init` to install or upgrade the managed pnpm hook. Relative `file:` and `link:` overrides resolve from the consumer workspace in the development profile, including transitive dependencies. `omnitron sdk registry` restores the distribution lockfile.
 
@@ -958,7 +960,7 @@ are installed on the destination; a macOS `node_modules` tree is never copied to
 Linux. After publishing a dependency to npm, update its version and lockfile,
 remove its local archive override, and verify a clean install before deployment.
 
-### Promoting a dependency from npm
+### Promoting a dependency from npm {#promoting-a-dependency-from-npm}
 
 For a coordinated Xec or Kysera release, compare each exact version with the
 publisher's saved SHA-512. An accepted upload, a distribution tag and a
@@ -984,7 +986,7 @@ Compare the runtime, application archives and static assets, then test
 admission of the resulting archives against the target runtime. Live release
 registrations continue to refer to their original digests.
 
-### Following a remote transfer
+### Following a remote transfer {#following-a-remote-transfer}
 
 Open **Deployments** in the project workspace or run
 `omnitron --json stack progress <project> [stack]`. Each remote stack start
@@ -996,7 +998,7 @@ memory. An earlier controller may supply reports without workspace identity.
 Console keeps those behind an explicit control. Use **Audit** for recorded
 starts and **Releases** for evidence of which artifact a process loaded.
 
-## Validate linked source checkouts
+## Validate linked source checkouts {#validate-linked-source-checkouts}
 
 Development applications can share a sibling Omnitron checkout. The release
 builder reproduces that relative layout with clean clones of pinned commits.
@@ -1018,7 +1020,7 @@ installed links and package manifests exist. Published dependencies need no
 sibling-checkout layout. Do not replace this validation with an allowed count of
 links: adding a framework module does not change whether a layout is reproducible.
 
-## Verify the deployed system
+## Verify the deployed system {#verify-the-deployed-system}
 
 An attestation records what probes measured about a release on a named stack.
 Build success alone does not establish that the deployed application works.
@@ -1041,7 +1043,7 @@ Use one input mode: `--on-node` or `--from`. The daemon checks attestation
 freshness against deployment history. A recorded probe failure remains a
 failure; storing the result does not turn it into a passing gate.
 
-## Move a release between machines
+## Move a release between machines {#move-a-release-between-machines}
 
 Configure `releaseStore` in the daemon configuration and keep its credential
 in the vault. The transfer commands use the artifact store:
@@ -1087,7 +1089,7 @@ A forwarding-only OpenSSH account can use `AuthenticationMethods publickey`, `Al
 
 Check the S3 server's security support as well as its compatibility with conditional writes. The archived MinIO Community image from September 2025 accepts forged unsigned-trailer writes under the conditions documented in the vendor advisory. An isolated bucket and private network do not verify a request signature. [MinIO security advisory](https://github.com/minio/minio/security/advisories/GHSA-hv4r-mvr4-25vw)
 
-## Retain recoverable artifacts
+## Retain recoverable artifacts {#retain-recoverable-artifacts}
 
 ```bash
 omnitron release prune --keep 5
@@ -1103,7 +1105,7 @@ Retaining an artifact is only one part of recovery. A previous application
 must still be compatible with the current schema. See
 [Production readiness](../deployment/production-readiness.md).
 
-## Project tool integration
+## Project tool integration {#project-tool-integration}
 
 Application-specific probes and account tools belong to the application
 repository. Omnitron supplies node transport, deployment coordination and
@@ -1126,7 +1128,7 @@ This is a server/CLI entry point: keep it out of browser bundles and let the
 daemon retain transport credentials in its vault. The regular CLI and Console
 pipelines remain the interface for running and tracking deployments.
 
-## Command reference
+## Command reference {#command-reference}
 
 | Command | Purpose |
 | --- | --- |
@@ -1141,7 +1143,7 @@ pipelines remain the interface for running and tracking deployments.
 
 Use `--help` on a command for its complete option set.
 
-## Prepare without damaging the running release
+## Prepare without damaging the running release {#prepare-without-damaging-the-running-release}
 
 Remote application installation uses a separate directory identified by package
 version and artifact digest. Reinstalling a package version does not clear the

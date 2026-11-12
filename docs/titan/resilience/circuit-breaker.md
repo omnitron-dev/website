@@ -1,4 +1,6 @@
 ---
+id: "titan/resilience/circuit-breaker"
+slug: "/docs/titan/resilience/circuit-breaker"
 sidebar_position: 3
 title: Circuit Breaker
 description: Stop calling a failing dependency. Let it cool down. Resume gradually.
@@ -10,7 +12,7 @@ description: Stop calling a failing dependency. Let it cool down. Resume gradual
 no `@CircuitBreaker` decorator — instantiate the class and use
 `.execute()` around the work you want to protect.
 
-## States
+## States {#states}
 
 ```typescript
 enum CircuitState {
@@ -37,7 +39,7 @@ stateDiagram-v2
   HalfOpen --> Open: probe failure
 ```
 
-## Basic usage
+## Basic usage {#basic-usage}
 
 ```typescript
 import { CircuitBreaker, CircuitState } from '@omnitron-dev/titan/utils';
@@ -73,7 +75,7 @@ canonical list):
 - `requestTimeout` — optional per-call timeout (ms) applied inside
   `execute()`.
 
-## Per-instance state
+## Per-instance state {#per-instance-state}
 
 Each `CircuitBreaker` instance has its own state. Use one instance
 per dependency you want to protect:
@@ -99,7 +101,7 @@ class PaymentsService {
 A failure in `chargeStripe` opens *only* the Stripe circuit;
 PayPal stays available.
 
-## Observability
+## Observability {#observability}
 
 `CircuitBreaker` extends `EventEmitter`. The emitted events are
 `stateChange`, `success`, `failure`, `rejected`, and `reset` — there
@@ -116,7 +118,7 @@ breaker.on('stateChange', ({ previousState, newState }) => {
 breaker.on('rejected', () => metrics.counter('breaker.rejected').inc());
 ```
 
-## Reading state
+## Reading state {#reading-state}
 
 ```typescript
 breaker.getState()             // CircuitState (state is private — use the getter)
@@ -126,7 +128,7 @@ breaker.getMetrics()           // CircuitBreakerMetrics — total calls, failure
 For imperative gating without `execute()`, the breaker also exposes
 `isOpen()`, `recordSuccess()`, and `recordFailure()`.
 
-## Composing with retry
+## Composing with retry {#composing-with-retry}
 
 ```typescript
 import { CircuitBreaker, retry, isOperationalError } from '@omnitron-dev/titan/utils';
@@ -141,7 +143,7 @@ await breaker.execute(() =>
 Breaker outside, retry inside. When the circuit is open, retries
 don't run — the breaker rejects before `retry()` is called.
 
-## Anti-patterns
+## Anti-patterns {#anti-patterns}
 
 - **Threshold too low.** A breaker that opens on the first failure
   flaps constantly. Pair `failureThreshold` with `volumeThreshold`

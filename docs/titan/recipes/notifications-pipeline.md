@@ -1,4 +1,6 @@
 ---
+id: "titan/recipes/notifications-pipeline"
+slug: "/docs/titan/recipes/notifications-pipeline"
 sidebar_position: 5
 title: Notifications pipeline
 description: Producer → queue → worker → channels, with rate limit and preferences.
@@ -11,7 +13,7 @@ rate-limits per channel, isolates flaky delivery providers from the
 request path, and runs on a worker fleet — so an SMS provider outage
 doesn't slow down API responses.
 
-## Shape
+## Shape {#shape}
 
 - **Producer.** API pods emit notification events; return
   immediately without waiting for delivery.
@@ -26,7 +28,7 @@ doesn't slow down API responses.
 - **Templates.** One payload renders to N channels with
   per-channel transformations.
 
-## Architecture
+## Architecture {#architecture}
 
 ```mermaid
 flowchart LR
@@ -52,7 +54,7 @@ flowchart LR
   Chan --> Provider[(SMTP / Twilio / FCM / …)]
 ```
 
-## `AppModule` — producer (API pod)
+## `AppModule` — producer (API pod) {#appmodule--producer-api-pod}
 
 ```typescript
 import { Module } from '@omnitron-dev/titan';
@@ -122,7 +124,7 @@ import { NotificationsModule } from '@omnitron-dev/titan-notifications';
 export class AppModule {}
 ```
 
-## Producer side — emitting a notification
+## Producer side — emitting a notification {#producer-side--emitting-a-notification}
 
 ```typescript
 import { Service, Inject } from '@omnitron-dev/titan';
@@ -155,7 +157,7 @@ class UsersService {
 }
 ```
 
-## Worker pod — consuming and delivering
+## Worker pod — consuming and delivering {#worker-pod--consuming-and-delivering}
 
 ```typescript
 import { Module, createToken } from '@omnitron-dev/titan';
@@ -202,7 +204,7 @@ three integration points you implement once per project. They
 wire the abstract worker to your concrete user store, your
 inbox storage, and your realtime channel.
 
-## A custom channel — e.g. SMTP email
+## A custom channel — e.g. SMTP email {#a-custom-channel--eg-smtp-email}
 
 ```typescript
 import { AbstractEmailChannel, type EmailContent } from '@omnitron-dev/titan-notifications';
@@ -227,7 +229,7 @@ class SmtpEmailChannel extends AbstractEmailChannel {
 
 Register it via `forRoot({ channels: [new SmtpEmailChannel()] })`.
 
-## Cross-module wiring notes
+## Cross-module wiring notes {#cross-module-wiring-notes}
 
 | Concern                          | Wiring detail                                                                                          |
 | -------------------------------- | ------------------------------------------------------------------------------------------------------ |
@@ -241,7 +243,7 @@ Register it via `forRoot({ channels: [new SmtpEmailChannel()] })`.
 | DLQ                              | Failed deliveries land in a Rotif dead-letter queue (see Rotif config)                                  |
 | Redis retention                  | Off in every form unless configured — see the checklist item below                                      |
 
-## Production checklist
+## Production checklist {#production-checklist}
 
 - [ ] **Producer + worker pods deployed separately** — independent scaling
 - [ ] **`rateLimiterConfig.channelLimits.sms` set** — SMS is expensive and rate-limited by providers
@@ -262,7 +264,7 @@ Register it via `forRoot({ channels: [new SmtpEmailChannel()] })`.
 - [ ] **Persistence backend backed up** — in-app inbox should survive redis loss
 - [ ] **Test channels** in staging — `MockEmailChannel` etc. for end-to-end verification
 
-## See also
+## See also {#see-also}
 
 - [`titan-notifications`](../modules/notifications.mdx) — full reference
 - [`titan-events`](../modules/events.mdx) — in-process events the producer emits

@@ -1,12 +1,14 @@
 # Dependencies
-node_modules/
+node_modules
 
 # Production
 build/
 .docusaurus/
 
 # Generated files
-.cache-loader
+.xec-eval-*
+test-results/
+playwright-report/
 
 # Misc
 .DS_Store

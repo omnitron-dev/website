@@ -1,4 +1,6 @@
 ---
+id: "reference/compatibility"
+slug: "/docs/reference/compatibility"
 title: Compatibility and status
 description: Runtime requirements, package boundaries, versioning, and the distinction between implemented APIs and design proposals.
 ---
@@ -20,7 +22,7 @@ describes the current source tree; pin the versions you deploy.
 | Infrastructure provisioning | Docker for container-backed infrastructure; [bare-metal](../deployment/bare-metal.md) has separate requirements |
 | Documentation site | A separate Docusaurus project with its own manifest, lockfile and TypeScript version |
 
-## Implemented API versus design
+## Implemented API versus design {#implemented-api-versus-design}
 
 The module references document exported APIs. **Design RFC** callouts mark
 proposed composition or application-level behaviour. The
@@ -32,7 +34,7 @@ checked against each method's explicit role list. Control-plane credentials
 use a separate service identity. See [Auth & RBAC](../omnitron/auth-rbac.md)
 for the boundaries; applications define their own end-user roles.
 
-## Versioning
+## Versioning {#versioning}
 
 Omnitron is pre-1.0. A minor release can change a public contract.
 Before upgrading:
@@ -47,7 +49,7 @@ A shared type catches incompatible code during compilation. It cannot
 prevent an older, already deployed client from calling a newer server.
 Plan backward compatibility or a coordinated rollout for that case.
 
-## Reporting a compatibility problem
+## Reporting a compatibility problem {#reporting-a-compatibility-problem}
 
 Include the package version, Node.js version, operating system, transport,
 compiler configuration and a small reproduction in an

@@ -1,4 +1,6 @@
 ---
+id: "titan/best-practices/observability"
+slug: "/docs/titan/best-practices/observability"
 sidebar_position: 3
 title: Observability
 description: Logs, metrics, traces — the three pillars and how to use each.
@@ -16,7 +18,7 @@ Three pillars, three purposes:
 
 Each pillar answers a question the others can't. You need all three.
 
-## Logs
+## Logs {#logs}
 
 For every event you might need to investigate one day. Structured,
 contextual, level-appropriate.
@@ -38,7 +40,7 @@ Don't:
 
 → See [Logging](../logging/overview.md).
 
-## Metrics
+## Metrics {#metrics}
 
 For every quantity you want to chart, alert on, or query in
 aggregate.
@@ -61,7 +63,7 @@ creates a separate time series. `tier=basic|pro|enterprise` is fine
 
 → See [titan-metrics](../modules/metrics).
 
-## Traces
+## Traces {#traces}
 
 For finding which call to which service caused the slowness or the
 failure. One trace per request, spans for sub-operations.
@@ -85,7 +87,7 @@ Don't span every function call. Span:
 
 → See [Tracing](../tracing.md).
 
-## What to instrument
+## What to instrument {#what-to-instrument}
 
 A canonical service exposes:
 
@@ -105,7 +107,7 @@ following Prometheus convention). The rest are illustrative names for
 signals you wire up per service. Custom metrics are for
 domain-specific quantities.
 
-## Alerting policy
+## Alerting policy {#alerting-policy}
 
 Alerts on:
 
@@ -122,7 +124,7 @@ Don't alert on:
   page anyone).
 - Cosmetic deviations (a 5% latency increase is normal noise).
 
-## Correlation
+## Correlation {#correlation}
 
 The three pillars correlate via shared identifiers:
 
@@ -135,7 +137,7 @@ In practice: a slow request in your dashboard (metric) has a
 `traceId`; pull the trace (spans) to see where time was spent; pull
 the logs by `traceId` to see what happened in each span.
 
-## Anti-patterns
+## Anti-patterns {#anti-patterns}
 
 - **One pillar.** Logs alone: can't aggregate. Metrics alone:
   can't investigate. Traces alone: can't quantify. Use all three.

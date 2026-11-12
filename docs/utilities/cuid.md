@@ -1,4 +1,6 @@
 ---
+id: "utilities/cuid"
+slug: "/docs/utilities/cuid"
 sidebar_position: 3
 title: cuid
 description: Collision-resistant URL-safe unique IDs for distributed systems.
@@ -16,7 +18,7 @@ coordination-free ID generation is required.
 
 Verified against `packages/cuid/src/`.
 
-## API
+## API {#api}
 
 ```typescript
 import { cuid, isCuid, createOptimizedCuid } from '@omnitron-dev/cuid';
@@ -34,7 +36,7 @@ const longId = makeId();
 - `createOptimizedCuid({ length?, fingerprint?, initialCount? })` — returns a closure
   generating IDs of a custom length / fingerprint / counter seed.
 
-## Properties
+## Properties {#properties}
 
 | Property | Value |
 | -------- | ----- |
@@ -45,7 +47,7 @@ const longId = makeId();
 | Predictable | No — salted hash output |
 | Speed | ~3M IDs/sec on modern CPUs |
 
-## Format
+## Format {#format}
 
 ```text
 k    3j7v0a8z4m1qp9x
@@ -59,7 +61,7 @@ SHA3-512 digest of the timestamp, a per-call salt, a monotonic counter, and a
 per-process fingerprint. There is **no** literal time/counter substring you can
 parse back out — sortability is approximate, not lexical.
 
-## When to use cuid
+## When to use cuid {#when-to-use-cuid}
 
 - **Distributed primary keys** — generate on the client, ship to
   server, no coordination round-trip.
@@ -69,7 +71,7 @@ parse back out — sortability is approximate, not lexical.
   without a central allocator and without leaking row counts or
   insertion order.
 
-## When NOT to use cuid
+## When NOT to use cuid {#when-not-to-use-cuid}
 
 - **Cryptographic randomness** — cuid is collision-resistant but
   not cryptographically random. For session tokens / API keys
@@ -80,9 +82,9 @@ parse back out — sortability is approximate, not lexical.
 - **Numeric IDs** — cuid is a string. If you need integer
   primary keys, use a snowflake-style scheme.
 
-## Examples
+## Examples {#examples}
 
-### Generate IDs for entities
+### Generate IDs for entities {#generate-ids-for-entities}
 
 ```typescript
 import { cuid } from '@omnitron-dev/cuid';
@@ -99,14 +101,14 @@ const user: User = {
 };
 ```
 
-### Request IDs
+### Request IDs {#request-ids}
 
 ```typescript
 const requestId = cuid();
 logger.info({ requestId }, 'incoming request');
 ```
 
-### Idempotency keys
+### Idempotency keys {#idempotency-keys}
 
 ```typescript
 async function chargeOnce(amount: number) {
@@ -118,7 +120,7 @@ async function chargeOnce(amount: number) {
 The client generates a key, retries on network error using the
 same key — server deduplicates.
 
-### Database default
+### Database default {#database-default}
 
 ```typescript
 // titan-database / Kysera repository
@@ -132,7 +134,7 @@ class UsersTable {
 Most repositories default ID columns to cuid; you almost never
 generate them manually for inserts.
 
-## Performance
+## Performance {#performance}
 
 | Scenario | Throughput |
 | -------- | ---------- |
@@ -143,14 +145,14 @@ generate them manually for inserts.
 The generator is stateless from the caller's view — no
 lock contention across calls.
 
-## Where it's used in the stack
+## Where it's used in the stack {#where-its-used-in-the-stack}
 
 - **`titan-database`** — default for repository primary keys.
 - **Omnitron** — internal request IDs, process IDs, run IDs.
 - **`titan-pm`** — worker pool IDs.
 - **`titan-events`** — message IDs.
 
-## See also
+## See also {#see-also}
 
 - [common](./common.md) — sibling utility (predicates, promises, …)
 - [titan-database](../titan/modules/database.mdx) — primary use case for cuid

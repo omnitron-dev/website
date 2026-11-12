@@ -1,4 +1,6 @@
 ---
+id: "titan/testing/modules"
+slug: "/docs/titan/testing/modules"
 sidebar_position: 4
 title: Testing modules
 description: How to mock each ecosystem module in unit and integration tests.
@@ -17,9 +19,9 @@ with the heavy infrastructure overridden via the `providers:` tuple
 array on `Application.create` (see
 [DI Overrides](./di-overrides.md) — there is no `overrides:` option).
 
-## Built-in modules
+## Built-in modules {#built-in-modules}
 
-### ConfigModule
+### ConfigModule {#configmodule}
 
 Most tests just want config values. Skip the real loader; provide
 the values directly:
@@ -49,7 +51,7 @@ ConfigModule.forRoot({
 })
 ```
 
-### LoggerModule
+### LoggerModule {#loggermodule}
 
 The framework ships `createNullLogger()` for this exact case:
 
@@ -76,9 +78,9 @@ const logger = {
 expect(logger.info).toHaveBeenCalledWith('findById', expect.objectContaining({ id: 'u_42' }));
 ```
 
-## Official modules
+## Official modules {#official-modules}
 
-### titan-auth
+### titan-auth {#titan-auth}
 
 Mock `JWTService` to bypass real signing:
 
@@ -135,7 +137,7 @@ const service = new MyService();
 (service as any).__authMiddleware__ = fakeAuthMiddleware;
 ```
 
-### titan-cache
+### titan-cache {#titan-cache}
 
 For services that depend on a cache, a `Map`-backed fake covers
 most cases:
@@ -168,7 +170,7 @@ const app = await Application.create({
 });
 ```
 
-### titan-redis
+### titan-redis {#titan-redis}
 
 For unit tests, stub the small surface your code uses:
 
@@ -189,7 +191,7 @@ For integration tests that exercise Redis semantics (Lua,
 clustering), use `ioredis-mock` or spin up Redis in Docker via
 `pnpm test:up`.
 
-### titan-lock
+### titan-lock {#titan-lock}
 
 The most common pattern: stub `withLock` to either run the callback
 or skip it.
@@ -226,7 +228,7 @@ const service = new MyScheduledTasks();
 await service.myJob();   // runs the body
 ```
 
-### titan-database
+### titan-database {#titan-database}
 
 Tests should hit a **real** database — even a transient SQLite —
 because most bugs live in the SQL, not the surrounding code.
@@ -258,7 +260,7 @@ const fakeRepo = {
 const service = new UsersService(fakeRepo);
 ```
 
-### titan-events
+### titan-events {#titan-events}
 
 `EventsService` works fine in tests with a fresh in-process
 instance — no mock needed:
@@ -290,7 +292,7 @@ const payload = await promise;
 expect(payload.id).toBeDefined();
 ```
 
-### titan-health
+### titan-health {#titan-health}
 
 Register a mock indicator that returns a controllable status:
 
@@ -312,7 +314,7 @@ fake.status = 'unhealthy';
 expect(await healthService.isReady()).toBe(false);
 ```
 
-### titan-metrics
+### titan-metrics {#titan-metrics}
 
 For tests, a no-op metrics service is usually sufficient:
 
@@ -335,7 +337,7 @@ expect(fakeMetrics.recordTyped).toHaveBeenCalledWith(
 );
 ```
 
-### titan-notifications
+### titan-notifications {#titan-notifications}
 
 Use the mock channels the module already exports:
 
@@ -358,7 +360,7 @@ expect(emailMock.deliveries).toHaveLength(1);
 expect(emailMock.deliveries[0].to).toBe('ada@example.com');
 ```
 
-### titan-pm
+### titan-pm {#titan-pm}
 
 Set `testing.useMockSpawner: true` to swap the real spawner for a
 mock that runs worker classes in the same process:
@@ -373,7 +375,7 @@ ProcessManagerModule.forRoot({
 The mock spawner runs `@Process`-decorated classes in-process so
 tests don't pay the worker-thread cost.
 
-### titan-ratelimit
+### titan-ratelimit {#titan-ratelimit}
 
 Stub `consume` / `enforce` for unit tests:
 
@@ -403,7 +405,7 @@ const r = await rate.consume('key');
 expect(r.allowed).toBe(false);
 ```
 
-### titan-discovery
+### titan-discovery {#titan-discovery}
 
 Stub the service for unit tests:
 
@@ -420,7 +422,7 @@ const fakeDiscovery = {
 For integration tests, point at a transient Redis (Docker compose
 or `ioredis-mock`).
 
-### titan-scheduler
+### titan-scheduler {#titan-scheduler}
 
 The scheduler accepts a `disabled: true` per-job option to register
 without auto-starting:
@@ -440,7 +442,7 @@ await job!.handler();   // invoke without waiting for cron
 Or invoke the underlying method directly — the decorator doesn't
 prevent direct calls.
 
-### titan-telemetry-relay
+### titan-telemetry-relay {#titan-telemetry-relay}
 
 Use the `'aggregator'` mode with an in-memory `TelemetryAggregator`
 for assertions:
@@ -465,14 +467,14 @@ await relay.receive('test-node', [
 expect(agg.entries).toHaveLength(1);
 ```
 
-## Generic patterns
+## Generic patterns {#generic-patterns}
 
-### One mock per test, not shared
+### One mock per test, not shared {#one-mock-per-test-not-shared}
 
 A `FakeCache` shared across tests will see each other's data. Use
 `beforeEach` to give each test a fresh fake.
 
-### `disableGracefulShutdown: true`
+### `disableGracefulShutdown: true` {#disablegracefulshutdown-true}
 
 Integration tests boot many `Application` instances. Without this
 flag, every test installs SIGTERM handlers — they stomp on each
@@ -485,13 +487,13 @@ const app = await Application.create({
 });
 ```
 
-### Cross-runtime testing
+### Cross-runtime testing {#cross-runtime-testing}
 
 `@omnitron-dev/testing` covers cross-runtime concerns (Node / Bun /
 Deno). If your module needs to ship to all three, run the same test
 file against each runtime via the package's harness.
 
-## Anti-patterns
+## Anti-patterns {#anti-patterns}
 
 - **Mocking everything.** A test where every dep is mocked tests
   the test, not the code. Mock the slow / external / unreliable;
@@ -502,7 +504,7 @@ file against each runtime via the package's harness.
 - **Testing the framework.** "Does `@Inject` work?" is the
   framework's job. Test your code's behaviour through it.
 
-## See also
+## See also {#see-also}
 
 - [Testing / Overview](./overview.md) — the test pyramid
 - [Testing / DI Overrides](./di-overrides.md) — replacing providers

@@ -1,4 +1,6 @@
 ---
+id: "auth/access-policy"
+slug: "/docs/auth/access-policy"
 title: Shared access policy
 description: Small, portable roles and permissions shared by issuers, servers and interfaces.
 ---
@@ -34,7 +36,7 @@ directory and use a relative `file:vendor/...tgz` dependency. The framework
 workspace and installed registry version can differ; verify the installed
 package's `exports` before adopting a new entry point.
 
-## Choose exactly what you need
+## Choose exactly what you need {#choose-exactly-what-you-need}
 
 | Entry point | Includes |
 | --- | --- |
@@ -49,7 +51,7 @@ Node built-ins, JWT library, Titan container, React or network client. Narrow
 imports and a named import from the root both support tree shaking. Importing
 permission helpers does not construct the platform hierarchy.
 
-## Define a role policy
+## Define a role policy {#define-a-role-policy}
 
 ```ts
 import { createRoleHierarchy } from '@omnitron-dev/access/roles';
@@ -95,7 +97,7 @@ Expansion preserves unknown claims for applications with independent roles;
 preserving a string does not establish its authority. Authenticate the principal
 before invoking policy and validate persisted grants against your catalog.
 
-## Share a permission catalog
+## Share a permission catalog {#share-a-permission-catalog}
 
 ```ts
 import {
@@ -122,7 +124,7 @@ interfaces; they do not change matching. Restrict the catalog to the relevant
 scope before validating a new grant. `*` is accepted by the validator, so enforce
 who may delegate it separately.
 
-## Select matching semantics explicitly
+## Select matching semantics explicitly {#select-matching-semantics-explicitly}
 
 | Grant → required | `explicit` | `hierarchical` (default) |
 | --- | --- | --- |
@@ -150,7 +152,7 @@ satisfy all-of and fail any-of. `resolvePermissions` returns recognised effectiv
 keys in catalog order. `expandWildcards` is a compatibility helper: it expands
 wildcards but retains concrete grants verbatim, including unregistered ones.
 
-## Compose authentication and enforcement
+## Compose authentication and enforcement {#compose-authentication-and-enforcement}
 
 - With opaque sessions, load the account and grants from your session adapter,
   then evaluate the pure policy. JWT and Titan Auth are unnecessary.
@@ -174,7 +176,7 @@ Service identities are separate from human role rank. A claim named
 `service_role` does not itself authenticate a machine or bypass resource policy.
 Only a trusted authentication boundary can establish that identity.
 
-## Optional platform preset and migration
+## Optional platform preset and migration {#optional-platform-preset-and-migration}
 
 The preset exports `PLATFORM_ROLES`, `PlatformRole`, `ROLE_PRIORITY`,
 `rolePriority`, `effectiveLevel`, `canSeeUserWithRole`,
@@ -194,7 +196,7 @@ roles are refused. Existing valid platform roles and permission patterns retain
 their behavior. Keep Netron's explicit mode and application hierarchical mode
 intentional when migrating.
 
-## Verification and build budget
+## Verification and build budget {#verification-and-build-budget}
 
 Run `pnpm --filter @omnitron-dev/access test` and
 `pnpm --filter @omnitron-dev/access check:bundle` in the source workspace.

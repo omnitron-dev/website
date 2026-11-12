@@ -1,4 +1,6 @@
 ---
+id: "titan/application/health"
+slug: "/docs/titan/application/health"
 sidebar_position: 4
 title: Health
 description: Liveness, readiness, indicator-based aggregation.
@@ -20,7 +22,7 @@ and `app.checkHealth(moduleName)` returns one module's status. Richer
 indicator registration and HTTP probes come from the
 [`titan-health`](../modules/health) ecosystem module.
 
-## Reading health from inside the app
+## Reading health from inside the app {#reading-health-from-inside-the-app}
 
 `titan-health` ships an `HealthService` and registers indicators with
 the application. Inject it where you need to read aggregate health:
@@ -45,7 +47,7 @@ class AdminService {
 The exact shape of the return value and token names lives in the
 `titan-health` package — consult its source for the canonical API.
 
-## Indicators
+## Indicators {#indicators}
 
 An *indicator* answers "is this dependency healthy?". The aggregator
 collects indicators from registered sources and combines them with a
@@ -62,7 +64,7 @@ decides whether the application can serve a particular workload. An operational
 failure must not become a warning just because other checks pass, and a warning
 must remain visible when readiness permits traffic.
 
-## Adding an indicator
+## Adding an indicator {#adding-an-indicator}
 
 The indicator interface and registration helper live in
 `titan-health`. Typically:
@@ -111,7 +113,7 @@ get `stripe === undefined` and fail at its first check rather than at
 registration. Use it for indicators that need nothing; resolve the
 others from DI and hand over the instance.
 
-## Liveness vs readiness
+## Liveness vs readiness {#liveness-vs-readiness}
 
 The kernel separates these intentionally. Two scenarios make the
 distinction important:
@@ -128,7 +130,7 @@ distinction important:
 If you collapse these into a single signal, the orchestrator will
 restart your app (good thing → bad thing) when a dependency hiccups.
 
-## Data origin during development
+## Data origin during development {#data-origin-during-development}
 
 Working-tree execution and an installed immutable release provide different
 origin evidence. A running process or a successful health probe does not establish
@@ -149,7 +151,7 @@ Document what an operator can use now, what evidence is missing, and what would
 make the warning clear. Test both policies through the actual configuration loader
 and the shared process-health adapter.
 
-## Probe routes
+## Probe routes {#probe-routes}
 
 When `titan-health` is loaded with its HTTP probe support, it
 exposes routes that map to the three signals (typically `/healthz`,
@@ -170,7 +172,7 @@ readinessProbe:
   periodSeconds: 3
 ```
 
-## Programmatic shutdown on unhealthy
+## Programmatic shutdown on unhealthy {#programmatic-shutdown-on-unhealthy}
 
 ```typescript
 const status = await app.health();   // aggregate IHealthStatus
@@ -188,7 +190,7 @@ readiness probe or an interval), not by subscribing to it. This pattern
 is rare — usually you want the readiness probe to handle this
 transparently — but it is available when you need it.
 
-## Anti-patterns
+## Anti-patterns {#anti-patterns}
 
 - **Heavy work in indicators.** Indicators are called frequently
   (every few seconds for readiness probes). They should be cheap

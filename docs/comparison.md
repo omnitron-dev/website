@@ -1,4 +1,6 @@
 ---
+id: "comparison"
+slug: "/docs/comparison"
 sidebar_position: 2
 title: vs alternatives
 description: How this stack differs from NestJS, tRPC, Fastify, Hono, and the typical TS app stack.
@@ -14,7 +16,7 @@ If you're migrating from one of these, the
 [migration guides](./titan/migrations) cover the mechanical
 parts. This page covers **fit**.
 
-## The big picture
+## The big picture {#the-big-picture}
 
 ```mermaid
 flowchart TB
@@ -47,7 +49,7 @@ type ergonomics from tRPC, transport flexibility from Hono,
 the supervised-process model from PM2/systemd — and unifies
 them under one TypeScript codebase.
 
-## vs NestJS
+## vs NestJS {#vs-nestjs}
 
 [NestJS](https://nestjs.com/) is the closest neighbour.
 
@@ -64,14 +66,14 @@ them under one TypeScript codebase.
 | **Supervisor / fleet** | Not included; you run it under PM2 / systemd / k8s | Omnitron daemon — supervised processes, 19+ RPC services, web console, MCP server |
 | **Bundle size** | Larger; pulls in metadata-reflect + RxJS for parts | Modular; pay-for-what-you-use |
 
-### Pick NestJS when…
+### Pick NestJS when… {#pick-nestjs-when}
 
 - Your team already knows it.
 - You need the broad ecosystem (huge selection of `@nestjs/*`
   packages — auth strategies, GraphQL, gRPC, etc.).
 - HTTP-only is fine; transport flexibility doesn't matter.
 
-### Pick Omnitron when…
+### Pick Omnitron when… {#pick-omnitron-when}
 
 - End-to-end TypeScript (no OpenAPI / protobuf step) is a hard
   requirement.
@@ -83,7 +85,7 @@ them under one TypeScript codebase.
 
 → Migration: [from NestJS](./titan/migrations/from-nestjs.md)
 
-## vs tRPC
+## vs tRPC {#vs-trpc}
 
 [tRPC](https://trpc.io/) is the gold standard for type-safe RPC.
 
@@ -101,7 +103,7 @@ them under one TypeScript codebase.
 | **Cross-language** | TS-only by design | TS-only; MessagePack wire format extensible |
 | **Operator surface** | None — you bring it | Full Omnitron daemon |
 
-### Pick tRPC when…
+### Pick tRPC when… {#pick-trpc-when}
 
 - You want a minimal RPC layer on top of an existing HTTP server
   (Next.js API routes, Hono, Express).
@@ -109,7 +111,7 @@ them under one TypeScript codebase.
   lifecycle / modules.
 - You're already invested in React Query for client cache.
 
-### Pick Omnitron when…
+### Pick Omnitron when… {#pick-omnitron-when-1}
 
 - You want the full stack (DI + lifecycle + 14 official modules), not
   just the RPC layer.
@@ -118,7 +120,7 @@ them under one TypeScript codebase.
 - You want auth / cache / retry / circuit breaker as
   framework-level concerns, not per-procedure code.
 
-## vs Fastify / Express / Hono
+## vs Fastify / Express / Hono {#vs-fastify--express--hono}
 
 These are HTTP servers — different category, but often the
 starting comparison.
@@ -134,20 +136,20 @@ starting comparison.
 | **Bundle** | Tiny (Hono <15 kB on edge) | Larger; framework-level |
 | **Performance** | Fastify ~70K req/s, Hono ~150K req/s on edge | Comparable HTTP perf; the cost is framework features |
 
-### Pick the HTTP server when…
+### Pick the HTTP server when… {#pick-the-http-server-when}
 
 - You're building a small, focused REST/HTTP service.
 - You want full control over routing, middleware order, request
   lifecycle.
 - You're targeting edge runtimes (Hono) or single-binary deploys.
 
-### Pick Omnitron when…
+### Pick Omnitron when… {#pick-omnitron-when-2}
 
 - You need RPC semantics (typed methods, not HTTP endpoints).
 - You need DI / modules / lifecycle / multi-transport — building
   these on top of Express ends up reinventing 60% of Titan.
 
-## vs PM2 / systemd / Docker Compose
+## vs PM2 / systemd / Docker Compose {#vs-pm2--systemd--docker-compose}
 
 Omnitron is a **supervisor + control plane**, similar in scope
 to PM2 (for Node) or systemd (for any process) — but typed,
@@ -165,28 +167,28 @@ opinionated for TypeScript services.
 | **Web console** | PM2+ paid add-on | No | Portainer (separate) | Built-in |
 | **MCP for agents** | No | No | No | Built-in (`omnitron kb mcp`) |
 
-### Pick PM2 when…
+### Pick PM2 when… {#pick-pm2-when}
 
 - Single-app Node deployment on one box.
 - You want lightweight; no opinion on app code.
 
-### Pick systemd when…
+### Pick systemd when… {#pick-systemd-when}
 
 - Mixed-language fleet.
 - You manage the OS layer too.
 
-### Pick Docker Compose / k8s when…
+### Pick Docker Compose / k8s when… {#pick-docker-compose--k8s-when}
 
 - Container-first deployment.
 - Multi-language; Omnitron just becomes one service among many.
 
-### Pick Omnitron when…
+### Pick Omnitron when… {#pick-omnitron-when-3}
 
 - All apps are Titan apps (or any decorated services).
 - You want typed control of the running fleet, not just process
   babysitting.
 
-## vs the typical "modern TypeScript stack"
+## vs the typical "modern TypeScript stack" {#vs-the-typical-modern-typescript-stack}
 
 A typical Next.js + Prisma + tRPC + Tailwind setup:
 
@@ -207,7 +209,7 @@ If you're already deep in the typical stack, the migration cost
 is real. The tradeoff: Omnitron unifies it under one decorator
 grammar, end-to-end types, and one operator surface.
 
-## Honest tradeoffs
+## Honest tradeoffs {#honest-tradeoffs}
 
 What this stack **gives up**:
 
@@ -229,7 +231,7 @@ What you **get back**:
 - Per-module independence (14 modules, opt-in each).
 - Built-in fleet primitives (cluster, fleet, replication).
 
-## See also
+## See also {#see-also}
 
 - [Migration / from NestJS](./titan/migrations/from-nestjs.md)
 - [Migration / from Express](./titan/migrations/from-express.md)

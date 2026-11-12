@@ -1,4 +1,6 @@
 ---
+id: "frontend/prism/theme"
+slug: "/docs/frontend/prism/theme"
 sidebar_position: 7
 title: Theme
 description: Palette, typography, shadows, dark mode, presets.
@@ -27,7 +29,7 @@ const theme = createPrismTheme({
 > builds the theme from the settings store for you. Reach for the factory
 > when you need a theme outside React (SSR, Storybook, tests).
 
-## Palette
+## Palette {#palette}
 
 `createPrismTheme` does not take a raw MUI `palette` object. Instead you
 pick a `preset` and (optionally) a `primaryColor`, and Prism builds the
@@ -52,7 +54,7 @@ the light/dark shades and contrast text. For deeper customisation, pass
 through raw MUI options via the `overrides` option
 (`createPrismTheme({ overrides: { palette: { … } } })`).
 
-### Semantic colour tokens
+### Semantic colour tokens {#semantic-colour-tokens}
 
 Avoid hex codes in app code — use theme tokens:
 
@@ -64,7 +66,7 @@ Avoid hex codes in app code — use theme tokens:
 This keeps dark mode working automatically and lets you re-skin
 without touching component code.
 
-### Readable status surfaces
+### Readable status surfaces {#readable-status-surfaces}
 
 Standard and soft alerts, soft chips and soft labels share one contrast
 policy. Prism compares the semantic colour tones against their translucent
@@ -87,7 +89,7 @@ meaning and icon. For example, `<Alert severity="warning" color="error">`
 uses the error palette with the warning icon. Use text as well as colour
 to explain the state.
 
-## Typography
+## Typography {#typography}
 
 ```typescript
 typography: {
@@ -119,7 +121,7 @@ Apply via `<Typography>` or `sx`:
 <Box sx={{ typography: 'body2', color: 'text.secondary' }}>Small print</Box>
 ```
 
-## Spacing
+## Spacing {#spacing}
 
 `spacing: 8` means `theme.spacing(N) === 8 × N` pixels. The
 `sx` shorthand interprets numbers in spacing units:
@@ -132,7 +134,7 @@ Apply via `<Typography>` or `sx`:
 Convention: use the spacing unit (`p: 2`) not pixel values
 (`p: '16px'`) — keeps the rhythm consistent and tunable.
 
-## Shape & shadows
+## Shape & shadows {#shape--shadows}
 
 Set the base radius via the `borderRadius` option (a number of px) —
 `createPrismTheme({ borderRadius: 8 })`. It surfaces as `theme.shape.borderRadius`
@@ -163,7 +165,7 @@ customShadows: {
 Use `<Paper elevation={N}>` for `shadows`; `boxShadow:
 'customShadows.z4'` via `sx` for the custom variants.
 
-## Dark mode
+## Dark mode {#dark-mode}
 
 `<PrismProvider>` reads the theme mode from the settings store, so it
 takes no `mode` prop — seed the initial mode with `defaultSettings`, then
@@ -205,7 +207,7 @@ persisted via the settings store; survives reload; syncs across tabs.
 (`toggleMode` flips light/dark; use `setMode('system')` to re-enable
 system tracking.)
 
-### Flash-of-wrong-theme prevention (SSR)
+### Flash-of-wrong-theme prevention (SSR) {#flash-of-wrong-theme-prevention-ssr}
 
 Prism's CSS variables output (`theme/css-variables.ts`) emits
 a stylesheet that applies the correct colour scheme **before**
@@ -220,7 +222,7 @@ React hydrates. Include in your HTML head:
 Or use the Vite plugin (when one is configured) to inject it
 automatically.
 
-## Presets
+## Presets {#presets}
 
 Pre-tuned palettes for common aesthetics. Select one by name via the
 `preset` option:
@@ -237,7 +239,7 @@ are light) — selecting them forces that mode, while the two `default-*`
 presets respect the `mode` option. Pick a preset, then layer
 `primaryColor` / `borderRadius` / `density` on top.
 
-## Density
+## Density {#density}
 
 Three densities adjust spacing + typography + control sizes:
 
@@ -249,7 +251,7 @@ useSettingsStore.getState().setDensity('compact');
 Tables, lists, forms, dialogs respond automatically. Useful for
 information-dense admin surfaces.
 
-## Mixins
+## Mixins {#mixins}
 
 Reusable style helpers (most are functions returning a `CSSObject` you
 spread into `sx`):
@@ -278,7 +280,7 @@ Built-in mixins (keys on the `mixins` object):
 `customScrollbarMixin`, `hideScrollbarMixin`, `textEllipsisMixin`,
 `multiLineEllipsisMixin`, `glassMixin`, `focusRingMixin`.)
 
-## Components theme overrides
+## Components theme overrides {#components-theme-overrides}
 
 Pass raw MUI component overrides through the `overrides` option:
 
@@ -303,7 +305,7 @@ createPrismTheme({
 Useful for enforcing project-wide conventions (e.g., "all
 buttons are contained, no uppercase").
 
-## CSS variables export
+## CSS variables export {#css-variables-export}
 
 ```tsx
 import { generateCssVariables } from '@omnitron-dev/prism/theme';
@@ -319,7 +321,7 @@ Useful for:
 - Embedding in `<style>` tag at the top of `<head>` to prevent
   flash.
 
-## Anti-patterns
+## Anti-patterns {#anti-patterns}
 
 - **Hard-coded hex colours in components.** Use
   `theme.palette.X` / `sx={{ color: 'primary.main' }}` so dark
@@ -347,14 +349,14 @@ Useful for:
   `ref?: Ref<HTMLElement>` on the props interface and use
   it directly. No `forwardRef`, no `displayName` follow-up.
 
-## See also
+## See also {#see-also}
 
 - [Components catalog](./components.md) — components themed via these tokens
 - [Layouts](./layouts.md) — `<DashboardLayout>` reads density
 - [Hooks catalog](./hooks-catalog.md) — `useSettingsStore`, theme-aware hooks
 - [MUI v9 theming docs](https://mui.com/material-ui/customization/theming/) — underlying foundation
 
-## Application icon families
+## Application icon families {#application-icon-families}
 
 `PrismIconProvider` from `@omnitron-dev/prism/icons` supplies a semantic icon set
 to layouts, editors, graphs and MUI slots, including portals. Its `icons` prop

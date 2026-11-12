@@ -1,4 +1,6 @@
 ---
+id: "titan/validation/contracts"
+slug: "/docs/titan/validation/contracts"
 sidebar_position: 2
 title: Contracts
 description: Method contracts — bind input + output schemas as a single declaration.
@@ -10,7 +12,7 @@ A `Contract` bundles per-method input/output schemas (plus optional
 metadata) for a whole service. `@Contract` applies it to the service
 **class**, mapping each method name to its `{ input, output, … }`.
 
-## Basic shape
+## Basic shape {#basic-shape}
 
 ```typescript
 import { contract } from '@omnitron-dev/titan/validation';
@@ -58,7 +60,7 @@ wraps each method whose contract declares an `input` or `output`
    service's `netron:service` metadata, so clients (and the Omnitron
    console) can introspect it.
 
-## Why contracts, not just schemas
+## Why contracts, not just schemas {#why-contracts-not-just-schemas}
 
 A method-level `@Validate(mc)` validates one method in place. A
 class-level `@Contract` adds:
@@ -76,7 +78,7 @@ class-level `@Contract` adds:
 - **Per-status error schemas.** A `MethodContract`'s `errors` map
   binds a Zod schema to each HTTP status the method can return.
 
-## Versioning
+## Versioning {#versioning}
 
 A contract's `version` lives in its metadata, independent of the
 service version:
@@ -93,7 +95,7 @@ const UsersContractV2 = contract(
 );
 ```
 
-## Predefined contract templates
+## Predefined contract templates {#predefined-contract-templates}
 
 The `Contracts` namespace ships ready-made shapes:
 
@@ -116,7 +118,7 @@ const CalcContract = Contracts.rpc(InputSchema, OutputSchema);
 For a fully custom contract there is also a fluent `contractBuilder()`:
 `contractBuilder().method(name, mc).withMetadata({ … }).build()`.
 
-## Per-status error schemas
+## Per-status error schemas {#per-status-error-schemas}
 
 A `MethodContract` can declare the error payload for each status (the
 `errors` field is `Record<number, ZodSchema>` — HTTP status → payload
@@ -159,7 +161,7 @@ The static type of `payload` is inferred from the contract via
 `ContractTypes.Errors`, so an unlisted status or a payload that
 doesn't match the schema is a compile-time error.
 
-## When to use `@Validate` vs `@Contract`
+## When to use `@Validate` vs `@Contract` {#when-to-use-validate-vs-contract}
 
 Both decorators carry the **same `MethodContract` shape** — `@Validate`
 takes one `MethodContract` and `@Contract` takes a map of them. So the
@@ -182,7 +184,7 @@ service-wide class decorator. When both are present, the method-level
 `@ValidateInput(schema)` and `@ValidateOutput(schema)` wrap `@Validate`
 for the input-only / output-only cases.
 
-## Output validation
+## Output validation {#output-validation}
 
 When a `MethodContract` declares `output`, the return value is
 validated (in dev and prod alike). The cost is small but non-zero
@@ -191,7 +193,7 @@ on the contract; gate it yourself (e.g. omit `output` outside dev, or
 via `options`) if profiling shows it matters. Output validation
 catches bugs that would otherwise ship as wire-incompatible responses.
 
-## Anti-patterns
+## Anti-patterns {#anti-patterns}
 
 - **Schema inline at every method.** Define schemas once (in a
   `schemas.ts` file) and import. Inline schemas lead to drift

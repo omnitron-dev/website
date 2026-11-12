@@ -1,4 +1,6 @@
 ---
+id: "frontend/netron/multi-backend"
+slug: "/docs/frontend/netron/multi-backend"
 sidebar_position: 8
 title: Multi-backend
 description: One frontend, many Netron servers — routing, hooks, components.
@@ -18,7 +20,7 @@ provider does not build the client: it takes one you built, which
 is why the same client can be used outside React (a worker, an
 SSR pass, a test) without a second configuration.
 
-## Setup
+## Setup {#setup}
 
 ```tsx
 import { createMultiBackendClient } from '@omnitron-dev/netron-browser';
@@ -57,7 +59,7 @@ A string pattern matches by **prefix**, not as a glob — see
 [Routing patterns](#routing-patterns). A call that matches
 nothing goes to `defaultBackend`; it does not throw.
 
-## Default backend
+## Default backend {#default-backend}
 
 `defaultBackend` is where anything unrouted lands, and it is
 required in practice — without it the first backend in the
@@ -78,7 +80,7 @@ const client = createMultiBackendClient({
 Anything not matched routes to `defaultBackend`. Useful when
 most services live on one backend and a few are extracted.
 
-## Per-backend service hooks
+## Per-backend service hooks {#per-backend-service-hooks}
 
 ```tsx
 import { useBackendService } from '@omnitron-dev/netron-react';
@@ -99,7 +101,7 @@ function MediaPreview({ id }: { id: string }) {
 `useBackendService(backend, service)` explicitly addresses a
 backend; the router's pattern matching is bypassed.
 
-## Routed `useService`
+## Routed `useService` {#routed-useservice}
 
 When you use the routed form, the router resolves the backend
 from the service name:
@@ -118,7 +120,7 @@ The router-based form is recommended — components don't need to
 know which backend a service lives on; the routing config is
 the contract.
 
-## Per-backend hooks
+## Per-backend hooks {#per-backend-hooks}
 
 | Hook | Purpose |
 | ---- | ------- |
@@ -132,7 +134,7 @@ the contract.
 | `useMultiBackendContext()` | Full context value (advanced) |
 | `useMultiBackendConnectionState()` | All backends' connection states |
 
-## Connection-aware rendering
+## Connection-aware rendering {#connection-aware-rendering}
 
 ```tsx
 import {
@@ -183,7 +185,7 @@ import {
 </MultiBackendConnectionAware>
 ```
 
-## Per-backend auth
+## Per-backend auth {#per-backend-auth}
 
 A backend's `auth` takes an `AuthenticationClient` you already
 built, or `AuthOptions` for the client to build one:
@@ -211,7 +213,7 @@ backends is right — the same JWT verifies everywhere in a
 fan-out architecture, and passing the same instance is what makes
 one refresh serve every backend.
 
-## Health checks
+## Health checks {#health-checks}
 
 `BackendPool` — the layer under the client — can poll its
 backends: `enableHealthChecks` (off by default) and
@@ -236,7 +238,7 @@ option name, two packages in the same monorepo, and the browser
 one is where it does not decide anything.
 :::
 
-## Shared cache
+## Shared cache {#shared-cache}
 
 The provider's query engine owns a single QueryCache shared
 across every backend. Cache keys distinguish entries — encode
@@ -259,7 +261,7 @@ function CacheManager() {
 }
 ```
 
-## Backend pool (no React)
+## Backend pool (no React) {#backend-pool-no-react}
 
 For vanilla JS / web workers / SSR:
 
@@ -305,7 +307,7 @@ lives in the client, the provider adds the React subscription
 glue. That separation is why the client above works unchanged in
 a worker or an SSR pass.
 
-## Routing patterns
+## Routing patterns {#routing-patterns}
 
 Not glob. A string pattern matches by **prefix** (or exactly);
 anything more expressive is a `RegExp`. Patterns are tried in
@@ -340,7 +342,7 @@ routing: {
 defaultBackend: 'default',
 ```
 
-## Prism integration
+## Prism integration {#prism-integration}
 
 Prism re-exports `MultiBackendProvider` with extra defaults
 (theming, settings store hooks, snackbar host):
@@ -366,7 +368,7 @@ const client = createMultiBackendClient({
 Prefer the Prism version for apps that already use Prism — it
 hooks into the Prism context.
 
-## Best practices
+## Best practices {#best-practices}
 
 - **One `MultiBackendProvider` per app**, mounted at the root.
 - **Routing config is the contract.** Components shouldn't
@@ -383,7 +385,7 @@ hooks into the Prism context.
   component that must survive one going away needs its own
   fallback.
 
-## Anti-patterns
+## Anti-patterns {#anti-patterns}
 
 - **Per-route `MultiBackendProvider`.** Loses connection
   sharing and cache; re-connects on every route change.
@@ -395,7 +397,7 @@ hooks into the Prism context.
 - **Hard-coding backend names in components.** Use `useService`
   (routed) so components stay transport-agnostic.
 
-## See also
+## See also {#see-also}
 
 - [netron-react](./react.md) — single-backend equivalents
 - [Auth manager](./auth.md) — shared auth across backends

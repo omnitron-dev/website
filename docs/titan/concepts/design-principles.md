@@ -1,4 +1,6 @@
 ---
+id: "titan/concepts/design-principles"
+slug: "/docs/titan/concepts/design-principles"
 sidebar_position: 1
 title: Design Principles
 description: The seven engineering decisions that shape every API in Titan.
@@ -11,7 +13,7 @@ are not negotiable inside the framework — they are how the framework was
 designed, why the APIs look the way they do, and what changes when you
 build on top of it.
 
-## 1. Explicitness over magic
+## 1. Explicitness over magic {#1-explicitness-over-magic}
 
 Every dependency is declared. Every provider is registered. No
 filesystem auto-discovery. No annotation scanning at startup. No
@@ -39,7 +41,7 @@ file. New team members can answer "where does this come from?" with
 > makes ambient state structurally impossible: if a service needs
 > something, it appears in its constructor.
 
-## 2. Pay only for what you use
+## 2. Pay only for what you use {#2-pay-only-for-what-you-use}
 
 The base framework imports nothing it does not need. The 14 ecosystem
 modules are independently versioned npm packages; you install the ones
@@ -65,7 +67,7 @@ The cost: you assemble what you want. The benefit: small services stay
 small. Large services do not pay the small-service tax of carrying
 features they don't use.
 
-## 3. The same primitives operate the system
+## 3. The same primitives operate the system {#3-the-same-primitives-operate-the-system}
 
 There is no separate "operator API" that drifts from the runtime API.
 The Omnitron CLI talks to a running Titan app over the same Netron
@@ -83,7 +85,7 @@ This means three things in practice:
   be inspected, called, and audited from the same code paths your
   product uses.
 
-## 4. The contract is a TypeScript type
+## 4. The contract is a TypeScript type {#4-the-contract-is-a-typescript-type}
 
 The wire contract between the server and any caller — browser, mobile,
 service-to-service, CLI — is the **TypeScript service interface
@@ -108,7 +110,7 @@ A signature change on the server fails the build on every caller in
 the same `tsc` invocation. Drift is a compile error, not a 3 AM
 production page.
 
-## 5. Errors are values
+## 5. Errors are values {#5-errors-are-values}
 
 Service methods that can fail throw typed errors (`TitanError` and
 its subclasses), each carrying an HTTP-style status, a structured
@@ -142,7 +144,7 @@ Native `Error` instances bubbling out of your code are wrapped with
 with the original stack. The client never sees an opaque 500 with no
 structure.
 
-## 6. Lifecycle is observable
+## 6. Lifecycle is observable {#6-lifecycle-is-observable}
 
 Every service can declare `onInit`, `onStart`, `onStop`, `onDestroy`.
 The container fires them in **dependency order** — services with more
@@ -163,7 +165,7 @@ Shutdown runs lifecycle hooks in reverse order with a global
 `gracefulShutdownTimeout` watchdog. A hard exit guarantees no zombie
 processes.
 
-## 7. The container is the single source of truth
+## 7. The container is the single source of truth {#7-the-container-is-the-single-source-of-truth}
 
 Every Titan-managed object is owned by the Nexus container. The
 container resolves dependencies, manages scopes, applies middleware,
@@ -177,7 +179,7 @@ fires lifecycle hooks. Three corollaries:
   the answer is "everything the container holds, in the topology
   declared by the modules."
 
-## The shape these decisions produce
+## The shape these decisions produce {#the-shape-these-decisions-produce}
 
 A Titan app, viewed from outside, is:
 

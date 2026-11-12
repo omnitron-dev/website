@@ -1,4 +1,6 @@
 ---
+id: "titan/overview"
+slug: "/docs/titan/overview"
 sidebar_position: 1
 title: Titan Framework
 description: A composable TypeScript backend framework — DI, lifecycle, validation, and a transport-agnostic RPC plane.
@@ -22,7 +24,7 @@ It is intentionally small at its core and large at its surface —
 a focused application kernel plus a deep catalogue of opt-in
 modules.
 
-## What Titan is
+## What Titan is {#what-titan-is}
 
 A backend framework gives you four things you would otherwise build by hand:
 
@@ -39,7 +41,7 @@ Titan provides all four with a deliberately minimal core (the
 `Application`, the `Container`, the `Lifecycle`) and a library of modules
 that compose into the runtime you actually want.
 
-## What Titan is not
+## What Titan is not {#what-titan-is-not}
 
 - **Not a "do everything" runtime.** Modules are independently versioned
   packages. You can run a Titan app with one of them.
@@ -51,7 +53,7 @@ that compose into the runtime you actually want.
   design — multi-token providers, contextual injection, middleware
   pipelines, runtime-portable across Node/Bun/Deno/browser.
 
-## The mental model
+## The mental model {#the-mental-model}
 
 ```mermaid
 flowchart TB
@@ -96,7 +98,7 @@ That is it. Everything else — the 14 ecosystem modules, the validation
 decorators, the resilience helpers — is built on top of these four
 primitives.
 
-## What this section covers
+## What this section covers {#what-this-section-covers}
 
 This is the reference section for Titan itself. It is dense, technical,
 and assumes you have read the
@@ -121,7 +123,7 @@ and assumes you have read the
 | [Best Practices](./best-practices/structuring-services.md)    | When you want the team to converge on conventions     |
 | [Modules Catalogue](./modules/index.mdx)                       | The 14 ecosystem modules in detail                    |
 
-## Versioning and public boundaries
+## Versioning and public boundaries {#versioning-and-public-boundaries}
 
 Titan is pre-1.0. Use declared package entry points, pin versions and verify
 upgrades against the contracts your application consumes. A minor release

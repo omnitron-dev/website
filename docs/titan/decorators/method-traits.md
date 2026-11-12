@@ -1,4 +1,6 @@
 ---
+id: "titan/decorators/method-traits"
+slug: "/docs/titan/decorators/method-traits"
 sidebar_position: 3
 title: Method Traits
 description: Composing decorators on a single method — order, semantics, common stacks.
@@ -9,13 +11,13 @@ description: Composing decorators on a single method — order, semantics, commo
 A "method trait" is a cross-cutting concern applied via decorator.
 Most methods have one trait or none; some methods stack several.
 
-## Two ways to express the same thing
+## Two ways to express the same thing {#two-ways-to-express-the-same-thing}
 
 `@Public(options)` accepts the same configuration that `@Auth`,
 `@RateLimit`, `@Cache`, and `@Audit` set individually. The two styles
 are equivalent.
 
-### Inline (single decorator):
+### Inline (single decorator): {#inline-single-decorator}
 
 ```typescript
 @Public({
@@ -26,7 +28,7 @@ are equivalent.
 async dangerousOp(input: Input) { /* … */ }
 ```
 
-### Composed (stacked decorators):
+### Composed (stacked decorators): {#composed-stacked-decorators}
 
 ```typescript
 @Public()
@@ -39,7 +41,7 @@ async dangerousOp(input: Input) { /* … */ }
 Pick a style per project. Inline is terser; composed reads top-down
 and groups easily.
 
-## The order rule (when composing)
+## The order rule (when composing) {#the-order-rule-when-composing}
 
 Decorators evaluate **outside-in** at declaration; they execute
 **inside-out** at call time.
@@ -57,9 +59,9 @@ finalises the dispatch. The runtime order is critical for stacks like
 "validate before rate-limit" so malformed requests don't consume rate
 budget.
 
-## Common stacks
+## Common stacks {#common-stacks}
 
-### Public read endpoint
+### Public read endpoint {#public-read-endpoint}
 
 ```typescript
 @Public({
@@ -73,7 +75,7 @@ async findById(id: string) { /* … */ }
 - Cache outermost — cache hits skip everything else.
 - Rate-limit before validation.
 
-### Authenticated write endpoint
+### Authenticated write endpoint {#authenticated-write-endpoint}
 
 ```typescript
 @Public({
@@ -87,7 +89,7 @@ async create(input: z.infer<typeof CreateOrderSchema>) { /* … */ }
 - Rate limit applies to *all* callers (authenticated or not).
 - Auth enforces a scope.
 
-### Admin-only endpoint
+### Admin-only endpoint {#admin-only-endpoint}
 
 ```typescript
 @Public({ auth: { roles: ['admin'] } })
@@ -98,7 +100,7 @@ async resetDatabase(input: Input) { /* … */ }
 No rate limit — admin operations are deliberate and infrequent.
 No cache — admin operations should always run.
 
-### Internal method (not RPC)
+### Internal method (not RPC) {#internal-method-not-rpc}
 
 ```typescript
 // No @Public — not exposed.
@@ -110,7 +112,7 @@ Internal methods use `@Retry`, `@Memoize`, `@Timeout` (from
 `/decorators/utility.ts`), etc. — but not `@Public`, `@Auth`, or
 `@RateLimit`, which only make sense at the network edge.
 
-## Combining lifecycle decorators
+## Combining lifecycle decorators {#combining-lifecycle-decorators}
 
 `@PostConstruct` and `@PreDestroy` mark methods for lifecycle phases.
 They do **not** stack with method traits — the marked method is
@@ -136,7 +138,7 @@ async warm() {
 private async loadDictionary() { /* … */ }
 ```
 
-## Custom traits via `createMethodInterceptor`
+## Custom traits via `createMethodInterceptor` {#custom-traits-via-createmethodinterceptor}
 
 If you need a trait the built-ins don't cover, write your own:
 
@@ -168,7 +170,7 @@ async create(input: Input) { /* … */ }
 
 Custom interceptors stack inside-out with the built-ins.
 
-## Class-level vs method-level
+## Class-level vs method-level {#class-level-vs-method-level}
 
 Many traits also support class-level application — they apply to
 every `@Public` method on the class:
@@ -189,7 +191,7 @@ class OrdersService {
 Method-level decorators **override** class-level ones for that
 method.
 
-## Anti-patterns
+## Anti-patterns {#anti-patterns}
 
 - **Cache outside an auth-gated method.** Cache hits skip the auth
   check — anyone who can warm the cache can read its contents. Put

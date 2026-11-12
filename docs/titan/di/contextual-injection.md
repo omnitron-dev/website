@@ -1,4 +1,6 @@
 ---
+id: "titan/di/contextual-injection"
+slug: "/docs/titan/di/contextual-injection"
 sidebar_position: 6
 title: Contextual Injection
 description: Resolve different providers based on runtime context — current user, environment, feature flags, tenant.
@@ -46,7 +48,7 @@ import {
 } from '@omnitron-dev/titan/nexus';
 ```
 
-## When you need it
+## When you need it {#when-you-need-it}
 
 Three scenarios that all reduce to "this dependency depends on who
 is asking":
@@ -62,7 +64,7 @@ Without contextual injection, you would write
 `if (tenant === 'X') { useA() } else { useB() }` in every consumer.
 Contextual injection moves the decision into the container.
 
-## How resolution threads context
+## How resolution threads context {#how-resolution-threads-context}
 
 ```mermaid
 flowchart TD
@@ -101,7 +103,7 @@ The four building blocks:
 - **`ContextAwareProvider`** — a provider whose value is computed from
   the resolution context.
 
-## Built-in strategies
+## Built-in strategies {#built-in-strategies}
 
 | Strategy                | What it reads                      |
 | ----------------------- | ---------------------------------- |
@@ -112,7 +114,7 @@ The four building blocks:
 
 These compose with the `ContextManager` to drive resolution.
 
-## Defining a context key
+## Defining a context key {#defining-a-context-key}
 
 ```typescript
 import { createContextKey } from '@omnitron-dev/titan/nexus';
@@ -124,7 +126,7 @@ const USER_ROLE = createContextKey<string>('user.role');
 `ContextKeys` is a registry of pre-defined keys the framework uses
 (see source for the canonical set).
 
-## Setting context per request
+## Setting context per request {#setting-context-per-request}
 
 The `ContextManager` owns the strategy registry and the active
 context. The key/value accessors —
@@ -174,7 +176,7 @@ await contextManager.runWithContext(requestContext, async () => {
 > frame (`Container.getContext` / `Container.withContext`) — convenient when you are wiring
 > context outside an HTTP layer.
 
-## End-to-end: context-driven provider selection
+## End-to-end: context-driven provider selection {#end-to-end-context-driven-provider-selection}
 
 Here is the full loop, mirroring the integration test in
 `test/nexus/context/context.spec.ts`. We populate a request-scoped
@@ -237,7 +239,7 @@ Walking `ContextManager.selectProvider`:
 Because `environment` is registered first, it takes precedence over
 `tenant` when both could match — registration order is the tie-break.
 
-## Building a context-aware provider
+## Building a context-aware provider {#building-a-context-aware-provider}
 
 `createContextAwareProvider` is an identity helper over the
 `ContextAwareProvider` interface — `{ provide(context), canProvide?(context) }`
@@ -275,7 +277,7 @@ context-aware provider when the value is cheap to compute inline; use
 strategies (+ `selectProvider`) when you have several concrete
 implementations to pick from.
 
-## Composition with scopes
+## Composition with scopes {#composition-with-scopes}
 
 Contextual providers usually live in `Request` scope — the context
 varies per request, so the resolution should too. A `Singleton`
@@ -293,7 +295,7 @@ wired `selectProvider`/`provide` into a factory registered at that
 scope — the scope governs how often that factory re-runs, and the
 factory is where the strategy or context-aware `provide` is invoked.)
 
-## `@InjectContext` decorator
+## `@InjectContext` decorator {#injectcontext-decorator}
 
 `@InjectContext(key)` is a **parameter** decorator that marks a
 constructor (or method) parameter to receive a single context
@@ -329,7 +331,7 @@ that contextual injection is meant to draw: ideally a service is
 handed the right *implementation* and never inspects the context
 itself.
 
-## Custom strategies
+## Custom strategies {#custom-strategies}
 
 Implement `ResolutionStrategy` — `{ name, applies(token, ctx), select(providers, ctx) }`
 — and register it with `contextManager.registerStrategy(...)`:
@@ -359,7 +361,7 @@ are consulted *after* the four defaults — order matters because the
 first strategy that both `applies` and returns a provider wins
 (strategy registration and `selectProvider`).
 
-## Anti-patterns
+## Anti-patterns {#anti-patterns}
 
 - **Contextual for static decisions.** If "which storage" is
   decided at boot, use a regular provider (or

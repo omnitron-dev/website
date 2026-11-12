@@ -1,4 +1,6 @@
 ---
+id: "frontend/prism/state"
+slug: "/docs/frontend/prism/state"
 title: State and persistence
 description: Local UI stores, persisted preferences, migrations and the boundary with server state.
 ---
@@ -11,7 +13,7 @@ these stores for local interface state. Keep remote query results in
 [Netron's query cache](../netron/caching.md), which owns their refresh and
 invalidation rules.
 
-## Choose a store
+## Choose a store {#choose-a-store}
 
 | Factory | Use it for | Persistence |
 | --- | --- | --- |
@@ -45,7 +47,7 @@ function SelectionLabel() {
 Outside React, use the returned store's `getState()` and `subscribe()`.
 Call the unsubscribe function when the consumer is disposed.
 
-## Built-in stores
+## Built-in stores {#built-in-stores}
 
 | Hook | Responsibility |
 | --- | --- |
@@ -60,7 +62,7 @@ Each also exports a non-hook alias: `settingsStore`, `themeStore`,
 Authentication state in a browser store does not enforce server access;
 use the [Netron auth provider](../netron/auth.md) for RPC sessions.
 
-## Persist preferences deliberately
+## Persist preferences deliberately {#persist-preferences-deliberately}
 
 ```typescript
 import { createPersistedStore } from '@omnitron-dev/prism/state';
@@ -100,7 +102,7 @@ For structured migrations, the same subpath exports `runMigrations`,
 and recovery. Consult the [API index](../../reference/api-index.mdx)
 for each current signature.
 
-## Server rendering and tests
+## Server rendering and tests {#server-rendering-and-tests}
 
 Create request-specific stores on the server; a module-level mutable store
 can otherwise share user state between requests. Browser persistence is

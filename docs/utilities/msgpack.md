@@ -1,4 +1,6 @@
 ---
+id: "utilities/msgpack"
+slug: "/docs/utilities/msgpack"
 sidebar_position: 5
 title: msgpack
 description: Extensible MessagePack with native JS types + custom extensions + streaming.
@@ -17,7 +19,7 @@ wire format for Netron RPC.
 
 Verified against `packages/msgpack/src/`.
 
-## Why MessagePack (not JSON)?
+## Why MessagePack (not JSON)? {#why-messagepack-not-json}
 
 | Property | JSON | MessagePack |
 | -------- | :--: | :---------: |
@@ -36,7 +38,7 @@ For Netron RPC — where a service call's return value should
 arrive on the client as the same object — MessagePack with
 native types is non-negotiable.
 
-## Quick start
+## Quick start {#quick-start}
 
 ```typescript
 import { encode, decode } from '@omnitron-dev/msgpack';
@@ -60,7 +62,7 @@ typeof result.amount === 'bigint';         // true
 
 Every native type survives the round-trip unchanged.
 
-## Built-in native types
+## Built-in native types {#built-in-native-types}
 
 | Type | Ext id | Notes |
 | ---- | ------ | ----- |
@@ -76,7 +78,7 @@ Every native type survives the round-trip unchanged.
 Registered by `registerCommonTypesFor()` on the default `serializer`
 at import time, so `encode`/`decode` handle them out of the box.
 
-## Custom extensions
+## Custom extensions {#custom-extensions}
 
 Register your own type on a `Serializer` with a unique id. User
 types use **1–99** (100–109 are reserved for Netron, 110–118 for
@@ -116,7 +118,7 @@ A bare `new Serializer()` starts empty — call `registerCommonTypesFor`
 if you also need the native types. The receiver needs the same
 registration to decode the type correctly.
 
-## Safe decoding — `tryDecode`
+## Safe decoding — `tryDecode` {#safe-decoding--trydecode}
 
 A non-throwing decode wrapper:
 
@@ -142,7 +144,7 @@ an incremental parser that resumes across partial network chunks.
 Netron's transports do their own length-prefixed framing and hand a
 complete frame to `decode`.
 
-## Performance
+## Performance {#performance}
 
 | Benchmark | This package | reference `msgpackr` | JSON.stringify |
 | --------- | :----------: | :------------------: | :------------: |
@@ -155,7 +157,7 @@ complete frame to `decode`.
 Slightly slower than `msgpackr` (which uses extension shortcuts
 not in the spec); strictly spec-compliant in exchange.
 
-## Error round-trips
+## Error round-trips {#error-round-trips}
 
 `Error` (and its standard subclasses) are encoded by the built-in
 ext-type 126 handler — `name`, `message`, `stack`, and any custom
@@ -182,7 +184,7 @@ debugging. Note the constructor is matched against a small table of
 decodes back as a plain `Error`, not as `FooError`. There is no
 `registerError` method on `Serializer`.
 
-## SmartBuffer
+## SmartBuffer {#smartbuffer}
 
 Internal auto-growing buffer-builder, exported from the
 `./smart-buffer` subpath:
@@ -211,7 +213,7 @@ Provides typed `writeXxx` / `readXxx` methods (UInt8/Int8,
 `SmartBuffer.fromBuffer()` constructors. Auto-grows; no upfront
 sizing needed.
 
-## API surface
+## API surface {#api-surface}
 
 ```typescript
 // Top-level, from '@omnitron-dev/msgpack' (uses the default `serializer`):
@@ -255,20 +257,20 @@ if (result) {
 }
 ```
 
-## Where it's used in the stack
+## Where it's used in the stack {#where-its-used-in-the-stack}
 
 - **Netron RPC** — default wire format on all four transports.
 - **`titan-events`** — payload serialisation for history persistence.
 - **`titan-telemetry-relay`** — WAL on-disk format.
 - **`titan-cache`** L2 (Redis) — encoded payload format.
 
-## Spec compliance
+## Spec compliance {#spec-compliance}
 
 Full compliance with [MessagePack spec v5](https://github.com/msgpack/msgpack/blob/master/spec.md).
 The native-type registry uses ext type ids in the user-defined
 range (0–127); ids ≥ 128 are reserved.
 
-## When to use vs JSON
+## When to use vs JSON {#when-to-use-vs-json}
 
 | Use MessagePack | Use JSON |
 | --------------- | -------- |
@@ -280,7 +282,7 @@ range (0–127); ids ≥ 128 are reserved.
 For Omnitron itself: MessagePack for the wire, JSON for the
 config / human inspection layer.
 
-## See also
+## See also {#see-also}
 
 - [Netron transports](../frontend/netron/transports.md) — uses this as default wire format
 - [common](./common.md) — sibling utility

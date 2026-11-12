@@ -1,4 +1,6 @@
 ---
+id: "frontend/netron/index"
+slug: "/docs/frontend/netron"
 sidebar_position: 1
 title: Overview
 description: Browser-side Netron RPC — netron-browser + netron-react.
@@ -30,7 +32,7 @@ pnpm add @omnitron-dev/netron-browser @omnitron-dev/netron-react
 pnpm add @omnitron-dev/netron-browser
 ```
 
-## How they relate
+## How they relate {#how-they-relate}
 
 ```mermaid
 flowchart LR
@@ -52,7 +54,7 @@ multi-backend hooks. For Vue / Svelte / Solid / Angular / Lit
 apps, wrap `netron-browser` calls in your framework's
 reactivity primitives directly.
 
-## Deep dives
+## Deep dives {#deep-dives}
 
 Topic-focused references:
 
@@ -65,7 +67,7 @@ Topic-focused references:
 - [Testing](./testing.md) — TestNetronProvider, integration patterns
 - [SSR](./ssr.md) — dehydration / hydration
 
-## Quick start — single backend
+## Quick start — single backend {#quick-start--single-backend}
 
 ```tsx
 import { NetronReactClient, NetronProvider, useService }
@@ -95,7 +97,7 @@ function UserCard({ userId }: { userId: string }) {
 }
 ```
 
-## Quick start — multi-backend
+## Quick start — multi-backend {#quick-start--multi-backend}
 
 ```tsx
 import { createMultiBackendClient }
@@ -129,7 +131,7 @@ function Component() {
 }
 ```
 
-## See also
+## See also {#see-also}
 
 - [Prism / Netron integration](../prism/index.md#netron-integration--omnitron-devprismnetron) —
   re-export helpers via Prism

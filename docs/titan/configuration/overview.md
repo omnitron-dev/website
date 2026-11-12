@@ -1,4 +1,6 @@
 ---
+id: "titan/configuration/overview"
+slug: "/docs/titan/configuration/overview"
 sidebar_position: 1
 title: Configuration
 description: Layered, validated, hot-reloadable configuration for Titan apps.
@@ -16,7 +18,7 @@ This is the entry point. Detail in:
 - [Validation](./validation.md) — schema-checked config at boot.
 - [Hot Reload](./hot-reload.md) — `ConfigWatcherService` and the `onChange` callback.
 
-## The mental model
+## The mental model {#the-mental-model}
 
 Configuration is **layered**: multiple sources merge into a single
 typed object. Later sources override earlier ones. Optionally
@@ -41,9 +43,9 @@ import { ConfigModule } from '@omnitron-dev/titan/module/config';
 class AppModule {}
 ```
 
-## Reading config
+## Reading config {#reading-config}
 
-### Through `ConfigService`
+### Through `ConfigService` {#through-configservice}
 
 ```typescript
 import { Inject, Service } from '@omnitron-dev/titan';
@@ -64,7 +66,7 @@ class UsersService {
 `get<T>(path, default?)` returns the typed value at the dotted path.
 The default is returned if the key is missing.
 
-### Through decorators
+### Through decorators {#through-decorators}
 
 ```typescript
 import { Config, InjectConfig } from '@omnitron-dev/titan/module/config';
@@ -92,7 +94,7 @@ Additional config decorators:
 | `@ConfigDefaults({...})`   | Provide defaults at class level                         |
 | `@ConfigProvider(name)`    | Mark a class as a custom config provider                |
 
-## Why validate at boot
+## Why validate at boot {#why-validate-at-boot}
 
 A typed schema for your config means:
 
@@ -103,7 +105,7 @@ A typed schema for your config means:
 - **Documentation lives in the schema** — readers know what config
   the app accepts by reading the Zod schema.
 
-## When to use what
+## When to use what {#when-to-use-what}
 
 | Approach                  | When                                                |
 | ------------------------- | --------------------------------------------------- |
@@ -115,7 +117,7 @@ A typed schema for your config means:
 For values that change per environment, **always** use config —
 hardcoded `localhost:5432` in code locks you to one deployment.
 
-## Read on
+## Read on {#read-on}
 
 - [Sources](./sources.md) — every source type and what it accepts.
 - [Validation](./validation.md) — schema patterns and error

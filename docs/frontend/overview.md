@@ -1,4 +1,6 @@
 ---
+id: "frontend/overview"
+slug: "/docs/frontend/overview"
 sidebar_position: 1
 title: Frontend overview
 description: Three packages that cover everything browser-side in a Titan app.
@@ -23,7 +25,7 @@ Browser-side packages:
 use `netron-browser` directly and wrap calls in your framework's
 reactivity primitives.
 
-## How they compose
+## How they compose {#how-they-compose}
 
 ```mermaid
 flowchart LR
@@ -65,7 +67,7 @@ function UsersPage() {
 
 Three packages, one screen, no codegen.
 
-## End-to-end types
+## End-to-end types {#end-to-end-types}
 
 There is no schema file, no codegen step, no manual sync. The
 TypeScript compiler is the source of truth:
@@ -85,7 +87,7 @@ const { data } = users.findById.useQuery([id]);
 A method signature change on the server fails the build on
 every caller in the same `tsc` pass.
 
-## Wiring an app from scratch
+## Wiring an app from scratch {#wiring-an-app-from-scratch}
 
 ```tsx
 import { NetronReactClient, NetronProvider }   from '@omnitron-dev/netron-react';
@@ -127,7 +129,7 @@ discoverable through `useService`. The auth API is `login` / `logout`
 `<RoleGuard>` / `<PermissionGuard>` route guards — see
 [netron-react / Auth](./netron/auth.md) for the full surface.
 
-## Multi-backend out of the box
+## Multi-backend out of the box {#multi-backend-out-of-the-box}
 
 Talking to several Netron servers? Swap `NetronProvider` for
 `MultiBackendProvider`:
@@ -164,7 +166,7 @@ const users = useBackendService<UserService>('auth', 'users');
 
 → [netron-react / Multi-backend](./netron/react.md#multi-backend-support).
 
-## What lives where
+## What lives where {#what-lives-where}
 
 | You want… | Reach for |
 | --------- | --------- |
@@ -183,7 +185,7 @@ const users = useBackendService<UserService>('auth', 'users');
 | Cross-tab auth sync | `AuthenticationClient` from `@omnitron-dev/netron-browser` |
 | Cache, retry, circuit breaker | `@omnitron-dev/netron-browser/middleware` |
 
-## Bundle strategy
+## Bundle strategy {#bundle-strategy}
 
 | Stage | Bundle goal |
 | ----- | ----------- |
@@ -205,14 +207,14 @@ stylesheet dependencies remain. It does not set an application-wide size promise
 measure initial requests, route chunks and shared peer dependencies in the actual
 production build.
 
-## Production reference
+## Production reference {#production-reference}
 
 The Omnitron Console (`apps/omnitron/webapp/`) is built entirely
 from these three packages. ~20 pages, multi-backend, full RBAC,
 real-time subscriptions, devtools — see
 [Console](../omnitron/console.md) for the route map.
 
-## Read on
+## Read on {#read-on}
 
 - [Prism](./prism/index.md) — design system in depth
 - [netron-browser](./netron/browser.md) — the transport client

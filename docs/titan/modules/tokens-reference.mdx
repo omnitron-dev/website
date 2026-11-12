@@ -1,10 +1,11 @@
 ---
+id: "titan/modules/tokens-reference"
+slug: "/docs/titan/modules/tokens-reference"
 sidebar_position: 3
 title: Tokens & RPC reference
 description: All injection tokens and exposed RPC services across every module.
 ---
 
-import ModuleBadge from '@site/src/components/ModuleBadge';
 
 # Tokens & RPC reference
 
@@ -22,11 +23,11 @@ node scripts/check-titan-inventories.mjs ../omni
 
 It exits non-zero if this page names a token no Titan package exports.
 
-## Built-in module tokens
+## Built-in module tokens {#built-in-module-tokens}
 
-<ModuleBadge origin="built-in" pkg="@omnitron-dev/titan" />
+<span class="module-badge">built-in · @omnitron-dev/titan</span>
 
-### `config` (`@omnitron-dev/titan/module/config`)
+### `config` (`@omnitron-dev/titan/module/config`) {#config-omnitron-devtitanmoduleconfig}
 
 | Token                              | Type                              |
 | ---------------------------------- | --------------------------------- |
@@ -37,7 +38,7 @@ It exits non-zero if this page names a token no Titan package exports.
 | `CONFIG_VALIDATOR_SERVICE_TOKEN`   | `ConfigValidatorService`          |
 | `CONFIG_WATCHER_SERVICE_TOKEN`     | `ConfigWatcherService`            |
 
-### `logger` (`@omnitron-dev/titan/module/logger`)
+### `logger` (`@omnitron-dev/titan/module/logger`) {#logger-omnitron-devtitanmodulelogger}
 
 | Token                       | Type                              |
 | --------------------------- | --------------------------------- |
@@ -47,11 +48,11 @@ It exits non-zero if this page names a token no Titan package exports.
 | `LOGGER_TRANSPORTS_TOKEN`   | `ITransport[]`                    |
 | `LOGGER_PROCESSORS_TOKEN`   | `ILogProcessor[]`                 |
 
-## Official module tokens
+## Official module tokens {#official-module-tokens}
 
-<ModuleBadge origin="official" pkg="@omnitron-dev/titan-*" />
+<span class="module-badge">official · @omnitron-dev/titan-*</span>
 
-### `titan-auth`
+### `titan-auth` {#titan-auth}
 
 | Token                            | Type                          |
 | -------------------------------- | ----------------------------- |
@@ -60,7 +61,7 @@ It exits non-zero if this page names a token no Titan package exports.
 | `JWT_SERVICE_TOKEN`              | `IJWTService`                 |
 | `SIGNED_URL_SERVICE_TOKEN`       | `ISignedUrlService`           |
 
-### `titan-cache`
+### `titan-cache` {#titan-cache}
 
 | Token                            | Type                                |
 | -------------------------------- | ----------------------------------- |
@@ -70,7 +71,7 @@ It exits non-zero if this page names a token no Titan package exports.
 | `CACHE_ADAPTER_TOKEN`            | `CacheAdapter`                      |
 | `CACHE_ADAPTER_OPTIONS_TOKEN`    | `ICacheAdapterOptions`              |
 
-### `titan-database`
+### `titan-database` {#titan-database}
 
 | Token                                   | Type                          |
 | --------------------------------------- | ----------------------------- |
@@ -91,7 +92,7 @@ For `forFeature(...)` repository registration, the per-repository
 tokens are generated from the repository class name. See the
 [`titan-database`](./database.mdx) page for `forFeature` patterns.
 
-### `titan-discovery`
+### `titan-discovery` {#titan-discovery}
 
 | Token                                  | Type                          |
 | -------------------------------------- | ----------------------------- |
@@ -105,7 +106,7 @@ tokens are generated from the repository class name. See the
 > symbol as `titan-redis`'s `REDIS_MANAGER`. Supply a client
 > against this token, or let the module create one from its options.
 
-### `titan-events`
+### `titan-events` {#titan-events}
 
 | Token                                  | Type                          |
 | -------------------------------------- | ----------------------------- |
@@ -122,7 +123,7 @@ tokens are generated from the repository class name. See the
 > barrel — their backing services are module-private. The seven
 > tokens above are the public DI surface.
 
-### `titan-health`
+### `titan-health` {#titan-health}
 
 | Token                                   | Type                          |
 | --------------------------------------- | ----------------------------- |
@@ -135,14 +136,14 @@ tokens are generated from the repository class name. See the
 | `DATABASE_HEALTH_INDICATOR_TOKEN`       | `DatabaseHealthIndicator`     |
 | `REDIS_HEALTH_INDICATOR_TOKEN`          | `RedisHealthIndicator`        |
 
-### `titan-lock`
+### `titan-lock` {#titan-lock}
 
 | Token                            | Type                          |
 | -------------------------------- | ----------------------------- |
 | `LOCK_SERVICE_TOKEN`             | `IDistributedLockService`     |
 | `LOCK_OPTIONS_TOKEN`             | `ILockModuleOptions`          |
 
-### `titan-metrics`
+### `titan-metrics` {#titan-metrics}
 
 | Token                       | Type                          |
 | --------------------------- | ----------------------------- |
@@ -150,7 +151,7 @@ tokens are generated from the repository class name. See the
 | `METRICS_OPTIONS_TOKEN`     | `IMetricsModuleOptions`       |
 | `METRICS_STORAGE_TOKEN`     | `IMetricsStorage`             |
 
-### `titan-notifications`
+### `titan-notifications` {#titan-notifications}
 
 Note the trailing `_TOKEN` is **omitted** in this package's naming
 convention — symbols are bare:
@@ -173,7 +174,7 @@ convention — symbols are bare:
 | `NOTIFICATION_REALTIME_SIGNALER`            | `INotificationRealtimeSignaler`         |
 | `NOTIFICATION_TARGET_RESOLVER`              | `INotificationTargetResolver`           |
 
-### `titan-pm`
+### `titan-pm` {#titan-pm}
 
 | Token                            | Type                          |
 | -------------------------------- | ----------------------------- |
@@ -184,7 +185,7 @@ convention — symbols are bare:
 | `PM_HEALTH_TOKEN`                | `ProcessHealthChecker`        |
 | `PM_METRICS_TOKEN`               | `ProcessMetricsCollector`     |
 
-### `titan-ratelimit`
+### `titan-ratelimit` {#titan-ratelimit}
 
 | Token                          | Type                          |
 | ------------------------------ | ----------------------------- |
@@ -192,7 +193,7 @@ convention — symbols are bare:
 | `RATE_LIMIT_OPTIONS_TOKEN`     | `IRateLimitModuleOptions`     |
 | `RATE_LIMIT_STORAGE_TOKEN`     | `IRateLimitStorage`           |
 
-### `titan-redis`
+### `titan-redis` {#titan-redis}
 
 | Symbol                                    | Type                          |
 | ----------------------------------------- | ----------------------------- |
@@ -215,7 +216,7 @@ import { getRedisClientToken, type IRedisClient }
 @Inject(getRedisClientToken('queue'))   queueRedis: IRedisClient;
 ```
 
-### `titan-scheduler`
+### `titan-scheduler` {#titan-scheduler}
 
 | Token                                   | Type                          |
 | --------------------------------------- | ----------------------------- |
@@ -228,13 +229,13 @@ import { getRedisClientToken, type IRedisClient }
 | `SCHEDULER_METRICS_TOKEN`               | `SchedulerMetricsCollector`   |
 | `SCHEDULER_LISTENERS_TOKEN`             | `IJobListener[]`              |
 
-### `titan-telemetry-relay`
+### `titan-telemetry-relay` {#titan-telemetry-relay}
 
 `titan-telemetry-relay` does **not** define DI tokens. Instantiate
 `TelemetryRelayService` directly with config; wire it into the
 container as a `useValue` provider if you want DI-style injection.
 
-## Importing tokens — the convention
+## Importing tokens — the convention {#importing-tokens--the-convention}
 
 Every module exports both the token and its type from the package
 root so you can pull them in one line:
@@ -257,7 +258,7 @@ class UsersService {
 > `CacheService` against the same token without subclassing the
 > production class.
 
-## RPC services — what's reachable from the wire
+## RPC services — what's reachable from the wire {#rpc-services--whats-reachable-from-the-wire}
 
 Most modules expose their API only via DI inside the same process.
 Two modules ship a Netron `@Service` class so the Omnitron CLI /
@@ -297,7 +298,7 @@ If you don't want it on the wire, simply don't register it (or
 control exposure at the transport layer: don't expose the Netron
 port externally, or front it with auth-only middleware).
 
-## Health RPC surface — `Health@1.0.0`
+## Health RPC surface — `Health@1.0.0` {#health-rpc-surface--health100}
 
 The single canonical example. Source:
 [`packages/titan-health/src/health.rpc-service.ts`](https://github.com/omnitron-dev/omni/tree/main/packages/titan-health/src/health.rpc-service.ts).
@@ -313,7 +314,7 @@ await health.ready();   // readiness
 The exact method set is `HealthRpcService` — refer to its
 `@Public()` decorators in source for the current surface.
 
-## Hardening checklist
+## Hardening checklist {#hardening-checklist}
 
 Before exposing the Netron port outside the cluster:
 
@@ -327,7 +328,7 @@ Before exposing the Netron port outside the cluster:
 - [ ] Review every `@Service` *you* wrote — those are the actual
       external surface.
 
-## See also
+## See also {#see-also}
 
 - [Netron / Authentication](../netron/authentication.md)
 - [Best Practices / Security](../best-practices/observability.md)

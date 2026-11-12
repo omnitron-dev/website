@@ -1,4 +1,6 @@
 ---
+id: "titan/best-practices/performance"
+slug: "/docs/titan/best-practices/performance"
 sidebar_position: 4
 title: Performance
 description: Where Titan apps win or lose latency and throughput.
@@ -10,7 +12,7 @@ Titan's framework cost is small. Most performance problems live in
 your code or your dependencies. This page covers what the framework
 contributes — and what's on you.
 
-## Where the framework spends time
+## Where the framework spends time {#where-the-framework-spends-time}
 
 Per Netron call, the framework adds:
 
@@ -29,9 +31,9 @@ bottleneck — framework overhead is invisible. For a method that does
 nothing (a health check), framework overhead dominates. Don't
 optimise the wrong layer.
 
-## What's on you
+## What's on you {#whats-on-you}
 
-### Database queries
+### Database queries {#database-queries}
 
 The single most common performance issue. Patterns:
 
@@ -45,7 +47,7 @@ The single most common performance issue. Patterns:
 The framework doesn't help here. `titan-database` exposes Kysely;
 write efficient queries.
 
-### Validation overhead
+### Validation overhead {#validation-overhead}
 
 Pre-compiled validators are fast (1–5 µs) but not free. For very
 hot paths:
@@ -55,7 +57,7 @@ hot paths:
 - For trusted internal calls, skip `@Validate` (TypeScript already
   enforces the type).
 
-### Logging
+### Logging {#logging}
 
 Every log line costs:
 
@@ -66,7 +68,7 @@ Every log line costs:
 In a tight loop, 1000 log lines / second is fine; 1 million is not.
 Promote loop logging to `trace` (off in production) or sample.
 
-### Cache
+### Cache {#cache}
 
 The single best win for read-heavy services. `titan-cache` with the
 LRU tier:
@@ -81,17 +83,17 @@ async findById(id: string) { /* … */ }
 `keyGenerator` for the cache key. A 95% cache hit rate cuts your
 database load by 20×. Worth the ceremony.
 
-## Measuring
+## Measuring {#measuring}
 
 You can't optimise what you don't measure.
 
-### Per-method latency
+### Per-method latency {#per-method-latency}
 
 `titan-metrics` emits an `rpc_request_duration_seconds` histogram per
 method by default (labelled by `method`). Look at p99 / p99.9 —
 averages hide tail behaviour.
 
-### Per-call profiling
+### Per-call profiling {#per-call-profiling}
 
 For a specific slow method, wrap sub-operations in child spans so the
 trace context propagates to each one:
@@ -113,7 +115,7 @@ propagation-only — span timing and export come from a telemetry layer
 (the relay module or an OTel sink) layered on top, which is what
 shows where time goes.
 
-### Process-level profiling
+### Process-level profiling {#process-level-profiling}
 
 Node.js has built-in CPU profiling:
 
@@ -126,7 +128,7 @@ Use for finding hot functions across the whole app. Combine with
 
 For production-safe profiling, use `clinic.js` or `0x`.
 
-## Scaling vertically vs horizontally
+## Scaling vertically vs horizontally {#scaling-vertically-vs-horizontally}
 
 A single Titan app can comfortably handle several thousand
 calls/second on a modest box. When you need more:
@@ -138,7 +140,7 @@ Both are fine. The framework is stateless by default
 (singletons hold infrastructure, not request state); horizontal
 scaling is the easy path.
 
-## Anti-patterns
+## Anti-patterns {#anti-patterns}
 
 - **Premature optimisation.** Don't tune what you haven't measured.
 - **Caching everything.** Adds complexity and cache-invalidation
@@ -148,7 +150,7 @@ scaling is the easy path.
 - **One giant Singleton state.** A 1 GB cache in a singleton is
   a 1 GB heap. Use external cache (Redis tier) or bounded LRU.
 
-## Read also
+## Read also {#read-also}
 
 - [titan-cache](../modules/cache) — caching strategies.
 - [titan-pm](../modules/pm) — worker pools for CPU work.

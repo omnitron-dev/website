@@ -1,4 +1,6 @@
 ---
+id: "tutorial/frontend"
+slug: "/docs/tutorial/frontend"
 sidebar_position: 5
 title: 4. Frontend
 description: Vite + React + Prism + netron-react with end-to-end types.
@@ -9,7 +11,7 @@ description: Vite + React + Prism + netron-react with end-to-end types.
 By the end: a React app that signs in and lists users using the
 backend service contract — no codegen.
 
-## Scaffold the frontend
+## Scaffold the frontend {#scaffold-the-frontend}
 
 ```bash
 cd apps
@@ -24,7 +26,7 @@ pnpm install
 pnpm add @omnitron-dev/netron-browser @omnitron-dev/netron-react @omnitron-dev/prism react-router-dom@7
 ```
 
-## Share the service types
+## Share the service types {#share-the-service-types}
 
 The frontend imports the backend's service interfaces directly.
 Easiest way: a workspace package.
@@ -87,7 +89,7 @@ And in `apps/web/`:
 pnpm add @my-platform/api-contracts@workspace:*
 ```
 
-## The client
+## The client {#the-client}
 
 `apps/web/src/client.ts`:
 
@@ -104,7 +106,7 @@ export const client = new NetronReactClient({
 });
 ```
 
-## Providers
+## Providers {#providers}
 
 `apps/web/src/main.tsx`:
 
@@ -134,7 +136,7 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
 );
 ```
 
-## Sign-in page
+## Sign-in page {#sign-in-page}
 
 `apps/web/src/SignInPage.tsx`:
 
@@ -183,7 +185,7 @@ export function SignInPage() {
 }
 ```
 
-## Users list page
+## Users list page {#users-list-page}
 
 `apps/web/src/UsersPage.tsx`:
 
@@ -210,7 +212,7 @@ export function UsersPage() {
 }
 ```
 
-## Routes
+## Routes {#routes}
 
 `apps/web/src/App.tsx`:
 
@@ -235,7 +237,7 @@ export default function App() {
 }
 ```
 
-## Run
+## Run {#run}
 
 In two terminals:
 
@@ -253,7 +255,7 @@ Open `http://localhost:5173/`:
 2. Enter `admin@example.com` / `correct-horse-battery-staple`.
 3. Redirected to `/` — users list renders.
 
-## Note the type flow
+## Note the type flow {#note-the-type-flow}
 
 When you call:
 
@@ -270,26 +272,26 @@ access fails the build.
 
 No codegen. No schema sync.
 
-## Verify auth gating
+## Verify auth gating {#verify-auth-gating}
 
 Replace `admin@example.com` with a non-admin user; you'll see
 `FORBIDDEN` from the backend, surfaced as `error` in the
 `useQuery` hook. The `<AuthGuard>` redirected non-auth requests
 back to `/sign-in`.
 
-## Commit
+## Commit {#commit}
 
 ```bash
 git add .
 git commit -m "step 4: React UI with end-to-end types"
 ```
 
-## Next
+## Next {#next}
 
 **[Step 5 — Tests →](./05-tests.md)** — cover the stack with
 unit + integration + E2E tests.
 
-## Troubleshooting
+## Troubleshooting {#troubleshooting}
 
 | Symptom | Fix |
 | ------- | --- |

@@ -1,4 +1,6 @@
 ---
+id: "frontend/netron/caching"
+slug: "/docs/frontend/netron/caching"
 sidebar_position: 6
 title: Caching
 description: LRU cache, stale-while-revalidate, tag invalidation.
@@ -10,7 +12,7 @@ netron-browser caches HTTP responses through its **fluent HTTP
 interface** (`HttpCacheManager`); netron-react layers a query
 cache on top with React-aware subscriptions.
 
-## Two cache layers
+## Two cache layers {#two-cache-layers}
 
 | Layer | When to use |
 | ----- | ----------- |
@@ -26,7 +28,7 @@ invalidation semantics. Pick one — don't double-cache.
 > its `http.caching` / `http.cacheTTL` options are currently
 > inert.
 
-## netron-react QueryCache
+## netron-react QueryCache {#netron-react-querycache}
 
 Used automatically by every `useQuery` / `useService(...).x.useQuery`:
 
@@ -52,7 +54,7 @@ const { data, isLoading, isStale } = users.getUser.useQuery([userId], {
 | `placeholderData` | — | Initial value before first fetch |
 | `select` | — | Transform `data` per subscription |
 
-### Cache key
+### Cache key {#cache-key}
 
 Generated from `[service, method, args]`:
 
@@ -69,7 +71,7 @@ users.getUser.useQuery(['u_43']);
 Args are deep-equal-compared — `{a:1, b:2}` and `{b:2, a:1}`
 match.
 
-### Programmatic cache access
+### Programmatic cache access {#programmatic-cache-access}
 
 ```tsx
 import { useNetronClient } from '@omnitron-dev/netron-react';
@@ -118,7 +120,7 @@ const prev = cache.get(['users', 'getUser', 'u_42']);
 cache.set(['users', 'getUser', 'u_42'], { ...prev, ...patch });
 ```
 
-### Filter patterns
+### Filter patterns {#filter-patterns}
 
 The client's filter methods take a `QueryFilters` object —
 `{ queryKey?, exact?, status?, stale?, fetching?, predicate? }`.
@@ -135,7 +137,7 @@ client.invalidateQueries({ predicate: (q) => q.queryKey[0] === 'users' && q.stat
 The functional `predicate` form lets you invalidate by age,
 state, or any custom condition.
 
-## Stale-while-revalidate
+## Stale-while-revalidate {#stale-while-revalidate}
 
 ```tsx
 users.getUser.useQuery([userId], {
@@ -160,7 +162,7 @@ flowchart LR
 subtle "refreshing" indicator while stale-while-revalidate
 runs.
 
-## Optimistic updates
+## Optimistic updates {#optimistic-updates}
 
 ```tsx
 const updateProfile = users.updateProfile.useMutation({
@@ -200,7 +202,7 @@ Pattern:
 4. **Rollback on error** — restore snapshot.
 5. **Invalidate on settled** — re-sync with server truth.
 
-## Tag-based invalidation
+## Tag-based invalidation {#tag-based-invalidation}
 
 For non-React HTTP clients, attach an `HttpCacheManager` to the
 peer and tag calls through the fluent `.cache({ tags })`:
@@ -242,7 +244,7 @@ A single cache entry can carry multiple tags; invalidating any
 one drops the entry. `cache.invalidate()` also accepts a key
 `RegExp` or a `'prefix*'` string for pattern-based invalidation.
 
-## Prefetching
+## Prefetching {#prefetching}
 
 ```tsx
 import { useNetronClient, useService } from '@omnitron-dev/netron-react';
@@ -269,7 +271,7 @@ function ProjectLink({ id }: { id: string }) {
 When the user hovers a link, prefetch the target's data so the
 destination renders instantly.
 
-## Cache stats
+## Cache stats {#cache-stats}
 
 The fluent `HttpCacheManager` exposes hit/miss statistics:
 
@@ -281,7 +283,7 @@ const stats = cache.getStats();
 
 Surface in devtools or a metrics dashboard.
 
-## React Query parity
+## React Query parity {#react-query-parity}
 
 netron-react's QueryCache API is intentionally TanStack
 Query–compatible at the high level — if you've used React
@@ -291,7 +293,7 @@ Query, the mental model carries over. The differences:
 - Backed by netron-browser, not raw fetch.
 - Subscribes via `useService` / `useQuery` hooks; same shape.
 
-## Best practices
+## Best practices {#best-practices}
 
 - **`staleTime` ≥ 30 s** for most read queries — saves needless
   refetches.
@@ -307,7 +309,7 @@ Query, the mental model carries over. The differences:
 - **Don't cache mutating calls.** `delete` / `update` should
   never read from cache.
 
-## Anti-patterns
+## Anti-patterns {#anti-patterns}
 
 - **`staleTime: 0` everywhere.** Defeats caching; every mount
   refetches.
@@ -321,7 +323,7 @@ Query, the mental model carries over. The differences:
 - **Invalidating after every keystroke.** Debounce or move to
   `onBlur`.
 
-## See also
+## See also {#see-also}
 
 - [Browser client](./browser.md#fluent-http-interface--caching-retry-circuit-breaking) — fluent `HttpCacheManager` / `.cache()`
 - [netron-react](./react.md) — `useQuery` / `useMutation`

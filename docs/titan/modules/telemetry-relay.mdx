@@ -1,12 +1,13 @@
 ---
+id: "titan/modules/telemetry-relay"
+slug: "/docs/titan/modules/telemetry-relay"
 title: titan-telemetry-relay
 ---
 
-import ModuleBadge from '@site/src/components/ModuleBadge';
 
 # titan-telemetry-relay
 
-<ModuleBadge origin="official" pkg="@omnitron-dev/titan-telemetry-relay" status="stable" />
+<span class="module-badge">official · @omnitron-dev/titan-telemetry-relay · stable</span>
 
 Store-and-forward telemetry pipeline for distributed Titan
 applications. Producers buffer telemetry locally, persist to an
@@ -23,7 +24,7 @@ pnpm add @omnitron-dev/titan-telemetry-relay
 > (producer / aggregator / both) is a deployment concern, not an
 > application-level configuration toggle.
 
-## When you need it
+## When you need it {#when-you-need-it}
 
 - **Services that emit telemetry but shouldn't ship it directly.**
   Producer pods buffer locally; an aggregator pod takes the hit of
@@ -35,7 +36,7 @@ pnpm add @omnitron-dev/titan-telemetry-relay
   may be disconnected for hours buffer to disk and drain when
   connectivity returns.
 
-## Three roles
+## Three roles {#three-roles}
 
 ```mermaid
 flowchart LR
@@ -57,7 +58,7 @@ flowchart LR
 | `aggregator` | Authenticated transport handler calling `receive(nodeId, entries)`   | Persistent sink (via `TelemetryAggregator`) |
 | `both`       | Local app + remote producers                          | Persistent sink directly             |
 
-## Quickstart — producer
+## Quickstart — producer {#quickstart--producer}
 
 ```typescript
 import { TelemetryRelayService } from '@omnitron-dev/titan-telemetry-relay';
@@ -78,7 +79,7 @@ relay.emitMetric('users.created.total', 1, { source: 'web' });
 relay.emitHealth('users', 'ok');
 ```
 
-## Quickstart — aggregator
+## Quickstart — aggregator {#quickstart--aggregator}
 
 ```typescript
 const relay = new TelemetryRelayService({
@@ -93,7 +94,7 @@ await relay.start();
 // which delegates to aggregator.ingest(nodeId, entries).
 ```
 
-## Quickstart — both (single-node / sidecar)
+## Quickstart — both (single-node / sidecar) {#quickstart--both-single-node--sidecar}
 
 ```typescript
 const relay = new TelemetryRelayService({
@@ -111,7 +112,7 @@ When `role: 'both'` and no `transport`, `forwardEntries` calls the
 local aggregator's `ingest` directly without going through the
 network — useful for single-node leader daemons.
 
-## Constructor options — `TelemetryRelayModuleOptions`
+## Constructor options — `TelemetryRelayModuleOptions` {#constructor-options--telemetryrelaymoduleoptions}
 
 | Option       | Type                                                  | Default                                |
 | ------------ | ----------------------------------------------------- | -------------------------------------- |
@@ -125,7 +126,7 @@ network — useful for single-node leader daemons.
 > disabled when `role: 'aggregator'` (the aggregator has no
 > outbound transport, so there's nothing to retry).
 
-### `TelemetryBufferConfig`
+### `TelemetryBufferConfig` {#telemetrybufferconfig}
 
 | Field             | Type    | Default  |
 | ----------------- | ------- | -------- |
@@ -133,7 +134,7 @@ network — useful for single-node leader daemons.
 | `flushIntervalMs` | `number` (ms) | `10_000` |
 | `maxBatchSize`    | `number`| `500`    |
 
-### `TelemetryWalConfig`
+### `TelemetryWalConfig` {#telemetrywalconfig}
 
 | Field           | Type    | Default                                        |
 | --------------- | ------- | ---------------------------------------------- |
@@ -143,7 +144,7 @@ network — useful for single-node leader daemons.
 
 Use a separate persistent directory for each producer. Rotation limits the number of segments. A single encoded batch can exceed the target segment size.
 
-## `TelemetryEntry` — the universal unit
+## `TelemetryEntry` — the universal unit {#telemetryentry--the-universal-unit}
 
 ```typescript
 interface TelemetryEntry {
@@ -160,7 +161,7 @@ interface TelemetryEntry {
 Five entry types route at the aggregator. The relay itself doesn't
 care — it just buffers, persists, and ships.
 
-## Convenience emitters
+## Convenience emitters {#convenience-emitters}
 
 | Method                                                     | Resulting `type` / `data`                                       |
 | ---------------------------------------------------------- | --------------------------------------------------------------- |
@@ -180,7 +181,7 @@ relay.record({
 });
 ```
 
-## Transport contract
+## Transport contract {#transport-contract}
 
 ```typescript
 interface TelemetryTransport {
@@ -195,7 +196,7 @@ Implement `connect` and `disconnect` for your transport. Bind the source identit
 
 Use `entry.id` scoped to the authenticated producer for idempotency. New records receive an ID at admission. Records from a WAL created by older releases can lack one. The receiver decides how to handle their duplicate risk. Where you need durable per-entry evidence or historical reconciliation across Omnitron nodes, use the fleet replication service.
 
-## Aggregator contract
+## Aggregator contract {#aggregator-contract}
 
 ```typescript
 interface TelemetryAggregator {
@@ -219,7 +220,7 @@ The aggregator owns persistence — write to Postgres, ClickHouse,
 S3, OTLP collector, or whatever backend fits. `ingest` returns the
 count of entries successfully persisted (used for ack accounting).
 
-## Delivery and recovery
+## Delivery and recovery {#delivery-and-recovery}
 
 1. `record` places an entry in memory. A process crash before the next flush can lose it. Watch `buffer.totalDropped` for memory pressure.
 2. With a WAL, the producer appends the batch and syncs it to disk before sending. Replay and normal sends run in sequence. New arrivals cannot be cleared by a previous send.
@@ -229,7 +230,7 @@ count of entries successfully persisted (used for ack accounting).
 
 With `wal: false`, pending entries exist in memory only. A failed sink call can return them to that bounded buffer. An application requiring durable replication should use a persistent WAL directory or the Omnitron outbox.
 
-## WAL on-disk format
+## WAL on-disk format {#wal-on-disk-format}
 
 NDJSON — one telemetry entry per line:
 
@@ -245,7 +246,7 @@ exceeds `maxSizeBytes`, a new segment opens; segments past
 
 An invalid NDJSON record or unreadable segment is a recovery error. Inspect the journal and the sink's committed IDs before repairing it. Keep a copy of the original segments.
 
-## Statistics
+## Statistics {#statistics}
 
 `relay.stats()` returns a snapshot:
 
@@ -267,13 +268,13 @@ An invalid NDJSON record or unreadable segment is a recovery error. Inspect the 
 Surface these via your existing metrics module — they're the
 primary signal for "is the pipeline healthy?".
 
-## Sizing guidance
+## Sizing guidance {#sizing-guidance}
 
 Each timer tick drains up to `maxBatchSize` entries from the memory buffer. With a ten-second interval and a batch of 500, the upper bound is 50 entries per second before disk and sink latency. At 100 entries per second the backlog will grow with those defaults. Measure under load, then select a batch size and interval that leave room for bursts and slow writes. Size the memory buffer for arrivals between completed flushes.
 
 For a four-hour outage at 100 entries per second and 1,000 encoded bytes per entry, plan for at least 1.44 GB of journal data plus operational headroom. Monitor actual encoded bytes and segment evictions to validate that estimate.
 
-## Lifecycle
+## Lifecycle {#lifecycle}
 
 `TelemetryRelayService` is a plain `EventEmitter` subclass — no
 DI lifecycle hooks. Wire it manually if you want DI integration:
@@ -295,11 +296,11 @@ class TelemetryRelayAdapter implements OnStart, OnStop {
 flushes the buffer to WAL, disconnects the transport, and disposes
 the WAL (awaits pending writes, closes fds).
 
-## Choosing a destination
+## Choosing a destination {#choosing-a-destination}
 
 The application supplies a destination or changes it with `setTransport`. If several collectors share a store, deduplicate against the same durable identity on every collector. Confirm a record only when the configured durability requirement has been met.
 
-## When to use this vs the built-in logger
+## When to use this vs the built-in logger {#when-to-use-this-vs-the-built-in-logger}
 
 | Need                                              | Use                                              |
 | ------------------------------------------------- | ------------------------------------------------ |
@@ -310,14 +311,14 @@ The application supplies a destination or changes it with `setTransport`. If sev
 | OTel-compatible sink                              | Build a `TelemetryAggregator` wrapping the OTLP exporter |
 | Edge node that may be offline for hours           | This module with large `maxSegments`             |
 
-## Operational checks
+## Operational checks {#operational-checks}
 
 - If `buffer.totalDropped` grows, the producer has exceeded the memory buffer. Oldest in-memory entries are evicted before they reach disk.
 - If WAL eviction counters grow, the outage or input rate has exceeded configured retention. Restore the destination and check for gaps.
 - Before accepting remote traffic, configure the receiving aggregator. A receiver with no sink returns zero acknowledgements.
 - Place each WAL on persistent storage and recover it under its original producer identity.
 
-## See also
+## See also {#see-also}
 
 - [`titan-metrics`](./metrics.mdx) — emit metrics that this relay
   can ship

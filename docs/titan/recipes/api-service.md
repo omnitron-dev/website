@@ -1,4 +1,6 @@
 ---
+id: "titan/recipes/api-service"
+slug: "/docs/titan/recipes/api-service"
 sidebar_position: 2
 title: API service stack
 description: Public HTTP/WS API — auth, database, cache, rate limiting, health, metrics.
@@ -11,7 +13,7 @@ authenticated requests, database reads/writes, cache in front,
 rate limiting per user, health probes for Kubernetes, metrics for
 dashboards.
 
-## Shape
+## Shape {#shape}
 
 - **Authenticated.** JWT tokens (or service-key for trusted
   callers) verified on every request.
@@ -25,7 +27,7 @@ dashboards.
 - **Metrics.** Counters / histograms for every RPC method,
   exported in Prometheus format.
 
-## Architecture
+## Architecture {#architecture}
 
 ```mermaid
 flowchart LR
@@ -45,7 +47,7 @@ flowchart LR
   Metrics --> Prom[/metrics endpoint]
 ```
 
-## `AppModule`
+## `AppModule` {#appmodule}
 
 ```typescript
 import { Module } from '@omnitron-dev/titan';
@@ -223,7 +225,7 @@ const AppConfigSchema = z.object({
 export class AppModule {}
 ```
 
-## A typical `@Service`
+## A typical `@Service` {#a-typical-service}
 
 ```typescript
 import { Service, Inject } from '@omnitron-dev/titan';
@@ -260,7 +262,7 @@ class UsersService {
 }
 ```
 
-## Cross-module wiring notes
+## Cross-module wiring notes {#cross-module-wiring-notes}
 
 | Concern               | Wiring detail                                                                                   |
 | --------------------- | ----------------------------------------------------------------------------------------------- |
@@ -272,7 +274,7 @@ class UsersService {
 | Rate limit key shape  | `@RateLimit` takes an options object only. The key defaults to `{class}:{method}:{arg0}`; pass `keyGenerator: (...args) => ...` to fold in the auth identity. The service must inject the limiter as `__rateLimitService__` or the decorator silently no-ops |
 | Metrics + Netron      | `collection.rpc: true` auto-instruments every `@Public` method — no per-method `@Metrics` needed unless you want a custom metric name (`@Metrics('users.findById')`) |
 
-## Production checklist
+## Production checklist {#production-checklist}
 
 - [ ] `validateOnStartup: true` on ConfigModule — misconfig fails at boot
 - [ ] `watchForChanges: false` in production — hot-reload is dev-only
@@ -289,7 +291,7 @@ class UsersService {
 - [ ] Logs shipping off-host (sidecar / fluentbit / stdout to log aggregator)
 - [ ] Database migrations run as a separate step (not at app boot in production)
 
-## See also
+## See also {#see-also}
 
 - [Worker fleet](./worker-fleet.md) — when the workload is async
   jobs, not request handlers
