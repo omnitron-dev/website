@@ -35,8 +35,8 @@ omnitron webapp open                 # open the web console
 
 | Layer | Responsibility |
 | ----- | -------------- |
-| **CLI** | One binary (`omnitron`) with 13 command groups covering every operator task — start/stop/status/logs/scale/secrets/backup/deploy/cluster/k8s/etc. |
-| **Daemon** | Long-running supervisor that owns the process tree, exposes a typed Netron RPC surface, and persists state under `~/.omnitron/` |
+| **CLI** | One `omnitron` entry point for applications, stacks, deployments, infrastructure, diagnostics and backend updates. |
+| **Daemon** | Typed Netron control plane with durable local state. Coupled mode owns applications directly; resident mode keeps them in an independent owner. |
 | **Orchestrator** | Per-app launch pipeline: TS compile / module load / fork process / wire DI / start lifecycle / watch files in dev |
 | **Process tree** | One OS process per `IProcessEntry` you declare; ≥ 1 instances per process; auto-restart with exponential backoff |
 | **Services** | Role-protected daemon RPC for authentication, deployment, fleet inventory, secrets, infrastructure and diagnostics. Availability depends on daemon role. |
@@ -68,81 +68,78 @@ or two machines.
 
 ```mermaid
 flowchart TB
-  subgraph User["Operator"]
-    CLI[omnitron CLI]
-    Console[Web console]
-    MCP[Agent via MCP]
+  CLI["CLI"] -->|Unix socket| RPC
+  Console["Console"] -->|Netron over HTTP / WebSocket| RPC
+  Agent["Agent via MCP"] -->|MCP adapter and local RPC| RPC
+
+  subgraph Instance["Omnitron instance (one per node)"]
+    RPC["Backend: Netron RPC services"]
+    State[("SQLite state and registries")]
+    Guardian["Resident backend guardian"]
+    Owner["Application owner"]
+    RPC --> State
+    Guardian -->|Supervise backend| RPC
+    RPC -->|Lifecycle commands| Owner
   end
 
-  CLI -- Unix socket --> Daemon
-  Console -- HTTP/WS --> Daemon
-  MCP   -- stdio    --> Daemon
-
-  subgraph Daemon["Omnitron daemon &#40;one per node&#41;"]
-    direction TB
-    RPC[Netron RPC services]
-    State[(state.json<br/>PID + status)]
-    Sched[Daemon scheduler]
+  Owner -->|Supervise| AppA["Application: API"]
+  Owner -->|Supervise| AppB["Application: ingestion"]
+  RPC -->|Provision declared resources| Infra
+  subgraph Infra["Infrastructure (Docker / bare-metal)"]
+    PG[("PostgreSQL")]
+    Redis[("Redis")]
+    S3[("S3-compatible storage")]
   end
-
-  Daemon -- spawn / signal --> AppA
-  Daemon -- spawn / signal --> AppB
-
-  subgraph AppA["App: api"]
-    P1[process: http]
-    P2[process: worker]
-  end
-  subgraph AppB["App: ingest"]
-    P3[process: collector]
-    P4[process: aggregator x3]
-  end
-
-  Daemon -- provision --> Infra
-  subgraph Infra["Infrastructure &#40;Docker / bare-metal&#41;"]
-    PG[(Postgres)]
-    Redis[(Redis)]
-    S3[(MinIO)]
-  end
-
-  AppA -. uses .-> PG
-  AppA -. uses .-> Redis
-  AppB -. uses .-> PG
-  AppB -. uses .-> S3
+  AppA -. Uses .-> PG
+  AppA -. Uses .-> Redis
+  AppB -. Uses .-> PG
+  AppB -. Uses .-> S3
 ```
 
-The daemon is the **only thing always running**. Apps come and
-go; the daemon stays. CLI invocations are short-lived RPC clients
-talking to the daemon — they exit immediately after the RPC
-returns.
+The diagram shows **resident mode**: the owner retains applications while the
+guardian replaces the backend. In default coupled mode, the backend also owns
+the application lifecycle. Moving from coupled to resident mode requires an
+initial application restart; later compatible backend handoffs can preserve
+those processes. See [backend replacement](./backend-handoff.md).
+
+Ordinary CLI invocations are short-lived RPC clients. Follow and watch commands
+keep their connection or polling loop for as long as the operator needs it.
 
 ## Filesystem layout {#filesystem-layout}
 
-Omnitron owns a single directory:
+By default, Omnitron stores its control-plane files in `~/.omnitron/`.
+`OMNITRON_HOME` selects another instance directory. This is a selected layout:
 
-```text
-~/.omnitron/
-├── daemon.sock          # Unix socket for the management plane
-├── daemon.pid           # Daemon PID file
-├── state.json           # Persisted app state (last-known status)
-├── secrets.enc          # Encrypted secret store (file provider)
-└── logs/
-    ├── daemon.log
-    ├── api.log
-    ├── api.log.1.gz
-    └── ...
-```
+:::filetree{title="~/.omnitron/"}
+- `daemon.sock` — Private management socket
+- `daemon.pid` — Backend process identity
+- `data/`
+  - `daemon-state.db` — Registries, execution intent and persisted state
+  - `application-logs.sqlite` — Application log delivery journal
+  - `backend-logs.sqlite` — Backend log delivery journal
+- `runtime/`
+  - `releases/` — Verified, installed backend runtimes
+- `execution/` — Resident owner and guardian control files
+- `secrets.enc` — Encrypted file-provider secrets
+- `logs/`
+  - `omnitron.log` — Backend log
+  - `omnitron.error.log` — Backend errors
+- `projects/` — Project and stack state, including application log archives
+:::
 
-By default everything else is project-local — the daemon never
-writes outside `~/.omnitron/` unless you point it at custom
-paths.
+The current state store is SQLite; `state.json` is only an import source for
+older installations. Project builds, configured backup destinations, container
+volumes and native service definitions have their own locations. The
+[observability guide](./observability.md#putting-it-together--what-the-daemon-stores)
+distinguishes query storage from delivery journals and log archives.
 
 ## Default endpoints {#default-endpoints}
 
 | Plane | Endpoint | Purpose |
 | ----- | -------- | ------- |
 | Management | `unix://~/.omnitron/daemon.sock` (mode `0o600`, owner-only) | CLI ↔ daemon — `OmnitronDaemon` service + the rest of the built-in services |
-| Public TCP | `tcp://0.0.0.0:9700` (opt-in) | Remote daemons + fleet operations |
-| Web/HTTP | `http://0.0.0.0:9800` (opt-in) | Webapp + REST gateway |
+| TCP | `tcp://127.0.0.1:9700` by default | Authenticated daemon RPC; configure the bind address for remote access |
+| Console | `http://localhost:9800` by default | Browser interface; publication and backend endpoints follow the configured gateway |
 
 The Unix socket is the **trust boundary** — owner-only file
 permissions make local CLI calls implicit-auth. TCP and HTTP
@@ -218,35 +215,33 @@ so dependencies stay process-isolated.
 
 ## Multi-project / multi-stack {#multi-project--multi-stack}
 
-Omnitron groups apps into **projects** and projects into
-**stacks**:
+A **project** owns one or more **stacks**. Each stack selects application
+configuration, infrastructure and placement for an environment:
 
-```text
-project: monorepo-A
-  ├── stack: dev      → apps: api, worker
-  ├── stack: staging  → apps: api, worker, batch
-  └── stack: prod     → apps: api, worker, batch, scheduler
-
-project: monorepo-B
-  └── stack: prod     → apps: gateway, events
-```
+| Project | Stack | Applications |
+| --- | --- | --- |
+| `monorepo-A` | `dev` | `api`, `worker` |
+| `monorepo-A` | `staging` | `api`, `worker`, `batch` |
+| `monorepo-A` | `prod` | `api`, `worker`, `batch`, `scheduler` |
+| `monorepo-B` | `prod` | `gateway`, `events` |
 
 Stack-aware commands (`omnitron stack status <project> <stack>`)
-operate on the named subset. Use stacks to keep
-`development` / `staging` / `production` boots side-by-side on
-one daemon.
+operate on that stack. Environments can share a node or target different
+nodes; they remain configurations of the same project. See
+[projects and stacks](./projects.md) for placement and lifecycle commands.
 
 ## Built-in observability {#built-in-observability}
 
-Every supervised process gets, for free:
+The supervisor captures process state and output. Additional signals depend on
+application instrumentation and configured collectors:
 
 | Signal | Where |
 | ------ | ----- |
-| Structured logs (pino JSON) | `~/.omnitron/logs/{app}.log` with size-based rotation |
+| Application output and structured logs | Durable capture and rotated per-application files; see [logs](./observability.md#logs) |
 | Per-process metrics | aggregated by daemon, exposed via RPC + Prometheus text |
-| Health probes | `LiveCheck` / `Ready` from `titan-health`, surfaced by daemon |
+| Health probes | Application-provided checks and declared readiness probes |
 | Crash tracking | Restart count, last error, backoff state |
-| Distributed traces | OTel-compatible via the telemetry transport |
+| Distributed traces | Configured application tracing and collectors |
 
 Both the CLI and webapp read these through the daemon — there's no
 separate metrics agent to deploy.
@@ -255,7 +250,7 @@ separate metrics agent to deploy.
 
 The console is a React + Vite + MUI SPA that lives at
 `apps/omnitron/webapp/` and talks to the daemon via the
-`@omnitron-dev/prism/netron` client. It gives you:
+`@omnitron-dev/netron-react` integration and browser client. It gives you:
 
 - Project + stack view with per-app status cards
 - Live log streams with filtering
@@ -265,10 +260,9 @@ The console is a React + Vite + MUI SPA that lives at
 - Secret editor (against the daemon's encrypted store)
 - Fleet view across remote daemons
 
-Serve it with `omnitron webapp build` then `omnitron webapp start`
-(an `omnitron-nginx` container fronting the built bundle on
-`:9800`); `omnitron webapp open` launches the browser at that
-URL. For development, run `pnpm dev` in `apps/omnitron/webapp/`
+The published package includes Console assets. `omnitron webapp start`
+reconciles the serving gateway; `omnitron webapp open` opens the configured
+address. `omnitron webapp build` is for a source checkout. For development, run `pnpm dev` in `apps/omnitron/webapp/`
 for a Vite dev server with HMR.
 
 → Full webapp reference: [console](./console.md).
@@ -277,7 +271,7 @@ for a Vite dev server with HMR.
 
 | Component | Requirement |
 | --------- | ----------- |
-| Node.js   | 22.x or 23.x (test matrix runs both) |
+| Node.js | Use a supported runtime from the [compatibility reference](../reference/compatibility.md); native dependencies are qualified for the target Node and OS |
 | OS | macOS, Linux. Windows works for CLI + non-supervisor commands; daemon assumes Unix sockets |
 | Docker | Required for `infra` commands (provisioning Postgres / Redis / etc.) |
 | Bun / Deno | Apps may run on Bun/Deno individually, but the daemon expects Node |

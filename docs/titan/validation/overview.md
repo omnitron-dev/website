@@ -72,7 +72,7 @@ field-level error messages.
 flowchart LR
   Wire[Bytes arrive] --> Decode[msgpack decode]
   Decode --> Lookup[Service descriptor lookup]
-  Lookup --> Validate{@Validate / @Contract}
+  Lookup --> Validate{"@Validate / @Contract"}
   Validate -- valid --> Body[Method body runs]
   Validate -- invalid --> Err[ValidationError 422]
   Body --> Output[Result]

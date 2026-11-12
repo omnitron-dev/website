@@ -11,34 +11,23 @@ sidebar_position: 6
 This page describes the target authorisation model. Omnitron today ships only the base auth surface; the role/permission/condition/RLS layering shown below is a design reference.
 :::
 
-```
-┌─────────────────────────────────────────────────────────────┐
-│                       JWT (per request)                      │
-│  sub | roles[] | permissions[] | pv | sid | cnf.fp           │
-└────────────┬───────────────────────────┬────────────────────┘
-             │                           │
-             ▼                           ▼
-   ┌────────────────────┐     ┌─────────────────────────┐
-   │  Invocation        │     │  PermVer counter (Redis)│
-   │  wrapper           │     │  perm-v:{userId}   │
-   │  (per-RPC)         │◄────┤                         │
-   └──────┬─────────────┘     └─────────────────────────┘
-          │  pass → propagate AuthContext into:
-          │
-  ┌───────┼─────────────────┬──────────────────────────┐
-  │       │                 │                          │
-  ▼       ▼                 ▼                          ▼
-┌──────┐┌──────────┐  ┌─────────────────┐   ┌────────────────┐
-│@Auth ││@kysera/  │  │ DynamicPolicy   │   │ Service-layer  │
-│ gate ││ rls      │  │  (org scope)    │   │ requirePermiss-│
-│      ││ policies │  │                 │   │ ion() helpers   │
-└──┬───┘└────┬─────┘  └────────┬────────┘   └────────┬───────┘
-   │         │                  │                    │
-   └─────────┴──────┬───────────┴────────────────────┘
-                   ▼
-            ┌──────────────┐
-            │  Audit log   │  (every privileged action)
-            └──────────────┘
+```mermaid
+flowchart TB
+  Token["Verified JWT: sub, roles, permissions, pv, sid, cnf.fp"]
+  Counter[("Permission version in Redis")]
+  Invocation["Netron invocation wrapper"]
+  Context["Admitted AuthContext"]
+  Token --> Invocation
+  Counter -->|Check permission version| Invocation
+  Invocation -->|Admit request| Context
+  Context --> Gate["Authorization gate"]
+  Context --> RLS["Kysera row-level policies"]
+  Context --> Policy["Organization policy"]
+  Context --> Service["Service permission checks"]
+  Gate --> Audit["Privileged-action audit"]
+  RLS --> Audit
+  Policy --> Audit
+  Service --> Audit
 ```
 
 Four layers. They share **one** identity (the JWT-resolved

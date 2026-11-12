@@ -158,27 +158,26 @@ application that happens to be named `omnitron`.
 
 ## Filesystem layout {#filesystem-layout}
 
-```text
-webapp/
-├── index.html
-├── vite.config.ts
-├── package.json
-├── public/                   # static assets shipped as-is
-└── src/
-    ├── main.tsx              # entrypoint
-    ├── app.tsx               # <App/> root
-    ├── routes/               # router definition
-    ├── layouts/              # ConsoleLayout, AuthLayout
-    ├── pages/                # 20+ pages, lazy-loaded
-    ├── components/           # shared UI building blocks
-    ├── hooks/                # custom React hooks
-    ├── netron/               # RPC client + DaemonWsClient wiring
-    ├── auth/                 # AuthGuard, GuestGuard, ProjectGuard, auth store
-    ├── stores/               # zustand state stores
-    ├── assets/               # icons
-    ├── utils/
-    └── stubs/                # fs/path stubs for Node builtins pulled in by Prism
-```
+:::filetree{title="webapp/"}
+- `index.html`
+- `vite.config.ts`
+- `package.json`
+- `public/` — static assets shipped as-is
+- `src/`
+  - `main.tsx` — entrypoint
+  - `app.tsx` — <App/> root
+  - `routes/` — router definition
+  - `layouts/` — ConsoleLayout, AuthLayout
+  - `pages/` — Lazy-loaded Console sections
+  - `components/` — shared UI building blocks
+  - `hooks/` — custom React hooks
+  - `netron/` — Netron client and typed daemon service bindings
+  - `auth/` — AuthGuard, GuestGuard, ProjectGuard, auth store
+  - `stores/` — zustand state stores
+  - `assets/` — icons
+  - `utils/`
+  - `stubs/` — fs/path stubs for Node builtins pulled in by Prism
+:::
 
 ## Route map {#route-map}
 
@@ -592,7 +591,7 @@ sequenceDiagram
     D->>A: signIn(credentials)
     A-->>D: { token, sessionId, roles }
     D-->>W: response
-    W->>W: store token; redirect to /
+    W->>W: store token<br/>redirect to /
   end
   W->>D: every subsequent call carries Authorization: Bearer ...
   D->>A: validateToken(token)

@@ -23,7 +23,7 @@ gates distinguish implemented behavior from planned autonomous operations.
 
 ```mermaid
 flowchart TB
-  subgraph DaemonProc["Daemon process &#40;one per node&#41;"]
+  subgraph DaemonProc["Daemon process (one per node)"]
     direction TB
 
     subgraph IngressPlane["Ingress planes"]
@@ -41,7 +41,7 @@ flowchart TB
       Sched[Daemon scheduler]
     end
 
-    subgraph BuiltIn["Built-in RPC services &#40;21 on a master daemon&#41;"]
+    subgraph BuiltIn["Built-in RPC services (master daemon)"]
       Deploy[deploy]
       Fleet[fleet]
       Secrets[secrets]
@@ -173,18 +173,18 @@ sequenceDiagram
   participant SS as State store
   participant PM as PID manager
 
-  OS->>D: spawn (omnitron up --detach)
+  OS->>D: Start configured daemon entry
   D->>PM: acquire lock (~/.omnitron/daemon.pid)
   alt lock taken
     PM-->>D: throw — already running
     D->>OS: exit 1
   end
-  D->>SS: load state.json (last-known apps)
+  D->>SS: Open durable state and project registry
   D->>D: bind Unix socket, [TCP, HTTP]
   D->>D: register all RPC services
-  D->>Orch: rehydrate(state.apps)
-  loop per app in state
-    Orch->>Orch: launch if was running
+  D->>Orch: Read registered projects and enabled stacks
+  loop per enabled stack
+    Orch->>Orch: Resume selected release or development configuration
   end
   D-->>OS: ready
   Note over D: serve requests indefinitely
@@ -265,7 +265,7 @@ app:
 
 ```mermaid
 flowchart LR
-  Daemon -- launch&#40;name&#41; --> AppH[AppHandle]
+  Daemon -->|"launch(name)"| AppH[AppHandle]
   AppH --> Boot[Bootstrap loader]
   Boot --> TSC[TS compiler<br/>if .ts source]
   Boot --> Resolve[Dependency resolver]
@@ -344,7 +344,7 @@ requirement, the daemon's infrastructure subsystem:
 
 ```mermaid
 flowchart LR
-  App[App declaration<br/>requires: { database, redis, s3 }]
+  App["App declaration<br/>requires: { database, redis, s3 }"]
   App --> Resolver
   Resolver{Provider?}
   Resolver -- dev/test --> Docker[Docker provider]

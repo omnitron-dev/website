@@ -22,21 +22,21 @@ does not implement those guarantees.
 
 Verified against `apps/omnitron/src/infrastructure/`:
 
-```
-infrastructure/
-├── infrastructure.service.ts   — orchestrator service
-├── service-resolver.ts         — picks the right provider per stack
-├── container-runtime.ts        — Docker provider
-├── stack-infra-manager.ts      — per-stack lifecycle
-├── server-registry.ts          — bare-metal connection registry
-├── config-normalizer.ts        — schema validation
-├── gateway-generator.ts        — OpenResty config materialisation
-├── infrastructure-gate.ts      — readiness barrier (block app start until deps healthy)
-├── phantom-endpoint-janitor.ts — clean up dead resolutions
-├── presets/                    — built-in presets (postgres, redis, minio, openresty, tor)
-├── runtime/                    — runtime helpers (Docker compose builder, env injectors)
-└── types.ts                    — public types
-```
+:::filetree{title="infrastructure/"}
+- `infrastructure.service.ts` — orchestrator service
+- `service-resolver.ts` — picks the right provider per stack
+- `container-runtime.ts` — Docker provider
+- `stack-infra-manager.ts` — per-stack lifecycle
+- `server-registry.ts` — bare-metal connection registry
+- `config-normalizer.ts` — schema validation
+- `host-ingress.service.ts` — Shared host ingress lifecycle
+- `host-ingress-config.ts` — Host gateway configuration
+- `infrastructure-gate.ts` — readiness barrier (block app start until deps healthy)
+- `phantom-endpoint-janitor.ts` — Clean up dead resolutions
+- `presets/` — built-in presets (postgres, redis, minio, openresty, tor)
+- `runtime/` — Provider runtime contracts
+- `types.ts` — public types
+:::
 
 ## Two layers of declaration {#two-layers-of-declaration}
 

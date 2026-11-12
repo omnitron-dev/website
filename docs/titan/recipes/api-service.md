@@ -44,7 +44,7 @@ flowchart LR
   Health[titan-health] -.indicators.-> DB
   Health -.indicators.-> Redis
   Probe[Kubernetes probes] --> Health
-  Metrics --> Prom[/metrics endpoint]
+  Metrics --> Prom["/metrics endpoint"]
 ```
 
 ## `AppModule` {#appmodule}

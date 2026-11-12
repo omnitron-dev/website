@@ -47,7 +47,7 @@ flowchart LR
   end
   Net --> AggPod[Aggregator pod]
   subgraph Aggregator pod
-    AggPod --> Ingest[ingest&#40;nodeId, entries&#41;]
+    AggPod --> Ingest["ingest(nodeId, entries)"]
     Ingest --> Sink[(Backend:<br/>Postgres / OTel /<br/>Loki / S3 / ...)]
   end
 ```

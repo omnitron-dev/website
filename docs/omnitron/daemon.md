@@ -19,17 +19,20 @@ preserves the owner; an explicit shutdown still stops applications.
 
 Verified against `src/daemon/`:
 
-```
-daemon/
-├── daemon.ts                         — main daemon class
-├── daemon.rpc-service.ts        — Netron-facing service
-├── daemon.module.ts             — Titan module wiring
-├── daemon-client.ts             — Typed RPC client (used by CLI)
-├── daemon-entry.ts              — Standalone entrypoint
-├── daemon-scheduler.ts          — Periodic task scheduler
-├── pid-manager.ts               — PID file lock + liveness sweep
-└── state-store.ts               — Persistent state on disk
-```
+:::filetree{title="daemon/"}
+- `daemon.ts` — main daemon class
+- `daemon.rpc-service.ts` — Netron-facing service
+- `daemon.module.ts` — Titan module wiring
+- `daemon-client.ts` — Typed RPC client (used by CLI)
+- `daemon-entry.ts` — Standalone entrypoint
+- `daemon-scheduler.ts` — Periodic task scheduler
+- `pid-manager.ts` — PID file lock + liveness sweep
+- `daemon-state-store.service.ts` — Transactional SQLite state storage
+- `state-store.ts` — Application snapshots and execution intent
+- `execution-owner.ts` — Independent application owner
+- `backend-supervisor.ts` — Backend guardian
+- `backend-upgrade.ts` — Validated backend handoff
+:::
 
 ## Lifecycle {#lifecycle}
 

@@ -38,7 +38,7 @@ pnpm add @omnitron-dev/netron-browser
 ```mermaid
 flowchart TB
   subgraph App["Your app"]
-    Code[Code calls client.service&#40;...&#41;]
+    Code["Code calls client.service(...)"]
   end
 
   subgraph Client["NetronClient"]

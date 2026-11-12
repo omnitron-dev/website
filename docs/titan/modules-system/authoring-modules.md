@@ -34,19 +34,18 @@ with the configuration it needs — same code, different bindings.
 
 Start from this layout:
 
-```
-my-titan-foo/
-├── src/
-│   ├── foo.module.ts          ← the @Module class + forRoot
-│   ├── foo.service.ts         ← main service exposed to consumers
-│   ├── foo.types.ts           ← public types (options, interfaces)
-│   ├── foo.tokens.ts          ← DI tokens for every export
-│   ├── foo.decorators.ts      ← optional: decorators if needed
-│   └── index.ts               ← public barrel
-├── package.json
-├── tsconfig.json
-└── README.md
-```
+:::filetree{title="my-titan-foo/"}
+- `src/`
+  - `foo.module.ts` — the @Module class + forRoot
+  - `foo.service.ts` — main service exposed to consumers
+  - `foo.types.ts` — public types (options, interfaces)
+  - `foo.tokens.ts` — DI tokens for every export
+  - `foo.decorators.ts` — optional: decorators if needed
+  - `index.ts` — public barrel
+- `package.json`
+- `tsconfig.json`
+- `README.md`
+:::
 
 ### `package.json` essentials {#packagejson-essentials}
 

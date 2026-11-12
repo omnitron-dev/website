@@ -309,7 +309,7 @@ sequenceDiagram
       Master->>Slave: ackDrained({ids, receipt})
       Slave->>Buffer: acknowledge confirmed IDs
     else failure
-      Master->>Master: retain diagnostic cause; retry later
+      Master->>Master: retain diagnostic cause<br/>retry later
     end
   end
 ```

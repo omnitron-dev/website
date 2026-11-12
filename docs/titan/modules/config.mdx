@@ -238,14 +238,13 @@ try {
 
 A common production layout for layered config:
 
-```
-config/
-├── default.yaml          # committed, shared defaults
-├── development.yaml      # committed, dev overrides
-├── staging.yaml          # committed, staging overrides
-├── production.yaml       # committed, prod-safe non-secrets
-└── local.yaml            # git-ignored, per-developer
-```
+:::filetree{title="config/"}
+- `default.yaml` — committed, shared defaults
+- `development.yaml` — committed, dev overrides
+- `staging.yaml` — committed, staging overrides
+- `production.yaml` — committed, prod-safe non-secrets
+- `local.yaml` — git-ignored, per-developer
+:::
 
 Wire it up:
 

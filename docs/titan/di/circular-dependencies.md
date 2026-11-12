@@ -132,11 +132,11 @@ Sort modules into layers: core (no domain deps), domain (depends
 on core), feature (depends on domain). A cycle implies a layer
 violation.
 
-```
-┌─ feature: BillingModule, UsersModule, OrdersModule
-├─ domain:  AuthModule
-└─ core:    LoggerModule, ConfigModule, DatabaseModule
-```
+| Layer | Example modules | Dependency direction |
+| --- | --- | --- |
+| Feature | `BillingModule`, `UsersModule`, `OrdersModule` | Domain and core |
+| Domain | `AuthModule` | Core |
+| Core | `LoggerModule`, `ConfigModule`, `DatabaseModule` | Shared infrastructure |
 
 Lower layers can be imported by higher layers, never the reverse.
 

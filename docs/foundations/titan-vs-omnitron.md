@@ -22,7 +22,7 @@ and what to skip.
 flowchart TB
   subgraph Titan["Titan — backend framework (always)"]
     direction LR
-    App[Application.create&#40;module&#41;]
+    App["Application.create(module)"]
     DI[Nexus DI container]
     Net[Netron RPC<br/>HTTP / WS / TCP / Unix]
     Lif[Lifecycle hooks]

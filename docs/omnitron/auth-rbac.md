@@ -223,13 +223,13 @@ sequenceDiagram
 
   loop access expires
     Client->>Auth: POST /refresh (rtid_1)
-    Auth->>Auth: mark rtid_1 used; create rtid_2
+    Auth->>Auth: mark rtid_1 used<br/>create rtid_2
     Auth-->>Client: { access: JWT(cnf.fp = HMAC(rtid_2)), refresh: rtid_2 }
-    Note over Client: rtid_1 now used; only rtid_2 is presentable
+    Note over Client: rtid_1 now used<br/>only rtid_2 is presentable
   end
 
   Note over Client: token stolen and used after refresh
-  Note over Auth: stolen JWT carries cnf.fp(rtid_1); session's<br/>currently-active is rtid_2 → mismatch → 401
+  Note over Auth: stolen JWT carries cnf.fp(rtid_1)<br/>session's<br/>currently-active is rtid_2 → mismatch → 401
 ```
 
 Refresh tokens are **one-use** — using `rtid_N` invalidates it

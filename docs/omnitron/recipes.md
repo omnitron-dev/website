@@ -534,16 +534,12 @@ graceful degradation.
 
 ```mermaid
 flowchart LR
-  Op[Operator: redis-cli SET platform:maintenance 1]
-  Op --> R[(Redis)]
-  R --> LB[Gateway Lua check]
-  LB -- read flag --> R
-  LB -- cached 1s --> LB
-  alt flag = 1
-    LB --> Page[Serve maintenance.html<br/>HTTP 503]
-  else flag = 0
-    LB --> Backend[Pass-through to backends]
-  end
+  Op["Operator: set maintenance flag"] --> R[(Redis)]
+  Request["Incoming request"] --> LB["Gateway Lua check"]
+  LB -->|"Read flag, cached for 1 second"| R
+  LB --> Flag{"Maintenance enabled?"}
+  Flag -->|Yes| Page["Serve maintenance.html<br/>HTTP 503"]
+  Flag -->|No| Backend["Pass through to backends"]
 ```
 
 The gateway's Lua block (see [Best Practices](./best-practices.md#reverse-proxy-with-maintenance-mode-flag-in-redis))

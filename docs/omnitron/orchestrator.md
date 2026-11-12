@@ -17,21 +17,20 @@ cleanly.
 
 Verified against `src/orchestrator/`:
 
-```
-orchestrator/
-├── orchestrator.service.ts   (~2k lines)  — top-level service
-├── app-handle.ts                    — per-app supervisor state
-├── bootstrap-loader.ts              — locates + loads bootstrap.{js,ts}
-├── bootstrap-process.ts             — per-app bootstrap entrypoint (classic)
-├── module-worker-process.ts         — per-process entrypoint (worker mode)
-├── classic-launcher.ts              — fork classic-mode bootstrap
-├── ts-compiler.ts                   — JIT TypeScript compile
-├── file-watcher.ts                  — hot reload in dev
-├── dependency-resolver.ts           — startup ordering by topology
-├── service-router.ts                — RPC routing to apps
-├── process-janitor.ts               — orphan + zombie reap
-└── build-service.ts                 — production bundle / tarball
-```
+:::filetree{title="orchestrator/"}
+- `orchestrator.service.ts` — top-level service
+- `app-handle.ts` — per-app supervisor state
+- `bootstrap-loader.ts` — locates + loads bootstrap.{js,ts}
+- `bootstrap-process.ts` — per-app bootstrap entrypoint (classic)
+- `module-worker-process.ts` — per-process entrypoint (worker mode)
+- `classic-launcher.ts` — fork classic-mode bootstrap
+- `ts-compiler.ts` — JIT TypeScript compile
+- `file-watcher.ts` — hot reload in dev
+- `dependency-resolver.ts` — startup ordering by topology
+- `service-router.ts` — RPC routing to apps
+- `process-janitor.ts` — orphan + zombie reap
+- `build-service.ts` — production bundle / tarball
+:::
 
 ## Two launch modes {#two-launch-modes}
 

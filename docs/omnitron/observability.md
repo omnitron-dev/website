@@ -39,8 +39,8 @@ sequenceDiagram
   participant Files as Application files
   App->>PM: stdout / stderr, including startup failures
   PM->>Journal: ID + source + capture time + message bytes
-  Note over Journal: WAL + synchronous=FULL; unfinished multiline records persist too
-  Journal->>Files: Append with a durable file offset; fsync
+  Note over Journal: WAL + synchronous=FULL<br/>unfinished multiline records persist too
+  Journal->>Files: Append with a durable file offset<br/>fsync
   Files-->>Journal: File projection confirmed
   Backend->>Journal: Read a bounded page
   Backend->>DB: Commit logs and node replication outbox together
@@ -489,24 +489,36 @@ omnitron node check [id]           # node connectivity probe
 
 ## Putting it together — what the daemon stores {#putting-it-together--what-the-daemon-stores}
 
-```text
-~/.omnitron/
-├── logs/                      # log-manager rotated files
-│   ├── omnitron.log           # the daemon's own log
-│   ├── omnitron.error.log
-│   ├── api/                   # one directory per standalone app
-│   │   ├── app.log
-│   │   ├── error.log
-│   │   ├── app.log.1.gz
-│   │   └── ...
-│   └── ...
-├── projects/{project}/{stack}/logs/{app}/   # project-mode apps
-├── state.json                 # app status + health summary
-└── secrets.enc
+The default storage directory is `~/.omnitron/`; `OMNITRON_HOME` and explicit
+storage settings can relocate it. Selected files are shown below. Application
+names and rotated archive names depend on the registered stack and retention
+settings.
 
-(traces persist to Postgres / OmnitronDatabase; metrics persist
-per-storage-backend — memory / SQLite / Postgres per config)
-```
+:::filetree{title="~/.omnitron/"}
+- `data/`
+  - `daemon-state.db` — Local registries, execution intent and state
+  - `application-logs.sqlite` — Durable application output journal
+  - `backend-logs.sqlite` — Durable backend output journal
+- `logs/`
+  - `omnitron.log` — Backend log
+  - `omnitron.error.log` — Backend errors
+  - `api/` — Example standalone application
+    - `app.log` — Combined application output
+    - `error.log` — Error output
+    - `app.log.1.gz` — Example retained archive
+- `projects/`
+  - `{project}/`
+    - `{stack}/`
+      - `logs/`
+        - `{app}/` — Project application logs and rotated archives
+- `execution/` — Resident owner and guardian journals
+- `secrets.enc` — Encrypted file-provider secrets
+:::
+
+Controller logs, metrics and traces persist in its configured database. Worker
+history and pending replication use local SQLite storage. These query stores
+are distinct from the private delivery journals; see the pipeline descriptions
+above for their commit and acknowledgment semantics.
 
 ## Retention {#retention}
 

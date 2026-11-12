@@ -720,22 +720,20 @@ directory. Manual override is rarely needed.
 
 ## Recommended layout {#recommended-layout}
 
-```text
-my-monorepo/
-├── omnitron.config.ts            # defineEcosystem({...})
-├── apps/
-│   ├── api/
-│   │   ├── src/bootstrap.ts      # defineSystem({...})
-│   │   ├── src/modules/http.module.ts
-│   │   ├── src/modules/worker.module.ts
-│   │   ├── config/default.json   # OmnitronAppConfig
-│   │   └── dist/bootstrap.js     # compiled artefact
-│   └── ingest/
-│       └── ...
-├── infra/
-│   └── nginx/                    # gateway configs (referenced by ecosystem.gateway)
-└── package.json
-```
+:::filetree{title="my-monorepo/"}
+- `omnitron.config.ts` — defineEcosystem({...})
+- `apps/`
+  - `api/`
+    - `src/bootstrap.ts` — defineSystem({...})
+    - `src/modules/http.module.ts`
+    - `src/modules/worker.module.ts`
+    - `config/default.json` — OmnitronAppConfig
+    - `dist/bootstrap.js` — compiled artefact
+  - `ingest/`
+- `infra/`
+  - `nginx/` — gateway configs (referenced by ecosystem.gateway)
+- `package.json`
+:::
 
 ## Anti-patterns {#anti-patterns}
 

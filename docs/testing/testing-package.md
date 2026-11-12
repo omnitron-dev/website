@@ -21,18 +21,17 @@ Verified against `packages/testing/src/`.
 
 ## What's inside {#whats-inside}
 
-```text
-packages/testing/src/
-├── async/         # Promise + timer + event helpers for tests
-├── docker/        # Helpers to spin up Postgres / Redis in tests
-├── helpers/       # Generic test helpers
-├── performance/   # Benchmarks & latency utilities
-├── runtime/       # Runtime adapters (vitest / jest / bun / deno)
-├── titan/         # Titan-specific test utilities (Application, DI overrides)
-├── env.ts         # Test environment helpers
-├── errors.ts      # Error-matching helpers
-└── globals.d.ts   # Vitest / Jest globals (no import)
-```
+:::filetree{title="packages/testing/src/"}
+- `async/` — Promise + timer + event helpers for tests
+- `docker/` — Helpers to spin up Postgres / Redis in tests
+- `helpers/` — Generic test helpers
+- `performance/` — Benchmarks & latency utilities
+- `runtime/` — Runtime adapters (vitest / jest / bun / deno)
+- `titan/` — Titan-specific test utilities (Application, DI overrides)
+- `env.ts` — Test environment helpers
+- `errors.ts` — Error-matching helpers
+- `globals.d.ts` — Vitest / Jest globals (no import)
+:::
 
 ## Runtime detection {#runtime-detection}
 

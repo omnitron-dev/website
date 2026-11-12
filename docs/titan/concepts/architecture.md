@@ -39,7 +39,7 @@ flowchart TB
   end
 
   subgraph Netron["Netron RPC"]
-    Services[@Service classes]
+    Services["@Service classes"]
     Transports[Transports]
     NetMiddleware[RPC Middleware]
   end

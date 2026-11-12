@@ -22,7 +22,7 @@ middleware classes. You register them on an `HttpClient` or
 
 ```mermaid
 flowchart LR
-  Inv[client.invoke&#40;...&#41;] --> Pre[pre-request stage]
+  Inv["client.invoke(...)"] --> Pre[pre-request stage]
   Pre --> Send[transport.send]
   Send -- ok --> Post[post-response stage]
   Send -- throws --> Err[error stage]

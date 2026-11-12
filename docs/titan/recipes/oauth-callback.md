@@ -35,15 +35,15 @@ sequenceDiagram
   participant P as OAuth provider
 
   U->>App: GET /auth/start
-  App->>App: Generate state + PKCE verifier; cache(state → verifier, TTL 10m)
+  App->>App: Generate state + PKCE verifier<br/>cache(state → verifier, TTL 10m)
   App-->>U: Redirect to provider with state + code_challenge
   U->>P: Authenticate
   P-->>U: Redirect to /auth/callback?code=&state=
   U->>App: GET /auth/callback?code=...&state=...
-  App->>App: Lookup state; retrieve verifier; pop from cache
+  App->>App: Lookup state<br/>retrieve verifier<br/>pop from cache
   App->>P: POST /token { code, code_verifier, redirect_uri }
   P-->>App: { access_token, refresh_token, id_token }
-  App->>App: Verify id_token; create local session
+  App->>App: Verify id_token<br/>create local session
   App->>App: Sign a session-bootstrap JWT
   App-->>U: Redirect to /session/bootstrap?token=...
 ```
