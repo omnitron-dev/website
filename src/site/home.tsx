@@ -1,4 +1,5 @@
 import React from 'react';
+import { renderCodeBlockHtml } from '@omnitron-dev/lumen-ast';
 
 const layers = [
   ['01', 'Titan', 'Runtime', 'Compose services with explicit modules, dependency injection and a managed lifecycle.', '/docs/titan/overview'],
@@ -12,7 +13,6 @@ export function Home() {
     <header className="home-hero">
       <div className="hero-meta"><span>OPEN SOURCE / TYPESCRIPT</span><span>COMPOSABLE SYSTEMS ENGINEERING</span></div>
       <div className="hero-grid"><div>
-        <p className="eyebrow">OMNITRON</p>
         <h1>Own the<br />whole <em>system.</em></h1>
         <p className="hero-lead">One language. Every layer under your control.</p>
         <p className="hero-description">Start with a service. Connect an interface. Document its contract. Add supervision when you need it.</p>
@@ -37,7 +37,7 @@ export function Home() {
       <div className="layer-list">{layers.map(([number,name,role,description,href]) => <a href={href} key={name}><span className="layer-number">{number}</span><h3>{name}<small>{role}</small></h3><p>{description}</p><span className="layer-arrow">↗</span></a>)}</div>
     </section>
     <section className="home-section" aria-labelledby="contract-title"><div className="section-heading"><p className="eyebrow">02 / THE CONTRACT</p><h2 id="contract-title">Declare once. Call directly.</h2><p>A service type connects the server and client. Validate untrusted inputs at the boundary.</p></div>
-      <div className="contract-grid"><div><div className="file-label">SERVER / signals.service.ts</div><pre><code>{`import { Service, Public } from\n  '@omnitron-dev/titan/decorators';\n\n@Service('signals@1.0.0')\nexport class SignalsService {\n  @Public()\n  async read(): Promise<{ status: string }> {\n    return { status: 'online' };\n  }\n}`}</code></pre></div><div><div className="file-label">CLIENT / client.ts</div><pre><code>{`import { createClient } from\n  '@omnitron-dev/netron-browser';\nimport type { SignalsService }\n  from './signals.service.js';\n\nconst client = createClient({\n  url: 'http://localhost:3000'\n});\nawait client.connect();\nconst signals = client.service<SignalsService>(\n  'signals@1.0.0'\n);\nconst state = await signals.read();`}</code></pre></div></div>
+      <div className="contract-grid"><div><div className="file-label">SERVER / signals.service.ts</div><div dangerouslySetInnerHTML={{ __html: renderCodeBlockHtml(`import { Service, Public } from\n  '@omnitron-dev/titan/decorators';\n\n@Service('signals@1.0.0')\nexport class SignalsService {\n  @Public()\n  async read(): Promise<{ status: string }> {\n    return { status: 'online' };\n  }\n}`, 'typescript') }} /></div><div><div className="file-label">CLIENT / client.ts</div><div dangerouslySetInnerHTML={{ __html: renderCodeBlockHtml(`import { createClient } from\n  '@omnitron-dev/netron-browser';\nimport type { SignalsService }\n  from './signals.service.js';\n\nconst client = createClient({\n  url: 'http://localhost:3000'\n});\nawait client.connect();\nconst signals = client.service<SignalsService>(\n  'signals@1.0.0'\n);\nconst state = await signals.read();`, 'typescript') }} /></div></div>
       <p className="section-note">These are service and client excerpts. The <a href="/docs/getting-started/quickstart">quickstart</a> includes registration, HTTP setup and runnable files.</p>
     </section>
     <section className="home-section" aria-labelledby="start-title"><div className="section-heading"><p className="eyebrow">03 / FIELD MANUAL</p><h2 id="start-title">Find the next useful step.</h2></div>

@@ -38,6 +38,7 @@ export function SiteLayout({ children, document: doc, documents, config }: Lumen
     return { href: item.routePath, label: item.title };
   };
   const home = doc.frontmatter?.layout === 'home';
+  const headings = (doc.headers ?? []).filter(h => h.depth === 2 || h.depth === 3).map(h => ({ ...h, level: h.depth }));
   const sidebar = (items: LumenSidebarItem[]) => <ul>{items.map((item, i) => {
     if (item.type === 'category') return <li key={i}><details open={item.href === doc.routePath || contains(item.items) || item.collapsed === false}>
       <summary>{item.label}</summary>
@@ -73,7 +74,7 @@ export function SiteLayout({ children, document: doc, documents, config }: Lumen
         <div className="document-context"><a href="/docs/intro">Documentation</a><span>/</span><span>{group?.[0] === 'docs' ? 'Learn' : group?.[0] || 'Project'}</span><span>/</span><strong>{doc.title}</strong></div>
         {items.length > 0 && <details className="mobile-document-nav"><summary>In this section</summary><nav aria-label="Mobile documentation sections">{sidebar(items)}</nav></details>}
         <DocLayout sidebar={items.length ? <nav aria-label="Documentation sections"><p className="sidebar-label">{group?.[0] === 'docs' ? 'Start building' : group?.[0]}</p>{sidebar(items)}</nav> : undefined}
-          sectionNav={<><p className="sidebar-label">On this page</p><DocSectionNav headings={(doc.headers ?? []).filter(h => h.depth === 2 || h.depth === 3).map(h => ({...h, level: h.depth}))} /><div className="page-exports"><a href={`${doc.routePath === '/' ? '/index' : doc.routePath}.md`}>Read as Markdown ↗</a><a href="/llms.txt">Agent index ↗</a></div></>}>
+          sectionNav={<><p className="sidebar-label">On this page</p><PortalIslandHost islandId="page-sections" component="DocSectionNav" hydrate="load" props={{ headings }}><DocSectionNav headings={headings} /></PortalIslandHost><div className="page-exports"><a href={`${doc.routePath === '/' ? '/index' : doc.routePath}.md`}>Read as Markdown ↗</a><a href="/llms.txt">Agent index ↗</a></div></>}>
           <div id="main-content" tabIndex={-1}>{children}</div>
           {(previous || next) && <DocPagination className="page-pagination"
             prev={adjacent(previous)}

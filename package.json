@@ -20,7 +20,8 @@
     "@omnitron-dev/lumen-ui": "0.4.6",
     "@omnitron-dev/prism": "0.4.6",
     "react": "19.3.1",
-    "react-dom": "19.3.1"
+    "react-dom": "19.3.1",
+    "@omnitron-dev/lumen-ast": "0.4.6"
   },
   "devDependencies": {
     "@types/node": "26.6.6",

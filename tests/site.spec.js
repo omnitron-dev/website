@@ -3,6 +3,7 @@ import { test, expect } from '@playwright/test';
 async function chooseTheme(page, mode) {
   await page.getByRole('button', { name: /^Color theme:/ }).click();
   await page.getByRole('menuitem', { name: new RegExp('^' + mode + '(?: · current)?$') }).click();
+  await expect(page.getByRole('menu')).toHaveCount(0);
 }
 
 for (const width of [320, 768, 1440]) {
@@ -172,8 +173,18 @@ for (const width of [320, 1440]) {
       const forward = pagination.locator('.lumen-pagination-next');
       await expect(prev).toHaveCount(previous ? 1 : 0);
       await expect(forward).toHaveCount(next ? 1 : 0);
-      if (previous) expect((await prev.boundingBox()).x).toBeCloseTo(bounds.x, 0);
-      if (next) expect((await forward.boundingBox()).x).toBeGreaterThan(bounds.x + bounds.width / 2);
+      if (previous) {
+        expect((await prev.boundingBox()).x).toBeCloseTo(bounds.x, 0);
+        const arrow = await prev.locator('.lumen-pagination-arrow').boundingBox();
+        const label = await prev.locator('.lumen-pagination-label').boundingBox();
+        expect(arrow.x + arrow.width).toBeLessThan(label.x);
+      }
+      if (next) {
+        expect((await forward.boundingBox()).x).toBeGreaterThan(bounds.x + bounds.width / 2);
+        const arrow = await forward.locator('.lumen-pagination-arrow').boundingBox();
+        const label = await forward.locator('.lumen-pagination-label').boundingBox();
+        expect(label.x + label.width).toBeLessThan(arrow.x);
+      }
       expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(width);
       if (route === '/docs/intro') await page.screenshot({ path: testInfo.outputPath(`pagination-${width}.png`) });
     }
@@ -309,4 +320,105 @@ test('documentation remains readable without JavaScript using the system palette
     await page.getByText('In this section', { exact: true }).click();
     await expect(page.getByRole('navigation', { name: 'Mobile documentation sections' })).toBeVisible();
   } finally { await context.close(); }
+});
+
+
+test('the current section follows native anchors and the final short section below the fixed header', async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await page.goto('/docs/getting-started/project-structure#single-app-layout');
+  const toc = page.locator('.lumen-doc-toc .lumen-section-nav');
+  await expect(toc.locator('[aria-current=location]')).toHaveAttribute('href', '#single-app-layout');
+  const link = toc.getByRole('link', { name: 'Sharing service types', exact: true });
+  await link.focus(); await page.keyboard.press('Enter');
+  await expect(page).toHaveURL(/#sharing-service-types$/);
+  await expect(link).toHaveAttribute('aria-current', 'location');
+  expect((await page.locator('#sharing-service-types').boundingBox()).y).toBeGreaterThanOrEqual((await page.locator('.site-header').boundingBox()).height);
+  await page.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight));
+  await expect(toc.locator('[aria-current=location]')).toHaveAttribute('href', '#conventions');
+});
+
+for (const width of [320, 1440]) {
+  test('native file trees preserve long inventories and annotations at ' + width + 'px', async ({ page }, testInfo) => {
+    await page.setViewportSize({ width, height: 1000 });
+    for (const route of ['/docs/getting-started/project-structure', '/docs/foundations/monorepo']) {
+      await page.goto(route);
+      const tree = page.locator('.lumen-file-tree').first();
+      await tree.scrollIntoViewIfNeeded();
+      await expect(tree).toBeVisible();
+      expect(await tree.locator('li').count()).toBeGreaterThan(8);
+      expect(await tree.locator('.lumen-file-tree-description').count()).toBeGreaterThan(1);
+      const marker = await tree.locator('svg').first().boundingBox();
+      expect(marker.width).toBe(16); expect(marker.height).toBe(16);
+      const directory = tree.locator('details').first();
+      const summary = directory.locator(':scope > summary');
+      await summary.focus(); await page.keyboard.press('Enter');
+      await expect(directory).not.toHaveAttribute('open');
+      await page.keyboard.press('Space'); await expect(directory).toHaveAttribute('open', '');
+      for (const mode of ['Dark', 'Light']) {
+        await chooseTheme(page, mode);
+        await tree.scrollIntoViewIfNeeded();
+        expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(width);
+        expect(await tree.evaluate(element => element.scrollWidth <= element.clientWidth)).toBe(true);
+        await page.evaluate(() => window.scrollTo(0, 0));
+        await expect(page.getByRole('menu')).toHaveCount(0);
+        await expect.poll(async () => (await page.locator('.site-header').boundingBox()).y).toBe(0);
+        await page.screenshot({ path: testInfo.outputPath(route.split('/').at(-1) + '-' + width + '-' + mode + '.png'), fullPage: true });
+      }
+    }
+  });
+}
+
+test('nested sidebar guides and active borders share the same inset', async ({ page }, testInfo) => {
+  await page.setViewportSize({ width: 1440, height: 1000 });
+  for (const route of ['/docs/getting-started/project-structure', '/docs/titan/netron/services']) {
+    await page.goto(route);
+    const active = page.locator('.lumen-doc-sidebar a[aria-current=page]');
+    await active.scrollIntoViewIfNeeded();
+    const positions = await active.evaluate(element => ({ link: element.getBoundingClientRect().x, guide: element.closest('ul').getBoundingClientRect().x }));
+    expect(positions.link).toBeCloseTo(positions.guide, 1);
+    await active.focus(); await expect(active).toBeFocused();
+  }
+  await page.screenshot({ path: testInfo.outputPath('sidebar-alignment-1440.png') });
+});
+
+test('homepage contract uses shared dual-theme syntax highlighting without page overflow', async ({ page }, testInfo) => {
+  await page.setViewportSize({ width: 320, height: 1000 });
+  await page.goto('/');
+  await expect(page.locator('.home-hero .eyebrow')).toHaveCount(0);
+  await expect(page.locator('.contract-grid pre > code.shiki')).toHaveCount(2);
+  const palettes = [];
+  for (const mode of ['Dark', 'Light']) {
+    await chooseTheme(page, mode);
+    await page.locator('#contract-title').scrollIntoViewIfNeeded();
+    const colors = await page.locator('.contract-grid .shiki span[style]').evaluateAll(elements => [...new Set(elements.filter(element => element.textContent.trim()).map(element => getComputedStyle(element).color))]);
+    expect(colors.length).toBeGreaterThan(3); palettes.push(colors);
+    expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(320);
+    const grid = await page.locator('.contract-grid').boundingBox();
+    for (const block of await page.locator('.contract-grid pre').all()) {
+      expect(await block.evaluate(element => getComputedStyle(element).overflowX)).toBe('auto');
+      expect((await block.boundingBox()).width).toBeLessThanOrEqual(grid.width);
+    }
+    await page.screenshot({ path: testInfo.outputPath('contract-320-' + mode + '.png') });
+  }
+  expect(palettes[0]).not.toEqual(palettes[1]);
+});
+
+
+test('the platform topology renders quoted labels in both themes without literal entities', async ({ page }, testInfo) => {
+  const errors = []; page.on('pageerror', error => errors.push(error.message));
+  await page.goto('/docs/omnitron/overview');
+  const diagram = page.locator('[data-component="MermaidDiagram"]').first();
+  for (const width of [1440, 320]) {
+    await page.setViewportSize({ width, height: 1000 });
+    for (const mode of ['Dark', 'Light']) {
+      await chooseTheme(page, mode); await diagram.scrollIntoViewIfNeeded();
+      const svg = diagram.locator('svg'); await expect(svg).toBeVisible();
+      await expect(svg).toContainText('Infrastructure (Docker / bare-metal)');
+      await expect(svg).toContainText('Omnitron instance (one per node)');
+      await expect(diagram.getByRole('alert')).toHaveCount(0);
+      expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(width);
+      await page.screenshot({ path: testInfo.outputPath('overview-diagram-' + width + '-' + mode + '.png') });
+    }
+  }
+  expect(errors).toEqual([]);
 });

@@ -44,7 +44,29 @@ HTML retains readable diagram source. The client registers `MermaidDiagram` and
 loads the engine when the island becomes visible; invalid diagrams show an error
 and retain their source. The shared helper is available from
 `@omnitron-dev/lumen-ast/diagrams`. It requires a browser DOM for SVG rendering;
-PDF and Markdown exports currently retain diagram source. On narrow screens, scroll the diagram horizontally or expand its source.
+PDF and Markdown exports currently retain diagram source. Put labels with punctuation in quotes, for example `A["Infrastructure (Docker / bare-metal)"]`. Mermaid escape codes use `#quot;` or `#40;`, without an HTML `&` prefix. On narrow screens, scroll the diagram horizontally or expand its source.
+
+## File trees
+
+Use the built-in file tree block for directory layouts. Keep filenames in inline
+code and descriptions in ordinary Markdown; folders with children use native
+keyboard-accessible disclosure controls and start expanded.
+
+```markdown
+:::filetree{title="my-service/"}
+- `src/` — application source
+  - `main.ts` — entry point
+  - `modules/`
+    - `users.module.ts` — feature module
+- `package.json` — dependencies and commands
+:::
+```
+
+The block renders as static HTML. Nested lists, filenames and annotations remain
+readable in search, Markdown and PDF exports; files are not pretend links.
+This is a Lumen build directive. Prism ResearchEditor preserves it as opaque
+source; the standalone ResearchDocument reader reports an unknown directive
+rather than rendering a file tree.
 
 ## Selective React islands
 

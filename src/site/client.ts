@@ -2,7 +2,7 @@ import '@omnitron-dev/prism/components/research/styles.css';
 import './site.css';
 import React, { lazy, Suspense, useEffect, useState } from 'react';
 import { createRoot } from 'react-dom/client';
-import { MermaidDiagram, NetronPlayground } from '@omnitron-dev/lumen-ui';
+import { DocSectionNav, MermaidDiagram, NetronPlayground } from '@omnitron-dev/lumen-ui';
 import { LumenShell } from '@omnitron-dev/lumen-ui/runtime';
 import { LumenSearchDialog } from '@omnitron-dev/lumen-ui/search';
 import { PrismProvider, usePrismContext } from '@omnitron-dev/prism/core';
@@ -17,7 +17,7 @@ function ApiExplorerIsland() {
 function SearchPage() {
   return React.createElement('button', { type: 'button', onClick: () => document.querySelector<HTMLButtonElement>('[data-open-search]')?.click() }, 'Search all documentation');
 }
-const islands = { MermaidDiagram, SiteBrand: OmnitronBrand, ThemeSelector, ApiExplorer: ApiExplorerIsland, SearchPage, Playground: NetronPlayground };
+const islands = { DocSectionNav, MermaidDiagram, SiteBrand: OmnitronBrand, ThemeSelector, ApiExplorer: ApiExplorerIsland, SearchPage, Playground: NetronPlayground };
 function Client() {
   const [mode, setMode] = useState(readThemePreference);
   useEffect(() => {
