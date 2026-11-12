@@ -7,7 +7,7 @@
     "start": "lumen dev",
     "build": "xec run scripts/build.js",
     "serve": "lumen serve",
-    "typecheck": "tsc --noEmit",
+    "typecheck": "tsc6 --noEmit",
     "check:content": "node scripts/check-content.mjs",
     "check:source": "node scripts/check-source.mjs",
     "check:routes": "node scripts/check-routes.js",
