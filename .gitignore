@@ -10,6 +10,9 @@ build/
 test-results/
 playwright-report/
 
+# Machine-specific managed development settings
+omnitron.stacks.json
+
 # Misc
 .DS_Store
 .env.local

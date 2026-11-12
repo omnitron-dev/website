@@ -15,10 +15,12 @@ node ../omni/apps/omnitron/bin/sdk.js init --project-dir .
 node ../omni/apps/omnitron/bin/sdk.js dev ../omni --project-dir .
 ```
 
-Leave `sdk dev` running. It watches the selected SDK's source and build inputs,
-rebuilds affected packages through Turbo, and reports a successful build
-checkpoint. Once it reports that the SDK is ready, start the site in another
-terminal:
+Leave `sdk dev` running for a standalone preview. It watches the selected SDK's
+source and build inputs and rebuilds affected packages through Turbo. Wait for
+`Development SDK build ready` or `Development SDK build is current`, then start
+the site in another terminal. These messages confirm compiled output; they do
+not confirm application reload or HTTP readiness. The managed workflow below
+uses `--stack` to request application refresh.
 
 ```bash
 pnpm start
@@ -54,8 +56,94 @@ The development preview rebuilds the site's content, public assets and `src`
 files. It does not watch the SDK's compiled output or replace already loaded
 Node modules. After `sdk dev` reports a changed SDK build, restart `pnpm start`
 to load it; no manual SDK build is needed. Also restart after changing the site
-configuration. Build and inspect the production output before submitting a
-change:
+configuration.
+
+For managed development, `omnitron.config.js` declares a local managed
+`dev/site` application. `scripts/dev.js` calls the public Lumen CLI API and sends
+its startup acknowledgement after the server listens; the declared HTTP probe
+checks the real home page at `http://127.0.0.1:4178/`. Lumen watches content and
+client files, while Omnitron owns process restarts. Use one preview for this
+checkout at a time.
+
+Prepare the SDK while the stack is stopped. Register the project once with a
+reviewed Omnitron development owner, then run:
+
+```bash
+node ../omni/apps/omnitron/bin/sdk.js dev ../omni --project-dir . --no-watch
+omnitron project add omnitron-docs "$PWD"
+omnitron stack start omnitron-docs dev --working-tree
+omnitron health omnitron-docs/dev/site
+```
+
+Use a development owner with file watching enabled and the `sourceRefresh@1`
+capability. Start the continuous SDK session after the application is online:
+
+```bash
+node ../omni/apps/omnitron/bin/sdk.js dev ../omni --project-dir . --stack dev
+```
+
+Every successful build reconciles this stack, including a build whose output
+has not changed. The owner confirms the restarted application's source binding;
+the CLI prints `Development SDK refresh confirmed for omnitron-docs/dev` only
+after checking the final stack membership, watch policy and generations. The
+command refuses a disabled or missing watcher, a starting application, a missing
+owned handle or a selected release. It does not substitute a manual restart.
+Append `--no-watch` for a single build and reconciliation pass without a watcher.
+
+The canonical `.omnitron/dev-sdk/built.json` schema 2 keeps two separate facts:
+`hashes` records SDK build output, while `applications[project/stack][handleKey]`
+records an acknowledged generation, definition revision, source directory and
+its dependent `buildIdentity`. A build-only checkpoint or another stack's
+receipt does not confirm this site's loaded modules. Stopped applications have
+no application receipt; reconcile again after they are started. A compiler
+failure leaves the checkpoint unchanged. A partial refresh failure retains
+individual acknowledgements so a retry can reconcile the remaining bindings.
+
+An application receipt confirms process lifecycle, not the HTTP result. After a
+refresh, check `omnitron health omnitron-docs/dev/site` again; the declared HTTP
+probe must pass separately from the process acknowledgement.
+
+This managed workflow was qualified in an isolated native owner using Omni
+`b5a083e6505c7bcd84ce6793b468e842c27d8d6f`. Two SDK source edits rebuilt through
+Turbo, produced new application generations and schema 2 receipts, and changed
+the served HTML. A deliberate compiler error preserved the last confirmed
+process, generation, checkpoint and HTTP content. The fixture also verified
+startup readiness and cleanup. This establishes the local source SDK workflow;
+npm distribution, a frozen registry install and Pages publication still require
+the release steps above. Stop the stack before changing the selected SDK
+workspace or reverting to registry dependencies.
+
+For machine-specific settings, use the existing `omnitron.stacks.json` contract.
+The development Mac uses a distinct `local` stack so its settings do not collide
+with the portable `dev` declaration:
+
+```json
+{
+  "local": {
+    "type": "local",
+    "watch": true,
+    "apps": ["site"],
+    "infrastructureOwnership": "external",
+    "settings": {
+      "appEnv": {
+        "site": {
+          "LUMEN_OUT_DIR": "/Volumes/AGI-Dev/work/omnitron-website/managed-build",
+          "TMPDIR": "/Volumes/AGI-Dev/tmp"
+        }
+      }
+    }
+  }
+}
+```
+
+Use `local` in the stack and application commands for that configuration.
+These values reach the managed child through stack settings; exporting them only
+in the caller's shell does not update an existing daemon. Keep
+`LUMEN_VIRTUAL_STORE_DIR` in the SDK/pnpm shell environment. This declaration does
+not register, start or reconfigure an existing owner, and production remains the
+static Pages build described above.
+
+Build and inspect production output before submitting a change:
 
 ```bash
 pnpm check:content
