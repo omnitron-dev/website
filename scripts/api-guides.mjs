@@ -14,7 +14,8 @@ export default {
   },
   "@omnitron-dev/titan-storage": { ".": "titan/modules/storage.md" },
   "@omnitron-dev/common": {
-    ".": "utilities/common.md"
+    ".": "utilities/common.md",
+    "./process-identity": "utilities/common.md"
   },
   "@omnitron-dev/cuid": {
     ".": "utilities/cuid.md"

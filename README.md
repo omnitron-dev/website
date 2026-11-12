@@ -6,10 +6,23 @@ client compilation, search and static output publication.
 
 Use Node 24 and the pnpm version declared in `package.json`.
 
+The Lumen packages in this branch are an unpublished SDK candidate. Start with
+an installed, built, full Omnitron workspace at a reviewed commit, then select it
+through the canonical SDK bridge:
+
 ```bash
-pnpm install --frozen-lockfile
+node ../omni/apps/omnitron/bin/sdk.js init --project-dir .
+node ../omni/apps/omnitron/bin/sdk.js dev ../omni --project-dir . --no-watch
 pnpm start
 ```
+
+The SDK checkout must be separate from this repository. `sdk dev` uses the
+workspace's Turbo build graph and a private development lock. The tracked root
+lock still describes the previous published application graph; it does not
+certify this Lumen candidate. Normal `pnpm install --frozen-lockfile` becomes a
+distribution check only after the Lumen release is published and that application
+lock is regenerated with the released versions. A package-manager metadata
+document added by pnpm does not establish a registry baseline.
 
 The development preview rebuilds content and client sources. Restart after
 changing the configuration. Build and inspect the production output before
@@ -32,7 +45,11 @@ original HTML IDs and the full list of 711 excluded structural IDs, including
 the old renderer root, skip-link target and base-URL diagnostic banner. The new
 site has its own working skip link. Keep public content URLs stable when editing prose.
 Lumen replaces only output directories with its own generation inventory;
-use an empty directory for the first build after migrating from another tool.
+select a new output directory for the first build after migrating from another
+tool. Interrupted publication is recovered by the next build or serve. A preview
+holds one verified generation until it is restarted, so it does not mix resources
+from subsequent builds. This local publication protocol currently requires macOS
+or Linux.
 
 On the development Mac, set `LUMEN_OUT_DIR` to a project directory on the mounted
 AGI development disk. Build artifacts and new dependency caches belong there.

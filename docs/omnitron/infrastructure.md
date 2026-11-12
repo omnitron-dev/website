@@ -100,6 +100,13 @@ closed until migrated. An older unbound generated configuration cannot be identi
 from its name; it needs an audited source binding and compatible runtime. The new
 generator does not retroactively fix running nodes.
 
+A maintenance stop with `--keep-infrastructure` also retains a durable
+preservation policy. The reviewed preservation start rechecks existing native
+resources without provisioning or rerunning setup and migrations. Plain starts
+and autostart cannot bypass that policy. Follow the [preservation start review](./cli.md#restart-with-preserved-infrastructure)
+when resuming the retained release; choose separately reviewed reconciliation
+only when those changes are intended.
+
 ## Readiness includes required service setup {#readiness-includes-required-service-setup}
 
 A running container, a successful native health probe, and completed service setup

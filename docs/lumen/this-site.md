@@ -13,9 +13,17 @@ This repository consumes Lumen's ordinary CLI. Its layout uses Lumen navigation 
 2. Lumen parses the corpus, resolves public routes and checks internal links and anchors.
 3. The public audience projection supplies HTML, search and Markdown exports.
 4. Vite bundles the declared client entry. `LumenShell` activates React islands through the shared portal runtime.
-5. The completed generation replaces the previous output. Failed builds retain the previous generation.
+5. The completed generation replaces the previous output after its full inventory is written. A failed content check retains the previous generation.
 
 There is no application RPC required to read or search this static manual.
+
+Publication persists a small recovery journal before moving the previous output.
+After interruption, the next build or serve verifies ownership and file hashes
+before retaining the complete new generation or restoring the complete previous
+one. `lumen serve` holds a verified snapshot until shutdown; restart it to preview
+a later build. Do not point another development server at the mutable output
+while rebuilding. This is recoverable directory replacement on a local macOS or
+Linux filesystem, with a brief rename gap; Windows publication is not supported.
 
 ## What is interactive
 

@@ -339,6 +339,33 @@ review, execution fence and per-node receipts. A legacy remote node that cannot
 confirm retention blocks preparation instead of receiving a destructive fallback.
 See [confirmed stack stops](./projects.md#confirmed-stack-stops).
 
+### Restart with preserved infrastructure {#restart-with-preserved-infrastructure}
+
+For a retained release, inspect the preservation start before execution:
+
+```bash
+omnitron stack start sample dev --release <release-id> \
+  --infrastructure preserve --dry-run --json
+```
+
+After the reviewed stop, use the returned digest for that exact start:
+
+```bash
+omnitron stack start sample dev --release <release-id> \
+  --infrastructure preserve --review <digest>
+```
+
+Preservation start rechecks release admission and native infrastructure evidence.
+It skips provisioning, setup, migrations, static uploads and environment
+provisioning; a mismatch refuses the start. A runtime or installed-path change
+may invalidate the earlier digest, requiring a fresh review.
+
+`stack stop --keep-infrastructure` durably selects preservation policy. A plain
+start or autostart cannot silently replace it with reconciliation. Explicit
+`--infrastructure reconcile` is a separately reviewed provisioning, setup and
+migration operation. See [infrastructure ownership](./infrastructure.md#infrastructure-ownership)
+for the responsibility boundary.
+
 Before a first start or after changing an environment:
 
 ```bash

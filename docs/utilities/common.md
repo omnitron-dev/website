@@ -315,6 +315,36 @@ They return `bigint` in the atomic direction on purpose: satoshis and piconeros
 exceed `Number.MAX_SAFE_INTEGER` for large amounts, so a `number` there is the
 same lossy trap `Decimal` exists to avoid.
 
+## Native process identity {#native-process-identity}
+
+The Node-only `@omnitron-dev/common/process-identity` entry combines a host boot
+identity with the native process birth. Omnitron ownership checks and Lumen
+publication recovery use the same implementation. The browser-safe root does not
+load native process probes.
+
+```typescript
+import {
+  readProcessLifetime,
+  compareProcessLifetimes,
+} from '@omnitron-dev/common/process-identity';
+
+const before = readProcessLifetime(process.pid);
+const after = readProcessLifetime(process.pid);
+if (before.state === 'alive' && after.state === 'alive') {
+  console.log(compareProcessLifetimes(before.identity, after.identity));
+}
+```
+
+`readProcessLifetime(pid)` returns `alive` with an opaque identity, `dead` when
+native observation proves the PID absent, or `unknown` when it cannot establish
+either. Comparisons return `same`, `different` or `unknown`. Never interpret an
+unknown observation as permission to take another process's resources.
+
+Linux uses the kernel boot UUID and process start ticks. macOS uses the boot
+session UUID and UTC native process birth. Legacy local-time births cannot prove
+a process replacement from a changed timestamp alone. These probes do not yet
+support Windows. Keep policy, cleanup and lifecycle decisions in the caller.
+
 ## Primitives {#primitives}
 
 ```typescript

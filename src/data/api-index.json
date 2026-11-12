@@ -62,6 +62,10 @@
       "guide": "/docs/utilities/common"
     },
     {
+      "path": "@omnitron-dev/common/process-identity",
+      "guide": "/docs/utilities/common"
+    },
+    {
       "path": "@omnitron-dev/cuid",
       "guide": "/docs/utilities/cuid"
     },
@@ -1344,6 +1348,18 @@
       ]
     },
     {
+      "name": "compareProcessLifetimes",
+      "package": "@omnitron-dev/common",
+      "kind": "function",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/common/src/node/process-identity.ts#L59",
+      "imports": [
+        {
+          "path": "@omnitron-dev/common/process-identity",
+          "guide": "/docs/utilities/common"
+        }
+      ]
+    },
+    {
       "name": "darwin",
       "package": "@omnitron-dev/common",
       "kind": "value",
@@ -1507,6 +1523,18 @@
       "imports": [
         {
           "path": "@omnitron-dev/common",
+          "guide": "/docs/utilities/common"
+        }
+      ]
+    },
+    {
+      "name": "formatDarwinProcessLifetime",
+      "package": "@omnitron-dev/common",
+      "kind": "function",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/common/src/node/process-identity.ts#L20",
+      "imports": [
+        {
+          "path": "@omnitron-dev/common/process-identity",
           "guide": "/docs/utilities/common"
         }
       ]
@@ -1836,6 +1864,18 @@
       ]
     },
     {
+      "name": "isLegacyDarwinBootIdentity",
+      "package": "@omnitron-dev/common",
+      "kind": "function",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/common/src/node/process-identity.ts#L25",
+      "imports": [
+        {
+          "path": "@omnitron-dev/common/process-identity",
+          "guide": "/docs/utilities/common"
+        }
+      ]
+    },
+    {
       "name": "isLess",
       "package": "@omnitron-dev/common",
       "kind": "function",
@@ -2131,6 +2171,30 @@
       "imports": [
         {
           "path": "@omnitron-dev/common",
+          "guide": "/docs/utilities/common"
+        }
+      ]
+    },
+    {
+      "name": "isStableDarwinBootIdentity",
+      "package": "@omnitron-dev/common",
+      "kind": "value",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/common/src/node/process-identity.ts#L16",
+      "imports": [
+        {
+          "path": "@omnitron-dev/common/process-identity",
+          "guide": "/docs/utilities/common"
+        }
+      ]
+    },
+    {
+      "name": "isStableHostBootIdentity",
+      "package": "@omnitron-dev/common",
+      "kind": "value",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/common/src/node/process-identity.ts#L31",
+      "imports": [
+        {
+          "path": "@omnitron-dev/common/process-identity",
           "guide": "/docs/utilities/common"
         }
       ]
@@ -2460,6 +2524,18 @@
       ]
     },
     {
+      "name": "ProcessLifetime",
+      "package": "@omnitron-dev/common",
+      "kind": "type",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/common/src/node/process-identity.ts#L88",
+      "imports": [
+        {
+          "path": "@omnitron-dev/common/process-identity",
+          "guide": "/docs/utilities/common"
+        }
+      ]
+    },
+    {
       "name": "promisify",
       "package": "@omnitron-dev/common",
       "kind": "value",
@@ -2491,6 +2567,42 @@
       "imports": [
         {
           "path": "@omnitron-dev/common",
+          "guide": "/docs/utilities/common"
+        }
+      ]
+    },
+    {
+      "name": "provesDifferentHostBoot",
+      "package": "@omnitron-dev/common",
+      "kind": "function",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/common/src/node/process-identity.ts#L53",
+      "imports": [
+        {
+          "path": "@omnitron-dev/common/process-identity",
+          "guide": "/docs/utilities/common"
+        }
+      ]
+    },
+    {
+      "name": "readHostBootIdentity",
+      "package": "@omnitron-dev/common",
+      "kind": "function",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/common/src/node/process-identity.ts#L35",
+      "imports": [
+        {
+          "path": "@omnitron-dev/common/process-identity",
+          "guide": "/docs/utilities/common"
+        }
+      ]
+    },
+    {
+      "name": "readProcessLifetime",
+      "package": "@omnitron-dev/common",
+      "kind": "function",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/common/src/node/process-identity.ts#L92",
+      "imports": [
+        {
+          "path": "@omnitron-dev/common/process-identity",
           "guide": "/docs/utilities/common"
         }
       ]
@@ -4483,7 +4595,7 @@
       "name": "loadCorpusFromDirectory",
       "package": "@omnitron-dev/lumen",
       "kind": "function",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/lumen/src/cli/index.ts#L155",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/lumen/src/cli/index.ts#L156",
       "imports": [
         {
           "path": "@omnitron-dev/lumen",
@@ -4811,7 +4923,7 @@
       "name": "runLumenCli",
       "package": "@omnitron-dev/lumen",
       "kind": "function",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/lumen/src/cli/index.ts#L346",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/lumen/src/cli/index.ts#L347",
       "imports": [
         {
           "path": "@omnitron-dev/lumen",
@@ -67399,18 +67511,6 @@
       "name": "DEFAULT_MAX_DOCUMENT_BYTES",
       "package": "@omnitron-dev/titan-lumen",
       "kind": "value",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-lumen/src/live/live-edit.service.ts#L15",
-      "imports": [
-        {
-          "path": "@omnitron-dev/titan-lumen",
-          "guide": "/docs/lumen/overview"
-        }
-      ]
-    },
-    {
-      "name": "DEFAULT_MAX_LIVE_DOCUMENTS",
-      "package": "@omnitron-dev/titan-lumen",
-      "kind": "value",
       "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-lumen/src/live/live-edit.service.ts#L13",
       "imports": [
         {
@@ -67423,7 +67523,19 @@
       "name": "DEFAULT_MAX_PATCH_BYTES",
       "package": "@omnitron-dev/titan-lumen",
       "kind": "value",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-lumen/src/live/live-edit.service.ts#L14",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-lumen/src/live/live-edit.service.ts#L12",
+      "imports": [
+        {
+          "path": "@omnitron-dev/titan-lumen",
+          "guide": "/docs/lumen/overview"
+        }
+      ]
+    },
+    {
+      "name": "DocumentRevision",
+      "package": "@omnitron-dev/titan-lumen",
+      "kind": "type",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-lumen/src/live/live-edit.service.ts#L33",
       "imports": [
         {
           "path": "@omnitron-dev/titan-lumen",
@@ -67435,7 +67547,7 @@
       "name": "DocumentState",
       "package": "@omnitron-dev/titan-lumen",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-lumen/src/live/live-edit.service.ts#L19",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-lumen/src/live/live-edit.service.ts#L21",
       "imports": [
         {
           "path": "@omnitron-dev/titan-lumen",
@@ -67468,10 +67580,22 @@
       ]
     },
     {
+      "name": "LiveEditActor",
+      "package": "@omnitron-dev/titan-lumen",
+      "kind": "interface",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-lumen/src/types.ts#L66",
+      "imports": [
+        {
+          "path": "@omnitron-dev/titan-lumen",
+          "guide": "/docs/lumen/overview"
+        }
+      ]
+    },
+    {
       "name": "LiveEditEvent",
       "package": "@omnitron-dev/titan-lumen",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-lumen/src/types.ts#L74",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-lumen/src/types.ts#L85",
       "imports": [
         {
           "path": "@omnitron-dev/titan-lumen",
@@ -67507,7 +67631,7 @@
       "name": "LiveEditResult",
       "package": "@omnitron-dev/titan-lumen",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-lumen/src/types.ts#L65",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-lumen/src/types.ts#L76",
       "imports": [
         {
           "path": "@omnitron-dev/titan-lumen",
@@ -67519,7 +67643,7 @@
       "name": "LiveEditService",
       "package": "@omnitron-dev/titan-lumen",
       "kind": "class",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-lumen/src/live/live-edit.service.ts#L28",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-lumen/src/live/live-edit.service.ts#L56",
       "imports": [
         {
           "path": "@omnitron-dev/titan-lumen",
@@ -67531,7 +67655,7 @@
       "name": "LiveEditServiceOptions",
       "package": "@omnitron-dev/titan-lumen",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-lumen/src/types.ts#L84",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-lumen/src/types.ts#L95",
       "imports": [
         {
           "path": "@omnitron-dev/titan-lumen",
@@ -67544,6 +67668,42 @@
       "package": "@omnitron-dev/titan-lumen",
       "kind": "value",
       "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-lumen/src/constants.ts#L1",
+      "imports": [
+        {
+          "path": "@omnitron-dev/titan-lumen",
+          "guide": "/docs/lumen/overview"
+        }
+      ]
+    },
+    {
+      "name": "LumenAuthoringDatabase",
+      "package": "@omnitron-dev/titan-lumen",
+      "kind": "interface",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-lumen/src/live/schema.ts#L17",
+      "imports": [
+        {
+          "path": "@omnitron-dev/titan-lumen",
+          "guide": "/docs/lumen/overview"
+        }
+      ]
+    },
+    {
+      "name": "lumenAuthoringMigration",
+      "package": "@omnitron-dev/titan-lumen",
+      "kind": "value",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-lumen/src/live/migration.ts#L8",
+      "imports": [
+        {
+          "path": "@omnitron-dev/titan-lumen",
+          "guide": "/docs/lumen/overview"
+        }
+      ]
+    },
+    {
+      "name": "LumenEditableDocument",
+      "package": "@omnitron-dev/titan-lumen",
+      "kind": "interface",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-lumen/src/types.ts#L68",
       "imports": [
         {
           "path": "@omnitron-dev/titan-lumen",
@@ -67579,7 +67739,7 @@
       "name": "LumenModule",
       "package": "@omnitron-dev/titan-lumen",
       "kind": "class",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-lumen/src/lumen.module.ts#L30",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-lumen/src/lumen.module.ts#L32",
       "imports": [
         {
           "path": "@omnitron-dev/titan-lumen",
@@ -67591,7 +67751,7 @@
       "name": "LumenModuleAsyncOptions",
       "package": "@omnitron-dev/titan-lumen",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-lumen/src/types.ts#L101",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-lumen/src/types.ts#L120",
       "imports": [
         {
           "path": "@omnitron-dev/titan-lumen",
@@ -67603,7 +67763,7 @@
       "name": "LumenModuleOptions",
       "package": "@omnitron-dev/titan-lumen",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-lumen/src/types.ts#L90",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-lumen/src/types.ts#L104",
       "imports": [
         {
           "path": "@omnitron-dev/titan-lumen",
@@ -67615,7 +67775,7 @@
       "name": "LumenService",
       "package": "@omnitron-dev/titan-lumen",
       "kind": "class",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-lumen/src/lumen.service.ts#L249",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-lumen/src/lumen.service.ts#L216",
       "imports": [
         {
           "path": "@omnitron-dev/titan-lumen",
@@ -67627,7 +67787,7 @@
       "name": "LumenServiceContract",
       "package": "@omnitron-dev/titan-lumen",
       "kind": "interface",
-      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-lumen/src/types.ts#L109",
+      "source": "https://github.com/omnitron-dev/omni/blob/main/packages/titan-lumen/src/types.ts#L128",
       "imports": [
         {
           "path": "@omnitron-dev/titan-lumen",
