@@ -818,6 +818,29 @@ Quiesce writers when application consistency is required. Restore overwrites the
 archived keys, leaves other keys intact and requires an existing bucket. If restore
 is interrupted, reconcile the destination before resuming writers.
 
+Database dumps use a private staging file and one deadline for the local process,
+compression, file writes and publication. The destination is created exclusively;
+an existing file is never overwritten. File contents and the containing directory
+are synchronized before a successful publication is acknowledged. If publication
+or indexing cannot be confirmed, a complete destination is retained and the error
+names the file and the uncertainty. Inspect that path and the backup index before
+repeating the operation.
+
+Historical `.meta.json` records are removed only after the SQLite index durably
+confirms the same identity and metadata. A database error, conflicting record or
+failed file removal retains the source for a later retry. This protects the index;
+it does not verify that an archive can restore its application's data.
+
+Failed requests, partial capture and an empty capture pass return a nonzero CLI
+exit status. Restore and schedule mutations require a positive acknowledgement.
+Read commands distinguish missing diagnostic data from an empty index and still
+show uncovered stacks when no backups or schedules exist. A previously failed
+scheduled pass remains a warning in an otherwise successful status query.
+
+A local Docker client exiting does not prove that its in-container command has
+stopped. The current pipeline reports local cleanup uncertainty; container exec
+termination and configurable per-target deadlines remain separate limitations.
+
 Schedules persist across daemon restarts; they do not run while the daemon is down.
 Active capture, restore and scheduled retention block backend handoff. Preparation
 pauses schedule admission, and an aborted handoff re-arms persisted schedules.
