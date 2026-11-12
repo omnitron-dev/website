@@ -120,6 +120,14 @@ directory. Worker threads share the parent's directory and reject a different
 `spawnOptions`; `spawnOptionsFactory(index)` supplies per-worker overrides.
 Keep mutable application state outside sealed runtime directories.
 
+Use `beforeSpawn` for asynchronous parent-side admission, such as verifying an
+installed executable before it starts. The manager awaits it before registering
+or spawning a process, including supervisor restarts and pool replacements. A
+rejection prevents that spawn; the function is never serialized to the worker.
+The pool also rechecks shutdown intent after admission, so a pending check cannot
+create a worker after draining begins. This hook does not replace application
+readiness or prove that the process subsequently remained healthy.
+
 | Method                                                                  | Returns                                       |
 | ----------------------------------------------------------------------- | --------------------------------------------- |
 | `spawn<T>(processClassOrPath, options?)`                                | `Promise<ServiceProxy<T>>`                    |
@@ -151,6 +159,13 @@ The pool routes the call to a free worker, queues if all workers
 are busy, and respects the pool's load-balancing policy. The proxy
 returned by `pool()` also lets you call `@Public` methods directly
 (`pool.resize(input, width)`).
+
+`membershipChanging` reports whether the pool is spawning, replacing, retiring
+or draining workers. `pool:membership-settled` notifies observers after a resize
+or replacement attempt leaves the lifecycle queue, including a failed attempt.
+Read the current flag and worker identities when handling it: a queued successor
+may already be running. The event does not mean the requested size was reached
+or that every worker is healthy.
 
 Worker retirement excludes the old proxy from both direct and queued requests
 before termination begins. A replacement becomes ready first; already admitted

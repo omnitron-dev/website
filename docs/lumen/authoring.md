@@ -123,6 +123,15 @@ snippet changes only this local example; it does not call an Omnitron service.
 Try returning an object, then try `while (true) {}` to inspect the timeout. A failed
 run is reported as an error. Recorded output is never substituted for execution.
 
+## Reading wide content
+
+Code, tables, diagrams and the API symbol list keep their own native scrolling.
+Internal scrollbars stay thin and reveal on hover or keyboard focus without
+changing the layout. Touch and high-contrast modes retain native visibility.
+Use Tab to reach a code block, table or diagram, then arrow keys to scroll; file
+trees use their existing disclosure controls. The static HTML remains usable
+without client JavaScript.
+
 ## Verify the result
 
 Run `lumen check` while authoring, then build and inspect the actual output. A parser accepting a widget is not evidence that its registered component loaded; exercise it in the production preview. Check keyboard focus, narrow viewports and both color themes.

@@ -870,7 +870,17 @@ The owner also reports the application's current `generation`, independently of
 its receipt's `launchId`. The shared reader requires these to match when the
 owner supplies a generation. This covers thread workers, process pools and
 worker-only applications that have no single main PID; `pid: null` does not mean
-such an application stopped. A child replacement invalidates the launch receipt.
+such an application stopped. A child replacement invalidates the current receipt.
+For installed applications, automatic replacement repeats the original executable
+and loader-environment verification before spawning. Once membership settles, the
+owner checks the installed release again and confirms only the exact, live
+supervisor children and pool workers observed throughout that check. A changed
+file, failed admission, missing worker or concurrent stop keeps the reason
+explicitly **unreported**. Normal worker recycling can therefore regain a verified
+receipt without restarting the whole application. A partially completed resize
+can confirm the actual members; readiness and the requested worker count remain
+separate observations.
+
 A stale or malformed generation cannot be rescued by a positive PID. Older
 owners without a generation retain their PID-based reading; applications without
 a main PID remain **unreported** until an updated owner can observe their launch.

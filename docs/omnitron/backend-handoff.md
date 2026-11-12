@@ -85,6 +85,14 @@ keep the current backend running and prepare a controlled owner transition with
 application inventory, readiness budgets and rollback. Never bypass the refusal
 by replacing the active files or changing an advertised capability.
 
+Candidate preflight has a 30-second deadline. Failures preserve a structured
+`BACKEND_PREFLIGHT_*` code with the runtime hash, child PID, elapsed time, last
+reported load phase, exit status and bounded stderr. CLI JSON retains the same
+error details carried over Netron. A load-progress message is diagnostic only:
+admission still requires a successful protocol response. A timeout with phase
+`not-reported` means no valid progress was received; it does not establish a
+particular cause or justify activating the candidate.
+
 ## First transition {#first-transition}
 
 Run `omnitron backend status --json` before planning an update. `mode: coupled` means the backend directly owns its workers. Those live forks and threads cannot be transferred to another parent without changing their lifecycle. **The first transition requires one controlled application restart.** The upgrade command refuses a legacy daemon before draining or stopping anything.

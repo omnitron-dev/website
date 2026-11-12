@@ -23,11 +23,11 @@ Verified against `packages/common/src/`.
 | Module | Surface |
 | ------ | ------- |
 | `predicates` | 50+ type predicates (`isString`, `isPlainObject`, `isPromise`, …) + platform flags |
-| `promise` | `defer`, `delay`, `timeout`, `retry`, `props`, `promisify`, `callbackify` |
+| `promise` | `defer`, `delay`, `timeout`, `retry`, `props`, `runExclusive`, `promisify`, `callbackify` |
 | `omit` | Deep / path-based / predicate-based property omission |
 | `entries` | Typed `entries` / `keys` / `values` |
 | `primitives` | `noop`, `identity`, `truly`, `falsely`, `arrify` |
-| `list-buffer` | O(1) FIFO queue with bounded capacity |
+| `list-buffer` | O(1) unbounded FIFO queue |
 | `timed-map` | TTL Map (auto-expiring entries) |
 | `p-limit` | Promise concurrency limiter |
 | `decimal` | Lossless decimal arithmetic |
@@ -146,6 +146,24 @@ const result = await props({
 ```
 
 `Promise.all` for objects — preserves keys.
+
+### `runExclusive(resource, operation)` {#runexclusive}
+
+```typescript
+import { runExclusive } from '@omnitron-dev/common';
+
+const output = await runExclusive(renderer, async () => {
+  renderer.configure(options);
+  return renderer.render(source);
+});
+```
+
+Calls sharing the same object run in arrival order; different objects remain
+independent. The next operation runs even when its predecessor rejects. This
+coordinates mutable library instances inside one JavaScript runtime, as used by
+Lumen and Prism for a shared Mermaid engine. Do not await another exclusive call
+for that same object from inside its operation: the queue is not reentrant. It
+provides neither inter-process locking nor transaction rollback.
 
 ### `promisify(fn)` / `callbackify(fn)` {#promisifyfn--callbackifyfn}
 

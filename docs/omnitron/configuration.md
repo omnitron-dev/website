@@ -127,7 +127,6 @@ interface IEcosystemAppEntry {
   enabled?:       boolean;     // default true
   critical?:      boolean;     // daemon shuts down if this crashes past maxRestarts
   dependsOn?:     string[];    // start order
-  instances?:     number;
   env?:           Record<string, string>;
   cwd?:           string;      // auto-stamped to project dir
   restartPolicy?: IRestartPolicy;
@@ -145,12 +144,19 @@ interface IEcosystemAppEntry {
 | `enabled`       | `false` skips during `startAll`                                          |
 | `critical`      | Crashing past `maxRestarts` brings the **daemon** down                   |
 | `dependsOn`     | Wait until these apps report healthy before starting this one            |
-| `instances`     | Override `defineSystem` process count (overrides app-internal value)     |
 | `env`           | App-level env merged over process env                                    |
 | `cwd`           | Base for relative paths; auto-stamped to the config's directory          |
 | `restartPolicy` | Per-app override of ecosystem `supervision`                              |
 | `startupTimeout`| Max ms for ready handshake before treated as failed                     |
 | `watch`         | Dev-mode file watching: string=directory; full config; or `false`        |
+
+An ecosystem entry describes one application. Declare replica counts on the
+individual `defineSystem` process entries with `processes[].instances`; a classic
+`script` entry starts one process. There is no application-wide `instances`
+override. A non-unit multiplier in an existing configuration is rejected before
+lifecycle changes instead of silently starting fewer processes than requested.
+Runtime pool resizing uses `omnitron scale <app> <count> --process <pool>` and does
+not rewrite the declared topology.
 
 ### `AppReadinessConfig` {#appreadinessconfig}
 
