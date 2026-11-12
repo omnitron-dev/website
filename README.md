@@ -47,7 +47,7 @@ document added by pnpm does not establish a registry baseline.
 CI and GitHub Pages install released npm dependencies with the frozen application
 lock; neither selects a development SDK. The source inventory check uses the
 matching Omni release tag. Before pushing this migration to `main`, qualify and
-publish Omni 0.4.0, regenerate the application lock in a clean registry consumer,
+publish Omni 0.4.6, regenerate the application lock in a clean registry consumer,
 and run the frozen install, build and browser checks there. Commit that lock
 before the website push. A push to this repository's `main` also starts its
 existing GitHub Pages deployment workflow.
