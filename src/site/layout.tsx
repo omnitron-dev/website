@@ -76,9 +76,9 @@ export function SiteLayout({ children, document: doc, documents, config }: Lumen
         <DocLayout sidebar={items.length ? <nav aria-label="Documentation sections"><p className="sidebar-label">{group?.[0] === 'docs' ? 'Start building' : group?.[0]}</p>{sidebar(items)}</nav> : undefined}
           sectionNav={<><p className="sidebar-label">On this page</p><PortalIslandHost islandId="page-sections" component="DocSectionNav" hydrate="load" props={{ headings }}><DocSectionNav headings={headings} /></PortalIslandHost><div className="page-exports"><a href={`${doc.routePath === '/' ? '/index' : doc.routePath}.md`}>Read as Markdown ↗</a><a href="/llms.txt">Agent index ↗</a></div></>}>
           <div id="main-content" tabIndex={-1}>{children}</div>
-          {(previous || next) && <DocPagination className="page-pagination"
-            prev={adjacent(previous)}
-            next={adjacent(next)} />}
+          {(previous || next) && <div id={next ? 'next' : undefined}>
+            <DocPagination className="page-pagination" prev={adjacent(previous)} next={adjacent(next)} />
+          </div>}
         </DocLayout>
       </>}
       <LumenFooter copyright="Omnitron · Open source / MIT" columns={[

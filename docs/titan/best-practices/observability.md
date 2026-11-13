@@ -149,5 +149,3 @@ the logs by `traceId` to see what happened in each span.
 - **Tracing without sampling.** Every span ends up in the
   collector; the cost is real. Sample at scale (the relay handles
   this).
-
-→ Next: [Performance](./performance.md).

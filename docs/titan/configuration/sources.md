@@ -187,5 +187,3 @@ interface and loader are in
 - **Big monolithic config.** A 500-line `default.yaml` is hard to
   reason about. Split into per-domain files and load them
   individually.
-
-→ Next: [Validation](./validation.md).

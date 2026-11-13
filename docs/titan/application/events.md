@@ -151,4 +151,4 @@ app.on(ApplicationEvent.ShutdownComplete, ({ reason, success }) => {
   cross-process events, use `titan-events` over redis or the
   notifications module.
 
-→ Next: [Modules](../modules-system/defining-modules.md).
+[Defining modules](../modules-system/defining-modules.md) explains where to register the providers that emit and handle events.

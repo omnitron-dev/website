@@ -100,5 +100,3 @@ class PaymentsService {
 - [Circuit Breaker](./circuit-breaker.md) — `CircuitBreaker` class
   semantics.
 - [Timeout](./timeout.md) — `withTimeout()`, abort signals.
-
-→ Next: [Retry](./retry.md).

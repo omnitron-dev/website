@@ -218,5 +218,3 @@ pattern shown above is the general multi-injection recipe.
   consumer assumes a specific order, encode that order in the
   providers themselves (`priority` field, sort step) — do not rely
   on import-order coincidence.
-
-→ Next: [Contextual Injection](./contextual-injection.md).

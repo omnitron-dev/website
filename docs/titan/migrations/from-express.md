@@ -335,5 +335,4 @@ and [`NotificationsModule`](../modules/notifications.mdx).
 - [Recipes / Webhook receiver](../recipes/webhook-receiver.md) —
   closest direct analogue to a small Express service
 - [Concepts / Mental Model](../concepts/mental-model.md)
-- [`titan-metrics`](../modules/metrics.mdx) — replaces `prom-client`
-  (see [next page](./from-prom-client.md))
+- [`titan-metrics`](../modules/metrics.mdx) — counters, gauges and histograms for services migrating from `prom-client`

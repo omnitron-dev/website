@@ -377,5 +377,3 @@ first strategy that both `applies` and returns a provider wins
   happens.
 - **Strategy with side effects.** Strategies are queried during
   resolution; they should be pure functions of the context.
-
-→ Next: [DI Middleware](./middleware.md).

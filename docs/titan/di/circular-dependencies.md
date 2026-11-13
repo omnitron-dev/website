@@ -151,5 +151,3 @@ types without depending on the implementation.
 
 When the cycle path is long, use [DevTools](./devtools.md) to
 render the full container graph and visually locate the cycle.
-
-→ Next: [DevTools](./devtools.md).

@@ -306,23 +306,7 @@ netron.registerTransportServer('quic', { name: 'quic', options: { port: 4433 } }
 `registerTransportServer` throws `NotFound` unless the name was
 registered first, so the two calls are ordered.
 
-:::warning There is also a module-global registry. Nothing reads it.
-
-`transport-registry.ts` exports a free `registerTransport(name, factory)`
-that writes to a module-level singleton. No `Netron` instance ever
-consults that singleton — each builds its own registry — so a transport
-registered through the free function is invisible to your application:
-
-```
-registerTransport('quic', () => new QuicTransport());  // global registry: OK
-netron.registerTransportServer('quic', { … });         // NotFound: Transport with id quic not found
-```
-
-The free function is also unreachable from any published entry point:
-the package exports `./netron/transport/http`, `/websocket`, `/tcp`
-and `/unix`, but not `./netron/transport` itself. Use the instance
-method — it is what every call site in this monorepo uses.
-:::
+Register custom transports on each Netron instance that serves them. The instance owns its transport registry.
 
 ## Cross-runtime transport availability {#cross-runtime-transport-availability}
 
@@ -342,8 +326,9 @@ import { HttpTransport } from '@omnitron-dev/titan/netron/transport/http';
 
 netron.registerTransport('http', () => new HttpTransport());
 netron.registerTransportServer('http', { name: 'http', options: { port: 8081 } });
-``` The browser RPC client lives in the
-separate `@omnitron-dev/netron-browser` package.
+```
+
+For browsers, use [the Netron browser client](../../frontend/netron/browser.md).
 
 ## HTTP failures and deadlines
 
@@ -373,5 +358,3 @@ that confirmation was not received, not that a remote mutation was undone.
   `maxPacketSize` (and HTTP's `maxRequestSize`) down to what your
   contract actually needs — it defends against accidental memory
   amplification on untrusted-peer transports.
-
-→ Next: [Middleware](./middleware.md).

@@ -216,5 +216,3 @@ Helper predicates for introspection:
 - **Async providers in hot paths.** Async resolution awaits a
   Promise on every call (per scope). Prefer eager async setup in
   `onStart` lifecycle hooks.
-
-→ Next: [Scopes](./scopes.md).

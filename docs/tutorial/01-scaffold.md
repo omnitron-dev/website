@@ -225,11 +225,6 @@ git add .
 git commit -m "step 1: scaffold pnpm workspace + first Titan app"
 ```
 
-## Next {#next}
-
-**[Step 2 — Service →](./02-service.md)** — replace the hello
-service with a real one backed by a database.
-
 ## Troubleshooting {#troubleshooting}
 
 | Symptom | Fix |

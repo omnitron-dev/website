@@ -178,5 +178,3 @@ throw usersErrors.notFound(id);
 ```
 
 Worth doing when the same error appears in multiple methods.
-
-→ Next: [Classification](./classification.md).

@@ -157,5 +157,3 @@ don't run — the breaker rejects before `retry()` is called.
 - **No fallback.** Every breaker should have a "what do we do when
   the circuit is open" plan. Cached value? Default? Error to the
   user? Decide explicitly.
-
-→ Next: [Timeout](./timeout.md).

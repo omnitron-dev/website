@@ -263,11 +263,6 @@ git add .
 git commit -m "step 2: real users service with Postgres"
 ```
 
-## Next {#next}
-
-**[Step 3 — Auth →](./03-auth.md)** — JWT sign-in, sessions,
-role-gated methods.
-
 ## Troubleshooting {#troubleshooting}
 
 | Symptom | Fix |

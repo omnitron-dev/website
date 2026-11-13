@@ -232,5 +232,3 @@ is built from the same skeleton.
 - **Mixing `forRoot` and `forFeature` semantics.** If your module
   does not need feature-scoped configuration, do not invent a
   `forFeature` — it adds API surface for no benefit.
-
-→ Next: [Module Discovery](./module-discovery.md).

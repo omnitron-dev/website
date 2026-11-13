@@ -216,6 +216,29 @@ test('category landing pages sit between their previous document and first child
   }
 });
 
+test('the next fragment opens the document pager after the last content section', async ({ page }) => {
+  for (const [route, destination] of [
+    ['getting-started/installation', 'getting-started/quickstart'], ['tutorial/scaffold', 'tutorial/service'],
+    ['tutorial/service', 'tutorial/auth'], ['tutorial/auth', 'tutorial/frontend'],
+    ['tutorial/frontend', 'tutorial/tests'], ['tutorial/tests', 'tutorial/deploy'],
+  ]) {
+    await page.goto('/docs/' + route + '#next');
+    const target = page.locator(':target');
+    await expect(target.getByRole('navigation', { name: 'Docs pagination' }).locator('.lumen-pagination-next'))
+      .toHaveAttribute('href', '/docs/' + destination);
+    await expect(page.locator('article').getByRole('heading', { name: 'Next', exact: true })).toHaveCount(0);
+    await expect(page.locator('.lumen-doc-toc a[href="#next"]')).toHaveCount(0);
+  }
+});
+
+test('Netron HTTP failure and deadline guidance is part of the document outline', async ({ page }) => {
+  await page.goto('/docs/titan/netron/transports#http-failures-and-deadlines');
+  const heading = page.getByRole('heading', { name: 'HTTP failures and deadlines' });
+  await expect(heading).toHaveAttribute('id', 'http-failures-and-deadlines');
+  await expect(page.locator('.lumen-doc-toc a[href="#http-failures-and-deadlines"]')).toHaveCount(1);
+  await expect(page.locator('article pre').filter({ hasText: 'HTTP failures and deadlines' })).toHaveCount(0);
+});
+
 test('system theme follows OS changes while explicit choices persist', async ({ page }, testInfo) => {
   await page.emulateMedia({ colorScheme: 'dark' });
   await page.goto('/docs/intro');

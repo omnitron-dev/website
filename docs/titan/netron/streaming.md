@@ -248,5 +248,3 @@ write. Throughput is bounded by the transport.
 - **Streaming where polling would do.** A stream that yields
   every 30 seconds is just polling, with more state. Use a unary
   method called on a timer.
-
-→ Next: [Multi-backend](./multi-backend.md).

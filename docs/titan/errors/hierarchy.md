@@ -227,5 +227,3 @@ catch (e) {
 
 Use class-based dispatch when you have a subclass. Use code-based
 dispatch for the long tail of `TitanError` variants.
-
-→ Next: [Factories](./factories.md).

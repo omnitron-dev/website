@@ -165,5 +165,3 @@ hold resources, the caller must dispose them.
   leaks. Use `Singleton` or explicit pooling.
 - **`Request` for stateless calculators.** Wasteful — a new
   instance per request, with no upside.
-
-→ Next: [Tokens](./tokens.md).

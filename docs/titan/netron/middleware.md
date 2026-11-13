@@ -252,5 +252,3 @@ result.
   `next()` returns (e.g. async logging).
 - **Sharing state between middlewares via globals.** Use
   `ctx.metadata` — it's per-call and isolated.
-
-→ Next: [Authentication](./authentication.md).

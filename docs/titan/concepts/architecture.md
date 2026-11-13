@@ -240,6 +240,3 @@ These boundaries are why Titan tests cleanly: you can replace any
 subsystem in isolation. You can mock the container. You can boot
 without Netron. You can bind a fake transport for end-to-end tests
 without sockets.
-
-→ Next: [Mental Model](./mental-model.md) — how to think about a
-running Titan app.

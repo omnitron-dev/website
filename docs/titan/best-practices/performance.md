@@ -157,4 +157,4 @@ scaling is the easy path.
 - [Resilience / Timeout](../resilience/timeout.md) — bounded
   external calls.
 
-→ Back to [Best Practices Overview](../best-practices/structuring-services.md).
+[Best practices](/docs/titan/best-practices) groups the guides on service structure, errors, observability and performance.

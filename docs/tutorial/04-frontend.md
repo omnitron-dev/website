@@ -286,11 +286,6 @@ git add .
 git commit -m "step 4: React UI with end-to-end types"
 ```
 
-## Next {#next}
-
-**[Step 5 — Tests →](./05-tests.md)** — cover the stack with
-unit + integration + E2E tests.
-
 ## Troubleshooting {#troubleshooting}
 
 | Symptom | Fix |

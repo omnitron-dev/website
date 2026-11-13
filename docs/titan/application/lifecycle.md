@@ -187,5 +187,3 @@ single module (e.g. binding a third-party SDK).
 - **Forgetting `onStop`.** Anything you opened in `onStart` must be
   closed in `onStop`. The framework cannot release file descriptors,
   sockets, or timer handles for you.
-
-→ Next: [Shutdown](./shutdown.md).

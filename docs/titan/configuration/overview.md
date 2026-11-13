@@ -124,5 +124,3 @@ hardcoded `localhost:5432` in code locks you to one deployment.
   handling.
 - [Hot Reload](./hot-reload.md) — `ConfigWatcherService` and the
   `ConfigService.onChange()` callback.
-
-→ Next: [Sources](./sources.md).

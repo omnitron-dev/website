@@ -112,5 +112,3 @@ no middleware):
 For sustained throughput, use WebSocket (no per-call HTTP framing
 cost) or TCP. For bursty short-lived clients, HTTP is fine and works
 through any reverse proxy.
-
-→ Read on: [Services](./netron/services.md).

@@ -216,5 +216,3 @@ finer control). To allow anonymous access on one method, declare
   **empty** (the qualified name is just `users`, not `users@1.0.0`).
   That's a valid identity, but clients then resolve `'users'` with no
   version pin. Always write the explicit version.
-
-→ Next: [Transports](./transports.md).

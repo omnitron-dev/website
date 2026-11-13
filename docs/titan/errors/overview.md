@@ -203,5 +203,3 @@ loop. Do not let a transient failure crash the whole boot.
   error class) into a `TitanError`.
 - `assert(condition, errorOrMessage)` — throw a `TitanError` if the
   condition is falsy. Type-narrows the value.
-
-→ Read on: [Hierarchy](./hierarchy.md).

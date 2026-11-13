@@ -202,5 +202,3 @@ transparently — but it is available when you need it.
   responding to liveness will not be restarted. Liveness should
   exercise enough of the request path to detect a stuck event
   loop.
-
-→ Next: [Events](./events.md).

@@ -163,5 +163,3 @@ class UsersService {
 - **State in singleton services.** Instance state is shared across
   every call. Either move to a `Request`-scoped service or store
   in the database.
-
-→ Next: [Error Handling](./error-handling.md).

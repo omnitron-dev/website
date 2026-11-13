@@ -173,5 +173,3 @@ app.on(ApplicationEvent.ShutdownComplete, ({ reason, success }) => {
   during shutdown, it will be killed on hard exit.
 - **Long blocking sync code.** The coordinator can only timeout
   async work. A 30 s synchronous CPU loop will not be interrupted.
-
-→ Next: [Health](./health.md).

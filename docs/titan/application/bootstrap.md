@@ -206,5 +206,3 @@ trace lifecycle ordering.
 - **Catching `start` errors and continuing.** A failed `start`
   leaves the app in `Failed` state. Re-throw and let the supervisor
   restart the process.
-
-→ Next: [Lifecycle](./lifecycle.md).

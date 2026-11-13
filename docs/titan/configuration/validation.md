@@ -175,5 +175,3 @@ read the right config key" bugs at the type level.
 - **Optional vs default for production values.** Use defaults for
   development conveniences. Production values should be required
   so a missing one fails the boot.
-
-→ Next: [Hot Reload](./hot-reload.md).

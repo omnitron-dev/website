@@ -240,5 +240,3 @@ investigation.
 - **Polymorphic returns.** `Promise<User | Error>` makes callers
   type-check the result. Throw the error; let the framework
   signal failure.
-
-→ Next: [Observability](./observability.md).

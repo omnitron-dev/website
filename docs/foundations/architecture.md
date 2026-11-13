@@ -103,7 +103,4 @@ type of the service method**. No translation step.
   cause across the wire. Client receives the original error type, not
   a generic `Error`.
 
-Next: [Monorepo](./monorepo.md) — how the Omnitron source tree itself
-is organised.
-
-Choose optional layers and verify bundle boundaries with [Composition and build boundaries](./composition.md).
+The [monorepo map](./monorepo.md) locates each layer in the source tree.

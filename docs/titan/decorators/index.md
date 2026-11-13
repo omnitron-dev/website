@@ -404,5 +404,3 @@ async dangerousOp(input: Input) { /* … */ }
 - **Decorating constructors.** Decorators on constructors do
   nothing in Titan — the framework reads class-level decorators,
   not constructor-level. Move the metadata to the class.
-
-→ Next: [Lifecycle Decorators](./lifecycle.md).

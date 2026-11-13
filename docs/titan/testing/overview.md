@@ -156,4 +156,4 @@ A typical Titan service ends up with:
 If you find yourself writing many integration tests for one service,
 the service is doing too much. Split it.
 
-→ Read on: [DI Overrides](./di-overrides.md), [Integration](./integration.md).
+[Integration tests](./integration.md) exercise a running application over a real transport.

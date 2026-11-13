@@ -364,5 +364,3 @@ exist in the errors module (both extend `HttpError` extends
 - **Auth as the only check.** Auth says *who* can call. It does
   not say *whether the input is valid* or *whether the resource is
   in the right state*. Combine with `@Validate` and domain checks.
-
-→ Next: [Streaming](./streaming.md).

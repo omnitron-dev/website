@@ -153,5 +153,3 @@ backend, so no exponential pile-up.
 - **No jitter.** Synchronised retries from many clients create
   bursts. Set a non-zero `jitterFactor` (e.g. `0.3`), or use
   `BackoffStrategy.ExponentialWithJitter`.
-
-→ Next: [Circuit Breaker](./circuit-breaker.md).

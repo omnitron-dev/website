@@ -8,8 +8,8 @@ description: Install only what you need. Server-side Netron ships inside Titan; 
 
 # Installation
 
-The stack ships as **independently versioned packages** under
-the `@omnitron-dev/` scope. Install only the layers you need.
+The public `@omnitron-dev/` packages share a release version.
+Install the packages your application uses.
 
 > **Important to understand upfront:**
 >
@@ -372,7 +372,8 @@ const users  = await peer.queryInterface<UsersService>('users@1.0.0');
 ## Verify {#verify}
 
 ```bash
-node -e "console.log(require('@omnitron-dev/titan/package.json').version)"
+pnpm list @omnitron-dev/titan --depth 0
+node --input-type=module -e "import { Application } from '@omnitron-dev/titan'; console.log(Application.name)"
 ```
 
 For Omnitron:
@@ -381,8 +382,3 @@ For Omnitron:
 omnitron --version
 omnitron ping
 ```
-
-## Next {#next}
-
-→ [Quickstart](./quickstart.md) — write your first Titan
-service and call it from a browser, end-to-end in five minutes.

@@ -123,4 +123,4 @@ These are decided at `Application.create` time. Truly dynamic
 load/unload at runtime is a multi-app concern; use the Omnitron
 orchestrator for that.
 
-→ Next: [Dependency Injection](../di/overview.md).
+See [dependency injection](../di/overview.md) for provider registration and resolution.

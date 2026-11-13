@@ -201,5 +201,3 @@ catches bugs that would otherwise ship as wire-incompatible responses.
 - **Validating outputs of every method.** Reserve output schemas for
   `@Public` methods. Internal methods are typed by TypeScript;
   runtime validation there is overhead with no benefit.
-
-→ Next: [Error Handling](./error-handling.md).

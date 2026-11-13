@@ -226,5 +226,3 @@ overlooked failover events.
   retried against every backend and still fail. Prefer the circuit
   breaker for infrastructure faults, and don't lean on failover to
   paper over 4xx-class errors.
-
-→ Next: [Serialization](./serialization.md).

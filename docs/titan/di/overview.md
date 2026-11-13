@@ -187,5 +187,3 @@ The Nexus error hierarchy (`NexusError` → specialised subclasses):
 | [Middleware](./middleware.md)                 | Wrapping resolution itself                                |
 | [Circular Dependencies](./circular-dependencies.md) | Diagnosing and fixing cycles                        |
 | [DevTools](./devtools.md)                     | Inspecting the container at runtime                       |
-
-→ Start with [Providers](./providers.md).

@@ -353,5 +353,3 @@ Catches wiring bugs without paying for a real database.
   `reset()` in `beforeEach`.
 - **Testing the framework.** "Does the container resolve providers?"
   is the framework's job. Test your code; trust the framework.
-
-→ Next: [Integration](./integration.md).

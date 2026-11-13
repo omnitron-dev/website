@@ -125,5 +125,3 @@ For `onStart` / `onStop` work, implement the interface.
   this.warmCache()` from a constructor or from a deferred
   `setImmediate` bypasses the framework's ordering guarantees. Use
   the proper hook.
-
-→ Next: [Method Traits](./method-traits.md).

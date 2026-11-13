@@ -219,5 +219,3 @@ Correlate logs across services by `traceId` in your log aggregator.
 - [Transports](./transports.md) — pluggable destinations.
 - [Processors](./processors.md) — transform / filter pipeline.
 - [Child Loggers](./child-loggers.md) — bound context.
-
-→ Next: [Transports](./transports.md).

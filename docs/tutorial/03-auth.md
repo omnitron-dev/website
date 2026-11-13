@@ -291,11 +291,6 @@ git add .
 git commit -m "step 3: JWT auth + role-gated methods"
 ```
 
-## Next {#next}
-
-**[Step 4 — Frontend →](./04-frontend.md)** — build a React UI
-that calls this service.
-
 ## Troubleshooting {#troubleshooting}
 
 | Symptom | Fix |

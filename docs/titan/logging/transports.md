@@ -227,5 +227,3 @@ lifecycle hook.
   defeats structured logging. Keep the JSON / object intact.
 - **Relying on a built-in `FileTransport` / rotation.** There isn't one.
   Use `destinations` with a rotating stream, or ship stdout.
-
-→ Next: [Processors](./processors.md).

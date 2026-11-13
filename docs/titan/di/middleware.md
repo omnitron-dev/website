@@ -190,5 +190,3 @@ Most application code does not need DI middleware at all.
   registers more providers is a smell.
 - **Async work that should be in `onStart`.** Heavy setup belongs
   in lifecycle hooks where the framework can sequence it.
-
-→ Next: [Circular Dependencies](./circular-dependencies.md).

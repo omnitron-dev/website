@@ -209,5 +209,3 @@ See [Circular Dependencies](../di/circular-dependencies.md).
 `AuthModule.forRoot({ jwt: { … } })` is better than asking every
 caller to wire `JwtSigner` and `JwtVerifier` themselves. Provide a
 high-level entry point that composes the low-level providers.
-
-→ Next: [Dynamic Modules](./dynamic-modules.md).

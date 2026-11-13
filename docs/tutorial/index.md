@@ -70,5 +70,3 @@ You'll know how to:
 
 Then deepen with the [reference docs](../intro.md) — every
 module, every API, every recipe.
-
-Ready? **[Step 1: Scaffold →](./01-scaffold.md)**

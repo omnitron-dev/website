@@ -170,5 +170,4 @@ When you tune Titan for throughput, you are tuning your method body,
 your validation schemas, and your transport configuration. The
 framework itself is approximately invisible at runtime.
 
-→ Next: [Application Bootstrap](../application/bootstrap.md) — how
-the kernel actually starts.
+See [application bootstrap](../application/bootstrap.md) for the order in which Titan builds the container and starts transports.

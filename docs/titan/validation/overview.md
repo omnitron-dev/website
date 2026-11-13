@@ -150,5 +150,3 @@ applied); for production APIs, be explicit.
 | ------------------------------------------------- | ---------------------------------------------- |
 | [Contracts](./contracts.md)                       | Per-method input + output schemas as contracts |
 | [Error Handling](./error-handling.md)             | What clients see when validation fails         |
-
-→ Next: [Contracts](./contracts.md).

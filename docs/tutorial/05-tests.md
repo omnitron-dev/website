@@ -387,11 +387,6 @@ git add .
 git commit -m "step 5: tests across the pyramid"
 ```
 
-## Next {#next}
-
-**[Step 6 — Deploy →](./06-deploy.md)** — package everything
-into Docker + ship to a server.
-
 ## Troubleshooting {#troubleshooting}
 
 | Symptom | Fix |

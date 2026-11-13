@@ -196,5 +196,3 @@ Human-readable dev output is a Pino concern, not a processor one. See
 - **A processor for a constant field.** A static value belongs on
   `base` or `setContext`; a per-scope value belongs on a child logger,
   not a global transform.
-
-→ Next: [Child Loggers](./child-loggers.md).

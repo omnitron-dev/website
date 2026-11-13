@@ -198,6 +198,3 @@ A Titan app, viewed from inside a service method, is:
 - Errors thrown become typed responses on the wire.
 
 That is the whole framework. Read on for the mechanics.
-
-→ Next: [Architecture](./architecture.md) — how these principles
-compose at runtime.

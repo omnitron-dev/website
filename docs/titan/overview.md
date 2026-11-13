@@ -94,7 +94,7 @@ bus. Modules register providers in the container. Services are providers
 that also register themselves with Netron. Netron exposes them over
 transports. Middleware wraps every call.
 
-That is it. Everything else — the 14 ecosystem modules, the validation
+That is it. Everything else — the optional ecosystem modules, the validation
 decorators, the resilience helpers — is built on top of these four
 primitives.
 
@@ -121,7 +121,7 @@ and assumes you have read the
 | [Resilience](./resilience/overview.md)                        | When you defend against partial failure               |
 | [Testing](./testing/overview.md)                              | When you write fast, deterministic tests              |
 | [Best Practices](./best-practices/structuring-services.md)    | When you want the team to converge on conventions     |
-| [Modules Catalogue](./modules/index.mdx)                       | The 14 ecosystem modules in detail                    |
+| [Modules Catalogue](./modules/index.mdx)                       | Public modules and their integrations                    |
 
 ## Versioning and public boundaries {#versioning-and-public-boundaries}
 

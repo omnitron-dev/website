@@ -215,5 +215,3 @@ Ecosystem modules (`titan-cache`, `titan-redis`, etc.) use the
   reconciles bare names through its global registry, re-deriving a
   token at each call site is brittle (a typo, or any metadata
   argument, breaks identity). Always import the same token instance.
-
-→ Next: [Multi-injection](./multi-injection.md).
