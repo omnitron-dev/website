@@ -3,9 +3,9 @@ import { MapPointPicker, type MapPointPickerValue, type MapStyle } from '@omnitr
 import '@omnitron-dev/prism/components/map/styles.css';
 
 // Include the MapLibre worker in the browser build alongside the local GeoJSON source.
-const workerUrl = new URL('maplibre-gl/dist/maplibre-gl-worker.mjs', import.meta.url).href;
+export const workerUrl = new URL('maplibre-gl/dist/maplibre-gl-worker.mjs', import.meta.url).href;
 
-const style: MapStyle = {
+export const transectStyle: MapStyle = {
   version: 8,
   sources: {
     transect: { type: 'geojson', data: {
@@ -18,11 +18,11 @@ const style: MapStyle = {
     { id: 'transect', type: 'line', source: 'transect', paint: { 'line-color': '#69daca', 'line-width': 4 } },
   ],
 };
-const initialViewport = { longitude: 0, latitude: 51.5, zoom: 11 };
+export const initialViewport = { longitude: 0, latitude: 51.5, zoom: 11 };
 
 export default function MapExample() {
   const [point, setPoint] = useState<MapPointPickerValue | null>({ lng: 0, lat: 51.5 });
   return <MapPointPicker value={point} onChange={setPoint} onClear={() => setPoint(null)}
-    styleUrl={style} mapProps={{ workerUrl }} initialViewport={initialViewport} height={280}
+    styleUrl={transectStyle} mapProps={{ workerUrl }} initialViewport={initialViewport} height={280}
     labels={{ chooseCenter: 'Select map center', clear: 'Clear sample point' }} />;
 }

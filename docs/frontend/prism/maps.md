@@ -15,25 +15,22 @@ for every URL referenced by its styles, fonts and tile sources.
 
 ```tsx
 import { Map, MapMarker, MapPointPicker, MapCoverageLayer, MapPlaceSearch } from '@omnitron-dev/prism/components/map';
-import '@omnitron-dev/prism/map.css';
+import '@omnitron-dev/prism/components/map/styles.css';
 ```
 
 ## The tile source is yours {#the-tile-source-is-yours}
 
 `<Map>` never falls back to a hosted tile provider. A style must come from one
-of two places:
+of three sources, in order of precedence:
 
-1. the `styleUrl` prop — a style JSON URL or an inline `StyleSpecification`;
-2. `window.__MAP_STYLE_URL__`, which the host app injects at boot.
+1. `styleUrl` accepts a style JSON URL or an inline `StyleSpecification`.
+2. `styles={{ light, dark }}` supplies complete styles for both Prism themes.
+3. The host can inject `window.__MAP_STYLE_URL__` at boot.
 
-`styles={{ light, dark }}` can supply complete styles for both Prism themes;
-`styleUrl` takes precedence. With no source configured, the component displays
-a localizable MUI alert. Loading and source failures also have explicit states.
-A missing source is not represented as a working, empty map.
+A missing style displays a localizable alert. A progress indicator tracks loading, and a warning reports source errors.
 
-`pmtiles://` is registered as a protocol on first mount, so a single-file
-PMTiles archive served over plain HTTP is a valid style source — which is the
-cheapest way to self-host, and works over Tor without a special case.
+The map entry registers `pmtiles://` before creating a map. Reference your own
+HTTP-served PMTiles archive from a vector or raster source in the style.
 
 ## `<Map>` {#map}
 
@@ -67,6 +64,8 @@ A pin at a coordinate, themed by default and replaceable wholesale.
 | `anchor` | `'center' \| 'top' \| 'bottom' \| 'left' \| 'right'` | Default `bottom`, so the pin tip sits on the coordinate |
 | `onClick` | `() => void` | Click-through handler |
 
+<PrismExample example="map-marker" deferred="true" hydrate="visible" />
+
 ## `<MapPointPicker>` {#mappointpicker}
 
 Controlled coordinate selection by map click, marker drag or the keyboard-accessible
@@ -94,10 +93,12 @@ const [point, setPoint] = useState<MapPointPickerValue | null>(null);
 backend to ask, and deliberately so — the component would otherwise carry a
 dependency on one app's RPC client.
 
+<PrismExample example="map" deferred="true" hydrate="visible" />
+
 ## `<MapCoverageLayer>` {#mapcoveragelayer}
 
-Many typed points as one MapLibre symbol layer — the right choice when a
-marker per item would be hundreds of DOM nodes.
+`MapCoverageLayer` draws its points in a single MapLibre circle layer. Enable
+`showLabels` to add a symbol layer for names. Both layers use the same GeoJSON source.
 
 ```tsx
 <MapCoverageLayer
@@ -107,16 +108,17 @@ marker per item would be hundreds of DOM nodes.
     longitude: d.lng,
     latitude: d.lat,
     status: d.status,     // bucket → colour
-    label: d.title,       // shown at zoom 12+ when showLabels
+    label: d.title,       // shown at zoom 11+ when showLabels is enabled
   }))}
   colorByStatus={{ active: 'green', expired: 'grey' }}
   showLabels
 />
 ```
 
-`status` is a free-form bucket, not an enum: the default palette covers
-`active` / `pending` / `expired` / `disabled`, and `colorByStatus` replaces it
-with your own domain's semantics. `radius` defaults to 6 px and is zoom-stable.
+The default palette covers `active`, `pending`, `expired`, `disabled` and `retired`.
+Use `colorByStatus` to add or override colors. `radius` defaults to 6 pixels at every zoom.
+
+<PrismExample example="map-coverage" deferred="true" hydrate="visible" />
 
 ## `<MapPlaceSearch>` {#mapplacesearch}
 
@@ -139,6 +141,8 @@ Every result has `id`, `label` and `point: { lng, lat }`. Generic result types
 preserve provider metadata. `labels`, `minLength`, `limit`, `debounceMs` and
 `disabled` configure the control. Failure, empty result and loading are distinct.
 The host should propagate aborts to its transport when supported.
+
+<PrismExample example="map-place-search" deferred="true" hydrate="visible" />
 
 ## Related {#related}
 

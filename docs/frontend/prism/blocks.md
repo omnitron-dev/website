@@ -13,9 +13,7 @@ They're higher-level composites — auth forms + guards, a
 collapsible dashboard panel, a full data-grid — that you drop
 into a route, wire to your data callbacks, and ship.
 
-Three blocks ship out of the box (`AuthBlock`, `DashboardBlock`,
-`DataGridBlock`). Each is also available as its own subpath
-import.
+Import `AuthBlock`, `DashboardBlock` and `DataGridBlock` from `@omnitron-dev/prism/blocks`.
 
 ## `AuthBlock` — auth forms + route guards {#authblock}
 
@@ -48,6 +46,8 @@ function SignInPage() {
   );
 }
 ```
+
+<PrismExample example="auth-login" deferred="true" hydrate="visible" />
 
 ### The forms {#the-forms}
 
@@ -159,6 +159,8 @@ function RequestsPanel({ loading, series }) {
 }
 ```
 
+<PrismExample example="dashboard-block" deferred="true" hydrate="visible" />
+
 | Prop | Type | Purpose |
 | ---- | ---- | ------- |
 | `title` / `subtitle` | `string` | Header text |
@@ -251,6 +253,8 @@ function UsersPage({ users, loading }) {
   );
 }
 ```
+
+<PrismExample example="data-grid-block" deferred="true" hydrate="visible" />
 
 ### Columns {#columns}
 
@@ -373,9 +377,7 @@ MUI X `<DataGrid>` directly (or `<FilterToolbar>` + the Prism
 ## Subpath imports {#subpath-imports}
 
 ```tsx
-import { AuthBlock      } from '@omnitron-dev/prism/blocks';
-import { DashboardBlock } from '@omnitron-dev/prism/blocks';
-import { DataGridBlock  } from '@omnitron-dev/prism/blocks';
+import { AuthBlock, DashboardBlock, DataGridBlock } from '@omnitron-dev/prism/blocks';
 ```
 
 ## See also {#see-also}
