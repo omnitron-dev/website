@@ -4,8 +4,9 @@
  * Each entry point needs an explicit guide mapping. This checks navigation
  * coverage, not the completeness or correctness of prose for every symbol.
  */
+import {execFileSync} from 'node:child_process';
 import {readFileSync, writeFileSync, readdirSync, existsSync} from 'node:fs';
-import {resolve, join, relative} from 'node:path';
+import {resolve, join, relative, sep} from 'node:path';
 import ts from 'typescript';
 import catalog from './api-guides.mjs';
 
@@ -15,6 +16,14 @@ const repo = repoArgument && resolve(repoArgument);
 if (!repo || !existsSync(join(repo, 'packages/titan/package.json'))) {
   throw new Error('usage: node scripts/build-api-index.mjs <omni-root> [--check]');
 }
+const git = (...args) => execFileSync('git', ['-C', repo, ...args], {encoding: 'utf8'}).trim();
+const revision = git('rev-parse', '--verify', 'HEAD^{commit}');
+const sourceInputs = ['packages', 'apps'].flatMap(dir =>
+  [`:(glob)${dir}/*/package.json`, `:(glob)${dir}/*/src/**`]);
+if (!/^[a-f0-9]{40}$/.test(revision) || git('status', '--porcelain', '--untracked-files=all', '--', ...sourceInputs)) {
+  throw new Error('Use a clean Omnitron source checkout so that indexed files and line numbers belong to its commit.');
+}
+const sourcePath = file => relative(repo, file).split(sep).join('/');
 const entries = [];
 const packages = [];
 for (const folder of ['packages', 'apps']) {
@@ -110,8 +119,8 @@ for (const entry of modules) {
     const declaration = actual.declarations?.[0] ?? exported.declarations?.[0];
     const name = exported.getName();
     const sourceFile = declaration?.getSourceFile();
-    const sourcePath = sourceFile && relative(repo, sourceFile.fileName);
-    const local = sourcePath && !sourcePath.startsWith('..') && !sourcePath.includes('node_modules');
+    const declarationPath = sourceFile && sourcePath(sourceFile.fileName);
+    const local = declarationPath && !declarationPath.startsWith('..') && !declarationPath.includes('node_modules');
     const line = declaration && sourceFile ? sourceFile.getLineAndCharacterOfPosition(declaration.getStart()).line + 1 : 1;
     const typeOnly = exported.declarations?.some(d => ts.isExportSpecifier(d) && (d.isTypeOnly || d.parent.parent.isTypeOnly));
     const isValue = !typeOnly && !!(actual.flags & ts.SymbolFlags.Value);
@@ -120,10 +129,10 @@ for (const entry of modules) {
       : actual.flags & ts.SymbolFlags.TypeAlias ? 'type'
       : actual.flags & ts.SymbolFlags.Enum ? 'enum'
       : actual.flags & ts.SymbolFlags.Function ? 'function' : isValue ? 'value' : 'type';
-    const key = `${entry.package}:${name}:${sourcePath}`;
+    const key = `${entry.package}:${name}:${declarationPath}`;
     if (!rows.has(key)) rows.set(key, {
       name, package: entry.package, kind,
-      source: local ? `https://github.com/omnitron-dev/omni/blob/main/${sourcePath}#L${line}` : null,
+      source: local ? `${declarationPath}#L${line}` : null,
       imports: [],
     });
     rows.get(key).imports.push({path: entry.path, guide: docRoute(entry.guide)});
@@ -132,8 +141,9 @@ for (const entry of modules) {
 const symbols = [...rows.values()].sort((a, b) => a.package.localeCompare(b.package, 'en') || a.name.localeCompare(b.name, 'en'));
 for (const row of symbols) row.imports.sort((a, b) => a.path.localeCompare(b.path, 'en'));
 const data = {
+  revision,
   packages: packages.sort(),
-  entryPoints: entries.map(({path, guide, kind, source}) => ({path, guide: docRoute(guide), ...(kind ? {kind, source: `https://github.com/omnitron-dev/omni/blob/main/${relative(repo, source)}`} : {})})).sort((a, b) => a.path.localeCompare(b.path, 'en')),
+  entryPoints: entries.map(({path, guide, kind, source}) => ({path, guide: docRoute(guide), ...(kind ? {kind, source: sourcePath(source)} : {})})).sort((a, b) => a.path.localeCompare(b.path, 'en')),
   symbols,
 };
 const serialized = `${JSON.stringify(data, null, 2)}\n`;

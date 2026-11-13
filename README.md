@@ -116,16 +116,19 @@ Keep examples publicly reproducible; label proposals as Design RFC. Documents
 contain literal widget props, not executable MDX imports. Register application
 components in the trusted client entry.
 
-After public API changes, run `pnpm docs:api ../omni` and review the generated
-[src/data/api-index.json](src/data/api-index.json). Source checks compare package
-exports, CLI commands and service contracts with their guides. An inventory entry
+After public API changes, run `pnpm docs:api ../omni` against a clean, committed
+platform checkout. Review the generated [API index](src/data/api-index.json) and
+make its source commit available in the public platform repository before pushing
+the website. The index records that commit for CI and for links to declarations.
+Source checks compare package exports, CLI commands and service contracts with their guides. An inventory entry
 is not proof of a working example: run the complete examples you change.
 
 ## Distribution
 
 [CI](.github/workflows/ci.yml) and [GitHub Pages](.github/workflows/deploy.yml)
-install released npm packages with a frozen application lock; neither uses a
-local SDK profile. Source checks use the matching Omni release tag, `v0.4.6`.
+install the released site renderer from the frozen npm lockfile. CI checks the
+manual against the exact public Omnitron commit recorded in the API index. The
+manual can document newer platform features while using the existing renderer.
 
 When updating packages, generate the lock from published npm versions in a clean
 consumer, then verify frozen install, dependency audit, types, build and browser

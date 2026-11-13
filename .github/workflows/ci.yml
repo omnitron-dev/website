@@ -39,11 +39,21 @@ jobs:
       - name: Public content boundary
         run: pnpm check:content
 
-      - name: Check out runtime source
+      - name: Read the API index source revision
+        id: source
+        run: |
+          node --input-type=module <<'NODE' >> "$GITHUB_OUTPUT"
+          import { readFileSync } from 'node:fs';
+          const { revision } = JSON.parse(readFileSync('src/data/api-index.json', 'utf8'));
+          if (!/^[a-f0-9]{40}$/.test(revision)) throw Error('API index must name a full Omni commit');
+          console.log('revision=' + revision);
+          NODE
+
+      - name: Check out documented platform source
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           repository: omnitron-dev/omni
-          ref: v0.4.6
+          ref: ${{ steps.source.outputs.revision }}
           path: .source/omni
           persist-credentials: false
 

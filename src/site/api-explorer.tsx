@@ -3,6 +3,7 @@ import data from '../data/api-index.json';
 import styles from '../components/ApiExplorer/styles.module.css';
 
 const pageSize = 40;
+const sourceBase = `https://github.com/omnitron-dev/omni/blob/${data.revision}/`;
 
 export default function ApiExplorer() {
   const [query, setQuery] = useState('');
@@ -57,7 +58,7 @@ export default function ApiExplorer() {
               <div className={styles.symbol}>
                 <code>{row.name}</code>
                 <span>{row.kind}</span>
-                {row.source && <a href={row.source} className={styles.source}>Source ↗</a>}
+                {row.source && <a href={sourceBase + row.source} className={styles.source}>Source ↗</a>}
               </div>
               <div className={styles.imports}>
                 {row.imports.map(item => (
@@ -83,7 +84,7 @@ export default function ApiExplorer() {
         <ul>
           {data.entryPoints.map(entry => (
             <li key={entry.path}><a href={entry.guide}><code>{entry.path}</code></a>
-              {'kind' in entry && <> · {entry.kind} · <a href={entry.source}>Source ↗</a></>}
+              {'kind' in entry && <> · {entry.kind} · <a href={sourceBase + entry.source}>Source ↗</a></>}
             </li>
           ))}
         </ul>

@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test';
+import apiIndex from '../src/data/api-index.json' with { type: 'json' };
 
 async function chooseTheme(page, mode) {
   await page.getByRole('button', { name: /^Color theme:/ }).click();
@@ -66,6 +67,14 @@ test('API explorer is a working React island with canonical guide links', async 
   await explorer.getByLabel('Search API').fill('OmnitronMark');
   const row = explorer.locator('li').filter({ has: page.getByText('OmnitronMark', { exact: true }) });
   await expect(row).toHaveCount(1);
+  const mark = apiIndex.symbols.find(symbol => symbol.name === 'OmnitronMark');
+  expect(mark.source).toMatch(/^packages\/prism\/.+#L\d+$/);
+  const sourceBase = `https://github.com/omnitron-dev/omni/blob/${apiIndex.revision}/`;
+  await expect(row.getByRole('link', { name: 'Source' })).toHaveAttribute('href', sourceBase + mark.source);
+  const stylesheet = apiIndex.entryPoints.find(entry => entry.kind === 'stylesheet');
+  await explorer.getByText('Browse all package entry points', { exact: true }).click();
+  await expect(explorer.locator('details li').filter({ has: page.getByText(stylesheet.path, { exact: true }) })
+    .getByRole('link', { name: 'Source' })).toHaveAttribute('href', sourceBase + stylesheet.source);
   const guide = row.getByRole('link', { name: 'Guide →' }).first();
   await expect(guide).toHaveAttribute('href', '/docs/frontend/prism/theme');
   await guide.click();
