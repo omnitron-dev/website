@@ -21,7 +21,15 @@ A static build needs no Titan server. Add Titan-Lumen only when the application 
 
 ## Build a document site
 
-Create `docs/intro.md`, then configure the site:
+Start with one document and one configuration file. The source directory determines the document routes. With the default route rules, `docs/intro.md` becomes `/docs/intro`.
+
+:::filetree{title="Engineering manual"}
+- `docs/` — public document sources
+  - `intro.md` — first page
+- `lumen.config.ts` — build configuration
+:::
+
+Set the input and output directories explicitly:
 
 ```typescript
 import { defineLumenConfig } from '@omnitron-dev/lumen';
@@ -46,6 +54,8 @@ lumen serve --host 127.0.0.1 --port 4173
 ## Read and reuse the corpus
 
 Every public document has a Markdown mirror. [This page as Markdown](/docs/lumen/overview.md), the [agent index](https://omnitron.dev/llms.txt) and [complete public corpus](https://omnitron.dev/llms-full.txt) are produced from the same public projection as the site.
+
+Open the Markdown mirror beside the HTML page and compare the headings. The agent index links to individual documents. The complete corpus combines them for clients that need one download.
 
 The default static audience is anonymous. Restricted documents and sections are projected out before HTML, search or agent exports are produced. Do not put secrets in public content or client props.
 

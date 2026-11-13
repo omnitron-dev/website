@@ -47,6 +47,38 @@ Linux filesystem, with a brief rename gap; Windows publication is not supported.
 
 The API inventory is generated from public package manifests and TypeScript re-exports. It checks that each entry point has a guide; it does not prove that every behavior has a complete example.
 
+## A page for people and tools
+
+Choose a format for the authoring guide. All three links are part of the static document. Use the arrow keys to change tabs, or Home and End to jump to either end.
+
+:::tabs{label="Public reading formats"}
+:::tab{label="HTML" value="html"}
+Use the [authoring guide](./authoring.md) to try the diagram and playground.
+:::
+:::tab{label="Markdown" value="markdown"}
+Read the [authoring guide as Markdown](/docs/lumen/authoring.md) to reuse its text and code.
+:::
+:::tab{label="Agent index" value="agents"}
+Find public documents in the [agent index](https://omnitron.dev/llms.txt).
+:::
+:::
+
+The Markdown below produces this group. Add a shared `syncKey` to several groups on one page when the same choice should follow the reader. Give matching choices the same `value`.
+
+```markdown
+:::tabs{label="Public reading formats"}
+:::tab{label="HTML" value="html"}
+Use the [authoring guide](./authoring.md) to try the diagram and playground.
+:::
+:::tab{label="Markdown" value="markdown"}
+Read the [authoring guide as Markdown](/docs/lumen/authoring.md) to reuse its text and code.
+:::
+:::tab{label="Agent index" value="agents"}
+Find public documents in the [agent index](https://omnitron.dev/llms.txt).
+:::
+:::
+```
+
 ## Preserving public links
 
 The migration records the previous built site's route and anchor inventory in `migration/url-contract.json`. Validation compares the new output against that contract and checks internal links in the emitted HTML, including fragment targets. Content changes must retain externally useful anchors or provide an explicit reviewed redirect.

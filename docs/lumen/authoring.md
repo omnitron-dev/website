@@ -31,6 +31,12 @@ Use explicit heading IDs when other pages or external readers depend on a link. 
 State ownership, prerequisites, failure behavior and cleanup next to the example. Search and agent exports see the same public document tree.
 :::
 
+```markdown
+:::note{title="Keep the contract visible"}
+State ownership, prerequisites, failure behavior and cleanup next to the example. Search and agent exports see the same public document tree.
+:::
+```
+
 ```mermaid
 flowchart LR
   Source[Document source] --> AST[Typed AST]
@@ -38,6 +44,8 @@ flowchart LR
   AST --> Search[Local search]
   AST --> Markdown[Markdown mirror]
 ```
+
+Open **Diagram source** below the drawing to see its Mermaid input. It is the same input the browser renders.
 
 Mermaid diagrams use the real browser engine, including its ELK layouts. Static
 HTML retains readable diagram source. The client registers `MermaidDiagram` and
@@ -51,6 +59,16 @@ PDF and Markdown exports currently retain diagram source. Put labels with punctu
 Use the built-in file tree block for directory layouts. Keep filenames in inline
 code and descriptions in ordinary Markdown; folders with children use native
 keyboard-accessible disclosure controls and start expanded.
+
+:::filetree{title="my-service/"}
+- `src/` — application source
+  - `main.ts` — entry point
+  - `modules/`
+    - `users.module.ts` — feature module
+- `package.json` — dependencies and commands
+:::
+
+Copy this Markdown to reproduce the tree:
 
 ```markdown
 :::filetree{title="my-service/"}
@@ -120,8 +138,13 @@ snippet changes only this local example; it does not call an Omnitron service.
 
 <Playground hydrate="visible" code="return [1, 2, 3].map(value => value * 2)" />
 
-Try returning an object, then try `while (true) {}` to inspect the timeout. A failed
-run is reported as an error. Recorded output is never substituted for execution.
+The editor above starts with the literal `code` value from this PDX widget:
+
+```jsx
+<Playground hydrate="visible" code="return [1, 2, 3].map(value => value * 2)" />
+```
+
+Run the initial expression to produce `[2, 4, 6]`. Change the multiplier and run it again. Reset the expression by reloading the page. A timeout or invalid expression appears in the result area; a subsequent run starts a fresh execution.
 
 ## Reading wide content
 
