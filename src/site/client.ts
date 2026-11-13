@@ -7,6 +7,8 @@ import { LumenShell } from '@omnitron-dev/lumen-ui/runtime';
 import { LumenSearchDialog } from '@omnitron-dev/lumen-ui/search';
 import { PrismProvider, usePrismContext } from '@omnitron-dev/prism/core';
 import { OmnitronBrand, omnitronTheme } from '@omnitron-dev/prism/identity';
+import { PrismExample } from './prism-example.tsx';
+import { OpenSearch, SearchTrigger } from './search-trigger.tsx';
 import { ThemeSelector } from './theme-selector.tsx';
 import { readThemePreference } from './theme-preference.ts';
 const ApiExplorer = lazy(() => import('./api-explorer.tsx'));
@@ -14,10 +16,8 @@ function ApiExplorerIsland() {
   return React.createElement(Suspense, { fallback: React.createElement('p', { role: 'status' }, 'Loading public API inventory…') }, React.createElement(ApiExplorer));
 }
 
-function SearchPage() {
-  return React.createElement('button', { type: 'button', onClick: () => document.querySelector<HTMLButtonElement>('[data-open-search]')?.click() }, 'Search all documentation');
-}
-const islands = { DocSectionNav, MermaidDiagram, SiteBrand: OmnitronBrand, ThemeSelector, ApiExplorer: ApiExplorerIsland, SearchPage, Playground: NetronPlayground };
+function SearchPage() { return React.createElement(SearchTrigger, { full: true }); }
+const islands = { DocSectionNav, MermaidDiagram, PrismExample, SiteBrand: OmnitronBrand, ThemeSelector, SearchTrigger, ApiExplorer: ApiExplorerIsland, SearchPage, Playground: NetronPlayground };
 function Client() {
   const [mode, setMode] = useState(readThemePreference);
   useEffect(() => {
@@ -45,19 +45,13 @@ function SiteClient() {
         event.preventDefault(); open();
       }
     };
-    const search = document.querySelector<HTMLButtonElement>('[data-open-search]');
-    search?.addEventListener('click', open);
-    if (search) search.disabled = false;
     document.addEventListener('keydown', key);
-    return () => {
-      search?.removeEventListener('click', open);
-      if (search) search.disabled = true;
-      document.removeEventListener('keydown', key);
-    };
+    return () => document.removeEventListener('keydown', key);
   }, []);
-  return React.createElement(LumenShell, { theme, currentPath: location.pathname, islands, disablePrismProvider: true },
+  return React.createElement(OpenSearch.Provider, { value: () => setSearchOpen(true) },
+    React.createElement(LumenShell, { theme, currentPath: location.pathname, islands, disablePrismProvider: true },
       searchOpen && React.createElement('div', { className: 'search-overlay', onClick: (event: React.MouseEvent) => { if (event.target === event.currentTarget) setSearchOpen(false); } },
-        React.createElement(LumenSearchDialog, { open: true, onClose: () => setSearchOpen(false), maxResults: 12, pagefindUrl: '/pagefind/pagefind.js' })));
+        React.createElement(LumenSearchDialog, { open: true, onClose: () => setSearchOpen(false), maxResults: 12, pagefindUrl: '/pagefind/pagefind.js' }))));
 }
 const host = document.getElementById('lumen-interactive-root');
 if (host) createRoot(host).render(React.createElement(Client));

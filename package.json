@@ -13,23 +13,28 @@
     "check:routes": "node scripts/check-routes.js",
     "docs:api": "node scripts/build-api-index.mjs",
     "check:api": "node scripts/build-api-index.mjs --check",
-    "test:browser": "playwright test tests/site.spec.js --workers=1"
+    "test:browser": "playwright test --workers=1"
   },
   "dependencies": {
     "@omnitron-dev/lumen": "0.4.6",
+    "@omnitron-dev/lumen-ast": "0.4.6",
     "@omnitron-dev/lumen-ui": "0.4.6",
     "@omnitron-dev/prism": "0.4.6",
+    "apexcharts": "8.8.1",
+    "maplibre-gl": "6.17.0",
     "react": "19.3.1",
+    "react-apexcharts": "2.2.0",
     "react-dom": "19.3.1",
-    "@omnitron-dev/lumen-ast": "0.4.6"
+    "react-hook-form": "7.92.0"
   },
   "devDependencies": {
+    "@playwright/test": "1.64.1",
     "@types/node": "26.6.6",
     "@types/react": "^19.3.0",
     "@types/react-dom": "^19.3.0",
     "@xec-sh/cli": "0.11.4",
     "typescript": "npm:@typescript/typescript6@^6.0.2",
-    "@playwright/test": "1.64.1"
+    "vite": "8.3.8"
   },
   "engines": {
     "node": ">=22.12.0",

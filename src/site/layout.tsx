@@ -4,6 +4,7 @@ import { OmnitronBrand, omnitronCssVariables, omnitronTheme } from '@omnitron-de
 import { DocLayout, DocSectionNav, DocPagination, LumenFooter } from '@omnitron-dev/lumen-ui';
 import type { LumenPageLayoutProps, LumenSidebarItem } from '@omnitron-dev/lumen';
 import { PortalIslandHost } from '@omnitron-dev/lumen-ui/runtime';
+import { SearchTrigger } from './search-trigger.tsx';
 import { Home } from './home.tsx';
 import { ThemeSelectorPlaceholder } from './theme-icons.tsx';
 import { themeBootstrap } from './theme-preference.ts';
@@ -65,7 +66,7 @@ export function SiteLayout({ children, document: doc, documents, config }: Lumen
         <span className="site-edition">FIELD MANUAL</span>
         <nav aria-label="Main navigation">{sections.map(([label, href]) => <a key={href} href={href}>{label}</a>)}</nav>
         <div className="header-actions">
-          <button type="button" className="search-trigger" data-open-search disabled>Search <kbd>/</kbd></button>
+          <PortalIslandHost islandId="site-search" component="SearchTrigger" hydrate="load" props={{}}><SearchTrigger /></PortalIslandHost>
           <PortalIslandHost islandId="site-theme" component="ThemeSelector" hydrate="load" props={{}}><ThemeSelectorPlaceholder /></PortalIslandHost>
           <details className="mobile-nav"><summary aria-label="Open navigation">Menu</summary><nav>{sections.map(([label, href]) => <a key={href} href={href}>{label}</a>)}</nav></details>
         </div>

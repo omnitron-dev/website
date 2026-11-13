@@ -49,6 +49,8 @@ The API inventory is generated from public package manifests and TypeScript re-e
 
 ## A page for people and tools
 
+The interactive reading-format tabs and direct Markdown mirror links in this section require Lumen 0.4.8 or later.
+
 Choose a format for the authoring guide. All three links are part of the static document. Use the arrow keys to change tabs, or Home and End to jump to either end.
 
 :::tabs{label="Public reading formats"}

@@ -8,10 +8,7 @@ description: Per-component reference for the widgets in Prism.
 
 # Components catalog
 
-This page is the per-component reference. Each component links
-to its subpath import, lists its props (where non-trivial),
-shows a representative example, and notes accessibility &
-integration concerns.
+Explore each component, change its state and open **Source code** to see the TypeScript that runs the example. The API and usage notes remain available with JavaScript disabled.
 
 For full-page composites see [Blocks](./blocks.md); for layouts
 see [Layouts](./layouts.md). For scientific documents, block editing and typed knowledge graphs, see [Research workspaces](./research.md).
@@ -19,6 +16,8 @@ see [Layouts](./layouts.md). For scientific documents, block editing and typed k
 ## Status & feedback {#status--feedback}
 
 ### `<Alert>` / `<FormAlert>` {#alert--formalert}
+
+<PrismExample example="alert" hydrate="visible" />
 
 ```tsx
 import { Alert, FormAlert } from '@omnitron-dev/prism';
@@ -60,6 +59,8 @@ const { formState, register } = useForm();
 
 ### `<Snackbar>` {#snackbar}
 
+<PrismExample example="snackbar" hydrate="visible" />
+
 Transient global notifications. Mounted once by `<PrismProvider>`;
 fire from anywhere:
 
@@ -94,6 +95,8 @@ provider level (`maxSnackbars`).
 
 ### `<ConfirmDialog>` {#confirmdialog}
 
+<PrismExample example="confirm-dialog" hydrate="visible" />
+
 `<ConfirmDialog>` is a controlled component — thread `open` /
 `onClose` / `onConfirm` (there is no `useConfirmDialog` hook):
 
@@ -126,6 +129,8 @@ while it resolves. A `<DeleteDialog>` preset is also exported.
 
 ### `<Tooltip>` {#tooltip}
 
+<PrismExample example="tooltip" hydrate="visible" />
+
 ```tsx
 import { Tooltip } from '@omnitron-dev/prism';
 
@@ -140,6 +145,8 @@ Standard MUI tooltip with Prism theme integration. Wrap a
 single child element (not a fragment).
 
 ### `<LoadingScreen>` {#loadingscreen}
+
+<PrismExample example="loading-screen" hydrate="visible" />
 
 Full-viewport loading bar — typical use is the Suspense fallback:
 
@@ -158,6 +165,8 @@ also exported.
 
 ### `<Skeleton>` {#skeleton}
 
+<PrismExample example="skeleton" hydrate="visible" />
+
 Animated placeholder while data loads.
 
 ```tsx
@@ -172,6 +181,8 @@ import { Skeleton, CardSkeleton, TableSkeleton }
 dedicated `<CardSkeleton>` and `<TableSkeleton>` exports.
 
 ### `<EmptyContent>` {#emptycontent}
+
+<PrismExample example="empty-content" hydrate="visible" />
 
 Friendly empty-state card. Use on every list that may be empty.
 
@@ -198,6 +209,8 @@ variants.
 
 ### `<ErrorBoundary>` {#errorboundary}
 
+<PrismExample example="error-boundary" hydrate="visible" />
+
 `fallback` receives a single `FallbackProps` object
 (`{ error, errorInfo, parsedStack, resetErrorBoundary }`):
 
@@ -221,13 +234,15 @@ stack details).
 
 ### `<LinearProgress>` / `<CircularProgress>` / `<ProgressBar>` / `<CountdownRing>` {#linearprogress--circularprogress--progressbar--countdownring}
 
+<PrismExample example="progress" hydrate="visible" />
+
 ```tsx
 import { LinearProgress, CircularProgress, ProgressBar, CountdownRing }
   from '@omnitron-dev/prism';
 
-<ProgressBar value={75} />                {/* labelled linear bar */}
+<ProgressBar segments={[{ value: 75, color: 'success' }, { value: 25, color: 'info' }]} />
 <LinearProgress />                         {/* indeterminate */}
-<CircularProgress value={50} />            {/* determinate ring */}
+<CircularProgress variant="determinate" value={50} />
 <CountdownRing deadline={expiresAt} totalMs={30_000} />  {/* timed ring */}
 ```
 
@@ -245,6 +260,8 @@ it and the ring starts full. It switches to `warningColor` below
 ## Data display {#data-display}
 
 ### `<Card>` {#card}
+
+<PrismExample example="card" hydrate="visible" />
 
 ```tsx
 import { Card, StatCard } from '@omnitron-dev/prism';
@@ -291,6 +308,8 @@ itself doesn't handle layout.
 
 ### `<Avatar>` {#avatar}
 
+<PrismExample example="avatar" hydrate="visible" />
+
 ```tsx
 import { Avatar, CustomAvatarGroup } from '@omnitron-dev/prism';
 
@@ -317,6 +336,8 @@ the same colour + initials, so users are visually identifiable
 even without photos.
 
 ### `<Badge>` {#badge}
+
+<PrismExample example="badge" hydrate="visible" />
 
 `<Badge>` wraps MUI Badge (use `badgeContent` / `variant="dot"`).
 For a count overlay, the `<CountBadge>` helper (with `count` /
@@ -346,6 +367,8 @@ import { Badge, CountBadge, StatusDot }
 `variant="dot"` shows a colour dot without a number.
 
 ### `<Table>` {#table}
+
+<PrismExample example="table" hydrate="visible" />
 
 The low-level table. For most app tables, prefer
 [`<DataGridBlock>`](./blocks.md#datagridblock--filterable--sortable--paginated-table) or
@@ -397,6 +420,8 @@ data, sorting or a second pagination implementation.
 
 ### `<Chart>` {#chart}
 
+<PrismExample example="chart" deferred="true" hydrate="visible" />
+
 ApexCharts wrapper with theme-aware defaults.
 
 ```tsx
@@ -438,6 +463,8 @@ Supported `type` values: `line`, `area`, `bar`, `pie`, `donut`,
 
 ### `<Carousel>` {#carousel}
 
+<PrismExample example="carousel" deferred="true" hydrate="visible" />
+
 Slides are passed as **children** (not a `slides` array prop):
 
 ```tsx
@@ -463,6 +490,8 @@ import { Carousel } from '@omnitron-dev/prism';
 
 ### `<Lightbox>` {#lightbox}
 
+<PrismExample example="lightbox" deferred="true" hydrate="visible" />
+
 Drive open/index state with `useLightbox`, then spread
 `getLightboxProps()` onto `<Lightbox>` (which takes a `slides`
 array). There is no `controller` prop:
@@ -487,7 +516,15 @@ function Gallery({ images }: { images: string[] }) {
 Keyboard navigation (arrows, Esc), zoom controls, thumbnails,
 counter, optional download/share buttons.
 
+### Map point picker {#map-point-picker}
+
+<PrismExample example="map" deferred="true" hydrate="visible" />
+
+Choose a point on the local GeoJSON layer, pan the map, or clear the selection. The example runs with the packaged map worker and its own data.
+
 ### `<Image>` {#image}
+
+<PrismExample example="image" hydrate="visible" />
 
 ```tsx
 import { Image } from '@omnitron-dev/prism';
@@ -508,6 +545,8 @@ optional loading `placeholder`. (`ratio` is the prop name — not
 `aspectRatio`.)
 
 ### `<TagCloud>` {#tagcloud}
+
+<PrismExample example="tags" hydrate="visible" />
 
 ```tsx
 import { TagCloud } from '@omnitron-dev/prism';
@@ -530,6 +569,8 @@ ranked list instead. `onTagClick` receives the full tag object.
 ## Navigation {#navigation}
 
 ### `<Breadcrumbs>` {#breadcrumbs}
+
+<PrismExample example="breadcrumbs" hydrate="visible" />
 
 ```tsx
 import { Breadcrumbs } from '@omnitron-dev/prism';
@@ -557,6 +598,8 @@ Pass `linkComponent` (e.g. react-router's `Link`) to keep
 breadcrumb links client-side.
 
 ### `<Menu>` {#menu}
+
+<PrismExample example="menu" hydrate="visible" />
 
 Dropdown menu. Pairs with `<IconButton>` or any trigger:
 
@@ -591,6 +634,8 @@ A `<ContextMenu>` variant is also exported for right-click menus.
 
 ### `<MegaMenu>` {#megamenu}
 
+<PrismExample example="mega-menu" hydrate="visible" />
+
 Multi-column dropdown for sites with deep navigation. It is
 config-driven — pass a `data` array (there is no `<MegaMenuColumn>`
 child component). Use `MegaMenu` (auto), or the explicit
@@ -622,6 +667,8 @@ import { MegaMenu } from '@omnitron-dev/prism';
 
 ### `<NavCard>` / `<NavCardGrid>` {#navcard--navcardgrid}
 
+<PrismExample example="nav-card" hydrate="visible" />
+
 Compact cards for navigation hubs. `<NavCard>` navigates via
 `to` + `linkComponent` (not `href`); `icon` is a `ReactNode`.
 `<NavCardGrid>` auto-wraps based on `minTileWidth` (not a fixed
@@ -638,6 +685,8 @@ import { Link as RouterLink } from 'react-router-dom';
 ```
 
 ### `<NavSection>` {#navsection}
+
+<PrismExample example="nav-section" hydrate="visible" />
 
 Sidebar navigation builder. The `<DashboardLayout>` uses this
 internally; you can use it standalone:
@@ -673,6 +722,8 @@ are the explicit layout variants.
 
 ### `<NavigationProgress>` {#navigationprogress}
 
+<PrismExample example="navigation-progress" deferred="true" hydrate="visible" />
+
 Top-of-page loading bar — shows during route transitions. Feed
 it the current `pathname` (and optionally `search`) from the
 router; it completes when those change:
@@ -689,6 +740,8 @@ const { pathname, search } = useLocation();
 `delay` (default 100ms) avoids flashing on fast transitions.
 
 ### `<Stepper>` {#stepper}
+
+<PrismExample example="stepper" hydrate="visible" />
 
 `<Stepper>` is config-driven — pass a `steps` array (there is no
 separate `<Step>` component):
@@ -714,6 +767,8 @@ stepper. `StepperActions` + `useStepper` cover next/back/reset
 wiring.
 
 ### `<Tabs>` / `<TabPanel>` {#tabs--tabpanel}
+
+<PrismExample example="tabs" hydrate="visible" />
 
 There is no separate `<Tab>` component. Either pass a `tabs`
 array of `{ value, label, content }`, or compose `<TabPanel>`
@@ -778,6 +833,8 @@ import { Tabs } from '@omnitron-dev/prism/components/tabs';
 
 ### `<ScrollSpy>` / `<ScrollSpyProvider>` {#scrollspy--scrollspyprovider}
 
+<PrismExample example="scroll-spy" hydrate="visible" />
+
 Wrap content in `<ScrollSpyProvider>`, mark each tracked region
 with `<ScrollSpySection id="…">`, and read the in-view section
 from the `useScrollSpy()` hook (`activeId`) to drive your own
@@ -813,6 +870,8 @@ pages.
 
 ### `<ScrollToTop>` {#scrolltotop}
 
+<PrismExample example="scroll-to-top" deferred="true" hydrate="visible" />
+
 Scrolls the window back to the top whenever the route changes —
 pass the current `pathname` from the router:
 
@@ -827,6 +886,8 @@ import { useLocation } from 'react-router-dom';
 "scroll to top" button. For that, see the `useBackToTop` hook.)
 
 ### `<Scrollbar>` {#scrollbar}
+
+<PrismExample example="scrollbar" hydrate="visible" />
 
 ```tsx
 import { Scrollbar } from '@omnitron-dev/prism';
@@ -848,6 +909,8 @@ The shared CSS baseline gives nested overflow regions the same behaviour.
 ## Input & form {#input--form}
 
 ### `Field` (namespace: `Field.Text`, `Field.Select`, …) {#field}
+
+<PrismExample example="field" hydrate="visible" />
 
 `Field` is a **namespace** of react-hook-form-integrated inputs —
 you use `<Field.Text>`, `<Field.Select>`, `<Field.Number>`, etc.,
@@ -892,6 +955,8 @@ overrides per field.
 
 ### `<Label>` {#label}
 
+<PrismExample example="label" hydrate="visible" />
+
 A small status/category chip (not an HTML form `<label>`). Use
 `color` + `variant` for status pills; `StatusLabel` and
 `BooleanLabel` are presets:
@@ -922,6 +987,8 @@ visualizations.
 
 ### `<SearchInput>` {#searchinput}
 
+<PrismExample example="search" hydrate="visible" />
+
 Debounced search input with a clear button:
 
 ```tsx
@@ -943,6 +1010,8 @@ built in. `aria-label` names the input independently of its placeholder;
 `clearTooltip` names the clear button.
 
 ### `<DateRangePicker>` {#daterangepicker}
+
+<PrismExample example="date-range" hydrate="visible" />
 
 `<DateRangePicker>` is a dialog driven by the
 `useDateRangePicker` hook — spread the hook's return onto it
@@ -969,6 +1038,8 @@ two-field inline form) is also exported.
 
 ### `<DurationPicker>` {#durationpicker}
 
+<PrismExample example="duration" hydrate="visible" />
+
 For "how long" inputs (TTLs, timeouts). The value is a duration
 **in seconds** (`null` = permanent/indefinite):
 
@@ -983,6 +1054,8 @@ For "how long" inputs (TTLs, timeouts). The value is a duration
 to localise the unit strings.
 
 ### `<CountrySelect>` {#countryselect}
+
+<PrismExample example="country" hydrate="visible" />
 
 ISO 3166 country dropdown with flags + search. It is
 **asset-free** — the consumer supplies the `options` list (and
@@ -1001,6 +1074,8 @@ data:
 Value / change are the lowercase ISO 3166-1 alpha-2 code.
 
 ### `<Editor>` + `<TipTapRenderer>` {#editor--tiptaprenderer}
+
+<PrismExample example="editor" deferred="true" hydrate="visible" />
 
 TipTap-based rich-text editor and read-only renderer. The
 `toolbar` prop takes a **preset** (`'full' | 'standard' |
@@ -1032,6 +1107,8 @@ edit/view, indexable for full-text search, safer than raw HTML.
 
 ### `<ContentRenderer>` {#contentrenderer}
 
+<PrismExample example="content" hydrate="visible" />
+
 Renders mixed content (TipTap JSON, markdown string, or HTML
 string) with consistent typography — it auto-detects the format
 from the content shape:
@@ -1045,6 +1122,8 @@ Props: `content`, `compact`, `className`, `sx`,
 router-aware `Link` to keep internal links client-side).
 
 ### `<CommandPalette>` {#commandpalette}
+
+<PrismExample example="commands" hydrate="visible" />
 
 `Cmd+K` style command palette. It self-manages open state via
 `triggerKey` (default `'k'` + the platform meta key) — just pass
@@ -1075,6 +1154,8 @@ keys + Enter; Esc closes. Pass `open` / `onOpenChange` for
 controlled mode.
 
 ### `<FilterToolbar>` {#filtertoolbar}
+
+<PrismExample example="filters" hydrate="visible" />
 
 Filter toolbar above admin tables — `search`, `select`,
 `multi-select`, `date-range`, `boolean`, `number-range` filter
@@ -1118,6 +1199,8 @@ and can be reset. `onReset` lets the host restore its own defaults.
 
 ### `<Drawer>` {#drawer}
 
+<PrismExample example="drawer" hydrate="visible" />
+
 Side panel — left, right, top, bottom:
 
 ```tsx
@@ -1146,6 +1229,8 @@ Use `width` for left/right anchors and `height` for top/bottom
 
 ### `<PageContent>` {#pagecontent}
 
+<PrismExample example="page-content" hydrate="visible" />
+
 A vertical-stack content wrapper (consistent section `gap`,
 optional `fill`). It does **not** render a title/breadcrumb
 header — compose `<Breadcrumbs>` + a heading above it, or use a
@@ -1154,12 +1239,14 @@ component (above):
 
 ```tsx
 <PageContent gap={3}>
-  <Breadcrumbs items={[{ label: 'Home', href: '/' }, { label: 'Projects' }]} />
+  <Breadcrumbs links={[{ name: 'Home', href: '/' }, { name: 'Projects' }]} />
   <ProjectsList />
 </PageContent>
 ```
 
 ### `<DocLayout>` {#doclayout}
+
+<PrismExample example="doc-layout" hydrate="visible" />
 
 For documentation pages — collapsible sidebar + main +
 on-this-page nav. The right-rail "table of contents" is
@@ -1179,6 +1266,8 @@ import { DocLayout, DocSidebar, DocSectionNav }
 ```
 
 ### `<Accordion>` {#accordion}
+
+<PrismExample example="accordion" hydrate="visible" />
 
 `<Accordion>` is config-driven — pass an `items` array (there is
 no `<Accordion.Item>` child). Single-open by default; pass
@@ -1200,6 +1289,8 @@ Item shape: `{ id, title, subtitle?, content, icon?, disabled? }`.
 A `<SimpleAccordion>` convenience wrapper is also exported.
 
 ### `<AnimateBorder>` / `<MotionLazy>` {#animateborder--motionlazy}
+
+<PrismExample example="motion" deferred="true" hydrate="visible" />
 
 The `animate` module exports `AnimateBorder` — a `Box` with an
 animated gradient border — and `MotionLazy`, a provider that
@@ -1223,6 +1314,8 @@ import { AnimateBorder, MotionLazy }
 
 ### `<SvgColor>` {#svgcolor}
 
+<PrismExample example="svg" hydrate="visible" />
+
 Inlines an SVG and applies a colour via CSS mask (uses
 `currentColor` by default — pass any CSS colour, e.g. a theme
 token via `sx`):
@@ -1234,6 +1327,8 @@ token via `sx`):
 Lets you tint icons without exporting per-colour copies.
 
 ### Settings drawer — `<SettingsProvider>` / `<SettingsDrawer>` {#settings-drawer--settingsprovider--settingsdrawer}
+
+<PrismExample example="settings" deferred="true" hydrate="visible" />
 
 In-app settings drawer (theme mode, layout, colour preset).
 Wrap the app in `<SettingsProvider>`, mount `<SettingsDrawer>`
@@ -1259,6 +1354,8 @@ State is backed by the Prism settings store (`useSettingsStore`
 from `@omnitron-dev/prism/state`) — persisted to localStorage.
 
 ### Changelog — `<ChangelogTimeline>` / `<ChangelogEntry>` {#changelog--changelogtimeline--changelogentry}
+
+<PrismExample example="changelog" hydrate="visible" />
 
 Renders a feed of changes (there is no single `<Changelog>`
 component — compose a `<ChangelogTimeline>` of
@@ -1433,6 +1530,8 @@ page: [Maps](./maps.md). The `Field.*` inputs are in [Forms](./forms.md).
 
 ## Research documents {#research-documents}
 
+<PrismExample example="research-document" deferred="true" hydrate="visible" />
+
 `@omnitron-dev/prism/components/research` adds a source-preserving Markdown → typed document → React path. Import `@omnitron-dev/prism/components/research/styles.css` once. It supports GFM, stable Unicode heading anchors, admonitions, tabs, KaTeX and strict Mermaid diagrams. `parseResearchMarkdown(source, documentId)` returns the document tree, heading outline and diagnostics; node attributes retain source positions.
 
 ```tsx
@@ -1453,6 +1552,8 @@ Use `$...$` / `$$...$$` for math, a `mermaid` fence for diagrams, and a `prism` 
 Raw HTML and unsupported constructs remain inert with source diagnostics. Unsupported diagram engines retain their source; Pintora is not interpreted as Mermaid. TeX runs with trust disabled and expansion/size limits. Mermaid source cannot change renderer configuration; rendered SVG is sanitized and displayed as an isolated SVG image, preserving the layout styles without inserting document-controlled CSS into the page. Active elements and links are removed; the browser image boundary disables scripting and external resources. Theme changes are serialized. Source/AST/block/edge limits bound accepted input, **not execution time**: Mermaid runs on the browser main thread. Host-owned widgets must independently obey the host's accessibility, resource, network and permission policies. This renderer provides presentation, not proof checking or Noesis semantics. The host owns immutable revision identity, digest verification, authorization and publication. Unknown or failing blocks preserve source rather than masquerading as successful verification.
 
 ### `<ResearchEditor>` {#researcheditor}
+
+<PrismExample example="research-editor" deferred="true" hydrate="visible" />
 
 A block-oriented scientific editor using Tiptap/ProseMirror and the same
 Markdown, math, diagram and widget contract as `ResearchDocument`.
@@ -1533,6 +1634,8 @@ cost. Measure browser input latency separately from parsing or serialization;
 no constant-time editing or arbitrary document-size guarantee is made.
 
 ### `<KnowledgeGraph>` {#knowledgegraph}
+
+<PrismExample example="knowledge-graph" deferred="true" hydrate="visible" />
 
 A configurable React Flow surface for typed knowledge relations. The data
 model is independent of React Flow node coordinates. A relation is a first-class

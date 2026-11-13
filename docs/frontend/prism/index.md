@@ -124,6 +124,8 @@ your bundler needs.
 
 ## Minimum wiring {#minimum-wiring}
 
+<PrismExample example="tabs" hydrate="visible" />
+
 ```tsx
 import { PrismProvider } from '@omnitron-dev/prism/core';
 

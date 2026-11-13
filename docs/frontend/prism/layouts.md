@@ -486,6 +486,8 @@ function CollapseToggle() {
 
 ## Core primitives (custom shells) {#core-primitives-custom-shells}
 
+<PrismExample example="doc-layout" hydrate="visible" />
+
 When none of the pre-built shells fit, compose your own from the core
 primitives. There is no `<CoreLayout>` — `LayoutSection` is the root
 container, `HeaderSection` is the slotted header, and `MainSection` is a

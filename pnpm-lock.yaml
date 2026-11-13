@@ -177,22 +177,34 @@ importers:
     dependencies:
       '@omnitron-dev/lumen':
         specifier: 0.4.6
-        version: 0.4.6(@floating-ui/dom@1.8.0)(@surrealdb/node-native@4.0.1)(@tiptap/extension-code-block@3.33.1(@tiptap/core@3.33.1(@tiptap/pm@3.33.1))(@tiptap/pm@3.33.1))(@tiptap/extension-list@3.33.1(@tiptap/core@3.33.1(@tiptap/pm@3.33.1))(@tiptap/pm@3.33.1))(@tiptap/extensions@3.33.1(@tiptap/core@3.33.1(@tiptap/pm@3.33.1))(@tiptap/pm@3.33.1))(@types/node@26.6.6)(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(ajv@8.20.0)(esbuild@0.28.2)(highlight.js@11.11.2)(jiti@1.21.7)(joi@17.13.9)(react-dom@19.3.1(react@19.3.1))(react@19.3.1)(supports-color@8.1.1)(surrealdb@2.2.2(@typescript/typescript6@6.0.2)(tslib@2.8.1))(terser@5.51.2)(use-sync-external-store@1.7.0(react@19.3.1))(yaml@2.9.1)
+        version: 0.4.6(@floating-ui/dom@1.8.0)(@surrealdb/node-native@4.0.1)(@tiptap/extension-code-block@3.33.1(@tiptap/core@3.33.1(@tiptap/pm@3.33.1))(@tiptap/pm@3.33.1))(@tiptap/extension-list@3.33.1(@tiptap/core@3.33.1(@tiptap/pm@3.33.1))(@tiptap/pm@3.33.1))(@tiptap/extensions@3.33.1(@tiptap/core@3.33.1(@tiptap/pm@3.33.1))(@tiptap/pm@3.33.1))(@types/node@26.6.6)(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(ajv@8.20.0)(apexcharts@8.8.1)(esbuild@0.28.2)(highlight.js@11.11.2)(jiti@1.21.7)(joi@17.13.9)(react-apexcharts@2.2.0(apexcharts@8.8.1)(react@19.3.1))(react-dom@19.3.1(react@19.3.1))(react@19.3.1)(supports-color@8.1.1)(surrealdb@2.2.2(@typescript/typescript6@6.0.2)(tslib@2.8.1))(terser@5.51.2)(use-sync-external-store@1.7.0(react@19.3.1))(yaml@2.9.1)
       '@omnitron-dev/lumen-ast':
         specifier: 0.4.6
         version: 0.4.6(supports-color@8.1.1)
       '@omnitron-dev/lumen-ui':
         specifier: 0.4.6
-        version: 0.4.6(@floating-ui/dom@1.8.0)(@surrealdb/node-native@4.0.1)(@tiptap/extension-code-block@3.33.1(@tiptap/core@3.33.1(@tiptap/pm@3.33.1))(@tiptap/pm@3.33.1))(@tiptap/extension-list@3.33.1(@tiptap/core@3.33.1(@tiptap/pm@3.33.1))(@tiptap/pm@3.33.1))(@tiptap/extensions@3.33.1(@tiptap/core@3.33.1(@tiptap/pm@3.33.1))(@tiptap/pm@3.33.1))(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(ajv@8.20.0)(highlight.js@11.11.2)(joi@17.13.9)(react-dom@19.3.1(react@19.3.1))(react@19.3.1)(supports-color@8.1.1)(surrealdb@2.2.2(@typescript/typescript6@6.0.2)(tslib@2.8.1))(use-sync-external-store@1.7.0(react@19.3.1))
+        version: 0.4.6(@floating-ui/dom@1.8.0)(@surrealdb/node-native@4.0.1)(@tiptap/extension-code-block@3.33.1(@tiptap/core@3.33.1(@tiptap/pm@3.33.1))(@tiptap/pm@3.33.1))(@tiptap/extension-list@3.33.1(@tiptap/core@3.33.1(@tiptap/pm@3.33.1))(@tiptap/pm@3.33.1))(@tiptap/extensions@3.33.1(@tiptap/core@3.33.1(@tiptap/pm@3.33.1))(@tiptap/pm@3.33.1))(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(ajv@8.20.0)(apexcharts@8.8.1)(highlight.js@11.11.2)(joi@17.13.9)(react-apexcharts@2.2.0(apexcharts@8.8.1)(react@19.3.1))(react-dom@19.3.1(react@19.3.1))(react@19.3.1)(supports-color@8.1.1)(surrealdb@2.2.2(@typescript/typescript6@6.0.2)(tslib@2.8.1))(use-sync-external-store@1.7.0(react@19.3.1))
       '@omnitron-dev/prism':
         specifier: 0.4.6
-        version: 0.4.6(@floating-ui/dom@1.8.0)(@tiptap/extension-code-block@3.33.1(@tiptap/core@3.33.1(@tiptap/pm@3.33.1))(@tiptap/pm@3.33.1))(@tiptap/extension-list@3.33.1(@tiptap/core@3.33.1(@tiptap/pm@3.33.1))(@tiptap/pm@3.33.1))(@tiptap/extensions@3.33.1(@tiptap/core@3.33.1(@tiptap/pm@3.33.1))(@tiptap/pm@3.33.1))(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(ajv@8.20.0)(highlight.js@11.11.2)(joi@17.13.9)(react-dom@19.3.1(react@19.3.1))(react@19.3.1)(supports-color@8.1.1)(use-sync-external-store@1.7.0(react@19.3.1))
+        version: 0.4.6(@floating-ui/dom@1.8.0)(@tiptap/extension-code-block@3.33.1(@tiptap/core@3.33.1(@tiptap/pm@3.33.1))(@tiptap/pm@3.33.1))(@tiptap/extension-list@3.33.1(@tiptap/core@3.33.1(@tiptap/pm@3.33.1))(@tiptap/pm@3.33.1))(@tiptap/extensions@3.33.1(@tiptap/core@3.33.1(@tiptap/pm@3.33.1))(@tiptap/pm@3.33.1))(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(ajv@8.20.0)(apexcharts@8.8.1)(highlight.js@11.11.2)(joi@17.13.9)(react-apexcharts@2.2.0(apexcharts@8.8.1)(react@19.3.1))(react-dom@19.3.1(react@19.3.1))(react@19.3.1)(supports-color@8.1.1)(use-sync-external-store@1.7.0(react@19.3.1))
+      apexcharts:
+        specifier: 8.8.1
+        version: 8.8.1
+      maplibre-gl:
+        specifier: 6.17.0
+        version: 6.17.0
       react:
         specifier: 19.3.1
         version: 19.3.1
+      react-apexcharts:
+        specifier: 2.2.0
+        version: 2.2.0(apexcharts@8.8.1)(react@19.3.1)
       react-dom:
         specifier: 19.3.1
         version: 19.3.1(react@19.3.1)
+      react-hook-form:
+        specifier: 7.92.0
+        version: 7.92.0(@types/react@19.3.0)(react@19.3.1)
     devDependencies:
       '@playwright/test':
         specifier: 1.64.1
@@ -212,6 +224,9 @@ importers:
       typescript:
         specifier: npm:@typescript/typescript6@^6.0.2
         version: '@typescript/typescript6@6.0.2'
+      vite:
+        specifier: 8.3.8
+        version: 8.3.8(@types/node@26.6.6)(esbuild@0.28.2)(jiti@1.21.7)(terser@5.51.2)(yaml@2.9.1)
 
 packages:
 
@@ -1636,6 +1651,13 @@ packages:
   ajv@8.20.0:
     resolution: {integrity: sha512-Thbli+OlOj+iMPYFBVBfJ3OmCAnaSyNn4M1vz9T6Gka5Jt9ba/HIR56joy65tY6kx/FCF5VXNB819Y7/GUrBGA==}
 
+  apex-commons@0.10.0:
+    resolution: {integrity: sha512-mBXqK6wykMnWV4TzT9636k4aaeEvE8PmBIfa2bHx91eQoit8RjJrOlBpGxNGz1Bmt6gq2U3CoqPAUZftBbYdLQ==}
+
+  apexcharts@8.8.1:
+    resolution: {integrity: sha512-Aeha39Wdrg4pTdJTpM+QsQemLoCRpwC5tEgwHYzbvtRxo4E9EmQ6zdTZbhcYia24HyPhqx3IATd1evgS0lRtzw==}
+    engines: {node: ^20.19.0 || ^22.12.0 || >=24.0.0}
+
   argparse@1.0.10:
     resolution: {integrity: sha512-o5Roy6tNG4SL/FOkCAN6RzjiakZS25RLYFrcMttJqbdd8BWrnA+fGz57iN5Pb06pvBGvl5gQ0B48dJlslXvoTg==}
 
@@ -2737,6 +2759,12 @@ packages:
   quickselect@3.0.0:
     resolution: {integrity: sha512-XdjUArbK4Bm5fLLvlm5KpTFOiOThgfWWI4axAZDWg4E/0mKdZyI9tNEfds27qCi1ze/vwTR16kvmmGhRra3c2g==}
 
+  react-apexcharts@2.2.0:
+    resolution: {integrity: sha512-MEiH/T65ooUNf8V7Cq7fCu1femP3+lN9Svzsv+jNNS6AcRSciyA1LLvc1VETWqAiqMxQyX8NYEhZxOYnMf262g==}
+    peerDependencies:
+      apexcharts: '>=5.10.1'
+      react: '>=16.8.0'
+
   react-dom@19.3.1:
     resolution: {integrity: sha512-Y0bARz53lhEC1NMCASs0/j+faB/zqt3R8hpvg1e8+61ZVJ4UL0UdC4cBbXfZMcIuhrfgeILTLe+ZeBCavQPtKQ==}
     peerDependencies:
@@ -3815,7 +3843,7 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  '@omnitron-dev/lumen-ui@0.4.6(@floating-ui/dom@1.8.0)(@surrealdb/node-native@4.0.1)(@tiptap/extension-code-block@3.33.1(@tiptap/core@3.33.1(@tiptap/pm@3.33.1))(@tiptap/pm@3.33.1))(@tiptap/extension-list@3.33.1(@tiptap/core@3.33.1(@tiptap/pm@3.33.1))(@tiptap/pm@3.33.1))(@tiptap/extensions@3.33.1(@tiptap/core@3.33.1(@tiptap/pm@3.33.1))(@tiptap/pm@3.33.1))(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(ajv@8.20.0)(highlight.js@11.11.2)(joi@17.13.9)(react-dom@19.3.1(react@19.3.1))(react@19.3.1)(supports-color@8.1.1)(surrealdb@2.2.2(@typescript/typescript6@6.0.2)(tslib@2.8.1))(use-sync-external-store@1.7.0(react@19.3.1))':
+  '@omnitron-dev/lumen-ui@0.4.6(@floating-ui/dom@1.8.0)(@surrealdb/node-native@4.0.1)(@tiptap/extension-code-block@3.33.1(@tiptap/core@3.33.1(@tiptap/pm@3.33.1))(@tiptap/pm@3.33.1))(@tiptap/extension-list@3.33.1(@tiptap/core@3.33.1(@tiptap/pm@3.33.1))(@tiptap/pm@3.33.1))(@tiptap/extensions@3.33.1(@tiptap/core@3.33.1(@tiptap/pm@3.33.1))(@tiptap/pm@3.33.1))(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(ajv@8.20.0)(apexcharts@8.8.1)(highlight.js@11.11.2)(joi@17.13.9)(react-apexcharts@2.2.0(apexcharts@8.8.1)(react@19.3.1))(react-dom@19.3.1(react@19.3.1))(react@19.3.1)(supports-color@8.1.1)(surrealdb@2.2.2(@typescript/typescript6@6.0.2)(tslib@2.8.1))(use-sync-external-store@1.7.0(react@19.3.1))':
     dependencies:
       '@emotion/cache': 11.14.0
       '@emotion/react': 11.14.0(@types/react@19.3.0)(react@19.3.1)(supports-color@8.1.1)
@@ -3823,7 +3851,7 @@ snapshots:
       '@mui/material': 9.5.0(@emotion/react@11.14.0(@types/react@19.3.0)(react@19.3.1)(supports-color@8.1.1))(@emotion/styled@11.14.1(@emotion/react@11.14.0(@types/react@19.3.0)(react@19.3.1)(supports-color@8.1.1))(@types/react@19.3.0)(react@19.3.1)(supports-color@8.1.1))(@types/react@19.3.0)(react-dom@19.3.1(react@19.3.1))(react@19.3.1)
       '@omnitron-dev/kb': 0.4.6(@surrealdb/node-native@4.0.1)(surrealdb@2.2.2(@typescript/typescript6@6.0.2)(tslib@2.8.1))
       '@omnitron-dev/lumen-ast': 0.4.6(supports-color@8.1.1)
-      '@omnitron-dev/prism': 0.4.6(@floating-ui/dom@1.8.0)(@tiptap/extension-code-block@3.33.1(@tiptap/core@3.33.1(@tiptap/pm@3.33.1))(@tiptap/pm@3.33.1))(@tiptap/extension-list@3.33.1(@tiptap/core@3.33.1(@tiptap/pm@3.33.1))(@tiptap/pm@3.33.1))(@tiptap/extensions@3.33.1(@tiptap/core@3.33.1(@tiptap/pm@3.33.1))(@tiptap/pm@3.33.1))(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(ajv@8.20.0)(highlight.js@11.11.2)(joi@17.13.9)(react-dom@19.3.1(react@19.3.1))(react@19.3.1)(supports-color@8.1.1)(use-sync-external-store@1.7.0(react@19.3.1))
+      '@omnitron-dev/prism': 0.4.6(@floating-ui/dom@1.8.0)(@tiptap/extension-code-block@3.33.1(@tiptap/core@3.33.1(@tiptap/pm@3.33.1))(@tiptap/pm@3.33.1))(@tiptap/extension-list@3.33.1(@tiptap/core@3.33.1(@tiptap/pm@3.33.1))(@tiptap/pm@3.33.1))(@tiptap/extensions@3.33.1(@tiptap/core@3.33.1(@tiptap/pm@3.33.1))(@tiptap/pm@3.33.1))(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(ajv@8.20.0)(apexcharts@8.8.1)(highlight.js@11.11.2)(joi@17.13.9)(react-apexcharts@2.2.0(apexcharts@8.8.1)(react@19.3.1))(react-dom@19.3.1(react@19.3.1))(react@19.3.1)(supports-color@8.1.1)(use-sync-external-store@1.7.0(react@19.3.1))
       clsx: 2.1.1
       katex: 0.19.1
       react: 19.3.1
@@ -3879,7 +3907,7 @@ snapshots:
       - vest
       - yup
 
-  '@omnitron-dev/lumen@0.4.6(@floating-ui/dom@1.8.0)(@surrealdb/node-native@4.0.1)(@tiptap/extension-code-block@3.33.1(@tiptap/core@3.33.1(@tiptap/pm@3.33.1))(@tiptap/pm@3.33.1))(@tiptap/extension-list@3.33.1(@tiptap/core@3.33.1(@tiptap/pm@3.33.1))(@tiptap/pm@3.33.1))(@tiptap/extensions@3.33.1(@tiptap/core@3.33.1(@tiptap/pm@3.33.1))(@tiptap/pm@3.33.1))(@types/node@26.6.6)(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(ajv@8.20.0)(esbuild@0.28.2)(highlight.js@11.11.2)(jiti@1.21.7)(joi@17.13.9)(react-dom@19.3.1(react@19.3.1))(react@19.3.1)(supports-color@8.1.1)(surrealdb@2.2.2(@typescript/typescript6@6.0.2)(tslib@2.8.1))(terser@5.51.2)(use-sync-external-store@1.7.0(react@19.3.1))(yaml@2.9.1)':
+  '@omnitron-dev/lumen@0.4.6(@floating-ui/dom@1.8.0)(@surrealdb/node-native@4.0.1)(@tiptap/extension-code-block@3.33.1(@tiptap/core@3.33.1(@tiptap/pm@3.33.1))(@tiptap/pm@3.33.1))(@tiptap/extension-list@3.33.1(@tiptap/core@3.33.1(@tiptap/pm@3.33.1))(@tiptap/pm@3.33.1))(@tiptap/extensions@3.33.1(@tiptap/core@3.33.1(@tiptap/pm@3.33.1))(@tiptap/pm@3.33.1))(@types/node@26.6.6)(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(ajv@8.20.0)(apexcharts@8.8.1)(esbuild@0.28.2)(highlight.js@11.11.2)(jiti@1.21.7)(joi@17.13.9)(react-apexcharts@2.2.0(apexcharts@8.8.1)(react@19.3.1))(react-dom@19.3.1(react@19.3.1))(react@19.3.1)(supports-color@8.1.1)(surrealdb@2.2.2(@typescript/typescript6@6.0.2)(tslib@2.8.1))(terser@5.51.2)(use-sync-external-store@1.7.0(react@19.3.1))(yaml@2.9.1)':
     dependencies:
       '@emotion/cache': 11.14.0
       '@emotion/react': 11.14.0(@types/react@19.3.0)(react@19.3.1)(supports-color@8.1.1)
@@ -3887,8 +3915,8 @@ snapshots:
       '@modelcontextprotocol/server': 2.4.0
       '@omnitron-dev/common': 0.4.6
       '@omnitron-dev/lumen-ast': 0.4.6(supports-color@8.1.1)
-      '@omnitron-dev/lumen-ui': 0.4.6(@floating-ui/dom@1.8.0)(@surrealdb/node-native@4.0.1)(@tiptap/extension-code-block@3.33.1(@tiptap/core@3.33.1(@tiptap/pm@3.33.1))(@tiptap/pm@3.33.1))(@tiptap/extension-list@3.33.1(@tiptap/core@3.33.1(@tiptap/pm@3.33.1))(@tiptap/pm@3.33.1))(@tiptap/extensions@3.33.1(@tiptap/core@3.33.1(@tiptap/pm@3.33.1))(@tiptap/pm@3.33.1))(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(ajv@8.20.0)(highlight.js@11.11.2)(joi@17.13.9)(react-dom@19.3.1(react@19.3.1))(react@19.3.1)(supports-color@8.1.1)(surrealdb@2.2.2(@typescript/typescript6@6.0.2)(tslib@2.8.1))(use-sync-external-store@1.7.0(react@19.3.1))
-      '@omnitron-dev/prism': 0.4.6(@floating-ui/dom@1.8.0)(@tiptap/extension-code-block@3.33.1(@tiptap/core@3.33.1(@tiptap/pm@3.33.1))(@tiptap/pm@3.33.1))(@tiptap/extension-list@3.33.1(@tiptap/core@3.33.1(@tiptap/pm@3.33.1))(@tiptap/pm@3.33.1))(@tiptap/extensions@3.33.1(@tiptap/core@3.33.1(@tiptap/pm@3.33.1))(@tiptap/pm@3.33.1))(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(ajv@8.20.0)(highlight.js@11.11.2)(joi@17.13.9)(react-dom@19.3.1(react@19.3.1))(react@19.3.1)(supports-color@8.1.1)(use-sync-external-store@1.7.0(react@19.3.1))
+      '@omnitron-dev/lumen-ui': 0.4.6(@floating-ui/dom@1.8.0)(@surrealdb/node-native@4.0.1)(@tiptap/extension-code-block@3.33.1(@tiptap/core@3.33.1(@tiptap/pm@3.33.1))(@tiptap/pm@3.33.1))(@tiptap/extension-list@3.33.1(@tiptap/core@3.33.1(@tiptap/pm@3.33.1))(@tiptap/pm@3.33.1))(@tiptap/extensions@3.33.1(@tiptap/core@3.33.1(@tiptap/pm@3.33.1))(@tiptap/pm@3.33.1))(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(ajv@8.20.0)(apexcharts@8.8.1)(highlight.js@11.11.2)(joi@17.13.9)(react-apexcharts@2.2.0(apexcharts@8.8.1)(react@19.3.1))(react-dom@19.3.1(react@19.3.1))(react@19.3.1)(supports-color@8.1.1)(surrealdb@2.2.2(@typescript/typescript6@6.0.2)(tslib@2.8.1))(use-sync-external-store@1.7.0(react@19.3.1))
+      '@omnitron-dev/prism': 0.4.6(@floating-ui/dom@1.8.0)(@tiptap/extension-code-block@3.33.1(@tiptap/core@3.33.1(@tiptap/pm@3.33.1))(@tiptap/pm@3.33.1))(@tiptap/extension-list@3.33.1(@tiptap/core@3.33.1(@tiptap/pm@3.33.1))(@tiptap/pm@3.33.1))(@tiptap/extensions@3.33.1(@tiptap/core@3.33.1(@tiptap/pm@3.33.1))(@tiptap/pm@3.33.1))(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(ajv@8.20.0)(apexcharts@8.8.1)(highlight.js@11.11.2)(joi@17.13.9)(react-apexcharts@2.2.0(apexcharts@8.8.1)(react@19.3.1))(react-dom@19.3.1(react@19.3.1))(react@19.3.1)(supports-color@8.1.1)(use-sync-external-store@1.7.0(react@19.3.1))
       commander: 15.0.0
       import-meta-resolve: 4.2.0
       pagefind: 1.6.0
@@ -3989,7 +4017,7 @@ snapshots:
       react: 19.3.1
       react-dom: 19.3.1(react@19.3.1)
 
-  '@omnitron-dev/prism@0.4.6(@floating-ui/dom@1.8.0)(@tiptap/extension-code-block@3.33.1(@tiptap/core@3.33.1(@tiptap/pm@3.33.1))(@tiptap/pm@3.33.1))(@tiptap/extension-list@3.33.1(@tiptap/core@3.33.1(@tiptap/pm@3.33.1))(@tiptap/pm@3.33.1))(@tiptap/extensions@3.33.1(@tiptap/core@3.33.1(@tiptap/pm@3.33.1))(@tiptap/pm@3.33.1))(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(ajv@8.20.0)(highlight.js@11.11.2)(joi@17.13.9)(react-dom@19.3.1(react@19.3.1))(react@19.3.1)(supports-color@8.1.1)(use-sync-external-store@1.7.0(react@19.3.1))':
+  '@omnitron-dev/prism@0.4.6(@floating-ui/dom@1.8.0)(@tiptap/extension-code-block@3.33.1(@tiptap/core@3.33.1(@tiptap/pm@3.33.1))(@tiptap/pm@3.33.1))(@tiptap/extension-list@3.33.1(@tiptap/core@3.33.1(@tiptap/pm@3.33.1))(@tiptap/pm@3.33.1))(@tiptap/extensions@3.33.1(@tiptap/core@3.33.1(@tiptap/pm@3.33.1))(@tiptap/pm@3.33.1))(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(ajv@8.20.0)(apexcharts@8.8.1)(highlight.js@11.11.2)(joi@17.13.9)(react-apexcharts@2.2.0(apexcharts@8.8.1)(react@19.3.1))(react-dom@19.3.1(react@19.3.1))(react@19.3.1)(supports-color@8.1.1)(use-sync-external-store@1.7.0(react@19.3.1))':
     dependencies:
       '@emotion/cache': 11.14.0
       '@emotion/react': 11.14.0(@types/react@19.3.0)(react@19.3.1)(supports-color@8.1.1)
@@ -4054,6 +4082,9 @@ snapshots:
       turndown: 7.2.5
       zod: 4.6.7
       zustand: 5.1.0(@types/react@19.3.0)(immer@11.2.10)(react@19.3.1)(use-sync-external-store@1.7.0(react@19.3.1))
+    optionalDependencies:
+      apexcharts: 8.8.1
+      react-apexcharts: 2.2.0(apexcharts@8.8.1)(react@19.3.1)
     transitivePeerDependencies:
       - '@floating-ui/dom'
       - '@mui/material-pigment-css'
@@ -4765,6 +4796,12 @@ snapshots:
       json-schema-traverse: 1.0.0
       require-from-string: 2.0.2
     optional: true
+
+  apex-commons@0.10.0: {}
+
+  apexcharts@8.8.1:
+    dependencies:
+      apex-commons: 0.10.0
 
   argparse@1.0.10:
     dependencies:
@@ -6223,6 +6260,12 @@ snapshots:
       '@jitl/quickjs-ffi-types': 0.32.0
 
   quickselect@3.0.0: {}
+
+  react-apexcharts@2.2.0(apexcharts@8.8.1)(react@19.3.1):
+    dependencies:
+      apexcharts: 8.8.1
+      prop-types: 15.8.1
+      react: 19.3.1
 
   react-dom@19.3.1(react@19.3.1):
     dependencies:

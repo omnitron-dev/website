@@ -1,4 +1,6 @@
 import React, {useMemo, useState} from 'react';
+import { Button, TextField } from '@omnitron-dev/prism/ui';
+import { ArrowLeftIcon, ArrowRightIcon } from '@omnitron-dev/prism/icons';
 import data from '../data/api-index.json';
 import styles from '../components/ApiExplorer/styles.module.css';
 
@@ -26,26 +28,22 @@ export default function ApiExplorer() {
         {data.packages.length} packages · {data.entryPoints.length} entry points · {data.symbols.length.toLocaleString('en')} exports
       </p>
       <div className={styles.filters}>
-        <label className={styles.search}>
-          Search API
-          <input type="search" placeholder="Symbol or import path…" value={query}
-            onChange={event => { setQuery(event.target.value); setPage(0); }} />
-        </label>
-        <label>
-          Package
-          <select value={pkg} onChange={event => { setPackage(event.target.value); setPage(0); }}>
-            <option value="">All packages</option>
-            {data.packages.map(name => <option key={name} value={name}>{name.replace('@omnitron-dev/', '')}</option>)}
-          </select>
-        </label>
-        <label>
-          Kind
-          <select value={kind} onChange={event => { setKind(event.target.value); setPage(0); }}>
-            <option value="">All exports</option>
-            {['class', 'enum', 'function', 'interface', 'type', 'value'].map(value =>
-              <option key={value} value={value}>{value}</option>)}
-          </select>
-        </label>
+        <TextField className={styles.search} type="search" label="Search API"
+          size="small" placeholder="Symbol or import path…" value={query}
+          onChange={event => { setQuery(event.target.value); setPage(0); }} />
+        <TextField select label="Package" size="small" value={pkg} id="api-package"
+          slotProps={{ select: { native: true }, inputLabel: { shrink: true } }}
+          onChange={event => { setPackage(event.target.value); setPage(0); }}>
+          <option value="">All packages</option>
+          {data.packages.map(name => <option key={name} value={name}>{name.replace('@omnitron-dev/', '')}</option>)}
+        </TextField>
+        <TextField select label="Kind" size="small" value={kind} id="api-export-kind"
+          slotProps={{ select: { native: true }, inputLabel: { shrink: true } }}
+          onChange={event => { setKind(event.target.value); setPage(0); }}>
+          <option value="">All exports</option>
+          {['class', 'enum', 'function', 'interface', 'type', 'value'].map(value =>
+            <option key={value} value={value}>{value}</option>)}
+        </TextField>
       </div>
       <p className={styles.results} role="status" aria-live="polite">
         {matches.length.toLocaleString('en')} {matches.length === 1 ? 'result' : 'results'}
@@ -74,9 +72,9 @@ export default function ApiExplorer() {
       ) : <p>No matching exports. Try a shorter symbol name or clear the package filter.</p>}
       {pageCount > 1 && (
         <nav className={styles.pagination} aria-label="API results pagination">
-          <button type="button" disabled={page === 0} onClick={() => setPage(page - 1)}>← Previous</button>
+          <Button startIcon={<ArrowLeftIcon />} disabled={page === 0} onClick={() => setPage(page - 1)}>Previous</Button>
           <span>Page {page + 1} of {pageCount}</span>
-          <button type="button" disabled={page + 1 === pageCount} onClick={() => setPage(page + 1)}>Next →</button>
+          <Button endIcon={<ArrowRightIcon />} disabled={page + 1 === pageCount} onClick={() => setPage(page + 1)}>Next</Button>
         </nav>
       )}
       <details className={styles.entries}>

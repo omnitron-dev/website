@@ -29,6 +29,8 @@ override a second renderer version.
 
 ## One visual system {#one-visual-system}
 
+<PrismExample example="research-editor" deferred="true" hydrate="visible" />
+
 Colours come from `theme.palette`; editor and graph radii come from
 `theme.shape.borderRadius`. Override these through the
 [Prism theme](./theme.md), rather than adding global `button` or `input` CSS.
@@ -52,6 +54,8 @@ configurable; pass a `labels` object to localize their controls. A graph's
 information without coupling Prism to that application's backend.
 
 ## Keep document and knowledge semantics separate {#keep-document-and-knowledge-semantics-separate}
+
+<PrismExample example="knowledge-graph" deferred="true" hydrate="visible" />
 
 `ResearchEditor` accepts `initialSource`. Its `onChange` callback delivers a
 `ResearchSnapshot`; call `getSource()` to obtain the exact current source.
@@ -83,6 +87,8 @@ verified status and diagnostics from the host through `renderDetails` and
 ordinary Prism components.
 
 ## Equations in place {#equations-in-place}
+
+<PrismExample example="research-document" deferred="true" hydrate="visible" />
 
 Inline and display equations open inside the document. Click an equation, or
 enter an adjacent inline equation with an arrow key. `Ctrl/Command + Shift + M`

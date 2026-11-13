@@ -1,4 +1,5 @@
 import React from 'react';
+import { IconButton } from '@omnitron-dev/prism/ui';
 import type { ThemeMode } from '@omnitron-dev/prism/theme';
 
 // Selected Hugeicons core-duotone-rounded glyphs: Sun03, Moon02 and Computer.
@@ -25,7 +26,7 @@ export function ThemeIcon({ mode }: { mode: ThemeMode }) {
 }
 
 export function ThemeSelectorPlaceholder() {
-  return <button type="button" className="theme-trigger" disabled aria-label="Choose color theme" title="Choose color theme">
+  return <IconButton className="theme-trigger" disabled aria-label="Choose color theme" title="Choose color theme">
     <ThemeIcon mode="system" />
-  </button>;
+  </IconButton>;
 }

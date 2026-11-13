@@ -19,6 +19,8 @@ reads its own error from react-hook-form state and renders it inline.
 
 ## The pieces {#the-pieces}
 
+<PrismExample example="field" hydrate="visible" />
+
 1. **A zod schema** — the source of truth for shape + validation, wired
    in via `zodResolver`.
 2. **react-hook-form** — `useForm` + `FormProvider` own the form state.
@@ -33,8 +35,7 @@ dependency of Prism but is **not** re-exported, so import it directly
 (this is the same import Prism's own blocks use):
 
 ```tsx
-import { Field } from '@omnitron-dev/prism';            // namespace
-// or: import { Field } from '@omnitron-dev/prism';
+import { Field } from '@omnitron-dev/prism/components';
 import { FormAlert } from '@omnitron-dev/prism';
 import { FormProvider, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -235,6 +236,8 @@ Recommendations:
 
 ## Error display {#error-display}
 
+<PrismExample example="alert" hydrate="visible" />
+
 ### Inline per-field {#inline-per-field}
 
 Every `Field.*` component renders its error message automatically below
@@ -402,6 +405,8 @@ items: z.array(z.object({
 ```
 
 ## Multi-step wizards {#multi-step-wizards}
+
+<PrismExample example="stepper" hydrate="visible" />
 
 ```tsx
 import { Stepper } from '@omnitron-dev/prism';

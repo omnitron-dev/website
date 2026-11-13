@@ -3,6 +3,9 @@ import { resolve, relative, join } from 'node:path';
 
 const root = resolve(import.meta.dirname, '..');
 const output = resolve(root, process.env.LUMEN_OUT_DIR || 'build');
+const examplesPath = join(root, 'src/site/examples');
+const registeredExamples = new Set(readdirSync(examplesPath).filter(name => name.endsWith('.tsx')).map(name => name.slice(0, -4)));
+const documentedExamples = new Set();
 const baseline = JSON.parse(readFileSync(join(root, 'migration/url-contract.json'), 'utf8'));
 const pages = new Map();
 const failures = [];
@@ -12,6 +15,12 @@ function scan(dir) {
     if (item.isDirectory()) scan(file);
     else if (item.name.endsWith('.html')) {
       const html = readFileSync(file, 'utf8');
+      for (const [tag] of html.matchAll(/<div\b[^>]*\bdata-component="PrismExample"[^>]*>/g)) {
+        const attribute = /\bdata-props="([^"]*)"/.exec(tag)?.[1] ?? '';
+        const { example } = JSON.parse(attribute.replaceAll('&quot;', '"').replaceAll('&#39;', "'").replaceAll('&amp;', '&'));
+        if (!registeredExamples.has(example)) failures.push(`${file}: no runnable Prism example for ${example}`);
+        documentedExamples.add(example);
+      }
       let route = '/' + relative(output, file).replace(/\\/g, '/').replace(/\.html$/, '').replace(/\/index$/, '');
       if (route === '/index') route = '/';
       const ids = [...html.matchAll(/\sid="([^"]+)"/g)].map(match => match[1]);
@@ -46,5 +55,9 @@ for (const [route, { html }] of pages) {
   }
 }
 console.log(`${pages.size} generated pages; ${Object.keys(baseline.routes).length} original routes; ${anchors} original anchors; ${links} local links/assets checked`);
+for (const example of registeredExamples) {
+  if (!documentedExamples.has(example)) failures.push(`Unreferenced Prism example: ${example}`);
+}
+console.log(`${registeredExamples.size} runnable Prism examples; ${documentedExamples.size} documented`);
 for (const failure of failures) console.error(failure);
 if (failures.length) process.exitCode = 1;
