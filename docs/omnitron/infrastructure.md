@@ -123,7 +123,15 @@ probe result; it can say `healthy` beside a failed setup. `pending` means setup 
 not completed, `ready` confirms completion for the observed container generation,
 and `failed` includes its reason. An absent setup observation is **not verified**;
 an older daemon or a native-only listing cannot prove setup succeeded. When the
-local daemon is unavailable, `infra status` explicitly labels its native-only view.
+local daemon is unavailable, the unscoped `infra status` labels native-only data.
+
+Without `--stack`, the inventory covers this machine. With `--stack example/dev`,
+the controller resolves the public project and stack, then selects local containers
+by their registered ownership labels. For a remote or cluster stack the answer
+comes from its nodes. A node that reports zero services is identified separately
+from one that did not report its inventory. Incomplete per-node coverage returns
+a nonzero exit code and preserves rows from responding nodes. If the controller
+cannot resolve the requested stack, the command reports the failure.
 
 Failed setup is retried with bounded backoff while native health permits it. This
 does not restart an otherwise healthy container. New container identity, restart
@@ -801,7 +809,7 @@ always points at the current location.
 | ------- | ------ |
 | `omnitron infra up` | Provision all infrastructure |
 | `omnitron infra down` | Stop and remove owned standalone containers by their observed Docker IDs. Their volumes are retained. The legacy `--volumes` flag returns an error. |
-| `omnitron infra status` (`ps`) | Container inventory |
+| `omnitron infra status [--stack <project>/<stack>]` (`ps`) | Local host inventory or the selected stack's observed containers and setup |
 | `omnitron infra logs [service] [-f] [-n N]` | Tail container logs |
 | `omnitron infra psql [database] [--stack project/stack] [-c sql]` | Open the local stack’s PostgreSQL shell or run SQL once. The command returns the client exit status. |
 | `omnitron infra redis-cli [--stack project/stack] [--db index] [command...]` | Open the local stack’s Redis shell or execute a Redis command in the selected database. |

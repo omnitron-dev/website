@@ -34,7 +34,24 @@ selected packages' built modules through its normal HMR path. Omit `--stack`
 to own application reload yourself. Use `--no-watch` to install the profile
 separately. Resume with `omnitron sdk dev --stack dev`.
 
+For an intentionally stopped working-tree stack, first confirm that its last
+stop retained infrastructure. Obtain a fresh start review on that stopped
+state, then give its digest to the SDK watcher:
+
+```sh
+omnitron --json stack start example dev --working-tree --infrastructure preserve --dry-run
+omnitron sdk dev /work/framework --stack dev --start-stopped --review <digest>
+```
+
+The watcher builds the SDK and requests one start for that stop. The first
+confirmed application generations establish the SDK receipts. If the reply is
+lost, inspect the reported state before trying again. Applications that manage
+their own HMR (`watch: false`) are reported separately. Add `--no-watch` for
+a single reviewed start.
+
 `omnitron --json sdk status` reports the active origin and verified import count.
+Add `--stack dev` to check existing receipts against the owner's current
+generations.
 After stopping source applications, `omnitron sdk registry` restores the normal
 frozen installation. A release can be built while a developer uses a local SDK:
 the builder installs the lockfile from the selected Git commit in a clean clone.
@@ -362,6 +379,14 @@ external file or service that trusted configuration code can read.
    It can run while the stack serves traffic. A successful preparation can
    report `prepared: true`, `ok: false`, `state: "requires-stop"`. The files
    are ready, but active applications still use the previous code.
+   For an independently owned local stack, `declarations: "refresh-required"`
+   means the controller needs declarations from this specific candidate before
+   it can review preservation. An administrator runs
+   `omnitron topology refresh <project> <stack> --release <release>` while the
+   current deployment serves. Inspect any per-application capture failures.
+   Check admission again and run `stack start <project> <stack> --release <release>
+   --infrastructure preserve --dry-run` to review actual resources before
+   scheduling the stop. A placement that requires a stop still reports that state.
 3. Record the current selection from `omnitron --json stack status <project> <stack>`
    and agree on an application maintenance window. To keep databases and other
    stack containers running, review

@@ -80,6 +80,11 @@ retaining the last successful metadata. Graph reads remain available to viewers.
 Refresh after application or dependency rebuilds; inspect source/capture times and
 coverage warnings with `project topology` or `topology show`.
 
+Use `omnitron topology refresh <project> <stack> --release <id>` to read the
+declarations of a prepared candidate for an independently owned local stack.
+The administrator can capture them while the previous release is running. See
+[local release preparation](./releases.md#pin-a-local-stack).
+
 `omnitron topology show <project> <stack>` reads configured, desired and observed
 placement. `export` writes portable JSON; `draft <project> <stack> <file>` saves a
 revision-protected draft; `plan` validates it; `apply <project> <stack> <plan-id>`
@@ -286,7 +291,8 @@ bind.
 | --- | --- |
 | `omnitron sdk init` | Prepare the consumer workspace pnpm hook and distribution lockfile |
 | `omnitron sdk dev [checkout]` | Select a local SDK and watch it; `--stack <name>` enables refresh of watched local applications |
-| `omnitron sdk status` | Verify imports and show the active source; supports global `--json` |
+| `omnitron sdk dev [checkout] --stack <name> --start-stopped --review <digest>` | Build the SDK, start a stopped local working tree on reviewed infrastructure and continue watching. Add `--no-watch` for a single run. |
+| `omnitron sdk status [--stack <name>]` | Verify imports and show the active source. For a stack, compare its SDK outputs and current owner generations with the recorded refresh receipts. Supports global `--json`. |
 | `omnitron sdk registry` | Restore the frozen registry installation |
 
 Each command accepts `--project-dir <path>`. The developer selection is machine-local.
@@ -746,7 +752,7 @@ custom) provisioned per app's `omnitronConfig.infrastructure`.
 | ------- | ------ |
 | `omnitron infra up` | Provision and start all infra services |
 | `omnitron infra down` | Remove containers owned by the current standalone configuration and preserve their volumes. The legacy `--volumes` option is rejected. |
-| `omnitron infra status` (alias `infra ps`) | Container status |
+| `omnitron infra status [--stack <project>/<stack>]` (alias `infra ps`) | Inspect this host, or resolve a registered stack and show its local containers or remote per-node observations. [Reading the inventory](./infrastructure.md#readiness-includes-required-service-setup) |
 | `omnitron infra logs [service] [-f] [-n N]` | View logs for one or all infra services |
 | `omnitron infra psql [database] [--stack project/stack] [-c sql]` | Open the local stack’s PostgreSQL shell or run SQL once. The command returns the client exit status. |
 | `omnitron infra redis-cli [--stack project/stack] [--db index] [command...]` | Open the local stack’s Redis shell or execute a Redis command in the selected database. |

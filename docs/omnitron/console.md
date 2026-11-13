@@ -18,25 +18,22 @@ Verified against `apps/omnitron/webapp/src/`.
 
 ## Workspace and stack scope {#workspace-and-stack-scope}
 
-The header selects a project and an explicit **All stacks** or **Stack: name**
-filter. The compact menu supports keyboard selection and stays bounded when a
-project has many stacks. This choice filters stack-aware views such as Dashboard,
-Applications, Metrics, Containers and Topology, and the application/stack counts
-in the bottom status bar. The workspace badge always counts all configured stacks
-in the project; the footer names its narrower scope when a stack is selected.
+Choose a project and **All stacks** to see its stack cards side by side. Choose a
+stack to see its card, applications, logs, metrics, topology, containers and
+deployment history. Dashboard and Dashboard Builder use the same scope for stack
+data. The workspace badge counts the whole project. The footer counts the
+selected scope. System-wide pages such as Audit and System omit the selector.
 
-Opening `/stacks/test` is navigation to that stack's details, not a change to the
-workspace filter. Direct links, stack cards and links from Releases preserve the
-same selected scope. Returning to another section therefore keeps your explicit
-filter. Choose **All stacks** to return to the whole project; even a project with
-one stack keeps that choice. Stack lists and release/deployment targets remain
-project inventories, and detail pages show the resource named in their route.
+Opening a stack from a card or a release link preserves the header selection.
+On a stack detail page, explicitly selecting another stack opens that stack's
+details. Choosing **All stacks** returns to the inventory. Browser Back and
+Forward restore the workspace for each history entry. Reload keeps the current
+choice. Switching projects clears the stack selection.
 
-The selection is saved for the current workspace across reloads. Switching
-projects clears the stack filter. A successful inventory refresh also clears a
-selection whose stack was removed or renamed. Failed reads keep the last choice
-and mark cached menu state as stale; they never invent an empty inventory or
-silently switch to another stack.
+Releases keeps the project's artifact catalog visible. The selected stack
+narrows deployment observations and sets the target in the **Deploy a release**
+dialog. A successful inventory refresh clears a stack that was removed or
+renamed. If the refresh fails, the last selection is marked stale.
 
 ## Consistent action placement {#consistent-action-placement}
 
@@ -198,15 +195,15 @@ sidebar.
 | `/projects` | `ProjectsPage` | global | `OmnitronProject` |
 | `/system` | `SystemInfoPage` | global | `OmnitronSystemInfo`, `OmnitronNodes.getNodeSystemSnapshot` |
 | `/settings` | `SettingsPage` | global | `OmnitronAuth` + config |
-| `/logs` | `LogsPage` | global | `OmnitronLogs` |
+| `/logs` | `LogsPage` | both | `OmnitronLogs` |
 | `/apps` | `AppsListPage` | project | `OmnitronDaemon.list` |
-| `/apps/:name` | `AppDetailPage` | project | `OmnitronDaemon.getApp` + many |
+| `/apps/:name` | `AppDetailPage` | both | `OmnitronDaemon.getApp` + many |
 | `/stacks` | `StacksPage` | project | `OmnitronProject.listStacks` |
-| `/stacks/:name` | `StackDetailPage` | project | `OmnitronProject.getStackStatus` |
+| `/stacks/:name` | `StackDetailPage` | project | `OmnitronProject.listStacks` |
 | `/metrics` | `MetricsPage` | project | `OmnitronMetrics` (`querySeries` / `getStorageStatus`) |
-| `/topology` | `TopologyPage` | project | stack deployments, daemon processes and runtime containers |
-| `/containers` | `ContainersPage` | project | `OmnitronInfra` |
-| `/deployments` | `DeploymentsPage` | project | `OmnitronDeploy` |
+| `/topology` | `TopologyPage` | both | stack deployments, daemon processes and runtime containers |
+| `/containers` | `ContainersPage` | both | `OmnitronInfra.listContainers` for this host, `OmnitronProject.listStacks` for placement and remote observations |
+| `/deployments` | `DeploymentsPage` | project | `OmnitronProject.getDeployProgress`, `OmnitronRelease.deployments`, `OmnitronDeploy.getHistory` |
 | `/alerts` | `AlertsPage` | global | `OmnitronAlerts` |
 | `/pipelines` | `PipelinesPage` | system | `OmnitronPipelines` |
 | `/traces` | `TracesPage` | project | `OmnitronTraces` |
@@ -261,8 +258,8 @@ complete inventory. Wide tables scroll inside their own keyboard-focusable regio
 
 ### Stacks {#stacks}
 
-`/stacks` — projects' stacks side-by-side with status, app count,
-runtime (Docker container count).
+`/stacks` shows cards for the current scope, including runtime status, online
+and configured applications, and node count.
 
 `/stacks/:name` — per-stack view: which apps run here, which
 infrastructure, runtime status. Start / stop the whole stack.
@@ -306,7 +303,10 @@ stack totals for inactive projects rather than presenting unobserved status as l
 
 A local stack's release card labels its durable choice **Selected**. Open **Deploy
 release…** to check a release. **Prepare release** verifies its files before a
-maintenance window. The dialog reports when the application processes must stop.
+maintenance window. If the candidate's declarations are missing or stale, an
+administrator can choose **Update declarations…** for that release and stack.
+The dialog checks admission again after capture. **Inspect stack** opens the
+target when its current processes must stop.
 After a confirmed stop, **Deploy** starts the selected code. **Use working tree…**
 appears on stopped local stacks that permit source launches. It starts the stack
 from its registered directory and changes the choice for future restarts.
@@ -445,13 +445,18 @@ managed through their owning stack.
 
 ### Containers {#containers}
 
-`/containers` reads the Docker engine attached to this controller through
-`OmnitronInfra`. **Local node** and **Local total** explicitly describe that scope;
-these counts are not fleet totals. On narrow screens the summary uses a compact
-two-column grid so the inventory stays in view. The workspace filter selects labelled project
-containers, while the Scope column distinguishes shared control-plane and
-unassigned containers that remain visible. Remote infrastructure belongs to each
-stack's page, where its node reports it; inline links lead to those stacks.
+`/containers` in the Omnitron workspace shows this controller's Docker
+inventory, including control-plane and unassigned containers. In a project,
+**All stacks** shows local containers owned by that project and links to its
+remote stacks. A local stack selection narrows the table to its registered
+ownership labels. **Local total** counts the rows in that scope.
+
+Selecting a remote or cluster stack shows read-only infrastructure grouped by
+node, with the same observations as the stack detail page. Each available row
+shows the service and container, with its reported ports, lifecycle, health and
+setup. A node can report an empty inventory. An unavailable inventory shows its
+coverage and any reported reason. Expand **Configured services** to inspect
+declarations whose runtime state has yet to be observed.
 
 Direct entry loads missing stack locations through the shared project store.
 Unknown locations show a loading state; failed reads explain the failure and offer
