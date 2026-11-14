@@ -187,9 +187,9 @@ reuse, channels, SFTP, forwarding and cancellation. Applications must use the Xe
 API and public types rather than importing its transport library or adding a
 parallel connection pool.
 
-The next Xec integration distinguishes `outcome-unknown` from a known command
+Xec 0.12 distinguishes `outcome-unknown` from a known command
 failure: losing a reply after dispatch does not prove whether an operation ran.
-The candidate refuses automatic replay and exposes `recoverable: false`. Inspect
+The execution boundary refuses automatic replay and exposes `recoverable: false`. Inspect
 the remote effect or reconcile an operation receipt before an explicit retry.
 SFTP interruption can leave a partial destination; upload/download helpers are not
 atomic deployment transactions. Omnitron's durable operation model must preserve

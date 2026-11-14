@@ -232,6 +232,7 @@ export default {
     "./stack-reading": "omnitron/diagnostics.md",
     "./release-source": "omnitron/releases.md",
     "./source-layout": "omnitron/releases.md",
+    "./runtime-artifact": "omnitron/cli.md",
     "./runtime": "omnitron/releases.md",
     "./runtime/identity": "omnitron/releases.md",
     "./node-check": "omnitron/cli.md",

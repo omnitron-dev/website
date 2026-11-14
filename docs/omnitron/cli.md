@@ -182,6 +182,41 @@ implemented.
 
 See [requirements, first transition and recovery](./backend-handoff.md).
 
+## Local runtime updates {#local-runtime-updates}
+
+`omnitron runtime` owns native artifact verification. `omnitron runtime update`
+owns a reviewed transition of local supervision, Console and the recorded stacks.
+
+| Command | Result |
+| --- | --- |
+| `omnitron runtime verify <directory>` | Verify the sealed files, links, executable bits and host compatibility without executing the candidate |
+| `omnitron runtime update prepare <runtime>` | Install the verified candidate and record the current installation, stack selections, infrastructure and recovery plan |
+| `omnitron runtime update apply <digest>` | Recheck and apply that exact SHA-256 plan once |
+| `omnitron runtime update status [digest]` | Read the durable receipt and verify its candidate without connecting to the daemon |
+| `omnitron runtime update recover <digest>` | Restore the previous installation recorded in the reviewed plan, or inspect its completed recovery |
+
+From a clean Omnitron checkout, Xec prepares the same public operation:
+
+```bash
+export OMNITRON_DEV_CACHE=/path/to/private/development-cache
+pnpm exec xec update local-sync
+```
+
+Review the returned scope, readiness conditions and recovery limitations before
+applying it. `pnpm exec xec update local-sync --review <digest>` performs the
+transition and may restart the listed applications. Inspect
+`pnpm exec xec update local-sync --status` after an interrupted response; do not
+repeat an uncertain operation. Recovery uses
+`pnpm exec xec update local-sync --review <digest> --rollback`.
+The cache directory must be private to the current user. Xec reuses a verified
+runtime for the same commit and Node producer; a changed checkout requires a new
+preparation. Preparation does not activate the runtime.
+
+Programmatic verifiers import `verifyRuntimeArtifact` or `inspectRuntimeArtifact`
+from `@omnitron-dev/omnitron/runtime-artifact`. The latter returns an
+`assertUnchanged()` check for a verified filesystem snapshot. A changed snapshot
+invalidates the proof; it is not a durable authorization to execute or activate.
+
 ## Daemon lifecycle {#daemon-lifecycle}
 
 ### `omnitron up` {#omnitron-up}
@@ -296,6 +331,8 @@ bind.
 | `omnitron sdk registry` | Restore the frozen registry installation |
 
 Each command accepts `--project-dir <path>`. The developer selection is machine-local.
+
+SDK watching uses Xec Loader to poll the selected source trees and build configuration every second. Atomic saves and missed native filesystem notifications are detected. Changes are coalesced; edits made during a build are rebuilt afterward. Generated output, dependencies and unrelated packages do not trigger builds. Cancellation closes the watchers and waits for the active build to settle.
 See [local SDK development and registry deployments](./releases.md#local-sdk-development-and-registry-deployments).
 
 ## Project management {#project-management}
@@ -423,7 +460,9 @@ that guarantee.
 | `omnitron list` (alias `ls`) | One row per app, then one per topology process |
 | `omnitron status` | Daemon-wide overview (apps, uptime, leader, infra) |
 | `omnitron config [--json]` | Print the resolved ecosystem config |
-| `omnitron init` | Scaffold `omnitron.config.ts` in the CWD |
+| `omnitron init [--force]` | Scaffold `omnitron.config.ts` in the CWD. Existing files require confirmation or explicit `--force`; symbolic links are refused |
+
+Cancelling the overwrite prompt preserves the original file and exits with status `130`. An existing file in a noninteractive session requires `--force`; a new file needs no confirmation.
 
 **Reading the child rows of `omnitron list`.** Each indented row is
 one entry of the app's process topology, and two of its columns say
