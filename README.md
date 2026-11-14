@@ -125,10 +125,13 @@ is not proof of a working example: run the complete examples you change.
 
 ## Distribution
 
-[CI](.github/workflows/ci.yml) and [GitHub Pages](.github/workflows/deploy.yml)
-install the released site renderer from the frozen npm lockfile. CI checks the
-manual against the exact public Omnitron commit recorded in the API index. The
-manual can document newer platform features while using the existing renderer.
+[CI](.github/workflows/ci.yml) installs the released renderer from the frozen
+npm lockfile and checks the manual against the exact public Omnitron commit in
+the API index. After browser acceptance, main publishes that same build to GitHub
+Pages. Pull requests never publish; manual publication follows the same checks.
+
+Guides may describe newer platform APIs, but live examples and rendering features
+must work with the locked Lumen and Prism versions.
 
 When updating packages, generate the lock from published npm versions in a clean
 consumer, then verify frozen install, dependency audit, types, build and browser
