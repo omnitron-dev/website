@@ -227,17 +227,38 @@ pnpm exec xec release <version> --prepare --previous <full-previous-commit> --pu
 This command commits synchronized public versions, builds and checks the package
 archives in an isolated source export, creates a local annotated tag, and pushes
 only the exact source branch for CI. Omit `--push-source` if your Git publication
-is handled separately. The command runs the independent build comparison and
-the CI/native checks through Xec Pipeline. The policy in
-`.xec/release-policy.mjs` selects the CI executor and exact Node versions.
-This repository uses GitHub Actions; the Omnitron platform and application
-deployment do not require GitHub.
+is handled separately. The same Xec workflow runs the independent build comparison,
+CI checks and native transition/rollback checks concurrently after preparation.
+The policy in `.xec/release-policy.mjs` selects the CI executor and exact Node
+versions. This repository uses GitHub Actions; the Omnitron platform and
+application deployment do not require GitHub.
+
+Local preparation and reproducibility use two independent clean builds in total.
+Preparation retains its completed build after every package-consumer gate passes.
+Qualification verifies that retained build and performs one further build from a
+fresh checkout and frozen installation. Both use the same commit, Node version,
+platform, architecture, pinned pnpm and build policy, with build-cache reads
+disabled. The sealed runtime, Console and normalized public npm archives must
+match. Missing, changed or incompatible preparation evidence stops qualification.
+CI and native jobs still perform their own target-specific builds. The standalone
+`pnpm check:reproducibility` gate performs two fresh builds when no preparation
+is supplied.
+
+Within each workspace build, `pnpm build` requests `build` and `build:titan` in
+one Turbo graph, so shared prerequisites run once while their declared ordering
+remains enforced. The full workspace test job completes that build before running
+`pnpm test:ci --only` with `TURBO_FORCE=true`: every normal package test executes
+without restoring cached results, and its build prerequisites are already present.
+The ordinary developer command `pnpm test:ci` still builds prerequisites. These
+changes remove duplicate work; elapsed release time depends on the completed
+local and remote runs.
+
 The CI reproducibility job installs this same frozen workspace before running
 `pnpm check:reproducibility`, which invokes the pinned Xec engine. A fresh runner
 does not depend on a globally installed Xec or another job’s build output.
 
 The qualification binds every result to the candidate commit, previous backend,
-policy and build Node version. It requires all five CI jobs and native transition
+policy and build Node version. It requires all configured CI jobs and native transition
 and rollback on every configured Node. A lost workflow dispatch response is
 reconciled by its saved intent; repeating the command does not dispatch a duplicate.
 A failed native run remains failed. Inspect it before explicitly retrying the
@@ -248,12 +269,21 @@ pnpm exec xec release <version> --qualify --previous <full-previous-commit>
 pnpm exec xec release <version> --status
 ```
 
-Completed independent builds are verified and reused. Native CI retains the actual
-tested Linux runtimes. Xec downloads them, verifies their source, run, attempt,
-archive checksum and runtime digest, and extracts them with Omnitron's existing
-archive validator. Evidence and artifacts live under `.release-artifacts/`.
-Use an external development volume for large builds and set `TMPDIR` and package
-manager cache directories before the command if required by your machine.
+Preparation evidence is retained under
+`.release-artifacts/qualification/<commit>/preparation/`: `PREPARATION.json`,
+`runtime/`, `sdk/` and `sdk-inventory.json`. The qualification directory retains
+`qualification.json` with each stage's evidence, plus the accepted independent
+build's `QUALIFICATION.json`, runtime and SDK archives. On resume, completed
+stages are reverified and reused. A partial build directory is not a completed
+receipt. `--status` checks the selected evidence without builds, workflow
+dispatches or receipt changes.
+
+Native CI retains the actual tested Linux runtimes. Xec downloads them, verifies
+their source, run, attempt, archive checksum and runtime digest, and extracts them
+with Omnitron's existing archive validator. Evidence and artifacts live under
+`.release-artifacts/`. Use an external development volume for large builds and
+set `TMPDIR` and package manager cache directories before the command if required
+by your machine.
 
 Package preparation also verifies exports and two ordinary npm consumers without
 workspace overrides: a minimal CLI/Netron runtime and every public package,

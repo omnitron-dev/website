@@ -48,12 +48,21 @@ pause needs an explicit transition, verification and rollback plan first.
 For a maintainer SDK export, run the same reproducibility gate from the source repository:
 
 ```sh
-node scripts/check-reproducible-backend.mjs --revision <full-commit> --out /absolute/new/qualification
+pnpm check:reproducibility --revision <full-commit> --out /absolute/new/qualification
 ```
 
 It runs the ordinary frozen install and complete build in two independent checkouts, then compares both the sealed runtime and every normalized public npm archive. A successful output contains `runtime/`, `sdk/framework-manifest.json`, the SDK archives and `QUALIFICATION.json`. Treat the qualification receipt as the completion marker; a partial directory is not an accepted export. Without `--revision`, the selected commit is `HEAD`.
 
-Export from these verified archives. A clean Git status does not make an existing build directory canonical: Console publication intentionally retains older hashed assets so open tabs can continue loading their chunks. Those retained generations belong to the served directory, not to a new SDK archive. The ordinary `release --prepare` path also builds from a clean source export; do not replace its sealed archives with a later pack of a working checkout.
+The [maintainer release workflow](../community/contributing.md#release-process)
+retains the clean preparation build after package-consumer acceptance and uses it
+as the first reproducibility build. Qualification verifies its identity and bytes,
+then makes the second independent build. This keeps two clean builds across local
+preparation and comparison; the standalone command above makes both from scratch.
+CI and native qualification run concurrently with the comparison and retain their
+own stage evidence. Publication checks the selected receipts and sealed archives
+without rerunning builds or tests.
+
+Export from these verified archives. A clean Git status does not make an existing build directory canonical: Console publication intentionally retains older hashed assets so open tabs can continue loading their chunks. Those retained generations belong to the served directory, not to a new SDK archive. Do not replace sealed preparation archives with a later pack of a working checkout.
 
 ## Invariants {#invariants}
 
