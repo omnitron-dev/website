@@ -176,17 +176,17 @@ importers:
   .:
     dependencies:
       '@omnitron-dev/lumen':
-        specifier: 0.4.6
-        version: 0.4.6(@floating-ui/dom@1.8.0)(@surrealdb/node-native@4.0.1)(@tiptap/extension-code-block@3.33.1(@tiptap/core@3.33.1(@tiptap/pm@3.33.1))(@tiptap/pm@3.33.1))(@tiptap/extension-list@3.33.1(@tiptap/core@3.33.1(@tiptap/pm@3.33.1))(@tiptap/pm@3.33.1))(@tiptap/extensions@3.33.1(@tiptap/core@3.33.1(@tiptap/pm@3.33.1))(@tiptap/pm@3.33.1))(@types/node@26.6.6)(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(ajv@8.20.0)(apexcharts@8.8.1)(esbuild@0.28.2)(highlight.js@11.11.2)(jiti@1.21.7)(joi@17.13.9)(react-apexcharts@2.2.0(apexcharts@8.8.1)(react@19.3.1))(react-dom@19.3.1(react@19.3.1))(react@19.3.1)(supports-color@8.1.1)(surrealdb@2.2.2(@typescript/typescript6@6.0.2)(tslib@2.8.1))(terser@5.51.2)(use-sync-external-store@1.7.0(react@19.3.1))(yaml@2.9.1)
+        specifier: 0.4.8
+        version: 0.4.8(@floating-ui/dom@1.8.0)(@surrealdb/node-native@4.0.1)(@tiptap/extension-code-block@3.33.1(@tiptap/core@3.33.1(@tiptap/pm@3.33.1))(@tiptap/pm@3.33.1))(@tiptap/extension-list@3.33.1(@tiptap/core@3.33.1(@tiptap/pm@3.33.1))(@tiptap/pm@3.33.1))(@tiptap/extensions@3.33.1(@tiptap/core@3.33.1(@tiptap/pm@3.33.1))(@tiptap/pm@3.33.1))(@types/node@26.6.6)(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(ajv@8.20.0)(apexcharts@8.8.1)(esbuild@0.28.2)(highlight.js@11.11.2)(jiti@1.21.7)(joi@17.13.9)(react-apexcharts@2.2.0(apexcharts@8.8.1)(react@19.3.1))(react-dom@19.3.1(react@19.3.1))(react@19.3.1)(supports-color@8.1.1)(surrealdb@2.2.2(@typescript/typescript6@6.0.2)(tslib@2.8.1))(terser@5.51.2)(use-sync-external-store@1.7.0(react@19.3.1))(yaml@2.9.1)
       '@omnitron-dev/lumen-ast':
-        specifier: 0.4.6
-        version: 0.4.6(supports-color@8.1.1)
+        specifier: 0.4.8
+        version: 0.4.8(supports-color@8.1.1)
       '@omnitron-dev/lumen-ui':
-        specifier: 0.4.6
-        version: 0.4.6(@floating-ui/dom@1.8.0)(@surrealdb/node-native@4.0.1)(@tiptap/extension-code-block@3.33.1(@tiptap/core@3.33.1(@tiptap/pm@3.33.1))(@tiptap/pm@3.33.1))(@tiptap/extension-list@3.33.1(@tiptap/core@3.33.1(@tiptap/pm@3.33.1))(@tiptap/pm@3.33.1))(@tiptap/extensions@3.33.1(@tiptap/core@3.33.1(@tiptap/pm@3.33.1))(@tiptap/pm@3.33.1))(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(ajv@8.20.0)(apexcharts@8.8.1)(highlight.js@11.11.2)(joi@17.13.9)(react-apexcharts@2.2.0(apexcharts@8.8.1)(react@19.3.1))(react-dom@19.3.1(react@19.3.1))(react@19.3.1)(supports-color@8.1.1)(surrealdb@2.2.2(@typescript/typescript6@6.0.2)(tslib@2.8.1))(use-sync-external-store@1.7.0(react@19.3.1))
+        specifier: 0.4.8
+        version: 0.4.8(@floating-ui/dom@1.8.0)(@surrealdb/node-native@4.0.1)(@tiptap/extension-code-block@3.33.1(@tiptap/core@3.33.1(@tiptap/pm@3.33.1))(@tiptap/pm@3.33.1))(@tiptap/extension-list@3.33.1(@tiptap/core@3.33.1(@tiptap/pm@3.33.1))(@tiptap/pm@3.33.1))(@tiptap/extensions@3.33.1(@tiptap/core@3.33.1(@tiptap/pm@3.33.1))(@tiptap/pm@3.33.1))(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(ajv@8.20.0)(apexcharts@8.8.1)(highlight.js@11.11.2)(joi@17.13.9)(react-apexcharts@2.2.0(apexcharts@8.8.1)(react@19.3.1))(react-dom@19.3.1(react@19.3.1))(react@19.3.1)(supports-color@8.1.1)(surrealdb@2.2.2(@typescript/typescript6@6.0.2)(tslib@2.8.1))(use-sync-external-store@1.7.0(react@19.3.1))
       '@omnitron-dev/prism':
-        specifier: 0.4.6
-        version: 0.4.6(@floating-ui/dom@1.8.0)(@tiptap/extension-code-block@3.33.1(@tiptap/core@3.33.1(@tiptap/pm@3.33.1))(@tiptap/pm@3.33.1))(@tiptap/extension-list@3.33.1(@tiptap/core@3.33.1(@tiptap/pm@3.33.1))(@tiptap/pm@3.33.1))(@tiptap/extensions@3.33.1(@tiptap/core@3.33.1(@tiptap/pm@3.33.1))(@tiptap/pm@3.33.1))(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(ajv@8.20.0)(apexcharts@8.8.1)(highlight.js@11.11.2)(joi@17.13.9)(react-apexcharts@2.2.0(apexcharts@8.8.1)(react@19.3.1))(react-dom@19.3.1(react@19.3.1))(react@19.3.1)(supports-color@8.1.1)(use-sync-external-store@1.7.0(react@19.3.1))
+        specifier: 0.4.8
+        version: 0.4.8(@floating-ui/dom@1.8.0)(@tiptap/extension-code-block@3.33.1(@tiptap/core@3.33.1(@tiptap/pm@3.33.1))(@tiptap/pm@3.33.1))(@tiptap/extension-list@3.33.1(@tiptap/core@3.33.1(@tiptap/pm@3.33.1))(@tiptap/pm@3.33.1))(@tiptap/extensions@3.33.1(@tiptap/core@3.33.1(@tiptap/pm@3.33.1))(@tiptap/pm@3.33.1))(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(ajv@8.20.0)(apexcharts@8.8.1)(highlight.js@11.11.2)(joi@17.13.9)(react-apexcharts@2.2.0(apexcharts@8.8.1)(react@19.3.1))(react-dom@19.3.1(react@19.3.1))(react@19.3.1)(supports-color@8.1.1)(use-sync-external-store@1.7.0(react@19.3.1))
       apexcharts:
         specifier: 8.8.1
         version: 8.8.1
@@ -548,14 +548,14 @@ packages:
   '@hapi/topo@5.1.0':
     resolution: {integrity: sha512-foQZKJig7Ob0BMAYBfcJk8d77QtOe7Wo4ox7ff1lQYoNNAb6jwcY1ncdoy2e9wQZzvNy7ODZCYJkK8kzmcAnAg==}
 
-  '@hookform/resolvers@7.0.1':
-    resolution: {integrity: sha512-F3aM0dDWsRGmFjnnXjogaGLwP7gY2HA6/c5qp4v4Im/UV7pTNkX+WAjcOlM1V0PE0zoMzuPqCyaYtMzUhoFToA==}
+  '@hookform/resolvers@7.0.6':
+    resolution: {integrity: sha512-LSTMwW4tmRWtM7pS5HkSqahi71USbhrmjc9pNHNa7UyYTbKIK/e0G1EAw6xsEnp9GahTjXhunxRJp0Bd8E6NZA==}
     peerDependencies:
       '@standard-schema/spec': ^1.0.0
       '@vinejs/vine': ^2.0.0 || ^3.0.0 || ^4.0.0
       ajv: ^8.12.0
       ajv-errors: ^3.0.0
-      ajv-formats: ^2.1.1
+      ajv-formats: ^2.1.1 || ^3.0.0
       arktype: ^2.0.0
       ata-validator: ^1.23.0
       class-transformer: '>=0.4.0'
@@ -873,25 +873,25 @@ packages:
     resolution: {integrity: sha512-X5XaVWZIBCT7HHZGm5I7ZQXDwLG+bGXuSrMQAW+7Zvl87h1kmc1ZB1VSRJcpUfoUrGQp4Fkoxm5kZ+Ms+aW+eA==}
     engines: {node: '>= 20.19.0'}
 
-  '@omnitron-dev/access@0.4.6':
-    resolution: {integrity: sha512-bulvsqAPDMEx+EUGyfZP35lUXchyWwLqOwSmM3NtzxMbgAwZ+3AgQ5dWsRwfIgEJlYH7XUVVSeevYCQrspjxUw==}
+  '@omnitron-dev/access@0.4.8':
+    resolution: {integrity: sha512-GMYHxs/aiIrDHaY2bxG7Ihv+sPJFm1QcMusEP+W47Ebj4/ximF40GDLJxaEVINL0H2fN6L935jfADks1Xb1FOA==}
     engines: {node: '>=18'}
 
-  '@omnitron-dev/common@0.4.6':
-    resolution: {integrity: sha512-+tZOKCi3IIPWTCr1SAWLP5uBikpMDEtbqBiyIoCLiy/Rn2i5ZbU1J4o9oYO2je3b27m8p2X3woS1qgTnok4gPA==}
+  '@omnitron-dev/common@0.4.8':
+    resolution: {integrity: sha512-4dLti0zFWmNryZYpmyg54M1BhRk/7J0j+TWJ87RK6I71j7T5It/1OL9kdwqI62qi3wtWxBkyMXUIkSQSon3N5A==}
 
-  '@omnitron-dev/cuid@0.4.6':
-    resolution: {integrity: sha512-pVqgSkYX6ovfL86ohxnCeZQP2+mg0zhJvfznID8P2j2V5CUW4ATWlCoanZTxe7U2IW0pk0Z5ialgqkGW+prhdA==}
+  '@omnitron-dev/cuid@0.4.8':
+    resolution: {integrity: sha512-mZne/ByntcDmkreUnUbpx3iMzHpO+83t2E2mu5znt3XujQpH4cjdlrcNJ7j19ygMV4+MxraMvLvYve/tN5dfFQ==}
 
-  '@omnitron-dev/eventemitter@0.4.6':
-    resolution: {integrity: sha512-p8QIIGdUKHufznGYGefq92thv4kQG3abFhRNuPZwLR4b1WfH7mb/GayL3NTE617Ftsvs9tltNmAk2iHmJbTGIA==}
+  '@omnitron-dev/eventemitter@0.4.8':
+    resolution: {integrity: sha512-M//EsbcliOHjJzERcMxHHU9iJ6CJWu/4BvwRi5ZHqdAZLyyk0ZVeAmlHAMGzMz59ySgELhvHPj5hhCc/CshCcw==}
 
-  '@omnitron-dev/kb@0.4.6':
-    resolution: {integrity: sha512-BDnUfksCCxv8LRN3ElT3xPsQoboqN7w/sMSXarD4tlxCK0qU1RXVt8j6NtRRcmrzgLMIeJgL6GijobTuSEDg2g==}
+  '@omnitron-dev/kb@0.4.8':
+    resolution: {integrity: sha512-5botHQpIwL6lLWbHiW7vL3mlmUuvG9mu1Sx7AZZPww8oXWL4EHtMkWccDfDvEdBkKS0H5naedYW/mR3yj40xwQ==}
     engines: {bun: '>=1.2.0', node: '>=22.0.0'}
     hasBin: true
     peerDependencies:
-      '@omnitron-dev/titan': 0.4.6
+      '@omnitron-dev/titan': 0.4.8
       surrealdb: ^2.0.0
     peerDependenciesMeta:
       '@omnitron-dev/titan':
@@ -901,49 +901,49 @@ packages:
     bundledDependencies:
       - ts-morph
 
-  '@omnitron-dev/lumen-ast@0.4.6':
-    resolution: {integrity: sha512-ksGRpImDf1seljg1Qj0HRG4JUzXeIT49gZi2APH2BDBBBHgM1ZC0abI+8DXqR33RN2ZJ8HTi5c8I0Qa8whxIXQ==}
+  '@omnitron-dev/lumen-ast@0.4.8':
+    resolution: {integrity: sha512-Ysv4pirnZyrmus7j6wVheaGiM1GRopNQbxxIO645M6rcK/p4nv6ennQCSUbElawOo9JcIAyEdFKtzTJl22P3HA==}
     engines: {node: '>=22.12.0'}
 
-  '@omnitron-dev/lumen-ui@0.4.6':
-    resolution: {integrity: sha512-tpz01MHbi1P4nwXzFSWp3AAUxhgb4l7CafuoPKXswGVHEAd1e/rxF7avK89uxCqka+BL4jJ7xUZUdjPaXGjqOA==}
+  '@omnitron-dev/lumen-ui@0.4.8':
+    resolution: {integrity: sha512-ILlf3lipsRO95/28dHrzFx9Z3EeuI/y9gh1H7JyIkZXQe2DhQRXfCkBjv3iJf3u6dlOyzTBY3eaXRFucQolcuA==}
     engines: {node: '>=22.12.0'}
     peerDependencies:
       react: ^19.0.0
       react-dom: ^19.0.0
 
-  '@omnitron-dev/lumen@0.4.6':
-    resolution: {integrity: sha512-sHjz5o1TK96IIk2i9X/JABuRzNU20m7WAZe7HLCnj8kpRZU/chWDVr1zMUP6e9SgUXtDe/OF0CFWrYydJwSCmA==}
+  '@omnitron-dev/lumen@0.4.8':
+    resolution: {integrity: sha512-Y0mEmUgsJuBITvntAunT3Z7i9lazWcNmufwEHiMSFs08LU9cymMyWWUrJxCqrqY8AuM00RhB9StJqesLe0HDaA==}
     engines: {node: '>=22.12.0'}
     hasBin: true
     peerDependencies:
       react: ^19.0.0
       react-dom: ^19.0.0
 
-  '@omnitron-dev/msgpack@0.4.6':
-    resolution: {integrity: sha512-CziyypAMDlXHblxudsrzZlo7+hdbYQZh7JfnRCTzBj1+ziOGZuF/QvAogXmnA152F1fSPTKIZXB1d16kTwdh/A==}
+  '@omnitron-dev/msgpack@0.4.8':
+    resolution: {integrity: sha512-BTW1PzrnpQWfuwZ0LbCRNxoG/dbDnRi1RBe2tVoRFwE1NtrDEBA9OSLeQiZxyfmRyGYzvu4GmMcwnwfFnSuSIA==}
 
-  '@omnitron-dev/netron-browser@0.4.6':
-    resolution: {integrity: sha512-ehZzuJLB05t9N58R3uB3dMWxqukFApVPKc6kX9DYjGFlPwrcVsN3L+mqI9dGiApeV4rOBX6XeBJQeiPhiQESxA==}
+  '@omnitron-dev/netron-browser@0.4.8':
+    resolution: {integrity: sha512-5zSBgOeMvmjjmkbeZv+xWNleUpAOSsRyknj8P01gosEaCe1uifXZlCGaz1U/od+T1Pog1ULjAwq5wGp6C1ckCw==}
     engines: {node: '>=22.0.0'}
 
-  '@omnitron-dev/netron-http-core@0.4.6':
-    resolution: {integrity: sha512-yeDIIAQPK2D+78cQs1vZ4OIVl70+g4IXlR3jB4WEDMRIrBj9Z7B3aC1nHhWKdgMcspBS5PoDva0flIKRxubiYA==}
+  '@omnitron-dev/netron-http-core@0.4.8':
+    resolution: {integrity: sha512-hzb43j1RWm7wuqON25pePvJ3xqcsgNBdNH/KayJwkxahxLkhRkzAjy3jCSVaAJ2hzv5+6O+mROpMBzcRL64K/w==}
     engines: {node: '>=22.0.0'}
 
-  '@omnitron-dev/netron-protocol@0.4.6':
-    resolution: {integrity: sha512-ymrVl3d0RyFWcyZAkehWTa1SmJHlF/EyWdVaMXA8hOWBP8jhk7+Ps89ykL0gM+1glKy131ZLE7Ly8NypejEoHg==}
+  '@omnitron-dev/netron-protocol@0.4.8':
+    resolution: {integrity: sha512-c98REy0W4DUPiQVZi3tC4tgnRpDUKM19DGIMliI61BJ1RRo4T94PgVY7hSv8VjWn/I1Pd/hkzCS6gzORM/Q5eA==}
     engines: {node: '>=22.0.0'}
 
-  '@omnitron-dev/netron-react@0.4.6':
-    resolution: {integrity: sha512-vZWZuUuy+m/mclI2o6J7Qkb7seMDrZm3y6uj0oE9V5h9s8pbAKbVznTNZ+aaLcK4hv2jgdmR+JVTfV9vX11fTQ==}
+  '@omnitron-dev/netron-react@0.4.8':
+    resolution: {integrity: sha512-PRAB9/VJkvP6MchEdK1W/uR7E/3dNM4HWeOuvCquYzLcl/x2DBeV7L6/VG3uNevcXZMbbFcg0DibHfNKgShlOg==}
     engines: {node: '>=22.12.0'}
     peerDependencies:
       react: '>=18.0.0 || >=19.0.0'
       react-dom: '>=18.0.0 || >=19.0.0'
 
-  '@omnitron-dev/prism@0.4.6':
-    resolution: {integrity: sha512-rdxex2shrrZoQPeBgOhWXnynI8HNIvJgO5WoY5Y8LhCXyvn2QsYZbzUnPZ+ogzoWpe4j1oh4Zq0iRpD9FwjVSg==}
+  '@omnitron-dev/prism@0.4.8':
+    resolution: {integrity: sha512-sdeBTIffOWifx1A+mexX0mSvJzZTAGvW4H+qAHQSUH+7mh2bZCU2LNF2pPYBcyP48eaGuSWZhX4LMniFjDk8Ww==}
     hasBin: true
     peerDependencies:
       apexcharts: '>=5.0.0'
@@ -1751,10 +1751,6 @@ packages:
   comma-separated-tokens@2.0.3:
     resolution: {integrity: sha512-Fu4hJdvzeylCfQPp9SGWidpzrMs7tTrlu6Vb8XGaRGck8QSNZJJp538Wrb60Lax4fPwR64ViY468OIUTbRlGZg==}
 
-  commander@15.0.0:
-    resolution: {integrity: sha512-z67u4ZhzCL/Tydu1lJARtEZYWbWaN7oYLHbsuzocr6y4N6WZAagG3RQ4FW61V1/0+jImpj293XfrcYnd1qxtPg==}
-    engines: {node: '>=22.12.0'}
-
   commander@15.1.0:
     resolution: {integrity: sha512-cgnQ88TRrWcC7pVq46RzJVRMktu3W2RcbnoidnfBsl1bmDCBwJS/udcIZpKoCrbAYYaCqsz1yZCVIgbIaU3ddQ==}
     engines: {node: '>=22.12.0'}
@@ -1994,12 +1990,8 @@ packages:
   earcut@3.2.4:
     resolution: {integrity: sha512-FHc6yNpnTORB0tM5kmZ03iD2mDuNakDE2lvf4Hw1XkfxtEHIGVi01B/GqUSwx+NcC1WGjidAfpTXzeALtPtfpg==}
 
-  elkjs@0.9.3:
-    resolution: {integrity: sha512-f/ZeWvW/BCXbhGEf1Ujp29EASo/lk1FDnETgNKwJrsVvGZhUWCZyg3xLJjAsxfOmt8KjswHmI5EwCQcPMpOYhQ==}
-
-  entities@6.0.1:
-    resolution: {integrity: sha512-aN97NXWF6AWBTahfVOIrB/NShkzi5H7F9r1s9mD3cDj4Ko5f2qhhVoYMibXF7GlLveb/D2ioWay8lxI97Ven3g==}
-    engines: {node: '>=0.12'}
+  elkjs@0.12.1:
+    resolution: {integrity: sha512-IhMYKHE4S2vtx0QrhBP3lYOIKDeIiJXBrdq9MGYkuB8ZHqhrBnHNfSUndjXFewrX1CPK8chwq+2NA0K0hliYuw==}
 
   entities@9.0.0:
     resolution: {integrity: sha512-oJFNDJg3kTPwAD1cNn2+WmUq4wFoo09npc3Ydf1D7ED4smRiWrsKnaLxykrTWgyGEcusc87P5dxlAleol9kpkg==}
@@ -2079,8 +2071,8 @@ packages:
   fontkit@3.0.0:
     resolution: {integrity: sha512-sjSkmtEw6RYJcvEbd+LHHLp2HFDaXdAia2RTbaGcBu/5QaDhxz35249eH9G07E0PzrtlkPF9FYXHF6YXxcAa1w==}
 
-  framer-motion@14.12.0:
-    resolution: {integrity: sha512-4m+10xYan0ic8nFI8zyB5hJkW5F8F4Rer617UecOs8esw0he9unDgXaEZ0rUX7oztz1w4iuvyPWhk4jltMX5iw==}
+  framer-motion@14.13.0:
+    resolution: {integrity: sha512-62FgGVeqEI3pgI5jG/d6yagg/hX9z7Vw3ytE0gGAsDXWBBruUCr74b5LQJXMSF1E62Zp7HKO88nDu/hhUdRSCQ==}
     peerDependencies:
       react: ^18.0.0 || ^19.0.0
       react-dom: ^18.0.0 || ^19.0.0
@@ -2139,9 +2131,6 @@ packages:
 
   hast-util-parse-selector@4.0.0:
     resolution: {integrity: sha512-wkQCkSYoOGCRKERFWcxMVMOcYE2K1AaNLU8DXS9arxnLOUEWbOXKXiJUNzEpqZ3JOKpnha3jkFrumEjVliDe7A==}
-
-  hast-util-raw@9.1.0:
-    resolution: {integrity: sha512-Y8/SBAHkZGoNkpzqqfCldijcuUKh7/su31kEBp67cFY09Wy0mTRgtsLYsiIxMJxlu0f6AA5SUTbDR8K0rxnbUw==}
 
   hast-util-raw@9.2.0:
     resolution: {integrity: sha512-1zVq3M9AlZiBZ4mlMPnLtkK2rdd+I8VhmFLNLb//XJm6xA2AVH2tz19EHy25RgRWut6z6FpTARAs7P8rnmRJUQ==}
@@ -2425,6 +2414,10 @@ packages:
     resolution: {integrity: sha512-2chIZwpLGenoUQOcnm9Pk4SLbA8ppNFq8jlpXiq9vcYm3Y1wJ3fc82FL0GLwBaPYJCLzPv/mC46KEupVov75rQ==}
     engines: {node: '>=16.14.0', npm: '>=8.1.0'}
 
+  maplibre-gl@6.18.0:
+    resolution: {integrity: sha512-8ucT+RhJtEZGFvWGPioVQwvOPMAIuUehEgxl2dELw9aJmX4SpUi+OCHHAD33B9EuohNC7kC/gccJacUgTMQfQQ==}
+    engines: {node: '>=16.14.0', npm: '>=8.1.0'}
+
   markdown-table@3.0.4:
     resolution: {integrity: sha512-wiYz4+JrLyb/DqW2hkFJxP7Vd7JuTDm77fvbM8VfEQdmSMqcImWeeRbHwZjBjIFki/VaMK2BhFi7oUUZeM5bqw==}
 
@@ -2481,14 +2474,14 @@ packages:
   mdast-util-to-hast@13.2.1:
     resolution: {integrity: sha512-cctsq2wp5vTsLIcaymblUriiTcZd0CwWtCbLvrOzYCDZoWyMNV8sZ7krj09FSnsiJi3WVsHLM4k6Dq/yaPyCXA==}
 
-  mdast-util-to-markdown@2.2.1:
-    resolution: {integrity: sha512-ThatlCBxG2GE+mljhNSfZPv56d3QrGiRh97jjYgIk80IzS4uU6d7cHAaexCYSAmUCCcOs3grJ07kX3oTGsFUOw==}
+  mdast-util-to-markdown@2.2.3:
+    resolution: {integrity: sha512-dImdB6VZRMRac1SwAW6o1c0ESk/7pFFAMCMuKM+9v7LpTSthMM5nzXpqKw4Mjo66aXVKhNkyrP4bMB9MurPyWg==}
 
   mdast-util-to-string@4.0.0:
     resolution: {integrity: sha512-0H44vDimn51F0YwvxSJSm0eCDOJTRlmN0R1yBh4HLj9wiV1Dn0QoXGbvFAWj2hSItVTlCmBF1hqKlIyUBVFLPg==}
 
-  mermaid@12.2.0:
-    resolution: {integrity: sha512-w7nr/SFrLO7BaVTs3dQTvYSV6nYSBj0Yy9DjBhsIJtAcHqRzXSq4Pg32ujHZ/AdWsAMNEvvhbm5dt9E2tOiHzw==}
+  mermaid@12.3.0:
+    resolution: {integrity: sha512-4113TdXeLAsMruJ79OpFL5O8+LTFXhQqZ260rF3tgUmiNAtRm4Uume04I+65PRN6yZ69J4f8rVYWW8zRk65UYw==}
     engines: {node: '>=22.12.0'}
 
   micromark-core-commonmark@2.0.4:
@@ -2592,8 +2585,8 @@ packages:
     resolution: {integrity: sha512-tEBHqDnIoM/1rXME1zgka9g6Q2lcoCkxHLuc7ODJ5BxbP5d4c2Z5cGgtXAku59200Cx7diuHTOYfSBD8n6mm8A==}
     engines: {node: '>=16 || 14 >=14.17'}
 
-  motion-dom@14.12.0:
-    resolution: {integrity: sha512-YnAY17g8mXRVoXGZbH+v/O2SkNBJqz2TMuqL9yek9Omfhsdjw7gJwNgI5nsGZFpbbm3vINyOo+VtGPryIslatw==}
+  motion-dom@14.13.0:
+    resolution: {integrity: sha512-nWrB6Psw7mFTBNL9r5hw9nm/a5+21WZ1LymOml/V2b43LdiIDO1oi+oBMSR3bcyuzEQKJoaa+t5qnsCWYhcNvA==}
 
   motion-utils@14.7.0:
     resolution: {integrity: sha512-woO0/Nb7ys75f94fjvQi/6leiHGvZUYkeHUPEZ3vxsV+9OpEVhkxp01x8MlRwX0zt31EqgXsKDAoBoJLC148Tw==}
@@ -2648,9 +2641,6 @@ packages:
   parse-json@5.2.0:
     resolution: {integrity: sha512-ayCKvm/phCGxOkYRSCM82iDwct8/EonSEgCSxWxD7ve6jHggsFl4fZVQBPRNgQoKiuV/odhFrGzQXZwbifC8Rg==}
     engines: {node: '>=8'}
-
-  parse5@7.3.0:
-    resolution: {integrity: sha512-IInvU7fabl34qmi9gY8XOVxhYyMyuH2xUNpb2q8/Y+7552KlejkRvqvD19nMoUW/uQGGbqNpA6Tufu5FL5BZgw==}
 
   parse5@8.1.1:
     resolution: {integrity: sha512-EcR/6WDcU7b2N3vQSxKALCk9lXGtUMQxXio008OEMBE0kavu/7JLfBEeFPzi43nMqVDSbEn3QCK+BMCc9zO//w==}
@@ -3115,10 +3105,6 @@ packages:
   util-deprecate@1.0.2:
     resolution: {integrity: sha512-EPD5q1uXyFxJpCrLnCc1nHnq3gOa6DZBocAIiI2TaSCA7VCJ1UJDMagCzIkXNsUYfD1daK//LTEQ8xiIbrHtcw==}
 
-  uuid@14.0.3:
-    resolution: {integrity: sha512-Sc5u1VVln93y1Xnz4R+CunOZc7R9LUcTmhj7Rc7Eg3HVcf7rVn2FOoa812fe0W8p3jD7xeoGSYbfqCGGH2B6xw==}
-    hasBin: true
-
   uuidv7@1.2.1:
     resolution: {integrity: sha512-4kPkK3/XTQW9Hbm4CaqfICn+kY9LJtDVEOfgsRRra/+n2Ofg4NqzRFceAkxvQ/Ud/6BpHOPzj8cirqM7TzTN5Q==}
     hasBin: true
@@ -3529,7 +3515,7 @@ snapshots:
       '@hapi/hoek': 9.3.0
     optional: true
 
-  '@hookform/resolvers@7.0.1(ajv@8.20.0)(joi@17.13.9)(react-hook-form@7.92.0(@types/react@19.3.0)(react@19.3.1))(zod@4.6.7)':
+  '@hookform/resolvers@7.0.6(ajv@8.20.0)(joi@17.13.9)(react-hook-form@7.92.0(@types/react@19.3.0)(react@19.3.1))(zod@4.6.7)':
     dependencies:
       '@standard-schema/utils': 0.3.0
       react-hook-form: 7.92.0(@types/react@19.3.0)(react@19.3.1)
@@ -3796,19 +3782,19 @@ snapshots:
 
   '@noble/hashes@2.4.0': {}
 
-  '@omnitron-dev/access@0.4.6': {}
+  '@omnitron-dev/access@0.4.8': {}
 
-  '@omnitron-dev/common@0.4.6': {}
+  '@omnitron-dev/common@0.4.8': {}
 
-  '@omnitron-dev/cuid@0.4.6':
+  '@omnitron-dev/cuid@0.4.8':
     dependencies:
       '@noble/hashes': 2.4.0
 
-  '@omnitron-dev/eventemitter@0.4.6':
+  '@omnitron-dev/eventemitter@0.4.8':
     dependencies:
-      '@omnitron-dev/common': 0.4.6
+      '@omnitron-dev/common': 0.4.8
 
-  '@omnitron-dev/kb@0.4.6(@surrealdb/node-native@4.0.1)(surrealdb@2.2.2(@typescript/typescript6@6.0.2)(tslib@2.8.1))':
+  '@omnitron-dev/kb@0.4.8(@surrealdb/node-native@4.0.1)(surrealdb@2.2.2(@typescript/typescript6@6.0.2)(tslib@2.8.1))':
     dependencies:
       '@surrealdb/node': 3.2.0(@surrealdb/node-native@4.0.1)(surrealdb@2.2.2(@typescript/typescript6@6.0.2)(tslib@2.8.1))
       gray-matter: 4.0.3
@@ -3817,12 +3803,13 @@ snapshots:
     transitivePeerDependencies:
       - '@surrealdb/node-native'
 
-  '@omnitron-dev/lumen-ast@0.4.6(supports-color@8.1.1)':
+  '@omnitron-dev/lumen-ast@0.4.8(supports-color@8.1.1)':
     dependencies:
       '@jitl/quickjs-singlefile-browser-release-sync': 0.32.0
       '@modelcontextprotocol/server': 2.4.0
       '@myriaddreamin/typst-ts-web-compiler': 0.7.0
-      '@omnitron-dev/access': 0.4.6
+      '@omnitron-dev/access': 0.4.8
+      '@omnitron-dev/common': 0.4.8
       '@types/hast': 3.0.5
       fontkit: 3.0.0
       hast-util-raw: 9.2.0
@@ -3834,8 +3821,8 @@ snapshots:
       mdast-util-gfm: 3.1.0(supports-color@8.1.1)
       mdast-util-math: 3.0.0(supports-color@8.1.1)
       mdast-util-to-hast: 13.2.1
-      mdast-util-to-markdown: 2.2.1
-      mermaid: 12.2.0
+      mdast-util-to-markdown: 2.2.3
+      mermaid: 12.3.0
       micromark-extension-directive: 4.0.0
       micromark-extension-gfm: 3.0.0
       quickjs-emscripten-core: 0.32.0
@@ -3847,15 +3834,15 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  '@omnitron-dev/lumen-ui@0.4.6(@floating-ui/dom@1.8.0)(@surrealdb/node-native@4.0.1)(@tiptap/extension-code-block@3.33.1(@tiptap/core@3.33.1(@tiptap/pm@3.33.1))(@tiptap/pm@3.33.1))(@tiptap/extension-list@3.33.1(@tiptap/core@3.33.1(@tiptap/pm@3.33.1))(@tiptap/pm@3.33.1))(@tiptap/extensions@3.33.1(@tiptap/core@3.33.1(@tiptap/pm@3.33.1))(@tiptap/pm@3.33.1))(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(ajv@8.20.0)(apexcharts@8.8.1)(highlight.js@11.11.2)(joi@17.13.9)(react-apexcharts@2.2.0(apexcharts@8.8.1)(react@19.3.1))(react-dom@19.3.1(react@19.3.1))(react@19.3.1)(supports-color@8.1.1)(surrealdb@2.2.2(@typescript/typescript6@6.0.2)(tslib@2.8.1))(use-sync-external-store@1.7.0(react@19.3.1))':
+  '@omnitron-dev/lumen-ui@0.4.8(@floating-ui/dom@1.8.0)(@surrealdb/node-native@4.0.1)(@tiptap/extension-code-block@3.33.1(@tiptap/core@3.33.1(@tiptap/pm@3.33.1))(@tiptap/pm@3.33.1))(@tiptap/extension-list@3.33.1(@tiptap/core@3.33.1(@tiptap/pm@3.33.1))(@tiptap/pm@3.33.1))(@tiptap/extensions@3.33.1(@tiptap/core@3.33.1(@tiptap/pm@3.33.1))(@tiptap/pm@3.33.1))(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(ajv@8.20.0)(apexcharts@8.8.1)(highlight.js@11.11.2)(joi@17.13.9)(react-apexcharts@2.2.0(apexcharts@8.8.1)(react@19.3.1))(react-dom@19.3.1(react@19.3.1))(react@19.3.1)(supports-color@8.1.1)(surrealdb@2.2.2(@typescript/typescript6@6.0.2)(tslib@2.8.1))(use-sync-external-store@1.7.0(react@19.3.1))':
     dependencies:
       '@emotion/cache': 11.14.0
       '@emotion/react': 11.14.0(@types/react@19.3.0)(react@19.3.1)(supports-color@8.1.1)
       '@emotion/styled': 11.14.1(@emotion/react@11.14.0(@types/react@19.3.0)(react@19.3.1)(supports-color@8.1.1))(@types/react@19.3.0)(react@19.3.1)(supports-color@8.1.1)
       '@mui/material': 9.5.0(@emotion/react@11.14.0(@types/react@19.3.0)(react@19.3.1)(supports-color@8.1.1))(@emotion/styled@11.14.1(@emotion/react@11.14.0(@types/react@19.3.0)(react@19.3.1)(supports-color@8.1.1))(@types/react@19.3.0)(react@19.3.1)(supports-color@8.1.1))(@types/react@19.3.0)(react-dom@19.3.1(react@19.3.1))(react@19.3.1)
-      '@omnitron-dev/kb': 0.4.6(@surrealdb/node-native@4.0.1)(surrealdb@2.2.2(@typescript/typescript6@6.0.2)(tslib@2.8.1))
-      '@omnitron-dev/lumen-ast': 0.4.6(supports-color@8.1.1)
-      '@omnitron-dev/prism': 0.4.6(@floating-ui/dom@1.8.0)(@tiptap/extension-code-block@3.33.1(@tiptap/core@3.33.1(@tiptap/pm@3.33.1))(@tiptap/pm@3.33.1))(@tiptap/extension-list@3.33.1(@tiptap/core@3.33.1(@tiptap/pm@3.33.1))(@tiptap/pm@3.33.1))(@tiptap/extensions@3.33.1(@tiptap/core@3.33.1(@tiptap/pm@3.33.1))(@tiptap/pm@3.33.1))(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(ajv@8.20.0)(apexcharts@8.8.1)(highlight.js@11.11.2)(joi@17.13.9)(react-apexcharts@2.2.0(apexcharts@8.8.1)(react@19.3.1))(react-dom@19.3.1(react@19.3.1))(react@19.3.1)(supports-color@8.1.1)(use-sync-external-store@1.7.0(react@19.3.1))
+      '@omnitron-dev/kb': 0.4.8(@surrealdb/node-native@4.0.1)(surrealdb@2.2.2(@typescript/typescript6@6.0.2)(tslib@2.8.1))
+      '@omnitron-dev/lumen-ast': 0.4.8(supports-color@8.1.1)
+      '@omnitron-dev/prism': 0.4.8(@floating-ui/dom@1.8.0)(@tiptap/extension-code-block@3.33.1(@tiptap/core@3.33.1(@tiptap/pm@3.33.1))(@tiptap/pm@3.33.1))(@tiptap/extension-list@3.33.1(@tiptap/core@3.33.1(@tiptap/pm@3.33.1))(@tiptap/pm@3.33.1))(@tiptap/extensions@3.33.1(@tiptap/core@3.33.1(@tiptap/pm@3.33.1))(@tiptap/pm@3.33.1))(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(ajv@8.20.0)(apexcharts@8.8.1)(highlight.js@11.11.2)(joi@17.13.9)(react-apexcharts@2.2.0(apexcharts@8.8.1)(react@19.3.1))(react-dom@19.3.1(react@19.3.1))(react@19.3.1)(supports-color@8.1.1)(use-sync-external-store@1.7.0(react@19.3.1))
       clsx: 2.1.1
       katex: 0.19.1
       react: 19.3.1
@@ -3911,17 +3898,17 @@ snapshots:
       - vest
       - yup
 
-  '@omnitron-dev/lumen@0.4.6(@floating-ui/dom@1.8.0)(@surrealdb/node-native@4.0.1)(@tiptap/extension-code-block@3.33.1(@tiptap/core@3.33.1(@tiptap/pm@3.33.1))(@tiptap/pm@3.33.1))(@tiptap/extension-list@3.33.1(@tiptap/core@3.33.1(@tiptap/pm@3.33.1))(@tiptap/pm@3.33.1))(@tiptap/extensions@3.33.1(@tiptap/core@3.33.1(@tiptap/pm@3.33.1))(@tiptap/pm@3.33.1))(@types/node@26.6.6)(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(ajv@8.20.0)(apexcharts@8.8.1)(esbuild@0.28.2)(highlight.js@11.11.2)(jiti@1.21.7)(joi@17.13.9)(react-apexcharts@2.2.0(apexcharts@8.8.1)(react@19.3.1))(react-dom@19.3.1(react@19.3.1))(react@19.3.1)(supports-color@8.1.1)(surrealdb@2.2.2(@typescript/typescript6@6.0.2)(tslib@2.8.1))(terser@5.51.2)(use-sync-external-store@1.7.0(react@19.3.1))(yaml@2.9.1)':
+  '@omnitron-dev/lumen@0.4.8(@floating-ui/dom@1.8.0)(@surrealdb/node-native@4.0.1)(@tiptap/extension-code-block@3.33.1(@tiptap/core@3.33.1(@tiptap/pm@3.33.1))(@tiptap/pm@3.33.1))(@tiptap/extension-list@3.33.1(@tiptap/core@3.33.1(@tiptap/pm@3.33.1))(@tiptap/pm@3.33.1))(@tiptap/extensions@3.33.1(@tiptap/core@3.33.1(@tiptap/pm@3.33.1))(@tiptap/pm@3.33.1))(@types/node@26.6.6)(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(ajv@8.20.0)(apexcharts@8.8.1)(esbuild@0.28.2)(highlight.js@11.11.2)(jiti@1.21.7)(joi@17.13.9)(react-apexcharts@2.2.0(apexcharts@8.8.1)(react@19.3.1))(react-dom@19.3.1(react@19.3.1))(react@19.3.1)(supports-color@8.1.1)(surrealdb@2.2.2(@typescript/typescript6@6.0.2)(tslib@2.8.1))(terser@5.51.2)(use-sync-external-store@1.7.0(react@19.3.1))(yaml@2.9.1)':
     dependencies:
       '@emotion/cache': 11.14.0
       '@emotion/react': 11.14.0(@types/react@19.3.0)(react@19.3.1)(supports-color@8.1.1)
       '@emotion/server': 11.11.0
       '@modelcontextprotocol/server': 2.4.0
-      '@omnitron-dev/common': 0.4.6
-      '@omnitron-dev/lumen-ast': 0.4.6(supports-color@8.1.1)
-      '@omnitron-dev/lumen-ui': 0.4.6(@floating-ui/dom@1.8.0)(@surrealdb/node-native@4.0.1)(@tiptap/extension-code-block@3.33.1(@tiptap/core@3.33.1(@tiptap/pm@3.33.1))(@tiptap/pm@3.33.1))(@tiptap/extension-list@3.33.1(@tiptap/core@3.33.1(@tiptap/pm@3.33.1))(@tiptap/pm@3.33.1))(@tiptap/extensions@3.33.1(@tiptap/core@3.33.1(@tiptap/pm@3.33.1))(@tiptap/pm@3.33.1))(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(ajv@8.20.0)(apexcharts@8.8.1)(highlight.js@11.11.2)(joi@17.13.9)(react-apexcharts@2.2.0(apexcharts@8.8.1)(react@19.3.1))(react-dom@19.3.1(react@19.3.1))(react@19.3.1)(supports-color@8.1.1)(surrealdb@2.2.2(@typescript/typescript6@6.0.2)(tslib@2.8.1))(use-sync-external-store@1.7.0(react@19.3.1))
-      '@omnitron-dev/prism': 0.4.6(@floating-ui/dom@1.8.0)(@tiptap/extension-code-block@3.33.1(@tiptap/core@3.33.1(@tiptap/pm@3.33.1))(@tiptap/pm@3.33.1))(@tiptap/extension-list@3.33.1(@tiptap/core@3.33.1(@tiptap/pm@3.33.1))(@tiptap/pm@3.33.1))(@tiptap/extensions@3.33.1(@tiptap/core@3.33.1(@tiptap/pm@3.33.1))(@tiptap/pm@3.33.1))(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(ajv@8.20.0)(apexcharts@8.8.1)(highlight.js@11.11.2)(joi@17.13.9)(react-apexcharts@2.2.0(apexcharts@8.8.1)(react@19.3.1))(react-dom@19.3.1(react@19.3.1))(react@19.3.1)(supports-color@8.1.1)(use-sync-external-store@1.7.0(react@19.3.1))
-      commander: 15.0.0
+      '@omnitron-dev/common': 0.4.8
+      '@omnitron-dev/lumen-ast': 0.4.8(supports-color@8.1.1)
+      '@omnitron-dev/lumen-ui': 0.4.8(@floating-ui/dom@1.8.0)(@surrealdb/node-native@4.0.1)(@tiptap/extension-code-block@3.33.1(@tiptap/core@3.33.1(@tiptap/pm@3.33.1))(@tiptap/pm@3.33.1))(@tiptap/extension-list@3.33.1(@tiptap/core@3.33.1(@tiptap/pm@3.33.1))(@tiptap/pm@3.33.1))(@tiptap/extensions@3.33.1(@tiptap/core@3.33.1(@tiptap/pm@3.33.1))(@tiptap/pm@3.33.1))(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(ajv@8.20.0)(apexcharts@8.8.1)(highlight.js@11.11.2)(joi@17.13.9)(react-apexcharts@2.2.0(apexcharts@8.8.1)(react@19.3.1))(react-dom@19.3.1(react@19.3.1))(react@19.3.1)(supports-color@8.1.1)(surrealdb@2.2.2(@typescript/typescript6@6.0.2)(tslib@2.8.1))(use-sync-external-store@1.7.0(react@19.3.1))
+      '@omnitron-dev/prism': 0.4.8(@floating-ui/dom@1.8.0)(@tiptap/extension-code-block@3.33.1(@tiptap/core@3.33.1(@tiptap/pm@3.33.1))(@tiptap/pm@3.33.1))(@tiptap/extension-list@3.33.1(@tiptap/core@3.33.1(@tiptap/pm@3.33.1))(@tiptap/pm@3.33.1))(@tiptap/extensions@3.33.1(@tiptap/core@3.33.1(@tiptap/pm@3.33.1))(@tiptap/pm@3.33.1))(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(ajv@8.20.0)(apexcharts@8.8.1)(highlight.js@11.11.2)(joi@17.13.9)(react-apexcharts@2.2.0(apexcharts@8.8.1)(react@19.3.1))(react-dom@19.3.1(react@19.3.1))(react@19.3.1)(supports-color@8.1.1)(use-sync-external-store@1.7.0(react@19.3.1))
+      commander: 15.1.0
       import-meta-resolve: 4.2.0
       pagefind: 1.6.0
       react: 19.3.1
@@ -3992,48 +3979,49 @@ snapshots:
       - yaml
       - yup
 
-  '@omnitron-dev/msgpack@0.4.6':
+  '@omnitron-dev/msgpack@0.4.8':
     dependencies:
-      '@omnitron-dev/common': 0.4.6
+      '@omnitron-dev/common': 0.4.8
       buffer: 6.0.3
       long: 5.3.2
 
-  '@omnitron-dev/netron-browser@0.4.6':
+  '@omnitron-dev/netron-browser@0.4.8':
     dependencies:
-      '@omnitron-dev/cuid': 0.4.6
-      '@omnitron-dev/eventemitter': 0.4.6
-      '@omnitron-dev/msgpack': 0.4.6
-      '@omnitron-dev/netron-http-core': 0.4.6
-      '@omnitron-dev/netron-protocol': 0.4.6
+      '@omnitron-dev/cuid': 0.4.8
+      '@omnitron-dev/eventemitter': 0.4.8
+      '@omnitron-dev/msgpack': 0.4.8
+      '@omnitron-dev/netron-http-core': 0.4.8
+      '@omnitron-dev/netron-protocol': 0.4.8
       buffer: 6.0.3
 
-  '@omnitron-dev/netron-http-core@0.4.6':
+  '@omnitron-dev/netron-http-core@0.4.8':
     dependencies:
-      '@omnitron-dev/eventemitter': 0.4.6
-      '@omnitron-dev/netron-protocol': 0.4.6
+      '@omnitron-dev/eventemitter': 0.4.8
+      '@omnitron-dev/netron-protocol': 0.4.8
 
-  '@omnitron-dev/netron-protocol@0.4.6': {}
+  '@omnitron-dev/netron-protocol@0.4.8': {}
 
-  '@omnitron-dev/netron-react@0.4.6(react-dom@19.3.1(react@19.3.1))(react@19.3.1)':
+  '@omnitron-dev/netron-react@0.4.8(react-dom@19.3.1(react@19.3.1))(react@19.3.1)':
     dependencies:
-      '@omnitron-dev/netron-browser': 0.4.6
-      '@omnitron-dev/netron-protocol': 0.4.6
+      '@omnitron-dev/netron-browser': 0.4.8
+      '@omnitron-dev/netron-protocol': 0.4.8
       react: 19.3.1
       react-dom: 19.3.1(react@19.3.1)
 
-  '@omnitron-dev/prism@0.4.6(@floating-ui/dom@1.8.0)(@tiptap/extension-code-block@3.33.1(@tiptap/core@3.33.1(@tiptap/pm@3.33.1))(@tiptap/pm@3.33.1))(@tiptap/extension-list@3.33.1(@tiptap/core@3.33.1(@tiptap/pm@3.33.1))(@tiptap/pm@3.33.1))(@tiptap/extensions@3.33.1(@tiptap/core@3.33.1(@tiptap/pm@3.33.1))(@tiptap/pm@3.33.1))(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(ajv@8.20.0)(apexcharts@8.8.1)(highlight.js@11.11.2)(joi@17.13.9)(react-apexcharts@2.2.0(apexcharts@8.8.1)(react@19.3.1))(react-dom@19.3.1(react@19.3.1))(react@19.3.1)(supports-color@8.1.1)(use-sync-external-store@1.7.0(react@19.3.1))':
+  '@omnitron-dev/prism@0.4.8(@floating-ui/dom@1.8.0)(@tiptap/extension-code-block@3.33.1(@tiptap/core@3.33.1(@tiptap/pm@3.33.1))(@tiptap/pm@3.33.1))(@tiptap/extension-list@3.33.1(@tiptap/core@3.33.1(@tiptap/pm@3.33.1))(@tiptap/pm@3.33.1))(@tiptap/extensions@3.33.1(@tiptap/core@3.33.1(@tiptap/pm@3.33.1))(@tiptap/pm@3.33.1))(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(ajv@8.20.0)(apexcharts@8.8.1)(highlight.js@11.11.2)(joi@17.13.9)(react-apexcharts@2.2.0(apexcharts@8.8.1)(react@19.3.1))(react-dom@19.3.1(react@19.3.1))(react@19.3.1)(supports-color@8.1.1)(use-sync-external-store@1.7.0(react@19.3.1))':
     dependencies:
       '@emotion/cache': 11.14.0
       '@emotion/react': 11.14.0(@types/react@19.3.0)(react@19.3.1)(supports-color@8.1.1)
       '@emotion/styled': 11.14.1(@emotion/react@11.14.0(@types/react@19.3.0)(react@19.3.1)(supports-color@8.1.1))(@types/react@19.3.0)(react@19.3.1)(supports-color@8.1.1)
-      '@hookform/resolvers': 7.0.1(ajv@8.20.0)(joi@17.13.9)(react-hook-form@7.92.0(@types/react@19.3.0)(react@19.3.1))(zod@4.6.7)
+      '@hookform/resolvers': 7.0.6(ajv@8.20.0)(joi@17.13.9)(react-hook-form@7.92.0(@types/react@19.3.0)(react@19.3.1))(zod@4.6.7)
       '@mui/icons-material': 9.5.0(@mui/material@9.5.0(@emotion/react@11.14.0(@types/react@19.3.0)(react@19.3.1)(supports-color@8.1.1))(@emotion/styled@11.14.1(@emotion/react@11.14.0(@types/react@19.3.0)(react@19.3.1)(supports-color@8.1.1))(@types/react@19.3.0)(react@19.3.1)(supports-color@8.1.1))(@types/react@19.3.0)(react-dom@19.3.1(react@19.3.1))(react@19.3.1))(@types/react@19.3.0)(react@19.3.1)
       '@mui/material': 9.5.0(@emotion/react@11.14.0(@types/react@19.3.0)(react@19.3.1)(supports-color@8.1.1))(@emotion/styled@11.14.1(@emotion/react@11.14.0(@types/react@19.3.0)(react@19.3.1)(supports-color@8.1.1))(@types/react@19.3.0)(react@19.3.1)(supports-color@8.1.1))(@types/react@19.3.0)(react-dom@19.3.1(react@19.3.1))(react@19.3.1)
       '@mui/system': 9.5.0(@emotion/react@11.14.0(@types/react@19.3.0)(react@19.3.1)(supports-color@8.1.1))(@emotion/styled@11.14.1(@emotion/react@11.14.0(@types/react@19.3.0)(react@19.3.1)(supports-color@8.1.1))(@types/react@19.3.0)(react@19.3.1)(supports-color@8.1.1))(@types/react@19.3.0)(react@19.3.1)
       '@mui/x-data-grid': 9.17.0(@emotion/react@11.14.0(@types/react@19.3.0)(react@19.3.1)(supports-color@8.1.1))(@emotion/styled@11.14.1(@emotion/react@11.14.0(@types/react@19.3.0)(react@19.3.1)(supports-color@8.1.1))(@types/react@19.3.0)(react@19.3.1)(supports-color@8.1.1))(@mui/material@9.5.0(@emotion/react@11.14.0(@types/react@19.3.0)(react@19.3.1)(supports-color@8.1.1))(@emotion/styled@11.14.1(@emotion/react@11.14.0(@types/react@19.3.0)(react@19.3.1)(supports-color@8.1.1))(@types/react@19.3.0)(react@19.3.1)(supports-color@8.1.1))(@types/react@19.3.0)(react-dom@19.3.1(react@19.3.1))(react@19.3.1))(@mui/system@9.5.0(@emotion/react@11.14.0(@types/react@19.3.0)(react@19.3.1)(supports-color@8.1.1))(@emotion/styled@11.14.1(@emotion/react@11.14.0(@types/react@19.3.0)(react@19.3.1)(supports-color@8.1.1))(@types/react@19.3.0)(react@19.3.1)(supports-color@8.1.1))(@types/react@19.3.0)(react@19.3.1))(@types/react@19.3.0)(react-dom@19.3.1(react@19.3.1))(react@19.3.1)
       '@mui/x-date-pickers': 9.17.0(@emotion/react@11.14.0(@types/react@19.3.0)(react@19.3.1)(supports-color@8.1.1))(@emotion/styled@11.14.1(@emotion/react@11.14.0(@types/react@19.3.0)(react@19.3.1)(supports-color@8.1.1))(@types/react@19.3.0)(react@19.3.1)(supports-color@8.1.1))(@mui/material@9.5.0(@emotion/react@11.14.0(@types/react@19.3.0)(react@19.3.1)(supports-color@8.1.1))(@emotion/styled@11.14.1(@emotion/react@11.14.0(@types/react@19.3.0)(react@19.3.1)(supports-color@8.1.1))(@types/react@19.3.0)(react@19.3.1)(supports-color@8.1.1))(@types/react@19.3.0)(react-dom@19.3.1(react@19.3.1))(react@19.3.1))(@mui/system@9.5.0(@emotion/react@11.14.0(@types/react@19.3.0)(react@19.3.1)(supports-color@8.1.1))(@emotion/styled@11.14.1(@emotion/react@11.14.0(@types/react@19.3.0)(react@19.3.1)(supports-color@8.1.1))(@types/react@19.3.0)(react@19.3.1)(supports-color@8.1.1))(@types/react@19.3.0)(react@19.3.1))(@types/react@19.3.0)(dayjs@1.11.23)(react-dom@19.3.1(react@19.3.1))(react@19.3.1)
-      '@omnitron-dev/netron-browser': 0.4.6
-      '@omnitron-dev/netron-react': 0.4.6(react-dom@19.3.1(react@19.3.1))(react@19.3.1)
+      '@omnitron-dev/common': 0.4.8
+      '@omnitron-dev/netron-browser': 0.4.8
+      '@omnitron-dev/netron-react': 0.4.8(react-dom@19.3.1(react@19.3.1))(react@19.3.1)
       '@tanstack/react-virtual': 3.14.26(react-dom@19.3.1(react@19.3.1))(react@19.3.1)
       '@tiptap/core': 3.33.1(@tiptap/pm@3.33.1)
       '@tiptap/extension-code-block-lowlight': 3.33.1(@tiptap/core@3.33.1(@tiptap/pm@3.33.1))(@tiptap/extension-code-block@3.33.1(@tiptap/core@3.33.1(@tiptap/pm@3.33.1))(@tiptap/pm@3.33.1))(@tiptap/pm@3.33.1)(highlight.js@11.11.2)(lowlight@3.3.0)
@@ -4052,21 +4040,21 @@ snapshots:
       '@xyflow/react': 12.12.1(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(immer@11.2.10)(react-dom@19.3.1(react@19.3.1))(react@19.3.1)
       class-variance-authority: 0.7.1
       clsx: 2.1.1
-      commander: 15.0.0
+      commander: 15.1.0
       dayjs: 1.11.23
       dompurify: 3.4.17
-      framer-motion: 14.12.0(react-dom@19.3.1(react@19.3.1))(react@19.3.1)
+      framer-motion: 14.13.0(react-dom@19.3.1(react@19.3.1))(react@19.3.1)
       immer: 11.2.10
       katex: 0.19.1
       lowlight: 3.3.0
-      maplibre-gl: 6.17.0
+      maplibre-gl: 6.18.0
       mathlive: 0.111.4
       mdast-util-directive: 3.2.0(supports-color@8.1.1)
       mdast-util-from-markdown: 2.1.0(supports-color@8.1.1)
       mdast-util-gfm: 3.1.0(supports-color@8.1.1)
       mdast-util-math: 3.0.0(supports-color@8.1.1)
-      mdast-util-to-markdown: 2.2.1
-      mermaid: 12.2.0
+      mdast-util-to-markdown: 2.2.3
+      mermaid: 12.3.0
       micromark-extension-directive: 4.0.0
       micromark-extension-gfm: 3.0.0
       nprogress: 0.2.0
@@ -4075,7 +4063,7 @@ snapshots:
       react-dom: 19.3.1(react@19.3.1)
       react-dropzone: 20.2.0(@types/react@19.3.0)(react@19.3.1)
       react-hook-form: 7.92.0(@types/react@19.3.0)(react@19.3.1)
-      react-map-gl: 8.1.3(maplibre-gl@6.17.0)(react-dom@19.3.1(react@19.3.1))(react@19.3.1)
+      react-map-gl: 8.1.3(maplibre-gl@6.18.0)(react-dom@19.3.1(react@19.3.1))(react@19.3.1)
       react-markdown: 10.1.0(@types/react@19.3.0)(react@19.3.1)(supports-color@8.1.1)
       rehype-highlight: 7.0.2
       rehype-raw: 7.0.0
@@ -4721,13 +4709,13 @@ snapshots:
       react: 19.3.1
       react-dom: 19.3.1(react@19.3.1)
 
-  '@vis.gl/react-maplibre@8.1.3(maplibre-gl@6.17.0)(react-dom@19.3.1(react@19.3.1))(react@19.3.1)':
+  '@vis.gl/react-maplibre@8.1.3(maplibre-gl@6.18.0)(react-dom@19.3.1(react@19.3.1))(react@19.3.1)':
     dependencies:
       '@maplibre/maplibre-gl-style-spec': 19.3.3
       react: 19.3.1
       react-dom: 19.3.1(react@19.3.1)
     optionalDependencies:
-      maplibre-gl: 6.17.0
+      maplibre-gl: 6.18.0
 
   '@xec-sh/cli@0.12.0':
     dependencies:
@@ -4891,8 +4879,6 @@ snapshots:
   clsx@2.1.1: {}
 
   comma-separated-tokens@2.0.3: {}
-
-  commander@15.0.0: {}
 
   commander@15.1.0: {}
 
@@ -5152,9 +5138,7 @@ snapshots:
 
   earcut@3.2.4: {}
 
-  elkjs@0.9.3: {}
-
-  entities@6.0.1: {}
+  elkjs@0.12.1: {}
 
   entities@9.0.0: {}
 
@@ -5241,9 +5225,9 @@ snapshots:
       unicode-properties: 2.0.2
       unicode-trie: 3.0.0
 
-  framer-motion@14.12.0(react-dom@19.3.1(react@19.3.1))(react@19.3.1):
+  framer-motion@14.13.0(react-dom@19.3.1(react@19.3.1))(react@19.3.1):
     dependencies:
-      motion-dom: 14.12.0
+      motion-dom: 14.13.0
       motion-utils: 14.7.0
       tslib: 2.8.1
     optionalDependencies:
@@ -5303,22 +5287,6 @@ snapshots:
   hast-util-parse-selector@4.0.0:
     dependencies:
       '@types/hast': 3.0.5
-
-  hast-util-raw@9.1.0:
-    dependencies:
-      '@types/hast': 3.0.5
-      '@types/unist': 3.0.3
-      '@ungap/structured-clone': 1.4.0
-      hast-util-from-parse5: 8.0.3
-      hast-util-to-parse5: 8.0.1
-      html-void-elements: 3.0.0
-      mdast-util-to-hast: 13.2.1
-      parse5: 7.3.0
-      unist-util-position: 5.0.0
-      unist-util-visit: 5.2.0
-      vfile: 6.0.3
-      web-namespaces: 2.0.1
-      zwitch: 2.0.4
 
   hast-util-raw@9.2.0:
     dependencies:
@@ -5520,11 +5488,11 @@ snapshots:
 
   katex@0.18.10:
     dependencies:
-      commander: 15.0.0
+      commander: 15.1.0
 
   katex@0.19.1:
     dependencies:
-      commander: 15.0.0
+      commander: 15.1.0
 
   kdbush@4.1.0: {}
 
@@ -5628,6 +5596,27 @@ snapshots:
       quickselect: 3.0.0
       tinyqueue: 3.0.0
 
+  maplibre-gl@6.18.0:
+    dependencies:
+      '@mapbox/point-geometry': 1.1.0
+      '@mapbox/tiny-sdf': 2.3.0
+      '@mapbox/unitbezier': 1.0.0
+      '@mapbox/vector-tile': 3.0.0
+      '@maplibre/geojson-vt': 6.3.1
+      '@maplibre/maplibre-gl-style-spec': 26.6.0
+      '@maplibre/mlt': 1.3.0
+      '@maplibre/vt-pbf': 4.3.3
+      '@types/geojson': 7946.0.16
+      bidi-js: 1.1.0
+      earcut: 3.2.4
+      gl-matrix: 3.4.4
+      kdbush: 4.1.0
+      murmurhash-js: 1.0.0
+      pbf: 5.1.2
+      potpack: 2.1.0
+      quickselect: 3.0.0
+      tinyqueue: 3.0.0
+
   markdown-table@3.0.4: {}
 
   marked@16.4.2: {}
@@ -5641,7 +5630,7 @@ snapshots:
       ccount: 2.0.1
       devlop: 1.1.0
       mdast-util-from-markdown: 2.1.0(supports-color@8.1.1)
-      mdast-util-to-markdown: 2.2.1
+      mdast-util-to-markdown: 2.2.3
       micromark-util-character: 2.1.1
       parse-entities: 4.0.2
       stringify-entities: 4.0.4
@@ -5685,7 +5674,7 @@ snapshots:
       '@types/mdast': 4.0.4
       devlop: 1.1.0
       mdast-util-from-markdown: 2.1.0(supports-color@8.1.1)
-      mdast-util-to-markdown: 2.2.1
+      mdast-util-to-markdown: 2.2.3
       micromark-util-normalize-identifier: 2.0.1
     transitivePeerDependencies:
       - supports-color
@@ -5694,7 +5683,7 @@ snapshots:
     dependencies:
       '@types/mdast': 4.0.4
       mdast-util-from-markdown: 2.1.0(supports-color@8.1.1)
-      mdast-util-to-markdown: 2.2.1
+      mdast-util-to-markdown: 2.2.3
     transitivePeerDependencies:
       - supports-color
 
@@ -5704,7 +5693,7 @@ snapshots:
       devlop: 1.1.0
       markdown-table: 3.0.4
       mdast-util-from-markdown: 2.1.0(supports-color@8.1.1)
-      mdast-util-to-markdown: 2.2.1
+      mdast-util-to-markdown: 2.2.3
     transitivePeerDependencies:
       - supports-color
 
@@ -5713,7 +5702,7 @@ snapshots:
       '@types/mdast': 4.0.4
       devlop: 1.1.0
       mdast-util-from-markdown: 2.1.0(supports-color@8.1.1)
-      mdast-util-to-markdown: 2.2.1
+      mdast-util-to-markdown: 2.2.3
     transitivePeerDependencies:
       - supports-color
 
@@ -5725,7 +5714,7 @@ snapshots:
       mdast-util-gfm-strikethrough: 2.0.1(supports-color@8.1.1)
       mdast-util-gfm-table: 2.0.0(supports-color@8.1.1)
       mdast-util-gfm-task-list-item: 2.0.0(supports-color@8.1.1)
-      mdast-util-to-markdown: 2.2.1
+      mdast-util-to-markdown: 2.2.3
     transitivePeerDependencies:
       - supports-color
 
@@ -5736,7 +5725,7 @@ snapshots:
       devlop: 1.1.0
       longest-streak: 3.1.0
       mdast-util-from-markdown: 2.1.0(supports-color@8.1.1)
-      mdast-util-to-markdown: 2.2.1
+      mdast-util-to-markdown: 2.2.3
       unist-util-remove-position: 5.0.0
     transitivePeerDependencies:
       - supports-color
@@ -5748,7 +5737,7 @@ snapshots:
       '@types/mdast': 4.0.4
       devlop: 1.1.0
       mdast-util-from-markdown: 2.1.0(supports-color@8.1.1)
-      mdast-util-to-markdown: 2.2.1
+      mdast-util-to-markdown: 2.2.3
     transitivePeerDependencies:
       - supports-color
 
@@ -5761,7 +5750,7 @@ snapshots:
       ccount: 2.0.1
       devlop: 1.1.0
       mdast-util-from-markdown: 2.1.0(supports-color@8.1.1)
-      mdast-util-to-markdown: 2.2.1
+      mdast-util-to-markdown: 2.2.3
       parse-entities: 4.0.2
       stringify-entities: 4.0.4
       unist-util-stringify-position: 4.0.0
@@ -5776,7 +5765,7 @@ snapshots:
       '@types/mdast': 4.0.4
       devlop: 1.1.0
       mdast-util-from-markdown: 2.1.0(supports-color@8.1.1)
-      mdast-util-to-markdown: 2.2.1
+      mdast-util-to-markdown: 2.2.3
     transitivePeerDependencies:
       - supports-color
 
@@ -5797,7 +5786,7 @@ snapshots:
       unist-util-visit: 5.2.0
       vfile: 6.0.3
 
-  mdast-util-to-markdown@2.2.1:
+  mdast-util-to-markdown@2.2.3:
     dependencies:
       '@types/mdast': 4.0.4
       '@types/unist': 3.0.3
@@ -5815,7 +5804,7 @@ snapshots:
     dependencies:
       '@types/mdast': 4.0.4
 
-  mermaid@12.2.0:
+  mermaid@12.3.0:
     dependencies:
       '@braintree/sanitize-url': 7.1.2
       '@iconify/utils': 3.1.7
@@ -5831,7 +5820,7 @@ snapshots:
       dagre-d3-es: 7.0.14
       dayjs: 1.11.23
       dompurify: 3.4.17
-      elkjs: 0.9.3
+      elkjs: 0.12.1
       es-toolkit: 1.53.0
       katex: 0.18.10
       khroma: 2.1.0
@@ -5839,7 +5828,6 @@ snapshots:
       roughjs: 4.6.6
       stylis: 4.4.0
       ts-dedent: 2.3.0
-      uuid: 14.0.3
 
   micromark-core-commonmark@2.0.4:
     dependencies:
@@ -6057,7 +6045,7 @@ snapshots:
 
   minipass@7.1.3: {}
 
-  motion-dom@14.12.0:
+  motion-dom@14.13.0:
     dependencies:
       motion-utils: 14.7.0
 
@@ -6122,10 +6110,6 @@ snapshots:
       error-ex: 1.3.4
       json-parse-even-better-errors: 2.3.1
       lines-and-columns: 1.2.4
-
-  parse5@7.3.0:
-    dependencies:
-      entities: 6.0.1
 
   parse5@8.1.1:
     dependencies:
@@ -6296,14 +6280,14 @@ snapshots:
 
   react-is@19.3.1: {}
 
-  react-map-gl@8.1.3(maplibre-gl@6.17.0)(react-dom@19.3.1(react@19.3.1))(react@19.3.1):
+  react-map-gl@8.1.3(maplibre-gl@6.18.0)(react-dom@19.3.1(react@19.3.1))(react@19.3.1):
     dependencies:
       '@vis.gl/react-mapbox': 8.1.3(react-dom@19.3.1(react@19.3.1))(react@19.3.1)
-      '@vis.gl/react-maplibre': 8.1.3(maplibre-gl@6.17.0)(react-dom@19.3.1(react@19.3.1))(react@19.3.1)
+      '@vis.gl/react-maplibre': 8.1.3(maplibre-gl@6.18.0)(react-dom@19.3.1(react@19.3.1))(react@19.3.1)
       react: 19.3.1
       react-dom: 19.3.1(react@19.3.1)
     optionalDependencies:
-      maplibre-gl: 6.17.0
+      maplibre-gl: 6.18.0
 
   react-markdown@10.1.0(@types/react@19.3.0)(react@19.3.1)(supports-color@8.1.1):
     dependencies:
@@ -6372,7 +6356,7 @@ snapshots:
   rehype-raw@7.0.0:
     dependencies:
       '@types/hast': 3.0.5
-      hast-util-raw: 9.1.0
+      hast-util-raw: 9.2.0
       vfile: 6.0.3
 
   rehype-sanitize@6.0.0:
@@ -6411,7 +6395,7 @@ snapshots:
   remark-stringify@11.0.0:
     dependencies:
       '@types/mdast': 4.0.4
-      mdast-util-to-markdown: 2.2.1
+      mdast-util-to-markdown: 2.2.3
       unified: 11.0.5
 
   require-from-string@2.0.2: {}
@@ -6686,8 +6670,6 @@ snapshots:
       react: 19.3.1
 
   util-deprecate@1.0.2: {}
-
-  uuid@14.0.3: {}
 
   uuidv7@1.2.1: {}
 

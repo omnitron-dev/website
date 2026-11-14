@@ -11,7 +11,7 @@ Start with the [Lumen overview](docs/lumen/overview.md),
 [explanation of this site's build](docs/lumen/this-site.md).
 
 The site uses the released `@omnitron-dev/lumen`, `@omnitron-dev/lumen-ast`, `@omnitron-dev/lumen-ui` and
-`@omnitron-dev/prism` packages at **0.4.6**. The tracked lockfile records the npm
+`@omnitron-dev/prism` packages at **0.4.8**. The tracked lockfile records the npm
 dependency graph used by CI and distribution.
 
 ## Develop

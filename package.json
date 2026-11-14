@@ -16,10 +16,10 @@
     "test:browser": "playwright test --workers=1"
   },
   "dependencies": {
-    "@omnitron-dev/lumen": "0.4.6",
-    "@omnitron-dev/lumen-ast": "0.4.6",
-    "@omnitron-dev/lumen-ui": "0.4.6",
-    "@omnitron-dev/prism": "0.4.6",
+    "@omnitron-dev/lumen": "0.4.8",
+    "@omnitron-dev/lumen-ast": "0.4.8",
+    "@omnitron-dev/lumen-ui": "0.4.8",
+    "@omnitron-dev/prism": "0.4.8",
     "apexcharts": "8.8.1",
     "maplibre-gl": "6.17.0",
     "react": "19.3.1",
