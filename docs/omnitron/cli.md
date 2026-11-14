@@ -881,8 +881,8 @@ Database dumps use a private staging file and one deadline for the local process
 compression, file writes and publication. The default database transfer budget is
 30 minutes per dump or restore. Configure it on each daemon, as described in
 [database backup policy](./configuration.md#database-backup-policy). The destination
-is created exclusively; an existing file is never overwritten. File contents and the containing directory
-are synchronized before a successful publication is acknowledged. If publication
+is created exclusively; an existing file is never overwritten. File contents and
+the containing directory are synchronized before a successful publication is acknowledged. If publication
 or indexing cannot be confirmed, a complete destination is retained and the error
 names the file and the uncertainty. Inspect that path and the backup index before
 repeating the operation.
@@ -901,6 +901,11 @@ scheduled pass remains a warning in an otherwise successful status query.
 `omnitron backup schedules` reports the effective database transfer budget beside
 the schedules and their last outcomes; `--json` returns the same diagnostic data.
 An expired budget is a failed operation, never a successful partial backup.
+PostgreSQL restores ignore personal `psql` startup files and stop at the first SQL
+error. Neither a SQL error nor a timeout rolls back statements already applied to
+the target: the restore is not a single transaction. Keep writers stopped and
+inspect the destination before deciding whether to restore again or recover
+another way.
 
 A local Docker client exiting does not prove that its in-container command has
 stopped. The pipeline reports unresolved cleanup instead of claiming termination.

@@ -1,5 +1,5 @@
 {
-  "revision": "b3720616f365dc4cf7b0673fc6e80077db502fff",
+  "revision": "30fdfc40d44fd7cb584c46d2b111cde37f68091d",
   "packages": [
     "@omnitron-dev/access",
     "@omnitron-dev/common",
@@ -15972,7 +15972,7 @@
       "name": "AggregatedHealthDto",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "apps/omnitron/src/config/types.ts#L1103",
+      "source": "apps/omnitron/src/config/types.ts#L1109",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron",
@@ -15992,7 +15992,7 @@
       "name": "AggregatedMetricsDto",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "apps/omnitron/src/config/types.ts#L1066",
+      "source": "apps/omnitron/src/config/types.ts#L1072",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron",
@@ -16244,7 +16244,7 @@
       "name": "AppDiagnosticsDto",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "apps/omnitron/src/config/types.ts#L1222",
+      "source": "apps/omnitron/src/config/types.ts#L1228",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron",
@@ -16372,7 +16372,7 @@
       "name": "AppStatus",
       "package": "@omnitron-dev/omnitron",
       "kind": "type",
-      "source": "apps/omnitron/src/config/types.ts#L971",
+      "source": "apps/omnitron/src/config/types.ts#L977",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron",
@@ -16580,7 +16580,7 @@
       "name": "ChildDiagnosticsDto",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "apps/omnitron/src/config/types.ts#L1172",
+      "source": "apps/omnitron/src/config/types.ts#L1178",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/config",
@@ -16916,7 +16916,7 @@
       "name": "DaemonStatusDto",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "apps/omnitron/src/config/types.ts#L1045",
+      "source": "apps/omnitron/src/config/types.ts#L1051",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron",
@@ -17760,7 +17760,7 @@
       "name": "IAlertSink",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "apps/omnitron/src/config/types.ts#L874",
+      "source": "apps/omnitron/src/config/types.ts#L880",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/config",
@@ -17840,7 +17840,7 @@
       "name": "IEcosystemConfig",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "apps/omnitron/src/config/types.ts#L888",
+      "source": "apps/omnitron/src/config/types.ts#L894",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron",
@@ -18932,7 +18932,7 @@
       "name": "LastExitDto",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "apps/omnitron/src/config/types.ts#L1144",
+      "source": "apps/omnitron/src/config/types.ts#L1150",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/config",
@@ -19040,7 +19040,7 @@
       "name": "LogEntryDto",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "apps/omnitron/src/config/types.ts#L1130",
+      "source": "apps/omnitron/src/config/types.ts#L1136",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron",
@@ -19084,7 +19084,7 @@
       "name": "LogPathsDto",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "apps/omnitron/src/config/types.ts#L1215",
+      "source": "apps/omnitron/src/config/types.ts#L1221",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/config",
@@ -20064,7 +20064,7 @@
       "name": "PoolDiagnosticsDto",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "apps/omnitron/src/config/types.ts#L1196",
+      "source": "apps/omnitron/src/config/types.ts#L1202",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/config",
@@ -20148,7 +20148,7 @@
       "name": "ProcessInfoDto",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "apps/omnitron/src/config/types.ts#L989",
+      "source": "apps/omnitron/src/config/types.ts#L995",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron",
@@ -20832,7 +20832,7 @@
       "name": "RuntimeReleaseEvidence",
       "package": "@omnitron-dev/omnitron",
       "kind": "type",
-      "source": "apps/omnitron/src/config/types.ts#L974",
+      "source": "apps/omnitron/src/config/types.ts#L980",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/config",
@@ -21372,7 +21372,7 @@
       "name": "SubProcessInfoDto",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "apps/omnitron/src/config/types.ts#L1011",
+      "source": "apps/omnitron/src/config/types.ts#L1017",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron",
@@ -72272,7 +72272,7 @@
       "name": "ProcessSpawner",
       "package": "@omnitron-dev/titan-pm",
       "kind": "class",
-      "source": "packages/titan-pm/src/process-spawner.ts#L806",
+      "source": "packages/titan-pm/src/process-spawner.ts#L822",
       "imports": [
         {
           "path": "@omnitron-dev/titan-pm",
@@ -72284,7 +72284,7 @@
       "name": "ProcessSpawnerFactory",
       "package": "@omnitron-dev/titan-pm",
       "kind": "class",
-      "source": "packages/titan-pm/src/process-spawner.ts#L1658",
+      "source": "packages/titan-pm/src/process-spawner.ts#L1674",
       "imports": [
         {
           "path": "@omnitron-dev/titan-pm",

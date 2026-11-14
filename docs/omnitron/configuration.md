@@ -677,7 +677,9 @@ A running daemon retains its current policy. Apply a reviewed
 editing the file alone does not reconfigure it. After activation,
 `omnitron backup schedules --json` exposes the effective `databaseTimeoutMs`,
 schedules and stack coverage. A larger budget allows a large database more time;
-it does not reserve disk space or prove the archive can be restored.
+it does not reserve disk space or prove the archive can be restored. An expired
+restore does not undo SQL already applied; see the
+[backup and restore boundaries](./cli.md#backups).
 
 ## Runtime DTOs (returned by RPC) {#runtime-dtos-returned-by-rpc}
 
