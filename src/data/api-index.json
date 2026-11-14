@@ -1,5 +1,5 @@
 {
-  "revision": "1ae8568eebc2581e2cc2428bd3ca1cf570ed3f03",
+  "revision": "f307cb205ef447b1c178398111f1ef216cd655eb",
   "packages": [
     "@omnitron-dev/access",
     "@omnitron-dev/common",
@@ -120,6 +120,10 @@
     },
     {
       "path": "@omnitron-dev/lumen-ast/execution/limits",
+      "guide": "/docs/lumen/authoring"
+    },
+    {
+      "path": "@omnitron-dev/lumen-ast/highlight",
       "guide": "/docs/lumen/authoring"
     },
     {
@@ -4204,7 +4208,7 @@
       "name": "buildStaticSite",
       "package": "@omnitron-dev/lumen",
       "kind": "function",
-      "source": "packages/lumen/src/ssg/ssg-engine.ts#L75",
+      "source": "packages/lumen/src/ssg/ssg-engine.ts#L88",
       "imports": [
         {
           "path": "@omnitron-dev/lumen",
@@ -4384,7 +4388,7 @@
       "name": "EmotionExtractionResult",
       "package": "@omnitron-dev/lumen",
       "kind": "interface",
-      "source": "packages/lumen/src/ssg/emotion-extractor.ts#L21",
+      "source": "packages/lumen/src/ssg/emotion-extractor.ts#L22",
       "imports": [
         {
           "path": "@omnitron-dev/lumen",
@@ -4432,7 +4436,7 @@
       "name": "extractCriticalEmotionCss",
       "package": "@omnitron-dev/lumen",
       "kind": "function",
-      "source": "packages/lumen/src/ssg/emotion-extractor.ts#L28",
+      "source": "packages/lumen/src/ssg/emotion-extractor.ts#L29",
       "imports": [
         {
           "path": "@omnitron-dev/lumen",
@@ -4624,7 +4628,7 @@
       "name": "loadCorpusFromDirectory",
       "package": "@omnitron-dev/lumen",
       "kind": "function",
-      "source": "packages/lumen/src/cli/index.ts#L158",
+      "source": "packages/lumen/src/cli/index.ts#L159",
       "imports": [
         {
           "path": "@omnitron-dev/lumen",
@@ -4940,7 +4944,7 @@
       "name": "runLumenCli",
       "package": "@omnitron-dev/lumen",
       "kind": "function",
-      "source": "packages/lumen/src/cli/index.ts#L376",
+      "source": "packages/lumen/src/cli/index.ts#L377",
       "imports": [
         {
           "path": "@omnitron-dev/lumen",
@@ -5220,7 +5224,7 @@
       "name": "defaultHighlighter",
       "package": "@omnitron-dev/lumen-ast",
       "kind": "value",
-      "source": "packages/lumen-ast/src/highlight/highlighter.ts#L111",
+      "source": "packages/lumen-ast/src/highlight/highlighter.ts#L62",
       "imports": [
         {
           "path": "@omnitron-dev/lumen-ast",
@@ -5405,10 +5409,22 @@
       ]
     },
     {
+      "name": "getCodeTokenizer",
+      "package": "@omnitron-dev/lumen-ast",
+      "kind": "function",
+      "source": "packages/lumen-ast/src/highlight/tokenizer.ts#L55",
+      "imports": [
+        {
+          "path": "@omnitron-dev/lumen-ast/highlight",
+          "guide": "/docs/lumen/authoring"
+        }
+      ]
+    },
+    {
       "name": "getShikiHighlighter",
       "package": "@omnitron-dev/lumen-ast",
       "kind": "function",
-      "source": "packages/lumen-ast/src/highlight/highlighter.ts#L64",
+      "source": "packages/lumen-ast/src/highlight/highlighter.ts#L33",
       "imports": [
         {
           "path": "@omnitron-dev/lumen-ast",
@@ -5429,10 +5445,58 @@
       ]
     },
     {
+      "name": "highlightCode",
+      "package": "@omnitron-dev/lumen-ast",
+      "kind": "function",
+      "source": "packages/lumen-ast/src/highlight/tokenizer.ts#L106",
+      "imports": [
+        {
+          "path": "@omnitron-dev/lumen-ast/highlight",
+          "guide": "/docs/lumen/authoring"
+        }
+      ]
+    },
+    {
+      "name": "HighlightedLine",
+      "package": "@omnitron-dev/lumen-ast",
+      "kind": "interface",
+      "source": "packages/lumen-ast/src/highlight/tokenizer.ts#L38",
+      "imports": [
+        {
+          "path": "@omnitron-dev/lumen-ast/highlight",
+          "guide": "/docs/lumen/authoring"
+        }
+      ]
+    },
+    {
+      "name": "HighlightedSource",
+      "package": "@omnitron-dev/lumen-ast",
+      "kind": "interface",
+      "source": "packages/lumen-ast/src/highlight/tokenizer.ts#L43",
+      "imports": [
+        {
+          "path": "@omnitron-dev/lumen-ast/highlight",
+          "guide": "/docs/lumen/authoring"
+        }
+      ]
+    },
+    {
+      "name": "HighlightedToken",
+      "package": "@omnitron-dev/lumen-ast",
+      "kind": "interface",
+      "source": "packages/lumen-ast/src/highlight/tokenizer.ts#L33",
+      "imports": [
+        {
+          "path": "@omnitron-dev/lumen-ast/highlight",
+          "guide": "/docs/lumen/authoring"
+        }
+      ]
+    },
+    {
       "name": "HighlightOptions",
       "package": "@omnitron-dev/lumen-ast",
       "kind": "interface",
-      "source": "packages/lumen-ast/src/highlight/highlighter.ts#L26",
+      "source": "packages/lumen-ast/src/highlight/highlighter.ts#L24",
       "imports": [
         {
           "path": "@omnitron-dev/lumen-ast",
@@ -5804,7 +5868,7 @@
       "name": "LumenHighlighter",
       "package": "@omnitron-dev/lumen-ast",
       "kind": "class",
-      "source": "packages/lumen-ast/src/highlight/highlighter.ts#L97",
+      "source": "packages/lumen-ast/src/highlight/highlighter.ts#L48",
       "imports": [
         {
           "path": "@omnitron-dev/lumen-ast",
@@ -6468,7 +6532,7 @@
       "name": "renderCodeBlockHtml",
       "package": "@omnitron-dev/lumen-ast",
       "kind": "function",
-      "source": "packages/lumen-ast/src/highlight/emitter.ts#L56",
+      "source": "packages/lumen-ast/src/highlight/emitter.ts#L20",
       "imports": [
         {
           "path": "@omnitron-dev/lumen-ast",
@@ -6545,6 +6609,18 @@
       ]
     },
     {
+      "name": "resolveHighlightLanguage",
+      "package": "@omnitron-dev/lumen-ast",
+      "kind": "function",
+      "source": "packages/lumen-ast/src/highlight/tokenizer.ts#L49",
+      "imports": [
+        {
+          "path": "@omnitron-dev/lumen-ast/highlight",
+          "guide": "/docs/lumen/authoring"
+        }
+      ]
+    },
+    {
       "name": "resolveProofLink",
       "package": "@omnitron-dev/lumen-ast",
       "kind": "function",
@@ -6560,7 +6636,7 @@
       "name": "resolveShikiLanguage",
       "package": "@omnitron-dev/lumen-ast",
       "kind": "function",
-      "source": "packages/lumen-ast/src/highlight/highlighter.ts#L89",
+      "source": "packages/lumen-ast/src/highlight/highlighter.ts#L43",
       "imports": [
         {
           "path": "@omnitron-dev/lumen-ast",
@@ -6720,6 +6796,18 @@
       "imports": [
         {
           "path": "@omnitron-dev/lumen-ast",
+          "guide": "/docs/lumen/authoring"
+        }
+      ]
+    },
+    {
+      "name": "tokenizeCode",
+      "package": "@omnitron-dev/lumen-ast",
+      "kind": "function",
+      "source": "packages/lumen-ast/src/highlight/tokenizer.ts#L79",
+      "imports": [
+        {
+          "path": "@omnitron-dev/lumen-ast/highlight",
           "guide": "/docs/lumen/authoring"
         }
       ]
@@ -7284,7 +7372,7 @@
       "name": "CodeBlock",
       "package": "@omnitron-dev/lumen-ui",
       "kind": "function",
-      "source": "packages/lumen-ui/src/blocks/code-block.tsx#L23",
+      "source": "packages/lumen-ui/src/blocks/code-block.tsx#L43",
       "imports": [
         {
           "path": "@omnitron-dev/lumen-ui",
@@ -7300,7 +7388,7 @@
       "name": "CodeBlockProps",
       "package": "@omnitron-dev/lumen-ui",
       "kind": "interface",
-      "source": "packages/lumen-ui/src/blocks/code-block.tsx#L6",
+      "source": "packages/lumen-ui/src/blocks/code-block.tsx#L9",
       "imports": [
         {
           "path": "@omnitron-dev/lumen-ui",
@@ -7316,7 +7404,7 @@
       "name": "ComponentExample",
       "package": "@omnitron-dev/lumen-ui",
       "kind": "function",
-      "source": "packages/lumen-ui/src/blocks/component-example.tsx#L17",
+      "source": "packages/lumen-ui/src/blocks/component-example.tsx#L19",
       "imports": [
         {
           "path": "@omnitron-dev/lumen-ui",
@@ -7332,7 +7420,7 @@
       "name": "ComponentExampleProps",
       "package": "@omnitron-dev/lumen-ui",
       "kind": "interface",
-      "source": "packages/lumen-ui/src/blocks/component-example.tsx#L6",
+      "source": "packages/lumen-ui/src/blocks/component-example.tsx#L8",
       "imports": [
         {
           "path": "@omnitron-dev/lumen-ui",
