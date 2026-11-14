@@ -17,6 +17,9 @@ see [Layouts](./layouts.md). For scientific documents, block editing and typed k
 
 ### `<Alert>` / `<FormAlert>` {#alert--formalert}
 
+This sample starts in a valid state. Select **Show validation error** to inspect
+`FormAlert`; the message belongs to this example.
+
 <PrismExample example="alert" hydrate="visible" />
 
 ```tsx

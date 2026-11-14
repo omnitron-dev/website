@@ -63,6 +63,12 @@ test('the rich editor renders its document and the chart switches observations',
   await expect(chart.locator('svg.apexcharts-svg')).toBeVisible();
   await chart.getByRole('button', { name: 'Show 95th percentile' }).click();
   await expect(chart.locator('output')).toContainText('30, 34, 35');
+  for (const [mode, fill] of [['dark', 'rgb(165, 181, 189)'], ['light', 'rgb(83, 100, 109)']]) {
+    await page.getByRole('button', { name: /^Color theme:/ }).click();
+    await page.getByRole('menuitem', { name: new RegExp('^' + (mode === 'dark' ? 'Dark' : 'Light')) }).click();
+    await expect(page.locator('html')).toHaveAttribute('data-omnitron-theme', mode);
+    await expect(chart.locator('.apexcharts-xaxis-label').first()).toHaveCSS('fill', fill);
+  }
 });
 
 test('the carousel changes slides and the gallery responds to arrow keys and Escape', async ({ page }) => {

@@ -11,6 +11,20 @@ async function example(page, name) {
   return result;
 }
 
+test('alert examples start valid and show a validation error only after an explicit action', async ({ page }) => {
+  const errors = [];
+  page.on('pageerror', error => errors.push(error.message));
+  await page.goto(route);
+  const feedback = await example(page, 'alert');
+  await expect(feedback.getByRole('alert')).toContainText('Configuration valid');
+  await expect(feedback.getByText('Example validation error', { exact: true })).toHaveCount(0);
+  await feedback.getByRole('button', { name: 'Show validation error' }).click();
+  await expect(feedback.getByRole('alert')).toContainText('Example validation error');
+  await feedback.getByRole('button', { name: 'Restore valid example' }).click();
+  await expect(feedback.getByRole('alert')).toContainText('Configuration valid');
+  expect(errors).toEqual([]);
+});
+
 test('sort and select actual table rows, then read the compiled example source', async ({ page }) => {
   await page.goto(route);
   const table = await example(page, 'table');
