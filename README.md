@@ -11,7 +11,7 @@ Start with the [Lumen overview](docs/lumen/overview.md),
 [explanation of this site's build](docs/lumen/this-site.md).
 
 The site uses the released `@omnitron-dev/lumen`, `@omnitron-dev/lumen-ast`, `@omnitron-dev/lumen-ui` and
-`@omnitron-dev/prism` packages at **0.4.8**. The tracked lockfile records the npm
+`@omnitron-dev/prism` packages at **0.4.9**. The tracked lockfile records the npm
 dependency graph used by CI and distribution.
 
 ## Develop
@@ -84,12 +84,15 @@ pnpm check:content
 pnpm check:source ../omni
 pnpm typecheck
 pnpm build
+pnpm exec playwright install chromium --no-shell
 CI=true pnpm test:browser
 pnpm serve --host 127.0.0.1 --port 4173
 ```
 
 `pnpm build` runs [scripts/build.js](scripts/build.js) through Xec. It invokes
 Lumen's ordinary build, then checks emitted links, assets and fragments.
+Browser tests use Playwright’s pinned Chromium in its standard headless mode,
+so installation does not download a separate headless shell.
 The browser command starts its own Lumen server on port 4179; stop an existing
 preview on that port first. `serve` holds one verified generation, so restart it
 to inspect a later build. Output recovery and the current macOS/Linux publication

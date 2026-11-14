@@ -8,7 +8,7 @@ export default defineConfig({
   outputDir: process.env.LUMEN_TEST_OUTPUT || 'test-results',
   timeout: 45000,
   expect: { timeout: 10000 },
-  use: { baseURL, browserName: 'chromium', trace: 'retain-on-failure' },
+  use: { baseURL, browserName: 'chromium', channel: 'chromium', trace: 'retain-on-failure' },
   webServer: process.env.LUMEN_TEST_BASE_URL ? undefined : {
     command: `pnpm exec lumen serve --host 127.0.0.1 --port ${port}`,
     url: baseURL,

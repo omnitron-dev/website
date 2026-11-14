@@ -77,7 +77,7 @@ jobs:
           SITE_BASE_URL: ${{ vars.SITE_BASE_URL || '/' }}
 
       - name: Install browser for production acceptance
-        run: pnpm exec playwright install --with-deps chromium
+        run: pnpm exec playwright install --with-deps chromium --no-shell
 
       - name: Verify production routes and interactions
         run: pnpm test:browser
