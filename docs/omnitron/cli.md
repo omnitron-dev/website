@@ -340,11 +340,11 @@ bind.
 
 ## Development SDK {#development-sdk}
 
-In the development branch, starting or restarting a source application refreshes
+From Omnitron 0.4.9, starting or restarting a source application refreshes
 its existing esbuild contexts before launch. A repaired package installation is
 resolved again even when application source files have not changed. CLI and RPC
 report success only for confirmed online applications; inspect a failed or
-in-progress launch before retrying. These changes are newer than published 0.4.8.
+in-progress launch before retrying.
 
 | Command | Result |
 | --- | --- |
@@ -358,14 +358,13 @@ Each command accepts `--project-dir <path>`. The developer selection is machine-
 The watcher runs in the foreground of `sdk dev`; saving the selection does not
 create a background watcher. Keep that command running or resume it after exit.
 
-In the development branch, `sdk status` also verifies the current Turbo build
+From Omnitron 0.4.9, `sdk status` also verifies the current Turbo build
 inputs, native Node producer and output digests. It reports a current build only
 when they match the saved build checkpoint. Changed sources or dependencies, an
 incomplete build or an older checkpoint require `sdk dev` to rebuild; inspection
-never installs, builds or restarts applications. This source verification is
-newer than published 0.4.8.
+never installs, builds or restarts applications.
 
-SDK watching uses Xec Loader for filesystem observation. In the development branch, the watched directories and shared files follow the Turbo task graph; Turbo inputs decide whether a change requires a build. Declare build inputs in Turbo, including generators and shared configuration. Unsupported or unbounded watch roots produce an explicit error. Atomic saves are detected, changes are coalesced, and edits made during a build are processed afterward. Generated output and installed dependencies do not trigger a rebuild loop. Cancellation closes the watchers and waits for the active build to settle.
+SDK watching uses Xec Loader for filesystem observation. From Omnitron 0.4.9, the watched directories and shared files follow the Turbo task graph; Turbo inputs decide whether a change requires a build. Declare build inputs in Turbo, including generators and shared configuration. Unsupported or unbounded watch roots produce an explicit error. Atomic saves are detected, changes are coalesced, and edits made during a build are processed afterward. Generated output and installed dependencies do not trigger a rebuild loop. Cancellation closes the watchers and waits for the active build to settle.
 See [local SDK development and registry deployments](./releases.md#local-sdk-development-and-registry-deployments).
 
 ## Project management {#project-management}
@@ -936,14 +935,13 @@ Schedules persist across daemon restarts; they do not run while the daemon is do
 Active capture, restore and scheduled retention block backend handoff. Preparation
 pauses schedule admission, and an aborted handoff re-arms persisted schedules.
 
-The development branch also fences explicit `OmnitronBackups.deleteBackup`
+Omnitron 0.4.9 also fences explicit `OmnitronBackups.deleteBackup`
 operations. Archive removal is asynchronous, so large-file deletion does not stop
 RPC or heartbeats. Restore and deletion of one archive are serialized; independent
 archives remain independent. A deletion is acknowledged only after its files and
 index entry are removed. On failure, inspect the reported ID before retrying:
 files may already be absent while the index preserves unfinished cleanup.
-Listing never finishes that deletion implicitly. These deletion guarantees are
-not included in the published 0.4.8 backend.
+Listing never finishes that deletion implicitly.
 
 ## Kubernetes {#kubernetes}
 

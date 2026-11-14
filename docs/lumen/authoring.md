@@ -115,8 +115,8 @@ import source from './counter.tsx?raw';
 </ComponentExample>
 ```
 
-:::note{title="Development branch"}
-Published 0.4.8 includes `ComponentExample`, its native Source disclosure and Reset control. The preview error isolation and progressive syntax highlighting described below are development-branch changes newer than 0.4.8. The `@omnitron-dev/lumen-ast/highlight` entry is not exported by 0.4.8.
+:::note{title="Version requirements"}
+`ComponentExample`, its native Source disclosure and Reset control are available from Lumen 0.4.8. Preview error isolation, progressive syntax highlighting and the `@omnitron-dev/lumen-ast/highlight` entry require Lumen 0.4.9 or later.
 :::
 
 Source uses a native disclosure and remains readable before hydration. Reset remounts the preview while keeping the source open; a client render error stays in the preview so Source and Reset remain available. The copy control preserves the original text, comments and newlines. The [Prism catalog](../frontend/prism/components.md) uses this same frame.

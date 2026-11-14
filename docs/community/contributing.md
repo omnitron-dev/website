@@ -125,11 +125,11 @@ artifacts and state snapshot for rollback. An immutable experiment that pins
 an older runtime needs a separate registration for an upgraded environment;
 replacing its recorded hashes changes the experiment rather than reproducing it.
 
-Unpublished Xec changes are supplied as archives under `vendor/`. Their manifest
-records the clean source commit and SHA-256/SHA-512 digests. Workspace overrides
-select the same Core, Kit, Loader and Ops artifacts throughout the dependency
-graph. Refresh the artifacts together after testing Xec; do not add a second SSH
-transport to Omnitron.
+Omnitron 0.4.9 uses published Xec 0.12.0 packages. Package manifests and the
+committed lockfile select their versions and integrity; workspace overrides and
+patches are declared in `pnpm-workspace.yaml`. No third-party package source is
+currently stored under `vendor/`. Run the dependency and package-consumer checks
+when updating these inputs; do not add a second SSH transport to Omnitron.
 
 A consumer that develops against Omnitron source can use relative `link:`
 dependencies into one checkout. Keep its manifests and workspace overrides in
@@ -238,8 +238,10 @@ Preparation retains its completed build after every package-consumer gate passes
 Qualification verifies that retained build and performs one further build from a
 fresh checkout and frozen installation. Both use the same commit, Node version,
 platform, architecture, pinned pnpm and build policy, with build-cache reads
-disabled. The sealed runtime, Console and normalized public npm archives must
-match. Missing, changed or incompatible preparation evidence stops qualification.
+disabled. Both producers run pending dependency builds under the checked-in pnpm
+policy without restoring native side-effect caches. The sealed runtime, Console
+and normalized public npm archives must match. Missing, changed or incompatible
+preparation evidence stops qualification.
 CI and native jobs still perform their own target-specific builds. The standalone
 `pnpm check:reproducibility` gate performs two fresh builds when no preparation
 is supplied.

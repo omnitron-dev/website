@@ -161,7 +161,7 @@ This plan supplies delivery order and acceptance gates, not a competing architec
 
 ## Current implementation evidence {#current-implementation-evidence}
 
-CI compares release artifacts from two independent checkouts. Omnitron 0.4.8
+CI compares release artifacts from two independent checkouts. Omnitron 0.4.9
 uses registry packages from Xec 0.12.0 and Kysera 0.10.2. The committed lockfile
 records their resolved versions and integrity. Qualification checks the actual
 archives and installed dependency graph; an earlier release's receipt does not

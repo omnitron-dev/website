@@ -420,7 +420,7 @@ port reservations until removal succeeds. The Xec Docker adapter resolves a name
 to an immutable container ID and verifies absence after removal. A replaced name,
 unavailable daemon, or denied request is an explicit failure.
 
-Omnitron 0.4.8 uses Xec 0.12.0 from the registry, with the exact dependency graph
+Omnitron 0.4.9 uses Xec 0.12.0 from the registry, with the exact dependency graph
 recorded in its lockfile. The Docker adapter preserves the requested stop grace
 period and allows time for the
 transport acknowledgement. An expired command deadline does not prove that the
