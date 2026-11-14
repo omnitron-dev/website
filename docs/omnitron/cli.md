@@ -212,6 +212,20 @@ The cache directory must be private to the current user. Xec reuses a verified
 runtime for the same commit and Node producer; a changed checkout requires a new
 preparation. Preparation does not activate the runtime.
 
+Preparation requires an idle controller and a current recovery checkpoint.
+`omnitron backend status` reports backup operations and other activity that defer
+it. Run preparation again after that work finishes.
+
+The rollback backend must also support reviewed stack boot, unless every stack
+already has the exact saved infrastructure-preservation review. Installing a new
+candidate does not add this capability to the previous runtime. For an older
+installation, first check a backend-only transition with
+`pnpm exec xec update local-check <sealed-runtime>/packages/0/dist`.
+After that transition is reviewed and activated, prepare `local-sync` again.
+The backend-only step preserves the owner and applications; the subsequent local
+plan covers their restart and retains the upgraded backend for owner rollback.
+See [backend handoff](./backend-handoff.md) for its scope and recovery contract.
+
 Programmatic verifiers import `verifyRuntimeArtifact` or `inspectRuntimeArtifact`
 from `@omnitron-dev/omnitron/runtime-artifact`. The latter returns an
 `assertUnchanged()` check for a verified filesystem snapshot. A changed snapshot
