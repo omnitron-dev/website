@@ -209,8 +209,12 @@ transition and may restart the listed applications. Inspect
 repeat an uncertain operation. Recovery uses
 `pnpm exec xec update local-sync --review <digest> --rollback`.
 The cache directory must be private to the current user. Xec reuses a verified
-runtime for the same commit and Node producer; a changed checkout requires a new
-preparation. Preparation does not activate the runtime.
+runtime for the same commit and native Node producer; a changed checkout requires
+a new preparation. In the development checkout, it also discovers the completed
+local release build for that exact commit, platform, architecture and Node version.
+The bytes are verified locally before use, without another build, archive copy or
+CI request. An invalid selected artifact fails verification instead of silently
+falling back to a different build. Preparation does not activate the runtime.
 
 Preparation requires an idle controller and a current recovery checkpoint.
 `omnitron backend status` reports backup operations and other activity that defer
@@ -336,6 +340,12 @@ bind.
 
 ## Development SDK {#development-sdk}
 
+In the development branch, starting or restarting a source application refreshes
+its existing esbuild contexts before launch. A repaired package installation is
+resolved again even when application source files have not changed. CLI and RPC
+report success only for confirmed online applications; inspect a failed or
+in-progress launch before retrying. These changes are newer than published 0.4.8.
+
 | Command | Result |
 | --- | --- |
 | `omnitron sdk init` | Prepare the consumer workspace pnpm hook and distribution lockfile |
@@ -345,8 +355,17 @@ bind.
 | `omnitron sdk registry` | Restore the frozen registry installation |
 
 Each command accepts `--project-dir <path>`. The developer selection is machine-local.
+The watcher runs in the foreground of `sdk dev`; saving the selection does not
+create a background watcher. Keep that command running or resume it after exit.
 
-SDK watching uses Xec Loader to poll the selected source trees and build configuration every second. Atomic saves and missed native filesystem notifications are detected. Changes are coalesced; edits made during a build are rebuilt afterward. Generated output, dependencies and unrelated packages do not trigger builds. Cancellation closes the watchers and waits for the active build to settle.
+In the development branch, `sdk status` also verifies the current Turbo build
+inputs, native Node producer and output digests. It reports a current build only
+when they match the saved build checkpoint. Changed sources or dependencies, an
+incomplete build or an older checkpoint require `sdk dev` to rebuild; inspection
+never installs, builds or restarts applications. This source verification is
+newer than published 0.4.8.
+
+SDK watching uses Xec Loader for filesystem observation. In the development branch, the watched directories and shared files follow the Turbo task graph; Turbo inputs decide whether a change requires a build. Declare build inputs in Turbo, including generators and shared configuration. Unsupported or unbounded watch roots produce an explicit error. Atomic saves are detected, changes are coalesced, and edits made during a build are processed afterward. Generated output and installed dependencies do not trigger a rebuild loop. Cancellation closes the watchers and waits for the active build to settle.
 See [local SDK development and registry deployments](./releases.md#local-sdk-development-and-registry-deployments).
 
 ## Project management {#project-management}
@@ -916,6 +935,15 @@ verified in-container exec termination are not implemented.
 Schedules persist across daemon restarts; they do not run while the daemon is down.
 Active capture, restore and scheduled retention block backend handoff. Preparation
 pauses schedule admission, and an aborted handoff re-arms persisted schedules.
+
+The development branch also fences explicit `OmnitronBackups.deleteBackup`
+operations. Archive removal is asynchronous, so large-file deletion does not stop
+RPC or heartbeats. Restore and deletion of one archive are serialized; independent
+archives remain independent. A deletion is acknowledged only after its files and
+index entry are removed. On failure, inspect the reported ID before retrying:
+files may already be absent while the index preserves unfinished cleanup.
+Listing never finishes that deletion implicitly. These deletion guarantees are
+not included in the published 0.4.8 backend.
 
 ## Kubernetes {#kubernetes}
 

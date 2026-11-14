@@ -32,7 +32,8 @@ waits for successful builds, then refreshes affected online applications whose
 watch policy is enabled in the named local stack. A Vite frontend can serve the
 selected packages' built modules through its normal HMR path. Omit `--stack`
 to own application reload yourself. Use `--no-watch` to install the profile
-separately. Resume with `omnitron sdk dev --stack dev`.
+separately. Resume with `omnitron sdk dev --stack dev`. The saved selection persists,
+but the watcher is a foreground process: it stops when that command exits.
 
 For an intentionally stopped working-tree stack, first confirm that its last
 stop retained infrastructure. Obtain a fresh start review on that stopped
