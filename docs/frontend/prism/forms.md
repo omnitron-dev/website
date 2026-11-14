@@ -75,7 +75,7 @@ function SignInForm() {
 }
 ```
 
-:::note `FormAlert` takes the message as **children**
+:::note{title="FormAlert takes the message as children"}
 `<FormAlert>` does not accept an `error` prop. The message is its
 `children`. react-hook-form errors are `FieldError` objects, so pass
 `errors.root.message` (a string), not the error object itself. See

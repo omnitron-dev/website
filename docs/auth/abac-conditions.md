@@ -7,7 +7,7 @@ sidebar_position: 3
 
 # ABAC Conditions
 
-:::caution Design RFC
+:::caution{title="Design RFC"}
 ABAC conditions (time-of-day, IP, fresh-MFA gates) are part of the planned authorisation stack. Today's Omnitron does not evaluate request-attribute predicates; the policy shapes below are the target design.
 :::
 

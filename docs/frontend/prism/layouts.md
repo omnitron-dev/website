@@ -205,7 +205,7 @@ There is **no** `brand` / `navItems` / `topRight` / `topLeft` /
 nav-item visibility is expressed per-item with `allowedRoles` /
 `allowedPermissions` (see [`LayoutNavItem`](#layoutnavitem)).
 
-:::note Mobile menu button is automatic
+:::note{title="Mobile menu button is automatic"}
 When a sidenav is active, `DashboardLayout` injects a hamburger
 `<IconButton>` into the header `leftArea` below `layoutQuery` (it
 toggles the mobile drawer). You don't need to add one yourself —

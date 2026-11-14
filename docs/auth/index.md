@@ -7,7 +7,7 @@ sidebar_position: 0
 
 # Authentication & Authorisation
 
-:::info Implementation status
+:::info{title="Implementation status"}
 The [shared access policy](./access-policy.md), Titan JWT/session adapters and Netron authorization gates are implemented. Pages explicitly marked Design RFC describe additional application architecture. The current Omnitron daemon ships JWT issuance, session lifecycle, and the `admin`, `operator` and `viewer` roles (see `OmnitronAuth` in [services-reference](../omnitron/services-reference.md#omnitronauth--authrpc-servicets)). These pages describe the broader application authorisation design. See [operator authentication](../omnitron/auth-rbac.md) for the implemented daemon role checks.
 :::
 

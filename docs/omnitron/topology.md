@@ -11,7 +11,7 @@ Use **Topology** to answer three questions: what is declared, where it is runnin
 and what evidence supports each connection. Use **Workspace** to design and review
 a target placement for a project and stack.
 
-:::important Execution boundary
+:::note{title="Execution boundary"}
 The workspace saves target intent. **Accept target** and `omnitron topology apply`
 do not change executable project configuration, start or stop applications, migrate
 data, or affect auto-resume. Ordinary stack deployment continues to use the project's

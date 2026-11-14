@@ -296,7 +296,7 @@ transport — runs inside an AsyncLocalStorage scope that exposes
 `user_id`, `is_system`, `tenant_id` to RLS policies. Repositories
 pick this up automatically via the kysera RLS plugin.
 
-:::note One wrapper, two places that apply it
+:::note{title="One wrapper, two places that apply it"}
 `transport/http/server.ts` applies it per request. Every socket
 transport — WebSocket, TCP, Unix — dispatches through
 `remote-peer.ts`, which applies it per invocation on the `CALL`

@@ -7,6 +7,9 @@ const directory = new URL('../src/site/examples/', import.meta.url);
 
 test('every Prism example mounts from the same module as its displayed source', async ({ page }) => {
   test.setTimeout(180_000);
+  const failures = [];
+  page.on('pageerror', error => failures.push(error.message));
+  page.on('console', message => { if (message.type() === 'error') failures.push(message.text()); });
   const expected = (await readdir(directory)).filter(file => file.endsWith('.tsx')).sort();
   const shown = new Set();
   for (const guideFile of (await readdir(docs)).filter(file => file.endsWith('.md'))) {
@@ -20,7 +23,7 @@ test('every Prism example mounts from the same module as its displayed source', 
       shown.add(example);
       await test.step(example, async () => {
         await host.scrollIntoViewIfNeeded();
-        const island = host.locator('[data-example]');
+        const island = host.locator(`[data-example="${example}"]`);
         await expect(island).toHaveAttribute('data-example', example);
         const { deferred } = JSON.parse(await host.getAttribute('data-props'));
         if (deferred === true || deferred === 'true') await island.getByRole('button', { name: 'Load example' }).click();
@@ -30,6 +33,7 @@ test('every Prism example mounts from the same module as its displayed source', 
         const code = island.locator('pre code.language-tsx, pre.language-tsx > code').first();
         await expect.poll(() => code.textContent()).toBe(file);
         await source.click();
+        expect(failures).toEqual([]);
       });
     }
   }

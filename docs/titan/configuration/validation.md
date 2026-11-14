@@ -39,7 +39,7 @@ export const AppConfigSchema = z.object({
 export type AppConfig = z.infer<typeof AppConfigSchema>;
 ```
 
-:::warning `.default({})` on a nested object drops the inner defaults
+:::warning{title=".default({}) on a nested object drops the inner defaults"}
 
 In zod 4 `.default(v)` is an **output** default: when the key is
 absent, `v` is returned as-is, without being parsed. So

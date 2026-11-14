@@ -608,7 +608,7 @@ TitanDatabaseModule.forRootAsync({
 alternatives — configuring one of them does not silently drop the
 other.
 
-:::warning Removed: `registerTablePlugins`
+:::warning{title="Removed: registerTablePlugins"}
 There used to be a per-table registry documented here, recommended
 for exactly the case above. Plugins registered through it were
 always skipped: `DATABASE_CONNECTION` already resolves to a kysera

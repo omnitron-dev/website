@@ -7,7 +7,7 @@ sidebar_position: 5
 
 # Audit Trail
 
-:::caution Design RFC
+:::caution{title="Design RFC"}
 The structured `audit_logs` + actor-from-JWT discipline described here is part of the planned auth stack. Today's Omnitron emits operator activity into the daemon log only; the typed audit table and the helpers below are reference designs.
 :::
 

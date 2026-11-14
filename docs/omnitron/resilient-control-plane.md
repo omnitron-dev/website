@@ -12,7 +12,7 @@ developer, operator, security engineer or agent chooses the outcome and its allo
 constraints. The platform owns planning, admission, execution, recovery and evidence.
 Adding a convenient button around an untracked shell command does not satisfy this contract.
 
-:::info Design status — 31 October 2026
+:::info{title="Design status — 31 October 2026"}
 This is the target architecture and implementation acceptance contract. The
 [topology workspace](./topology.md) implements observation, portable target drafts,
 validation and durable acceptance. Existing release verification, resident process

@@ -231,7 +231,7 @@ So there is no `failover` map, no `onUnhealthy` policy and no
 request queue. A call to a backend that is down fails like any
 other call.
 
-:::note The same option means something else on the server
+:::note{title="The same option means something else on the server"}
 `@omnitron-dev/titan`'s multi-backend does route on health — it
 skips backends marked unhealthy and has a circuit breaker. One
 option name, two packages in the same monorepo, and the browser

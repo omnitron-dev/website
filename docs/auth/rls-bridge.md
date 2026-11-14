@@ -7,7 +7,7 @@ sidebar_position: 4
 
 # RLS Bridge
 
-:::caution Design RFC
+:::caution{title="Design RFC"}
 The RLS-bridge stack documented here (wrapper, `permVer` enforcement, generic policy projection) is a planned architecture, not what Omnitron ships today. Treat the code excerpts as reference shapes you'd implement in your own auth-utils package.
 :::
 

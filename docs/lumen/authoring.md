@@ -101,6 +101,28 @@ Props cross a strict JSON boundary shared by SSR and the browser through
 `@omnitron-dev/lumen-ast/islands`. Unsupported values, cycles and oversized props
 fail explicitly; they are not silently converted to different values. Arbitrary document expressions are not application code. Import and register application components in the trusted client entry.
 
+## Component source
+
+Use `ComponentExample` from `@omnitron-dev/lumen-ui/blocks` to keep a trusted React preview beside the exact module that implements it:
+
+```tsx
+import { ComponentExample } from '@omnitron-dev/lumen-ui/blocks';
+import Counter from './counter.tsx';
+import source from './counter.tsx?raw';
+
+<ComponentExample title="Request counter" code={source} resettable>
+  <Counter />
+</ComponentExample>
+```
+
+:::note{title="Development branch"}
+Published 0.4.8 includes `ComponentExample`, its native Source disclosure and Reset control. The preview error isolation and progressive syntax highlighting described below are development-branch changes newer than 0.4.8. The `@omnitron-dev/lumen-ast/highlight` entry is not exported by 0.4.8.
+:::
+
+Source uses a native disclosure and remains readable before hydration. Reset remounts the preview while keeping the source open; a client render error stays in the preview so Source and Reset remain available. The copy control preserves the original text, comments and newlines. The [Prism catalog](../frontend/prism/components.md) uses this same frame.
+
+`CodeBlock` adds light and dark syntax colors when its source becomes visible. It uses the browser-safe `@omnitron-dev/lumen-ast/highlight` entry, which exports `highlightCode` and literal token types and loads the requested language grammar on demand. The TypeScript compiler and Twoslash stay outside the client bundle. Unknown languages remain plain text; a failed grammar download shows a status beside the complete source.
+
 ## Inspect inferred types
 
 A `typescript twoslash` fence requests analysis from the actual TypeScript language service. The caret points to the symbol on the preceding line:

@@ -7,7 +7,7 @@ sidebar_position: 50
 
 # Migration: Auth v1 → v2
 
-:::caution Design RFC
+:::caution{title="Design RFC"}
 This migration plan accompanies the planned authorisation stack documented under [Authentication & Authorisation](../../auth/index.md). The unified permission engine, the `pv` claim, and the RLS bridge are target shapes — not changes the current Omnitron build has actually rolled out. Treat the steps below as the upgrade contract you'd hand to a platform team adopting that stack.
 :::
 

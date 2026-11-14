@@ -7,7 +7,7 @@ sidebar_position: 6
 
 # Mental Model
 
-:::caution Design RFC
+:::caution{title="Design RFC"}
 This page describes the target authorisation model. Omnitron today ships only the base auth surface; the role/permission/condition/RLS layering shown below is a design reference.
 :::
 

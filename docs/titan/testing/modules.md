@@ -105,7 +105,7 @@ const fakeJwt: IJWTService = {
 };
 ```
 
-:::caution Three different auth contexts share these names
+:::caution{title="Three different auth contexts share these names"}
 
 The fake above is typed against `IAuthContext` from
 `@omnitron-dev/titan-auth`: `{ userId, role, tenantId, isServiceRole,
