@@ -125,11 +125,13 @@ By default, Omnitron stores its control-plane files in `~/.omnitron/`.
   - `omnitron.log` — Backend log
   - `omnitron.error.log` — Backend errors
 - `projects/` — Project and stack state, including application log archives
+- `backups/` — Database dumps and captured resource archives
 :::
 
 The current state store is SQLite; `state.json` is only an import source for
-older installations. Project builds, configured backup destinations, container
-volumes and native service definitions have their own locations. The
+older installations. Backups use `backups/` under the selected `OMNITRON_HOME`;
+there is no separate backup-directory setting. Project builds, container volumes
+and native service definitions have their own locations. The
 [observability guide](./observability.md#putting-it-together--what-the-daemon-stores)
 distinguishes query storage from delivery journals and log archives.
 

@@ -764,10 +764,10 @@ contents can establish package identity.
 Run the controller in an ordinary environment without Git repository/object
 redirects such as `GIT_DIR` or `GIT_OBJECT_DIRECTORY`. Source verification refuses
 these overrides because they can change which repository is inspected. The
-current Xec 0.11.3 process API inherits ambient environment keys; an internal
-registry request that requires removing a key is refused before starting a
-worker rather than claiming isolation that the transport cannot provide. Git
-credential helpers and SSH configuration remain available.
+release executor inherits ambient environment keys. An internal registry request
+that requires removing a key is refused before starting a worker; a partial
+environment is not treated as an isolated process environment. Git credential
+helpers and SSH configuration remain available.
 
 ### Build from local sources {#build-from-local-sources}
 

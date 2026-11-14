@@ -628,7 +628,9 @@ same HTTP transport.
 The daemon's own config — paths, ports, role, cluster, secrets,
 health-monitor — is **not** in `omnitron.config.ts`. Defaults
 are baked in (see [Daemon / config defaults](./daemon.md#daemon-configuration)).
-Override via CLI flags on `omnitron up` or environment variables.
+Persist supported instance policy in `~/.omnitron/config.json` (or the selected
+`OMNITRON_HOME`). CLI flags and environment variables override only the settings
+they explicitly expose. These are startup settings, not live mutations.
 
 ```typescript
 interface IDaemonConfig {
@@ -647,8 +649,35 @@ interface IDaemonConfig {
   auth?:       { jwtSecret? };
   healthMonitor?: { intervalMs?, concurrency?, offlineTimeoutMs?, ...retentionDays? };
   applicationReadiness?: Record<string, AppReadinessConfig>; // qualified app names, HTTP fallback
+  backups?: { databaseTimeoutMs?: number }; // PostgreSQL dump/restore, default 1800000
 }
 ```
+
+### Database backup policy {#database-backup-policy}
+
+Merge this field into the daemon's existing `config.json`, preserving its other
+settings and private file permissions:
+
+```json
+{
+  "backups": {
+    "databaseTimeoutMs": 1800000
+  }
+}
+```
+
+The value is a positive integer in milliseconds, at most `86400000` (24 hours).
+Omission selects 30 minutes. The same budget covers each local or Docker
+PostgreSQL dump and restore, including streams, compression and durable file
+publication. Invalid values refuse startup before backup RPC and schedules become
+available. S3 object transfers and Tor archives do not use this setting.
+
+A running daemon retains its current policy. Apply a reviewed
+[backend replacement](./backend-handoff.md) or planned restart to load a change;
+editing the file alone does not reconfigure it. After activation,
+`omnitron backup schedules --json` exposes the effective `databaseTimeoutMs`,
+schedules and stack coverage. A larger budget allows a large database more time;
+it does not reserve disk space or prove the archive can be restored.
 
 ## Runtime DTOs (returned by RPC) {#runtime-dtos-returned-by-rpc}
 

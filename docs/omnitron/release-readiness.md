@@ -7,11 +7,12 @@ description: Ordered implementation and acceptance plan for the control plane, e
 
 # Release readiness
 
-This is the implementation plan as of 1 November 2026, not a list of capabilities
-already delivered. Each gate needs code, adversarial tests, documentation, packaged
-verification and an activation record. A passing unit test does not establish that
-the running fleet has received a fix. Track **implemented**, **verified**, and
-**activated** separately. No gate below is complete merely because it is documented.
+This page defines implementation and acceptance gates. It is not a live release
+status report. Each gate needs code, adversarial tests, documentation, packaged
+verification and an activation record. Track **implemented**, **verified**, and
+**activated** separately: a passing source test does not establish that the running
+fleet has received a fix. Use the candidate's qualification receipt and each
+installation's status for those decisions.
 
 The scope includes the known release blockers and the previously identified product
 limitations. Do not silently defer an item by renaming it a roadmap feature. If an
@@ -20,8 +21,8 @@ capability unavailable or explicitly limited until its acceptance criteria pass.
 
 ## Final npm qualification {#final-npm-qualification}
 
-Freeze one source commit for publication. Complete these three checks before
-preparing its npm archives:
+Freeze one source commit for publication. The release recipe prepares its npm
+archives and qualifies that same commit. Publication requires all three checks:
 
 1. Remote release admission uses the verified resident owner protocol and the
    exact Node target that installation will use. A frozen application owns its
@@ -151,10 +152,12 @@ This plan supplies delivery order and acceptance gates, not a competing architec
 
 ## Current implementation evidence {#current-implementation-evidence}
 
-CI compares release artifacts from two independent checkouts. For the registry
-transition, all six Xec 0.11.2 and fourteen Kysera 0.10.2 tarballs were downloaded
-from npm. Their SHA-512 digests matched the preparation receipts and the public
-registry metadata. Frozen installs resolve the packages used by each workspace.
+CI compares release artifacts from two independent checkouts. Omnitron 0.4.8
+uses registry packages from Xec 0.12.0 and Kysera 0.10.2. The committed lockfile
+records their resolved versions and integrity. Qualification checks the actual
+archives and installed dependency graph; an earlier release's receipt does not
+qualify a changed candidate. Frozen installs resolve the packages used by each
+workspace.
 Run `pnpm audit --audit-level low` to check runtime and development dependencies,
 and `pnpm check:packages` to verify every public export inside the packed archives.
 CI and release preparation additionally install the actual archives into an independent
@@ -200,8 +203,7 @@ still need operation-specific fencing.
 G03 keeps `ssh2` inside Xec. Direct use outside Xec and protocol implementation
 dependencies are different architectural concerns. Tunnel target isolation, pooled
 connection ownership and acknowledged closure are implemented and verified in Xec.
-The source candidate now also has Xec-owned public SSH/SFTP contracts, custom-agent
-bridging, finite request deadlines, shared connection-failure observation, bounded
+Xec 0.12 exposes public SSH/SFTP contracts, custom-agent bridging, finite request deadlines, shared connection-failure observation, bounded
 pending requests, binary/UTF-8 preservation, explicit unknown command/write outcomes,
 and complete high-level upload/download directory operations. Incomplete transfers
 reject, and a lost reply never authorizes command replay. A clean consumer check
@@ -214,7 +216,7 @@ Protocol keepalives replace remote keepalive commands; adapter disposal is termi
 Four upstream transport defects were reproduced in isolation: zero-size packets,
 receive-window overflow, abandoned buffered-write callbacks and a shared ChaCha
 nonce during nested writes. A compatible patch and an offline npm-artifact gate
-now cover these cases. The prepared Xec package carries the patched transport,
+cover these cases. The published Xec package carries the patched transport,
 its license and checksums; direct packing of an unprepared workspace is rejected.
 SFTP close acknowledgement, cleanup under backpressure and lost high-level read
 callbacks are also covered by the installed-package gate, including 25 consecutive

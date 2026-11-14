@@ -441,10 +441,15 @@ launch. The app stays stopped until a new start is requested. When ready, run
 | Is the daemon up?                     | `omnitron ping`                                  |
 | What's running right now?             | `omnitron status` / `omnitron --json status`    |
 | Force shutdown                        | `omnitron down` (graceful) or `omnitron kill` (forceful) |
-| Reload daemon config without restart  | `omnitron --json status` then admin call (or restart) |
+| Apply changed daemon startup policy   | Prepare and review a [backend replacement](./backend-handoff.md), or schedule a restart |
 | See the lock holder                   | `cat ~/.omnitron/daemon.pid`                     |
-| Reset persisted process state cold    | `omnitron down` → delete `~/.omnitron/data/daemon-state.db` → `omnitron up` (note: this DB also holds the project / node / backup registries) |
-| Reset secret store from cold          | `omnitron down` → `rm ~/.omnitron/secrets.enc` → `omnitron up` |
+| Inspect replacement/recovery state    | `omnitron backend status` |
+
+Do not delete `daemon-state.db` to reset a process: it also holds project and node
+registrations, execution intent and the backup index. Deleting `secrets.enc`
+destroys the file-provider vault. Recover these stores only from a verified backup
+with a reviewed data-loss and rollback plan. Use normal application and stack
+lifecycle commands for process changes.
 
 ## Anti-patterns {#anti-patterns}
 

@@ -163,10 +163,11 @@ Database backup, restore, scheduling.
 | `setSchedule({database, cron})` | Configure recurring backups |
 | `getSchedule({database})` | Read current schedule |
 | `listSchedules()` | Every configured schedule |
+| `getBackupStatus()` | Effective database transfer budget, schedule outcomes, next runs and stack coverage |
 | `removeSchedule({database})` | Drop a schedule |
 
 Driven by `omnitron backup` commands. Reads (`listBackups`,
-`getSchedule`, `listSchedules`) gate on `viewer`; every mutation
+`getSchedule`, `listSchedules`, `getBackupStatus`) gate on `viewer`; every mutation
 requires `admin`.
 
 ### `OmnitronDeploy` — `deploy.rpc-service.ts` {#omnitrondeploy--deployrpc-servicets}

@@ -878,8 +878,10 @@ archived keys, leaves other keys intact and requires an existing bucket. If rest
 is interrupted, reconcile the destination before resuming writers.
 
 Database dumps use a private staging file and one deadline for the local process,
-compression, file writes and publication. The destination is created exclusively;
-an existing file is never overwritten. File contents and the containing directory
+compression, file writes and publication. The default database transfer budget is
+30 minutes per dump or restore. Configure it on each daemon, as described in
+[database backup policy](./configuration.md#database-backup-policy). The destination
+is created exclusively; an existing file is never overwritten. File contents and the containing directory
 are synchronized before a successful publication is acknowledged. If publication
 or indexing cannot be confirmed, a complete destination is retained and the error
 names the file and the uncertainty. Inspect that path and the backup index before
@@ -896,9 +898,15 @@ Read commands distinguish missing diagnostic data from an empty index and still
 show uncovered stacks when no backups or schedules exist. A previously failed
 scheduled pass remains a warning in an otherwise successful status query.
 
+`omnitron backup schedules` reports the effective database transfer budget beside
+the schedules and their last outcomes; `--json` returns the same diagnostic data.
+An expired budget is a failed operation, never a successful partial backup.
+
 A local Docker client exiting does not prove that its in-container command has
-stopped. The current pipeline reports local cleanup uncertainty; container exec
-termination and configurable per-target deadlines remain separate limitations.
+stopped. The pipeline reports unresolved cleanup instead of claiming termination.
+The database budget applies to each PostgreSQL dump or restore on this daemon;
+S3 transfers and Tor archives have separate limits. Per-database overrides and
+verified in-container exec termination are not implemented.
 
 Schedules persist across daemon restarts; they do not run while the daemon is down.
 Active capture, restore and scheduled retention block backend handoff. Preparation

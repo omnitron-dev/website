@@ -292,9 +292,10 @@ Use the same `--registry <url>` when resuming a private registry release.
 
 ### Correct an unsubmitted draft
 
-If qualification finds a defect after local preparation, preserve that clean
-checkout and its archives. After committing the fix in another worktree of the
-same repository, run `xec release <version> --supersede <old-checkout>` there.
+If qualification finds a defect after local preparation, preserve the prepared
+commit in a clean checkout of the same repository with its original archives.
+Commit the fix on `main`, then run
+`pnpm exec xec release <version> --supersede <old-checkout>` from `main`.
 Xec verifies the old sealed artifacts, refuses any publication journal or remote
 tag, and preserves the annotated object under `refs/release-attempts/` before
 removing the old local tag with compare-and-swap. It never changes an npm version
