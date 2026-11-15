@@ -58,6 +58,8 @@ export function SiteLayout({ children, document: doc, documents, config }: Lumen
   const sidebarProps = { items: navigation, activeId: doc.id, title: navigationTitle };
   return <PrismProvider modeStorageKey="omnitron-theme" themeOverrides={omnitronTheme}>
     <link rel="icon" type="image/svg+xml" href="/img/logo.svg" />
+    <link rel="preload" as="font" type="font/woff2" href="/fonts/inter-400.woff2" crossOrigin="anonymous" />
+    <link rel="preload" as="font" type="font/woff2" href="/fonts/inter-600.woff2" crossOrigin="anonymous" />
     <PrismThemeScript modeStorageKey="omnitron-theme" />
     <div className="omnitron-site">
       <a className="skip-link" href="#main-content">Skip to content</a>
