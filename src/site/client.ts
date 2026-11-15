@@ -41,8 +41,7 @@ function SiteClient() {
   }, []);
   return React.createElement(OpenSearch.Provider, { value: () => setSearchOpen(true) },
     React.createElement(LumenShell, { theme, currentPath: location.pathname, islands, disablePrismProvider: true },
-      searchOpen && React.createElement('div', { className: 'search-overlay', onClick: (event: React.MouseEvent) => { if (event.target === event.currentTarget) setSearchOpen(false); } },
-        React.createElement(LumenSearchDialog, { open: true, onClose: () => setSearchOpen(false), maxResults: 12, pagefindUrl: '/pagefind/pagefind.js' }))));
+      React.createElement(LumenSearchDialog, { open: searchOpen, onClose: () => setSearchOpen(false), maxResults: 12, pagefindUrl: '/pagefind/pagefind.js' })));
 }
 const host = document.getElementById('lumen-interactive-root');
 if (host) createRoot(host).render(React.createElement(Client));

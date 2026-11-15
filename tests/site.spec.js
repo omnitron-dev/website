@@ -45,8 +45,14 @@ test('Pagefind queries the generated local index and follows a real document', a
   const responses = [];
   page.on('response', response => { if (response.url().includes('/pagefind/')) responses.push(response); });
   await page.goto('/');
-  await page.getByRole('button', { name: 'Search', exact: false }).click();
+  const trigger = page.getByRole('button', { name: 'Search', exact: false });
+  await trigger.click();
   const dialog = page.getByRole('dialog', { name: 'Search documentation' });
+  await expect(dialog).toBeVisible();
+  await dialog.getByRole('searchbox', { name: 'Search query' }).press('Escape');
+  await expect(dialog).toHaveCount(0);
+  await expect(trigger).toBeFocused();
+  await trigger.press('Enter');
   await expect(dialog).toBeVisible();
   await expect(dialog.getByRole('button', { name: 'Semantic AI' })).toHaveCount(0);
   await dialog.getByRole('searchbox', { name: 'Search query' }).fill('circuit breaker');
