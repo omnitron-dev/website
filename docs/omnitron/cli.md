@@ -45,7 +45,7 @@ when piped into another process. Check both the JSON result and the exit status.
 | **Backend installation and replacement** | `backend status`, `backend install`, `backend installation`, `backend select`, `backend upgrade`, `backend abort`, `backend recover`, `backend owner-reconcile prepare`, `backend owner-reconcile acknowledge` |
 | **Controller builds** | `release build --publish --detach`, `release builds [project]`, `release job <id> --follow`, `release stop-build <id>` |
 | **Release admission** | `stack check-release <project> <stack> <id>` |
-| **Development SDK** | `sdk init`, `sdk dev`, `sdk status`, `sdk registry` |
+| **Development SDK** | `sdk init`, `sdk dev`, `sdk status`, `sdk registry`, `sdk recover` |
 | **Project** | `project add`, `project list`, `project remove`, `project scan`, `project topology` |
 | **Topology** | `topology refresh`, `topology show`, `topology export`, `topology draft`, `topology plan`, `topology apply` |
 | **Stack** | `stack list`, `stack create`, `stack delete`, `stack status`, `stack progress`, `stack diagnose`, `stack prepare-release`, `stack start`, `stack stop`, `stack resume`, `stack runtime` |
@@ -378,10 +378,18 @@ in-progress launch before retrying.
 | `omnitron sdk dev [checkout] --stack <name> --start-stopped --review <digest>` | Build the SDK, start a stopped local working tree on reviewed infrastructure and continue watching. Add `--no-watch` for a single run. |
 | `omnitron sdk status [--stack <name>]` | Verify imports and show the active source. For a stack, compare its SDK outputs and current owner generations with the recorded refresh receipts. Supports global `--json`. |
 | `omnitron sdk registry` | Restore the frozen registry installation |
+| `omnitron sdk recover [--stack <name>]` | Restore retained SDK bytes and dependency bindings without rebuilding or installing (upcoming 0.4.11) |
 
 Each command accepts `--project-dir <path>`. The developer selection is machine-local.
 The watcher runs in the foreground of `sdk dev`; saving the selection does not
 create a background watcher. Keep that command running or resume it after exit.
+
+`recover` requires a retained transition with verified file ownership and stopped
+source applications. With `--stack`, it also checks the named local stack. It
+refuses to overwrite unrelated edits or outputs whose ownership was not recorded
+before an interrupted build or install. Recovery restores bytes and bindings; it
+does not restart applications or certify their readiness. Inspect `sdk status`
+and the reviewed stack state before resuming work.
 
 From Omnitron 0.4.9, `sdk status` also verifies the current Turbo build
 inputs, native Node producer and output digests. It reports a current build only

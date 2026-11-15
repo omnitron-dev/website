@@ -31,7 +31,7 @@ diffs them against the index table below.
 | `alert.rpc-service.ts` | `OmnitronAlerts` | 8 | viewer (read) + operator (mutate) |
 | `audit.rpc-service.ts` | `OmnitronAudit` | 2 | admin |
 | `auth.rpc-service.ts` | `OmnitronAuth` | 7 | mixed (5 allowAnonymous; 2 authenticated) |
-| `backup.rpc-service.ts` | `OmnitronBackups` | 12 | viewer (read) + admin (mutate) |
+| `backup.rpc-service.ts` | `OmnitronBackups` | 16 | viewer (read) + admin (mutate) |
 | `deploy.rpc-service.ts` | `OmnitronDeploy` | 4 | viewer (history) + operator (deploy/rollback) |
 | `discovery.rpc-service.ts` | `OmnitronDiscovery` | 3 | viewer |
 | `event-broadcaster.rpc-service.ts` | `OmnitronEvents` | 3 | viewer (subscribe, unsubscribe, stats) |
@@ -153,22 +153,35 @@ Database backup, restore, scheduling.
 
 | Method | Effect |
 | ------ | ------ |
-| `createBackup({database, compress?})` | One-shot backup of one database |
+| `createBackup({database, compress?, operationId?})` | One-shot backup of one database |
 | `createArtifactBackup({project, stack, kind, bucket?})` | Capture one stack’s `storage-objects` (explicit bucket) or `tor-keys` |
 | `createAllBackups(...)` | Back up every registered database |
 | `createFullBackup(...)` | Full backup including non-database state |
 | `listBackups({database?})` | List available backups |
-| `restoreBackup({backupId})` | Restore from a backup |
+| `restoreBackup({backupId, operationId?})` | Restore from a backup |
 | `deleteBackup({backupId})` | Drop a backup file |
 | `setSchedule({database, cron})` | Configure recurring backups |
 | `getSchedule({database})` | Read current schedule |
 | `listSchedules()` | Every configured schedule |
 | `getBackupStatus()` | Effective database transfer budget, schedule outcomes, next runs and stack coverage |
 | `removeSchedule({database})` | Drop a schedule |
+| `listOperations()` | Pending backup and restore operation receipts |
+| `getOperation({id})` | Read a retained operation receipt, or `null` when absent |
+| `cancelOperation({id, revision})` | Request cancellation of the exact reviewed operation revision |
+| `reconcileOperation({id, revision})` | Inspect retained execution evidence after backend ownership was lost; never replay the effect |
 
-Driven by `omnitron backup` commands. Reads (`listBackups`,
-`getSchedule`, `listSchedules`, `getBackupStatus`) gate on `viewer`; every mutation
-requires `admin`.
+Driven by `omnitron backup` commands. Reads (`listBackups`, `getSchedule`,
+`listSchedules`, `getBackupStatus`, `listOperations`, `getOperation`) gate on
+`viewer`; every mutation requires `admin`.
+
+The operation-receipt methods and optional caller-supplied `operationId` are part
+of the upcoming 0.4.11 source contract. An operation ID identifies one attempt;
+reusing it does not execute the backup or restore again. Read the latest receipt
+before cancellation or reconciliation: a changed revision is refused. Cancellation
+can return `cancelling` or `unknown` while completion is unconfirmed, and does not
+undo database writes already applied by a restore. Reconciliation observes the
+recorded execution resource; it cannot infer success from a missing process or
+replay an unconfirmed operation.
 
 ### `OmnitronDeploy` — `deploy.rpc-service.ts` {#omnitrondeploy--deployrpc-servicets}
 

@@ -9,17 +9,30 @@ description: Multiple SSH tabs through Xec, with pinned host keys, live authoriz
 
 Open **SSH workspace** from the sidebar, or **SSH** on a registered node. Each tab creates an independent interactive shell using the SSH identity configured for that node. The workspace supports split view, terminal search, font controls, copy selection, a local read-only mode and review before pasting line breaks or control characters.
 
-The service runs on a master with PostgreSQL-backed authentication and audit. The daemon owns the SSH connection. Credentials stay on the server. The browser renders the terminal through lazily loaded xterm.js; the CLI uses the same `OmnitronTerminal` RPC service. SSH runs through Xec's existing `NodeSSH` implementation, exposed by `@xec-sh/core/ssh`.
+The service runs on a master with PostgreSQL-backed authentication and audit. The daemon owns the SSH connection. Credentials stay on the server. The browser renders the terminal through lazily loaded xterm.js; the CLI uses the same `OmnitronTerminal` RPC service. Xec owns SSH authentication, protocol transport and channel lifecycle.
 
 ## Integration boundary {#integration-boundary}
 
-The terminal service uses Xec's shell, host-key and connection-lifecycle APIs.
-It must not construct a separate SSH client or duplicate authentication and
-connection policies. The Xec source candidate makes its connection reference a
-lifecycle-event facade; raw transport execution stays private. SSH channel and
-SFTP types are exported by Xec itself. Existing terminal event subscriptions fit
-this boundary; new capabilities belong in Xec before Console or another application
-uses them. See the [release checklist](./release-readiness.md) for activation status.
+Published Omnitron 0.4.10 uses Xec 0.12.0. The upcoming 0.4.11 source integrates
+Xec 0.13's `SSHClient` from `@xec-sh/ssh`; its registry dependency and packed
+consumer checks must pass before publication. This source change does not update
+an installed daemon. See the [release checklist](./release-readiness.md) for the
+qualification and activation gates.
+
+The terminal driver uses the shared client's host-key probe, `connect` and
+`requestShell` APIs. Its connection reference exposes lifecycle events; raw
+transport execution stays private. SSH channel and SFTP contracts belong to
+`@xec-sh/ssh`. Omnitron owns session authorization, target selection, PTY size,
+input sequencing and output retention. It does not add a second protocol client
+or duplicate Xec's authentication and request lifecycle.
+
+Automated commands and uploads use Xec Core's execution adapter. Bulk uploads
+own a separate engine so transfer shutdown cannot close control connections.
+Mesh tunnels hold leases in the SSH package's pool: idle or lifetime limits
+cannot close a connection with an active lease. Once the last tunnel closes, normal
+reclamation resumes. A failed tunnel close is returned to its owner; it is not
+reported as successful cleanup. Interactive terminal sessions keep their own
+session limits below rather than inheriting an automation pool's idle policy.
 
 ## Working with tabs {#working-with-tabs}
 

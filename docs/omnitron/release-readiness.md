@@ -89,7 +89,7 @@ Export from these verified archives. A clean Git status does not make an existin
 | G00 — Baseline | Inventory source revisions, active artifacts, owners, application PIDs/start times, database schema, replication receipts and pinned experiment environment. Establish a repeatable isolated test environment and fault fixtures. | Before/after inventory, immutable rollback artifacts, no live dependency replacement during development. | — |
 | G01 — Cluster authority | Remove anonymous election authority; bind machine identity to permitted operations. Replace volatile leadership assumptions with durable coordination, explicit failure semantics and fencing. Reject unsafe network publication with seeded administrator credentials. State exactly which database/coordination availability the cluster requires. | Forged identity, replay, stale epoch, restart, concurrent controllers, partition, lost database and delayed response tests. No leadership or effect is admitted on uncertain authority. | G00 |
 | G02 — Stack lifecycle | Node-confirmed stop with exact project/stack/allocation ownership, serialization and durable operation identity. Preserve remote observation and infrastructure on partial failure. Handle retries, lost replies, unreachable nodes and legacy deployment identities without stopping another stack. | Multi-node tests with one unreachable node, stop failure, stale incarnation, controller restart and repeated request. CLI/Console agree on stopped, partial and unknown outcomes. | G01 |
-| G03 — Xec SSH | Keep `ssh2` as the reviewed protocol implementation inside Xec. Applications and Omnitron use Xec, without independent SSH clients or transport policies. Audit dependency versions and upstream defects; strengthen host verification, streaming, PTY/resize, SFTP, forwarding, cancellation, deadlines and lifecycle in the owning layer. Public Xec types must install cleanly. Do not replace the SSH protocol implementation merely to remove a dependency. | Independent OpenSSH interoperability fixtures; password/key/agent authentication; host-key mismatch; Unicode/binary transfer; parallel channels; backpressure; interrupted transfer; tunnel disposal; no leaked processes, descriptors or secrets. Dependency-boundary checks distinguish direct imports from transitive lock entries. Reproduce relevant upstream reports and record mitigations. | G00; G02 before fleet activation |
+| G03 — Xec SSH | `@xec-sh/ssh` owns the reviewed protocol implementation derived from `ssh2`, its MIT attribution, client contracts, SFTP and connection leases. Xec Core adapts that package to command execution; applications do not add another SSH client or protocol policy. Audit upstream defects and the owned fork; verify trust, streaming, PTY/resize, forwarding, cancellation and deadlines. Public types and the protocol must install and work from the same archives. | Independent OpenSSH interoperability fixtures; password/key/agent authentication; host-key mismatch; Unicode/binary transfer; parallel channels; backpressure; interrupted transfer; tunnel disposal; no leaked processes, descriptors or secrets. Dependency-boundary checks distinguish direct imports from transitive lock entries. Reproduce relevant upstream reports and record mitigations. | G00; G02 before fleet activation |
 | G04 — Shared access policy | Complete resource-scoped grants, custom roles, explicit deny, delegation ceilings, session revocation and account suspension in the shared policy layer. Separate human, service and agent identities; privileged machine credentials cannot become user delegation. Design MFA/SSO as optional identity adapters with tested enrollment and recovery. | Same allow/deny matrix through HTTP, Netron, CLI and Console; cross-project isolation; live revocation; privilege escalation and stale-session tests; application integration tests. | G01 |
 | G05 — Release transaction | Discover all publishable workspaces; validate exports and dependency ordering. Make dry-run read-only, prerelease tags correct, git changes scoped, tag push exact, and partial publication resumable without overwriting published versions. Repair missing publish entry points. | Sandbox registry and git remotes covering interrupted publish, existing version, divergent tag, dirty tree, rerun and prerelease; package inventory has no omissions. Publication remains a separate operator action. | G00 |
 | G06 — Registry integration | Release verified Xec/Kysera artifacts, consume registry versions in Omnitron and application manifests, and remove release-time sibling paths/vendor overrides. Preserve intentional development workspaces as an explicit mode. Keep migrations accessible through Omnitron's facade. | Clean install/build/test from tarballs with sibling repositories unavailable; manifests and locks agree; runtime closure and migration checks for every application. | G03, G04, G05 |
@@ -161,12 +161,31 @@ This plan supplies delivery order and acceptance gates, not a competing architec
 
 ## Current implementation evidence {#current-implementation-evidence}
 
-CI compares release artifacts from two independent checkouts. Omnitron 0.4.9
-uses registry packages from Xec 0.12.0 and Kysera 0.10.2. The committed lockfile
-records their resolved versions and integrity. Qualification checks the actual
-archives and installed dependency graph; an earlier release's receipt does not
-qualify a changed candidate. Frozen installs resolve the packages used by each
-workspace.
+CI compares release artifacts from two independent checkouts. Published
+Omnitron 0.4.10 uses registry packages from Xec 0.12.0 and Kysera 0.10.2. Its
+committed lockfile records their resolved versions and integrity. Qualification
+checks the actual archives and installed dependency graph; an earlier release's
+receipt does not qualify a changed candidate.
+
+The upcoming 0.4.11 source requires Xec 0.13 for durable execution-resource
+inspection and termination, retained release production, and the separate
+`@xec-sh/ssh` API. Release preparation checks both declarations and installed
+versions before changing versions or building. Complete these gates in order:
+
+1. Publish and verify the Xec packages that supply those contracts.
+2. Generate the real registry lockfile and verify a frozen Omnitron installation.
+   Source aliases used in isolated tests do not satisfy this gate.
+3. Prepare Omnitron's sealed archive batch, qualify its exact consumers and
+   independent build, and complete CI plus native transition/rollback on the
+   selected Node versions. Reuse evidence only through the recipe's verified
+   input-identity contract.
+4. Publish the accepted archives, then update each installation through its
+   reviewed transition and rollback plan. Qualify documentation consumers
+   against the published Lumen and Prism versions.
+
+These are dependency and acceptance requirements, not a claim that either
+candidate is already published or active.
+
 Run `pnpm audit --audit-level low` to check runtime and development dependencies,
 and `pnpm check:packages` to verify every public export inside the packed archives.
 CI and release preparation additionally install the actual archives into an independent
@@ -209,36 +228,30 @@ Recovery acceptance transfers a real PostgreSQL lease between consecutive applic
 require explicit ownership evidence. Provisioning, routing and stateful recovery
 still need operation-specific fencing.
 
-G03 keeps `ssh2` inside Xec. Direct use outside Xec and protocol implementation
-dependencies are different architectural concerns. Tunnel target isolation, pooled
-connection ownership and acknowledged closure are implemented and verified in Xec.
-Xec 0.12 exposes public SSH/SFTP contracts, custom-agent bridging, finite request deadlines, shared connection-failure observation, bounded
-pending requests, binary/UTF-8 preservation, explicit unknown command/write outcomes,
-and complete high-level upload/download directory operations. Incomplete transfers
-reject, and a lost reply never authorizes command replay. A clean consumer check
-compiles without the underlying transport or its type package and runs in Xec CI.
-Reverse-listener allocation now has a deadline and cancellation, and invalidates
-its dedicated connection when acknowledgement is lost. Shared commands remain
-isolated. The connection budget includes in-progress handshakes, busy connections
-cannot be evicted, and unpooled connections close when their last operation ends.
-Protocol keepalives replace remote keepalive commands; adapter disposal is terminal.
-Four upstream transport defects were reproduced in isolation: zero-size packets,
-receive-window overflow, abandoned buffered-write callbacks and a shared ChaCha
-nonce during nested writes. A compatible patch and an offline npm-artifact gate
-cover these cases. The published Xec package carries the patched transport,
-its license and checksums; direct packing of an unprepared workspace is rejected.
-SFTP close acknowledgement, cleanup under backpressure and lost high-level read
-callbacks are also covered by the installed-package gate, including 25 consecutive
-server-initiated closures without leaking channels. Both npm and pnpm installations
-preserve the reviewed patch. High-level SSH targets inherit the same Xec connection
-contract as `NodeSSH`: agents, host pins, algorithms and cancellation are available
-without a parallel transport API. Connection identities include the effective trust
-and authentication policy; rotated key files cannot reuse the previous identity.
-Timeouts retire repeated failures after active users finish, preserving other commands.
-OpenSSH authentication tests exercise agent signatures, encrypted key files and
-rejection of a mismatching `known_hosts` entry without password fallback.
-Installed-package tests also exercise malformed packets, channel cleanup under
-backpressure and simultaneous writes in the published transport. Before promotion,
-complete the remaining adversarial SSH cases and transport security review. After
-activation, record the running version and repeat the role, host-key and session
-checks through the CLI and Console on the target nodes.
+G03's Xec 0.13 candidate moves the protocol implementation into `@xec-sh/ssh`.
+It is an owned fork derived from `ssh2`, with the original MIT attribution;
+it is not a newly invented SSH protocol. The package owns authentication,
+host verification, channels, SFTP, forwarding and connection leases. Core owns
+execution adaptation and maps remote failures into its common outcome contract.
+Direct SSH applications import the shared package; Omnitron automation uses
+Core's adapter and its terminal driver uses `SSHClient`.
+
+Trust and authentication policy form part of connection identity. A pooled
+connection revalidates trust before a new borrow; a trust refusal prevents new
+work without silently terminating another active lease. Strict host checking
+is the default. Commands, forwarded listeners and transfers retain their own
+request limits and cancellation. After a command is dispatched, transport loss
+can leave its outcome unknown; cancellation is not proof that the remote process
+stopped and never authorizes automatic replay. Active tunnels retain their leases
+through idle and lifetime deadlines. Normal cleanup resumes after release, and
+cleanup errors remain observable to the owner.
+
+The package's independent-peer and installed-artifact tests cover malformed
+packets, receive-window overflow, buffered writes during channel closure, nested
+ChaCha writes, SFTP response and close handling, authentication, host-key trust
+and bounded cleanup. Source test success is evidence for those source inputs;
+it does not establish acceptance of the future npm archives. G03 and G06 require
+the same tests and public consumer imports against the selected Core/SSH package
+closure, with no sibling source alias supplying a missing contract. After
+activation, record the running version and repeat role, host-key and session
+checks through CLI and Console on the target nodes.
