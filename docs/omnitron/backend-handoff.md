@@ -394,7 +394,25 @@ omnitron --json backend guardian apply /absolute/instance/runtime/supervisor-tra
 
 If the installed launcher predates these commands, invoke the candidate's `node` executable and `packages/0/dist/cli/omnitron.js` directly. Preparation verifies and installs the sealed management runtime, records the loaded unit file and current owner/application identities, and saves a private plan. It does not stop services. The record contains the original supervision configuration and unit for recovery; do not publish its contents.
 
-Apply drains and checkpoints the backend, records an activation intent, stops only the guardian's native OS job, atomically replaces its unit and private configuration, then starts the new guardian. The existing backend release is restored under that guardian with a fresh controller epoch. The owner and application processes remain in their separate job. CLI and Console requests pause while backend control is restored.
+The serving backend supplies its public socket path through its authenticated
+private control service. Reading this configuration does not require a recovery
+certificate. With `backupHandoffProtocol: 1`, the plan also records the exact
+locally owned backup attempts that the transition may cancel. Preparation and
+`--check` only inspect these operations. Restores, unknown outcomes and operations
+without confirmed local ownership remain blockers.
+
+Apply passes the reviewed references to the ordinary backend handoff. An attempt
+that already finished is observed without replay; a new or changed active attempt
+requires a new plan. After draining the approved backups, the backend obtains its
+strict checkpoint and records an activation intent. Only then does Omnitron stop
+the guardian's native OS job, replace its unit and private configuration, and
+start the new guardian. The existing backend release is restored with a fresh
+controller epoch. The owner and application processes remain in their separate
+job. CLI and Console requests pause while backend control is restored.
+
+If the preparation reply is lost, the plan remains `preparing`. Continuing the
+same plan must observe its original controller ticket; it never repeats an
+unacknowledged preparation or infers success from a missing reply.
 
 A pool can recycle a worker while a plan awaits review. If the read-only check
 refuses a changed inventory before retirement, prepare a fresh plan and review its
