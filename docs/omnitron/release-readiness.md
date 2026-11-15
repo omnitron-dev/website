@@ -8,9 +8,9 @@ description: Ordered implementation and acceptance plan for the control plane, e
 # Release readiness
 
 This page defines implementation and acceptance gates. It is not a live release
-status report. Each gate needs code, adversarial tests, documentation, packaged
-verification and an activation record. Track **implemented**, **verified**, and
-**activated** separately: a passing source test does not establish that the running
+status report. Each gate needs code, adversarial tests, documentation and packaged
+verification. An installation's activation needs its own reviewed record. Track
+**implemented**, **verified**, and **activated** separately: a passing source test does not establish that the running
 fleet has received a fix. Use the candidate's qualification receipt and each
 installation's status for those decisions.
 
@@ -21,8 +21,44 @@ capability unavailable or explicitly limited until its acceptance criteria pass.
 
 ## Final npm qualification {#final-npm-qualification}
 
-Freeze one source commit for publication. The release recipe prepares its npm
-archives and qualifies that same commit. Publication requires all three checks:
+Freeze one source commit and prepare its exact archive batch:
+
+```sh
+pnpm exec xec release <version> --prepare
+pnpm exec xec release <version> --status
+pnpm exec xec release <version> --finish
+```
+
+Preparation builds and packs once, then retains the archives before checking
+three independent npm consumers: the minimal runtime, all public packages
+together and Lumen on its own. Each verifies installed archive identities and
+runs an audit; the Lumen consumer also checks SSR, MCP and browser behavior.
+`release.json` is written only after acceptance and cleanup succeed. A rejected
+consumer can retry acceptance against the same producer and archive bytes;
+changed inputs or damaged archives refuse reuse.
+
+`--status` and publication verify the accepted archive inventory, canonical
+producer and acceptance receipts, source commit, recipe, policy and dependency
+lockfile. Publication does not repeat builds, consumer checks or runtime-tree
+hashing. The publishing process may use a different Node version or environment
+from the recorded producer. Missing acceptance, incomplete cleanup or changed
+evidence blocks publication.
+
+Runtime qualification is a separate operation:
+
+```sh
+pnpm exec xec release <version> --qualify --previous <full-previous-commit> --push-source
+```
+
+It verifies the accepted preparation as the first clean build, performs a second
+independent build, and requires CI plus native transition/rollback on the configured
+Node versions. Comparison, CI and native qualification run concurrently and retain
+their own stage evidence. A failed or unavailable stage remains failed or
+unavailable; npm acceptance does not replace it. Managed runtime updates require
+this qualification. Complete runtime qualification is not a prerequisite for npm
+publication.
+
+Runtime acceptance also covers the target installation's admission contract:
 
 1. Remote release admission uses the verified resident owner protocol and the
    exact Node target that installation will use. A frozen application owns its
@@ -32,37 +68,36 @@ archives and qualifies that same commit. Publication requires all three checks:
 2. Compiler and linter checks cover production code and all test fixtures.
    Omnitron's server tests inherit its strict backend options; Console tests use
    its browser configuration. Both belong to normal workspace typecheck.
-3. Qualify the same commit through independent clean builds, all packed package
-   entry points and consumers, tests with isolated services, documentation,
-   and native backend transition/rollback on the fleet's Node versions. The native
-   qualification also delivers an application built with the candidate SDK through
-   the previous execution owner, verifies its private dependency graph, reuses the
-   verified installation and restores the retained application. A matching
-   controller version alone is not proof of application compatibility.
+3. Native qualification delivers an application built with the candidate SDK
+   through the previous execution owner, verifies its private dependency graph,
+   reuses the verified installation and restores the retained application.
+   A matching controller version alone is not proof of application compatibility.
    Record CLI and Console acceptance separately from isolated fixtures.
 
 Do not reuse a passing result from an earlier commit as proof for the selected
 one. Preparation and publication do not activate the fleet. Any required live
 pause needs an explicit transition, verification and rollback plan first.
 
-For a maintainer SDK export, run the same reproducibility gate from the source repository:
+For a maintainer SDK export, run the reproducibility gate from the source repository:
 
 ```sh
 pnpm check:reproducibility --revision <full-commit> --out /absolute/new/qualification
 ```
 
-It runs the ordinary frozen install and complete build in two independent checkouts, then compares both the sealed runtime and every normalized public npm archive. A successful output contains `runtime/`, `sdk/framework-manifest.json`, the SDK archives and `QUALIFICATION.json`. Treat the qualification receipt as the completion marker; a partial directory is not an accepted export. Without `--revision`, the selected commit is `HEAD`.
+This standalone command runs the ordinary frozen install and complete build in
+two independent checkouts, then compares both the sealed runtime and every
+normalized public npm archive. A successful output contains `runtime/`,
+`sdk/framework-manifest.json`, the SDK archives and `QUALIFICATION.json`. Treat the
+qualification receipt as the completion marker; a partial directory is not an
+accepted export. Without `--revision`, the selected commit is `HEAD`.
 
 The [maintainer release workflow](../community/contributing.md#release-process)
-retains the clean preparation build after package-consumer acceptance and uses it
-as the first reproducibility build. Qualification verifies its identity and bytes,
-then makes the second independent build. This keeps two clean builds across local
-preparation and comparison; the standalone command above makes both from scratch.
-CI and native qualification run concurrently with the comparison and retain their
-own stage evidence. Publication checks the selected receipts and sealed archives
-without rerunning builds or tests.
-
-Export from these verified archives. A clean Git status does not make an existing build directory canonical: Console publication intentionally retains older hashed assets so open tabs can continue loading their chunks. Those retained generations belong to the served directory, not to a new SDK archive. Do not replace sealed preparation archives with a later pack of a working checkout.
+reuses the accepted preparation as the first reproducibility build, while the
+standalone command makes both from scratch. Export from the verified archives.
+A clean Git status does not make an existing build directory canonical: Console
+publication retains older hashed assets so open tabs can continue loading their
+chunks. Those served generations do not belong in a new SDK archive. Do not
+replace sealed preparation archives with a later pack of a working checkout.
 
 ## Invariants {#invariants}
 
@@ -170,21 +205,23 @@ receipt does not qualify a changed candidate.
 The upcoming 0.4.11 source requires Xec 0.13 for durable execution-resource
 inspection and termination, retained release production, and the separate
 `@xec-sh/ssh` API. Release preparation checks both declarations and installed
-versions before changing versions or building. Complete these gates in order:
+versions before changing versions or building. The npm delivery path is:
 
 1. Publish and verify the Xec packages that supply those contracts.
 2. Generate the real registry lockfile and verify a frozen Omnitron installation.
    Source aliases used in isolated tests do not satisfy this gate.
-3. Prepare Omnitron's sealed archive batch, qualify its exact consumers and
-   independent build, and complete CI plus native transition/rollback on the
-   selected Node versions. Reuse evidence only through the recipe's verified
-   input-identity contract.
-4. Publish the accepted archives, then update each installation through its
-   reviewed transition and rollback plan. Qualify documentation consumers
-   against the published Lumen and Prism versions.
+3. Prepare Omnitron's sealed archive batch and verify its exact npm consumers.
+   Publish only after acceptance, cleanup and the canonical receipts are confirmed.
+4. Qualify documentation consumers against the published Lumen and Prism versions.
 
-These are dependency and acceptance requirements, not a claim that either
-candidate is already published or active.
+Before updating a managed runtime, separately complete independent build
+comparison, CI and native transition/rollback on the selected Node versions.
+Reuse evidence only through the recipe's verified input-identity contract, then
+apply the installation's reviewed transition and rollback plan. Qualification
+may run in parallel with npm delivery; publishing does not certify that it passed.
+
+These are dependency and acceptance requirements, not a live claim that a selected
+candidate is published, qualified for runtime changes or active.
 
 Run `pnpm audit --audit-level low` to check runtime and development dependencies,
 and `pnpm check:packages` to verify every public export inside the packed archives.

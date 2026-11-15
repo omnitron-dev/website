@@ -234,22 +234,19 @@ pnpm exec xec release --list
 pnpm exec xec release <version> --dry-run
 ```
 
-Prepare and qualify the release with the full commit of the backend being replaced:
+Prepare the npm archives from the exact source commit:
 
 ```sh
-pnpm exec xec release <version> --prepare --previous <full-previous-commit> --push-source
+pnpm exec xec release <version> --prepare
 ```
 
 This command commits synchronized public versions, builds and checks the package
-archives in an isolated source export, creates a local annotated tag, and pushes
-only the exact source branch for CI. Omit `--push-source` if your Git publication
-is handled separately. The same Xec workflow runs the independent build comparison,
-CI checks and native transition/rollback checks concurrently after preparation.
-The policy in `.xec/release-policy.mjs` selects the CI executor and exact Node
-versions. This repository uses GitHub Actions; the Omnitron platform and
-application deployment do not require GitHub.
+archives in an isolated source export, and creates a local annotated tag after
+consumer acceptance. Publication uses those accepted archives. Independent build
+comparison, CI and native transition/rollback belong to the separate runtime
+qualification below; npm publication does not require that qualification or
+activate an installation.
 
-Local preparation and reproducibility use two independent clean builds in total.
 The producer builds and freezes its runtime once. Xec packs each public package
 once, adds its exact source provenance, validates it and retains the resulting
 immutable batch before consumer acceptance. Consumer checks read those same
@@ -263,8 +260,10 @@ producer. The final `release.json` is written only after acceptance and cleanup
 succeed. A changed input or damaged archive is an explicit refusal, not a cache
 miss that silently starts another build.
 
-Qualification verifies the accepted first build and performs one further build
-from a fresh checkout and frozen installation. Both use the same commit, Node version,
+Runtime qualification verifies the accepted first build and performs one further
+build from a fresh checkout and frozen installation. Preparation and runtime
+qualification therefore use two independent clean builds in total. Both use the
+same commit, Node version,
 platform, architecture, pinned pnpm and build policy, with build-cache reads
 disabled. The environment is explicitly replaced rather than overlaid: required
 system/tool/cache settings and public Vite inputs are selected; daemon authority
@@ -292,16 +291,28 @@ The CI reproducibility job installs this same frozen workspace before running
 `pnpm check:reproducibility`, which invokes the pinned Xec engine. A fresh runner
 does not depend on a globally installed Xec or another job’s build output.
 
+Run runtime qualification for a managed installation's transition:
+
+```sh
+pnpm exec xec release <version> --qualify --previous <full-previous-commit> --push-source
+```
+
+`--push-source` pushes only the exact source branch for CI; omit it when Git
+publication is handled separately. Independent build comparison, CI and native
+transition/rollback run concurrently. `.xec/release-policy.mjs` selects the CI
+executor and exact Node versions. This repository uses GitHub Actions; application
+deployment does not require GitHub.
+
 The qualification binds every result to the candidate commit, previous backend,
 policy and build Node version. It requires all configured CI jobs and native transition
-and rollback on every configured Node. A lost workflow dispatch response is
+and rollback on every configured Node. These checks admit runtime updates; npm
+acceptance alone does not satisfy them. A lost workflow dispatch response is
 reconciled by its saved intent; repeating the command does not dispatch a duplicate.
 A failed native run remains failed. Inspect it before explicitly retrying the
 GitHub run; Xec observes its new attempt when qualification is resumed.
 
 ```sh
 pnpm exec xec release <version> --qualify --previous <full-previous-commit>
-pnpm exec xec release <version> --status
 ```
 
 Preparation evidence is retained under
@@ -312,8 +323,12 @@ is not consumer acceptance or publication authority. The qualification directory
 `qualification.json` with each stage's evidence, plus the accepted independent
 build's `QUALIFICATION.json`, runtime and SDK archives. On resume, completed
 stages are reverified and reused. A partial build directory is not a completed
-receipt. `--status` checks the selected evidence without builds, workflow
-dispatches or receipt changes.
+receipt. Repeating `--qualify` resumes this runtime qualification; it does not
+publish the packages.
+
+`pnpm exec xec release <version> --status` checks the accepted npm archives and
+publication receipts without builds, workflow dispatches or receipt changes. It
+reports publication readiness, not runtime activation readiness.
 
 Native CI retains the actual tested Linux runtimes. Xec downloads them, verifies
 their source, run, attempt, archive checksum and runtime digest, and extracts them
@@ -327,6 +342,7 @@ workspace overrides: a minimal CLI/Netron runtime, every public package together
 and Lumen on its own, including optional dependencies. The runtime runs one
 ordinary `npm install`; the other two resolve fresh lockfiles and install once
 through `npm ci`. All profiles verify installed archive integrity and run an audit.
+The independent Lumen consumer also runs its installed-package SSR, MCP and browser checks.
 Inspect `release.json`, SHA-512 digests and `NOTES.md` under `.release-artifacts/<version>/<commit>/`.
 
 Publish the sealed batch:
@@ -335,16 +351,22 @@ Publish the sealed batch:
 pnpm exec xec release <version> --finish
 ```
 
-Publication rechecks the saved qualification and archive bytes; it does not rerun
-builds or tests. Xec checks npm authorization before pushing the selected commit
-and its single tag, submits the archives and completes the GitHub release only
-after npm confirms the batch. The separate `--push`, `--publish`, `--resume`
-and `--github` operations use the same qualification gate.
+Publication verifies the accepted archive inventory, canonical producer and
+acceptance receipts, source commit, recipe, policy and dependency lockfile. Missing
+acceptance, incomplete cleanup or changed evidence prevents publication. It does
+not repeat builds, consumer checks or runtime-tree hashing; the publishing process
+may use a different Node version or environment from the recorded producer.
+
+Xec checks npm authorization before pushing the selected commit and its single
+tag, submits the exact accepted bytes and completes the GitHub release only after
+npm confirms the batch. The separate `--push`, `--publish`, `--resume` and `--github`
+operations use the same publication gate. None grants runtime activation authority
+or marks skipped, missing or failed qualification stages as successful.
 
 If npm reports an expired session, run
 `npm login --auth-type=web --registry=https://registry.npmjs.org/` and check
 `npm whoami --registry=https://registry.npmjs.org/`. Credentials remain in
-npm's normal configuration; qualification receipts contain no tokens.
+npm's normal configuration; release receipts contain no tokens.
 
 ### Browser approval and recovery {#browser-approval-for-a-package-batch}
 
