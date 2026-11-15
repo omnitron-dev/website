@@ -125,11 +125,20 @@ artifacts and state snapshot for rollback. An immutable experiment that pins
 an older runtime needs a separate registration for an upgraded environment;
 replacing its recorded hashes changes the experiment rather than reproducing it.
 
-Omnitron 0.4.9 uses published Xec 0.12.0 packages. Package manifests and the
+Published Omnitron 0.4.10 uses Xec 0.12.0 packages. Package manifests and the
 committed lockfile select their versions and integrity; workspace overrides and
 patches are declared in `pnpm-workspace.yaml`. No third-party package source is
 currently stored under `vendor/`. Run the dependency and package-consumer checks
 when updating these inputs; do not add a second SSH transport to Omnitron.
+
+The current unreleased backup-recovery implementation requires the Xec Core
+0.13 execution-ownership contract. Release preparation checks both the declared
+application dependency and the installed package before changing versions or
+starting a build. Local isolated builds repeat that check after frozen install.
+Until the required Xec package is published and the lockfile is updated, preparation
+fails explicitly. Existing sealed archives can still be inspected or published
+without rebuilding them. The repository driver remains the pinned published CLI;
+a locally built Xec binary is not a substitute for the missing runtime contract.
 
 A consumer that develops against Omnitron source can use relative `link:`
 dependencies into one checkout. Keep its manifests and workspace overrides in
@@ -210,6 +219,13 @@ The repository uses Xec as its scripting engine. Run the checked-in recipes thro
 the pinned CLI installed by `pnpm install --frozen-lockfile`; `pnpm release` is the
 same entry point as `pnpm exec xec release`. No temporary publisher or personal
 shell setup is required.
+
+The implementations live in `.xec/commands/release.js` and
+`.xec/commands/update.js`. They register their options, arguments and update
+subcommands directly with Xec; there is no second argument parser or alternate
+release script. Use `pnpm exec xec release --help`,
+`pnpm exec xec update --help`, or a specific subcommand's `--help`. Unknown options,
+extra arguments and conflicting release operations fail before the action.
 
 From a clean `main`, inspect the inventory and plan:
 
@@ -365,9 +381,25 @@ activation response, inspect or reconcile that ID; never replay activation
 blindly. An already qualified runtime from another builder can be supplied with
 `--runtime <directory>`. `--cli <executable>` selects the fleet controller CLI.
 
-The local controller uses the existing supervised backend transition. Xec runs
-the sealed candidate’s own Node and CLI so admission checks understand its
-requirements; `--cli` cannot substitute an older CLI for these local operations:
+For a completed local development batch, use the native local-sync command:
+
+```sh
+pnpm exec xec update local-sync
+pnpm exec xec update local-sync --review <sha256>
+pnpm exec xec update local-sync --status
+```
+
+Preparation returns a review of supervision, Console and the exact local stack
+selections. Applying the digest may restart those applications; review the scope
+and recovery limitations first. After interruption, inspect status before
+requesting recovery with `local-sync --review <sha256> --rollback`. Set
+`OMNITRON_DEV_CACHE` or use `--cache-dir` to retain verified builds between batches.
+The status and recovery paths reuse retained evidence and do not start a build.
+
+For a backend-only transition, the separate commands below preserve the execution
+owner. Xec runs the sealed candidate's own Node and CLI so admission checks
+understand its requirements; `--cli` cannot substitute an older CLI for these
+local check/apply operations:
 
 ```sh
 pnpm exec xec update local-check <qualified-runtime>/packages/0/dist
