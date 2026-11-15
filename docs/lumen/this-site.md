@@ -9,17 +9,19 @@ This repository consumes Lumen's ordinary CLI. Its layout uses Lumen navigation 
 
 ## The build path
 
-1. `lumen.config.ts` declares document and page directories, the SSR layout and the client entry.
+1. The native Xec `build` task runs Lumen, then verifies emitted routes. `lumen.config.ts` declares document and page directories, the SSR layout, shared island registry and client entry.
 2. Lumen parses the corpus, resolves public routes and checks internal links and anchors.
 3. The public audience projection supplies HTML, search and Markdown exports.
-4. Vite bundles the declared client entry. `LumenShell` activates React islands through the shared portal runtime.
+4. Registered React examples render with the page context during the build, including lazy modules. Vite bundles the declared client entry; `LumenShell` keeps the static preview visible until its interactive replacement commits.
 5. The completed generation replaces the previous output after its full inventory is written. A failed content check retains the previous generation.
 
 There is no application RPC required to read or search this static manual.
 
+Build, check, preview, development and corpus-export commands load the same executable project graph, including `import.meta.glob` and raw source imports. Programmatic integrations use `withLumenProject(root, async ({ config, build }) => { ... })` and finish their work before that callback returns.
+
 The trusted configuration, layout and renderer are compiled into one Vite SSR graph. Local components and imported React packages share the project's React peers, so state and context hooks also work during static rendering. The compiler preserves source module paths and ESM resolution and releases its temporary files after success or failure.
 
-Browser resources enter through `clientEntry`, `stylesheets` or `publicDir`. Importing a separate CSS, image or font file from the SSR layout fails with a diagnostic instead of leaving a missing resource in the published site. Self-contained inline assets need no separate file.
+Browser resources enter through `clientEntry`, `stylesheets` or `publicDir`. CSS imported by the server layout or registered examples, including its relative fonts and images, enters the same verified output generation. The compiler preserves lazy module boundaries, so a deferred browser component is not evaluated while building an unrelated static preview. Server-side JavaScript imports of resource URLs require inline assets or explicit public URLs; conflicting emitted files fail the build.
 
 Publication persists a small recovery journal before moving the previous output.
 After interruption, the next build or serve verifies ownership and file hashes
@@ -32,6 +34,7 @@ Linux filesystem, with a brief rename gap; Windows publication is not supported.
 ## What is interactive
 
 - The header opens Lumen's local search dialog.
+- Ordinary Prism examples include their initial preview and source in static HTML. Their controls enable when handlers are ready. Immediate examples let asynchronous loading reach Lumen’s outer boundary, which retains the complete static preview; they do not replace it with a loading placeholder. Examples requiring browser-only libraries explicitly offer **Load example**, instead of silently failing during the build.
 - The API index filters the generated public symbols by package, import path and kind.
 - The authoring guide runs editable JavaScript inside a bounded QuickJS worker and renders a Mermaid diagram with the actual browser engine.
 - Type annotations and mathematical typesetting are generated during the build and remain readable without JavaScript.

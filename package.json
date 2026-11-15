@@ -5,7 +5,7 @@
   "description": "Omnitron documentation and reference Lumen site",
   "scripts": {
     "start": "lumen dev",
-    "build": "xec run scripts/build.js",
+    "build": "xec run build",
     "serve": "lumen serve",
     "typecheck": "tsc6 --noEmit",
     "check:content": "node scripts/check-content.mjs",

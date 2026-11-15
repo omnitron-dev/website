@@ -70,3 +70,20 @@ test('route previews use keyboard actions without pretending to navigate to a re
     if (name === 'scroll-to-top') await expect.poll(() => frame.locator('body').evaluate(() => window.scrollY)).toBe(0);
   }
 });
+
+
+test('ordinary previews and source remain readable without JavaScript', async ({ browser, baseURL }) => {
+  const context = await browser.newContext({ baseURL, javaScriptEnabled: false });
+  try {
+    const page = await context.newPage();
+    await page.goto(route);
+    const alert = page.locator('[data-example="alert"]');
+    await expect(alert.getByRole('alert')).toContainText('Configuration valid');
+    await expect(alert.getByRole('button', { name: 'Show validation error' })).toBeDisabled();
+    const table = page.locator('[data-example="table"]');
+    await expect(table.getByRole('row').nth(1)).toContainText('beta');
+    await table.getByText('Source code', { exact: true }).click();
+    const source = await readFile(new URL('../src/site/examples/table.tsx', import.meta.url), 'utf8');
+    await expect(table.locator('pre > code')).toHaveText(source);
+  } finally { await context.close(); }
+});

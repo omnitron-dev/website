@@ -19,8 +19,8 @@ The site uses the released `@omnitron-dev/lumen`, `@omnitron-dev/lumen-ast`, `@o
 dependency graph used by CI and distribution.
 
 The current source theme integration requires the forthcoming Prism
-`PrismThemeScript` and `modeStorageKey` API. It is qualified against the development
-SDK; update the registry dependencies and lockfile after that API is published
+`PrismThemeScript` and `modeStorageKey` API, and the Lumen server island registry
+prepared for 0.4.11. It is qualified against the development SDK; update the registry dependencies and lockfile after that API is published
 before distributing this revision. The existing 0.4.9 lock is not acceptance of
 these new imports.
 
@@ -99,8 +99,9 @@ CI=true pnpm test:browser
 pnpm serve --host 127.0.0.1 --port 4173
 ```
 
-`pnpm build` runs [scripts/build.js](scripts/build.js) through Xec. It invokes
-Lumen's ordinary build, then checks emitted links, assets and fragments.
+`pnpm build` runs the native Xec task in [.xec/config.yaml](.xec/config.yaml).
+Its ordered steps invoke Lumen's ordinary build and check emitted links, assets
+and fragments. A failed step stops the task; Xec owns execution and cancellation.
 Browser tests use Playwright’s pinned Chromium in its standard headless mode,
 so installation does not download a separate headless shell.
 The browser command starts its own Lumen server on port 4179; stop an existing
@@ -127,7 +128,10 @@ Keep public routes and externally useful headings stable.
 Document outcomes, prerequisites, complete imports, defaults and failure behavior.
 Keep examples publicly reproducible; label proposals as Design RFC. Documents
 contain literal widget props, not executable MDX imports. Register application
-components in the trusted client entry.
+components in the shared [island registry](src/site/islands.ts) for static previews
+and client activation. Browser-only examples explicitly opt into loading after an
+action; ordinary previews and their source are present in the initial HTML.
+Interactive controls remain disabled until their handlers are mounted.
 
 After public API changes, run `pnpm docs:api ../omni` against a clean, committed
 platform checkout. Review the generated [API index](src/data/api-index.json) and

@@ -1,0 +1,11 @@
+version: '1.0'
+name: Omnitron documentation
+tasks:
+  build:
+    description: Build the static manual and verify emitted links, assets and fragments.
+    timeout: 12m
+    steps:
+      - name: Compile with Lumen
+        command: lumen build
+      - name: Verify generated routes
+        command: node scripts/check-routes.js

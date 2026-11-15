@@ -7,7 +7,7 @@ import { LumenShell } from '@omnitron-dev/lumen-ui/runtime';
 import { LumenSearchDialog } from '@omnitron-dev/lumen-ui/search';
 import { PrismProvider, usePrismContext } from '@omnitron-dev/prism/core';
 import { OmnitronBrand, omnitronTheme } from '@omnitron-dev/prism/identity';
-import { PrismExample } from './prism-example.tsx';
+import { documentIslands } from './islands.ts';
 import { OpenSearch, SearchTrigger } from './search-trigger.tsx';
 import { ThemeSelector } from './theme-selector.tsx';
 import { DocSidebar } from '@omnitron-dev/prism/components/doc-layout';
@@ -19,7 +19,7 @@ function ApiExplorerIsland() {
 }
 
 function SearchPage() { return React.createElement(SearchTrigger, { full: true }); }
-const islands = { Home, MainNavigation, DocSidebar, MobileNavigation, SectionNavigation, DocSectionNav, MermaidDiagram, PrismExample, SiteBrand: OmnitronBrand, ThemeSelector, SearchTrigger, ApiExplorer: ApiExplorerIsland, SearchPage, Playground: NetronPlayground };
+const islands = { ...documentIslands, Home, MainNavigation, DocSidebar, MobileNavigation, SectionNavigation, DocSectionNav, MermaidDiagram, SiteBrand: OmnitronBrand, ThemeSelector, SearchTrigger, ApiExplorer: ApiExplorerIsland, SearchPage, Playground: NetronPlayground };
 function Client() {
   return React.createElement(PrismProvider, { children: null, modeStorageKey: 'omnitron-theme', themeOverrides: omnitronTheme },
     React.createElement(SiteClient));
