@@ -117,6 +117,16 @@ omnitron --json backend select <installed-sha256> --check
 
 The result identifies the current and proposed releases and the migration scope. You can run this check while applications are online. Selection repeats the checks under the installation lock after the backend and owner have stopped. An independently supervised worker with cluster coordination disabled compares its complete SQLite migration registry in both releases. Controllers, enrolled workers and installations without a proven managed role compare both registries. Changed worker migrations require a separate data transition. A successful cold-selection check does not establish live owner compatibility. Use `backend upgrade --check` for that decision.
 
+Warm backend review requires `backendHandoffReviewProtocol: 1` on the controller
+and guardian. `backend upgrade <sealed-dist> --check --json` reports the reviewed
+controller, configuration digest and exact backup attempts. Applying can cancel
+only those owned attempts through their journal revisions. The candidate still
+validates the frozen checkpoint before retirement; review does not publish a
+recovery certificate. Unknown outcomes and new backup attempts block the transition.
+A standalone upgrade takes a fresh admission in that command; a separate `--check`
+is inspection, not a persistent approval. Fleet and local-sync plans retain their
+reviewed authority across calls.
+
 For supported independent services, `omnitron backend guardian prepare <sealed-runtime>` records a private transition plan. `omnitron backend guardian apply <plan>` applies or resumes it while retaining the execution owner and application processes. The existing backend release is restored under the updated guardian.
 
 `omnitron backend schema prepare <sealed-runtime>` reads the master database and saves a plan for explicitly reviewed compatible additions. `omnitron backend schema apply <plan>` applies or resumes it under the shared migration lock. After rollback, `prepare <sealed-runtime> --from-plan <applied-plan>` binds the same already-applied expansion to a corrected candidate, checking the original runtimes and exact database history. `omnitron backend upgrade <sealed-dist> --schema-plan <plan>` requires that exact applied plan for an upgrade or rollback between its two sealed releases. Legacy bridges, changed definitions, foreign databases and local node schema transitions are refused.
@@ -1144,6 +1154,12 @@ Account cleanup modes belong to the project's tool: `--leftovers` performs a
 census, `--leftovers rehearse` previews removal in rolled-back transactions,
 and `--leftovers apply` requests committed removal. Inspect the census and
 project policy before applying cleanup.
+
+Fleet plan receipts expose each target's `backupOperations`. The CLI and Console
+show their IDs, revisions and resources before applying the plan. Completed
+archives remain available. A finished attempt needs no cancellation; changed or
+new active attempts require a new review. Automatic rollback carries no permission
+to cancel backups started after planning.
 
 ## Fleet recovery and host ingress {#fleet-recovery-and-host-ingress}
 

@@ -93,6 +93,27 @@ admission still requires a successful protocol response. A timeout with phase
 `not-reported` means no valid progress was received; it does not establish a
 particular cause or justify activating the candidate.
 
+A warm update requires `backendHandoffReviewProtocol: 1` on the serving backend
+and its guardian. `--check --json` returns a read-only admission containing the
+controller identity, effective configuration digest and exact backup attempts.
+It can inspect a known owned backup while recovery is `pending`; it does not
+publish a ready certificate, cancel work or authorize retirement. Unknown
+outcomes, restores and foreign operations still block the review.
+
+A standalone `backend upgrade` is an immediate operation: it obtains a fresh
+admission in that invocation. A separate `--check` is inspection, not a saved
+approval. Fleet and local-sync plans retain their reviewed admission across calls.
+
+Applying the admission uses the backup operation journal's compare-and-set
+revision checks. A completed reviewed attempt is observed without replay. A new
+attempt or changed active revision requires a fresh plan. After drain, the
+controller freezes its checkpoint and compares the registry, effective definitions,
+resolved infrastructure declarations and native IDs, execution environment, owner
+grant and application inventory with the review.
+The candidate checks native infrastructure against that exact frozen checkpoint
+before retirement. A lost prepare acknowledgement is not retried: inspect the
+original ticket and checkpoint before continuing.
+
 ## First transition {#first-transition}
 
 Run `omnitron backend status --json` before planning an update. `mode: coupled` means the backend directly owns its workers. Those live forks and threads cannot be transferred to another parent without changing their lifecycle. **The first transition requires one controlled application restart.** The upgrade command refuses a legacy daemon before draining or stopping anything.
@@ -733,6 +754,9 @@ Omit `--stage` to inspect builds already installed through
 `omnitron backend install <runtime>`. A single blocked target prevents activation
 of the entire plan. A successful plan records the exact rollback artifact,
 candidate, current selection revision, backend PID, owner and application inventory.
+It also binds the effective configuration digest and exact backup operation IDs
+and revisions. CLI and Console show those cancellation permissions before apply;
+completed backup archives are retained.
 
 In Console, open **Nodes → Managed backend updates → Plan update**. Choose a catalog
 commit and select the servers in canary order, or explicitly choose **All
@@ -759,6 +783,12 @@ Keep the original receipt for audit. A stale refusal is not evidence that an
 activation happened or that rollback ran. After dispatch, inspect the original
 ID. Follow an operation that is still running and reconcile an uncertain outcome
 before creating another plan.
+
+Automatic recovery follows the successor's proven controller grant and preserves
+the reviewed configuration. Its cancellation list is empty: rollback cannot cancel
+backups started after the original review. A new active attempt must finish before
+rollback can drain. Historical plans without reviewed backup admission remain
+readable, but cannot be activated; prepare a new plan for the current protocol.
 
 ### Reverse an accepted node {#reverse-an-accepted-node}
 
