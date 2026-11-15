@@ -1,5 +1,5 @@
 import React, {useMemo, useState} from 'react';
-import { Button, TextField } from '@omnitron-dev/prism/ui';
+import { Button, Link, TextField } from '@omnitron-dev/prism/ui';
 import { ArrowLeftIcon, ArrowRightIcon } from '@omnitron-dev/prism/icons';
 import data from '../data/api-index.json';
 import styles from '../components/ApiExplorer/styles.module.css';
@@ -56,13 +56,13 @@ export default function ApiExplorer() {
               <div className={styles.symbol}>
                 <code>{row.name}</code>
                 <span>{row.kind}</span>
-                {row.source && <a href={sourceBase + row.source} className={styles.source}>Source ↗</a>}
+                {row.source && <Link href={sourceBase + row.source} className={styles.source}>Source ↗</Link>}
               </div>
               <div className={styles.imports}>
                 {row.imports.map(item => (
                   <div key={item.path}>
                     <code>{item.path}</code>
-                    <a href={item.guide}>Guide →</a>
+                    <Link href={item.guide}>Guide →</Link>
                   </div>
                 ))}
               </div>
@@ -81,8 +81,8 @@ export default function ApiExplorer() {
         <summary>Browse all package entry points</summary>
         <ul>
           {data.entryPoints.map(entry => (
-            <li key={entry.path}><a href={entry.guide}><code>{entry.path}</code></a>
-              {'kind' in entry && <> · {entry.kind} · <a href={sourceBase + entry.source}>Source ↗</a></>}
+            <li key={entry.path}><Link href={entry.guide}><code>{entry.path}</code></Link>
+              {'kind' in entry && <> · {entry.kind} · <Link href={sourceBase + entry.source}>Source ↗</Link></>}
             </li>
           ))}
         </ul>

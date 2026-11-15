@@ -1,21 +1,20 @@
 import React from 'react';
+import { renderCodeBlockHtml } from '@omnitron-dev/lumen-ast';
 import { PrismProvider } from '@omnitron-dev/prism/core';
+import { Link } from '@omnitron-dev/prism/ui';
+import { DocSidebar, type DocSidebarItem } from '@omnitron-dev/prism/components/doc-layout';
 import { OmnitronBrand, omnitronCssVariables, omnitronTheme } from '@omnitron-dev/prism/identity';
 import { DocLayout, DocSectionNav, DocPagination, LumenFooter } from '@omnitron-dev/lumen-ui';
 import type { LumenPageLayoutProps, LumenSidebarItem } from '@omnitron-dev/lumen';
 import { PortalIslandHost } from '@omnitron-dev/lumen-ui/runtime';
 import { SearchTrigger } from './search-trigger.tsx';
-import { Home } from './home.tsx';
-import { ThemeSelectorPlaceholder } from './theme-icons.tsx';
+import { Home, serviceExample, clientExample } from './home.tsx';
+import { ThemeSelectorPlaceholder } from './theme-selector.tsx';
+import { MainNavigation, MobileNavigation, SectionNavigation } from './navigation.tsx';
 import { themeBootstrap } from './theme-preference.ts';
 
-const sections = [
-  ['Learn', '/docs/intro'], ['Titan', '/docs/titan/overview'],
-  ['Frontend', '/docs/frontend/overview'], ['Lumen', '/docs/lumen/overview'],
-  ['Operations', '/docs/omnitron/overview'], ['Reference', '/docs/reference/api-index'],
-];
-
 export function SiteLayout({ children, document: doc, documents, config }: LumenPageLayoutProps) {
+  if (!doc.routePath) throw new Error(`Page document has no public route: ${doc.id}`);
   const byId = new Map(documents.map(document => [document.id, document]));
   const byRoute = new Map(documents.map(document => [document.routePath, document]));
   const contains = (items: LumenSidebarItem[]): boolean => items.some(item =>
@@ -39,20 +38,25 @@ export function SiteLayout({ children, document: doc, documents, config }: Lumen
     return { href: item.routePath, label: item.title };
   };
   const home = doc.frontmatter?.layout === 'home';
+  const homeProps = home ? { serverCode: renderCodeBlockHtml(serviceExample, 'typescript'), clientCode: renderCodeBlockHtml(clientExample, 'typescript') } : null;
   const headings = (doc.headers ?? []).filter(h => h.depth === 2 || h.depth === 3).map(h => ({ ...h, level: h.depth }));
-  const sidebar = (items: LumenSidebarItem[]) => <ul>{items.map((item, i) => {
-    if (item.type === 'category') return <li key={i}><details open={item.href === doc.routePath || contains(item.items) || item.collapsed === false}>
-      <summary>{item.label}</summary>
-      {item.href && <a className="sidebar-overview" href={item.href} aria-current={item.href === doc.routePath ? 'page' : undefined}>Overview</a>}
-      {sidebar(item.items)}
-    </details></li>;
+  const sidebarItems = (entries: LumenSidebarItem[], parent = 'root'): DocSidebarItem[] => entries.map((item, index) => {
+    const id = `${parent}/${index}`;
+    if (item.type === 'category') {
+      const landing = item.href ? byRoute.get(item.href) : undefined;
+      return { id, label: item.label, children: [
+        ...(item.href ? [{ id: landing?.id ?? `${id}/overview`, label: 'Overview', href: item.href }] : []),
+        ...sidebarItems(item.items, id),
+      ] };
+    }
     const target = item.type === 'doc' ? byId.get(item.id) : undefined;
     const href = item.type === 'link' ? item.href : target?.routePath;
     if (!href) throw new Error(`Sidebar target is unavailable: ${JSON.stringify(item)}`);
-    return <li key={i}><a href={href} aria-current={target?.id === doc.id ? 'page' : undefined}>
-      {item.label || target?.title}
-    </a></li>;
-  })}</ul>;
+    return { id: target?.id ?? id, href, label: item.label || target?.title || href };
+  });
+  const navigation = sidebarItems(items);
+  const navigationTitle = group?.[0] === 'docs' ? 'Start building' : group?.[0] || 'Documentation';
+  const sidebarProps = { items: navigation, activeId: doc.id, title: navigationTitle };
   const css = (mode: 'dark' | 'light', selector: string) => `${selector}{${Object.entries(omnitronCssVariables(mode)).map(([key,value]) => `${key}:${value}`).join(';')};color-scheme:${mode}}`;
 
   return <PrismProvider mode="dark" disableCssBaseline themeOverrides={omnitronTheme}>
@@ -64,18 +68,19 @@ export function SiteLayout({ children, document: doc, documents, config }: Lumen
       <header className="site-header">
         <a href="/" className="brand" aria-label="Omnitron home"><PortalIslandHost islandId="site-brand" component="SiteBrand" hydrate="load" props={{ size: 30 }}><OmnitronBrand size={30} /></PortalIslandHost></a>
         <span className="site-edition">FIELD MANUAL</span>
-        <nav aria-label="Main navigation">{sections.map(([label, href]) => <a key={href} href={href}>{label}</a>)}</nav>
+        <PortalIslandHost islandId="main-navigation" component="MainNavigation" hydrate="load" props={{ currentPath: doc.routePath }}><MainNavigation currentPath={doc.routePath} /></PortalIslandHost>
         <div className="header-actions">
           <PortalIslandHost islandId="site-search" component="SearchTrigger" hydrate="load" props={{}}><SearchTrigger /></PortalIslandHost>
           <PortalIslandHost islandId="site-theme" component="ThemeSelector" hydrate="load" props={{}}><ThemeSelectorPlaceholder /></PortalIslandHost>
-          <details className="mobile-nav"><summary aria-label="Open navigation">Menu</summary><nav>{sections.map(([label, href]) => <a key={href} href={href}>{label}</a>)}</nav></details>
+          <div className="mobile-nav"><PortalIslandHost islandId="site-navigation" component="MobileNavigation" hydrate="load" props={{ currentPath: doc.routePath }}><MobileNavigation currentPath={doc.routePath} disabled /></PortalIslandHost></div>
         </div>
       </header>
-      {home ? <Home /> : <>
-        <div className="document-context"><a href="/docs/intro">Documentation</a><span>/</span><span>{group?.[0] === 'docs' ? 'Learn' : group?.[0] || 'Project'}</span><span>/</span><strong>{doc.title}</strong></div>
-        {items.length > 0 && <details className="mobile-document-nav"><summary>In this section</summary><nav aria-label="Mobile documentation sections">{sidebar(items)}</nav></details>}
-        <DocLayout sidebar={items.length ? <nav aria-label="Documentation sections"><p className="sidebar-label">{group?.[0] === 'docs' ? 'Start building' : group?.[0]}</p>{sidebar(items)}</nav> : undefined}
-          sectionNav={<><p className="sidebar-label">On this page</p><PortalIslandHost islandId="page-sections" component="DocSectionNav" hydrate="load" props={{ headings }}><DocSectionNav headings={headings} /></PortalIslandHost><div className="page-exports"><a href={`${doc.routePath === '/' ? '/index' : doc.routePath}.md`}>Read as Markdown ↗</a><a href="/llms.txt">Agent index ↗</a></div></>}>
+      <noscript><div className="static-navigation"><MainNavigation currentPath={doc.routePath} /></div></noscript>
+      {homeProps ? <PortalIslandHost islandId="site-home" component="Home" hydrate="load" props={homeProps}><Home {...homeProps} /></PortalIslandHost> : <>
+        <div className="document-context"><Link href="/docs/intro">Documentation</Link><span>/</span><span>{group?.[0] === 'docs' ? 'Learn' : group?.[0] || 'Project'}</span><span>/</span><strong>{doc.title}</strong></div>
+        {items.length > 0 && <div className="mobile-document-nav"><PortalIslandHost islandId="section-navigation" component="SectionNavigation" hydrate="load" props={sidebarProps}><SectionNavigation {...sidebarProps} disabled /></PortalIslandHost><noscript><nav aria-label="Mobile documentation sections"><DocSidebar {...sidebarProps} /></nav></noscript></div>}
+        <DocLayout sidebar={items.length ? <nav aria-label="Documentation sections"><PortalIslandHost islandId="documentation-navigation" component="DocSidebar" hydrate="load" props={sidebarProps}><DocSidebar {...sidebarProps} /></PortalIslandHost></nav> : undefined}
+          sectionNav={<><p className="sidebar-label">On this page</p><PortalIslandHost islandId="page-sections" component="DocSectionNav" hydrate="load" props={{ headings }}><DocSectionNav headings={headings} /></PortalIslandHost><div className="page-exports"><Link href={`${doc.routePath === '/' ? '/index' : doc.routePath}.md`}>Read as Markdown ↗</Link><Link href="/llms.txt">Agent index ↗</Link></div></>}>
           <div id="main-content" tabIndex={-1}>{children}</div>
           {(previous || next) && <div id={next ? 'next' : undefined}>
             <DocPagination className="page-pagination" prev={adjacent(previous)} next={adjacent(next)} />
@@ -87,7 +92,7 @@ export function SiteLayout({ children, document: doc, documents, config }: Lumen
         { title: 'Reference', items: [{ label: 'Public APIs', href: '/docs/reference/api-index' }, { label: 'Compatibility', href: '/docs/reference/compatibility' }] },
         { title: 'Project', items: [{ label: 'Source ↗', href: 'https://github.com/omnitron-dev/omni' }, { label: 'Contributing', href: '/docs/community/contributing' }] },
       ]} />
-      <div className="site-colophon"><span>BUILT WITH LUMEN</span><a href="/docs/lumen/this-site">How this manual works →</a></div>
+      <div className="site-colophon"><span>BUILT WITH LUMEN</span><Link href="/docs/lumen/this-site">How this manual works →</Link></div>
       <div id="lumen-interactive-root" />
     </div>
   </PrismProvider>;

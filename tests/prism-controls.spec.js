@@ -53,3 +53,20 @@ test('submit typed form values and cancel or confirm a draft change', async ({ p
   await page.getByRole('dialog').getByRole('button', { name: 'Archive', exact: true }).click();
   await expect(draft.getByRole('status')).toHaveText('Draft archived');
 });
+
+test('route previews use keyboard actions without pretending to navigate to a real page', async ({ page }) => {
+  await page.goto(route);
+  for (const [name, title] of [['navigation-progress', 'Route progress preview'], ['scroll-to-top', 'Scroll restoration preview']]) {
+    const preview = await example(page, name);
+    await preview.getByRole('button', { name: 'Load example', exact: true }).click();
+    const frame = page.frameLocator(`iframe[title="${title}"]`);
+    const next = frame.getByRole('button', { name: 'Open Analysis', exact: true });
+    await expect(next).toBeVisible();
+    await expect(frame.getByRole('link', { name: 'Open Analysis', exact: true })).toHaveCount(0);
+    await next.press('Enter');
+    await expect(frame.locator('header')).toHaveText('Analysis');
+    await frame.getByRole('button', { name: 'Open Measurements', exact: true }).press('Space');
+    await expect(frame.locator('header')).toHaveText('Measurements');
+    if (name === 'scroll-to-top') await expect.poll(() => frame.locator('body').evaluate(() => window.scrollY)).toBe(0);
+  }
+});

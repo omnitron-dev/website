@@ -36,7 +36,7 @@ test('theme toggle updates shared identity and mobile section navigation works',
   await page.goto('/docs/lumen/this-site');
   await chooseTheme(page, 'Light');
   await expect(page.locator('.brand .MuiTypography-root')).toHaveCSS('color', 'rgb(22, 32, 38)');
-  await page.locator('.mobile-document-nav > summary').click();
+  await page.getByRole('button', { name: 'In this section', exact: true }).click();
   await page.getByRole('navigation', { name: 'Mobile documentation sections' }).getByRole('link', { name: 'Authoring with Lumen' }).click();
   await expect(page).toHaveURL(/\/docs\/lumen\/authoring$/);
 });
@@ -349,8 +349,11 @@ test('documentation remains readable without JavaScript using the system palette
     await expect(page.locator('h1')).toBeVisible();
     await expect(page.getByRole('button', { name: 'Choose color theme' })).toBeDisabled();
     await expect(page.getByRole('button', { name: /^Search/ })).toBeDisabled();
-    await page.getByText('In this section', { exact: true }).click();
+    await expect(page.getByRole('button', { name: 'In this section', exact: true })).toBeDisabled();
     await expect(page.getByRole('navigation', { name: 'Mobile documentation sections' })).toBeVisible();
+    await page.locator('.static-navigation').getByRole('link', { name: 'Operations', exact: true }).click();
+    await expect(page).toHaveURL(/\/docs\/omnitron\/overview$/);
+    await expect(page.locator('h1')).toBeVisible();
   } finally { await context.close(); }
 });
 
@@ -400,17 +403,26 @@ for (const width of [320, 1440]) {
   });
 }
 
-test('nested sidebar guides and active borders share the same inset', async ({ page }, testInfo) => {
+test('shared sidebar preserves current links and keyboard-operated category state', async ({ page }, testInfo) => {
   await page.setViewportSize({ width: 1440, height: 1000 });
   for (const route of ['/docs/getting-started/project-structure', '/docs/titan/netron/services']) {
     await page.goto(route);
-    const active = page.locator('.lumen-doc-sidebar a[aria-current=page]');
+    const sidebar = page.getByRole('navigation', { name: 'Documentation sections', exact: true });
+    const active = sidebar.locator('a[aria-current=page]');
+    await expect(active).toHaveCount(1);
     await active.scrollIntoViewIfNeeded();
-    const positions = await active.evaluate(element => ({ link: element.getBoundingClientRect().x, guide: element.closest('ul').getBoundingClientRect().x }));
-    expect(positions.link).toBeCloseTo(positions.guide, 1);
+    await expect(active).toHaveClass(/MuiListItemButton-root/);
+    await expect(active).toHaveAttribute('href', route);
     await active.focus(); await expect(active).toBeFocused();
+    const category = sidebar.getByRole('button').first();
+    await expect(category).toHaveAttribute('aria-expanded', 'true');
+    await category.focus(); await page.keyboard.press('Enter');
+    await expect(category).toHaveAttribute('aria-expanded', 'false');
+    await page.keyboard.press('Space');
+    await expect(category).toHaveAttribute('aria-expanded', 'true');
+    expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(1440);
   }
-  await page.screenshot({ path: testInfo.outputPath('sidebar-alignment-1440.png') });
+  await page.screenshot({ path: testInfo.outputPath('shared-sidebar-1440.png') });
 });
 
 test('homepage contract uses shared dual-theme syntax highlighting without page overflow', async ({ page }, testInfo) => {
@@ -453,4 +465,55 @@ test('the platform topology renders quoted labels in both themes without literal
     }
   }
   expect(errors).toEqual([]);
+});
+
+for (const width of [320, 1440]) {
+  test(`shared home actions remain links with visible keyboard focus at ${width}px`, async ({ page }, testInfo) => {
+    await page.setViewportSize({ width, height: 1000 });
+    await page.goto('/');
+    const primary = page.getByRole('link', { name: 'Build your first service', exact: true });
+    const secondary = page.getByRole('link', { name: 'Explore the architecture', exact: true });
+    await expect(primary).toHaveClass(/MuiButton-contained/);
+    await expect(secondary).toHaveClass(/MuiButton-text/);
+    await expect(primary).toHaveAttribute('href', '/docs/getting-started/quickstart');
+    await expect(secondary).toHaveAttribute('href', '/docs/foundations/architecture');
+    await expect(page.locator('.layer-list > a')).toHaveCount(5);
+    for (const tile of await page.locator('.layer-list > a, .start-paths > a').all()) {
+      await expect(tile).toHaveClass(/MuiCardActionArea-root/);
+    }
+    for (const mode of ['Dark', 'Light']) {
+      await chooseTheme(page, mode);
+      await primary.focus();
+      await page.keyboard.press('Tab');
+      await expect(secondary).toBeFocused();
+      await page.keyboard.press('Shift+Tab');
+      await expect(primary).toBeFocused();
+      await expect(primary).toHaveCSS('outline-style', 'solid');
+      expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(width);
+      await page.screenshot({ path: testInfo.outputPath(`shared-home-${width}-${mode}.png`) });
+    }
+    await primary.press('Enter');
+    await expect(page).toHaveURL(/\/docs\/getting-started\/quickstart$/);
+    await expect(page.locator('h1')).toBeVisible();
+  });
+}
+
+test('mobile navigation uses the shared drawer with keyboard focus restoration', async ({ page }) => {
+  await page.setViewportSize({ width: 320, height: 900 });
+  await page.goto('/');
+  const trigger = page.getByRole('button', { name: 'Open navigation', exact: true });
+  await trigger.focus(); await trigger.press('Enter');
+  const dialog = page.getByRole('dialog', { name: 'Navigation', exact: true });
+  await expect(dialog).toBeVisible();
+  const close = dialog.getByRole('button', { name: 'Close drawer', exact: true });
+  await close.focus(); await page.keyboard.press('Tab');
+  await expect(dialog.getByRole('link', { name: 'Learn', exact: true })).toBeFocused();
+  await page.keyboard.press('Escape');
+  await expect(dialog).toHaveCount(0);
+  await expect(trigger).toBeFocused();
+  await trigger.press('Space');
+  await expect(dialog).toBeVisible();
+  await dialog.getByRole('link', { name: 'Titan', exact: true }).press('Enter');
+  await expect(page).toHaveURL(/\/docs\/titan\/overview$/);
+  expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(320);
 });

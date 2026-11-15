@@ -10,6 +10,9 @@ import { OmnitronBrand, omnitronTheme } from '@omnitron-dev/prism/identity';
 import { PrismExample } from './prism-example.tsx';
 import { OpenSearch, SearchTrigger } from './search-trigger.tsx';
 import { ThemeSelector } from './theme-selector.tsx';
+import { DocSidebar } from '@omnitron-dev/prism/components/doc-layout';
+import { MainNavigation, MobileNavigation, SectionNavigation } from './navigation.tsx';
+import { Home } from './home.tsx';
 import { readThemePreference } from './theme-preference.ts';
 const ApiExplorer = lazy(() => import('./api-explorer.tsx'));
 function ApiExplorerIsland() {
@@ -17,7 +20,7 @@ function ApiExplorerIsland() {
 }
 
 function SearchPage() { return React.createElement(SearchTrigger, { full: true }); }
-const islands = { DocSectionNav, MermaidDiagram, PrismExample, SiteBrand: OmnitronBrand, ThemeSelector, SearchTrigger, ApiExplorer: ApiExplorerIsland, SearchPage, Playground: NetronPlayground };
+const islands = { Home, MainNavigation, DocSidebar, MobileNavigation, SectionNavigation, DocSectionNav, MermaidDiagram, PrismExample, SiteBrand: OmnitronBrand, ThemeSelector, SearchTrigger, ApiExplorer: ApiExplorerIsland, SearchPage, Playground: NetronPlayground };
 function Client() {
   const [mode, setMode] = useState(readThemePreference);
   useEffect(() => {

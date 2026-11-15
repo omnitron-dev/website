@@ -4,7 +4,11 @@ The public Omnitron manual and a reference project built with Lumen. Lumen
 compiles Markdown and literal-widget MDX into static HTML, Pagefind search and
 Markdown exports. React islands provide API filtering, interactive examples and
 theme controls; reading and searching the manual requires no application RPC.
-The layout uses the same Prism identity as Omnitron Console.
+The layout uses the same Prism identity as Omnitron Console. Site actions, navigation,
+drawers and documentation trees use the published Prism UI and icons. React islands
+connect their shared interaction states to the site theme; the server still emits
+ordinary links and a complete navigation fallback for readers without JavaScript.
+Keep site CSS focused on page layout and document prose.
 
 Start with the [Lumen overview](docs/lumen/overview.md),
 [authoring guide](docs/lumen/authoring.md) or
