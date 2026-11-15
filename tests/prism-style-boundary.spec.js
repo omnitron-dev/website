@@ -93,7 +93,8 @@ for (const width of [320, 1440]) {
     await page.goto('/docs/lumen/authoring');
     const host = page.locator('[data-component="Playground"]');
     await host.scrollIntoViewIfNeeded();
-    await expect(host.getByRole('textbox')).toHaveCSS('font-size', '14px');
+    // Editable code keeps a 16px floor on small screens to avoid mobile input zoom.
+    await expect(host.getByRole('textbox')).toHaveCSS('font-size', width < 600 ? '16px' : '14px');
     await host.getByRole('button', { name: 'Run code' }).click();
     await expect(host.locator('.lumen-playground-result')).toHaveCSS('font-size', '14px');
     expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(width);

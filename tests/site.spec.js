@@ -325,7 +325,7 @@ for (const [saved, system, expected, background, text] of [
       new PerformanceObserver(list => {
         if (list.getEntries().some(entry => entry.name === 'first-contentful-paint')) {
           window.__firstThemePaint = {
-            mode: document.documentElement.dataset.omnitronTheme,
+            mode: document.documentElement.dataset.prismColorScheme,
             background: getComputedStyle(document.querySelector('.omnitron-site')).backgroundColor,
             text: getComputedStyle(document.querySelector('.brand .MuiTypography-root')).color,
           };
@@ -361,7 +361,7 @@ test('documentation remains readable without JavaScript using the system palette
 test('the current section follows native anchors and the final short section below the fixed header', async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 900 });
   await page.goto('/docs/getting-started/project-structure#single-app-layout');
-  const toc = page.locator('.lumen-doc-toc .lumen-section-nav');
+  const toc = page.locator('.lumen-doc-toc').getByRole('navigation', { name: 'Table of contents' });
   await expect(toc.locator('[aria-current=location]')).toHaveAttribute('href', '#single-app-layout');
   const link = toc.getByRole('link', { name: 'Sharing service types', exact: true });
   await link.focus(); await page.keyboard.press('Enter');

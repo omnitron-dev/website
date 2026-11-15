@@ -1,5 +1,5 @@
 {
-  "revision": "c6005ff1d0cde480cfa6b0bc346c9b53b2e638bf",
+  "revision": "413eb0f1948672994cd01c47f00eb411f8a84d1a",
   "packages": [
     "@omnitron-dev/access",
     "@omnitron-dev/common",
@@ -4208,7 +4208,7 @@
       "name": "buildStaticSite",
       "package": "@omnitron-dev/lumen",
       "kind": "function",
-      "source": "packages/lumen/src/ssg/ssg-engine.ts#L88",
+      "source": "packages/lumen/src/ssg/ssg-engine.ts#L91",
       "imports": [
         {
           "path": "@omnitron-dev/lumen",
@@ -4412,7 +4412,7 @@
       "name": "expandEnvVariables",
       "package": "@omnitron-dev/lumen",
       "kind": "function",
-      "source": "packages/lumen/src/config/env.ts#L5",
+      "source": "packages/lumen/src/config/env.ts#L7",
       "imports": [
         {
           "path": "@omnitron-dev/lumen",
@@ -4628,7 +4628,7 @@
       "name": "loadCorpusFromDirectory",
       "package": "@omnitron-dev/lumen",
       "kind": "function",
-      "source": "packages/lumen/src/cli/index.ts#L159",
+      "source": "packages/lumen/src/cli/index.ts#L94",
       "imports": [
         {
           "path": "@omnitron-dev/lumen",
@@ -4641,22 +4641,10 @@
       ]
     },
     {
-      "name": "loadLumenConfig",
-      "package": "@omnitron-dev/lumen",
-      "kind": "function",
-      "source": "packages/lumen/src/config/loader.ts#L20",
-      "imports": [
-        {
-          "path": "@omnitron-dev/lumen",
-          "guide": "/docs/lumen/overview"
-        }
-      ]
-    },
-    {
       "name": "LumenConfig",
       "package": "@omnitron-dev/lumen",
       "kind": "interface",
-      "source": "packages/lumen/src/config/schema.ts#L105",
+      "source": "packages/lumen/src/config/schema.ts#L113",
       "imports": [
         {
           "path": "@omnitron-dev/lumen",
@@ -4680,7 +4668,7 @@
       "name": "LumenLocalesConfigSchema",
       "package": "@omnitron-dev/lumen",
       "kind": "value",
-      "source": "packages/lumen/src/config/schema.ts#L68",
+      "source": "packages/lumen/src/config/schema.ts#L75",
       "imports": [
         {
           "path": "@omnitron-dev/lumen",
@@ -4692,7 +4680,7 @@
       "name": "LumenPageLayoutProps",
       "package": "@omnitron-dev/lumen",
       "kind": "interface",
-      "source": "packages/lumen/src/config/schema.ts#L7",
+      "source": "packages/lumen/src/config/schema.ts#L9",
       "imports": [
         {
           "path": "@omnitron-dev/lumen",
@@ -4704,7 +4692,19 @@
       "name": "LumenPdfConfigSchema",
       "package": "@omnitron-dev/lumen",
       "kind": "value",
-      "source": "packages/lumen/src/config/schema.ts#L58",
+      "source": "packages/lumen/src/config/schema.ts#L60",
+      "imports": [
+        {
+          "path": "@omnitron-dev/lumen",
+          "guide": "/docs/lumen/overview"
+        }
+      ]
+    },
+    {
+      "name": "LumenProject",
+      "package": "@omnitron-dev/lumen",
+      "kind": "interface",
+      "source": "packages/lumen/src/config/project.ts#L25",
       "imports": [
         {
           "path": "@omnitron-dev/lumen",
@@ -4716,7 +4716,7 @@
       "name": "LumenSidebarCategoryItemSchema",
       "package": "@omnitron-dev/lumen",
       "kind": "value",
-      "source": "packages/lumen/src/config/schema.ts#L37",
+      "source": "packages/lumen/src/config/schema.ts#L39",
       "imports": [
         {
           "path": "@omnitron-dev/lumen",
@@ -4728,7 +4728,7 @@
       "name": "LumenSidebarDocItemSchema",
       "package": "@omnitron-dev/lumen",
       "kind": "value",
-      "source": "packages/lumen/src/config/schema.ts#L14",
+      "source": "packages/lumen/src/config/schema.ts#L16",
       "imports": [
         {
           "path": "@omnitron-dev/lumen",
@@ -4740,7 +4740,7 @@
       "name": "LumenSidebarItem",
       "package": "@omnitron-dev/lumen",
       "kind": "type",
-      "source": "packages/lumen/src/config/schema.ts#L26",
+      "source": "packages/lumen/src/config/schema.ts#L28",
       "imports": [
         {
           "path": "@omnitron-dev/lumen",
@@ -4752,7 +4752,7 @@
       "name": "LumenSidebarItemSchema",
       "package": "@omnitron-dev/lumen",
       "kind": "value",
-      "source": "packages/lumen/src/config/schema.ts#L47",
+      "source": "packages/lumen/src/config/schema.ts#L49",
       "imports": [
         {
           "path": "@omnitron-dev/lumen",
@@ -4764,7 +4764,7 @@
       "name": "LumenSidebarLinkItemSchema",
       "package": "@omnitron-dev/lumen",
       "kind": "value",
-      "source": "packages/lumen/src/config/schema.ts#L20",
+      "source": "packages/lumen/src/config/schema.ts#L22",
       "imports": [
         {
           "path": "@omnitron-dev/lumen",
@@ -4776,7 +4776,7 @@
       "name": "LumenThemeConfigSchema",
       "package": "@omnitron-dev/lumen",
       "kind": "value",
-      "source": "packages/lumen/src/config/schema.ts#L53",
+      "source": "packages/lumen/src/config/schema.ts#L55",
       "imports": [
         {
           "path": "@omnitron-dev/lumen",
@@ -4788,7 +4788,7 @@
       "name": "LumenUserConfig",
       "package": "@omnitron-dev/lumen",
       "kind": "type",
-      "source": "packages/lumen/src/config/schema.ts#L103",
+      "source": "packages/lumen/src/config/schema.ts#L111",
       "imports": [
         {
           "path": "@omnitron-dev/lumen",
@@ -4800,7 +4800,7 @@
       "name": "LumenUserConfigSchema",
       "package": "@omnitron-dev/lumen",
       "kind": "value",
-      "source": "packages/lumen/src/config/schema.ts#L76",
+      "source": "packages/lumen/src/config/schema.ts#L83",
       "imports": [
         {
           "path": "@omnitron-dev/lumen",
@@ -4884,7 +4884,7 @@
       "name": "renderDocumentHtml",
       "package": "@omnitron-dev/lumen",
       "kind": "function",
-      "source": "packages/lumen/src/ssg/render-html.ts#L30",
+      "source": "packages/lumen/src/ssg/render-html.ts#L76",
       "imports": [
         {
           "path": "@omnitron-dev/lumen",
@@ -4896,7 +4896,7 @@
       "name": "RenderDocumentHtmlOptions",
       "package": "@omnitron-dev/lumen",
       "kind": "interface",
-      "source": "packages/lumen/src/ssg/render-html.ts#L19",
+      "source": "packages/lumen/src/ssg/render-html.ts#L18",
       "imports": [
         {
           "path": "@omnitron-dev/lumen",
@@ -4908,7 +4908,7 @@
       "name": "resolveConfigFile",
       "package": "@omnitron-dev/lumen",
       "kind": "function",
-      "source": "packages/lumen/src/config/loader.ts#L10",
+      "source": "packages/lumen/src/config/project.ts#L21",
       "imports": [
         {
           "path": "@omnitron-dev/lumen",
@@ -4944,7 +4944,7 @@
       "name": "runLumenCli",
       "package": "@omnitron-dev/lumen",
       "kind": "function",
-      "source": "packages/lumen/src/cli/index.ts#L377",
+      "source": "packages/lumen/src/cli/index.ts#L338",
       "imports": [
         {
           "path": "@omnitron-dev/lumen",
@@ -5008,7 +5008,7 @@
       "name": "SsgBuildResult",
       "package": "@omnitron-dev/lumen",
       "kind": "interface",
-      "source": "packages/lumen/src/ssg/ssg-engine.ts#L35",
+      "source": "packages/lumen/src/ssg/ssg-engine.ts#L38",
       "imports": [
         {
           "path": "@omnitron-dev/lumen",
@@ -5041,10 +5041,22 @@
       ]
     },
     {
+      "name": "withLumenProject",
+      "package": "@omnitron-dev/lumen",
+      "kind": "function",
+      "source": "packages/lumen/src/config/project.ts#L35",
+      "imports": [
+        {
+          "path": "@omnitron-dev/lumen",
+          "guide": "/docs/lumen/overview"
+        }
+      ]
+    },
+    {
       "name": "ADMONITION_KINDS",
       "package": "@omnitron-dev/lumen-ast",
       "kind": "value",
-      "source": "packages/lumen-ast/src/compiler/directives.ts#L18",
+      "source": "packages/lumen-ast/src/compiler/directives.ts#L19",
       "imports": [
         {
           "path": "@omnitron-dev/lumen-ast",
@@ -5056,7 +5068,7 @@
       "name": "AdmonitionKind",
       "package": "@omnitron-dev/lumen-ast",
       "kind": "type",
-      "source": "packages/lumen-ast/src/ast/types.ts#L144",
+      "source": "packages/lumen-ast/src/ast/types.ts#L148",
       "imports": [
         {
           "path": "@omnitron-dev/lumen-ast",
@@ -5080,7 +5092,7 @@
       "name": "CleanMarkdownOptions",
       "package": "@omnitron-dev/lumen-ast",
       "kind": "interface",
-      "source": "packages/lumen-ast/src/transformers/to-clean-markdown.ts#L19",
+      "source": "packages/lumen-ast/src/transformers/to-clean-markdown.ts#L20",
       "imports": [
         {
           "path": "@omnitron-dev/lumen-ast",
@@ -5116,7 +5128,7 @@
       "name": "createAdmonitionNode",
       "package": "@omnitron-dev/lumen-ast",
       "kind": "function",
-      "source": "packages/lumen-ast/src/compiler/directives.ts#L237",
+      "source": "packages/lumen-ast/src/compiler/directives.ts#L233",
       "imports": [
         {
           "path": "@omnitron-dev/lumen-ast",
@@ -5164,7 +5176,7 @@
       "name": "createMathEnvironmentNode",
       "package": "@omnitron-dev/lumen-ast",
       "kind": "function",
-      "source": "packages/lumen-ast/src/compiler/directives.ts#L213",
+      "source": "packages/lumen-ast/src/compiler/directives.ts#L209",
       "imports": [
         {
           "path": "@omnitron-dev/lumen-ast",
@@ -5176,7 +5188,7 @@
       "name": "createTabItemNode",
       "package": "@omnitron-dev/lumen-ast",
       "kind": "function",
-      "source": "packages/lumen-ast/src/compiler/directives.ts#L269",
+      "source": "packages/lumen-ast/src/compiler/directives.ts#L265",
       "imports": [
         {
           "path": "@omnitron-dev/lumen-ast",
@@ -5188,7 +5200,7 @@
       "name": "createTabsNode",
       "package": "@omnitron-dev/lumen-ast",
       "kind": "function",
-      "source": "packages/lumen-ast/src/compiler/directives.ts#L255",
+      "source": "packages/lumen-ast/src/compiler/directives.ts#L251",
       "imports": [
         {
           "path": "@omnitron-dev/lumen-ast",
@@ -5200,7 +5212,7 @@
       "name": "dedentJsxInnerContent",
       "package": "@omnitron-dev/lumen-ast",
       "kind": "function",
-      "source": "packages/lumen-ast/src/compiler/jsx-parser.ts#L546",
+      "source": "packages/lumen-ast/src/compiler/jsx-parser.ts#L547",
       "imports": [
         {
           "path": "@omnitron-dev/lumen-ast",
@@ -5280,7 +5292,7 @@
       "name": "DirectivePreProcessResult",
       "package": "@omnitron-dev/lumen-ast",
       "kind": "interface",
-      "source": "packages/lumen-ast/src/compiler/directives.ts#L24",
+      "source": "packages/lumen-ast/src/compiler/directives.ts#L25",
       "imports": [
         {
           "path": "@omnitron-dev/lumen-ast",
@@ -5520,7 +5532,7 @@
       "name": "InnerFragmentParser",
       "package": "@omnitron-dev/lumen-ast",
       "kind": "type",
-      "source": "packages/lumen-ast/src/compiler/jsx-parser.ts#L576",
+      "source": "packages/lumen-ast/src/compiler/jsx-parser.ts#L594",
       "imports": [
         {
           "path": "@omnitron-dev/lumen-ast",
@@ -5544,7 +5556,7 @@
       "name": "isAdmonitionKind",
       "package": "@omnitron-dev/lumen-ast",
       "kind": "function",
-      "source": "packages/lumen-ast/src/compiler/directives.ts#L20",
+      "source": "packages/lumen-ast/src/compiler/directives.ts#L21",
       "imports": [
         {
           "path": "@omnitron-dev/lumen-ast",
@@ -5664,7 +5676,7 @@
       "name": "isPascalCaseTag",
       "package": "@omnitron-dev/lumen-ast",
       "kind": "function",
-      "source": "packages/lumen-ast/src/compiler/jsx-parser.ts#L11",
+      "source": "packages/lumen-ast/src/compiler/jsx-parser.ts#L12",
       "imports": [
         {
           "path": "@omnitron-dev/lumen-ast",
@@ -5724,7 +5736,7 @@
       "name": "LumenAdmonitionNode",
       "package": "@omnitron-dev/lumen-ast",
       "kind": "interface",
-      "source": "packages/lumen-ast/src/ast/types.ts#L146",
+      "source": "packages/lumen-ast/src/ast/types.ts#L150",
       "imports": [
         {
           "path": "@omnitron-dev/lumen-ast",
@@ -5736,7 +5748,7 @@
       "name": "LumenBaseNode",
       "package": "@omnitron-dev/lumen-ast",
       "kind": "interface",
-      "source": "packages/lumen-ast/src/ast/types.ts#L27",
+      "source": "packages/lumen-ast/src/ast/types.ts#L31",
       "imports": [
         {
           "path": "@omnitron-dev/lumen-ast",
@@ -5748,7 +5760,7 @@
       "name": "LumenCodeBlockNode",
       "package": "@omnitron-dev/lumen-ast",
       "kind": "interface",
-      "source": "packages/lumen-ast/src/ast/types.ts#L99",
+      "source": "packages/lumen-ast/src/ast/types.ts#L103",
       "imports": [
         {
           "path": "@omnitron-dev/lumen-ast",
@@ -5784,7 +5796,7 @@
       "name": "LumenDiagramNode",
       "package": "@omnitron-dev/lumen-ast",
       "kind": "interface",
-      "source": "packages/lumen-ast/src/ast/types.ts#L172",
+      "source": "packages/lumen-ast/src/ast/types.ts#L176",
       "imports": [
         {
           "path": "@omnitron-dev/lumen-ast",
@@ -5796,7 +5808,7 @@
       "name": "LumenDocument",
       "package": "@omnitron-dev/lumen-ast",
       "kind": "interface",
-      "source": "packages/lumen-ast/src/ast/types.ts#L236",
+      "source": "packages/lumen-ast/src/ast/types.ts#L241",
       "imports": [
         {
           "path": "@omnitron-dev/lumen-ast",
@@ -5808,7 +5820,7 @@
       "name": "LumenDocumentAst",
       "package": "@omnitron-dev/lumen-ast",
       "kind": "interface",
-      "source": "packages/lumen-ast/src/ast/types.ts#L228",
+      "source": "packages/lumen-ast/src/ast/types.ts#L232",
       "imports": [
         {
           "path": "@omnitron-dev/lumen-ast",
@@ -5820,7 +5832,7 @@
       "name": "LumenExampleSource",
       "package": "@omnitron-dev/lumen-ast",
       "kind": "interface",
-      "source": "packages/lumen-ast/src/ast/types.ts#L21",
+      "source": "packages/lumen-ast/src/ast/types.ts#L25",
       "imports": [
         {
           "path": "@omnitron-dev/lumen-ast",
@@ -5856,7 +5868,7 @@
       "name": "LumenHeadingNode",
       "package": "@omnitron-dev/lumen-ast",
       "kind": "interface",
-      "source": "packages/lumen-ast/src/ast/types.ts#L80",
+      "source": "packages/lumen-ast/src/ast/types.ts#L84",
       "imports": [
         {
           "path": "@omnitron-dev/lumen-ast",
@@ -5880,7 +5892,7 @@
       "name": "LumenInlineCodeNode",
       "package": "@omnitron-dev/lumen-ast",
       "kind": "interface",
-      "source": "packages/lumen-ast/src/ast/types.ts#L94",
+      "source": "packages/lumen-ast/src/ast/types.ts#L98",
       "imports": [
         {
           "path": "@omnitron-dev/lumen-ast",
@@ -5892,7 +5904,7 @@
       "name": "LumenJsxWidgetNode",
       "package": "@omnitron-dev/lumen-ast",
       "kind": "interface",
-      "source": "packages/lumen-ast/src/ast/types.ts#L180",
+      "source": "packages/lumen-ast/src/ast/types.ts#L184",
       "imports": [
         {
           "path": "@omnitron-dev/lumen-ast",
@@ -5916,7 +5928,7 @@
       "name": "LumenMathBlockNode",
       "package": "@omnitron-dev/lumen-ast",
       "kind": "interface",
-      "source": "packages/lumen-ast/src/ast/types.ts#L111",
+      "source": "packages/lumen-ast/src/ast/types.ts#L115",
       "imports": [
         {
           "path": "@omnitron-dev/lumen-ast",
@@ -5928,7 +5940,7 @@
       "name": "LumenMathEnvironmentNode",
       "package": "@omnitron-dev/lumen-ast",
       "kind": "interface",
-      "source": "packages/lumen-ast/src/ast/types.ts#L118",
+      "source": "packages/lumen-ast/src/ast/types.ts#L122",
       "imports": [
         {
           "path": "@omnitron-dev/lumen-ast",
@@ -5940,7 +5952,7 @@
       "name": "LumenMathInlineNode",
       "package": "@omnitron-dev/lumen-ast",
       "kind": "interface",
-      "source": "packages/lumen-ast/src/ast/types.ts#L106",
+      "source": "packages/lumen-ast/src/ast/types.ts#L110",
       "imports": [
         {
           "path": "@omnitron-dev/lumen-ast",
@@ -5976,7 +5988,7 @@
       "name": "LumenNode",
       "package": "@omnitron-dev/lumen-ast",
       "kind": "type",
-      "source": "packages/lumen-ast/src/ast/types.ts#L198",
+      "source": "packages/lumen-ast/src/ast/types.ts#L202",
       "imports": [
         {
           "path": "@omnitron-dev/lumen-ast",
@@ -5988,7 +6000,7 @@
       "name": "LumenParagraphNode",
       "package": "@omnitron-dev/lumen-ast",
       "kind": "interface",
-      "source": "packages/lumen-ast/src/ast/types.ts#L75",
+      "source": "packages/lumen-ast/src/ast/types.ts#L79",
       "imports": [
         {
           "path": "@omnitron-dev/lumen-ast",
@@ -6000,7 +6012,7 @@
       "name": "LumenRawHtmlPlaceholderNode",
       "package": "@omnitron-dev/lumen-ast",
       "kind": "interface",
-      "source": "packages/lumen-ast/src/ast/types.ts#L188",
+      "source": "packages/lumen-ast/src/ast/types.ts#L192",
       "imports": [
         {
           "path": "@omnitron-dev/lumen-ast",
@@ -6012,7 +6024,19 @@
       "name": "LumenRawNode",
       "package": "@omnitron-dev/lumen-ast",
       "kind": "interface",
-      "source": "packages/lumen-ast/src/ast/types.ts#L193",
+      "source": "packages/lumen-ast/src/ast/types.ts#L197",
+      "imports": [
+        {
+          "path": "@omnitron-dev/lumen-ast",
+          "guide": "/docs/lumen/authoring"
+        }
+      ]
+    },
+    {
+      "name": "LumenRenderMetadata",
+      "package": "@omnitron-dev/lumen-ast",
+      "kind": "type",
+      "source": "packages/lumen-ast/src/transformers/html-tree.ts#L5",
       "imports": [
         {
           "path": "@omnitron-dev/lumen-ast",
@@ -6024,7 +6048,7 @@
       "name": "LumenRootNode",
       "package": "@omnitron-dev/lumen-ast",
       "kind": "interface",
-      "source": "packages/lumen-ast/src/ast/types.ts#L70",
+      "source": "packages/lumen-ast/src/ast/types.ts#L74",
       "imports": [
         {
           "path": "@omnitron-dev/lumen-ast",
@@ -6036,7 +6060,7 @@
       "name": "LumenSmartRefNode",
       "package": "@omnitron-dev/lumen-ast",
       "kind": "interface",
-      "source": "packages/lumen-ast/src/ast/types.ts#L134",
+      "source": "packages/lumen-ast/src/ast/types.ts#L138",
       "imports": [
         {
           "path": "@omnitron-dev/lumen-ast",
@@ -6048,7 +6072,7 @@
       "name": "LumenTabItemNode",
       "package": "@omnitron-dev/lumen-ast",
       "kind": "interface",
-      "source": "packages/lumen-ast/src/ast/types.ts#L163",
+      "source": "packages/lumen-ast/src/ast/types.ts#L167",
       "imports": [
         {
           "path": "@omnitron-dev/lumen-ast",
@@ -6060,7 +6084,7 @@
       "name": "LumenTabsNode",
       "package": "@omnitron-dev/lumen-ast",
       "kind": "interface",
-      "source": "packages/lumen-ast/src/ast/types.ts#L155",
+      "source": "packages/lumen-ast/src/ast/types.ts#L159",
       "imports": [
         {
           "path": "@omnitron-dev/lumen-ast",
@@ -6072,7 +6096,7 @@
       "name": "LumenTextNode",
       "package": "@omnitron-dev/lumen-ast",
       "kind": "interface",
-      "source": "packages/lumen-ast/src/ast/types.ts#L89",
+      "source": "packages/lumen-ast/src/ast/types.ts#L93",
       "imports": [
         {
           "path": "@omnitron-dev/lumen-ast",
@@ -6084,7 +6108,7 @@
       "name": "LumenTocEntry",
       "package": "@omnitron-dev/lumen-ast",
       "kind": "type",
-      "source": "packages/lumen-ast/src/ast/types.ts#L226",
+      "source": "packages/lumen-ast/src/ast/types.ts#L230",
       "imports": [
         {
           "path": "@omnitron-dev/lumen-ast",
@@ -6096,7 +6120,7 @@
       "name": "LumenTocItem",
       "package": "@omnitron-dev/lumen-ast",
       "kind": "interface",
-      "source": "packages/lumen-ast/src/ast/types.ts#L218",
+      "source": "packages/lumen-ast/src/ast/types.ts#L222",
       "imports": [
         {
           "path": "@omnitron-dev/lumen-ast",
@@ -6108,7 +6132,7 @@
       "name": "maskPascalJsxElements",
       "package": "@omnitron-dev/lumen-ast",
       "kind": "function",
-      "source": "packages/lumen-ast/src/compiler/jsx-parser.ts#L220",
+      "source": "packages/lumen-ast/src/compiler/jsx-parser.ts#L221",
       "imports": [
         {
           "path": "@omnitron-dev/lumen-ast",
@@ -6120,7 +6144,7 @@
       "name": "matchCompletePascalJsxElement",
       "package": "@omnitron-dev/lumen-ast",
       "kind": "function",
-      "source": "packages/lumen-ast/src/compiler/jsx-parser.ts#L121",
+      "source": "packages/lumen-ast/src/compiler/jsx-parser.ts#L122",
       "imports": [
         {
           "path": "@omnitron-dev/lumen-ast",
@@ -6156,7 +6180,7 @@
       "name": "MathEnvKind",
       "package": "@omnitron-dev/lumen-ast",
       "kind": "type",
-      "source": "packages/lumen-ast/src/ast/types.ts#L116",
+      "source": "packages/lumen-ast/src/ast/types.ts#L120",
       "imports": [
         {
           "path": "@omnitron-dev/lumen-ast",
@@ -6324,7 +6348,7 @@
       "name": "parseDocument",
       "package": "@omnitron-dev/lumen-ast",
       "kind": "function",
-      "source": "packages/lumen-ast/src/compiler/parser.ts#L147",
+      "source": "packages/lumen-ast/src/compiler/parser.ts#L149",
       "imports": [
         {
           "path": "@omnitron-dev/lumen-ast",
@@ -6336,7 +6360,7 @@
       "name": "parseDocumentSync",
       "package": "@omnitron-dev/lumen-ast",
       "kind": "function",
-      "source": "packages/lumen-ast/src/compiler/parser.ts#L152",
+      "source": "packages/lumen-ast/src/compiler/parser.ts#L154",
       "imports": [
         {
           "path": "@omnitron-dev/lumen-ast",
@@ -6372,7 +6396,7 @@
       "name": "parseJsxTag",
       "package": "@omnitron-dev/lumen-ast",
       "kind": "function",
-      "source": "packages/lumen-ast/src/compiler/jsx-parser.ts#L587",
+      "source": "packages/lumen-ast/src/compiler/jsx-parser.ts#L606",
       "imports": [
         {
           "path": "@omnitron-dev/lumen-ast",
@@ -6460,7 +6484,7 @@
       "name": "Position",
       "package": "@omnitron-dev/lumen-ast",
       "kind": "interface",
-      "source": "packages/lumen-ast/src/ast/types.ts#L15",
+      "source": "packages/lumen-ast/src/ast/types.ts#L19",
       "imports": [
         {
           "path": "@omnitron-dev/lumen-ast",
@@ -6472,7 +6496,7 @@
       "name": "preProcessDirectives",
       "package": "@omnitron-dev/lumen-ast",
       "kind": "function",
-      "source": "packages/lumen-ast/src/compiler/directives.ts#L29",
+      "source": "packages/lumen-ast/src/compiler/directives.ts#L31",
       "imports": [
         {
           "path": "@omnitron-dev/lumen-ast",
@@ -6520,7 +6544,7 @@
       "name": "registerJsxFragmentParser",
       "package": "@omnitron-dev/lumen-ast",
       "kind": "function",
-      "source": "packages/lumen-ast/src/compiler/jsx-parser.ts#L583",
+      "source": "packages/lumen-ast/src/compiler/jsx-parser.ts#L602",
       "imports": [
         {
           "path": "@omnitron-dev/lumen-ast",
@@ -6588,7 +6612,7 @@
       "name": "renderNodesToHtml",
       "package": "@omnitron-dev/lumen-ast",
       "kind": "function",
-      "source": "packages/lumen-ast/src/transformers/to-html-ssr.ts#L145",
+      "source": "packages/lumen-ast/src/transformers/to-html-ssr.ts#L161",
       "imports": [
         {
           "path": "@omnitron-dev/lumen-ast",
@@ -6600,7 +6624,7 @@
       "name": "resolveDirectiveAttributes",
       "package": "@omnitron-dev/lumen-ast",
       "kind": "function",
-      "source": "packages/lumen-ast/src/compiler/directives.ts#L201",
+      "source": "packages/lumen-ast/src/compiler/directives.ts#L197",
       "imports": [
         {
           "path": "@omnitron-dev/lumen-ast",
@@ -6672,7 +6696,7 @@
       "name": "sanitizeUrl",
       "package": "@omnitron-dev/lumen-ast",
       "kind": "function",
-      "source": "packages/lumen-ast/src/transformers/to-html-ssr.ts#L64",
+      "source": "packages/lumen-ast/src/transformers/to-html-ssr.ts#L77",
       "imports": [
         {
           "path": "@omnitron-dev/lumen-ast",
@@ -6684,7 +6708,7 @@
       "name": "scanJsxOpeningTagEnd",
       "package": "@omnitron-dev/lumen-ast",
       "kind": "function",
-      "source": "packages/lumen-ast/src/compiler/jsx-parser.ts#L21",
+      "source": "packages/lumen-ast/src/compiler/jsx-parser.ts#L22",
       "imports": [
         {
           "path": "@omnitron-dev/lumen-ast",
@@ -6756,7 +6780,7 @@
       "name": "SsrOptions",
       "package": "@omnitron-dev/lumen-ast",
       "kind": "interface",
-      "source": "packages/lumen-ast/src/transformers/to-html-ssr.ts#L15",
+      "source": "packages/lumen-ast/src/transformers/to-html-ssr.ts#L17",
       "imports": [
         {
           "path": "@omnitron-dev/lumen-ast",
@@ -6780,7 +6804,7 @@
       "name": "toCleanMarkdown",
       "package": "@omnitron-dev/lumen-ast",
       "kind": "function",
-      "source": "packages/lumen-ast/src/transformers/to-clean-markdown.ts#L24",
+      "source": "packages/lumen-ast/src/transformers/to-clean-markdown.ts#L25",
       "imports": [
         {
           "path": "@omnitron-dev/lumen-ast",
@@ -6792,7 +6816,19 @@
       "name": "toHtmlSsr",
       "package": "@omnitron-dev/lumen-ast",
       "kind": "function",
-      "source": "packages/lumen-ast/src/transformers/to-html-ssr.ts#L124",
+      "source": "packages/lumen-ast/src/transformers/to-html-ssr.ts#L156",
+      "imports": [
+        {
+          "path": "@omnitron-dev/lumen-ast",
+          "guide": "/docs/lumen/authoring"
+        }
+      ]
+    },
+    {
+      "name": "toHtmlTree",
+      "package": "@omnitron-dev/lumen-ast",
+      "kind": "function",
+      "source": "packages/lumen-ast/src/transformers/to-html-ssr.ts#L138",
       "imports": [
         {
           "path": "@omnitron-dev/lumen-ast",
@@ -7292,7 +7328,7 @@
       "name": "ApiExplorer",
       "package": "@omnitron-dev/lumen-ui",
       "kind": "function",
-      "source": "packages/lumen-ui/src/interactive/api-explorer.tsx#L38",
+      "source": "packages/lumen-ui/src/interactive/api-explorer.tsx#L39",
       "imports": [
         {
           "path": "@omnitron-dev/lumen-ui",
@@ -7304,7 +7340,7 @@
       "name": "ApiExplorerMethod",
       "package": "@omnitron-dev/lumen-ui",
       "kind": "interface",
-      "source": "packages/lumen-ui/src/interactive/api-explorer.tsx#L4",
+      "source": "packages/lumen-ui/src/interactive/api-explorer.tsx#L5",
       "imports": [
         {
           "path": "@omnitron-dev/lumen-ui",
@@ -7316,7 +7352,7 @@
       "name": "ApiExplorerProps",
       "package": "@omnitron-dev/lumen-ui",
       "kind": "interface",
-      "source": "packages/lumen-ui/src/interactive/api-explorer.tsx#L23",
+      "source": "packages/lumen-ui/src/interactive/api-explorer.tsx#L24",
       "imports": [
         {
           "path": "@omnitron-dev/lumen-ui",
@@ -7328,7 +7364,7 @@
       "name": "ApiSymbolItem",
       "package": "@omnitron-dev/lumen-ui",
       "kind": "interface",
-      "source": "packages/lumen-ui/src/interactive/api-explorer.tsx#L13",
+      "source": "packages/lumen-ui/src/interactive/api-explorer.tsx#L14",
       "imports": [
         {
           "path": "@omnitron-dev/lumen-ui",
@@ -7372,7 +7408,7 @@
       "name": "CodeBlock",
       "package": "@omnitron-dev/lumen-ui",
       "kind": "function",
-      "source": "packages/lumen-ui/src/blocks/code-block.tsx#L43",
+      "source": "packages/lumen-ui/src/blocks/code-block.tsx#L44",
       "imports": [
         {
           "path": "@omnitron-dev/lumen-ui",
@@ -7388,7 +7424,7 @@
       "name": "CodeBlockProps",
       "package": "@omnitron-dev/lumen-ui",
       "kind": "interface",
-      "source": "packages/lumen-ui/src/blocks/code-block.tsx#L9",
+      "source": "packages/lumen-ui/src/blocks/code-block.tsx#L10",
       "imports": [
         {
           "path": "@omnitron-dev/lumen-ui",
@@ -7404,7 +7440,7 @@
       "name": "ComponentExample",
       "package": "@omnitron-dev/lumen-ui",
       "kind": "function",
-      "source": "packages/lumen-ui/src/blocks/component-example.tsx#L19",
+      "source": "packages/lumen-ui/src/blocks/component-example.tsx#L21",
       "imports": [
         {
           "path": "@omnitron-dev/lumen-ui",
@@ -7436,7 +7472,7 @@
       "name": "defaultLumenContextValue",
       "package": "@omnitron-dev/lumen-ui",
       "kind": "value",
-      "source": "packages/lumen-ui/src/hydration/context.ts#L17",
+      "source": "packages/lumen-ui/src/hydration/context.ts#L22",
       "imports": [
         {
           "path": "@omnitron-dev/lumen-ui",
@@ -7532,7 +7568,7 @@
       "name": "DocSectionHeading",
       "package": "@omnitron-dev/lumen-ui",
       "kind": "interface",
-      "source": "packages/lumen-ui/src/navigation/section-nav.tsx#L5",
+      "source": "packages/lumen-ui/src/navigation/section-nav.tsx#L4",
       "imports": [
         {
           "path": "@omnitron-dev/lumen-ui",
@@ -7548,7 +7584,7 @@
       "name": "DocSectionNav",
       "package": "@omnitron-dev/lumen-ui",
       "kind": "function",
-      "source": "packages/lumen-ui/src/navigation/section-nav.tsx#L45",
+      "source": "packages/lumen-ui/src/navigation/section-nav.tsx#L22",
       "imports": [
         {
           "path": "@omnitron-dev/lumen-ui",
@@ -7564,7 +7600,7 @@
       "name": "DocSectionNavProps",
       "package": "@omnitron-dev/lumen-ui",
       "kind": "interface",
-      "source": "packages/lumen-ui/src/navigation/section-nav.tsx#L12",
+      "source": "packages/lumen-ui/src/navigation/section-nav.tsx#L11",
       "imports": [
         {
           "path": "@omnitron-dev/lumen-ui",
@@ -7584,6 +7620,22 @@
       "imports": [
         {
           "path": "@omnitron-dev/lumen-ui",
+          "guide": "/docs/lumen/authoring"
+        }
+      ]
+    },
+    {
+      "name": "getIslandComponent",
+      "package": "@omnitron-dev/lumen-ui",
+      "kind": "function",
+      "source": "packages/lumen-ui/src/hydration/context.ts#L7",
+      "imports": [
+        {
+          "path": "@omnitron-dev/lumen-ui",
+          "guide": "/docs/lumen/authoring"
+        },
+        {
+          "path": "@omnitron-dev/lumen-ui/runtime",
           "guide": "/docs/lumen/authoring"
         }
       ]
@@ -7672,7 +7724,7 @@
       "name": "LumenContext",
       "package": "@omnitron-dev/lumen-ui",
       "kind": "value",
-      "source": "packages/lumen-ui/src/hydration/context.ts#L28",
+      "source": "packages/lumen-ui/src/hydration/context.ts#L33",
       "imports": [
         {
           "path": "@omnitron-dev/lumen-ui",
@@ -7688,7 +7740,7 @@
       "name": "LumenContextValue",
       "package": "@omnitron-dev/lumen-ui",
       "kind": "interface",
-      "source": "packages/lumen-ui/src/hydration/context.ts#L6",
+      "source": "packages/lumen-ui/src/hydration/context.ts#L11",
       "imports": [
         {
           "path": "@omnitron-dev/lumen-ui",
@@ -7784,7 +7836,7 @@
       "name": "LumenNavbar",
       "package": "@omnitron-dev/lumen-ui",
       "kind": "function",
-      "source": "packages/lumen-ui/src/navigation/navbar.tsx#L53",
+      "source": "packages/lumen-ui/src/navigation/navbar.tsx#L67",
       "imports": [
         {
           "path": "@omnitron-dev/lumen-ui",
@@ -7800,7 +7852,7 @@
       "name": "LumenNavbarItem",
       "package": "@omnitron-dev/lumen-ui",
       "kind": "interface",
-      "source": "packages/lumen-ui/src/navigation/navbar.tsx#L4",
+      "source": "packages/lumen-ui/src/navigation/navbar.tsx#L6",
       "imports": [
         {
           "path": "@omnitron-dev/lumen-ui",
@@ -7816,7 +7868,7 @@
       "name": "LumenNavbarProps",
       "package": "@omnitron-dev/lumen-ui",
       "kind": "interface",
-      "source": "packages/lumen-ui/src/navigation/navbar.tsx#L13",
+      "source": "packages/lumen-ui/src/navigation/navbar.tsx#L15",
       "imports": [
         {
           "path": "@omnitron-dev/lumen-ui",
@@ -7832,7 +7884,7 @@
       "name": "LumenSearchDialog",
       "package": "@omnitron-dev/lumen-ui",
       "kind": "function",
-      "source": "packages/lumen-ui/src/search/search-dialog.tsx#L452",
+      "source": "packages/lumen-ui/src/search/search-dialog.tsx#L330",
       "imports": [
         {
           "path": "@omnitron-dev/lumen-ui",
@@ -7848,7 +7900,7 @@
       "name": "LumenSearchDialogContent",
       "package": "@omnitron-dev/lumen-ui",
       "kind": "function",
-      "source": "packages/lumen-ui/src/search/search-dialog.tsx#L218",
+      "source": "packages/lumen-ui/src/search/search-dialog.tsx#L217",
       "imports": [
         {
           "path": "@omnitron-dev/lumen-ui",
@@ -7864,7 +7916,7 @@
       "name": "LumenSearchDialogProps",
       "package": "@omnitron-dev/lumen-ui",
       "kind": "interface",
-      "source": "packages/lumen-ui/src/search/search-dialog.tsx#L5",
+      "source": "packages/lumen-ui/src/search/search-dialog.tsx#L7",
       "imports": [
         {
           "path": "@omnitron-dev/lumen-ui",
@@ -7880,7 +7932,7 @@
       "name": "LumenShell",
       "package": "@omnitron-dev/lumen-ui",
       "kind": "function",
-      "source": "packages/lumen-ui/src/hydration/shell.tsx#L423",
+      "source": "packages/lumen-ui/src/hydration/shell.tsx#L464",
       "imports": [
         {
           "path": "@omnitron-dev/lumen-ui",
@@ -8000,7 +8052,7 @@
       "name": "NetronPlayground",
       "package": "@omnitron-dev/lumen-ui",
       "kind": "function",
-      "source": "packages/lumen-ui/src/interactive/playground.tsx#L33",
+      "source": "packages/lumen-ui/src/interactive/playground.tsx#L35",
       "imports": [
         {
           "path": "@omnitron-dev/lumen-ui",
@@ -8012,7 +8064,7 @@
       "name": "NetronPlaygroundProps",
       "package": "@omnitron-dev/lumen-ui",
       "kind": "interface",
-      "source": "packages/lumen-ui/src/interactive/playground.tsx#L12",
+      "source": "packages/lumen-ui/src/interactive/playground.tsx#L14",
       "imports": [
         {
           "path": "@omnitron-dev/lumen-ui",
@@ -8120,7 +8172,7 @@
       "name": "parseSearchSnippet",
       "package": "@omnitron-dev/lumen-ui",
       "kind": "function",
-      "source": "packages/lumen-ui/src/search/search-dialog.tsx#L106",
+      "source": "packages/lumen-ui/src/search/search-dialog.tsx#L105",
       "imports": [
         {
           "path": "@omnitron-dev/lumen-ui",
@@ -8136,7 +8188,7 @@
       "name": "PlaygroundExecutionResult",
       "package": "@omnitron-dev/lumen-ui",
       "kind": "interface",
-      "source": "packages/lumen-ui/src/interactive/playground.tsx#L10",
+      "source": "packages/lumen-ui/src/interactive/playground.tsx#L12",
       "imports": [
         {
           "path": "@omnitron-dev/lumen-ui",
@@ -8148,7 +8200,7 @@
       "name": "PlaygroundExecutor",
       "package": "@omnitron-dev/lumen-ui",
       "kind": "type",
-      "source": "packages/lumen-ui/src/interactive/playground.tsx#L9",
+      "source": "packages/lumen-ui/src/interactive/playground.tsx#L11",
       "imports": [
         {
           "path": "@omnitron-dev/lumen-ui",
@@ -8160,7 +8212,7 @@
       "name": "PlaygroundServiceResult",
       "package": "@omnitron-dev/lumen-ui",
       "kind": "interface",
-      "source": "packages/lumen-ui/src/interactive/playground.tsx#L8",
+      "source": "packages/lumen-ui/src/interactive/playground.tsx#L10",
       "imports": [
         {
           "path": "@omnitron-dev/lumen-ui",
@@ -8172,7 +8224,7 @@
       "name": "PlaygroundSnapshot",
       "package": "@omnitron-dev/lumen-ui",
       "kind": "interface",
-      "source": "packages/lumen-ui/src/interactive/playground.tsx#L6",
+      "source": "packages/lumen-ui/src/interactive/playground.tsx#L8",
       "imports": [
         {
           "path": "@omnitron-dev/lumen-ui",
@@ -8216,7 +8268,7 @@
       "name": "PortalIslandManager",
       "package": "@omnitron-dev/lumen-ui",
       "kind": "function",
-      "source": "packages/lumen-ui/src/hydration/shell.tsx#L92",
+      "source": "packages/lumen-ui/src/hydration/shell.tsx#L146",
       "imports": [
         {
           "path": "@omnitron-dev/lumen-ui",
@@ -8248,7 +8300,7 @@
       "name": "sanitizeSearchResultUrl",
       "package": "@omnitron-dev/lumen-ui",
       "kind": "function",
-      "source": "packages/lumen-ui/src/search/search-dialog.tsx#L52",
+      "source": "packages/lumen-ui/src/search/search-dialog.tsx#L51",
       "imports": [
         {
           "path": "@omnitron-dev/lumen-ui",
@@ -8392,7 +8444,7 @@
       "name": "useLumen",
       "package": "@omnitron-dev/lumen-ui",
       "kind": "value",
-      "source": "packages/lumen-ui/src/hydration/context.ts#L30",
+      "source": "packages/lumen-ui/src/hydration/context.ts#L35",
       "imports": [
         {
           "path": "@omnitron-dev/lumen-ui",
@@ -16048,7 +16100,7 @@
       "name": "AddNodeInput",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "apps/omnitron/src/shared/dto/nodes.ts#L83",
+      "source": "apps/omnitron/src/shared/dto/nodes.ts#L84",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/dto/services",
@@ -16584,7 +16636,7 @@
       "name": "AttestStored",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "apps/omnitron/src/shared/dto/services.ts#L912",
+      "source": "apps/omnitron/src/shared/dto/services.ts#L916",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/dto/services",
@@ -17368,7 +17420,7 @@
       "name": "ExecutionService",
       "package": "@omnitron-dev/omnitron",
       "kind": "class",
-      "source": "apps/omnitron/src/execution/execution.service.ts#L215",
+      "source": "apps/omnitron/src/execution/execution.service.ts#L177",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/operations",
@@ -17620,7 +17672,7 @@
       "name": "FleetHistoryConfig",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "apps/omnitron/src/shared/dto/nodes.ts#L152",
+      "source": "apps/omnitron/src/shared/dto/nodes.ts#L153",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/dto/services",
@@ -17972,7 +18024,7 @@
       "name": "IMeshNodeStatus",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "apps/omnitron/src/shared/dto/nodes.ts#L167",
+      "source": "apps/omnitron/src/shared/dto/nodes.ts#L168",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/dto/services",
@@ -18068,7 +18120,7 @@
       "name": "INode",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "apps/omnitron/src/shared/dto/nodes.ts#L8",
+      "source": "apps/omnitron/src/shared/dto/nodes.ts#L9",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/dto/services",
@@ -18080,7 +18132,7 @@
       "name": "INodeClusterState",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "apps/omnitron/src/shared/dto/nodes.ts#L270",
+      "source": "apps/omnitron/src/shared/dto/nodes.ts#L271",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/dto/services",
@@ -18092,7 +18144,7 @@
       "name": "INodeDaemonAnswer",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "apps/omnitron/src/shared/dto/nodes.ts#L228",
+      "source": "apps/omnitron/src/shared/dto/nodes.ts#L229",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/dto/services",
@@ -18104,7 +18156,7 @@
       "name": "INodeIndicators",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "apps/omnitron/src/shared/dto/nodes.ts#L202",
+      "source": "apps/omnitron/src/shared/dto/nodes.ts#L203",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/dto/services",
@@ -18116,7 +18168,7 @@
       "name": "INodeRelayStats",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "apps/omnitron/src/shared/dto/nodes.ts#L262",
+      "source": "apps/omnitron/src/shared/dto/nodes.ts#L263",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/dto/services",
@@ -18128,7 +18180,7 @@
       "name": "INodeRolloutStart",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "apps/omnitron/src/shared/dto/nodes.ts#L350",
+      "source": "apps/omnitron/src/shared/dto/nodes.ts#L351",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/dto/services",
@@ -18140,7 +18192,7 @@
       "name": "INodeStatus",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "apps/omnitron/src/shared/dto/nodes.ts#L38",
+      "source": "apps/omnitron/src/shared/dto/nodes.ts#L39",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/dto/services",
@@ -18152,7 +18204,7 @@
       "name": "INodeSyncStatus",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "apps/omnitron/src/shared/dto/nodes.ts#L249",
+      "source": "apps/omnitron/src/shared/dto/nodes.ts#L250",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/dto/services",
@@ -18164,7 +18216,7 @@
       "name": "INodeUpgradePlan",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "apps/omnitron/src/shared/dto/nodes.ts#L325",
+      "source": "apps/omnitron/src/shared/dto/nodes.ts#L326",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/dto/services",
@@ -18176,7 +18228,7 @@
       "name": "INodeUpgradePlanRow",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "apps/omnitron/src/shared/dto/nodes.ts#L299",
+      "source": "apps/omnitron/src/shared/dto/nodes.ts#L300",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/dto/services",
@@ -18188,7 +18240,7 @@
       "name": "INodeWithStatus",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "apps/omnitron/src/shared/dto/nodes.ts#L79",
+      "source": "apps/omnitron/src/shared/dto/nodes.ts#L80",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/dto/services",
@@ -18252,7 +18304,7 @@
       "name": "inspectRuntimeArtifact",
       "package": "@omnitron-dev/omnitron",
       "kind": "function",
-      "source": "apps/omnitron/src/shared/runtime-artifact.ts#L87",
+      "source": "apps/omnitron/src/shared/runtime-artifact.ts#L168",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/runtime-artifact",
@@ -18372,7 +18424,7 @@
       "name": "IOmnitronAuditService",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "apps/omnitron/src/shared/dto/services.ts#L653",
+      "source": "apps/omnitron/src/shared/dto/services.ts#L657",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/dto/services",
@@ -18432,7 +18484,7 @@
       "name": "IOmnitronDiscoveryService",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "apps/omnitron/src/shared/dto/services.ts#L641",
+      "source": "apps/omnitron/src/shared/dto/services.ts#L645",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/dto/services",
@@ -18480,7 +18532,7 @@
       "name": "IOmnitronHealthService",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "apps/omnitron/src/shared/dto/services.ts#L633",
+      "source": "apps/omnitron/src/shared/dto/services.ts#L637",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/dto/services",
@@ -18504,7 +18556,7 @@
       "name": "IOmnitronKubernetesService",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "apps/omnitron/src/shared/dto/services.ts#L620",
+      "source": "apps/omnitron/src/shared/dto/services.ts#L624",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/dto/services",
@@ -18528,7 +18580,7 @@
       "name": "IOmnitronMetricsService",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "apps/omnitron/src/shared/dto/services.ts#L824",
+      "source": "apps/omnitron/src/shared/dto/services.ts#L828",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/dto/services",
@@ -18540,7 +18592,7 @@
       "name": "IOmnitronNodesService",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "apps/omnitron/src/shared/dto/services.ts#L684",
+      "source": "apps/omnitron/src/shared/dto/services.ts#L688",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/dto/services",
@@ -18568,7 +18620,7 @@
       "name": "IOmnitronReleaseService",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "apps/omnitron/src/shared/dto/services.ts#L919",
+      "source": "apps/omnitron/src/shared/dto/services.ts#L923",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/dto/services",
@@ -18580,7 +18632,7 @@
       "name": "IOmnitronSecretsService",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "apps/omnitron/src/shared/dto/services.ts#L660",
+      "source": "apps/omnitron/src/shared/dto/services.ts#L664",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/dto/services",
@@ -18608,7 +18660,7 @@
       "name": "IOmnitronTerminalService",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "apps/omnitron/src/shared/dto/services.ts#L949",
+      "source": "apps/omnitron/src/shared/dto/services.ts#L953",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/dto/services",
@@ -18984,7 +19036,7 @@
       "name": "KernelRollout",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "apps/omnitron/src/shared/dto/nodes.ts#L433",
+      "source": "apps/omnitron/src/shared/dto/nodes.ts#L436",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/dto/services",
@@ -18996,7 +19048,7 @@
       "name": "KernelRolloutTarget",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "apps/omnitron/src/shared/dto/nodes.ts#L422",
+      "source": "apps/omnitron/src/shared/dto/nodes.ts#L423",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/dto/services",
@@ -19680,7 +19732,7 @@
       "name": "NodeCheckConfig",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "apps/omnitron/src/shared/dto/nodes.ts#L130",
+      "source": "apps/omnitron/src/shared/dto/nodes.ts#L131",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/dto/services",
@@ -19740,7 +19792,7 @@
       "name": "NodeUpgradeProgress",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "apps/omnitron/src/shared/dto/nodes.ts#L381",
+      "source": "apps/omnitron/src/shared/dto/nodes.ts#L382",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/dto/services",
@@ -20496,7 +20548,7 @@
       "name": "readRuntimeManifest",
       "package": "@omnitron-dev/omnitron",
       "kind": "function",
-      "source": "apps/omnitron/src/shared/runtime-artifact.ts#L76",
+      "source": "apps/omnitron/src/shared/runtime-artifact.ts#L157",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/runtime-artifact",
@@ -20640,7 +20692,7 @@
       "name": "ReleaseDeploymentDto",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "apps/omnitron/src/shared/dto/services.ts#L865",
+      "source": "apps/omnitron/src/shared/dto/services.ts#L869",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/dto/services",
@@ -20712,7 +20764,7 @@
       "name": "ReleasePreflightDto",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "apps/omnitron/src/shared/dto/services.ts#L845",
+      "source": "apps/omnitron/src/shared/dto/services.ts#L849",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/dto/services",
@@ -20724,7 +20776,7 @@
       "name": "ReleasePruneAnswer",
       "package": "@omnitron-dev/omnitron",
       "kind": "type",
-      "source": "apps/omnitron/src/shared/dto/services.ts#L891",
+      "source": "apps/omnitron/src/shared/dto/services.ts#L895",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/dto/services",
@@ -20880,7 +20932,7 @@
       "name": "runtimeArtifactDigest",
       "package": "@omnitron-dev/omnitron",
       "kind": "function",
-      "source": "apps/omnitron/src/shared/runtime-artifact.ts#L71",
+      "source": "apps/omnitron/src/shared/runtime-artifact.ts#L152",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/runtime-artifact",
@@ -20892,7 +20944,7 @@
       "name": "runtimeDigestRecord",
       "package": "@omnitron-dev/omnitron",
       "kind": "function",
-      "source": "apps/omnitron/src/shared/runtime-artifact.ts#L22",
+      "source": "apps/omnitron/src/shared/runtime-artifact.ts#L41",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/runtime-artifact",
@@ -20944,7 +20996,7 @@
       "name": "RuntimeUpdatePlan",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "apps/omnitron/src/shared/dto/runtime-update.ts#L93",
+      "source": "apps/omnitron/src/shared/dto/runtime-update.ts#L113",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/operations",
@@ -20956,7 +21008,7 @@
       "name": "RuntimeUpdateReceipt",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "apps/omnitron/src/shared/dto/runtime-update.ts#L127",
+      "source": "apps/omnitron/src/shared/dto/runtime-update.ts#L153",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/operations",
@@ -20968,7 +21020,7 @@
       "name": "RuntimeUpdateStatus",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "apps/omnitron/src/shared/dto/runtime-update.ts#L138",
+      "source": "apps/omnitron/src/shared/dto/runtime-update.ts#L166",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/operations",
@@ -21088,7 +21140,7 @@
       "name": "SshKeyInfo",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "apps/omnitron/src/shared/dto/nodes.ts#L117",
+      "source": "apps/omnitron/src/shared/dto/nodes.ts#L118",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/dto/services",
@@ -21100,7 +21152,7 @@
       "name": "SSHTarget",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "apps/omnitron/src/execution/execution.service.ts#L30",
+      "source": "apps/omnitron/src/execution/execution.service.ts#L23",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/operations",
@@ -21780,7 +21832,7 @@
       "name": "UpdateNodeInput",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "apps/omnitron/src/shared/dto/nodes.ts#L100",
+      "source": "apps/omnitron/src/shared/dto/nodes.ts#L101",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/dto/services",
@@ -21792,7 +21844,7 @@
       "name": "UpgradePhase",
       "package": "@omnitron-dev/omnitron",
       "kind": "type",
-      "source": "apps/omnitron/src/shared/dto/nodes.ts#L363",
+      "source": "apps/omnitron/src/shared/dto/nodes.ts#L364",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/dto/services",
@@ -21816,7 +21868,7 @@
       "name": "VerifiedRuntimeReference",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "apps/omnitron/src/shared/dto/runtime-update.ts#L71",
+      "source": "apps/omnitron/src/shared/dto/runtime-update.ts#L90",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/operations",
@@ -21840,7 +21892,7 @@
       "name": "verifyRuntimeArtifact",
       "package": "@omnitron-dev/omnitron",
       "kind": "function",
-      "source": "apps/omnitron/src/shared/runtime-artifact.ts#L111",
+      "source": "apps/omnitron/src/shared/runtime-artifact.ts#L192",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/runtime-artifact",
@@ -24928,7 +24980,7 @@
       "name": "COLOR_GROUPS",
       "package": "@omnitron-dev/prism",
       "kind": "value",
-      "source": "packages/prism/src/theme/create-theme.ts#L443",
+      "source": "packages/prism/src/theme/create-theme.ts#L453",
       "imports": [
         {
           "path": "@omnitron-dev/prism",
@@ -25216,7 +25268,7 @@
       "name": "componentOverrides",
       "package": "@omnitron-dev/prism",
       "kind": "function",
-      "source": "packages/prism/src/theme/components/index.ts#L71",
+      "source": "packages/prism/src/theme/components/index.ts#L72",
       "imports": [
         {
           "path": "@omnitron-dev/prism",
@@ -25856,7 +25908,7 @@
       "name": "createButtonGroupOverrides",
       "package": "@omnitron-dev/prism",
       "kind": "function",
-      "source": "packages/prism/src/theme/components/Button.ts#L288",
+      "source": "packages/prism/src/theme/components/Button.ts#L299",
       "imports": [
         {
           "path": "@omnitron-dev/prism",
@@ -26164,7 +26216,7 @@
       "name": "createPrismIcon",
       "package": "@omnitron-dev/prism",
       "kind": "function",
-      "source": "packages/prism/src/icons/context.tsx#L109",
+      "source": "packages/prism/src/icons/context.tsx#L119",
       "imports": [
         {
           "path": "@omnitron-dev/prism/icons",
@@ -26192,7 +26244,7 @@
       "name": "createPrismTheme",
       "package": "@omnitron-dev/prism",
       "kind": "function",
-      "source": "packages/prism/src/theme/create-theme.ts#L646",
+      "source": "packages/prism/src/theme/create-theme.ts#L666",
       "imports": [
         {
           "path": "@omnitron-dev/prism",
@@ -26208,7 +26260,7 @@
       "name": "CreatePrismThemeOptions",
       "package": "@omnitron-dev/prism",
       "kind": "interface",
-      "source": "packages/prism/src/theme/create-theme.ts#L87",
+      "source": "packages/prism/src/theme/create-theme.ts#L97",
       "imports": [
         {
           "path": "@omnitron-dev/prism",
@@ -27788,7 +27840,7 @@
       "name": "DocHeading",
       "package": "@omnitron-dev/prism",
       "kind": "interface",
-      "source": "packages/prism/src/components/doc-layout/doc-section-nav.tsx#L8",
+      "source": "packages/prism/src/components/doc-layout/doc-section-nav.tsx#L9",
       "imports": [
         {
           "path": "@omnitron-dev/prism",
@@ -27828,7 +27880,7 @@
       "name": "DocSectionNav",
       "package": "@omnitron-dev/prism",
       "kind": "function",
-      "source": "packages/prism/src/components/doc-layout/doc-section-nav.tsx#L23",
+      "source": "packages/prism/src/components/doc-layout/doc-section-nav.tsx#L29",
       "imports": [
         {
           "path": "@omnitron-dev/prism",
@@ -27838,6 +27890,18 @@
           "path": "@omnitron-dev/prism/components",
           "guide": "/docs/frontend/prism/components"
         },
+        {
+          "path": "@omnitron-dev/prism/components/doc-layout",
+          "guide": "/docs/frontend/prism/components"
+        }
+      ]
+    },
+    {
+      "name": "DocSectionNavProps",
+      "package": "@omnitron-dev/prism",
+      "kind": "interface",
+      "source": "packages/prism/src/components/doc-layout/doc-section-nav.tsx#L15",
+      "imports": [
         {
           "path": "@omnitron-dev/prism/components/doc-layout",
           "guide": "/docs/frontend/prism/components"
@@ -28009,6 +28073,18 @@
         {
           "path": "@omnitron-dev/prism/components",
           "guide": "/docs/frontend/prism/components"
+        }
+      ]
+    },
+    {
+      "name": "DuotoneIcon",
+      "package": "@omnitron-dev/prism",
+      "kind": "value",
+      "source": "packages/prism/src/icons/context.tsx#L8",
+      "imports": [
+        {
+          "path": "@omnitron-dev/prism/icons",
+          "guide": "/docs/frontend/prism/theme"
         }
       ]
     },
@@ -30732,7 +30808,7 @@
       "name": "getPresetDisplayName",
       "package": "@omnitron-dev/prism",
       "kind": "function",
-      "source": "packages/prism/src/theme/create-theme.ts#L859",
+      "source": "packages/prism/src/theme/create-theme.ts#L900",
       "imports": [
         {
           "path": "@omnitron-dev/prism",
@@ -36140,7 +36216,7 @@
       "name": "omnitronTheme",
       "package": "@omnitron-dev/prism",
       "kind": "function",
-      "source": "packages/prism/src/identity/theme.ts#L6",
+      "source": "packages/prism/src/identity/theme.ts#L7",
       "imports": [
         {
           "path": "@omnitron-dev/prism/identity",
@@ -36588,7 +36664,7 @@
       "name": "PRESET_DISPLAY_NAMES",
       "package": "@omnitron-dev/prism",
       "kind": "value",
-      "source": "packages/prism/src/theme/create-theme.ts#L825",
+      "source": "packages/prism/src/theme/create-theme.ts#L866",
       "imports": [
         {
           "path": "@omnitron-dev/prism",
@@ -36604,7 +36680,7 @@
       "name": "PRESET_INHERENT_MODE",
       "package": "@omnitron-dev/prism",
       "kind": "value",
-      "source": "packages/prism/src/theme/create-theme.ts#L843",
+      "source": "packages/prism/src/theme/create-theme.ts#L884",
       "imports": [
         {
           "path": "@omnitron-dev/prism",
@@ -36620,7 +36696,7 @@
       "name": "PRESET_NAMES",
       "package": "@omnitron-dev/prism",
       "kind": "value",
-      "source": "packages/prism/src/theme/create-theme.ts#L809",
+      "source": "packages/prism/src/theme/create-theme.ts#L850",
       "imports": [
         {
           "path": "@omnitron-dev/prism",
@@ -36776,7 +36852,7 @@
       "name": "PrismIconComponent",
       "package": "@omnitron-dev/prism",
       "kind": "type",
-      "source": "packages/prism/src/icons/context.tsx#L94",
+      "source": "packages/prism/src/icons/context.tsx#L104",
       "imports": [
         {
           "path": "@omnitron-dev/prism/icons",
@@ -36792,7 +36868,7 @@
       "name": "PrismIconName",
       "package": "@omnitron-dev/prism",
       "kind": "type",
-      "source": "packages/prism/src/icons/context.tsx#L93",
+      "source": "packages/prism/src/icons/context.tsx#L103",
       "imports": [
         {
           "path": "@omnitron-dev/prism/icons",
@@ -36808,7 +36884,7 @@
       "name": "prismIconNames",
       "package": "@omnitron-dev/prism",
       "kind": "value",
-      "source": "packages/prism/src/icons/context.tsx#L7",
+      "source": "packages/prism/src/icons/context.tsx#L17",
       "imports": [
         {
           "path": "@omnitron-dev/prism/icons",
@@ -36824,7 +36900,7 @@
       "name": "PrismIconProvider",
       "package": "@omnitron-dev/prism",
       "kind": "function",
-      "source": "packages/prism/src/icons/context.tsx#L102",
+      "source": "packages/prism/src/icons/context.tsx#L112",
       "imports": [
         {
           "path": "@omnitron-dev/prism/icons",
@@ -36840,7 +36916,7 @@
       "name": "PrismIconSet",
       "package": "@omnitron-dev/prism",
       "kind": "type",
-      "source": "packages/prism/src/icons/context.tsx#L95",
+      "source": "packages/prism/src/icons/context.tsx#L105",
       "imports": [
         {
           "path": "@omnitron-dev/prism/icons",
@@ -36880,7 +36956,7 @@
       "name": "PrismProvider",
       "package": "@omnitron-dev/prism",
       "kind": "function",
-      "source": "packages/prism/src/core/provider.tsx#L125",
+      "source": "packages/prism/src/core/provider.tsx#L122",
       "imports": [
         {
           "path": "@omnitron-dev/prism",
@@ -36896,7 +36972,7 @@
       "name": "PrismProviderProps",
       "package": "@omnitron-dev/prism",
       "kind": "interface",
-      "source": "packages/prism/src/core/provider.tsx#L41",
+      "source": "packages/prism/src/core/provider.tsx#L34",
       "imports": [
         {
           "path": "@omnitron-dev/prism",
@@ -36928,7 +37004,7 @@
       "name": "PrismThemeOverrideContext",
       "package": "@omnitron-dev/prism",
       "kind": "interface",
-      "source": "packages/prism/src/core/provider.tsx#L29",
+      "source": "packages/prism/src/theme/create-theme.ts#L66",
       "imports": [
         {
           "path": "@omnitron-dev/prism",
@@ -36937,6 +37013,10 @@
         {
           "path": "@omnitron-dev/prism/core",
           "guide": "/docs/frontend/prism/theme"
+        },
+        {
+          "path": "@omnitron-dev/prism/theme",
+          "guide": "/docs/frontend/prism/theme"
         }
       ]
     },
@@ -36944,7 +37024,7 @@
       "name": "PrismThemeOverrides",
       "package": "@omnitron-dev/prism",
       "kind": "type",
-      "source": "packages/prism/src/core/provider.tsx#L34",
+      "source": "packages/prism/src/theme/create-theme.ts#L71",
       "imports": [
         {
           "path": "@omnitron-dev/prism",
@@ -36952,6 +37032,10 @@
         },
         {
           "path": "@omnitron-dev/prism/core",
+          "guide": "/docs/frontend/prism/theme"
+        },
+        {
+          "path": "@omnitron-dev/prism/theme",
           "guide": "/docs/frontend/prism/theme"
         }
       ]
@@ -36964,6 +37048,38 @@
       "imports": [
         {
           "path": "@omnitron-dev/prism/ui",
+          "guide": "/docs/frontend/prism/theme"
+        }
+      ]
+    },
+    {
+      "name": "PrismThemeScript",
+      "package": "@omnitron-dev/prism",
+      "kind": "function",
+      "source": "packages/prism/src/core/theme-script.tsx#L15",
+      "imports": [
+        {
+          "path": "@omnitron-dev/prism",
+          "guide": "/docs/frontend/prism"
+        },
+        {
+          "path": "@omnitron-dev/prism/core",
+          "guide": "/docs/frontend/prism/theme"
+        }
+      ]
+    },
+    {
+      "name": "PrismThemeScriptProps",
+      "package": "@omnitron-dev/prism",
+      "kind": "interface",
+      "source": "packages/prism/src/core/theme-script.tsx#L5",
+      "imports": [
+        {
+          "path": "@omnitron-dev/prism",
+          "guide": "/docs/frontend/prism"
+        },
+        {
+          "path": "@omnitron-dev/prism/core",
           "guide": "/docs/frontend/prism/theme"
         }
       ]
@@ -40120,7 +40236,7 @@
       "name": "SupportedLocale",
       "package": "@omnitron-dev/prism",
       "kind": "type",
-      "source": "packages/prism/src/theme/create-theme.ts#L61",
+      "source": "packages/prism/src/theme/create-theme.ts#L62",
       "imports": [
         {
           "path": "@omnitron-dev/prism",
@@ -40208,6 +40324,22 @@
       "imports": [
         {
           "path": "@omnitron-dev/prism/ui",
+          "guide": "/docs/frontend/prism/theme"
+        }
+      ]
+    },
+    {
+      "name": "syntaxHighlightStyles",
+      "package": "@omnitron-dev/prism",
+      "kind": "function",
+      "source": "packages/prism/src/theme/syntax-highlight.ts#L4",
+      "imports": [
+        {
+          "path": "@omnitron-dev/prism",
+          "guide": "/docs/frontend/prism"
+        },
+        {
+          "path": "@omnitron-dev/prism/theme",
           "guide": "/docs/frontend/prism/theme"
         }
       ]
@@ -41984,7 +42116,7 @@
       "name": "useChart",
       "package": "@omnitron-dev/prism",
       "kind": "function",
-      "source": "packages/prism/src/components/chart/use-chart.ts#L43",
+      "source": "packages/prism/src/components/chart/use-chart.ts#L44",
       "imports": [
         {
           "path": "@omnitron-dev/prism",
@@ -43112,7 +43244,7 @@
       "name": "useMediaQuery",
       "package": "@omnitron-dev/prism",
       "kind": "value",
-      "source": "packages/prism/src/core/index.ts#L57",
+      "source": "packages/prism/src/core/index.ts#L60",
       "imports": [
         {
           "path": "@omnitron-dev/prism",
@@ -44188,7 +44320,7 @@
       "name": "useTable",
       "package": "@omnitron-dev/prism",
       "kind": "function",
-      "source": "packages/prism/src/components/table/table.tsx#L502",
+      "source": "packages/prism/src/components/table/table.tsx#L504",
       "imports": [
         {
           "path": "@omnitron-dev/prism",
@@ -44208,7 +44340,7 @@
       "name": "UseTableOptions",
       "package": "@omnitron-dev/prism",
       "kind": "interface",
-      "source": "packages/prism/src/components/table/table.tsx#L425",
+      "source": "packages/prism/src/components/table/table.tsx#L427",
       "imports": [
         {
           "path": "@omnitron-dev/prism",
@@ -44228,7 +44360,7 @@
       "name": "UseTableReturn",
       "package": "@omnitron-dev/prism",
       "kind": "interface",
-      "source": "packages/prism/src/components/table/table.tsx#L440",
+      "source": "packages/prism/src/components/table/table.tsx#L442",
       "imports": [
         {
           "path": "@omnitron-dev/prism",
