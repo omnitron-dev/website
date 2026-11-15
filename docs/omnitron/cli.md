@@ -193,7 +193,7 @@ owns a reviewed transition of local supervision, Console and the recorded stacks
 | `omnitron runtime update prepare <runtime>` | Install the verified candidate and record the current installation, stack selections, infrastructure and recovery plan |
 | `omnitron runtime update apply <digest>` | Recheck and apply that exact SHA-256 plan once |
 | `omnitron runtime update status [digest]` | Read the durable receipt and verify its candidate without connecting to the daemon |
-| `omnitron runtime update recover <digest>` | Restore the previous installation recorded in the reviewed plan, or inspect its completed recovery |
+| `omnitron runtime update recover <digest>` | Release interrupted admission before shutdown, or restore and inspect the previous installation after a process transition |
 
 From a clean Omnitron checkout, Xec prepares the same public operation:
 
@@ -216,9 +216,24 @@ The bytes are verified locally before use, without another build, archive copy o
 CI request. An invalid selected artifact fails verification instead of silently
 falling back to a different build. Preparation does not activate the runtime.
 
-Preparation requires an idle controller and a current recovery checkpoint.
-`omnitron backend status` reports backup operations and other activity that defer
-it. Run preparation again after that work finishes.
+Preparation is read-only with respect to running work. Its plan names the exact
+locally owned backup attempts that applying the update may cancel. Restores,
+unknown outcomes and operations without confirmed local ownership still block
+admission; they are never treated as successful cancellation.
+
+Applying the reviewed digest records `draining`, pauses new backups for that
+transaction and cancels only the reviewed attempts through the operation journal.
+An attempt that already finished is observed without replaying it. The controller
+then requires a fresh recovery certificate and an unchanged configuration digest
+before stopping any process. A new backup attempt or changed active revision
+requires a new review. The serving controller advertises
+`runtimeRestartAdmissionProtocol: 1` for this admission contract.
+
+If admission fails before shutdown, the update releases its own pause and records
+`aborted`; applications continue without a rollback restart. A lost release
+acknowledgement leaves `draining` in the receipt. Recovering that phase only
+releases the same plan's admission, without stopping or restoring applications.
+`omnitron backend status` continues to report all activity and recovery blockers.
 
 The rollback backend must also support reviewed stack boot, unless every stack
 already has the exact saved infrastructure-preservation review. Installing a new
