@@ -150,7 +150,11 @@ For a paper, set `pdf.paperSections` to the document IDs or source paths you wan
 lumen pdf --outDir papers
 ```
 
-The command writes one PDF per selected public document using the offline Typst compiler. Unsupported mathematical commands fail explicitly. HTML `katexMacros` do not define PDF macros; diagram blocks retain their source in PDF output.
+The command writes one PDF per selected public document using the offline Typst compiler. The output directory is required; an empty public selection or an unknown `pdf.paperSections` entry fails before compilation. Document IDs determine PDF filenames within that directory; absolute paths and traversal are rejected. Unsupported mathematical commands fail explicitly. HTML `katexMacros` do not define PDF macros; diagram blocks retain their source in PDF output.
+
+Use `lumen types --outDir generated` to export TypeScript unions of public document IDs, routes and mathematical object IDs. An intentionally empty corpus produces `never` unions. Both export commands reject parsing errors and replace their complete previous generation through Lumen's verified publisher. A failed compilation preserves the previous output. Use a dedicated directory for each export, separate from the static site's output and its ancestors or descendants.
+
+The configured source directory (`docs` by default) must exist. It may be empty, including a site that has only content in `pagesDir`; an explicitly configured pages directory must also exist. A missing directory is an error, not an empty corpus.
 
 ## Run an isolated example
 
