@@ -49,7 +49,7 @@ for (const width of [320, 1440]) {
       await page.setViewportSize({ width, height: 1000 });
       await page.addInitScript(value => localStorage.setItem('omnitron-theme', value), mode);
       await page.goto('/docs/frontend/prism');
-      await expect(page.locator('html')).toHaveAttribute('data-omnitron-theme', mode);
+      await expect(page.locator('html')).toHaveAttribute('data-prism-color-scheme', mode);
       await expect(page.locator('.lumen-admonition-tip .lumen-admonition-title')).toHaveText('React 19 + MUI v9 idioms');
       const preview = await example(page, 'tabs');
       await expect(preview.getByRole('tabpanel')).toHaveText('2 connected nodes');

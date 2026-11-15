@@ -21,8 +21,8 @@
 .mobile-document-nav{display:none}
 @media(max-width:900px){.mobile-document-nav{display:block;border-bottom:1px solid var(--omni-border);padding:12px 22px;font-size:12px}}
 
-:root[data-omnitron-theme=dark] .shiki span[style]{color:var(--shiki-dark,inherit);font-style:var(--shiki-dark-font-style,normal)}
-:root[data-omnitron-theme=light] .shiki span[style]{color:var(--shiki-light,inherit);font-style:var(--shiki-light-font-style,normal)}
+:root[data-prism-color-scheme=dark] .shiki span[style]{color:var(--shiki-dark,inherit);font-style:var(--shiki-dark-font-style,normal)}
+:root:not([data-prism-color-scheme=dark]) .shiki span[style]{color:var(--shiki-light,inherit);font-style:var(--shiki-light-font-style,normal)}
 .lumen-code-block{font-size:var(--lumen-code-font-size,.875rem)}
 .lumen-twoslash-popup,.lumen-twoslash-error{display:block;white-space:pre-wrap;padding:8px 12px;margin:8px 0;border-left:2px solid var(--omni-accent);color:var(--omni-text-muted);font:var(--lumen-code-font-size,.875rem)/1.6 var(--omni-font-mono)}.lumen-twoslash-error{border-color:var(--omni-error)}
 .lumen-doc .katex-display{overflow-x:auto;overflow-y:hidden;padding:8px 0}

@@ -13,7 +13,6 @@ import { ThemeSelector } from './theme-selector.tsx';
 import { DocSidebar } from '@omnitron-dev/prism/components/doc-layout';
 import { MainNavigation, MobileNavigation, SectionNavigation } from './navigation.tsx';
 import { Home } from './home.tsx';
-import { readThemePreference } from './theme-preference.ts';
 const ApiExplorer = lazy(() => import('./api-explorer.tsx'));
 function ApiExplorerIsland() {
   return React.createElement(Suspense, { fallback: React.createElement('p', { role: 'status' }, 'Loading public API inventory…') }, React.createElement(ApiExplorer));
@@ -22,24 +21,13 @@ function ApiExplorerIsland() {
 function SearchPage() { return React.createElement(SearchTrigger, { full: true }); }
 const islands = { Home, MainNavigation, DocSidebar, MobileNavigation, SectionNavigation, DocSectionNav, MermaidDiagram, PrismExample, SiteBrand: OmnitronBrand, ThemeSelector, SearchTrigger, ApiExplorer: ApiExplorerIsland, SearchPage, Playground: NetronPlayground };
 function Client() {
-  const [mode, setMode] = useState(readThemePreference);
-  useEffect(() => {
-    try { localStorage.setItem('omnitron-theme', mode); } catch { /* The explicit choice still works for this page. */ }
-    const sync = (event: StorageEvent) => { if (event.key === 'omnitron-theme' || event.key === null) setMode(readThemePreference()); };
-    window.addEventListener('storage', sync);
-    return () => window.removeEventListener('storage', sync);
-  }, [mode]);
-  return React.createElement(PrismProvider, { children: null, disableCssBaseline: true, mode, onModeChange: setMode, themeOverrides: omnitronTheme },
+  return React.createElement(PrismProvider, { children: null, modeStorageKey: 'omnitron-theme', themeOverrides: omnitronTheme },
     React.createElement(SiteClient));
 }
 function SiteClient() {
   const { theme: prismTheme } = usePrismContext();
   const theme = prismTheme.palette.mode;
   const [searchOpen, setSearchOpen] = useState(false);
-  useEffect(() => {
-    document.documentElement.setAttribute('data-omnitron-theme', theme);
-    document.documentElement.style.colorScheme = theme;
-  }, [theme]);
   useEffect(() => {
     const open = () => setSearchOpen(true);
     const key = (event: KeyboardEvent) => {

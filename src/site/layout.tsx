@@ -1,9 +1,9 @@
 import React from 'react';
 import { renderCodeBlockHtml } from '@omnitron-dev/lumen-ast';
-import { PrismProvider } from '@omnitron-dev/prism/core';
+import { PrismProvider, PrismThemeScript } from '@omnitron-dev/prism/core';
 import { Link } from '@omnitron-dev/prism/ui';
 import { DocSidebar, type DocSidebarItem } from '@omnitron-dev/prism/components/doc-layout';
-import { OmnitronBrand, omnitronCssVariables, omnitronTheme } from '@omnitron-dev/prism/identity';
+import { OmnitronBrand, omnitronTheme } from '@omnitron-dev/prism/identity';
 import { DocLayout, DocSectionNav, DocPagination, LumenFooter } from '@omnitron-dev/lumen-ui';
 import type { LumenPageLayoutProps, LumenSidebarItem } from '@omnitron-dev/lumen';
 import { PortalIslandHost } from '@omnitron-dev/lumen-ui/runtime';
@@ -11,7 +11,6 @@ import { SearchTrigger } from './search-trigger.tsx';
 import { Home, serviceExample, clientExample } from './home.tsx';
 import { ThemeSelectorPlaceholder } from './theme-selector.tsx';
 import { MainNavigation, MobileNavigation, SectionNavigation } from './navigation.tsx';
-import { themeBootstrap } from './theme-preference.ts';
 
 export function SiteLayout({ children, document: doc, documents, config }: LumenPageLayoutProps) {
   if (!doc.routePath) throw new Error(`Page document has no public route: ${doc.id}`);
@@ -57,12 +56,9 @@ export function SiteLayout({ children, document: doc, documents, config }: Lumen
   const navigation = sidebarItems(items);
   const navigationTitle = group?.[0] === 'docs' ? 'Start building' : group?.[0] || 'Documentation';
   const sidebarProps = { items: navigation, activeId: doc.id, title: navigationTitle };
-  const css = (mode: 'dark' | 'light', selector: string) => `${selector}{${Object.entries(omnitronCssVariables(mode)).map(([key,value]) => `${key}:${value}`).join(';')};color-scheme:${mode}}`;
-
-  return <PrismProvider mode="dark" disableCssBaseline themeOverrides={omnitronTheme}>
+  return <PrismProvider modeStorageKey="omnitron-theme" themeOverrides={omnitronTheme}>
     <link rel="icon" type="image/svg+xml" href="/img/logo.svg" />
-    <style>{css('dark', ':root') + css('light', ':root[data-omnitron-theme=light]') + `@media(prefers-color-scheme:light){${css('light', ':root:not([data-omnitron-theme])')}}`}</style>
-    <script dangerouslySetInnerHTML={{ __html: themeBootstrap }} />
+    <PrismThemeScript modeStorageKey="omnitron-theme" />
     <div className="omnitron-site">
       <a className="skip-link" href="#main-content">Skip to content</a>
       <header className="site-header">

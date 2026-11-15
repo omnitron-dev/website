@@ -18,6 +18,12 @@ The site uses the released `@omnitron-dev/lumen`, `@omnitron-dev/lumen-ast`, `@o
 `@omnitron-dev/prism` packages at **0.4.9**. The tracked lockfile records the npm
 dependency graph used by CI and distribution.
 
+The current source theme integration requires the forthcoming Prism
+`PrismThemeScript` and `modeStorageKey` API. It is qualified against the development
+SDK; update the registry dependencies and lockfile after that API is published
+before distributing this revision. The existing 0.4.9 lock is not acceptance of
+these new imports.
+
 ## Develop
 
 Use Node **24.13.0** and the pnpm version in [package.json](package.json).

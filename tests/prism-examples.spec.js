@@ -66,7 +66,7 @@ test('the rich editor renders its document and the chart switches observations',
   for (const [mode, fill] of [['dark', 'rgb(165, 181, 189)'], ['light', 'rgb(83, 100, 109)']]) {
     await page.getByRole('button', { name: /^Color theme:/ }).click();
     await page.getByRole('menuitem', { name: new RegExp('^' + (mode === 'dark' ? 'Dark' : 'Light')) }).click();
-    await expect(page.locator('html')).toHaveAttribute('data-omnitron-theme', mode);
+    await expect(page.locator('html')).toHaveAttribute('data-prism-color-scheme', mode);
     await expect(chart.locator('.apexcharts-xaxis-label').first()).toHaveCSS('fill', fill);
   }
 });
