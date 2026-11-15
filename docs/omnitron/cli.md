@@ -1083,14 +1083,6 @@ agent pipeline.
 - **`omnitron --json`** in agent workflows — never parse the
   styled output; it's not stable.
 
-## See also {#see-also}
-
-- [Architecture](./architecture.md) — what each component does
-- [Daemon](./daemon.md) — what `up` / `down` actually do
-- [Services reference](./services-reference.md) — the RPC surface every
-  CLI command targets
-- [Console](./console.md) — the GUI equivalent
-
 ## Releases {#releases}
 
 `omnitron release` builds and verifies artifacts from project and runtime
@@ -1198,3 +1190,11 @@ Stack stop/status JSON includes a durable `stopOperation` with per-node confirma
 A lost reply is unconfirmed, and CLI exits unsuccessfully until every required node
 acknowledges the stop. See [confirmed stack stops](./projects.md#confirmed-stack-stops)
 for retries, existing allocation bindings and upgrade prerequisites.
+
+## See also {#see-also}
+
+- [Architecture](./architecture.md) — what each component does
+- [Daemon](./daemon.md) — what `up` / `down` actually do
+- [Services reference](./services-reference.md) — the RPC surface every
+  CLI command targets
+- [Console](./console.md) — the GUI equivalent

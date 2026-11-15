@@ -644,12 +644,6 @@ the module options as above.
 - Peer deps on the drivers you use: `pg`, `mysql2`, `better-sqlite3`.
 - Optional health indicator integrates with [`titan-health`](./health.mdx).
 
-## See also {#see-also}
-
-- [`titan-health`](./health.mdx) — `DatabaseHealthIndicator` exported by this module
-- [Best Practices / Performance](../best-practices/performance.md) — N+1, projection, indexing
-
-
 ## PostgreSQL coordination leases {#postgresql-coordination-leases}
 
 The optional `@omnitron-dev/titan-database/coordination` entry point exports
@@ -702,3 +696,8 @@ connection-acquisition timeout on the pool too. Fenced callbacks must be bounded
 and perform database work through the supplied transaction. External I/O is not
 rolled back or fenced by a SQL transaction: its recipient needs an epoch-aware
 admission contract. Never delete lease rows to reset ownership.
+
+## See also {#see-also}
+
+- [`titan-health`](./health.mdx) — `DatabaseHealthIndicator` exported by this module
+- [Best Practices / Performance](../best-practices/performance.md) — N+1, projection, indexing

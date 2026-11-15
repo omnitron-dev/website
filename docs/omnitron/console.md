@@ -806,18 +806,6 @@ everything as typed Netron services.
   service proxies from `src/netron/client.ts` — they carry the
   bearer token and give you end-to-end types from the daemon DTOs.
 
-## See also {#see-also}
-
-- [CLI](./cli.md) — the same operator surface from the terminal
-- [Services reference](./services-reference.md) — every RPC the
-  webapp consumes
-- [Architecture](./architecture.md) — where the webapp sits
-- [Prism](../frontend/prism/index.md) — provides the
-  `@omnitron-dev/prism/netron` RPC client the webapp uses, plus
-  select UI components (the bulk of the UI is MUI)
-- [netron-browser](../frontend/netron/browser.md) — the underlying
-  browser RPC transport that Prism's netron client builds on
-
 ## SSH and role administration {#ssh-and-role-administration}
 
 [SSH workspace](./terminal.md) provides independent terminal tabs, split view, search, paste review and a shared CLI/backend lifecycle through Xec. It is lazily loaded and stays mounted across navigation after first use.
@@ -1075,3 +1063,15 @@ labelled as partial checks, not full installation integrity.
 `--inspect-installed` for the same on-demand disk comparison. See
 [Releases and verification](./releases.md#understand-what-is-built-and-what-is-running)
 for the evidence boundaries, JSON and exit codes.
+
+## See also {#see-also}
+
+- [CLI](./cli.md) — the same operator surface from the terminal
+- [Services reference](./services-reference.md) — every RPC the
+  webapp consumes
+- [Architecture](./architecture.md) — where the webapp sits
+- [Prism](../frontend/prism/index.md) — provides the
+  `@omnitron-dev/prism/netron` RPC client the webapp uses, plus
+  select UI components (the bulk of the UI is MUI)
+- [netron-browser](../frontend/netron/browser.md) — the underlying
+  browser RPC transport that Prism's netron client builds on

@@ -322,7 +322,7 @@ component metadata.
 - [netron-react](../netron/react.md) — React hooks for RPC
 - [Frontend overview](../overview.md) — the three-package picture
 
-## Further guides {#further-guides}
+### Further guides {#further-guides}
 
 - [State and persistence](./state.md) — stores, hydration and migrations.
 - [HTTP client](./http.md) — REST requests, cancellation and interceptors.

@@ -470,15 +470,6 @@ lifecycle commands for process changes.
 - **Removing the lock file while the daemon is running.** Causes
   inconsistent state where two daemons can subsequently start.
 
-## See also {#see-also}
-
-- [Architecture](./architecture.md) — where the daemon fits in
-  the broader picture
-- [Orchestrator](./orchestrator.md) — what the daemon hands apps off to
-- [Services reference](./services-reference.md) — all 19 RPC services
-- [CLI](./cli.md) — every command that talks to this daemon
-
-
 ## Updating a source runtime {#updating-a-source-runtime}
 
 In coupled mode the daemon directly supervises application processes. Replacing
@@ -540,3 +531,11 @@ capabilities, prepare the candidate, switch controllers and verify rollback. Mig
 only workers already owned by the execution host can survive later control-daemon
 updates. Immutable application runtimes and experiment registrations must remain
 separate from controller upgrades.
+
+## See also {#see-also}
+
+- [Architecture](./architecture.md) — where the daemon fits in
+  the broader picture
+- [Orchestrator](./orchestrator.md) — what the daemon hands apps off to
+- [Services reference](./services-reference.md) — all 19 RPC services
+- [CLI](./cli.md) — every command that talks to this daemon

@@ -851,13 +851,6 @@ omnitron infra redis-cli --stack sample/dev --db 3 XLEN orders
 - **Bypassing the resolver to write Docker compose by hand.**
   Drifts from `omnitron.config.ts` cause reconciler thrashing.
 
-## See also {#see-also}
-
-- [Configuration](./configuration.md) — where `infrastructure: { ... }` lives
-- [CLI](./cli.md#infrastructure) — `omnitron infra ...`
-- [Services reference](./services-reference.md) — `OmnitronInfra` methods
-- [Architecture](./architecture.md#infrastructure-subsystem) — where this fits
-
 ## Readiness before provisioning {#readiness-before-provisioning}
 
 Use `omnitron stack diagnose <project> <stack>` or **Stacks → Diagnose** before
@@ -871,3 +864,10 @@ the plan instead of silently choosing the first application's specification.
 An invalid service preset fails resolution rather than falling back to a different
 legacy plan. See [Console readiness reports](./console.md#stacks) for coverage and
 [CLI exit codes](./cli.md#stack-management) for automation.
+
+## See also {#see-also}
+
+- [Configuration](./configuration.md) — where `infrastructure: { ... }` lives
+- [CLI](./cli.md#infrastructure) — `omnitron infra ...`
+- [Services reference](./services-reference.md) — `OmnitronInfra` methods
+- [Architecture](./architecture.md#infrastructure-subsystem) — where this fits

@@ -375,14 +375,6 @@ spawn time. Do not rely on either as a security boundary.
   shared mutable state. If you need shared state, put it in Redis
   or a database.
 
-## See also {#see-also}
-
-- [Resilience / Retry](../resilience/retry.md), [Circuit Breaker](../resilience/circuit-breaker.md)
-- [`titan-metrics`](./metrics.mdx) — collects process metrics
-  when `monitoring.metrics: true`
-- [`titan-events`](./events.mdx) — inter-process event delivery
-
-
 ## Workflow failure and recovery {#workflow-failure-and-recovery}
 
 `@Workflow()`, `@Stage({ dependsOn, timeout, retries })` and `@Compensate(stageName)`
@@ -426,3 +418,10 @@ registered, with automatic recovery disabled during teardown. Pool destruction
 also joins already admitted spawns, preventing late workers from escaping a stop.
 Retry the operation after resolving the reported cause; do not interpret a timeout
 as permission to launch a replacement over an unconfirmed process.
+
+## See also {#see-also}
+
+- [Resilience / Retry](../resilience/retry.md), [Circuit Breaker](../resilience/circuit-breaker.md)
+- [`titan-metrics`](./metrics.mdx) — collects process metrics
+  when `monitoring.metrics: true`
+- [`titan-events`](./events.mdx) — inter-process event delivery

@@ -349,13 +349,6 @@ Useful for:
   `ref?: Ref<HTMLElement>` on the props interface and use
   it directly. No `forwardRef`, no `displayName` follow-up.
 
-## See also {#see-also}
-
-- [Components catalog](./components.md) — components themed via these tokens
-- [Layouts](./layouts.md) — `<DashboardLayout>` reads density
-- [Hooks catalog](./hooks-catalog.md) — `useSettingsStore`, theme-aware hooks
-- [MUI v9 theming docs](https://mui.com/material-ui/customization/theming/) — underlying foundation
-
 ## Application icon families {#application-icon-families}
 
 `PrismIconProvider` from `@omnitron-dev/prism/icons` supplies a semantic icon set
@@ -377,3 +370,10 @@ const icons = { search: ApplicationSearchIcon } satisfies PrismIconSet;
 The application supplies and licenses its artwork. The provider does not fetch
 icons or replace rendered DOM. Component-level MUI slots and explicit icon props
 take precedence; nested providers inherit the outer set.
+
+## See also {#see-also}
+
+- [Components catalog](./components.md) — components themed via these tokens
+- [Layouts](./layouts.md) — `<DashboardLayout>` reads density
+- [Hooks catalog](./hooks-catalog.md) — `useSettingsStore`, theme-aware hooks
+- [MUI v9 theming docs](https://mui.com/material-ui/customization/theming/) — underlying foundation

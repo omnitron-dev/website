@@ -303,14 +303,6 @@ eviction.
 - **Using `serviceKey` from a browser.** The service key bypasses
   user-scoped policies. Reserve it for trusted machine clients.
 
-## See also {#see-also}
-
-- [Netron Authentication](../netron/authentication.md) — the policy
-  framework (`BuiltInPolicies`, `PolicyEngine`) for fine-grained
-  authorisation
-- [`@RequireAuth`](#requireauthoptions) — vs `@Public({ auth: …  })`
-  (the inline form on `@Public`)
-
 ## Shared sessions across backends {#shared-sessions-across-backends}
 
 The shipped [shared-session preset](./shared-session.md) configures JWT claim
@@ -322,3 +314,11 @@ Read it before composing a multi-backend authentication system.
 Use [`@omnitron-dev/access`](../../auth/access-policy.md) for shared browser/server
 policy without installing JWT infrastructure. `titan-auth/access` remains a
 compatibility facade. The JWT module and shared-session preset are optional adapters.
+
+## See also {#see-also}
+
+- [Netron Authentication](../netron/authentication.md) — the policy
+  framework (`BuiltInPolicies`, `PolicyEngine`) for fine-grained
+  authorisation
+- [`@RequireAuth`](#requireauthoptions) — vs `@Public({ auth: …  })`
+  (the inline form on `@Public`)

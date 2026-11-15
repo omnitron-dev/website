@@ -792,15 +792,6 @@ directory. Manual override is rarely needed.
   instead of using `OmnitronAppConfig`. The schema is
   validated — declarative is the right path.
 
-## See also {#see-also}
-
-- [Architecture](./architecture.md) — what these configs drive
-- [Daemon](./daemon.md) — own config and lifecycle
-- [Orchestrator](./orchestrator.md) — what `defineSystem` becomes
-  at launch
-- [Infrastructure](./infrastructure.md) — `OmnitronAppConfig` deep dive
-- [CLI](./cli.md) — commands that read this config
-
 ## Interactive SSH policy {#interactive-ssh-policy}
 
 `daemon.terminal` accepts `enabled`, `maxSessions`, `maxSessionsPerOwner`, `idleTimeoutMs`, `absoluteTimeoutMs` and `disconnectTimeoutMs`. See the [SSH policy table and example](./terminal.md#session-lifetime-and-limits). This is startup policy enforced by the daemon, independent of browser settings.
@@ -809,3 +800,12 @@ directory. Manual override is rarely needed.
 ## File workspace exports {#file-workspace-exports}
 
 `files` in `~/.omnitron/config.json` configures administrator file access per node; it is not a project ecosystem setting. Omission exposes the `/` filesystem within daemon OS permissions. Set `enabled: false` or `roots: []` to disable exports. An explicit `roots` array replaces the default with `{ id, label, path, readOnly? }` entries. See [File workspace](./files.md#configure-access-per-node) for configuration examples and boundaries.
+
+## See also {#see-also}
+
+- [Architecture](./architecture.md) — what these configs drive
+- [Daemon](./daemon.md) — own config and lifecycle
+- [Orchestrator](./orchestrator.md) — what `defineSystem` becomes
+  at launch
+- [Infrastructure](./infrastructure.md) — `OmnitronAppConfig` deep dive
+- [CLI](./cli.md) — commands that read this config

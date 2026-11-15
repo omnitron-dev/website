@@ -1467,15 +1467,6 @@ import { Drawer } from '@omnitron-dev/prism';
 
 Use subpaths in production for the leanest payload.
 
-## See also {#see-also}
-
-- [Blocks](./blocks.md) — full-page composites built from components
-- [Layouts](./layouts.md) — shell components
-- [Forms](./forms.md) — `<Field>` + schema-driven forms
-- [Hooks catalog](./hooks-catalog.md) — 25+ React hooks
-- [Theme](./theme.md) — colours, typography, dark mode
-
-
 ## Also exported {#also-exported}
 
 These are exported from `@omnitron-dev/prism/components` and had no entry
@@ -1758,3 +1749,11 @@ The following component groups are independently importable:
 `@omnitron-dev/prism/components/admin-filters`, `@omnitron-dev/prism/components/alert`, `@omnitron-dev/prism/components/animate`, `@omnitron-dev/prism/components/breadcrumbs`, `@omnitron-dev/prism/components/card`, `@omnitron-dev/prism/components/chart`, `@omnitron-dev/prism/components/command-palette`, `@omnitron-dev/prism/components/confirm-dialog`, `@omnitron-dev/prism/components/empty-content`, `@omnitron-dev/prism/components/error-boundary`, `@omnitron-dev/prism/components/label`, `@omnitron-dev/prism/components/loading-screen`, `@omnitron-dev/prism/components/navigation-progress`, `@omnitron-dev/prism/components/page-content`, `@omnitron-dev/prism/components/popover`, `@omnitron-dev/prism/components/search-input`, `@omnitron-dev/prism/components/scroll-to-top`, `@omnitron-dev/prism/components/skeleton`, `@omnitron-dev/prism/components/snackbar`, `@omnitron-dev/prism/components/stepper`, `@omnitron-dev/prism/components/table`, `@omnitron-dev/prism/components/tabs`.
 
 Use `@omnitron-dev/prism/core` for `PrismProvider` and its core hooks, `@omnitron-dev/prism/layouts` for layout composition, `@omnitron-dev/prism/state` for stores and `@omnitron-dev/prism/auth` for guards. Maps and editors retain their existing explicit subpaths and can be loaded only on the routes that need them. The root barrel remains compatible, but opt-in imports give a consumer tighter control of its dependency graph.
+
+## See also {#see-also}
+
+- [Blocks](./blocks.md) — full-page composites built from components
+- [Layouts](./layouts.md) — shell components
+- [Forms](./forms.md) — `<Field>` + schema-driven forms
+- [Hooks catalog](./hooks-catalog.md) — 25+ React hooks
+- [Theme](./theme.md) — colours, typography, dark mode

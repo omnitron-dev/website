@@ -494,15 +494,6 @@ function ProductGrid({ filters }: { filters: ProductFilters }) {
 }
 ```
 
-## See also {#see-also}
-
-- [Components catalog](./components.md) — components paired
-  with these hooks
-- [Forms](./forms.md) — hooks used in form patterns
-- [netron-react hooks](../netron/react.md) — RPC-specific hooks
-  (use those, not these, for data fetching from a Titan backend)
-
-
 ## Also exported {#also-exported}
 
 Twenty-one further hooks are exported from `@omnitron-dev/prism/hooks` and had
@@ -560,3 +551,11 @@ Hooks named on other pages — `useSnackbar`, `useLightbox`, `useCarousel`,
 `useChart`, `useMenu`, `usePrismContext`, `useLayoutContext`,
 `useSettingsStore` — are exported from `/components`, `/core`, `/layouts` and
 `/state` rather than from `/hooks`, which is why they are not in this list.
+
+## See also {#see-also}
+
+- [Components catalog](./components.md) — components paired
+  with these hooks
+- [Forms](./forms.md) — hooks used in form patterns
+- [netron-react hooks](../netron/react.md) — RPC-specific hooks
+  (use those, not these, for data fetching from a Titan backend)

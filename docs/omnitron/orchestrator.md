@@ -398,16 +398,6 @@ loading `titan-health` / `titan-metrics` modules.
   orchestrator can run both modes side-by-side, but only across
   apps — within one app, the mode is global.
 
-## See also {#see-also}
-
-- [Daemon](./daemon.md) — what invokes the orchestrator
-- [Architecture](./architecture.md) — where the orchestrator fits
-- [titan-pm](../titan/modules/pm.mdx) — the process manager the
-  orchestrator builds on
-- [Services reference](./services-reference.md) — `OmnitronDaemon.exec`
-  routes through the service router
-- [CLI](./cli.md) — `start`, `stop`, `reload`, `restart`, `scale`
-
 ## Stop acknowledgements {#stop-acknowledgements}
 
 An application is marked `stopped` only after its supervisor, classic process group
@@ -434,3 +424,13 @@ The owner stores a FULL-durability SQLite fence per project/stack. It binds the 
 to exact handle generations and an operation identity. Automatic resume cannot
 clear a deliberate stop. See [confirmed stack stops](./projects.md#confirmed-stack-stops)
 for controller/node receipts, rollout prerequisites and remaining allocation limits.
+
+## See also {#see-also}
+
+- [Daemon](./daemon.md) — what invokes the orchestrator
+- [Architecture](./architecture.md) — where the orchestrator fits
+- [titan-pm](../titan/modules/pm.mdx) — the process manager the
+  orchestrator builds on
+- [Services reference](./services-reference.md) — `OmnitronDaemon.exec`
+  routes through the service router
+- [CLI](./cli.md) — `start`, `stop`, `reload`, `restart`, `scale`

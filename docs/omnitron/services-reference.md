@@ -532,13 +532,6 @@ The same code works against a remote daemon by swapping the URL
   daemon plumbing. The shape may change between releases without
   notice.
 
-## See also {#see-also}
-
-- [Daemon](./daemon.md) — the `OmnitronDaemon` service + auth model
-- [Architecture](./architecture.md) — where these services live
-- [CLI](./cli.md) — most commands map directly to one method here
-- [Console](./console.md) — webapp uses the same services
-
 ## Release and audit services {#release-and-audit-services}
 
 `OmnitronRelease` provides `preflight`, `list`, `get`, `getLog`, `builds`,
@@ -574,3 +567,10 @@ The six recipient lifecycle operations accept only an authenticated machine cred
 `stopStack` and `resumeInstalledStack` coordinate them on behalf of an operator.
 Nodes verify ownership and admission before applying an effect. Their durable
 receipts are available to the controller after a transport interruption.
+
+## See also {#see-also}
+
+- [Daemon](./daemon.md) — the `OmnitronDaemon` service + auth model
+- [Architecture](./architecture.md) — where these services live
+- [CLI](./cli.md) — most commands map directly to one method here
+- [Console](./console.md) — webapp uses the same services

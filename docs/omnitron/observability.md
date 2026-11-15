@@ -577,17 +577,6 @@ Daemon process metrics and replication work independently of that registry. For 
   aggregates across apps; if you need real-time per-app data,
   query `OmnitronMetrics.querySeries` with the right filter.
 
-## See also {#see-also}
-
-- [`titan-metrics`](../titan/modules/metrics.mdx) — producer-side detail
-- [`titan-telemetry-relay`](../titan/modules/telemetry-relay.mdx) — store-and-forward for offline producers
-- [`titan-health`](../titan/modules/health.mdx) — indicator framework
-- [Services reference](./services-reference.md) — `OmnitronLogs`,
-  `OmnitronTelemetry`, `OmnitronTraces`, `OmnitronHealth`,
-  `OmnitronNodes`
-- [Architecture](./architecture.md) — where these pipelines sit
-- [CLI](./cli.md#monitoring) — `omnitron logs` / `metrics` / `health`
-
 ## Bounded queries and agent evidence {#bounded-queries-and-agent-evidence}
 
 Log filters are validated in the collector before SQL construction, so CLI, Console and RPC consumers share the bounds: `limit` 1–1000, recent `tail` 1–10000, `offset` 0–100000, valid levels/timestamps, ordered time ranges and bounded strings/labels. These input bounds do not by themselves impose a database execution deadline. Prefer a narrow application and time window over deep offset pagination.
@@ -624,3 +613,14 @@ still unknown history. Group repeated stack frames into error reports before
 counting events; a plain stack trace or a time-of-day-only header cannot be dated
 from the audit time. Neighboring absolute timestamps can establish context, but
 do not supply an exact event time on their own.
+
+## See also {#see-also}
+
+- [`titan-metrics`](../titan/modules/metrics.mdx) — producer-side detail
+- [`titan-telemetry-relay`](../titan/modules/telemetry-relay.mdx) — store-and-forward for offline producers
+- [`titan-health`](../titan/modules/health.mdx) — indicator framework
+- [Services reference](./services-reference.md) — `OmnitronLogs`,
+  `OmnitronTelemetry`, `OmnitronTraces`, `OmnitronHealth`,
+  `OmnitronNodes`
+- [Architecture](./architecture.md) — where these pipelines sit
+- [CLI](./cli.md#monitoring) — `omnitron logs` / `metrics` / `health`
