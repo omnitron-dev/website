@@ -56,7 +56,7 @@ export default function ApiExplorer() {
               <div className={styles.symbol}>
                 <code>{row.name}</code>
                 <span>{row.kind}</span>
-                {row.source && <Link href={sourceBase + row.source} className={styles.source}>Source ↗</Link>}
+                {row.source && <Link target="_blank" rel="noopener noreferrer" href={sourceBase + row.source} className={styles.source}>Source ↗</Link>}
               </div>
               <div className={styles.imports}>
                 {row.imports.map(item => (
@@ -82,7 +82,7 @@ export default function ApiExplorer() {
         <ul>
           {data.entryPoints.map(entry => (
             <li key={entry.path}><Link href={entry.guide}><code>{entry.path}</code></Link>
-              {'kind' in entry && <> · {entry.kind} · <Link href={sourceBase + entry.source}>Source ↗</Link></>}
+              {'kind' in entry && <> · {entry.kind} · <Link target="_blank" rel="noopener noreferrer" href={sourceBase + entry.source}>Source ↗</Link></>}
             </li>
           ))}
         </ul>

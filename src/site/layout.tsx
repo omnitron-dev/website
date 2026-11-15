@@ -78,7 +78,7 @@ export function SiteLayout({ children, document: doc, documents, config }: Lumen
         <div className="document-context"><Link href="/docs/intro">Documentation</Link><span>/</span><span>{group?.[0] === 'docs' ? 'Learn' : group?.[0] || 'Project'}</span><span>/</span><strong>{doc.title}</strong></div>
         {items.length > 0 && <div className="mobile-document-nav"><PortalIslandHost islandId="section-navigation" component="SectionNavigation" hydrate="load" props={sidebarProps}><SectionNavigation {...sidebarProps} disabled /></PortalIslandHost><noscript><nav aria-label="Mobile documentation sections"><DocSidebar {...sidebarProps} /></nav></noscript></div>}
         <DocLayout sidebar={items.length ? <nav aria-label="Documentation sections"><PortalIslandHost islandId="documentation-navigation" component="DocSidebar" hydrate="load" props={sidebarProps}><DocSidebar {...sidebarProps} /></PortalIslandHost></nav> : undefined}
-          sectionNav={<><p className="sidebar-label">On this page</p><PortalIslandHost islandId="page-sections" component="DocSectionNav" hydrate="load" props={{ headings }}><DocSectionNav headings={headings} /></PortalIslandHost><div className="page-exports"><Link href={`${doc.routePath === '/' ? '/index' : doc.routePath}.md`}>Read as Markdown ↗</Link><Link href="/llms.txt">Agent index ↗</Link></div></>}>
+          sectionNav={<><p className="sidebar-label">On this page</p><PortalIslandHost islandId="page-sections" component="DocSectionNav" hydrate="load" props={{ headings }}><DocSectionNav headings={headings} /></PortalIslandHost><div className="page-exports"><Link target="_blank" rel="noopener noreferrer" href={`${doc.routePath === '/' ? '/index' : doc.routePath}.md`}>Read as Markdown ↗</Link><Link href="/llms.txt" target="_blank" rel="noopener noreferrer">Agent index ↗</Link></div></>}>
           <div id="main-content" tabIndex={-1}>{children}</div>
           {(previous || next) && <div id={next ? 'next' : undefined}>
             <DocPagination className="page-pagination" prev={adjacent(previous)} next={adjacent(next)} />
@@ -88,7 +88,7 @@ export function SiteLayout({ children, document: doc, documents, config }: Lumen
       <LumenFooter copyright="Omnitron · Open source / MIT" columns={[
         { title: 'Build', items: [{ label: 'Quickstart', href: '/docs/getting-started/quickstart' }, { label: 'Architecture', href: '/docs/foundations/architecture' }] },
         { title: 'Reference', items: [{ label: 'Public APIs', href: '/docs/reference/api-index' }, { label: 'Compatibility', href: '/docs/reference/compatibility' }] },
-        { title: 'Project', items: [{ label: 'Source ↗', href: 'https://github.com/omnitron-dev/omni' }, { label: 'Contributing', href: '/docs/community/contributing' }] },
+        { title: 'Project', items: [{ label: 'Source ↗', href: 'https://github.com/omnitron-dev/omni', external: true }, { label: 'Contributing', href: '/docs/community/contributing' }] },
       ]} />
       <div className="site-colophon"><span>BUILT WITH LUMEN</span><Link href="/docs/lumen/this-site">How this manual works →</Link></div>
       <div id="lumen-interactive-root" />

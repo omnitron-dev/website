@@ -1,5 +1,5 @@
 {
-  "revision": "413eb0f1948672994cd01c47f00eb411f8a84d1a",
+  "revision": "45a5b66a23be194d616f2cd409d9ce8f18e3e4c7",
   "packages": [
     "@omnitron-dev/access",
     "@omnitron-dev/common",
@@ -7884,7 +7884,7 @@
       "name": "LumenSearchDialog",
       "package": "@omnitron-dev/lumen-ui",
       "kind": "function",
-      "source": "packages/lumen-ui/src/search/search-dialog.tsx#L330",
+      "source": "packages/lumen-ui/src/search/search-dialog.tsx#L365",
       "imports": [
         {
           "path": "@omnitron-dev/lumen-ui",
@@ -7900,7 +7900,7 @@
       "name": "LumenSearchDialogContent",
       "package": "@omnitron-dev/lumen-ui",
       "kind": "function",
-      "source": "packages/lumen-ui/src/search/search-dialog.tsx#L217",
+      "source": "packages/lumen-ui/src/search/search-dialog.tsx#L218",
       "imports": [
         {
           "path": "@omnitron-dev/lumen-ui",
@@ -7916,7 +7916,7 @@
       "name": "LumenSearchDialogProps",
       "package": "@omnitron-dev/lumen-ui",
       "kind": "interface",
-      "source": "packages/lumen-ui/src/search/search-dialog.tsx#L7",
+      "source": "packages/lumen-ui/src/search/search-dialog.tsx#L8",
       "imports": [
         {
           "path": "@omnitron-dev/lumen-ui",
@@ -8172,7 +8172,7 @@
       "name": "parseSearchSnippet",
       "package": "@omnitron-dev/lumen-ui",
       "kind": "function",
-      "source": "packages/lumen-ui/src/search/search-dialog.tsx#L105",
+      "source": "packages/lumen-ui/src/search/search-dialog.tsx#L106",
       "imports": [
         {
           "path": "@omnitron-dev/lumen-ui",
@@ -8300,7 +8300,7 @@
       "name": "sanitizeSearchResultUrl",
       "package": "@omnitron-dev/lumen-ui",
       "kind": "function",
-      "source": "packages/lumen-ui/src/search/search-dialog.tsx#L51",
+      "source": "packages/lumen-ui/src/search/search-dialog.tsx#L52",
       "imports": [
         {
           "path": "@omnitron-dev/lumen-ui",
@@ -17420,7 +17420,7 @@
       "name": "ExecutionService",
       "package": "@omnitron-dev/omnitron",
       "kind": "class",
-      "source": "apps/omnitron/src/execution/execution.service.ts#L177",
+      "source": "apps/omnitron/src/execution/execution.service.ts#L117",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/operations",

@@ -46,7 +46,7 @@ export function Home({ serverCode, clientCode }: { serverCode: string; clientCod
     </section>
     <section className="home-section" aria-labelledby="start-title"><div className="section-heading"><p className="eyebrow">03 / FIELD MANUAL</p><h2 id="start-title">Find the next useful step.</h2></div>
       <div className="start-paths"><CardActionArea component="a" href="/docs/getting-started/quickstart"><small>BUILD</small><h3>Run a service</h3><p>Install, compile and make the first RPC call.</p><ArrowRightIcon className="start-path-arrow" /></CardActionArea><CardActionArea component="a" href="/docs/reference/api-index"><small>INTEGRATE</small><h3>Find the API</h3><p>Search public exports and follow their guides.</p><ArrowRightIcon className="start-path-arrow" /></CardActionArea><CardActionArea component="a" href="/docs/deployment/production-readiness"><small>OPERATE</small><h3>Prepare for production</h3><p>Readiness, recovery and observable failures.</p><ArrowRightIcon className="start-path-arrow" /></CardActionArea></div>
-      <div className="lumen-note"><span>THIS MANUAL IS A LUMEN REFERENCE PROJECT</span><p>Static HTML. Local search. Verified links. Markdown for tools.</p><Link href="/docs/lumen/this-site">Inspect how it is built ↗</Link></div>
+      <div className="lumen-note"><span>THIS MANUAL IS A LUMEN REFERENCE PROJECT</span><p>Static HTML. Local search. Verified links. Markdown for tools.</p><Link href="/docs/lumen/this-site">Inspect how it is built →</Link></div>
     </section>
   </main>;
 }
