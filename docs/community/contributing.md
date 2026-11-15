@@ -220,9 +220,9 @@ the pinned CLI installed by `pnpm install --frozen-lockfile`; `pnpm release` is 
 same entry point as `pnpm exec xec release`. No temporary publisher or personal
 shell setup is required.
 
-The implementations live in `.xec/commands/release.js` and
-`.xec/commands/update.js`. They register their options, arguments and update
-subcommands directly with Xec; there is no second argument parser or alternate
+The implementations live in `.xec/commands/`: `release`, `release-build`,
+`check-packages`, `reproduce` and `update`. They register their options, arguments
+and update subcommands directly with Xec; there is no second argument parser or alternate
 release script. Use `pnpm exec xec release --help`,
 `pnpm exec xec update --help`, or a specific subcommand's `--help`. Unknown options,
 extra arguments and conflicting release operations fail before the action.
@@ -250,12 +250,29 @@ versions. This repository uses GitHub Actions; the Omnitron platform and
 application deployment do not require GitHub.
 
 Local preparation and reproducibility use two independent clean builds in total.
-Preparation retains its completed build after every package-consumer gate passes.
-Qualification verifies that retained build and performs one further build from a
-fresh checkout and frozen installation. Both use the same commit, Node version,
+The producer builds and freezes its runtime once. Xec packs each public package
+once, adds its exact source provenance, validates it and retains the resulting
+immutable batch before consumer acceptance. Consumer checks read those same
+archive bytes; they never pack a replacement. This contract requires published
+Xec Ops 0.13 and is refused on an older installed API.
+
+If acceptance fails, repeat `--prepare` from the same clean commit and inputs.
+Xec verifies `producer.json` and every archive, then runs acceptance in a fresh
+source-only snapshot. It installs verification tools but does not rebuild the
+producer. The final `release.json` is written only after acceptance and cleanup
+succeed. A changed input or damaged archive is an explicit refusal, not a cache
+miss that silently starts another build.
+
+Qualification verifies the accepted first build and performs one further build
+from a fresh checkout and frozen installation. Both use the same commit, Node version,
 platform, architecture, pinned pnpm and build policy, with build-cache reads
-disabled. Both producers run pending dependency builds under the checked-in pnpm
-policy without restoring native side-effect caches. The sealed runtime, Console
+disabled. The environment is explicitly replaced rather than overlaid: required
+system/tool/cache settings and public Vite inputs are selected; daemon authority
+and ambient Turbo credentials are excluded. Receipts bind environment and
+configuration digests, the frozen lockfile and the installed Xec driver closure
+without recording credential values. `NODE_OPTIONS` may set resource and diagnostic
+limits, but may not inject external loaders into the producer. Both producers run
+pending dependency builds under the checked-in pnpm policy without restoring native side-effect caches. The sealed runtime, Console
 and normalized public npm archives must match. Missing, changed or incompatible
 preparation evidence stops qualification.
 CI and native jobs still perform their own target-specific builds. The standalone
@@ -288,8 +305,10 @@ pnpm exec xec release <version> --status
 ```
 
 Preparation evidence is retained under
-`.release-artifacts/qualification/<commit>/preparation/`: `PREPARATION.json`,
-`runtime/`, `sdk/` and `sdk-inventory.json`. The qualification directory retains
+`.release-artifacts/qualification/<commit>/preparation/`: the runtime's `BUILD.json`
+records production, while `PREPARATION.json`, `sdk/` and `sdk-inventory.json`
+are finalized only after Xec has sealed the accepted batch. `BUILD.json` alone
+is not consumer acceptance or publication authority. The qualification directory retains
 `qualification.json` with each stage's evidence, plus the accepted independent
 build's `QUALIFICATION.json`, runtime and SDK archives. On resume, completed
 stages are reverified and reused. A partial build directory is not a completed
@@ -303,10 +322,12 @@ with Omnitron's existing archive validator. Evidence and artifacts live under
 set `TMPDIR` and package manager cache directories before the command if required
 by your machine.
 
-Package preparation also verifies exports and two ordinary npm consumers without
-workspace overrides: a minimal CLI/Netron runtime and every public package,
-including optional dependencies. Inspect `release.json`, SHA-512 digests and
-`NOTES.md` under `.release-artifacts/<version>/<commit>/`.
+Package preparation verifies exports and three ordinary npm consumers without
+workspace overrides: a minimal CLI/Netron runtime, every public package together
+and Lumen on its own, including optional dependencies. The runtime runs one
+ordinary `npm install`; the other two resolve fresh lockfiles and install once
+through `npm ci`. All profiles verify installed archive integrity and run an audit.
+Inspect `release.json`, SHA-512 digests and `NOTES.md` under `.release-artifacts/<version>/<commit>/`.
 
 Publish the sealed batch:
 
