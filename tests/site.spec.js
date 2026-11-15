@@ -372,6 +372,16 @@ test('the current section follows native anchors and the final short section bel
   await expect(toc.locator('[aria-current=location]')).toHaveAttribute('href', '#conventions');
 });
 
+test('related guidance closes the overview outline and preserves its published fragment', async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await page.goto('/docs/frontend/prism#further-guides');
+  const toc = page.locator('.lumen-doc-toc').getByRole('navigation', { name: 'Table of contents' });
+  await expect(toc.getByRole('link').last()).toHaveAttribute('href', '#see-also');
+  await expect(page.locator('#further-guides')).toBeVisible();
+  await expect(toc.getByRole('link', { name: 'Further guides', exact: true })).toHaveAttribute('href', '#further-guides');
+  await expect(page.locator('article.lumen-doc').getByRole('link', { name: 'State and persistence', exact: true }).last()).toHaveAttribute('href', '/docs/frontend/prism/state');
+});
+
 for (const width of [320, 1440]) {
   test('native file trees preserve long inventories and annotations at ' + width + 'px', async ({ page }, testInfo) => {
     await page.setViewportSize({ width, height: 1000 });

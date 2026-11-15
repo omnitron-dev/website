@@ -308,6 +308,13 @@ component metadata.
   Zustand** for any state that persists — the versioned-settings
   helpers handle migrations.
 
+### Further guides {#further-guides}
+
+- [State and persistence](./state.md) — stores, hydration and migrations.
+- [HTTP client](./http.md) — REST requests, cancellation and interceptors.
+- [Component CLI](./cli.md) — copy and maintain local component source.
+- [API index](../../reference/api-index.mdx) — every declared public export.
+
 ## See also {#see-also}
 
 - [Components catalog](./components.md) — 50+ widgets with
@@ -321,10 +328,3 @@ component metadata.
 - [netron-browser](../netron/browser.md) — the RPC client
 - [netron-react](../netron/react.md) — React hooks for RPC
 - [Frontend overview](../overview.md) — the three-package picture
-
-### Further guides {#further-guides}
-
-- [State and persistence](./state.md) — stores, hydration and migrations.
-- [HTTP client](./http.md) — REST requests, cancellation and interceptors.
-- [Component CLI](./cli.md) — copy and maintain local component source.
-- [API index](../../reference/api-index.mdx) — every declared public export.
