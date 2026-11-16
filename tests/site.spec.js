@@ -55,9 +55,16 @@ test('Pagefind queries the generated local index and follows a real document', a
   await trigger.press('Enter');
   await expect(dialog).toBeVisible();
   await expect(dialog.getByRole('button', { name: 'Semantic AI' })).toHaveCount(0);
-  await dialog.getByRole('searchbox', { name: 'Search query' }).fill('circuit breaker');
+  await expect(dialog).toHaveCSS('opacity', '1');
+  const bounds = await dialog.boundingBox();
+  const query = dialog.getByRole('searchbox', { name: 'Search query' });
+  await query.fill('"zznonexistentsearchtermzz"');
+  await expect(dialog).toContainText('No results found');
+  expect(Math.abs((await dialog.boundingBox()).height - bounds.height)).toBeLessThan(1.5);
+  await query.fill('circuit breaker');
   const first = dialog.locator('.lumen-search-result-link').first();
   await expect(first).toBeVisible();
+  expect(Math.abs((await dialog.boundingBox()).height - bounds.height)).toBeLessThan(1.5);
   expect(responses.some(response => response.url().includes('wasm.en.pagefind') && response.ok())).toBe(true);
   expect(responses.filter(response => !response.ok())).toEqual([]);
   const target = await first.getAttribute('href');

@@ -13,6 +13,7 @@ export default defineConfig({
     command: `pnpm exec lumen serve --host 127.0.0.1 --port ${port}`,
     url: baseURL,
     reuseExistingServer: false,
-    timeout: 30000,
+    // Cold configuration and module loading can exceed 30s on external build storage.
+    timeout: 60000,
   },
 });
