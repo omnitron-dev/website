@@ -5,14 +5,17 @@ import { Drawer } from '@omnitron-dev/prism/components';
 import { DocSidebar, type DocSidebarItem } from '@omnitron-dev/prism/components/doc-layout';
 
 export const sections = [
-  ['Learn', '/docs/intro'], ['Titan', '/docs/titan/overview'],
-  ['Frontend', '/docs/frontend/overview'], ['Lumen', '/docs/lumen/overview'],
-  ['Operations', '/docs/omnitron/overview'], ['Reference', '/docs/reference/api-index'],
+  { id: 'docs', label: 'Learn', href: '/docs/intro' },
+  { id: 'titan', label: 'Titan', href: '/docs/titan/overview' },
+  { id: 'frontend', label: 'Frontend', href: '/docs/frontend/overview' },
+  { id: 'lumen', label: 'Lumen', href: '/docs/lumen/overview' },
+  { id: 'omnitron', label: 'Operations', href: '/docs/omnitron/overview' },
+  { id: 'reference', label: 'Reference', href: '/docs/reference/api-index' },
 ];
 
 export function MainNavigation({ currentPath }: { currentPath: string }) {
   return <nav aria-label="Main navigation" className="main-navigation">
-    {sections.map(([label, href]) => <Button key={href} href={href} variant="text" color="inherit" size="small"
+    {sections.map(({ label, href }) => <Button key={href} href={href} variant="text" color="inherit" size="small"
       aria-current={currentPath === href ? 'page' : undefined}>{label}</Button>)}
   </nav>;
 }
@@ -25,7 +28,7 @@ export function MobileNavigation({ currentPath, disabled = false }: { currentPat
     <Drawer open={open} onClose={() => setOpen(false)} title="Navigation" closeIcon={<CloseIcon />}
       width="min(320px, 100vw)" PaperProps={{ role: 'dialog', 'aria-label': 'Navigation', 'aria-modal': true }}>
       <nav aria-label="Mobile navigation"><List disablePadding>
-        {sections.map(([label, href]) => <ListItemButton key={href} component="a" href={href}
+        {sections.map(({ label, href }) => <ListItemButton key={href} component="a" href={href}
           selected={currentPath === href} aria-current={currentPath === href ? 'page' : undefined}>
           <ListItemText primary={label} />
         </ListItemButton>)}

@@ -10,7 +10,7 @@ import { PortalIslandHost } from '@omnitron-dev/lumen-ui/runtime';
 import { SearchTrigger } from './search-trigger.tsx';
 import { Home, serviceExample, clientExample } from './home.tsx';
 import { ThemeSelectorPlaceholder } from './theme-selector.tsx';
-import { MainNavigation, MobileNavigation, SectionNavigation } from './navigation.tsx';
+import { MainNavigation, MobileNavigation, SectionNavigation, sections } from './navigation.tsx';
 
 export function SiteLayout({ children, document: doc, documents, config }: LumenPageLayoutProps) {
   if (!doc.routePath) throw new Error(`Page document has no public route: ${doc.id}`);
@@ -54,7 +54,7 @@ export function SiteLayout({ children, document: doc, documents, config }: Lumen
     return { id: target?.id ?? id, href, label: item.label || target?.title || href };
   });
   const navigation = sidebarItems(items);
-  const navigationTitle = group?.[0] === 'docs' ? 'Start building' : group?.[0] || 'Documentation';
+  const navigationTitle = sections.find(section => section.id === group?.[0])?.label ?? 'Documentation';
   const sidebarProps = { items: navigation, activeId: doc.id, title: navigationTitle };
   return <PrismProvider modeStorageKey="omnitron-theme" themeOverrides={omnitronTheme}>
     <link rel="icon" type="image/svg+xml" href="/img/logo.svg" />
@@ -66,7 +66,7 @@ export function SiteLayout({ children, document: doc, documents, config }: Lumen
       <header className="site-header">
         <a href="/" className="brand" aria-label="Omnitron home"><PortalIslandHost islandId="site-brand" component="SiteBrand" hydrate="load" props={{ size: 30 }}><OmnitronBrand size={30} /></PortalIslandHost></a>
         <span className="site-edition">FIELD MANUAL</span>
-        <PortalIslandHost islandId="main-navigation" component="MainNavigation" hydrate="load" props={{ currentPath: doc.routePath }}><MainNavigation currentPath={doc.routePath} /></PortalIslandHost>
+        <PortalIslandHost className="lumen-portal-island header-navigation" islandId="main-navigation" component="MainNavigation" hydrate="load" props={{ currentPath: doc.routePath }}><MainNavigation currentPath={doc.routePath} /></PortalIslandHost>
         <div className="header-actions">
           <PortalIslandHost islandId="site-search" component="SearchTrigger" hydrate="load" props={{}}><SearchTrigger /></PortalIslandHost>
           <PortalIslandHost islandId="site-theme" component="ThemeSelector" hydrate="load" props={{}}><ThemeSelectorPlaceholder /></PortalIslandHost>
@@ -75,7 +75,7 @@ export function SiteLayout({ children, document: doc, documents, config }: Lumen
       </header>
       <noscript><div className="static-navigation"><MainNavigation currentPath={doc.routePath} /></div></noscript>
       {homeProps ? <PortalIslandHost islandId="site-home" component="Home" hydrate="load" props={homeProps}><Home {...homeProps} /></PortalIslandHost> : <>
-        <div className="document-context"><Link href="/docs/intro">Documentation</Link><span>/</span><span>{group?.[0] === 'docs' ? 'Learn' : group?.[0] || 'Project'}</span><span>/</span><strong>{doc.title}</strong></div>
+        <div className="document-context"><Link href="/docs/intro">Documentation</Link><span>/</span><span>{navigationTitle}</span><span>/</span><strong>{doc.title}</strong></div>
         {items.length > 0 && <div className="mobile-document-nav"><PortalIslandHost islandId="section-navigation" component="SectionNavigation" hydrate="load" props={sidebarProps}><SectionNavigation {...sidebarProps} disabled /></PortalIslandHost><noscript><nav aria-label="Mobile documentation sections"><DocSidebar {...sidebarProps} /></nav></noscript></div>}
         <DocLayout sidebar={items.length ? <nav aria-label="Documentation sections"><PortalIslandHost islandId="documentation-navigation" component="DocSidebar" hydrate="load" props={sidebarProps}><DocSidebar {...sidebarProps} /></PortalIslandHost></nav> : undefined}
           sectionNav={<><p className="sidebar-label">On this page</p><PortalIslandHost islandId="page-sections" component="DocSectionNav" hydrate="load" props={{ headings }}><DocSectionNav headings={headings} /></PortalIslandHost><div className="page-exports"><Link target="_blank" rel="noopener noreferrer" href={`${doc.routePath === '/' ? '/index' : doc.routePath}.md`}>Read as Markdown ↗</Link><Link href="/llms.txt" target="_blank" rel="noopener noreferrer">Agent index ↗</Link></div></>}>
