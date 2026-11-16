@@ -8,15 +8,11 @@ description: Replacing prom-client with titan-metrics.
 
 # From prom-client
 
-[`prom-client`](https://github.com/siimon/prom-client) is the
-de-facto Prometheus client for Node. It is excellent at what it
-does — instrument code, expose `/metrics`, hand off to a real
-Prometheus server. `titan-metrics` covers the same use case while
-also persisting samples to a storage backend (memory / SQLite /
-Postgres), letting you query time-series **inside** your app and
-ship cross-pod aggregates without standing up Prometheus first.
-
-This page is the surgical recipe for moving from one to the other.
+This guide is for applications that already use `prom-client` and want Titan
+in-process instrumentation and time-series storage. `titan-metrics` has its own
+registry; it is not a wrapper around `prom-client` or a drop-in implementation
+of its API. Text exposition is optional. Check metric names, units, bucket
+boundaries, labels and counter semantics before changing an existing dashboard.
 
 ## At a glance {#at-a-glance}
 
@@ -27,11 +23,11 @@ This page is the surgical recipe for moving from one to the other.
 | `new Gauge(...)`                          | `metrics.recordTyped('gauge', name, labels, v)` |
 | `new Histogram({ buckets })`              | `metrics.recordTyped('histogram', name, labels, v)`           |
 | `register.metrics()`                      | `metrics.getPrometheusText()`                  |
-| `collectDefaultMetrics()`                 | `collection: { process: true, system: true }` |
-| Custom registry per app                   | `appName` option (tags every sample)           |
-| (no built-in storage)                     | `storage: { type: 'memory' \| 'sqlite' \| 'postgres' }` |
+| `collectDefaultMetrics()`                 | `collection: { process: true }` (different metric set) |
+| Custom registry per app                   | Collector `appName`; explicit `app` labels on custom samples           |
+| (no built-in storage)                     | Memory by default; SQL adapter + connection + schema for persistence |
 | (manual cleanup)                          | `retention: { maxAge: '7d' }` (automatic)      |
-| (manual exposition route)                 | `MetricsRpcService` over Netron (or roll your own) |
+| (manual exposition route)                 | Application HTTP route; Netron RPC is a different protocol |
 
 ## A side-by-side concrete example {#a-side-by-side-concrete-example}
 
@@ -74,15 +70,14 @@ app.get('/metrics', async (_req, res) => {
 });
 ```
 
-The Titan equivalent uses the `@Metrics` decorator for automatic
-RPC instrumentation, and `recordTyped` for your own counters /
-histograms:
+The Titan example records an explicit counter. For method timing use
+`recordTyped('histogram', ...)` around the operation whose duration you need:
 
 ```typescript
 // titan-metrics
 import { Module, Service, Inject } from '@omnitron-dev/titan';
 import { Public } from '@omnitron-dev/titan/decorators';
-import { TitanMetricsModule, MetricsService, METRICS_SERVICE_TOKEN, Metrics }
+import { TitanMetricsModule, MetricsService, METRICS_SERVICE_TOKEN }
   from '@omnitron-dev/titan-metrics';
 
 @Service('orders@1.0.0')
@@ -91,16 +86,12 @@ class OrdersService {
     @Inject(METRICS_SERVICE_TOKEN) private readonly metrics: MetricsService,
   ) {}
 
-  // @Metrics() auto-records rpc_requests_total,
-  // rpc_request_duration_seconds and rpc_errors_total for this method.
-  // The optional string only overrides the `method` label.
   @Public()
-  @Metrics()
   async create(input: CreateOrder) {
     const order = await this.repo.create(input);
     // Custom metrics use recordTyped — there is no counter/histogram
     // option on @Metrics.
-    this.metrics.recordTyped('counter', 'orders_processed_total', { status: 'ok' }, 1);
+    this.metrics.recordTyped('counter', 'orders_processed_total', { app: 'orders-api', status: 'ok' }, 1);
     return order;
   }
 }
@@ -109,7 +100,7 @@ class OrdersService {
   imports: [
     TitanMetricsModule.forRoot({
       appName:    'orders-api',
-      collection: { enabled: true, process: true, system: true, rpc: true },
+      collection: { enabled: true, process: true, system: false },
       storage:    { type: 'memory' },
     }),
   ],
@@ -147,7 +138,7 @@ Don't uninstall `prom-client` yet — you'll cut it last.
 ```typescript
 TitanMetricsModule.forRoot({
   appName:    'my-service',
-  collection: { enabled: true, process: true, system: true, rpc: true },
+  collection: { enabled: true, process: true, system: false },
   storage:    { type: 'memory' },  // try sqlite/postgres later
 })
 ```
@@ -171,11 +162,13 @@ const userCreated = new Counter({
 userCreated.inc({ source: 'web' });
 
 // After
-metrics.recordTyped('counter', 'users_created_total', { source: 'web' }, 1);
+metrics.recordTyped('counter', 'users_created_total', { app: 'my-service', source: 'web' }, 1);
 ```
 
 `recordTyped` is the canonical API — it keeps the Prometheus
-registry and storage backend synchronised in a single call.
+registry and history queue in one call. History becomes queryable after flush;
+custom `app` labels must be explicit. Counter history contains the supplied
+observations, not the cumulative value of the registry.
 
 ### 4. Migrate the exposition route {#4-migrate-the-exposition-route}
 
@@ -272,26 +265,26 @@ Use cases:
 
 - **Operator console** without Prometheus.
 - **Auto-degradation logic** that reads its own metrics.
-- **Cross-pod aggregation** by pointing `storage: { type: 'postgres' }`
-  at a shared connection.
+- **Shared SQL history** by supplying a `PostgresMetricsStorage` with an
+  application-owned Kysely connection and schema. `storage.type` is not a URL
+  or automatic fleet replication setting.
 
-If you don't need these, the `'memory'` backend is essentially
-free — the ring buffer caps RAM use, the exposition path is
-identical to a plain registry, and you keep the option of turning
-persistence on later.
+The `'memory'` backend is bounded and volatile. It still consumes CPU and memory;
+its ring limit does not bound the independent registry's label cardinality.
 
 ## What's different {#whats-different}
 
-- **No registry per-instance.** The container provides one
-  `MetricsService` per app; multi-registry scenarios are rare and
-  handled by `appName` tags or separate processes.
+- **Separate registry and history.** DI provides a service for the module;
+  callers can also construct independent `MetricsRegistry` instances. `appName`
+  does not create a registry namespace or relabel custom samples.
 - **`recordTyped` instead of typed builders.** Less verbose,
   fewer pre-declared objects, but you lose the compile-time
   guarantee that the label set matches the declaration.
 - **`@Metrics()` decorator** auto-instruments a Netron method with
   the fixed `rpc_requests_total` / `rpc_request_duration_seconds` /
   `rpc_errors_total` set. It takes only an optional method-label
-  string — for custom metrics you still use `recordTyped`.
+  string and requires `attachMetricsService`. It writes only registry metrics,
+  not history. `collection.rpc: true` does not install this decorator or middleware.
 
 ## See also {#see-also}
 

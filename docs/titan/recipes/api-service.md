@@ -210,7 +210,7 @@ const AppConfigSchema = z.object({
         interval: 10_000,
         process:  true,
         system:   true,
-        rpc:      true,                                 // auto-collect Netron call metrics
+        rpc:      true,                                 // declared option; no automatic RPC collection
       },
       storage: { type: 'memory', batchSize: 500, flushInterval: 10_000 },
       retention: { maxAge: '7d', cleanupInterval: 3_600_000 },
@@ -272,7 +272,7 @@ class UsersService {
 | Health → redis        | Pass `redis.getClient('default')` — uses `.ping()` for liveness                                  |
 | Auth cache vs JWT TTL | `cacheTTL: 300_000` < typical JWT expiry; revoked tokens stay valid until cache expires. Lower for high-churn revocation. |
 | Rate limit key shape  | `@RateLimit` takes an options object only. The key defaults to `{class}:{method}:{arg0}`; pass `keyGenerator: (...args) => ...` to fold in the auth identity. The service must inject the limiter as `__rateLimitService__` or the decorator silently no-ops |
-| Metrics + Netron      | `collection.rpc: true` auto-instruments every `@Public` method — no per-method `@Metrics` needed unless you want a custom metric name (`@Metrics('users.findById')`) |
+| Metrics + Netron      | Instrument calls explicitly with `recordTyped`; `collection.rpc` has no runtime effect. `@Metrics` requires attachment and updates only the registry |
 
 ## Production checklist {#production-checklist}
 
@@ -287,7 +287,7 @@ class UsersService {
       livenessProbe:  { httpGet: { path: /healthz, port: 3000 } }
       readinessProbe: { httpGet: { path: /readyz,  port: 3000 } }
       ```
-- [ ] `/metrics` endpoint exposed and scraped by Prometheus
+- [ ] Metric history is flushed and queryable; expose an application HTTP route only if a text scraper is required
 - [ ] Logs shipping off-host (sidecar / fluentbit / stdout to log aggregator)
 - [ ] Database migrations run as a separate step (not at app boot in production)
 

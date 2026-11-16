@@ -186,7 +186,7 @@ or a 50-pod fleet.
 - [ ] **No PII in label values.** `{ userId }` creates a fresh
   series per user — both a cardinality explosion and a PII leak.
   Keep labels to `tier`, `region`, `status`.
-- [ ] **`appName` set.** Untagged metrics from multiple services
+- [ ] **Collector `appName` and custom `labels.app` set.** Untagged metrics from multiple services
   collide.
 - [ ] **Storage backend access controlled.** Postgres-backed
   metrics give whoever has DB access full historical visibility.

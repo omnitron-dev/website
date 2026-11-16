@@ -8,257 +8,179 @@ description: Logs, metrics, traces, health — collected and shipped via the tel
 
 # Observability stack
 
-End-to-end observability without external SDKs: structured logs
-with trace correlation, native counters / gauges / histograms,
-W3C trace propagation across RPC calls, and a store-and-forward
-relay that ships everything to your sink even through network
-outages.
+Compose the signals the application needs: structured logs, explicit metrics,
+trace context and pull-based health checks. The optional telemetry relay moves
+application-supplied records to an application-supplied sink. None of these
+modules automatically installs an external observability backend.
 
 ## Shape {#shape}
 
-- **Logs.** Structured JSON via `LoggerModule`, with `traceId` /
-  `spanId` attached automatically.
-- **Metrics.** Counters / histograms via `titan-metrics`, with
-  Prometheus exposition + persistent storage.
-- **Traces.** W3C `traceparent` carried through async scopes via
-  `@omnitron-dev/titan/tracing`.
-- **Health.** Standard probes via `titan-health`.
-- **Shipping.** All three pillars buffered locally and shipped via
-  `titan-telemetry-relay` — survives collector outages without
-  data loss.
+| Component | What the application gets | What the application supplies |
+| --- | --- | --- |
+| Logger | Structured Pino logs, processors and transports | Destinations and any trace-context processor |
+| Metrics | Registry, process samples, history queue and storage adapters | Business/RPC instrumentation, custom `app` labels and SQL connection/schema |
+| Tracing | Trace context and async-scope propagation | Span recording/export if needed |
+| Health | Indicator results and optional Netron RPC service | HTTP probe routes and any custom dependency checks |
+| Relay | Bounded buffer, optional WAL, retry/ack handling | Bridges from signals, authenticated transport and durable sink |
 
 ## Architecture {#architecture}
 
 ```mermaid
 flowchart LR
-  subgraph "Producer pod (your service)"
-    Code[Service code]
-    Code -- log --> Log[LoggerModule]
-    Code -- metric --> Met[titan-metrics]
-    Code -- span --> Trace[tracing]
-    Health[titan-health]
-
-    Log -- processor adds traceId --> Buf[Telemetry buffer]
-    Met -- recordTyped --> Buf
-    Trace -- end --> Buf
-    Buf -- WAL on backpressure --> WAL[(local WAL)]
-  end
-
-  subgraph "Aggregator pod"
-    AggBuf[Telemetry buffer]
-    AggBuf --> Sink[Sink writer]
-  end
-
-  Buf -- Netron transport --> AggBuf
-  Sink --> Backend[(OTLP collector / Loki / Tempo)]
-  Sink --> Prom[(Prometheus)]
-  Health --> Probe[Kubernetes probes]
+  App[Application] --> Logs[Logger]
+  App --> Metrics[MetricsService]
+  App --> Context[Trace context]
+  App --> Health[HealthService]
+  Logs -- configured transport --> Dest[Log destination]
+  Metrics -- flush --> History[(Metric storage)]
+  History -- querySeries --> Charts[Application charts]
+  App -- explicit emit calls --> Relay[Telemetry relay]
+  Relay -- configured WAL and transport --> Sink[Application sink]
 ```
+
+The arrows labelled as configured or explicit require application code. Trace
+context alone is not an exported duration span; metric history is not populated
+by reading the registry.
 
 ## `AppModule` — producer side {#appmodule--producer-side}
 
 ```typescript
 import { Module } from '@omnitron-dev/titan';
-import { ConfigModule } from '@omnitron-dev/titan/module/config';
-import {
-  LoggerModule,
-  ConsoleTransport,
-  RedactionProcessor,
-  type ILogProcessor,
-} from '@omnitron-dev/titan/module/logger';
-import { currentTrace } from '@omnitron-dev/titan/tracing';
-
+import { LoggerModule } from '@omnitron-dev/titan/module/logger';
 import { TitanMetricsModule } from '@omnitron-dev/titan-metrics';
-import { TitanHealthModule }  from '@omnitron-dev/titan-health';
-
-// Custom processor: stamp traceId/spanId on every log line
-const TraceContextProcessor: ILogProcessor = {
-  process(record) {
-    const trace = currentTrace();
-    if (trace) {
-      record.traceId = trace.traceId;
-      record.spanId  = trace.spanId;
-    }
-    return record;
-  },
-};
+import { TitanHealthModule } from '@omnitron-dev/titan-health';
 
 @Module({
   imports: [
-    ConfigModule.forRoot({/* ... */}),
-
-    // ── Logging with redaction + trace correlation ─────────────────────
-    LoggerModule.forRoot({
-      level: process.env.NODE_ENV === 'production' ? 'info' : 'debug',
-      transports: [new ConsoleTransport()],
-      processors: [
-        new RedactionProcessor(['password', 'token', 'headers.authorization']),
-        TraceContextProcessor,
-      ],
-    }),
-
-    // ── Metrics (with auto RPC instrumentation) ────────────────────────
+    LoggerModule.forRoot({ level: 'info', redact: ['password', 'token'] }),
     TitanMetricsModule.forRoot({
       appName: 'my-service',
-      collection: {
-        enabled:  true,
-        interval: 10_000,
-        process:  true,      // CPU / RSS / heap
-        system:   true,      // load, free mem
-        rpc:      true,      // every Netron call auto-counted
-        custom:   true,
-      },
-      storage:   { type: 'memory', batchSize: 500, flushInterval: 10_000 },
-      retention: { maxAge: '24h', cleanupInterval: 600_000 },
+      collection: { enabled: true, process: true, system: false, interval: 10_000 },
+      storage: { type: 'memory', batchSize: 500, flushInterval: 10_000 },
+      retention: { maxAge: '24h' },
     }),
-
-    // ── Health probes ──────────────────────────────────────────────────
     TitanHealthModule.forRoot({
-      enableMemoryIndicator:    true,
+      enableMemoryIndicator: true,
       enableEventLoopIndicator: true,
-      memoryThresholds:         { heapDegradedThreshold: 0.8, heapUnhealthyThreshold: 0.95 },
-      eventLoopThresholds:      { lagDegradedThreshold: 50, lagUnhealthyThreshold: 200 },
-      timeout:                  3_000,
-      enableCaching:            true,
-      cacheTtl:                 1_000,
-      enableRpcService:         true,
-      version:                  process.env.APP_VERSION,
+      timeout: 3_000,
+      enableCaching: true,
+      cacheTtl: 1_000,
     }),
-
-    // ── Your feature modules ───────────────────────────────────────────
-    UsersModule,
   ],
 })
 export class AppModule {}
 ```
 
-## Wiring the telemetry relay {#wiring-the-telemetry-relay}
+This starts local process collection when the metrics provider is created. The
+memory history disappears on restart. For persistence, supply the SQL adapter,
+connection and schema described in [metrics storage](../modules/metrics.mdx#storage-and-commit-boundaries).
+`collection.rpc` and `collection.custom` do not control runtime instrumentation.
 
-The relay is **not** a Titan module — instantiate it in your
-bootstrap and wire it as a clientModule or via your DI container:
+## Wiring the telemetry relay {#wiring-the-telemetry-relay}
 
 ```typescript
 import { TelemetryRelayService } from '@omnitron-dev/titan-telemetry-relay';
-import { Application } from '@omnitron-dev/titan';
 
 const relay = new TelemetryRelayService({
-  role:   'producer',
-  nodeId: process.env.HOSTNAME ?? 'unknown',
+  role: 'producer',
+  nodeId: 'service-node-1',
   buffer: { maxBufferSize: 10_000, flushIntervalMs: 5_000, maxBatchSize: 500 },
-  // `wal: false` disables it; otherwise pass a config (retention is by segment count).
-  wal:    { directory: './.wal', maxSizeBytes: 10 * 1024 * 1024, maxSegments: 7 },
+  wal: { directory: './data/telemetry-wal', maxSizeBytes: 10 * 1024 * 1024, maxSegments: 7 },
 });
-
-relay.setTransport(buildNetronTransportToAggregator());
+relay.setTransport(myAuthenticatedTransport); // application implementation
 await relay.start();
-
-const app = await Application.create({ modules: [AppModule] });
-await app.start();
-
-// Bridge: pipe LoggerService outputs into the relay
-// Bridge: pipe MetricsService periodic snapshots into the relay
-// (project-specific glue — implement once per app)
-
-process.on('SIGTERM', async () => {
-  await app.stop();
-  await relay.stop();
-});
+relay.emitMetric('jobs_completed_total', 1, { queue: 'default' }, 'my-service');
+// After stopping all producers:
+await relay.stop();
 ```
+
+Use a stable node ID and a persistent directory. `record` initially admits data
+to memory; WAL writes occur on flush. Crashes before that boundary, bounded-buffer
+drops and WAL segment eviction can lose records. Inspect `stats()` for these
+conditions. A WAL is enabled by default for producer/both roles; `wal: false`
+disables it. The relay has no built-in Netron transport or logger/metrics bridge.
 
 ## Aggregator pod {#aggregator-pod}
 
-```typescript
-const relay = new TelemetryRelayService({
-  role: 'aggregator',
-});
+Implement `TelemetryAggregator.ingest(nodeId, entries)` and `query(filter)`, then
+pass the object to `relay.setAggregator(...)`. An authenticated receiving handler
+calls `relay.receive(nodeId, entries)`; the relay does not open a port.
 
-relay.setAggregator({
-  // The aggregator interface is { ingest(nodeId, entries), query(filter) }.
-  // Entry types are 'log' | 'metric' | 'event' | 'health' | 'alert'.
-  async ingest(nodeId, entries) {
-    // Ship to your backend(s): OTLP, Loki, Tempo, Prometheus remote-write, etc.
-    await Promise.all([
-      shipLogs(entries.filter(e => e.type === 'log')),
-      shipMetrics(entries.filter(e => e.type === 'metric')),
-      shipEvents(entries.filter(e => e.type === 'event')),
-    ]);
-    return entries.length;        // count acknowledged
-  },
-  async query(filter) { /* … */ return []; },
-});
-
-await relay.start();
-
-// Expose a Netron RPC endpoint so producer pods can call relay.receive(nodeId, entries)
-const app = await Application.create({ modules: [AggregatorModule] });
-await app.start();
-```
+Return the acknowledged count only after the required durable write. Retried
+batches may repeat records, so deduplicate stable entry IDs per authenticated
+producer. A partial acknowledgement retains the whole snapshot for retry. There
+are no packaged OTLP, Loki, Tempo or Prometheus remote-write exporters; using
+those protocols requires a separate sink implementation.
 
 ## Trace propagation in your code {#trace-propagation-in-your-code}
 
 ```typescript
-import { startSpan, withTrace } from '@omnitron-dev/titan';
+import { currentTrace, startSpan, withTrace } from '@omnitron-dev/titan/tracing';
 
-@Public()
-async findById(id: string) {
-  // startSpan(parent?) returns a new child TraceContext; run work inside
-  // withTrace so currentTrace() — and the log processor — see this span.
-  const span = startSpan();
-  return withTrace(span, () => this.repo.find(id));
-}
+await withTrace(startSpan(), async () => {
+  const trace = currentTrace();
+  logger.info({ traceId: trace?.traceId, spanId: trace?.spanId }, 'work started');
+  await performWork();
+});
 ```
 
-Netron propagates the `traceparent` across RPC calls automatically;
-log lines inside `withTrace` automatically carry `traceId` / `spanId`
-through the `TraceContextProcessor` above.
+`startSpan` creates context; `withTrace` scopes it to asynchronous work. Netron
+carries that context across supported RPC calls. Reading `currentTrace()` in a
+logger processor can attach IDs consistently. This does not measure span duration
+or send a trace to an external collector.
 
 ## A typical instrumented service {#a-typical-instrumented-service}
 
+This wrapper can be called by a service around the operation it wants to measure:
+
 ```typescript
-import { Service, startSpan, withTrace } from '@omnitron-dev/titan';
-import { Public } from '@omnitron-dev/titan/netron';
-import { Metrics } from '@omnitron-dev/titan-metrics';
+import type { IMetricsService } from '@omnitron-dev/titan-metrics';
 
-@Service('users@1.0.0')
-class UsersService {
-  constructor(
-    private readonly logger: ILogger,
-    private readonly metrics: MetricsService,
-  ) {}
-
-  @Public()
-  @Metrics('users.findById')                                    // name only; tracks total + duration + errors
-  async findById(id: string) {
-    this.logger.info('findById', { id });                       // gets traceId/spanId via processor
-    return withTrace(startSpan(), () => this.repo.find(id));
+export async function measure<T>(
+  metrics: IMetricsService,
+  method: string,
+  operation: () => Promise<T>,
+): Promise<T> {
+  const started = performance.now();
+  const labels = { app: 'my-service', method };
+  try {
+    const result = await operation();
+    metrics.recordTyped('counter', 'work_completed_total', labels, 1);
+    return result;
+  } catch (error) {
+    metrics.recordTyped('counter', 'work_errors_total', labels, 1);
+    throw error;
+  } finally {
+    metrics.recordTyped('histogram', 'work_duration_seconds', labels,
+      (performance.now() - started) / 1000);
   }
 }
 ```
 
+Keep `method` values bounded. `recordTyped` writes both the registry and the
+history queue; `await metrics.flush()` makes accepted observations available to
+history queries. The stored counter observations here are increments, while the
+registry exposes their cumulative sum. `@Metrics` is a different path: attach the
+service explicitly, and expect registry-only output.
+
 ## Cross-module wiring notes {#cross-module-wiring-notes}
 
-| Concern                       | Wiring detail                                                                                       |
-| ----------------------------- | --------------------------------------------------------------------------------------------------- |
-| Trace → log correlation       | `TraceContextProcessor` reads `currentTrace()` and stamps `traceId` / `spanId` on every log record   |
-| Auto-RPC metrics              | `collection.rpc: true` auto-counts Netron calls — no per-method `@Metrics` needed                    |
-| Health → readiness            | `/readyz` returns `200` only when every indicator is `healthy` or `degraded` — not `unhealthy`       |
-| Relay producer vs aggregator  | Producer pods buffer + ship via transport; aggregator receives + writes to sink. Either or both.    |
-| WAL crash safety              | Provide a `wal` config object (omit or `wal: false` to disable); buffer overflow spills to disk and replays on next start |
-| Metrics retention             | `retention.maxAge` is the in-storage window; ship metrics to long-term backend before that elapses   |
+| Concern | Boundary |
+| --- | --- |
+| RPC measurement | Explicit instrumentation; no automatic handler installed by `collection.rpc` |
+| Health probes | `isAlive()` returns true when callable; `isReady()` rejects `unhealthy`, accepts `degraded`; HTTP routing is application code |
+| Metric text | `getPrometheusText()` is an optional registry export, separate from SQL history |
+| Relay | Application calls emitters or supplies a bridge; no automatic metric/log/span subscription |
+| SQL vs relay delivery | Metric commit and relay acknowledgement are separate operations; use a transactional outbox where their atomicity matters |
 
 ## Production checklist {#production-checklist}
 
-- [ ] **Logs**: `RedactionProcessor` includes every sensitive header / field
-- [ ] **Logs**: `TraceContextProcessor` (or equivalent) attached — without it, trace correlation breaks
-- [ ] **Metrics**: `appName` set; otherwise cross-pod metrics pile together
-- [ ] **Metrics**: storage backend chosen — `'memory'` is lost on restart
-- [ ] **Metrics**: scraped by Prometheus (`/metrics`) OR shipped via relay (pick one)
-- [ ] **Traces**: trace context propagated across worker thread boundaries via `withTrace`
-- [ ] **Health**: `enableRpcService: true` so the orchestrator can poll via Netron
-- [ ] **Relay**: a `wal` config provided (not `wal: false`) in production
-- [ ] **Relay**: producer / aggregator topology mirrors your deployment shape
-- [ ] **Relay**: aggregator's `write()` is idempotent (handles retries from buffer re-enqueue)
-- [ ] **K8s**: `terminationGracePeriodSeconds` ≥ relay's flush interval + buffer drain time
+- Verify a custom observation through the ordinary recording, flush and query path.
+- Check queue loss/error readings and prove restart recovery for the selected store.
+- Verify probe routes and access policy from an actual client.
+- Stop producers before draining the relay; allow time for pending writes.
+- Test sink acknowledgement, retries and duplicate handling during a simulated outage.
+- Configure a scraper or an external exporter only when the deployment needs one.
 
 ## See also {#see-also}
 

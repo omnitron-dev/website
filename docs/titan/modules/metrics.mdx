@@ -9,20 +9,20 @@ title: titan-metrics
 
 <span class="module-badge">official · @omnitron-dev/titan-metrics · stable</span>
 
-Pure Titan-native counters, gauges, and histograms with a Prometheus
-exposition registry, pluggable storage backends (memory / PostgreSQL
-/ SQLite), automatic process / system / RPC collection, retention,
-re-enqueue-on-failure semantics, ghost-app filtering, and optional
-sync hooks for external systems.
+Titan-native counters, gauges and histograms, a sample queue, time-series
+queries and memory / PostgreSQL / SQLite storage. The package also provides
+a local process collector and a text export for existing Prometheus deployments.
+It does not install a monitoring server, HTTP route or automatic RPC instrumentation.
 
 ```bash
 pnpm add @omnitron-dev/titan-metrics
 ```
 
-> **No `prom-client` dependency.** This module ships its own
-> Prometheus exposition format generator and time-series storage.
-> Scrape with any Prometheus-compatible tool; persist locally with
-> SQLite; aggregate across pods with PostgreSQL.
+The ordinary read path is `MetricsService.querySeries()` or `getSnapshot()`
+against the configured storage. `getPrometheusText()` serializes the separate
+in-memory registry; it is an optional export, not the storage backend.
+There is no `prom-client` dependency. SQL adapters take a caller-owned Kysely
+connection; a storage type alone does not create a database.
 
 ## When you need it {#when-you-need-it}
 
@@ -39,6 +39,7 @@ pnpm add @omnitron-dev/titan-metrics
 ## Quickstart {#quickstart}
 
 ```typescript
+import { Module } from '@omnitron-dev/titan';
 import { TitanMetricsModule } from '@omnitron-dev/titan-metrics';
 
 @Module({
@@ -49,9 +50,7 @@ import { TitanMetricsModule } from '@omnitron-dev/titan-metrics';
         enabled:  true,
         interval: 5_000,                 // sample every 5s
         process:  true,                  // CPU, RSS, heap
-        system:   true,                  // load, free mem
-        rpc:      true,                  // Netron call metrics
-        custom:   true,
+        system:   false,                 // no orchestrator in this standalone example
       },
       storage:   { type: 'memory', batchSize: 200, flushInterval: 5_000 },
       retention: { maxAge: '7d', cleanupInterval: 3_600_000 },
@@ -61,17 +60,25 @@ import { TitanMetricsModule } from '@omnitron-dev/titan-metrics';
 class AppModule {}
 ```
 
-Async config via `forRootAsync({ useFactory, inject? })`.
+Async config via `forRootAsync({ useFactory, inject?, storage?, isGlobal? })`.
+
+`collection.process` records CPU, RSS, heap, external memory and uptime. It does
+not measure GC, file descriptors, event-loop lag or OS load. `collection.system`
+reads child metrics only when an orchestrator is passed to the `MetricsService`
+constructor; the module factory does not provide one. `collection.rpc` and
+`collection.custom` are declared options with no runtime consumer. Setting
+them does not instrument Netron or disable explicit recordings.
 
 ## `IMetricsModuleOptions` {#imetricsmoduleoptions}
 
 | Option              | Type                                                                          | Default                  |
 | ------------------- | ----------------------------------------------------------------------------- | ------------------------ |
-| `appName`           | `string` — required; tags every metric                                       | —                        |
+| `appName`           | `string` — required; labels automatic process samples                                       | —                        |
 | `collection`        | `{ enabled?, interval?, process?, system?, rpc?, custom? }`                  | enabled, 5s, all on      |
-| `storage`           | `{ type: 'memory' \| 'postgres' \| 'sqlite', batchSize?, flushInterval? }`   | `'memory'`, `200`, `5_000` |
+| `storage`           | `{ type: 'memory' \| 'postgres' \| 'sqlite', batchSize?, flushInterval?, maxBufferSize?, maxBufferBytes? }`   | `'memory'`, `200`, `5_000` |
 | `retention`         | `{ maxAge?, cleanupInterval? }`                                              | `'7d'`, `1h`             |
 | `sync`              | `{ enabled?, onFlush?: (batch) => Promise<void> }`                           | —                        |
+| `onError` | `(error, operation) => void` for background write/cleanup/sync failures | — |
 | `isGlobal`          | `boolean`                                                                     | `false`                  |
 
 ## `MetricsService` — the API {#metricsservice--the-api}
@@ -86,15 +93,15 @@ class UsersService {
 
   @Public()
   async create(input: CreateInput) {
-    this.metrics.recordTyped('counter', 'users.created.total',
-      { source: input.source }, 1);
+    this.metrics.recordTyped('counter', 'users_created_total',
+      { app: 'my-api', source: input.source }, 1);
 
     const t0 = performance.now();
     try {
       return await this.repo.create(input);
     } finally {
-      this.metrics.recordTyped('histogram', 'users.create.ms',
-        { source: input.source }, performance.now() - t0);
+      this.metrics.recordTyped('histogram', 'users_create_ms',
+        { app: 'my-api', source: input.source }, performance.now() - t0);
     }
   }
 }
@@ -108,12 +115,18 @@ class UsersService {
 | `recordBatch(samples[])`                                          | Queue many samples at once                       |
 | `recordDurable(samples[])`                                        | Await a persistent commit receipt                 |
 | `recordTyped(type, name, labels, value)`                          | **Preferred** — keeps registry + storage in sync |
-| `getRegistry()`                                                   | Direct access to the in-memory Prometheus registry |
+| `getRegistry()`                                                   | Direct access to the in-memory registry (writes bypass history) |
 
 The `recordTyped()` method is the canonical entry point — it
-updates the Prometheus registry and queues history together. The queue
+updates the registry and queues history together. The queue
 is volatile until its write commits; use `recordDurable` to await that boundary. Lower-level `record` is for cases where you've
-already built a sample object.
+already built a sample object. Custom recordings must supply their own `app`
+label: `appName` is not appended by `record`, `recordBatch` or `recordTyped`.
+Call `flush()` before querying freshly queued history. Counter recordings store
+the supplied observation in history while the registry accumulates increments;
+SQL buckets keep the last value for names ending in `_total` or `_count`. Do not
+interpret that history as a cumulative counter or a rate without defining the
+recording convention for your application.
 
 ### Query API {#query-api}
 
@@ -136,28 +149,20 @@ already built a sample object.
 
 ## Why `recordTyped` matters (T#74) {#why-recordtyped-matters-t74}
 
-The unified entry point exists because pre-T#74, callers had two
-incompatible ways to write metrics:
+`recordTyped(type, name, labels, value)` selects the registry operation explicitly
+and queues the supplied observation for history. `record(sample)` uses an existing
+metric definition, defaulting unknown names to gauges. Direct `getRegistry()`
+writes and the `@Metrics` decorator update only the registry.
 
-1. **`record(sample)`** — wrote to BOTH registry and storage, but
-   the registry routed by previously-registered type, defaulting
-   to **gauge**. Wrong for counters and histograms unless someone
-   else pre-registered the metric name.
-2. **`getRegistry().counter(...)` etc** — wrote to ONLY the
-   registry. These metrics appeared in `/metrics` (Prometheus) but
-   were **invisible** to `querySeries()` — every dashboard query
-   for them returned empty.
-
-`recordTyped` takes an explicit type, writes to the registry via
-the correct type-specific method, and pushes the sample to the
-storage buffer in the same call. Use it unless you have a specific
-reason not to.
+These paths have different visibility: a value present in a text export need not
+exist in `querySeries()`. The registry is process-local and is not rebuilt from SQL
+history on restart. Use explicit recordings and a flush when testing both paths.
 
 ## `MetricsQueryFilter` — the shape of time-series queries {#metricsqueryfilter--the-shape-of-time-series-queries}
 
 ```typescript
 interface MetricsQueryFilter {
-  names?:    string[];                          // ['orders.process.ms']
+  names?:    string[];                          // ['orders_process_ms']
   apps?:     string[];                          // ['orders-api']
   from?:     string | number;                   // ISO string or ms
   to?:       string | number;
@@ -182,7 +187,7 @@ A typical dashboard query:
 
 ```typescript
 const series = await metrics.querySeries({
-  names:    ['orders.process.ms'],
+  names:    ['orders_process_ms'],
   apps:     ['orders-api'],
   from:     Date.now() - 3_600_000,           // last hour
   to:       Date.now(),
@@ -190,8 +195,8 @@ const series = await metrics.querySeries({
 });
 ```
 
-Pagination uses `limit` + repeated calls with adjusted `from` —
-there's no opaque cursor.
+`limit` bounds points per series; there is no cursor or stable pagination
+contract. Narrow the time range for another query rather than assuming offsets.
 
 ## `MetricsSnapshot` — what `getSnapshot()` returns {#metricssnapshot--what-getsnapshot-returns}
 
@@ -216,8 +221,10 @@ interface MetricsSnapshot {
 }
 ```
 
-The snapshot powers the omnitron-console dashboard. It includes
-**per-app aggregates** plus cluster-wide totals.
+Snapshots interpret known families such as `cpu_percent`, `memory_bytes`,
+`rpc_requests_total` and `app_status`. They are not a summary of arbitrary custom
+metrics. The Omnitron daemon supplies application status and fleet observations;
+a standalone module does not discover remote applications.
 
 ### Ghost-app filtering {#ghost-app-filtering}
 
@@ -391,8 +398,10 @@ const text = await this.metrics.getPrometheusText();
 // ...
 ```
 
-Serve this on a `/metrics` route from a tiny HTTP handler and point
-Prometheus at it. No `prom-client` needed.
+If an existing monitoring system needs this format, serve it through an
+application-owned HTTP route with the required access policy. The Titan module
+does not open `/metrics`. The Omnitron daemon has its own optional MetricsServer.
+Use valid metric names and bounded labels; the serializer does not rename them.
 
 ## RPC surface — `OmnitronMetrics` {#rpc-surface--omnitronmetrics}
 
@@ -425,12 +434,12 @@ const snap = await metricsClient.getSnapshot();
 ```mermaid
 flowchart LR
   Code[Service.recordTyped]
-  Code --> Reg[Prometheus registry<br/>in-memory]
+  Code --> Reg[Metric registry<br/>in-memory]
   Code --> Buf[Sample buffer<br/>batchSize=200]
   Buf -- auto when full<br/>or flushInterval --> Flush{flush}
   Flush -- success --> Storage[(Storage backend)]
   Flush -- failure --> Buf
-  Reg -- /metrics --> Prom[Prometheus scrape]
+  Reg -- getPrometheusText --> Prom[Optional application HTTP route]
   Storage -- querySeries --> Dashboard[Console / dashboards]
   Storage -- retention sweep --> Cleanup[Drop > maxAge]
   Storage -- ghost-filter --> Snap[MetricsSnapshot]
@@ -460,32 +469,15 @@ retention is independent: pruning chart history cannot delete pending deliveries
 
 ## Sizing & cardinality control {#sizing--cardinality-control}
 
-The single biggest operational risk is **label cardinality**.
-Every unique combination of label values creates a separate
-time-series in storage. At 1 metric × 10 labels × 100 values
-each, that's 10^10 series — far past anything healthy.
+Each distinct label set creates registry state and time-series data. Keep request,
+user and document identifiers out of labels; use bounded categories such as route
+or status. Adding labels can multiply series count. There is no universal safe
+series count: measure registry memory, queued bytes and database growth for the
+workload. `getRegistry()` does not expose a public size statistic.
 
-Recipes:
-
-- **Bucket continuous values.** Don't label by exact `amount`;
-  label by `tier` derived from amount (`free|pro|enterprise`).
-- **Drop request IDs.** They're unique per request — never use as
-  labels.
-- **Quantise time.** If you must label by a timestamp, round to
-  the hour or day, not the second.
-- **One metric, many labels** beats **many metrics, few labels**
-  for cardinality budget — but be sane about it.
-
-Healthy cardinality targets:
-
-| Setup                       | Total series target           |
-| --------------------------- | ----------------------------- |
-| Single small app            | < 10 000                      |
-| Multi-pod cluster           | < 100 000                     |
-| Aggregator backbone         | < 1 000 000                   |
-
-Monitor `metrics.getRegistry()` size as a meta-metric; alert when
-it grows faster than your service count.
+The storage queue defaults to 50,000 samples and 16 MiB. Its limits and loss
+counters are available through `getStorageStatus()`. Those queue limits do not
+bound the separate registry's cardinality.
 
 ## Tokens {#tokens}
 
@@ -497,9 +489,9 @@ it grows faster than your service count.
 
 ## Lifecycle {#lifecycle-1}
 
-`MetricsService.start()` is invoked at module init and:
-- Starts the collector (process / system / RPC samples on
-  `collection.interval`, default 5 s).
+The module factory calls `MetricsService.start()` when DI creates the service:
+- Starts the process collector and any explicitly supplied orchestrator
+  integration on `collection.interval` (default 5 s).
 - Schedules flush on `storage.flushInterval` (default 5 s).
 - Schedules cleanup on `retention.cleanupInterval` (default 1 h).
 
@@ -526,8 +518,8 @@ Both timers `unref()` so they don't pin the event loop alive.
   increasing. Use a gauge for values that go up *and* down.
 - **Histograms with too many buckets.** Each bucket is a separate
   time series. Five to ten buckets per histogram is usually right.
-- **Forgetting `appName`.** Without it, metrics from different
-  services pile together. Always set it per application.
+- **Missing custom labels.** Set the required collector `appName`, and supply
+  `labels.app` yourself on custom recordings that must be queryable by app.
 - **Confusing collection with commit.** `record` and `recordTyped` both queue
   history. Use `recordDurable` when the caller needs database confirmation.
 - **Disabling retention.** Leaving samples to accumulate
