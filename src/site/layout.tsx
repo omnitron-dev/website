@@ -120,7 +120,7 @@ export function SiteLayout({ children, document: doc, documents, config }: Lumen
         </div>
         <div className="site-colophon">
           <span>Omnitron · Open source / MIT</span>
-          <div className="footer-meta"><Link href="/docs/lumen/this-site">Built with Lumen</Link><Link href="/llms.txt">Agent index ↗</Link></div>
+          <div className="footer-meta"><Link href="/docs/lumen/this-site">Built with Lumen</Link><Link href="/llms.txt" target="_blank" rel="noopener noreferrer">Agent index ↗</Link></div>
         </div>
       </footer>
       <div id="lumen-interactive-root" />
