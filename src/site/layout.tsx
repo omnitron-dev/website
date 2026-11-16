@@ -4,13 +4,31 @@ import { PrismProvider, PrismThemeScript } from '@omnitron-dev/prism/core';
 import { Link } from '@omnitron-dev/prism/ui';
 import { DocSidebar, type DocSidebarItem } from '@omnitron-dev/prism/components/doc-layout';
 import { OmnitronBrand, omnitronTheme } from '@omnitron-dev/prism/identity';
-import { DocLayout, DocSectionNav, DocPagination, LumenFooter } from '@omnitron-dev/lumen-ui';
+import { DocLayout, DocSectionNav, DocPagination } from '@omnitron-dev/lumen-ui';
 import type { LumenPageLayoutProps, LumenSidebarItem } from '@omnitron-dev/lumen';
 import { PortalIslandHost } from '@omnitron-dev/lumen-ui/runtime';
 import { SearchTrigger } from './search-trigger.tsx';
 import { Home, serviceExample, clientExample } from './home.tsx';
 import { ThemeSelectorPlaceholder } from './theme-selector.tsx';
 import { MainNavigation, MobileNavigation, SectionNavigation, sections } from './navigation.tsx';
+
+const footerGroups = [
+  { id: 'build', title: 'Build', links: [
+    { label: 'Quickstart', href: '/docs/getting-started/quickstart' },
+    { label: 'Application tutorial', href: '/docs/tutorial' },
+    { label: 'Public APIs', href: '/docs/reference/api-index' },
+  ] },
+  { id: 'operate', title: 'Operate', links: [
+    { label: 'Node and fleet architecture', href: '/docs/omnitron/architecture' },
+    { label: 'Production readiness', href: '/docs/deployment/production-readiness' },
+    { label: 'CLI reference', href: '/docs/omnitron/cli' },
+  ] },
+  { id: 'project', title: 'Project', links: [
+    { label: 'Privacy and ownership', href: '/docs/foundations/privacy' },
+    { label: 'Contributing', href: '/docs/community/contributing' },
+    { label: 'Source on GitHub ↗', href: 'https://github.com/omnitron-dev/omni' },
+  ] },
+];
 
 export function SiteLayout({ children, document: doc, documents, config }: LumenPageLayoutProps) {
   if (!doc.routePath) throw new Error(`Page document has no public route: ${doc.id}`);
@@ -84,12 +102,27 @@ export function SiteLayout({ children, document: doc, documents, config }: Lumen
           </div>}
         </DocLayout>
       </>}
-      <LumenFooter copyright="Omnitron · Open source / MIT" columns={[
-        { title: 'Build', items: [{ label: 'Quickstart', href: '/docs/getting-started/quickstart' }, { label: 'Architecture', href: '/docs/foundations/architecture' }] },
-        { title: 'Reference', items: [{ label: 'Public APIs', href: '/docs/reference/api-index' }, { label: 'Compatibility', href: '/docs/reference/compatibility' }] },
-        { title: 'Project', items: [{ label: 'Privacy and ownership', href: '/docs/foundations/privacy' }, { label: 'Source ↗', href: 'https://github.com/omnitron-dev/omni', external: true }, { label: 'Contributing', href: '/docs/community/contributing' }] },
-      ]} />
-      <div className="site-colophon"><span>BUILT WITH LUMEN</span><Link href="/docs/lumen/this-site">How this manual works →</Link></div>
+      <footer className="site-footer">
+        <div className="footer-main">
+          <div className="footer-about">
+            <Link className="footer-name" href="/">OMNITRON</Link>
+            <p>A private full-stack platform. Build and operate TypeScript applications on infrastructure you control.</p>
+            <Link className="footer-architecture" href="/docs/foundations/architecture">Explore the architecture →</Link>
+          </div>
+          <nav className="footer-navigation" aria-label="Footer navigation">
+            {footerGroups.map(group => <section className="footer-group" key={group.id} aria-labelledby={`footer-${group.id}`}>
+              <h2 id={`footer-${group.id}`}>{group.title}</h2>
+              <ul>{group.links.map(link => <li key={link.href}>
+                <Link href={link.href} {...(link.href.startsWith('https://') ? { target: '_blank', rel: 'noopener noreferrer' } : {})}>{link.label}</Link>
+              </li>)}</ul>
+            </section>)}
+          </nav>
+        </div>
+        <div className="site-colophon">
+          <span>Omnitron · Open source / MIT</span>
+          <div className="footer-meta"><Link href="/docs/lumen/this-site">Built with Lumen</Link><Link href="/llms.txt">Agent index ↗</Link></div>
+        </div>
+      </footer>
       <div id="lumen-interactive-root" />
     </div>
   </PrismProvider>;
