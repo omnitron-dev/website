@@ -3,266 +3,154 @@ id: "titan/recipes/notifications-pipeline"
 slug: "/docs/titan/recipes/notifications-pipeline"
 sidebar_position: 5
 title: Notifications pipeline
-description: Producer → queue → worker → channels, with rate limit and preferences.
+description: Distinguish local channel delivery, notification-event workers and durable mail outboxes.
 ---
 
 # Notifications pipeline
 
-The shape for a notifications system that respects user preferences,
-rate-limits per channel, isolates flaky delivery providers from the
-request path, and runs on a worker fleet — so an SMS provider outage
-doesn't slow down API responses.
+The package exposes several notification paths with different contracts. Choose
+one explicitly: `NotificationsService.send` can deliver in the caller, the event
+worker persists and signals application records, and `titan-mailer` provides a
+separate durable SMTP outbox worker. They are not interchangeable stages of an
+automatically assembled pipeline.
 
 ## Shape {#shape}
 
-- **Producer.** API pods emit notification events; return
-  immediately without waiting for delivery.
-- **Queue.** Rotif (Redis-backed) carries events to workers,
-  decoupling the request path from delivery.
-- **Worker.** A separate pod consumes events, resolves channel
-  targets per recipient, persists the notification, renders the
-  template, calls the channel.
-- **Rate-limited.** Per-user / per-channel limits prevent runaway
-  loops from spamming users.
-- **Preferences.** Per-user opt-in/out per channel.
-- **Templates.** One payload renders to N channels with
-  per-channel transformations.
+| Path | Input | Work performed |
+| --- | --- | --- |
+| `NotificationsService.send` | Recipient `{ id }`, payload `{ type, title, message }`, send options | Optional rate/preferences/router checks, transport publication and local channel calls |
+| `NotificationPublisher` / event worker | `NotificationEvent` with targeting, `category`, `body`, `sourceApp` | Stream publication; explicit worker resolves users, persists and signals |
+| Mail outbox worker | Opaque durable delivery ID | Claims SQL record, sends via MailerService, records outcome and retries |
+
+Templates require an explicit `TemplateEngine.render` call. The event worker does
+not install SMTP, SMS or push providers.
 
 ## Architecture {#architecture}
 
 ```mermaid
 flowchart LR
-  subgraph "API pod (producer)"
-    Code[Service code]
-    Code -- NotificationsService.send --> Pub[Rotif publish]
-  end
-
-  Pub --> Q[(Rotif queue<br/>Redis)]
-
-  subgraph "Worker pod (consumer)"
-    Sub[Rotif subscribe]
-    Q --> Sub
-    Sub --> Resolver[TargetResolver<br/>look up channels per recipient]
-    Resolver --> Persister[Persister<br/>write to inbox / DB]
-    Resolver --> Rate{Rate-limit<br/>per channel}
-    Rate -- allowed --> Pref{Preferences<br/>per channel}
-    Pref -- opted in --> Tpl[TemplateEngine<br/>render]
-    Tpl --> Chan[Channel.deliver<br/>email / sms / push / webhook / inapp]
-    Persister --> Real[RealtimeSignaler<br/>WS / SSE push]
-  end
-
-  Chan --> Provider[(SMTP / Twilio / FCM / …)]
+  Request[Request handler] --> Send[NotificationsService.send]
+  Send --> Channel[Local channel delivery]
+  Send --> Bus[Transport publication]
+  Business[Business transaction] --> Outbox[(Mail outbox)]
+  Outbox -- opaque IDs / reconciliation --> MailWorker[MailDeliveryWorker]
+  MailWorker --> SMTP[MailerService / SMTP]
+  MailWorker -- committed result --> Outbox
 ```
+
+The SMTP outbox path separates delivery from requests and preserves business-state
+atomicity. SMTP acceptance and SQL commit still cannot form one distributed
+transaction; the documented delivery guarantee is at least once under recovery.
 
 ## `AppModule` — producer (API pod) {#appmodule--producer-api-pod}
 
+A module for direct in-app delivery:
+
 ```typescript
 import { Module } from '@omnitron-dev/titan';
-import { ConfigModule } from '@omnitron-dev/titan/module/config';
-import { LoggerModule } from '@omnitron-dev/titan/module/logger';
-
-import { TitanRedisModule } from '@omnitron-dev/titan-redis';
-import { EventsModule } from '@omnitron-dev/titan-events';
 import { NotificationsModule } from '@omnitron-dev/titan-notifications';
 
 @Module({
-  imports: [
-    ConfigModule.forRoot({/* … */}),
-    LoggerModule.forRoot({ level: 'info' }),
-
-    TitanRedisModule.forRoot({
-      config: { url: process.env.REDIS_URL, db: 0 },
-    }),
-
-    EventsModule.forRoot({
-      wildcard:     true,
-      maxListeners: 100,
-      history:      { enabled: false },
-    }),
-
-    NotificationsModule.forRoot({
-      redis: process.env.REDIS_URL,
-
-      // Optional: route through Rotif for cross-pod delivery
-      transport: {
-        rotif: { /* rotif transport options */ },
-      },
-
-      defaultChannels: ['inApp', 'email'],   // channel ids are camelCase: 'inApp', not 'inapp'
-      enableInApp:     true,
-      enableWebhook:   true,
-
-      templates: {
-        enabled:      true,
-        cacheEnabled: true,
-        cacheTTL:     60_000,
-      },
-
-      rateLimiterConfig: {
-        defaultLimits: { perMinute: 10, perHour: 100, perDay: 1_000 },
-        channelLimits: { sms: { perMinute: 1, perHour: 10 } },
-        enableBurstDetection: true,
-      },
-
-      preferenceStoreConfig: {
-        // Each channel maps to an object, not a bare boolean.
-        // Channel ids are camelCase: 'inApp', not 'inapp'.
-        defaultPreferences: {
-          channels: {
-            email: { enabled: true },
-            sms:   { enabled: false },
-            push:  { enabled: true },
-            inApp: { enabled: true },
-          },
-        },
-      },
-    }),
-
-    UsersModule,
-  ],
+  imports: [NotificationsModule.forRoot({
+    redis: process.env.REDIS_URL,
+    enableInApp: true,
+    enableWebhook: false,
+    rateLimiterConfig: {
+      defaultLimits: { perMinute: 10, perHour: 100 },
+    },
+    preferenceStoreConfig: {
+      defaultPreferences: { channels: { inApp: { enabled: true } } },
+    },
+  })],
 })
 export class AppModule {}
 ```
 
+Use the exact registered channel ID `inApp`. `defaultChannels` is declared in the
+options but is not consumed by `send`; pass channels on the call or supply a
+router. If transport consumers are required, register them explicitly and verify
+publication acknowledgements.
+
 ## Producer side — emitting a notification {#producer-side--emitting-a-notification}
 
 ```typescript
-import { Service, Inject } from '@omnitron-dev/titan';
-import { Public } from '@omnitron-dev/titan/netron';
-import {
-  NOTIFICATIONS_SERVICE,
-  type NotificationsService,
-} from '@omnitron-dev/titan-notifications';
+import { Inject, Service } from '@omnitron-dev/titan';
+import { NOTIFICATIONS_SERVICE, type NotificationsService }
+  from '@omnitron-dev/titan-notifications';
 
-@Service({ name: 'users' })
-class UsersService {
-  constructor(
-    @Inject(NOTIFICATIONS_SERVICE) private readonly notify: NotificationsService,
-  ) {}
+@Service({ name: 'welcome-notifications' })
+class WelcomeNotifications {
+  constructor(@Inject(NOTIFICATIONS_SERVICE) private readonly notify: NotificationsService) {}
 
-  @Public()
-  async create(input: CreateInput) {
-    const user = await this.repo.create(input);
-
-    // Returns immediately — actual delivery happens on a worker pod.
-    // Recipient keys on `id` (not `userId`); payload needs `type`/`title`/`message`.
-    await this.notify.send(
-      { id: user.id, email: user.email },
-      { type: 'announcement', title: 'Welcome', message: `Welcome, ${user.name}!`, data: { name: user.name } },
-      { channels: ['email', 'inApp'] },
+  async sendWelcome(id: string, name: string) {
+    return this.notify.send(
+      { id },
+      { type: 'announcement', title: 'Welcome', message: `Welcome, ${name}!` },
+      { channels: ['inApp'] },
     );
-
-    return user;
   }
 }
 ```
+
+This awaits the send path, including any local channel calls. Inspect returned
+status and per-channel outcomes; a resolved promise is not recipient delivery.
+Register email/SMS/push implementations before selecting those channel IDs.
 
 ## Worker pod — consuming and delivering {#worker-pod--consuming-and-delivering}
 
-```typescript
-import { Module, createToken } from '@omnitron-dev/titan';
-import {
-  NotificationsModule,
-  type INotificationTargetResolver,
-  type INotificationPersister,
-  type INotificationRealtimeSignaler,
-} from '@omnitron-dev/titan-notifications';
+`NotificationsModule.forWorker({ targetResolver, persister, realtimeSignaler,
+workerOptions })` aliases application provider tokens and registers the worker.
+It neither starts the worker nor configures a messaging transport. The host calls
+`start(rawRedis, options?)`; `stop()` waits at most ten seconds for the consume
+loop, and does not cancel arbitrary application work still running.
 
-const USER_TARGET_RESOLVER_TOKEN = createToken<INotificationTargetResolver>('UserTargetResolver');
-const NOTIFICATION_PERSISTER_TOKEN = createToken<INotificationPersister>('NotificationPersister');
-const REALTIME_SIGNALER_TOKEN = createToken<INotificationRealtimeSignaler>('RealtimeSignaler');
+The worker expects `NotificationEvent` records and writes through the supplied
+persister before signaling clients. It does not render templates, call email/SMS/
+push channels, or invoke the producer service's preference/rate-limit policies.
 
-@Module({
-  imports: [
-    ConfigModule.forRoot({/* … */}),
-    LoggerModule.forRoot({ level: 'info' }),
-    TitanRedisModule.forRoot({ config: { url: process.env.REDIS_URL } }),
-
-    NotificationsModule.forWorker({
-      targetResolver:   USER_TARGET_RESOLVER_TOKEN,
-      persister:        NOTIFICATION_PERSISTER_TOKEN,
-      realtimeSignaler: REALTIME_SIGNALER_TOKEN,
-      workerOptions: {
-        // There is no `concurrency`. The worker runs one XREADGROUP loop and
-        // takes a BATCH per read; `readCount` is the knob that sizes it.
-        readCount: 100,
-        blockTimeoutMs: 5_000,
-      },
-    }),
-  ],
-  providers: [
-    { provide: USER_TARGET_RESOLVER_TOKEN, useClass: MyUserResolver },
-    { provide: NOTIFICATION_PERSISTER_TOKEN, useClass: MyPersister },
-    { provide: REALTIME_SIGNALER_TOKEN, useClass: MyRealtimeSignaler },
-  ],
-})
-export class WorkerModule {}
-```
-
-`MyUserResolver`, `MyPersister`, `MyRealtimeSignaler` are the
-three integration points you implement once per project. They
-wire the abstract worker to your concrete user store, your
-inbox storage, and your realtime channel.
+There is also a startup gap: the worker creates its stream/group but does not
+register its stream pattern in Rotif's active-pattern registry. The publisher
+skips unmatched patterns and its wrapper ignores that result. Do not treat
+`forWorker` plus `NotificationPublisher` as a complete delivery setup on an empty
+Redis server. Verify routing, consumer group, stored record and retry behavior
+through the application's ordinary path. The package currently provides no
+single module factory that establishes this whole contract.
 
 ## A custom channel — e.g. SMTP email {#a-custom-channel--eg-smtp-email}
 
-```typescript
-import { AbstractEmailChannel, type EmailContent } from '@omnitron-dev/titan-notifications';
-import nodemailer from 'nodemailer';
+For SMTP use the existing [titan-mailer](../modules/mailer.mdx) package.
+`MailerEmailChannel` from `@omnitron-dev/titan-mailer/notifications` adapts a
+`MailerService` to the channel registry. For deferred durable delivery, use its
+`MailDeliveryWorker` with an application outbox or `PostgresMailOutbox`.
 
-// AbstractEmailChannel fixes `name = 'email'` / `type = ChannelType.Email`
-// and renders the payload; you only implement the transport.
-class SmtpEmailChannel extends AbstractEmailChannel {
-  private readonly transport = nodemailer.createTransport({/* … */});
-
-  async sendEmail(to: string, content: EmailContent): Promise<{ messageId: string }> {
-    const info = await this.transport.sendMail({
-      to,
-      subject: content.subject,
-      html:    content.html,
-      text:    content.text,
-    });
-    return { messageId: info.messageId };
-  }
-}
-```
-
-Register it via `forRoot({ channels: [new SmtpEmailChannel()] })`.
+The notification package's `AbstractEmailChannel`, `AbstractSMSChannel` and
+`AbstractPushChannel` are extension points. Optional library peers do not install
+providers for SendGrid, SES, Twilio, FCM or APNS. A custom channel must own its
+transport initialization, errors and shutdown; registration alone does not
+provide a durable retry transaction.
 
 ## Cross-module wiring notes {#cross-module-wiring-notes}
 
-| Concern                          | Wiring detail                                                                                          |
-| -------------------------------- | ------------------------------------------------------------------------------------------------------ |
-| Producer vs worker mode          | `NotificationsModule.forRoot` for producers, `NotificationsModule.forWorker` for workers — different DI shapes |
-| Rotif transport                  | Configured under `transport.rotif` on the producer side; worker consumes via the same Redis instance    |
-| Rate-limiter location            | `RedisRateLimiter` runs on the worker side, before each channel delivery                                |
-| Preference enforcement           | `RedisPreferenceStore` checked on the worker — producer doesn't know per-user prefs                     |
-| Template caching                 | `templates.cacheEnabled: true` + `cacheTTL` avoid re-fetching template definitions on every send       |
-| Realtime + in-app                | `RealtimeSignaler` pushes to WS/SSE; in-app channel persists the notification to the inbox             |
-| Webhook signature                | `webhookConfig.signatureSecret` + `signatureHeader` for HMAC-signed delivery                            |
-| DLQ                              | Failed deliveries land in a Rotif dead-letter queue (see Rotif config)                                  |
-| Redis retention                  | Off in every form unless configured — see the checklist item below                                      |
+| Concern | Actual owner |
+| --- | --- |
+| Preferences and rate checks | `NotificationsService.send` path; event-worker application ports need their own policy |
+| Rendering | Caller invokes `TemplateEngine`; `send` takes the rendered payload |
+| Channel delivery | Registered channel called in `send`; separate consumer/outbox required for deferred work |
+| Worker start/stop | Host calls explicit methods with a caller-owned Redis client |
+| Health | Resolve `NOTIFICATIONS_HEALTH` and register it with HealthService explicitly |
+| Lifecycle topics | Optional `titan-events`; distinct from Rotif transport topics |
+| Retry and DLQ | Transport-specific; event worker acknowledges poison messages after `maxDeliveries` rather than sharing the Rotif DLQ policy |
+| Scheduling | Delays transport publication; local channels in `send` still run immediately |
 
 ## Production checklist {#production-checklist}
 
-- [ ] **Producer + worker pods deployed separately** — independent scaling
-- [ ] **`rateLimiterConfig.channelLimits.sms` set** — SMS is expensive and rate-limited by providers
-- [ ] **`preferenceStoreConfig.defaultPreferences` set** — compliance with user opt-outs
-- [ ] **Templates registered** at boot, not at first use
-- [ ] **DLQ monitored** — repeated failures should alert
-- [ ] **Redis retention configured** — every retention mechanism Rotif has is OFF by default, so a
-      pipeline that never sets them grows in Redis memory for as long as it runs:
-      - `maxStreamLength` (or `minStreamId`) — without one of these `publish` never trims the stream
-        it writes to. The trim runs inside the publish script, so it is also the producer that bounds
-        the stream: a stream stops being trimmed when publishing stops, at whatever size it reached.
-      - `dlqCleanup.enabled` — defaults to `false`, and the sibling limits it gates
-        (`dlqCleanup.maxAge`, `dlqCleanup.maxSize`) carry usable values that simply do not apply
-        until it is turned on. A monitored DLQ is still an unbounded one.
-      Sizing these is a deployment decision, but leaving all three unset is not a neutral default.
-- [ ] **Channel-specific timeouts** — e.g. `webhookConfig.timeout: 5_000`
-- [ ] **Realtime signaler graceful degradation** — if WS gateway is down, notification is still persisted
-- [ ] **Persistence backend backed up** — in-app inbox should survive redis loss
-- [ ] **Test channels** in staging — `MockEmailChannel` etc. for end-to-end verification
+- Select one message contract and trace producer, routing, consumer and final result.
+- Test with an empty Redis instance so pre-existing pattern registrations cannot hide missing setup.
+- Register the exact channel IDs and required concrete implementations.
+- Keep preference policy and durable retries at the layer that actually performs delivery.
+- Set retention for the chosen path: event worker defaults differ from general Rotif/DLQ settings.
+- Observe pending, failed and accepted outcomes separately; do not call broker acceptance inbox delivery.
+- Stop admission and account for outstanding work before closing dependencies.
 
 ## See also {#see-also}
 

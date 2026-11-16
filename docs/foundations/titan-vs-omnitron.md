@@ -26,7 +26,7 @@ flowchart TB
     DI[Nexus DI container]
     Net[Netron RPC<br/>HTTP / WS / TCP / Unix]
     Lif[Lifecycle hooks]
-    Mods[14 modules: auth, cache, db, ...]
+    Mods[Modules: auth, cache, db, ...]
   end
 
   subgraph Omnitron["Omnitron — supervisor + control plane (opt-in)"]
@@ -122,8 +122,8 @@ You get **everything**:
 | Distributed locks | `titan-lock` |
 | Rate limiting | `titan-ratelimit` |
 | Worker pools / process management | `titan-pm` |
-| Prometheus metrics | `titan-metrics` |
-| Notifications (email / push / SMS / webhooks) | `titan-notifications` |
+| Metric registry, history and optional text export | `titan-metrics` |
+| Notification channels and extension contracts | `titan-notifications` |
 | Service discovery | `titan-discovery` |
 | In-process event bus | `titan-events` |
 | Cross-tab browser auth | `netron-browser` + `AuthenticationClient` |
@@ -283,7 +283,7 @@ your container orchestrator. Titan keeps running.
 | Section | Layer |
 | ------- | ----- |
 | [Titan overview](../titan/overview.md) | Titan core |
-| [Titan modules](../titan/modules) | The 14 official modules — all usable without Omnitron |
+| [Titan modules](../titan/modules) | The official module packages — all usable without Omnitron |
 | [Frontend / Netron](../frontend/netron) | Browser-side; works whether the backend is Titan-alone or Omnitron-supervised |
 | [Omnitron overview](../omnitron/overview.md) | Omnitron-specific |
 | [Omnitron CLI](../omnitron/cli.md) | The 75+ commands — only relevant if you use Omnitron |

@@ -292,8 +292,9 @@ in a follow-up step.
 
 - **Logs** — `docker compose logs -f --tail 100`. For real
   aggregation, ship to Loki via the docker logging driver.
-- **Metrics** — scrape `api:3001/metrics` from a Prometheus
-  container.
+- **Metrics** — configure application instrumentation and query its chosen metric
+  store. To use a text scraper, first implement and secure an HTTP route for
+  `getPrometheusText()`; importing `titan-metrics` does not create that endpoint.
 - **Uptime** — external ping of `/healthz`.
 
 ## What you've shipped {#what-youve-shipped}

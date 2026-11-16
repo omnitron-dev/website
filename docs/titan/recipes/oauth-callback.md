@@ -3,232 +3,127 @@ id: "titan/recipes/oauth-callback"
 slug: "/docs/titan/recipes/oauth-callback"
 sidebar_position: 8
 title: OAuth callback
-description: PKCE-protected authorisation-code flow with state validation and signed-URL session bootstrap.
+description: Application-owned OAuth state and session boundaries around Titan auth primitives.
 ---
 
 # OAuth callback
 
-Handling an OAuth 2.0 authorisation-code flow correctly has a long
-checklist: state validation, PKCE, token exchange, refresh
-storage, and bootstrapping the user's session. This recipe shows
-the canonical shape using `titan-auth`, `titan-cache` (for the
-short-lived state), and the rest of the standard stack.
+Titan supplies JWT verification, signed resource tokens, rate limiting and
+storage building blocks. It does not implement a complete OAuth client or a
+single-use OAuth state store. This page describes the application boundaries
+needed around those primitives; importing the modules alone does not establish
+a working or replay-safe login flow.
 
 ## Shape {#shape}
 
-- **PKCE.** The initiating page generates `code_verifier` +
-  `code_challenge` (SHA-256). The callback validates against the
-  stored verifier.
-- **State parameter.** Random, opaque, short-TTL, tied to one
-  session. Replaying a state from another browser fails.
-- **Token exchange.** Authorisation code → access + refresh
-  tokens — server-side only, never in the browser.
-- **Signed session bootstrap.** Issue a signed URL with a JWT
-  pointing back to your app's session endpoint.
+- Generate random state and a PKCE verifier; send only the challenge in the authorization request.
+- Bind the state to the initiating browser/session and consume it atomically with an expiry check.
+- Exchange the code at the configured provider; validate the identity token against that provider's keys and claims.
+- Create the local session through the application's session authority and chosen cookie policy.
+
+`titan-cache` has no atomic compare-and-consume API. Separate `get` and `delete`
+calls can race and do not bind the request to a browser. A signed resource token
+has an expiry and unique ID, but no built-in single-use consumption store.
 
 ## Architecture {#architecture}
 
 ```mermaid
 sequenceDiagram
-  participant U as User
-  participant App as Your app
-  participant P as OAuth provider
-
-  U->>App: GET /auth/start
-  App->>App: Generate state + PKCE verifier<br/>cache(state → verifier, TTL 10m)
-  App-->>U: Redirect to provider with state + code_challenge
-  U->>P: Authenticate
-  P-->>U: Redirect to /auth/callback?code=&state=
-  U->>App: GET /auth/callback?code=...&state=...
-  App->>App: Lookup state<br/>retrieve verifier<br/>pop from cache
-  App->>P: POST /token { code, code_verifier, redirect_uri }
-  P-->>App: { access_token, refresh_token, id_token }
-  App->>App: Verify id_token<br/>create local session
-  App->>App: Sign a session-bootstrap JWT
-  App-->>U: Redirect to /session/bootstrap?token=...
+  participant Browser
+  participant App
+  participant State as Application state store
+  participant IDP as Identity provider
+  Browser->>App: start login
+  App->>State: save state + browser binding + verifier + expiry
+  App-->>Browser: provider redirect with state and challenge
+  Browser->>IDP: authenticate
+  IDP-->>Browser: authorization callback
+  Browser->>App: code, state and browser session
+  App->>State: atomically validate binding/expiry and consume
+  State-->>App: verifier or rejected state
+  App->>IDP: exchange code with verifier
+  IDP-->>App: provider tokens
+  App->>App: verify identity and create local session
+  App-->>Browser: session cookie and redirect
 ```
 
 ## Setup {#setup}
 
-```typescript
-import { Module } from '@omnitron-dev/titan';
-import { ConfigModule } from '@omnitron-dev/titan/module/config';
-import { LoggerModule } from '@omnitron-dev/titan/module/logger';
+Configure a JWT verifier for the provider's actual algorithm, JWKS URL, issuer
+and audience. A symmetric local-session secret is not the external provider's
+verification key. Do not reuse a single verifier configuration for unrelated
+issuers or audiences.
 
-import { TitanAuthModule } from '@omnitron-dev/titan-auth';
-import { TitanCacheModule } from '@omnitron-dev/titan-cache';
-import { TitanRedisModule } from '@omnitron-dev/titan-redis';
-import { TitanRateLimitModule } from '@omnitron-dev/titan-ratelimit';
+The application also supplies an authoritative state store with atomic
+consumption, HTTP routes/cookies, provider configuration, token exchange and local
+session creation. Persist state in shared storage when callbacks may reach another
+replica. An LRU cache can evict state and has no cross-replica consume guarantee.
 
-@Module({
-  imports: [
-    ConfigModule.forRoot({/* … */}),
-    LoggerModule.forRoot({ level: 'info' }),
-
-    TitanRedisModule.forRoot({ config: { url: env.REDIS_URL } }),
-
-    // Short-lived auth state cache
-    TitanCacheModule.forRoot({
-      maxSize:        10_000,
-      defaultTtl:     600,                    // 10 min
-      evictionPolicy: 'ttl',
-    }),
-
-    TitanAuthModule.forRoot({
-      algorithm:     'HS256',
-      jwtSecret:     env.JWT_SECRET,
-      issuer:        env.APP_ISSUER,
-      audience:      env.APP_AUDIENCE,
-      urlSigningKey: env.URL_SIGNING_KEY,
-    }),
-
-    TitanRateLimitModule.forRoot({
-      enabled:         true,
-      storageType:     'redis',
-      defaultLimit:    10,                   // 10 OAuth starts per minute per IP
-      defaultWindowMs: 60_000,
-    }),
-
-    AuthFlowModule,
-  ],
-})
-export class AppModule {}
-```
+Apply rate limits to the actual HTTP/RPC handlers. Registering
+`TitanRateLimitModule` alone does not protect an uninstrumented endpoint.
 
 ## Implementation {#implementation}
 
+PKCE generation is application code using Node's crypto primitives:
+
 ```typescript
-import { Service, Inject } from '@omnitron-dev/titan';
-import { Public } from '@omnitron-dev/titan/netron';
-import { Errors } from '@omnitron-dev/titan/errors';
-import {
-  JWT_SERVICE_TOKEN, SIGNED_URL_SERVICE_TOKEN,
-  type IJWTService, type ISignedUrlService,
-} from '@omnitron-dev/titan-auth';
-import { CACHE_SERVICE_TOKEN, type ICacheService }
-  from '@omnitron-dev/titan-cache';
 import { createHash, randomBytes } from 'node:crypto';
 
-const PROVIDER_AUTHORIZE = 'https://idp.example.com/oauth/authorize';
-const PROVIDER_TOKEN     = 'https://idp.example.com/oauth/token';
-const CLIENT_ID          = process.env.OAUTH_CLIENT_ID!;
-const CLIENT_SECRET      = process.env.OAUTH_CLIENT_SECRET!;
-const REDIRECT_URI       = `${process.env.APP_BASE_URL}/auth/callback`;
-
-@Service({ name: 'auth-flow' })
-class AuthFlowService {
-  constructor(
-    @Inject(CACHE_SERVICE_TOKEN)        private readonly cache:  ICacheService,
-    @Inject(JWT_SERVICE_TOKEN)          private readonly jwt:    IJWTService,
-    @Inject(SIGNED_URL_SERVICE_TOKEN)   private readonly signer: ISignedUrlService,
-  ) {}
-
-  /**
-   * Step 1: start the flow. Returns the provider URL to redirect to.
-   */
-  @Public()
-  async start(): Promise<{ redirectTo: string }> {
-    const state    = randomBytes(32).toString('base64url');
-    const verifier = randomBytes(32).toString('base64url');
-    const challenge = createHash('sha256').update(verifier).digest('base64url');
-
-    // Cache state → verifier with TTL = 10 min
-    await this.cache.getCache('auth-flow').set(`state:${state}`, verifier, { ttl: 600 });
-
-    const url = new URL(PROVIDER_AUTHORIZE);
-    url.searchParams.set('response_type',         'code');
-    url.searchParams.set('client_id',             CLIENT_ID);
-    url.searchParams.set('redirect_uri',          REDIRECT_URI);
-    url.searchParams.set('state',                 state);
-    url.searchParams.set('code_challenge',        challenge);
-    url.searchParams.set('code_challenge_method', 'S256');
-    url.searchParams.set('scope',                 'openid profile email');
-
-    return { redirectTo: url.toString() };
-  }
-
-  /**
-   * Step 2: handle the provider's callback.
-   */
-  @Public()
-  async callback(code: string, state: string): Promise<{ bootstrapUrl: string }> {
-    // Validate state — atomic get-and-delete so it can't be replayed
-    const cache = this.cache.getCache<string>('auth-flow');
-    const verifier = await cache.get(`state:${state}`);
-    if (!verifier) throw Errors.unauthorized('invalid or expired state');
-    await cache.delete(`state:${state}`);
-
-    // Exchange code for tokens
-    const response = await fetch(PROVIDER_TOKEN, {
-      method:  'POST',
-      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-      body:    new URLSearchParams({
-        grant_type:    'authorization_code',
-        client_id:     CLIENT_ID,
-        client_secret: CLIENT_SECRET,
-        code,
-        code_verifier: verifier,
-        redirect_uri:  REDIRECT_URI,
-      }),
-    });
-    if (!response.ok) throw Errors.unauthorized('token exchange failed');
-    const tokens = await response.json();
-    // tokens: { access_token, refresh_token, id_token, expires_in }
-
-    // Verify the id_token (the OAuth provider's JWT proves the user)
-    // For external IDPs, use TitanAuthModule with jwksUrl for this verify.
-    // Project-specific: store refresh_token securely (encrypted-at-rest).
-
-    // Bootstrap the local session via signed URL.
-    // ISignedTokenPayload is { resourceId, resourcePath, operation, transform? };
-    // stash bootstrap claims under `transform`.
-    const bootstrapToken = await this.signer.createSignedToken(
-      {
-        resourceId:   'session',
-        resourcePath: 'bootstrap',
-        operation:    'read',
-        transform: {
-          accessTokenHash: createHash('sha256').update(tokens.access_token).digest('hex'),
-        },
-      },
-      120,    // 2 min expiry — single-use
-    );
-
-    return {
-      bootstrapUrl: `${process.env.APP_BASE_URL}/session/bootstrap?token=${bootstrapToken}`,
-    };
-  }
+export function createAuthorizationAttempt() {
+  const state = randomBytes(32).toString('base64url');
+  const verifier = randomBytes(32).toString('base64url');
+  const challenge = createHash('sha256').update(verifier).digest('base64url');
+  return { state, verifier, challenge };
 }
 ```
 
+The following is an **application-owned contract**, not an export from Titan:
+
+```typescript
+interface OAuthStateStore {
+  save(attempt: {
+    state: string;
+    browserBinding: string;
+    verifier: string;
+    expiresAt: number;
+  }): Promise<void>;
+  // One storage operation: verify browser binding and expiry, then consume.
+  // Exactly one competing caller may receive a verifier.
+  consume(state: string, browserBinding: string): Promise<string | null>;
+}
+```
+
+Implement and test that atomic operation in the chosen database or Redis script.
+The callback rejects a missing result before token exchange. Neither `get` followed
+by `delete` nor `createSignedToken` implements this contract.
+
+After exchange, verify the provider identity token and application-specific claims
+before issuing a local session. `JWTService.createSignedToken` signs a resource
+payload (`resourceId`, `resourcePath`, `operation`, optional `transform`); it is
+not a general login/session issuance API. If an application chooses a bootstrap
+link, it must additionally store and atomically consume its one-time grant. A short
+expiry alone does not prevent reuse.
+
 ## Cross-module wiring notes {#cross-module-wiring-notes}
 
-| Concern                          | Wiring detail                                                                                  |
-| -------------------------------- | ---------------------------------------------------------------------------------------------- |
-| State cache name                 | Dedicated cache (`'auth-flow'`) — keeps short-lived auth state separate from app data           |
-| State key vs the value           | Cache key = `state:${state}` (opaque); value = `verifier`. State is what the URL carries; verifier never leaves the server. |
-| State TTL                        | 10 minutes is generous — most users finish in seconds. Shorter is fine.                         |
-| Atomic state consumption         | `get` + `delete` — prevents replaying the same state. The `getOrSet` pattern doesn't apply here. |
-| PKCE algorithm                   | SHA-256 base64url; matches `code_challenge_method: 'S256'`                                      |
-| Token storage                    | `refresh_token` is long-lived and sensitive — store encrypted at rest (`pgcrypto` or KMS)       |
-| Rate-limit per IP                | Prevents brute-force `state` guessing against the cache                                          |
-| Signed bootstrap URL             | Short TTL (≤ 2 min) and single-use; check + reject reuse on the bootstrap endpoint              |
-| Tokens never reach the browser   | Access + refresh tokens stay server-side; only your session JWT goes to the client              |
+| Concern | Boundary |
+| --- | --- |
+| State and PKCE | Application generation, browser binding, shared expiry and atomic consume |
+| Provider JWT | `JWTService.verify` with provider-specific keys/issuer/audience; full OAuth client behavior remains application code |
+| State caching | Cache TTL and `get`/`delete` do not establish single use |
+| Signed resource token | Signature and expiry, not session creation or replay prevention |
+| Rate limiting | Apply to the actual start and callback handlers |
+| Session | Application authority validates identity and creates/revokes its session |
+| Refresh tokens | Keep in the application's protected server-side store |
 
 ## Production checklist {#production-checklist}
 
-- [ ] **PKCE enabled** — `code_challenge_method: 'S256'`, never `'plain'`
-- [ ] **State validated atomically** — `get` then `delete`; no race window
-- [ ] **State TTL** ≤ 15 minutes
-- [ ] **Redirect URI exact-match** on the provider side (no wildcards)
-- [ ] **Token exchange uses POST** with `Content-Type: application/x-www-form-urlencoded`
-- [ ] **`client_secret` server-side only** — never in the browser
-- [ ] **id_token verified** — JWKS-backed verify against the IDP's keys
-- [ ] **`refresh_token` encrypted at rest** in the database
-- [ ] **Bootstrap JWT** with very short TTL (≤ 2 min) and single-use semantics
-- [ ] **Rate-limit `/auth/start` and `/auth/callback`** per IP
-- [ ] **Detect and reject reused authorisation codes** — the provider should also do this; defense in depth
-- [ ] **Detect impossible-time-window flows** (state created seconds ago coming back from a different IP)
+- Test concurrent callbacks: only one can consume the same browser-bound state.
+- Reject expired state and a callback from a different initiating browser/session.
+- Verify the chosen provider's identity token before creating the local session.
+- Keep the redirect URI and provider endpoints in trusted application configuration.
+- Verify callback routing and state storage across replicas and restarts.
+- If using bootstrap grants, test atomic consumption and replay rejection separately from signature verification.
 
 ## See also {#see-also}
 

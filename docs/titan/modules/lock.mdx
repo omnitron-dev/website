@@ -7,7 +7,7 @@ title: titan-lock
 
 # titan-lock
 
-<span class="module-badge">official · @omnitron-dev/titan-lock · stable</span>
+<span class="module-badge">official · @omnitron-dev/titan-lock</span>
 
 Distributed locks over Redis with UUIDv7 ownership, Lua-script-based
 atomic compare-and-delete release, TTL leasing with auto-extend,
@@ -20,9 +20,14 @@ Requires [`titan-redis`](./redis.mdx) (peer dependency).
 pnpm add @omnitron-dev/titan-lock @omnitron-dev/titan-redis
 ```
 
+A Redis lease can expire during a pause or partition. Renewal and UUID ownership
+prevent some races but do not fence external writes or guarantee exactly-once
+effects. Use transactional idempotency or storage fencing for those requirements.
+There is no module shutdown hook that releases every outstanding lock.
+
 ## When you need it {#when-you-need-it}
 
-- **Exactly-once jobs across a fleet** — multiple pods running the
+- **Lease-coordinated jobs across a fleet** — multiple pods running the
   same scheduler; only one should execute a given run.
 - **Critical sections across processes** — write a payment, drain a
   queue, allocate a unique resource.
@@ -128,7 +133,7 @@ async withLock<T>(
     retryDelay?:         number;     // ms (default: module defaultRetryDelay)
     exponentialBackoff?: boolean;    // default: true — delay × (attempt + 1)
     skipOnLockFailure?:  boolean;    // default: false — return undefined instead of throwing
-    autoRenew?:          boolean;    // default: true — extend the lock while fn runs so it can't expire mid-execution
+    autoRenew?:          boolean;    // default: true — attempt renewal while fn runs
     renewIntervalMs?:    number;     // default: floor(ttl / 3)
   },
 ): Promise<T>
@@ -147,17 +152,17 @@ if (result === undefined) {
 }
 ```
 
-By default (`autoRenew: true`) `withLock` runs a watchdog that
-extends the lock every `ttl / 3` while `fn` is running, so a function
-that outlives its TTL cannot let the lock expire and be re-acquired
-by another node mid-execution. If a renewal ever finds the lock no
-longer owned, it logs an error and stops renewing.
+By default (`autoRenew: true`) `withLock` attempts to extend the lease every
+`ttl / 3` while `fn` runs. A blocked event loop or Redis/network failure can still
+allow expiry. Losing the lease stops renewal but does not cancel `fn` or fence its
+external writes. Use idempotency or fencing where overlapping work is unsafe.
 
 ## `@WithDistributedLock` decorator {#withdistributedlock-decorator}
 
-Wraps a method with auto acquire / release. Returns `undefined` if
-another instance holds the lock — perfect for scheduled jobs that
-should run on exactly one pod per fleet.
+Wraps a method with acquire/release. Returns `undefined` when acquisition fails,
+including contention and Redis errors. Unlike `withLock`, the decorator does not
+renew the lease. It prevents overlapping entry only while that lease remains valid;
+a later caller can run after release in the same scheduling interval.
 
 ```typescript
 import { Cron, CronExpression } from '@omnitron-dev/titan-scheduler';
@@ -173,7 +178,7 @@ class ScheduledTasksService {
   @Cron(CronExpression.EVERY_30_SECONDS)
   @WithDistributedLock('jobs:poll-queue', 25_000)
   async pollQueue() {
-    // Exactly one pod runs this per 30s window.
+    // Perform idempotent work; the lease alone does not deduplicate a time window.
   }
 }
 ```

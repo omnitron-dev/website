@@ -7,12 +7,13 @@ title: titan-redis
 
 # titan-redis
 
-<span class="module-badge">official · @omnitron-dev/titan-redis · stable</span>
+<span class="module-badge">official · @omnitron-dev/titan-redis</span>
 
 Redis connection management with clustering, Sentinel, TLS, multiple
-named instances, pluggable Lua scripts, and the underlying foundation
-for `titan-cache` (L2), `titan-lock`, `titan-discovery`,
-`titan-ratelimit`, and `titan-notifications`.
+named instances and pluggable Lua scripts. `titan-lock` and `titan-discovery`
+consume this module; `titan-ratelimit` can use its default client. Cache L2 needs
+an `IL2CacheAdapter`; notification transports/workers receive explicit Redis
+clients. Those integrations are not installed by importing this module.
 
 ```bash
 pnpm add @omnitron-dev/titan-redis

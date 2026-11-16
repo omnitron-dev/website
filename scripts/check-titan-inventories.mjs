@@ -20,6 +20,9 @@
 
 import fs from 'node:fs';
 import path from 'node:path';
+import { createRequire } from 'node:module';
+
+const ts = createRequire(import.meta.url)('typescript');
 
 const repo = process.argv[2];
 if (!repo) {
@@ -217,6 +220,66 @@ const fail = (msg) => {
       console.log(`ok — the root re-exports exactly the ${actual.length} decorators the page names`);
     }
   }
+}
+
+// ---------------------------------------------------------------------------
+// 3. Package coverage, factory methods and declared external runtime libraries.
+// These are deliberately source facts. Their agreement does NOT prove that an
+// option in an interface is consumed or that a deployment integration works.
+// ---------------------------------------------------------------------------
+{
+  const expectedPackages = titanPkgs.map((dir) => path.basename(dir)).filter((name) => name !== 'titan').sort();
+  const index = fs.readFileSync(path.join(docsRoot, 'index.mdx'), 'utf8');
+  const indexed = [...index.matchAll(/^\|[^\n]+\|\s*`@omnitron-dev\/(titan-[a-z-]+)`\s*\|/gm)].map((m) => m[1]).sort();
+  const compare = (label, actual, expected) => JSON.stringify(actual) === JSON.stringify(expected)
+    ? [] : [`${label}: got ${JSON.stringify(actual)}, expected ${JSON.stringify(expected)}`];
+  for (const issue of compare('modules index package coverage', indexed, expectedPackages)) fail(issue);
+
+  const map = fs.readFileSync(path.join(docsRoot, 'module-map.mdx'), 'utf8');
+  const libraries = new Map();
+  for (const match of map.matchAll(/^\|\s*`(titan-[a-z-]+)`\s*\|([^\n|]*)\|\s*$/gm)) {
+    if (libraries.has(match[1])) fail(`duplicate runtime-library row: ${match[1]}`);
+    libraries.set(match[1], [...match[2].matchAll(/`([^`]+)`/g)].map((m) => m[1]).sort());
+  }
+  for (const issue of compare('runtime-library package coverage', [...libraries.keys()].sort(), expectedPackages)) fail(issue);
+  for (const pkg of expectedPackages) {
+    const manifest = JSON.parse(fs.readFileSync(path.join(pkgRoot, pkg, 'package.json'), 'utf8'));
+    const expected = Object.keys(manifest.dependencies ?? {}).filter((name) => !name.startsWith('@omnitron-dev/') && !name.startsWith('@types/')).sort();
+    for (const issue of compare(`${pkg} declared runtime libraries`, libraries.get(pkg), expected)) fail(issue);
+  }
+
+  const factoryNames = ['forRoot', 'forRootAsync', 'forFeature', 'forWorker'];
+  const factoryRows = new Map();
+  const options = fs.readFileSync(path.join(docsRoot, 'options-patterns.mdx'), 'utf8');
+  for (const line of options.split('\n')) {
+    const cells = line.split('|').map((cell) => cell.trim());
+    const match = /^`(titan-[a-z-]+|config|logger)`$/.exec(cells[1] ?? '');
+    if (!match) continue;
+    if (factoryRows.has(match[1])) fail(`duplicate factory row: ${match[1]}`);
+    factoryRows.set(match[1], factoryNames.map((_, i) => cells[i + 2] === '✓'));
+  }
+  const modules = [...expectedPackages, 'config', 'logger'].sort();
+  for (const issue of compare('factory-matrix coverage', [...factoryRows.keys()].sort(), modules)) fail(issue);
+  for (const name of modules) {
+    const dir = name.startsWith('titan-') ? path.join(pkgRoot, name, 'src') : path.join(pkgRoot, 'titan/src/modules', name);
+    const declared = new Set();
+    for (const entry of fs.readdirSync(dir)) {
+      if (!entry.endsWith('.module.ts')) continue;
+      const file = ts.createSourceFile(entry, fs.readFileSync(path.join(dir, entry), 'utf8'), ts.ScriptTarget.Latest, true);
+      for (const statement of file.statements) {
+        if (!ts.isClassDeclaration(statement)) continue;
+        for (const member of statement.members) {
+          if (ts.isMethodDeclaration(member) && member.modifiers?.some((modifier) => modifier.kind === ts.SyntaxKind.StaticKeyword)) {
+            declared.add(member.name.getText(file));
+          }
+        }
+      }
+    }
+    for (const issue of compare(`${name} factory methods`, factoryRows.get(name), factoryNames.map((factory) => declared.has(factory)))) fail(issue);
+  }
+  controls.push(['a missing module inventory row', compare('control', indexed.slice(1), expectedPackages).length, 1]);
+  controls.push(['a falsely documented factory', compare('control', [true, true, true, true], [true, true, false, false]).length, 1]);
+  console.log(`checked ${expectedPackages.length} Titan packages, their runtime-library rows and ${modules.length} factory rows`);
 }
 
 // ---------------------------------------------------------------------------

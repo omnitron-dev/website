@@ -78,15 +78,17 @@ or a 50-pod fleet.
 
 <span class="module-badge">official · @omnitron-dev/titan-cache</span>
 
-- [ ] **Don't cache sensitive payloads in L2.** L2 is Redis;
-  Redis persistence means caches survive process restart and may
-  be backed up. Use L1-only for PII / auth state.
+- [ ] **Define cache data retention.** L2 is the configured adapter, not
+  necessarily Redis. Check its persistence, backups and access controls before
+  placing sensitive data there. Authentication state needs an authoritative store,
+  not an eviction-prone cache alone.
 - [ ] **Key namespacing per tenant.** `users:{tenantId}:{userId}` —
   never a bare `users:{userId}` if you have multi-tenant data.
-- [ ] **TTL always set.** Default to `defaultTTL`; unbounded keys
+- [ ] **TTL always set.** Configure `defaultTtl`; unbounded keys
   drift forever.
-- [ ] **Cache stampede protection.** Use `getOrSet` (singleflight)
-  not `get` + manual `set` on miss.
+- [ ] **Cache stampede protection.** Reuse `createCacheGetOrSet(cache)` or a
+  multi-tier `getOrSet` method. Single-flight is process-local; it does not
+  coordinate external side effects across replicas.
 - [ ] **No cache-key from user input without hashing/length cap.**
   Multi-MB keys are a DOS vector against the cache itself.
 
@@ -180,9 +182,9 @@ or a 50-pod fleet.
 
 <span class="module-badge">official · @omnitron-dev/titan-metrics</span>
 
-- [ ] **`/metrics` endpoint authenticated.** Prometheus exposition
-  reveals throughput, error rates, internal endpoints — gate
-  behind an operator token.
+- [ ] **Access policy for any metric route.** If the application exposes text
+  metrics over HTTP, restrict access to operational readers. The module supplies
+  text output but does not install a `/metrics` endpoint.
 - [ ] **No PII in label values.** `{ userId }` creates a fresh
   series per user — both a cardinality explosion and a PII leak.
   Keep labels to `tier`, `region`, `status`.

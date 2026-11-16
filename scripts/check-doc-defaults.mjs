@@ -28,12 +28,10 @@ if (!OMNI || !fs.existsSync(path.join(OMNI, 'packages'))) {
   process.exit(2);
 }
 
-const PKGS = [
-  'titan', 'titan-auth', 'titan-cache', 'titan-database', 'titan-discovery',
-  'titan-events', 'titan-health', 'titan-lock', 'titan-metrics',
-  'titan-notifications', 'titan-pm', 'titan-ratelimit', 'titan-redis',
-  'titan-scheduler', 'titan-telemetry-relay',
-];
+const PKGS = fs.readdirSync(path.join(OMNI, 'packages'), { withFileTypes: true })
+  .filter(entry => entry.isDirectory() && /^titan(?:-|$)/.test(entry.name))
+  .map(entry => entry.name);
+if (PKGS.length < 15) throw new Error('Titan package discovery is unexpectedly incomplete');
 
 /** A modules/ page documents ONE package. Without this, a page about
  *  titan-health "matches" titan's unrelated option of the same name. */
@@ -41,6 +39,7 @@ const PAGE_PKG = {
   redis: 'titan-redis', auth: 'titan-auth', cache: 'titan-cache',
   database: 'titan-database', discovery: 'titan-discovery', events: 'titan-events',
   health: 'titan-health', lock: 'titan-lock', metrics: 'titan-metrics',
+  lumen: 'titan-lumen', mailer: 'titan-mailer', storage: 'titan-storage',
   notifications: 'titan-notifications', pm: 'titan-pm', ratelimit: 'titan-ratelimit',
   scheduler: 'titan-scheduler', 'telemetry-relay': 'titan-telemetry-relay',
   config: 'titan', logger: 'titan', 'shared-session': 'titan-auth', 'rls': 'titan',

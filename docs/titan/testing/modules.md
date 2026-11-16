@@ -75,7 +75,7 @@ const logger = {
 } as any;
 
 // Later:
-expect(logger.info).toHaveBeenCalledWith('findById', expect.objectContaining({ id: 'u_42' }));
+expect(logger.info).toHaveBeenCalledWith(expect.objectContaining({ id: 'u_42' }), 'findById');
 ```
 
 ## Official modules {#official-modules}

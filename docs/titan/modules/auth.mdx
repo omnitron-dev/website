@@ -7,11 +7,11 @@ title: titan-auth
 
 # titan-auth
 
-<span class="module-badge">official · @omnitron-dev/titan-auth · stable</span>
+<span class="module-badge">official · @omnitron-dev/titan-auth</span>
 
 :::info
-This page covers the JWT primitives (issuance, verification,
-rotation, caching). For the **authorisation** surface
+This page covers JWT verification, key selection, caching and signed resource
+tokens. General account login and session issuance belong to an application or preset. For the **authorisation** surface
 (permissions, roles, ABAC, per-user overrides, RLS bridge,
 audit), start at the [Authentication & Authorisation](../../auth/index.md)
 section — `titan-auth` is the foundation it builds on.
@@ -22,8 +22,8 @@ For migrating from a pre-`pv`-claim deployment, see the
 
 JWT authentication with HS256 / RS256 / ES256 support, remote JWKS,
 multi-key rotation via the `kid` header, an LRU token cache, signed-URL
-service, and Bearer/API-key middleware. Single self-contained module
-that issues, verifies, caches, and rotates.
+service, and Bearer/API-key middleware. Verification and signed resource tokens use `jose`. The verification-key map
+accepts multiple HS256 secrets; the application supplies keys and rotation policy.
 
 ```bash
 pnpm add @omnitron-dev/titan-auth
@@ -292,10 +292,9 @@ eviction.
 
 ## Anti-patterns {#anti-patterns}
 
-- **Long `cacheTTL` with frequent token revocation.** Revocation
-  bypasses the cache only after `cacheTTL` expires. For high-churn
-  revocation lists, lower `cacheTTL` or call `clearCache()` on
-  revocation events.
+- **Assuming cache expiry is revocation.** Plain JWT verification has no
+  revocation store: clearing the cache still accepts a valid signed token. Use
+  the shared-session preset or an explicit authority check for revocation.
 - **Reading `jwtSecret` from a checked-in config.** Always inject
   via env or a secret manager.
 - **Skipping `issuer` and `audience` claims.** Without them, a token

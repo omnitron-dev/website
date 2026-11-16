@@ -265,7 +265,11 @@ The decorator releases the lock in `finally` — even on throw.
 
 | Decorator                                                       | Targets | Effect                                                  |
 | --------------------------------------------------------------- | ------- | ------------------------------------------------------- |
-| `@Metrics(metricName?)`                                         | method  | Auto-track `rpc_requests_total`, `rpc_request_duration_seconds`, `rpc_errors_total` around the call (optional name prefix) |
+| `@Metrics(metricName?)`                                         | method  | Update registry request/error counters and latency; argument overrides the `method` label |
+
+`@Metrics` requires `attachMetricsService(instance, service)`. No module bootstrap
+automatically attaches it; observations update the registry, not the history queue.
+Use `recordTyped` when history is required.
 
 ### `titan-notifications` {#titan-notifications}
 
@@ -273,7 +277,11 @@ The decorator releases the lock in `finally` — even on throw.
 
 | Decorator                                | Targets | Effect                                                       |
 | ---------------------------------------- | ------- | ------------------------------------------------------------ |
-| `@OnNotification(pattern, opts?)`        | method  | Worker-side handler for notifications matching a pattern     |
+| `@OnNotification(pattern, opts?)`        | method  | Attach notification-handler metadata for explicit registration     |
+
+Register decorated notification instances with `NotificationsModule.registerHandlers`
+and unregister them on shutdown. This metadata is separate from EventService
+lifecycle topics and does not start a notification worker.
 
 ### `titan-pm` {#titan-pm}
 
@@ -367,39 +375,26 @@ When in doubt, the import path is authoritative.
 
 ## Composability rules {#composability-rules}
 
-Decorators apply **outside-in** — outermost runs last. The framework
-order normally arranges:
+Decorator composition depends on each implementation. Legacy TypeScript method
+decorators are applied from the bottom upward; wrappers then call the function
+they received. A metadata-only decorator does not add a runtime call frame.
+There is no framework-wide order that automatically combines every package.
 
-```typescript
-@Public()                  // Netron exposure (outermost)
-@RequireAuth()             // auth check
-@RateLimit({ ... })        // rate limit
-@Validate({ input })       // input validation
-@Metrics()                 // instrumentation
-@WithDistributedLock(key)  // lock
-async create(input) {/*…*/}
-```
-
-The runtime order at call-time:
-- enter Public → enter auth → enter rate limit → enter validate →
-  enter metrics → enter lock → **method body** → exit lock → exit
-  metrics → exit validate → exit rate limit → exit auth → exit Public
-
-This is the *only* order that makes sense:
-- Exposure outside auth (auth runs after the request enters the surface).
-- Rate limit before validate (cheaper to reject early).
-- Metrics around the lock (so you measure lock contention).
+Before composing wrappers, satisfy their wiring contracts: authentication context,
+rate-limit service, cache provider, metric attachment and lock service. Choose the
+order according to the operation: whether denied requests are measured, whether
+cached results require authorization, and which work a lease protects. Test that
+actual method path, including rejection and cleanup.
 
 ## Anti-patterns {#anti-patterns}
 
-- **`@Cacheable` on a non-idempotent method.** Cache returns the
-  same value forever; the side-effect runs once. Use `@CachePut`
-  or `@CacheInvalidate` if you have side-effects.
+- **`@Cacheable` on a side-effecting method.** Cache hits skip the method; misses,
+  expiry and eviction run it again. Use explicit write and invalidation logic.
 - **`@RateLimit` without a per-caller key.** All callers share one
   bucket. Include the user / IP / api-key in the key template.
-- **`@WithDistributedLock` without a TTL.** A crashed holder pins
-  the lock forever. Always set a TTL ≥ the longest credible work
-  time.
+- **Assuming a lock covers unlimited work.** The decorator defaults to a 60-second
+  TTL and does not renew it. Choose a lease budget and protect external writes
+  against work that continues after lease loss.
 - **`@OnEvent` handler that throws.** Throws don't propagate
   through the bus by default; the bus may log and continue. Wrap
   in try/catch if you need to ensure recovery.

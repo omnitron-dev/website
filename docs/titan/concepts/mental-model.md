@@ -44,8 +44,14 @@ export class OrdersService {
 
   @Public()
   async findById(@Validate(IdSchema) id: string): Promise<Order> {
-    this.logger.debug('findById', { id });
-    return this.cache.getOrSet(`order:${id}`, () => this.db.findOrder(id));
+    this.logger.debug({ id }, 'findById');
+    const cache = this.cache.getCache<Order>();
+    const key = `order:${id}`;
+    const cached = await cache.get(key);
+    if (cached !== undefined) return cached;
+    const order = await this.db.findOrder(id);
+    await cache.set(key, order);
+    return order;
   }
 }
 ```

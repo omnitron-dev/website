@@ -3,293 +3,168 @@ id: "titan/recipes/api-service"
 slug: "/docs/titan/recipes/api-service"
 sidebar_position: 2
 title: API service stack
-description: Public HTTP/WS API — auth, database, cache, rate limiting, health, metrics.
+description: Compose API infrastructure with explicit authentication, caching, health and instrumentation boundaries.
 ---
 
 # API service stack
 
-The canonical shape for a public API that handles user traffic:
-authenticated requests, database reads/writes, cache in front,
-rate limiting per user, health probes for Kubernetes, metrics for
-dashboards.
+This recipe composes providers for an API application. Importing the modules
+does not expose an HTTP server, authorize requests or instrument every method.
+The application must connect those providers to its service and transport paths.
 
 ## Shape {#shape}
 
-- **Authenticated.** JWT tokens (or service-key for trusted
-  callers) verified on every request.
-- **Database-backed.** Postgres + Kysely, soft-delete + timestamps
-  plugins on, RLS for tenant isolation.
-- **Cache in front.** L1 in-memory per pod, L2 in Redis shared
-  across pods.
-- **Rate-limited.** Per-user sliding window in Redis, tiered plans.
-- **Health-probed.** `/healthz` for liveness, `/readyz` for
-  readiness, both Kubernetes-friendly.
-- **Metrics.** Counters / histograms for every RPC method,
-  exported in Prometheus format.
+| Requirement | Implementation boundary |
+| --- | --- |
+| Authentication | Configure Netron authentication and application authorization; `titan-auth` supplies verification primitives |
+| Database | Supply a connection, schema and repository policy |
+| Cache | Start with a local cache; shared L2 requires an `IL2CacheAdapter` |
+| Rate limits | Check a key derived from verified caller identity; shared storage must actually be connected |
+| Health | Register dependency indicators and expose any HTTP probe routes explicitly |
+| Metrics | Record application observations and choose history storage; optional text output is separate |
 
 ## Architecture {#architecture}
 
 ```mermaid
 flowchart LR
-  Client[Browser / mobile]
-  Client -->|HTTPS + JWT| Edge[Netron HTTP transport]
-  Edge --> Auth[titan-auth<br/>JWTService]
-  Auth --> Rate[titan-ratelimit<br/>per-user]
-  Rate --> Service[Your @Service classes]
-  Service --> Cache[titan-cache<br/>L1 → L2]
-  Cache -.L2.-> Redis[(Redis)]
-  Service --> DB[titan-database<br/>Kysely + RLS]
+  Client[Client] --> Boundary[Configured Netron authentication]
+  Boundary --> API[Application authorization and service methods]
+  API --> Limit[RateLimitService]
+  API --> Cache[Local cache]
+  API --> DB[DatabaseManager and repositories]
+  API --> Metrics[MetricsService]
+  Limit --> Redis[(Configured Redis client)]
   DB --> PG[(PostgreSQL)]
-  Service --> Metrics[titan-metrics]
-  Health[titan-health] -.indicators.-> DB
-  Health -.indicators.-> Redis
-  Probe[Kubernetes probes] --> Health
-  Metrics --> Prom["/metrics endpoint"]
+  Metrics --> History[(Selected metric history store)]
+  Probe[Application HTTP probe route] --> Health[HealthService indicators]
 ```
+
+The application implements the arrows from request handling to rate limiting,
+cache and metrics. Configure health indicators for the dependencies the readiness
+policy needs; module imports do not register every dependency automatically.
 
 ## `AppModule` {#appmodule}
 
+This provider configuration assumes PostgreSQL and Redis are available. It uses
+an in-memory cache and metric history so their lifetime is explicit.
+
 ```typescript
 import { Module } from '@omnitron-dev/titan';
-import { z } from '@omnitron-dev/titan/validation';
-import { ConfigModule } from '@omnitron-dev/titan/module/config';
-import { LoggerModule, ConsoleTransport, RedactionProcessor }
-  from '@omnitron-dev/titan/module/logger';
-
+import { LoggerModule } from '@omnitron-dev/titan/module/logger';
 import { TitanRedisModule } from '@omnitron-dev/titan-redis';
-import { TitanAuthModule } from '@omnitron-dev/titan-auth';
 import { TitanDatabaseModule } from '@omnitron-dev/titan-database';
 import { TitanCacheModule } from '@omnitron-dev/titan-cache';
 import { TitanRateLimitModule } from '@omnitron-dev/titan-ratelimit';
 import { TitanHealthModule } from '@omnitron-dev/titan-health';
 import { TitanMetricsModule } from '@omnitron-dev/titan-metrics';
-import { sql } from 'kysely';
-
-const AppConfigSchema = z.object({
-  env: z.enum(['development', 'staging', 'production']),
-  redis: z.object({ url: z.string().url() }),
-  database: z.object({ url: z.string().url() }),
-  auth: z.object({
-    jwtSecret: z.string(),
-    issuer: z.string(),
-    audience: z.string(),
-  }),
-  rateLimit: z.object({
-    defaultLimit: z.number().int(),
-    defaultWindowMs: z.number().int(),
-  }),
-});
 
 @Module({
   imports: [
-    // ── Configuration + logging (auto-loaded; shown for completeness) ──
-    ConfigModule.forRoot({
-      schema:  AppConfigSchema,
-      sources: [
-        { type: 'file', path: 'config/default.yaml' },
-        { type: 'file', path: 'config/${NODE_ENV}.yaml', optional: true },
-        { type: 'env',  prefix: 'APP_' },
-      ],
-      validateOnStartup: true,
-      watchForChanges:   process.env.NODE_ENV !== 'production',
+    LoggerModule.forRoot({ level: 'info', redact: ['password', 'token'] }),
+    TitanRedisModule.forRoot({
+      config: { host: 'localhost', port: 6379, db: 0 },
     }),
-
-    LoggerModule.forRoot({
-      level: process.env.NODE_ENV === 'production' ? 'info' : 'debug',
-      transports: [new ConsoleTransport()],
-      processors: [
-        new RedactionProcessor(['password', 'token', 'headers.authorization', 'creditCard.*']),
-      ],
-    }),
-
-    // ── Foundation ─────────────────────────────────────────────────────
-    TitanRedisModule.forRootAsync({
-      useFactory: (config: ConfigService) => ({
-        clients: [
-          { namespace: 'default', url: config.get('redis.url'), db: 0 },
-          { namespace: 'cache',   url: config.get('redis.url'), db: 1 },
-          { namespace: 'rl',      url: config.get('redis.url'), db: 4 },
-        ],
-      }),
-      inject: [ConfigService],
-    }),
-
-    // ── Database ───────────────────────────────────────────────────────
-    TitanDatabaseModule.forRootAsync({
-      useFactory: (config: ConfigService) => ({
-        connection: {
-          dialect:        'postgres',
-          connection:     config.get('database.url'),
-          pool:           { min: 2, max: 20 },
-          migrationsPath: './migrations',
-          coerceBigint:   true,
-        },
-        // Global plugins are a Kysera plugin list, not a boolean map.
-        kysera: {
-          plugins: ['soft-delete', 'timestamps', 'audit'],
-        },
-        // RLS is enabled per-repository via @Policy/@Filter decorators
-        // (see the Multi-tenant SaaS recipe), not a global plugin toggle.
-      }),
-      inject: [ConfigService],
-    }),
-
-    // ── Cache (L1 in-memory + L2 Redis) ────────────────────────────────
-    TitanCacheModule.forRootAsync({
-      useFactory: (redis: RedisService) => ({
-        multiTier: true,
-        l1: { maxSize: 5_000,  ttl: 60 },             // hot — 1 min
-        l2: { client: redis.getClient('cache'), ttl: 3_600, prefix: 'cache:' },
-        evictionPolicy: 'lru',
-      }),
-      inject: [RedisService],
-    }),
-
-    // ── Auth ───────────────────────────────────────────────────────────
-    TitanAuthModule.forRootAsync({
-      useFactory: (config: ConfigService) => ({
-        algorithm:    'HS256',
-        jwtSecret:    config.get('auth.jwtSecret'),
-        issuer:       config.get('auth.issuer'),
-        audience:     config.get('auth.audience'),
-        cacheEnabled: true,
-        cacheMaxSize: 5_000,
-        cacheTTL:     300_000,                         // 5 min
-      }),
-      inject: [ConfigService],
-    }),
-
-    // ── Rate limiting ──────────────────────────────────────────────────
-    TitanRateLimitModule.forRootAsync({
-      useFactory: (config: ConfigService) => ({
-        enabled:         true,
-        strategy:        'sliding-window',
-        storageType:     'redis',                      // shared across pods
-        defaultLimit:    config.get('rateLimit.defaultLimit'),
-        defaultWindowMs: config.get('rateLimit.defaultWindowMs'),
-        keyPrefix:       'rl',
-        tiers: {
-          free:       { name: 'free',       limit: 60,     windowMs: 60_000 },
-          pro:        { name: 'pro',        limit: 1_000,  windowMs: 60_000 },
-          enterprise: { name: 'enterprise', limit: 10_000, windowMs: 60_000 },
-        },
-      }),
-      inject: [ConfigService],
-    }),
-
-    // ── Health probes ──────────────────────────────────────────────────
-    TitanHealthModule.forRootAsync({
-      // The database indicator wants an object with raw(), execute() or
-      // query() — a Kysely instance has none of them, so wrap it. Passing the
-      // connection straight through throws on the first check.
-      useFactory: async (db: DatabaseManager, redis: RedisService) => ({
-        enableMemoryIndicator:    true,
-        enableEventLoopIndicator: true,
-        enableDatabaseIndicator:  true,
-        databaseConnection: {
-          execute: async (q: string) => { await sql.raw(q).execute(await db.getConnection()); },
-        },
-        enableRedisIndicator:     true,
-        redisClient:              redis.getClient('default'),
-        memoryThresholds:         { heapDegradedThreshold: 0.8, heapUnhealthyThreshold: 0.95 },
-        eventLoopThresholds:      { lagDegradedThreshold: 50, lagUnhealthyThreshold: 200 },
-        timeout:                  3_000,
-        enableCaching:            true,
-        cacheTtl:                 1_000,
-        enableRpcService:         true,                 // expose via Netron
-        version:                  process.env.APP_VERSION,
-      }),
-      inject: [DATABASE_MANAGER, RedisService],
-    }),
-
-    // ── Metrics ────────────────────────────────────────────────────────
-    TitanMetricsModule.forRoot({
-      appName:    'my-api',
-      collection: {
-        enabled:  true,
-        interval: 10_000,
-        process:  true,
-        system:   true,
-        rpc:      true,                                 // declared option; no automatic RPC collection
+    TitanDatabaseModule.forRoot({
+      connection: {
+        dialect: 'postgres',
+        connection: process.env.DATABASE_URL!,
       },
-      storage: { type: 'memory', batchSize: 500, flushInterval: 10_000 },
-      retention: { maxAge: '7d', cleanupInterval: 3_600_000 },
     }),
-
-    // ── Your feature modules ───────────────────────────────────────────
-    UsersModule,
-    OrdersModule,
-    BillingModule,
+    TitanCacheModule.forRoot({ maxSize: 5_000, defaultTtl: 60, evictionPolicy: 'lru' }),
+    TitanRateLimitModule.forRoot({
+      storageType: 'redis',
+      strategy: 'sliding-window',
+      defaultLimit: 100,
+      defaultWindowMs: 60_000,
+    }),
+    TitanHealthModule.forRoot({
+      enableMemoryIndicator: true,
+      enableEventLoopIndicator: true,
+      timeout: 3_000,
+    }),
+    TitanMetricsModule.forRoot({
+      appName: 'my-api',
+      collection: { process: true, system: false, interval: 10_000 },
+      storage: { type: 'memory', batchSize: 500, flushInterval: 10_000 },
+    }),
   ],
 })
 export class AppModule {}
 ```
 
+Validate required configuration before boot. Register the application's service
+providers and configure its [Netron authentication](../netron/authentication.md)
+before exposing a listener. See [auth](../modules/auth.mdx) for verification
+configuration; importing that module alone does not authenticate Netron calls.
+
+The rate-limit factory uses the default Redis service. If it cannot obtain a
+client, its factory can fall back to memory, so verify the selected storage in the
+running application. Redis names do not implicitly assign clients to other
+modules. Add SQL metric persistence using the [storage adapter contract](../modules/metrics.mdx#storage-and-commit-boundaries).
+
 ## A typical `@Service` {#a-typical-service}
 
+A service can create this reader once and call it after authorization and rate
+limiting. The caller supplies the cache, metrics provider and repository lookup;
+this helper is application code, not a Titan export.
+
 ```typescript
-import { Service, Inject } from '@omnitron-dev/titan';
-import { Public } from '@omnitron-dev/titan/netron';
-import { Cacheable, CacheInvalidate } from '@omnitron-dev/titan-cache';
-import { InjectRepository } from '@omnitron-dev/titan-database';
-import { RequireAuth } from '@omnitron-dev/titan-auth';
-import { RateLimit, RATE_LIMIT_SERVICE_TOKEN, type IRateLimitService } from '@omnitron-dev/titan-ratelimit';
-import { Metrics }     from '@omnitron-dev/titan-metrics';
+import { createCacheGetOrSet, type ICache } from '@omnitron-dev/titan-cache';
+import type { IMetricsService } from '@omnitron-dev/titan-metrics';
 
-@Service('users@1.0.0')
-class UsersService {
-  constructor(
-    @InjectRepository(UsersRepository) private readonly repo: UsersRepository,
-    // @RateLimit reads the service off this exact property name.
-    @Inject(RATE_LIMIT_SERVICE_TOKEN) private readonly __rateLimitService__: IRateLimitService,
-  ) {}
-
-  @Public()
-  @RequireAuth({ allowAnonymous: false })
-  @RateLimit({ limit: 100, windowMs: 60_000 })   // key = {class}:{method}:{arg0} by default
-  @Cacheable({ cacheName: 'users', keyPrefix: 'u', ttl: 60, tags: (id) => [`user:${id}`] })
-  @Metrics('users.findById')                      // tracks total + duration + errors
-  async findById(id: string) {
-    return this.repo.find(id);
-  }
-
-  @Public()
-  @RequireAuth({ roles: ['admin'] })
-  @CacheInvalidate({ cacheName: 'users', tags: (input) => [`user:${input.id}`] })
-  async update(input: { id: string; patch: Partial<User> }) {
-    return this.repo.update(input.id, input.patch);
-  }
+export function createCachedReader<T>(
+  cache: ICache<T>,
+  metrics: IMetricsService,
+  load: (id: string) => Promise<T>,
+) {
+  const getOrSet = createCacheGetOrSet(cache);
+  return async (id: string): Promise<T> => {
+    const started = performance.now();
+    const labels = { app: 'my-api', operation: 'read' };
+    try {
+      return await getOrSet(`record:${id}`, () => load(id), { ttl: 60 });
+    } finally {
+      metrics.recordTyped('histogram', 'api_read_duration_seconds', labels,
+        (performance.now() - started) / 1000);
+    }
+  };
 }
 ```
 
+For tenant-dependent results, include the verified tenant in the key and enforce
+the repository's access policy before returning data. Do not cache a result under
+a key shared by callers with different visibility. Invalidate affected keys after
+a successful write. The helper coalesces concurrent loads only within that helper
+instance; it is not a distributed transaction or an idempotency ledger.
+
+`recordTyped` updates the registry and queues a history sample. `@Metrics` instead
+requires `attachMetricsService(instance, service)` and updates only the registry.
+Neither path is installed automatically by `collection.rpc`.
+
 ## Cross-module wiring notes {#cross-module-wiring-notes}
 
-| Concern               | Wiring detail                                                                                   |
-| --------------------- | ----------------------------------------------------------------------------------------------- |
-| Redis namespaces      | `default` (general), `cache` (L2), `rl` (rate limits) — isolate per DB index to prevent collisions |
-| Cache L2 client       | `TitanCacheModule.forRootAsync` injects `RedisService` and gets the `cache` namespace explicitly |
-| Health → database     | `await db.getConnection()` — `getConnection()` is async; the awaited `Kysely` instance is what `DatabaseHealthIndicator` accepts |
-| Health → redis        | Pass `redis.getClient('default')` — uses `.ping()` for liveness                                  |
-| Auth cache vs JWT TTL | `cacheTTL: 300_000` < typical JWT expiry; revoked tokens stay valid until cache expires. Lower for high-churn revocation. |
-| Rate limit key shape  | `@RateLimit` takes an options object only. The key defaults to `{class}:{method}:{arg0}`; pass `keyGenerator: (...args) => ...` to fold in the auth identity. The service must inject the limiter as `__rateLimitService__` or the decorator silently no-ops |
-| Metrics + Netron      | Instrument calls explicitly with `recordTyped`; `collection.rpc` has no runtime effect. `@Metrics` requires attachment and updates only the registry |
+| Concern | Required wiring |
+| --- | --- |
+| Shared cache | Implement/supply `IL2CacheAdapter`; a raw `ioredis` client does not satisfy the cache adapter contract |
+| Database health | Supply `execute`, `raw` or `query` through an adapter; a Kysely object cannot be passed directly |
+| Redis health | Pass the selected client explicitly to the indicator |
+| JWT revocation | Verification cache expiry is not token revocation; implement the required revocation/session policy separately |
+| Method auth decorator | `@RequireAuth` needs `__authMiddleware__` and a request-like argument with headers; arbitrary RPC arguments do not supply that context |
+| Rate-limit decorator | Resolves `__rateLimitService__` or the ambient configured service; an absent service allows the call. Use verified identity for the key |
+| Health endpoints | `HealthService` supplies results; application routes choose HTTP status, access and liveness/readiness policy |
+| Cleanup | Stop producers and await persistence; explicitly invoke cleanup required by the [lifecycle contract](../modules/lifecycle-reference.mdx) |
 
 ## Production checklist {#production-checklist}
 
-- [ ] `validateOnStartup: true` on ConfigModule — misconfig fails at boot
-- [ ] `watchForChanges: false` in production — hot-reload is dev-only
-- [ ] `LoggerModule.processors` includes `RedactionProcessor` with **every** sensitive path
-- [ ] `auth.cacheTTL` ≤ acceptable revocation window
-- [ ] Database `pool.max` ≤ Postgres `max_connections` ÷ pod count
-- [ ] Rate limit `storageType: 'redis'` (not `'memory'`) for multi-pod
-- [ ] Kubernetes probes wired:
-      ```yaml
-      livenessProbe:  { httpGet: { path: /healthz, port: 3000 } }
-      readinessProbe: { httpGet: { path: /readyz,  port: 3000 } }
-      ```
-- [ ] Metric history is flushed and queryable; expose an application HTTP route only if a text scraper is required
-- [ ] Logs shipping off-host (sidecar / fluentbit / stdout to log aggregator)
-- [ ] Database migrations run as a separate step (not at app boot in production)
+- Verify the authenticated client path and rejection of unauthorized operations.
+- Exercise cache misses, writes, invalidation and tenant separation through the service.
+- Verify rate limits across application instances using the actual shared backend.
+- Register and test dependency health indicators; do not mark readiness from memory checks alone.
+- Record, flush and query a known metric; memory history disappears on restart.
+- Test shutdown and recovery using the selected storage and connection owners.
+
+There is no built-in `/metrics`, `/healthz` or `/readyz` HTTP listener in these
+modules. Expose and secure the routes the deployment actually needs.
 
 ## See also {#see-also}
 

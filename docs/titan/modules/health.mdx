@@ -7,7 +7,7 @@ title: titan-health
 
 # titan-health
 
-<span class="module-badge">official · @omnitron-dev/titan-health · stable</span>
+<span class="module-badge">official · @omnitron-dev/titan-health</span>
 
 Centralised health-check system with built-in indicators (memory,
 event loop, disk, database, Redis), Kubernetes-style probes (live,
@@ -25,8 +25,8 @@ pnpm add @omnitron-dev/titan-health
   is up".
 - **Operator dashboards.** A single endpoint returns per-indicator
   status the web console / CLI can render.
-- **Auto-degradation triggers.** Subscribe to `health:changed` and
-  remove the pod from rotation on unhealthy.
+- **Readiness decisions.** Poll `isReady()` or `check()` and let your host or
+  orchestrator act on the result. There is no `health:changed` event.
 
 ## Quickstart {#quickstart}
 
@@ -137,32 +137,34 @@ class AdminService {
 
 ## Custom indicators {#custom-indicators}
 
-Implement the indicator interface:
+For a check with dependencies, construct an indicator and register the instance:
 
 ```typescript
-import { Injectable } from '@omnitron-dev/titan';
-import type { IHealthIndicator, HealthIndicatorResult }
+import { HealthService, type IHealthIndicator, type HealthIndicatorResult }
   from '@omnitron-dev/titan-health';
 
-@Injectable()
-class StripeHealthIndicator implements IHealthIndicator {
-  name = 'stripe';
-
-  constructor(private readonly stripe: Stripe) {}
-
+class DependencyIndicator implements IHealthIndicator {
+  name = 'dependency';
+  constructor(private readonly probe: () => Promise<void>) {}
   async check(): Promise<HealthIndicatorResult> {
     try {
-      await this.stripe.balance.retrieve();
+      await this.probe();
       return { status: 'healthy' };
-    } catch (e) {
-      return { status: 'degraded', message: String(e) };
+    } catch {
+      return { status: 'degraded', message: 'Dependency probe failed' };
     }
   }
 }
+
+export function registerDependency(health: HealthService, probe: () => Promise<void>) {
+  health.registerIndicator(new DependencyIndicator(probe));
+}
 ```
 
-Register via the `indicators: [StripeHealthIndicator]` option on
-`forRoot`, or call `health.registerIndicator(...)` at runtime.
+`forRoot({ indicators: [...] })` and `forFeature([...])` call indicator constructors
+without arguments; they do not resolve constructor dependencies through DI. Use
+those options only for no-argument indicators. Indicators exported by other
+packages, such as notifications, must also be registered explicitly.
 
 ## Aggregation rule {#aggregation-rule}
 
@@ -197,6 +199,7 @@ readinessProbe:
   periodSeconds:       3
 ```
 
+The application must provide these HTTP routes; the module opens no HTTP server.
 `/healthz` → `isAlive()`; `/readyz` → `isReady()`. Detailed JSON
 report typically served under `/healthz/full` or via the Netron RPC
 endpoint.
@@ -218,10 +221,9 @@ Pass `detailRpcRoles: ['viewer', 'operator', 'admin']` to `forRoot` or return it
 
 ## TTL caching {#ttl-caching}
 
-Set `enableCaching: true` + `cacheTtl: 1000` to coalesce repeated
-checks within a 1-second window. Useful when many components ask
-for health simultaneously (probe + dashboard + auto-degrade
-listener). Call `invalidateCache()` to force re-check.
+Set `enableCaching: true` + `cacheTtl: 1000` to reuse a completed result for one
+second. Concurrent calls before the first result completes each run checks; there
+is no single-flight coalescing. `invalidateCache()` drops the completed result.
 
 ## Tokens {#tokens}
 

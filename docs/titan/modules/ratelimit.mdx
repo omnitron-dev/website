@@ -7,7 +7,7 @@ title: titan-ratelimit
 
 # titan-ratelimit
 
-<span class="module-badge">official · @omnitron-dev/titan-ratelimit · stable</span>
+<span class="module-badge">official · @omnitron-dev/titan-ratelimit</span>
 
 Unified rate limiting with three algorithms (sliding-window,
 fixed-window, token-bucket), pluggable storage (in-memory or Redis),
@@ -431,11 +431,17 @@ For most workloads:
 
 ## Lifecycle {#lifecycle}
 
-The service uses periodic cleanup intervals on the in-memory
-storage (sweeping expired keys); no explicit lifecycle hooks
-beyond the standard ones. On module shutdown, `destroy()` clears
-the cleanup timer and closes the Redis storage client where
-applicable.
+In-memory storage owns a cleanup timer. `RateLimitService.destroy()` invokes its
+storage's `destroy()`; call it explicitly when the host shuts down. The service's
+Titan `onDestroy()` currently only clears the ambient decorator reference and
+does not run that cleanup. Redis storage borrows its client and does not close it.
+
+`forRootAsync` currently injects the default Redis client token even when the
+resolved configuration selects memory. For memory-only configuration without
+that provider, use synchronous `forRoot` or supply storage/service providers
+explicitly. Selecting Redis is not proof of the actual backend: the factory can
+fall through to memory when it receives no usable client. Verify the resolved
+storage in deployments that require a shared limit.
 
 ## Algorithm selection — what to pick {#algorithm-selection--what-to-pick}
 

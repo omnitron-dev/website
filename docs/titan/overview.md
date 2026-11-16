@@ -43,7 +43,7 @@ that compose into the runtime you actually want.
 
 ## What Titan is not {#what-titan-is-not}
 
-- **Not a "do everything" runtime.** Modules are independently versioned
+- **Not a "do everything" runtime.** Modules are separately installable workspace
   packages. You can run a Titan app with one of them.
 - **Not opinion-free.** Titan has strong opinions about explicitness:
   declared providers and explicit lifecycle ownership. Request context

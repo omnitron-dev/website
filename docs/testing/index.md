@@ -70,7 +70,7 @@ skip with a reason; it is not evidence that SQL behavior passed.
 
 Plus the per-module testing reference:
 [Titan / Testing / Modules](../titan/testing/modules.md) —
-specific mock recipes for each of the 14 modules.
+mock recipes for the modules covered on that page.
 
 ## Quick reference — one test per level {#quick-reference--one-test-per-level}
 

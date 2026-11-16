@@ -9,240 +9,146 @@ description: What every module logs, raises as events, and writes as metrics.
 
 # Observability matrix
 
-Operating a Titan app means knowing *what to grep for* and *what
-to alert on*. This page lists — per module — the events emitted,
-notable log keys, and metric/health signals you can rely on.
-
-All claims here are verified against module source. If a row is
-empty, the module is deliberately quiet at that layer.
+This reference distinguishes values a caller can read, events from a particular
+object, and integration that application code must install. A `getStats` method
+is not an automatic `titan-metrics` exporter, and an exported health indicator is
+not automatically registered by another module.
 
 ## At-a-glance {#at-a-glance}
 
-<span class="module-badge">official · @omnitron-dev/titan-*</span>
+| Package | Read/observe | Integration boundary |
+| --- | --- | --- |
+| `titan-auth` | JWT verification result/errors, `getCacheStats()` | No automatic metric exporter |
+| `titan-cache` | Per-cache/global stats and cache events; health helper classes | Register/bridge explicitly |
+| `titan-database` | Connection/query failures and configured instrumentation | Database health indicator is in `titan-health` |
+| `titan-discovery` | Discovery events and heartbeat/registration logs | Pub/sub must be enabled; integration startup can fail independently |
+| `titan-events` | `getStatistics()`, configured emitter history | In-process observations |
+| `titan-health` | `check`, `checkOne`, `isReady`, `isAlive` | Pull-based; no health-change event or HTTP listener |
+| `titan-lock` | Acquire/renew/release results, FailureTracker logs | No metric exporter or release-all lifecycle hook |
+| `titan-lumen` | Published document service results and errors | Host owns operational telemetry |
+| `titan-mailer` | Send result, outbox status/health, delivery observer | SMTP acceptance is not inbox delivery |
+| `titan-metrics` | History/snapshot, registry text, storage status | Explicit business/RPC recording and SQL wiring |
+| `titan-notifications` | Send outcomes, transport diagnostics, supplied health indicator | Distinct producer/channel/event-worker contracts |
+| `titan-pm` | Manager, supervisor and pool events; process metrics | Subscribe to the object that emits the event |
+| `titan-ratelimit` | Check result, `getStats()`, tier stats | No automatic dashboard/exporter |
+| `titan-redis` | Managed connection state and errors | Health indicator needs a passed client |
+| `titan-scheduler` | Registry events and `getMetrics()` | Application bridges to external storage |
+| `titan-storage` | Per-operation results/errors and `getStorageInfo()` | Usage readings are not atomic quotas |
+| `titan-telemetry-relay` | `stats()` including delivery error and loss counters | No built-in external sink or automatic module subscription |
 
-The **Metrics surface** column distinguishes metrics actively *pushed*
-into `titan-metrics` from stats you read on demand (*pull* — a
-`getStats()` / `getMetrics()` / `stats()` accessor).
-
-| Module                  | Emits events | Notable logs            | Metrics surface | Health indicator |
-| ----------------------- | :----------: | :---------------------: | :-------------: | :--------------: |
-| `titan-auth`            |       —      | JWT verify failures     |        —        |        —         |
-| `titan-cache`           |       —      | L2 fallback / errors    | hit/miss/evict *(pull: `getStats()`)* |        —         |
-| `titan-database`        |       —      | slow query, retries     |        —        | yes (via titan-health) |
-| `titan-discovery`       |  `discovery:event` | register, heartbeat, dereg | —       |        —         |
-| `titan-events`          |     proxy    | dispatch errors         |        —        |        —         |
-| `titan-health`          |       —      | indicator failures      |        —        | n/a (itself)     |
-| `titan-lock`            |       —      | failure-tracker windows |        —        |        —         |
-| `titan-metrics`         |       —      | quiet by design         | process/system collectors |        —         |
-| `titan-notifications`   | `notifications.*` *(via titan-events)* | send + DLQ | —     | yes              |
-| `titan-pm`              |   many *(below)* | spawn / crash / restart | process stats | yes (via titan-health) |
-| `titan-ratelimit`       |       —      | reject reasons          | allow/deny *(pull: `getStats()`)* |        —         |
-| `titan-redis`           |       —      | reconnect / errors      |        —        | yes (via titan-health) |
-| `titan-scheduler`       |       —      | job start / finish      | runs/failures *(pull: `getMetrics()`)* |        —         |
-| `titan-telemetry-relay` |       —      | WAL events              | pull: `stats()` |     —         |
-
-<span class="module-badge">built-in · @omnitron-dev/titan</span>
-
-| Module    | Change notifications      | Notable logs       | Pushes metrics |
-| --------- | :-----------------------: | :----------------: | :------------: |
-| `config`  | `onChange()` callback     | reload success/fail|        —       |
-| `logger`  |        —                  | (the logger itself)|        —       |
+Config exposes `onChange`; Logger exposes structured records, sink health and
+flush status. These signals have separate ownership and persistence.
 
 ## Per-module reference {#per-module-reference}
 
-### `titan-pm` — the most chatty module {#titan-pm--the-most-chatty-module}
+### `titan-pm` — process observations {#titan-pm--the-most-chatty-module}
 
-<span class="module-badge">official · @omnitron-dev/titan-pm</span>
-
-Process manager is the loudest module by design — every supervised
-process / pool / worker raises events you can subscribe to.
-
-| Event                          | Args                                        | Meaning                                                |
-| ------------------------------ | ------------------------------------------- | ------------------------------------------------------ |
-| `process:spawn`                | `processInfo`                               | Child process started                                  |
-| `process:ready`                | `processInfo`                               | Child responded to ready handshake                     |
-| `process:stop`                 | `processInfo`                               | Child exited cleanly                                   |
-| `process:crash`                | `processInfo, error`                        | Child died unexpectedly                                |
-| `child:started`                | `name`                                      | Supervised child entry started                         |
-| `child:stopped`                | `name`                                      | Supervised child stopped                               |
-| `child:start-failed`           | `name, error`                               | Initial start raised before ready                      |
-| `child:crash`                  | `name, error`                               | Supervised child crashed mid-run                       |
-| `child:restart`                | `name, count`                               | Child restarted; `count` = total restarts              |
-| `pool:initialized`             | `{ size, class }`                           | Worker pool warmed up                                  |
-| `pool:scaled`                  | `{ from, to, class }`                       | Pool grew / shrank                                     |
-| `pool:drained`                 | `{ class }`                                 | Pool finished draining queued work                     |
-| `pool:destroyed`               | `{ class }`                                 | Pool released                                          |
-| `pool:memory`                  | `{ workerId, rssMB }`                       | Memory limit exceeded                                  |
-| `worker:spawned`               | `{ workerId, class }`                       | Pool worker forked                                     |
-| `worker:shutdown`              | `{ workerId, class }`                       | Pool worker reaped                                     |
-| `worker:unhealthy`             | `{ workerId }`                              | Worker missed a ping                                   |
-| `worker:unresponsive`          | `{ workerId }`                              | Worker still silent after retries                      |
-| `worker:replaced`              | `{ workerId }`                              | Unresponsive worker replaced                           |
-| `request:queued`               | `{ poolClass, queueSize }`                  | Pool saturated; work queued                            |
-| `circuitbreaker:open`          | —                                           | Breaker tripped                                        |
-| `circuitbreaker:halfopen`      | —                                           | Probe window started                                   |
-| `circuitbreaker:close`         | —                                           | Breaker reset                                          |
-| `escalate`                     | `name, error`                               | Restart limit exceeded; failure escalated upstream     |
-| `shutdown`                     | —                                           | Supervisor shutdown                                    |
-| `exit`                         | `info`                                      | Process exited                                         |
-| `health:change`                | `processId, IHealthStatus`                  | Per-process health flipped                             |
-| `health:critical`              | `processId, IHealthStatus`                  | Per-process health became critical                     |
-
-Subscribe with the standard event emitter API:
+`ProcessManager` emits process lifecycle events such as `process:crash`.
+`ProcessSupervisor` and a pool have their own emitters; their child/pool events
+are not all forwarded through the manager. Subscribe to the object returned by
+the API you use. `ProcessManager.getMetrics(processId)` asks the worker proxy for
+process readings and can return null.
 
 ```typescript
-pmService.on('process:crash', (info, error) => {
-  logger.error({ pid: info.id, error }, 'child crashed');
+pm.on('process:crash', (info, error) => {
+  logger.error({ processId: info.id, error }, 'child crashed');
 });
 ```
 
+A health event, a worker's responsiveness and completion of a particular request
+are different observations. See [PM](./pm.mdx) for supervision and pool admission.
+
 ### `titan-notifications` {#titan-notifications}
 
-<span class="module-badge">official · @omnitron-dev/titan-notifications</span>
+`NOTIFICATIONS_EVENTS` names lifecycle topics on an optional `EventsService`.
+Transport topics consumed by `@OnNotification` are a different channel. The host
+must register decorated handlers; metadata alone does not create a subscription.
 
-Lifecycle events are emitted through `titan-events` under the
-`NOTIFICATIONS_EVENTS` topic names (only when an `EventsService` is
-available). Selected topics:
-
-| Topic constant            | Event name                              | Meaning                          |
-| ------------------------- | --------------------------------------- | -------------------------------- |
-| `NOTIFICATION_SENT`       | `notifications.notification.sent`       | Send completed                   |
-| `NOTIFICATION_FAILED`     | `notifications.notification.failed`     | Send failed                      |
-| `CHANNEL_DELIVERY_SUCCESS`| `notifications.channel.delivery.success`| Per-channel delivery ok          |
-| `CHANNEL_DELIVERY_FAILED` | `notifications.channel.delivery.failed` | Per-channel delivery failed      |
-| `DLQ_MESSAGE_ADDED`       | `notifications.dlq.message.added`       | Message routed to DLQ            |
-
-Dead-lettered messages are also inspectable on the service via
-`getDLQStats()` / `getDLQMessages(options?)` and requeued with
-`requeueFromDLQ(count?)`.
-
-Health: the module registers `NotificationsHealthIndicator`
-(`NOTIFICATIONS_HEALTH`) — automatically picked up by
-`titan-health` if both modules are loaded.
+Resolve `NOTIFICATIONS_HEALTH` and register that indicator explicitly with
+`HealthService`. It includes transport and observer failures. Send status,
+per-channel status, database persistence and recipient delivery are distinct
+boundaries. The standalone event worker's poison-message handling is not the
+same as Rotif's DLQ. See [notifications](./notifications.mdx).
 
 ### `titan-discovery` {#titan-discovery}
 
-<span class="module-badge">official · @omnitron-dev/titan-discovery</span>
+The service logs registration, heartbeat failures and shutdown. With pub/sub
+enabled it emits `discovery:event` for received registry events. Default pub/sub
+is disabled. A stopped heartbeat and Redis TTL govern registry staleness; this
+is not a health probe of the application handler.
 
-| Event              | Payload                                       | Meaning                                    |
-| ------------------ | --------------------------------------------- | ------------------------------------------ |
-| `discovery:event`  | `{ type, node, service?, ts }`                | Node added / removed / updated             |
-
-`type` is one of `node.added`, `node.removed`, `node.updated`.
-
-Notable logs (all under the service's own logger namespace):
-
-| Level   | Pattern                                                           |
-| ------- | ----------------------------------------------------------------- |
-| `info`  | `Node 'X' registered`, `DiscoveryService started`                 |
-| `info`  | `Initiating graceful shutdown for node 'X'`                       |
-| `warn`  | `Heartbeat attempt failed`                                        |
-| `error` | `All N heartbeat attempts failed`                                 |
-| `error` | `Failed to publish discovery event`                               |
-| `debug` | `Received discovery event`, `Cleaned up inactive nodes`           |
+The module attempts Netron integration separately and can continue when that
+initialization fails. Check the discovery and Netron paths independently.
 
 ### `titan-events` {#titan-events}
 
-<span class="module-badge">official · @omnitron-dev/titan-events</span>
-
-`titan-events` *is* the event bus; it doesn't emit framework-level
-events of its own. Per-emitter introspection is available via
-`EventHistoryService` if `enableHistory: true`.
+`EventsService.getStatistics(event?)` reports its in-memory event counts and
+handler observations. When emitter history is enabled, `getHistory` and
+`replayEvents` operate on that emitter's retained memory. `EventHistoryService`
+is an additional exported service; its existence does not make history durable.
+Await async emission to observe handler rejection. Application effects already
+committed are not rolled back by a failed handler.
 
 ### `titan-scheduler` {#titan-scheduler}
 
-<span class="module-badge">official · @omnitron-dev/titan-scheduler</span>
+`SchedulerService.getMetrics()` reads scheduler metrics when available. The
+registry publishes scheduler/job events; startup logs discovered job counts.
+None of these automatically writes to `titan-metrics`.
 
-Doesn't expose a hot event stream — `IJobListener` is the
-extension point. Implement one to observe job execution:
-
-```typescript
-class MyJobListener implements IJobListener {
-  onJobStart?(job, context)         { /* ... */ }
-  onJobComplete?(job, result)       { /* ... */ }
-  onJobError?(job, error, context)  { /* ... */ }
-  onJobRetry?(job, attempt, error)  { /* ... */ }
-  onJobCancelled?(job, reason?)     { /* ... */ }
-}
-```
-
-All hooks are optional. Register listeners via the
-`listeners` module option or the `SCHEDULER_LISTENERS_TOKEN`.
+Observe that the expected job was registered, that a scheduled fire ran, and that
+its business effect committed. Those observations cannot be inferred from a
+running scheduler or a Redis lock alone.
 
 ### `titan-cache` {#titan-cache}
 
-<span class="module-badge">official · @omnitron-dev/titan-cache</span>
+Read `cache.getStats()` or `CacheService.getGlobalStats()` and subscribe through
+`CacheService.on(...)` to the cache events it forwards. Stats are local to the
+process. An L2 miss can mean missing data or a backend failure; some L2 operations
+catch failures. Do not interpret hit rate as backend availability.
 
-Cache hit/miss/eviction metrics are exposed through the
-`@Cached` decorator metadata and the `CacheService.getStats()` API.
-
-```typescript
-const stats = cache.getStats();
-// { hits, misses, evictions, size, hitRate, ... }
-```
-
-No native event stream — wrap calls if you need per-key
-observability.
+The package exports `CacheHealthIndicator` and `MultiTierCacheHealthIndicator`.
+Wire the chosen helper explicitly; importing cache and health modules does not
+perform that registration.
 
 ### `titan-lock` {#titan-lock}
 
-<span class="module-badge">official · @omnitron-dev/titan-lock</span>
-
-Uses the framework's `FailureTracker` primitive: instead of
-logging every failure, it collapses repeated failures of the same
-operation into windowed "X failing" warnings. This keeps logs
-quiet when Redis briefly hiccups.
-
-| Level   | Pattern                                                   |
-| ------- | --------------------------------------------------------- |
-| `warn`  | `[DistributedLock] X started failing`                     |
-| `debug` | `[DistributedLock] X still failing`                       |
-| `info`  | `[DistributedLock] X recovered`                           |
+The service uses Titan's `FailureTracker` to report repeated Redis failures and
+recovery rather than logging every identical error. An acquire returns an owner
+ID or no lease; callers must also handle renewal/release failure. These are
+coordination readings, not evidence that an external effect happened once.
+No metric exporter is installed.
 
 ### `titan-database` {#titan-database}
 
-<span class="module-badge">official · @omnitron-dev/titan-database</span>
+Query failures propagate through the database API. Logging and query/transaction
+instrumentation depend on the manager configuration and selected path. Use the
+`DatabaseHealthIndicator` exported by `titan-health` with the actual connection;
+it is not an export or automatic provider of `titan-database`.
 
-| Level   | Pattern                                                   |
-| ------- | --------------------------------------------------------- |
-| `warn`  | Slow query (over the configured threshold)                |
-| `warn`  | Transient error retried (via `withRetry`)                 |
-| `error` | Pool exhaustion / connection lost                         |
-| `info`  | Migration applied                                         |
-
-The module exposes `DatabaseHealthIndicator` for k8s probes.
+A successful connectivity check does not establish schema readiness, a migration
+result or a business transaction's durable outcome. Use the database readiness
+and transaction APIs for their respective checks.
 
 ### `titan-redis` {#titan-redis}
 
-<span class="module-badge">official · @omnitron-dev/titan-redis</span>
-
-Inherits ioredis's event model (`connect`, `ready`, `error`,
-`close`, `reconnecting`, `end`). The manager logs reconnect
-attempts and surfaces a `RedisHealthIndicator` via
-`titan-health`.
+The manager reports connection/reconnect/errors through its configured logger.
+Use `RedisHealthIndicator` with the selected client for an on-demand check.
+Connection readiness does not establish that a notification was routed, a stream
+retained it or a lock is still owned. Observe the consuming module's operation.
 
 ### `titan-auth` {#titan-auth}
 
-<span class="module-badge">official · @omnitron-dev/titan-auth</span>
-
-Quiet by design — token-verification details should not be
-logged at info level (PII/tokens). Failures log at `warn` with
-`error.code` populated; successful verifications are silent.
+`JWTService.getCacheStats()` exposes verification-cache readings. Verification
+errors and key/JWKS initialization can be logged through the configured logger.
+The cache is local and no metrics exporter is installed. Cache eviction/expiry
+is not token revocation; session authority checks are a separate path.
 
 ### `titan-ratelimit` {#titan-ratelimit}
 
-<span class="module-badge">official · @omnitron-dev/titan-ratelimit</span>
-
-Statistics are pull-based:
-
-```typescript
-const stats = rate.getStats();
-// { totalChecks, totalAllowed, totalDenied, activeKeys, byTier? }
-```
-
-Denied requests are not logged automatically (volume would be
-high) — count them via `metrics.recordTyped('counter', ...)` from
-the caller if you need to.
+`RateLimitService.getStats()` and tier statistics expose local checks, allowed
+and denied counts. Check results carry allowance and retry/reset information.
+The Redis storage reports connection errors through its logger, but this is not
+a guaranteed per-denial log stream or an automatic metrics integration.
 
 ### `titan-metrics` {#titan-metrics}
 
@@ -264,28 +170,41 @@ the built-in collector.
 
 ### `titan-telemetry-relay` {#titan-telemetry-relay}
 
-<span class="module-badge">official · @omnitron-dev/titan-telemetry-relay</span>
+Read `stats()` for `totalEmitted`, `totalSent`, `totalFailed`, `totalReceived`,
+`transportConnected`, `lastError`, buffer drops and WAL retention/eviction data.
+The service does not automatically publish these to Titan metrics. It extends an
+event emitter, but that inheritance is not a documented stream of WAL events.
 
-Exposes a pull-based `stats()` snapshot —
-`{ totalEmitted, totalSent, totalFailed, totalReceived,
-transportConnected, buffer, wal }` — where `buffer`
-(`{ size, totalPushed, totalDropped, totalFlushed }`) and `wal`
-(`{ segments, totalSize, totalWritten, currentSegment }`) carry the
-queue-depth and throughput signals. Surface these through your metrics
-module at the leader node; the relay does not push them itself.
+Read [delivery and recovery](./telemetry-relay.mdx#delivery-and-recovery) before
+interpreting a buffered entry, WAL record or acknowledgement as durable delivery.
 
 ### `titan-health` {#titan-health}
 
-<span class="module-badge">official · @omnitron-dev/titan-health</span>
+`check()` returns worst-status aggregation, per-indicator results, timestamp,
+aggregate latency and uptime. `checkOne()` returns an indicator result. Individual
+latency/details depend on the indicator.
 
-| Level   | Pattern                                          |
-| ------- | ------------------------------------------------ |
-| `error` | Indicator threw during check                     |
-| `warn`  | Indicator returned `degraded`                    |
-| `debug` | Probe cache hit / refresh                        |
+The service converts indicator failures/timeouts into unhealthy results; it does
+not emit `health:changed`, log every degraded result or export check latency.
+Poll it and route observations explicitly. A timeout does not cancel arbitrary
+work inside the indicator.
 
-Health results carry per-check timing in their own result objects;
-the module does not push check latency into `titan-metrics`.
+### `titan-mailer` {#titan-mailer}
+
+`PostgresMailOutbox.status`, `failed` and `health` describe the durable queue.
+`onDelivery` reports committed outcomes without message content. The application
+forwards those events to Logger; they are separate from SMTP inbox delivery.
+
+### `titan-storage` {#titan-storage}
+
+Inspect operation results and per-key errors from `deleteMany`. `getStorageInfo`
+returns backend usage data; S3 usage is cached and is not an atomic quota check.
+
+### `titan-lumen` {#titan-lumen}
+
+Observe the actual document/access/live-edit RPC results. The module supplies no
+automatic metrics exporter or health indicator; the host wires its operational
+checks around the configured corpus and authoring store.
 
 ## Built-in modules {#built-in-modules}
 
@@ -308,48 +227,45 @@ Notable logs:
 
 ### `logger` {#logger}
 
-<span class="module-badge">built-in · @omnitron-dev/titan/module/logger</span>
+`LoggerService.getSinkHealth()` reports sink errors, dropped/unconfirmed bytes
+and delivery state; `flush()` awaits configured delivery barriers and reports
+failure. Read those receipts when persistence matters. JSON output alone is not
+evidence that a downstream file/database/exporter accepted the record.
 
-The logger doesn't log about itself except at fatal failures
-(e.g., transport open failed at boot). Use `createNullLogger()` in
-tests when you want absolute silence.
+Use `createNullLogger()` only when discarding logs is intentional, such as a
+focused unit test. Configure processors and destinations explicitly.
 
 ## Cross-cutting recommendations {#cross-cutting-recommendations}
 
 ### Subscribe instead of poll {#subscribe-instead-of-poll}
 
-The pm/discovery event streams are hot — subscribing is cheaper
-and more responsive than polling state. For per-process autoscaling
-or alerting, hook the events:
-
-```typescript
-pm.on('pool:memory',      handleMemorySpike);
-pm.on('worker:unresponsive', handleWorkerHang);
-pm.on('circuitbreaker:open', notifyOncall);
-```
+Use subscriptions where the owning object emits the event and polling where
+only a snapshot API exists. A pool event belongs to the pool, a supervisor child
+event to the supervisor, and a health result to an explicit check. Do not invent
+an event name from the corresponding method or result status.
 
 ### Tie metrics to events {#tie-metrics-to-events}
 
-For dashboards, route key events through `titan-metrics`:
+An application can bridge a known event to a custom observation:
 
 ```typescript
-pm.on('process:crash', (info, error) => {
-  metrics.recordTyped('counter', 'pm.process.crash.total',
-    { class: info.processName }, 1);
+pm.on('process:crash', () => {
+  metrics.recordTyped('counter', 'worker_crashes_total', { app: 'worker-fleet' }, 1);
 });
 ```
 
+The registry accumulates this counter; history queues the supplied increments.
+Flush before reading recent history. The bridge is application code, and repeated
+subscription would double-count events.
+
 ### Alert thresholds — common starting points {#alert-thresholds--common-starting-points}
 
-| Signal                                   | Suggested alert                          |
-| ---------------------------------------- | ---------------------------------------- |
-| `rss_bytes` growth rate                  | > +50 MB/min sustained                   |
-| `cpu_percent`                            | sustained near 100 for 2 min             |
-| `pool:scaled` to/from limit              | repeated within 5 min                    |
-| `worker:replaced` count                  | > 3 in 5 min for same pool               |
-| `circuitbreaker:open`                    | any open lasting > 30 s                  |
-| `app_status` flips to 0                  | any supervised app offline               |
-| Health `degraded`/`unhealthy`            | sustained > 1 probe window               |
+Set thresholds from workload measurements and failure budgets rather than a
+universal CPU/RSS percentage. Useful conditions include nonzero storage loss,
+failed durable writes, growing pending age, repeated worker replacement, missing
+scheduled completion and retained terminal mail failures. Define the observation
+window and recovery condition for each alert. No alerting backend is installed
+by this reference.
 
 ### Don't log per-call by default {#dont-log-per-call-by-default}
 

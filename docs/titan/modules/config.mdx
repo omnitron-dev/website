@@ -7,7 +7,7 @@ title: ConfigModule
 
 # ConfigModule
 
-<span class="module-badge">built-in · @omnitron-dev/titan · /module/config · stable</span>
+<span class="module-badge">built-in · @omnitron-dev/titan · /module/config</span>
 
 Layered, validated, hot-reloadable configuration. **Auto-loaded** as
 a core module by every Titan application (unless `disableCoreModules:
@@ -118,8 +118,9 @@ class UsersService {
 
   @Public()
   async findById(id: string) {
-    const ttl = this.config.get<number>('cache.ttlMs', 60_000);
-    return this.cache.getOrSet(`u:${id}`, () => this.repo.findById(id), { ttl });
+    const ttlSeconds = this.config.get<number>('cache.ttlSeconds', 60);
+    // Pass ttlSeconds to your cache layer; Titan cache TTLs are in seconds.
+    return { id, ttlSeconds };
   }
 }
 ```

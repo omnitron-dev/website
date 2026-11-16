@@ -160,8 +160,8 @@ See [Cluster + Fleet / Multi-region patterns](./../omnitron/cluster.md#multi-reg
 ### Observability checklist {#observability-checklist}
 
 - [ ] Logs → SIEM / log aggregator.
-- [ ] Metrics → Prometheus / managed metrics backend.
-- [ ] Traces → OTel collector (if `titan-tracing` configured).
+- [ ] Metrics recorded, flushed and queryable in the configured store; optional text scraping verified.
+- [ ] Trace export verified if required; Titan trace context does not install an OTel exporter.
 - [ ] Health probes → load balancer.
 - [ ] Uptime monitoring → external pinger of `/healthz`.
 - [ ] Error reporting → Sentry via netron-browser middleware.

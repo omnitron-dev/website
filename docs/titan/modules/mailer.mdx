@@ -7,7 +7,7 @@ title: titan-mailer
 
 # titan-mailer
 
-<span class="module-badge">official · @omnitron-dev/titan-mailer · stable</span>
+<span class="module-badge">official · @omnitron-dev/titan-mailer</span>
 
 Transactional email for Titan: lifecycle-managed Nodemailer SMTP pools, typed templates,
 a concrete email notification channel, and a durable outbox consumer using Titan Notifications.
@@ -171,5 +171,5 @@ actual Titan DI disposal. Worker contract tests cover lost wake-ups, failed comm
 envelopes and draining. An independent consumer also exercises the complete PostgreSQL → Redis → SMTP path
 with competing workers and checks the resulting Mailpit messages.
 
-Design references: [NestJS Mailer](https://nest-modules.github.io/mailer/docs/configuration/),
-[Nodemailer SMTP](https://nodemailer.com/smtp), [pool lifecycle](https://nodemailer.com/smtp/pooled).
+Dependency documentation: [Nodemailer SMTP](https://nodemailer.com/smtp) and
+[pool lifecycle](https://nodemailer.com/smtp/pooled).

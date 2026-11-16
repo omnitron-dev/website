@@ -143,7 +143,7 @@ pnpm add @omnitron-dev/titan-discovery     # service discovery
 pnpm add @omnitron-dev/titan-events        # event bus
 pnpm add @omnitron-dev/titan-health        # health probes
 pnpm add @omnitron-dev/titan-lock          # distributed locks
-pnpm add @omnitron-dev/titan-metrics       # Prometheus metrics
+pnpm add @omnitron-dev/titan-metrics       # Native metrics and time-series storage
 pnpm add @omnitron-dev/titan-notifications # multi-channel delivery
 pnpm add @omnitron-dev/titan-pm            # worker pools, autoscaling
 pnpm add @omnitron-dev/titan-ratelimit     # rate limiting

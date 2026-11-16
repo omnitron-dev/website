@@ -9,12 +9,9 @@ description: forRoot / forRootAsync / forFeature / forWorker across every module
 
 # Options patterns
 
-Every Titan module is configured through one of four static factory
-methods. They are intentionally repetitive across modules — the
-shape stays the same so muscle memory transfers from one module to
-the next. This page gives you the canonical examples plus a
-support matrix so you know which factory each module actually
-implements.
+Module factories share names, but not identical option shapes or lifecycle
+behavior. This matrix records which factories exist; consult the owning module
+for required providers and side effects. The relay is constructed directly.
 
 ## Support matrix {#support-matrix}
 
@@ -29,6 +26,9 @@ implements.
 | `titan-events`                |     ✓     |       ✓        |       ✓      |       —     |
 | `titan-health`                |     ✓     |       ✓        |       ✓      |       —     |
 | `titan-lock`                  |     ✓     |       ✓        |       —      |       —     |
+| `titan-lumen` | ✓ | ✓ | — | — |
+| `titan-mailer` | ✓ | ✓ | — | — |
+| `titan-storage` | ✓ | — | — | — |
 | `titan-metrics`               |     ✓     |       ✓        |       —      |       —     |
 | `titan-notifications`         |     ✓     |       ✓        |       —      |       ✓     |
 | `titan-pm`                    |     ✓     |       ✓        |       —      |       —     |
@@ -47,8 +47,12 @@ Built-in modules follow the same pattern:
 
 | Module     | `forRoot` | `forRootAsync` | `forFeature` |
 | ---------- | :-------: | :------------: | :----------: |
-| `config`   |     ✓     |       ✓        |       —      |
+| `config`   |     ✓     |       ✓        |       ✓      |
 | `logger`   |     ✓     |       ✓        |       —      |
+
+`ConfigModule.forFeature(name, schema?)` exports a provider for the named
+configuration subtree and validates it when a schema is supplied. It does not
+load a separate configuration source.
 
 ## `forRoot(options)` — synchronous configuration {#forrootoptions--synchronous-configuration}
 
@@ -176,13 +180,16 @@ global `TitanDatabaseModule.forRoot(...)`.
 class CacheLayerModule {}
 ```
 
-Multiple named caches share the same backing store but have
-independent TTLs and namespacing.
+Each name resolves its own cache configuration. Sharing an L2 backend requires
+explicit adapter options; named caches do not automatically share one store.
 
-### `titan-events.forFeature(emitters)` {#titan-eventsforfeatureemitters}
+### `titan-events.forFeature({ events, schemas })` {#titan-eventsforfeatureemitters}
 
-Adds event metadata / discovery for additional event-emitting
-services. See [`titan-events`](./events.mdx).
+The actual signature is `EventsModule.forFeature({ events?, schemas? })`. It
+registers feature-local symbols containing those values, but the current discovery
+and validation services do not consume them. It is not a provider-discovery API.
+Register listener classes as ordinary providers and register/validate schemas
+explicitly through `EventValidationService`.
 
 ### `titan-health.forFeature(indicators)` {#titan-healthforfeatureindicators}
 
@@ -231,33 +238,15 @@ Registers additional providers that own `@Cron` / `@Interval` /
 
 ## `forWorker(...)` — separate runtime {#forworker--separate-runtime}
 
-`titan-notifications` ships this fourth factory specifically for
-the **worker** pod — the one that consumes the messaging
-transport and actually delivers messages. The producer pod uses
-`forRoot`; the worker pod uses `forWorker`.
+`NotificationsModule.forWorker` binds application target resolver, persister and
+realtime signaler tokens and registers `NotificationWorkerService`. It does not
+create a transport, start a consumer or implement SMTP/SMS/push delivery.
 
-```typescript
-// Worker pod
-@Module({
-  imports: [
-    NotificationsModule.forWorker({
-      targetResolver:   NOTIFICATION_TARGET_RESOLVER,
-      persister:        NOTIFICATION_PERSISTER,
-      realtimeSignaler: NOTIFICATION_REALTIME_SIGNALER,
-      workerOptions:    { concurrency: 8 },
-    }),
-  ],
-  providers: [
-    { provide: NOTIFICATION_TARGET_RESOLVER, useClass: MyTargetResolver },
-    { provide: NOTIFICATION_PERSISTER,        useClass: MyPersister },
-    { provide: NOTIFICATION_REALTIME_SIGNALER,useClass: MyRealtimeSignaler },
-  ],
-})
-class NotificationsWorkerModule {}
-```
-
-This separation lets you scale producers (web pods) independently
-from workers (delivery pods).
+The application calls `worker.start(rawRedis, options?)` after its dependencies
+are ready and awaits `worker.stop()` before closing that caller-owned connection.
+This worker consumes the `NotificationEvent` schema published by
+`NotificationPublisher`; it is not a deferred version of `NotificationsService.send`.
+See the [notification worker guide](./notifications.mdx#quickstart--worker-the-pod-that-consumes-and-delivers).
 
 ## Global vs scoped modules {#global-vs-scoped-modules}
 
@@ -311,15 +300,12 @@ used to instantiate the module's services.
   `Application.create({ modules: [GlobalModule, FeatureModule] })`
   resolves order from the dependency graph, but if you're loading
   them in `imports: []` manually, list `forRoot` first.
-- **Hardcoding `redisOptions` in two modules** — when you let
-  `titan-cache`, `titan-lock`, `titan-discovery`, etc. each spin
-  up their own Redis connection, you triple-count connections.
-  Configure `TitanRedisModule` once and let the other modules
-  pick up the shared client.
-- **Calling `forRoot` twice** — the second call typically wins,
-  which is rarely what you want. If you need different options for
-  different scopes, use `forFeature` (where supported) or
-  consciously override via test fixtures.
+- **Assuming one Redis registration wires every module.** Lock and discovery
+  can use the manager, notifications may create dedicated connections, and cache
+  needs an adapter. Follow each module's connection contract.
+- **Calling `forRoot` twice.** Factories can register the same tokens; do not
+  rely on an undocumented last-call-wins rule. Use named resources supported by
+  the package and explicit test overrides.
 - **`forRootAsync` factory throwing.** A throw aborts boot — the
   error propagates out of the container's async resolution (the
   Nexus DI layer raises `ResolutionError` / `AsyncResolutionError`

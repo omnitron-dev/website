@@ -19,7 +19,7 @@ supervisor — collected in one place.
 
 - **Titan core** — DI container, modules, lifecycle, validation.
 - **Netron** — RPC plane over HTTP, WebSocket, TCP, Unix.
-- **14 Titan modules** — auth, cache, database, discovery, events,
+- **Titan module packages** — auth, cache, database, discovery, events,
   health, lock, metrics, notifications, pm, ratelimit, redis, scheduler,
   telemetry-relay.
 - **Frontend trio** — netron-browser, netron-react, prism.

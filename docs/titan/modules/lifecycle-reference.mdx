@@ -9,11 +9,9 @@ description: What every module does in onInit / onStart / onStop / onDestroy.
 
 # Lifecycle reference
 
-Knowing **when** during boot/shutdown each module runs which hook
-is the difference between a clean restart and a half-drained
-buffer. This page documents the lifecycle behaviour of every
-official module — verified against source — so you can predict
-where a `console.log('foo')` in your `onStart` will run.
+Module hooks, provider disposal and explicit service methods are different
+mechanisms. This page names the implemented entry point and its owner. A method
+named `start`, `shutdown` or `onModuleDestroy` is not automatically a Titan hook.
 
 ## The four phases {#the-four-phases}
 
@@ -49,173 +47,145 @@ client it opens lazily on first use.
 
 ### `titan-cache` {#titan-cache}
 
-| Hook         | What it does                                                |
-| ------------ | ----------------------------------------------------------- |
-| `onInit`     | —                                                           |
-| `onStart`    | —                                                           |
-| `onStop`     | L2 adapter (Redis) is released when its owning client closes |
-| `onDestroy`  | —                                                           |
-
-L1 (in-memory LRU/LFU) lives in JS heap. L2 (Redis) is owned by
-`titan-redis` and shuts down with that module.
+`CacheService` creates its default cache in the constructor. It has no `onStop`
+hook; Titan tracks its async `dispose()` for container teardown. Disposal awaits
+cache cleanup, pending write-back, invalidation unsubscription and an optional
+L2 adapter `dispose()`. The adapter decides whether it owns or borrows a Redis
+connection. A caller creating the service directly must await `dispose()`.
 
 ### `titan-database` {#titan-database}
 
-| Hook         | What it does                                                |
-| ------------ | ----------------------------------------------------------- |
-| `onInit`     | —                                                           |
-| `onStart`    | Connection pool warmed up on first query (lazy)             |
-| `onStop`     | **Drains and closes** the connection pool                   |
-| `onDestroy`  | —                                                           |
-
-The `onStop` matters: a clean drain prevents in-flight queries
-from being killed mid-transaction.
+Factories configure `DatabaseManager`; connection initialization is handled by
+its providers. `TitanDatabaseModule.onStop(app)` resolves the manager and calls
+`closeAll()`. The module catches close errors during shutdown, so this hook alone
+is not proof that every write committed. Directly constructed connections remain
+the caller's responsibility.
 
 ### `titan-discovery` {#titan-discovery}
 
-Implemented on both the module and the service.
+The module's `onStart(app)` starts `DiscoveryService` and attempts optional Netron
+integration. Integration initialization failure is logged at debug level and does
+not abort startup. The service opens pub/sub only when `pubSubEnabled` is true and
+starts heartbeats only outside `clientMode`.
 
-| Hook         | Module (`DiscoveryModule`)              | Service (`DiscoveryService`)                           |
-| ------------ | --------------------------------------- | ------------------------------------------------------ |
-| `onInit`     | —                                       | Resolves Redis client; prepares scripts                |
-| `onStart`    | Triggers service start                  | Opens pub/sub; registers this node; starts heartbeat   |
-| `onStop`     | Triggers service stop                   | Stops heartbeat; deregisters; closes pub/sub           |
-| `onDestroy`  | —                                       | Final cleanup                                          |
-
-In `clientMode: true`, registration is skipped but pub/sub still
-opens on `onStart` so the node receives events.
+`onStop` stops heartbeats, attempts deregistration and unsubscribes; `onDestroy`
+also awaits the same stop path. `clientMode` does not enable pub/sub by itself.
+The service is terminal after stop.
 
 ### `titan-events` {#titan-events}
 
-Each sub-service has its own `onInit` / `onDestroy`; the
-orchestrator `EventsService` adds `onStart` / `onStop`.
-
-| Hook         | What happens                                                |
-| ------------ | ----------------------------------------------------------- |
-| `onInit`     | History / metadata / scheduler / validation services initialise their stores |
-| `onStart`    | Bus subscribes; persisted scheduled jobs are re-armed       |
-| `onStop`     | Drain in-flight emissions; flush history                    |
-| `onDestroy`  | Release all listener references                             |
+Event services initialize their in-memory state and discovery during startup.
+`EventsService.onStart()` and `onStop()` currently log only; `onStop` does not
+block new emits or await all application handler work. `onDestroy()` removes
+subscriptions, listener references and statistics. Scheduler/history sub-services
+have their own teardown. Stop and await your event producers before disposing the
+container; there is no durable replay or shutdown-drain guarantee.
 
 ### `titan-health` {#titan-health}
 
-| Hook         | What it does                                                |
-| ------------ | ----------------------------------------------------------- |
-| `onInit`     | —                                                           |
-| `onStart`    | —                                                           |
-| `onStop`     | —                                                           |
-| `onDestroy`  | —                                                           |
-
-`titan-health` is **lifecycle-passive**: the module registers its
-indicators eagerly at config time (inside `forRoot` / `forFeature`),
-not in a lifecycle hook. Checks are *pull-driven* — Kubernetes probes
-invoke `check()` on demand. No background loop runs.
+Factories register indicators. `HealthService` has no polling loop or lifecycle
+hooks; callers invoke checks. A cached result is reused only after a completed
+check. Concurrent cold calls are not coalesced. HTTP probe routes are owned by
+the host; the optional Netron RPC service is a separate surface.
 
 ### `titan-lock` {#titan-lock}
 
-| Hook         | What it does                                                |
-| ------------ | ----------------------------------------------------------- |
-| `onInit`     | —                                                           |
-| `onStart`    | —                                                           |
-| `onStop`     | Best-effort: releases locks currently held by this process  |
-| `onDestroy`  | —                                                           |
-
-> Releasing locks on `onStop` is best-effort because the process
-> may already be in a degraded state. Always set a lock TTL so
-> abandoned locks self-expire.
+The lock service has no `onStop`, release-all hook or registry of all acquired
+leases. `withLock` releases its own lease in `finally`; low-level callers must
+pair `acquireLock` with `releaseLock`. TTL expiration is the recovery path after
+process death. Renewal failure cannot forcibly cancel arbitrary application code.
 
 ### `titan-metrics` {#titan-metrics}
 
-Uses **explicit** `start()` / `stop()` methods rather than the
-lifecycle interface, called from module setup.
+The module factory calls `MetricsService.start()` on provider creation. It starts
+process collection, periodic flush and retention timers. An orchestrator must be
+passed explicitly for child collection; the RPC/custom flags do not add hooks.
 
-| Method       | What it does                                                |
-| ------------ | ----------------------------------------------------------- |
-| `start()`    | Starts periodic collection (process, system, RPC); kicks off flush interval |
-| `stop()`     | Drains the buffer to storage; stops collection; calls `cleanup()` |
-
-The module calls `start()` during initialisation and `stop()`
-during shutdown — you don't have to wire it up by hand.
+Provider `onDestroy()` awaits `stop()`: timers stop, the collector is drained,
+queued writes flush and active durable writes settle. `stop()` does not run a
+retention cleanup. A directly constructed service needs an explicit awaited stop
+before its storage connection closes.
 
 ### `titan-notifications` {#titan-notifications}
 
-| Hook         | What it does                                                |
-| ------------ | ----------------------------------------------------------- |
-| `onInit`     | Builds channel registry; resolves transports                |
-| `onStart`    | Producer connects to messaging transport; worker subscribes to queues |
-| `onStop`     | Stop consuming new messages; drain in-flight delivery       |
-| `onDestroy`  | Disconnect transport; release channel resources             |
+Provider factories build the transport and channel registry. `NotificationsService.onStart()`
+awaits transport readiness. Its `onStop()` is empty; do not assume that it fences
+new sends or drains callers. `onDestroy()` shuts down channels, then destroys the
+transport.
 
-`forWorker(...)` registrations subscribe to the messaging transport
-on `onStart` — the producer (registered via `forRoot`) opens its
-publisher connection in the same phase.
+`forWorker()` only registers `NotificationWorkerService` and its application ports.
+The host must call `start(rawRedis, options?)` and await `stop()` before closing
+that caller-owned Redis client. The worker has no Titan lifecycle hook.
 
 ### `titan-pm` {#titan-pm}
 
-| Hook         | What it does                                                |
-| ------------ | ----------------------------------------------------------- |
-| `onInit`     | Initialise registry / spawner / health checker / metrics    |
-| `onStart`    | Start any auto-start processes from config                  |
-| `onStop`     | Send `SIGTERM` to every child; wait for the configured grace period; `SIGKILL` survivors |
-| `onDestroy`  | Final reap of any stragglers                                |
+The `ProcessManager` constructor initializes components and starts its liveness
+sweep. Work starts through `spawn`, `pool` and supervisor operations; the module
+has no automatic process list or `onStart` hook.
 
-Crash-supervised children stop in the **opposite** order they
-started — gives you a chance to drain a worker before its
-dependencies disappear.
+The host must await `ProcessManager.shutdown()` during shutdown. Neither the
+module nor manager currently implements a Titan `onStop`/`onDestroy` bridge.
+Process signal handling is opt-in via `handleSignals: true`; it defaults off so
+the application can own signals. Shutdown fences new work and drains/terminates
+tracked resources. Supervision and spawn admission are described in [PM](./pm.mdx).
 
 ### `titan-ratelimit` {#titan-ratelimit}
 
-Uses an explicit `destroy()` method called during module shutdown.
+`MemoryRateLimitStorage` owns an expiry-cleanup timer. `RateLimitService.destroy()`
+calls storage `destroy()` when available; call it explicitly for cleanup. The
+service's Titan `onDestroy()` currently only withdraws the ambient decorator
+reference and does not call `destroy()`.
 
-| Method       | What it does                                                |
-| ------------ | ----------------------------------------------------------- |
-| `destroy()`  | Stops the periodic cleanup timer on in-memory storage; closes Redis storage client |
+Redis storage borrows its client and does not close it. The client's owner handles
+connection shutdown. Do not infer Redis cleanup from the memory-storage method.
 
 ### `titan-redis` {#titan-redis}
 
-| Hook            | What it does                                                |
-| --------------- | ----------------------------------------------------------- |
-| `onModuleInit`  | Establishes the connection(s) configured via `forRoot` / `forFeature` |
-| `onModuleDestroy` | Disconnects all named clients gracefully (`closeAllClients()`) |
+The module's provider factory awaits `RedisManager.init()` to create clients and
+load scripts. `TitanRedisModule.onStop(app)` calls `manager.destroy()` and closes
+registered clients through the manager's bounded close path.
 
-`titan-redis` uses the `onModuleInit` / `onModuleDestroy` hook names
-(on `RedisManager`) — functionally equivalent to `onInit` / `onDestroy`
-in newer modules. There is no `onStop` hook; cleanup runs in
-`onModuleDestroy`.
+`RedisManager.onModuleInit` / `onModuleDestroy` exist for hosts that call those
+names explicitly. Titan does not treat them as aliases for its own lifecycle;
+the module factory and `onStop` are the ordinary Titan path.
 
 ### `titan-scheduler` {#titan-scheduler}
 
-| Hook         | What it does                                                |
-| ------------ | ----------------------------------------------------------- |
-| `onInit`     | Resolve persistence backend; rebuild registry from store    |
-| `onStart`    | Schedule all registered jobs; arm cron timers / intervals   |
-| `onStop`     | Cancel pending timers; flush in-flight to persistence       |
-| `onDestroy`  | Release listeners; close persistence backend                |
+`SchedulerService.onInit()` loads recoverable persisted records, discovers
+decorated handlers and calls `onStart()` unless `enabled: false`. Timers can
+therefore be armed during initialization. A serialized record without a callable
+handler is skipped; persistence does not reconstruct JavaScript closures.
 
-The split matters: `onInit` rebuilds the *registry*, `onStart`
-actually *arms* the timers. Don't expect jobs to fire between
-those two.
+`onStop()` clears timers, requests cancellation, waits up to `shutdownTimeout`
+and flushes persistence. `onDestroy()` awaits stop and destroys persistence/metrics
+services. Cancellation is cooperative: a job ignoring it can outlive the wait.
 
 ### `titan-telemetry-relay` {#titan-telemetry-relay}
 
-Not a module — instantiated directly. Lifecycle is manual:
+The relay is constructed directly. The host calls `start()` to enable buffered
+flushes and WAL replay, and awaits `stop()` after stopping telemetry producers.
+Stop disposes the buffer, awaits delivery, disconnects the transport and disposes
+the WAL. It does not close a caller-provided aggregator or install subscriptions.
+After stop the relay is terminal; create a new instance to restart.
 
-| Method       | What it does                                                |
-| ------------ | ----------------------------------------------------------- |
-| `start()`    | Open WAL; start flush interval; start aggregator subscriptions |
-| `stop()`     | Stop flush; drain WAL; close aggregator                    |
+### `titan-mailer` {#titan-mailer}
 
-When integrated into an app via DI, wrap it in a thin lifecycle
-adapter:
+Mailer factories construct the SMTP service and optionally verify it.
+`MailerService.onDestroy()` stops admission, drains accepted operations and closes
+its pool. An explicit mail worker must stop before its outbox, mailer and transport.
 
-```typescript
-@Injectable()
-class TelemetryRelayAdapter implements OnStart, OnStop {
-  constructor(private readonly relay: TelemetryRelayService) {}
-  async onStart() { await this.relay.start(); }
-  async onStop()  { await this.relay.stop();  }
-}
-```
+### `titan-storage` {#titan-storage}
+
+Titan calls the selected adapter's initialization. Local root creation is deferred
+to the first operation. S3 initialization creates a client; `onDestroy()` destroys
+it. Direct constructors require caller-owned lifecycle.
+
+### `titan-lumen` {#titan-lumen}
+
+The module registers `LumenService`, access filtering and live editing providers.
+The service reads the configured corpus on demand; it has no module-managed
+background watcher or lifecycle hooks. Optional authoring persistence uses the
+injected database manager. See [Lumen](../../lumen/overview.md).
 
 ## Built-in modules {#built-in-modules}
 
@@ -223,107 +193,50 @@ class TelemetryRelayAdapter implements OnStart, OnStop {
 
 ### `config` {#config}
 
-| Hook         | What it does                                                |
-| ------------ | ----------------------------------------------------------- |
-| `onInit`     | Load all `sources` in order; deep-merge; validate against `schema` |
-| `onStart`    | If `watchForChanges: true`, start file watchers             |
-| `onStop`     | Stop file watchers                                          |
-| `onDestroy`  | Release schema reference                                    |
-
-If validation fails in `onInit`, the app aborts boot with the
-underlying Zod error — no partial start.
+`ConfigService.onInit()` loads sources, validates when `validateOnStartup` is
+set, and installs file watchers when `watchForChanges` is set. `onStart()` logs
+only. `onStop()` removes watchers; `onDestroy()` removes them again and clears
+cache/change listeners. Validation failure is a Titan bad-request error with
+validation details, not a raw Zod exception contract.
 
 ### `logger` {#logger}
 
-| Hook         | What it does                                                |
-| ------------ | ----------------------------------------------------------- |
-| `onInit`     | Open transports (file, network, console)                    |
-| `onStart`    | —                                                           |
-| `onStop`     | **Flush** all transports before draining (critical: lossy without this) |
-| `onDestroy`  | Close transport handles                                     |
-
-The flush in `onStop` is why graceful shutdown matters for
-observability — `SIGKILL` skips it and you lose the last few
-seconds of logs.
+`LoggerService` initializes Pino, processors and configured transports in its
+constructor. It has no `onInit`/`onStop`/`onDestroy` hooks. `Application`'s default
+shutdown task calls its async `flush()`; directly owned loggers require an explicit
+flush. A sink can still fail or contain unconfirmed writes, which flush reports.
+Async stdout has a separate process-exit flush mechanism. Forced termination
+cannot guarantee buffered delivery or close application-owned transport handles.
 
 ## Putting it together — full boot/shutdown timeline {#putting-it-together--full-bootshutdown-timeline}
 
 ```mermaid
 sequenceDiagram
-  participant App
-  participant Config
-  participant Logger
-  participant Redis
-  participant DB as Database
-  participant Lock
-  participant Disc as Discovery
-  participant Cache
-  participant RL as RateLimit
-  participant Sched as Scheduler
-  participant Notif as Notifications
-  participant Metr as Metrics
-  participant User as Your services
-
-  App->>Config: onInit (load + validate)
-  App->>Logger: onInit (open transports)
-  App->>Redis: onModuleInit (connect)
-  App->>DB: (no onInit)
-  App->>Disc: onInit
-  App->>Cache: (no onInit)
-  App->>Notif: onInit
-  App->>Sched: onInit (rebuild registry)
-  App->>Metr: start()
-  App->>User: onInit
-
-  Note over App: ─── onInit complete ───
-
-  App->>Config: onStart (watchers)
-  App->>Disc: onStart (register node + heartbeat)
-  App->>Notif: onStart (subscribe)
-  App->>Sched: onStart (arm timers)
-  App->>User: onStart
-
-  Note over App: ─── App ready ───
-  Note over App: ─── app.stop() called ───
-
-  App->>User: onStop (reverse order)
-  App->>Sched: onStop (cancel timers + flush)
-  App->>Notif: onStop (drain delivery)
-  App->>Disc: onStop (deregister)
-  App->>Lock: onStop (release best-effort)
-  App->>DB: onStop (drain pool)
-  App->>Config: onStop (stop watchers)
-  App->>Metr: stop() (drain buffer)
-  App->>Logger: onStop (FLUSH transports)
-
-  Note over App: ─── onDestroy phase ───
-  App->>User: onDestroy
-  App->>Sched: onDestroy
-  App->>Notif: onDestroy
-  App->>Disc: onDestroy
-  App->>RL: destroy()
-  App->>Redis: onModuleDestroy (disconnect)
-  App->>Logger: onDestroy
-  App->>Config: onDestroy
+  participant Host
+  participant App as Titan Application
+  participant Manual as Manually owned PM/worker/relay
+  participant Store as Shared stores and connections
+  Host->>App: create and start declared modules
+  Host->>Manual: start after dependencies are ready
+  Host->>Host: stop admitting application work
+  Host->>Manual: await worker stop / PM shutdown / relay stop
+  Host->>App: stop through its lifecycle controller
+  App->>Store: provider/module cleanup at declared boundary
 ```
+
+The diagram is an ownership sequence, not a fixed package order. Application
+shutdown hooks must explicitly await manually owned resources while their
+connections are still usable.
 
 ## Practical rules {#practical-rules}
 
-- **Long-running background work belongs in `onStart`, not
-  `onInit`.** Hooks at `onInit` should be fast — they block every
-  later module from initialising.
-- **Resources opened in `onInit` should close in `onDestroy`.**
-  Resources started in `onStart` should stop in `onStop`. Mixing
-  them causes subtle leaks.
-- **`onStop` runs in reverse dependency order.** Your services
-  drain before the modules they depend on. Don't rely on Redis
-  inside an `onStop` if your service's `onStop` was already
-  followed by Redis disconnecting.
-- **Don't throw in `onStop` / `onDestroy`.** A throw aborts the
-  remaining cleanup chain. Catch + log, let the process exit.
-- **Heavy CPU work in `onStart` blocks readiness.** If you must
-  precompute, do it in a background task started from `onStart`
-  and gate readiness on a separate flag.
+- Register dependency edges explicitly; ordering cannot be inferred from prose.
+- Stop producers before their stores and transports.
+- Await explicit `stop`, `shutdown`, `dispose` or `flush` operations where the
+  package has no lifecycle bridge.
+- Treat cancellation, a method returning and durable commit as different events.
+- Test shutdown through `Application`, including failed writes and outstanding work;
+  calling a service hook in isolation does not verify the owning application's path.
 
 ## See also {#see-also}
 

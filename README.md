@@ -138,8 +138,17 @@ After public API changes, run `pnpm docs:api ../omni` against a clean, committed
 platform checkout. Review the generated [API index](src/data/api-index.json) and
 make its source commit available in the public platform repository before pushing
 the website. The index records that commit for CI and for links to declarations.
-Source checks compare package exports, CLI commands and service contracts with their guides. An inventory entry
-is not proof of a working example: run the complete examples you change.
+Source checks compare package exports, CLI commands and service contracts with their guides.
+Titan inventories also compare package coverage, static factory methods and declared external
+runtime dependencies. An inventory entry or interface field is not proof of implemented
+behavior: trace the public factory through DI and the operation that consumes an option.
+Distinguish native implementation, optional adapter and application glue. Record lifecycle
+ownership and commit/delivery boundaries; do not infer them from a method name or package
+dependency. Similar APIs do not establish design provenance: do not describe features
+as borrowed or inspired by another project without attributable evidence. Compare
+capabilities with current sources and reproducible measurements. Typecheck importing
+examples with `node scripts/check-doc-examples.mjs ../omni docs/titan` and exercise
+the complete changed example when it claims runtime behavior.
 
 ## Distribution
 

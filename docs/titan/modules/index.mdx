@@ -8,20 +8,20 @@ title: Modules
 
 # Titan Modules
 
-The Titan ecosystem has three module tiers, each rendered with a
-origin badge so you can tell at a glance where a module comes
-from and what its guarantees are.
+Titan provides built-in modules and separately installable packages. The origin
+badge identifies the package owner; it is not a guarantee of delivery, durability
+or a particular deployment integration.
 
 | Tier         | Origin | Where it lives                                | Guarantees                                          |
 | ------------ | ------------ | --------------------------------------------- | --------------------------------------------------- |
 | **Built-in** | Built-in   | `@omnitron-dev/titan/module/*`           | Ships with the framework; same release cadence     |
-| **Official** | Official    | `packages/titan-*` in the `omnitron-dev` monorepo | Maintained by the Omnitron team; independent versions |
+| **Official** | Official    | `packages/titan-*` in the `omnitron-dev` monorepo | Maintained in the Omnitron workspace |
 | **Community**| Community     | Third-party npm packages                      | Audit before adopting; no maintenance commitment    |
 
 Every module page in this section starts with a `<span class="module-badge"></span>`
 chip that reflects its tier.
 
-> Want a bird's-eye view of how the 16 modules interlock — who
+> Want a view of how the modules connect — who
 > depends on whom, which combinations form common stacks, when to
 > prefer one over a similar one? Read the **[Module map](./module-map.mdx)**.
 
@@ -43,17 +43,21 @@ No extra Titan package is needed for these entry points.
 
 <span class="module-badge">official · @omnitron-dev/titan-*</span>
 
-Fourteen independent packages in the `omnitron-dev` monorepo. Each is
-versioned separately; adopting one does not pin you to others.
+The following packages are present in the source workspace. Install their declared
+peers and the driver required by the chosen backend. Package boundaries do not
+imply independent release compatibility; keep workspace releases aligned.
 
 | Module                                          | Package                              | Purpose                                                          |
 | ----------------------------------------------- | ------------------------------------ | ---------------------------------------------------------------- |
 | [`TitanAuthModule`](./auth.mdx)                  | `@omnitron-dev/titan-auth`           | JWT auth (HS256 / RS256 / ES256), JWKS, token cache              |
-| [`TitanCacheModule`](./cache.mdx)                | `@omnitron-dev/titan-cache`          | Multi-tier (L1/L2) caching with LRU / LFU, Redis backing         |
+| [`TitanCacheModule`](./cache.mdx)                | `@omnitron-dev/titan-cache`          | LRU / LFU caches, multi-tier with caller-supplied L2 adapter         |
 | [`TitanDatabaseModule`](./database.mdx)          | `@omnitron-dev/titan-database`       | Kysely + migrations + RLS, multi-dialect                         |
 | [`DiscoveryModule`](./discovery.mdx)             | `@omnitron-dev/titan-discovery`      | Redis-backed service discovery + Netron integration              |
 | [`EventsModule`](./events.mdx)                   | `@omnitron-dev/titan-events`         | Typed event bus, wildcard, scheduling, history                   |
 | [`TitanHealthModule`](./health.mdx)              | `@omnitron-dev/titan-health`         | Health indicators (memory, event-loop, disk, db, redis)          |
+| [`LumenModule`](../../lumen/overview.md) | `@omnitron-dev/titan-lumen` | Titan-hosted document services, access filtering, live editing and MCP adapter |
+| [`MailerModule`](./mailer.mdx) | `@omnitron-dev/titan-mailer` | Nodemailer SMTP lifecycle, templates and optional durable mail worker |
+| [`StorageModule`](./storage.md) | `@omnitron-dev/titan-storage` | Local filesystem and S3 object adapters |
 | [`TitanLockModule`](./lock.mdx)                  | `@omnitron-dev/titan-lock`           | Distributed Redis locks with UUID ownership + Lua scripts        |
 | [`TitanMetricsModule`](./metrics.mdx)            | `@omnitron-dev/titan-metrics`        | Counters / gauges / histograms, pluggable storage                |
 | [`NotificationsModule`](./notifications.mdx)     | `@omnitron-dev/titan-notifications`  | Multi-channel delivery + templates + DLQ                         |
@@ -73,43 +77,41 @@ how to publish your own.
 
 ## Composition {#composition}
 
-Modules compose through the standard `imports` chain — order does
-not matter, the container resolves the dependency graph:
+Declare the imports required by the providers you actually use:
 
 ```typescript
+import { Module } from '@omnitron-dev/titan';
+import { TitanAuthModule } from '@omnitron-dev/titan-auth';
+import { TitanCacheModule } from '@omnitron-dev/titan-cache';
+import { TitanMetricsModule } from '@omnitron-dev/titan-metrics';
+
 @Module({
   imports: [
-    // Built-in (auto-loaded; shown explicitly here for illustration)
-    ConfigModule.forRoot({ schema: AppConfigSchema, sources: [/* … */] }),
-    LoggerModule.forRoot({ level: 'info' }),
-
-    // Official
-    TitanRedisModule.forRoot({ config: { url: env.REDIS_URL } }),
-    TitanAuthModule.forRoot({ jwtSecret: env.JWT_SECRET }),
-    TitanCacheModule.forRoot({ multiTier: true, l2: { client: redisClient, ttl: 60 } }),
-    TitanDatabaseModule.forRoot({ connection: { dialect: 'postgres', connection: env.DATABASE_URL } }),
-    SchedulerModule.forRoot({ persistence: { provider: redisPersistenceProvider } }),
-    TitanMetricsModule.forRoot({ storage: { type: 'memory' } }),
+    TitanAuthModule.forRoot({ jwtSecret: process.env.JWT_SECRET }),
+    TitanCacheModule.forRoot({ maxSize: 1_000, defaultTtl: 60 }),
+    TitanMetricsModule.forRoot({ appName: 'my-api', storage: { type: 'memory' } }),
   ],
-  providers: [/* your services */],
 })
 export class AppModule {}
 ```
 
+Config and Logger are core modules by default. An SQL backend, cache L2 adapter,
+Redis client or relay transport requires its own wiring. Importing a module does
+not make every package consume its connection automatically.
+
 ## Redis dependency among official modules {#redis-dependency-among-official-modules}
 
-Five official modules depend on a Redis client provided by
-`TitanRedisModule`:
+| Consumer | How it gets Redis |
+| --- | --- |
+| `titan-lock` | `REDIS_MANAGER.getClient(redisClientName)` |
+| `titan-discovery` | Shared manager's internal client, or its own connection from `redisUrl` / `redisOptions` |
+| `titan-ratelimit` | Default Redis client token for Redis storage; see async-factory caveat in its guide |
+| `titan-notifications` | Explicit `redis`, otherwise optional managed client; Rotif creates dedicated connections from those options |
+| `titan-cache` | Caller supplies an `IL2CacheAdapter` in `l2.client`; no automatic Redis lookup |
+| `titan-scheduler` | Caller constructs `RedisPersistenceProvider` with a compatible client |
 
-- `titan-cache` (when L2 tier enabled)
-- `titan-lock`
-- `titan-discovery`
-- `titan-ratelimit` (when `storageType: 'redis'`)
-- `titan-notifications` (rate limiter, preference store, rotif
-  messaging)
-
-Register `TitanRedisModule.forRoot(...)` first; the rest pick up the
-shared client automatically.
+See the [module map](./module-map.mdx#where-redis-sits) for connection ownership.
+Redis persistence, Streams retention and locking guarantees are separate concerns.
 
 ## Choosing modules {#choosing-modules}
 

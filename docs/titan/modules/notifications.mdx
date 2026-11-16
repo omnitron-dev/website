@@ -7,13 +7,15 @@ title: titan-notifications
 
 # titan-notifications
 
-<span class="module-badge">official · @omnitron-dev/titan-notifications · stable</span>
+<span class="module-badge">official · @omnitron-dev/titan-notifications</span>
 
 Multi-channel notification delivery (in-app, webhook, plus extensible
 email / SMS / push abstractions) with a template engine, Redis-backed
 rate limiting, per-user preferences, channel routing, scheduled and
 broadcast send, and a separate **worker mode** for consuming
-notification events from Rotif.
+`NotificationEvent` records from Rotif. `NotificationsService.send` publishes and
+can deliver through local channels in the caller; it is not automatically deferred
+to that worker.
 
 ```bash
 pnpm add @omnitron-dev/titan-notifications @omnitron-dev/titan-events @omnitron-dev/titan-redis
@@ -47,7 +49,7 @@ import { NotificationsModule } from '@omnitron-dev/titan-notifications';
       redis:           env.REDIS_URL,
       enableInApp:     true,
       enableWebhook:   true,
-      defaultChannels: ['inapp', 'email'],
+      // Pass channels per send; no email channel is installed by this example.
       templates:       { enabled: true, cacheEnabled: true },
       rateLimiterConfig: {
         defaultLimits: { perMinute: 10, perHour: 100, perDay: 1_000 },
@@ -67,26 +69,36 @@ import { NotificationsModule } from '@omnitron-dev/titan-notifications';
 @Module({
   imports: [
     NotificationsModule.forWorker({
-      targetResolver:   NOTIFICATION_TARGET_RESOLVER,
-      persister:        NOTIFICATION_PERSISTER,
-      realtimeSignaler: NOTIFICATION_REALTIME_SIGNALER,
+      targetResolver:   MyUserResolver,
+      persister:        MyPersister,
+      realtimeSignaler: MyRealtimeSignaler,
       // There is no `concurrency` — the worker runs one XREADGROUP loop and
       // takes a batch per read. `readCount` sizes the batch.
       workerOptions:    { readCount: 100, blockTimeoutMs: 5_000 },
     }),
   ],
   providers: [
-    { provide: NOTIFICATION_TARGET_RESOLVER, useClass: MyUserResolver },
-    { provide: NOTIFICATION_PERSISTER,        useClass: MyPersister },
-    { provide: NOTIFICATION_REALTIME_SIGNALER,useClass: MyRealtimeSignaler },
+    MyUserResolver, MyPersister, MyRealtimeSignaler, // implement the application ports
   ],
 })
 class WorkerModule {}
 ```
 
-The worker consumes events emitted by the producer (typically via
-Rotif), looks up channel targets, persists the notification, and
-signals realtime channels (WebSocket / SSE).
+`forWorker` only registers providers. The host must resolve
+`NotificationWorkerService`, call `await worker.start(rawRedis, options?)`, and
+await `worker.stop()` before closing that caller-owned connection. Stop waits
+up to ten seconds for its consume loop; a longer application operation can still
+be running after that wait. Use a dedicated
+client for its blocking reads. It consumes the `NotificationEvent` schema used
+by `NotificationPublisher` (default stream pattern `notify.*`), resolves recipients,
+persists records and calls the application realtime signaler. It does not consume
+`NotificationsService.send` envelopes as a generic email/SMS/push dispatcher.
+
+The worker creates a Redis consumer group but does not register its pattern in
+Rotif's active-pattern registry. `NotificationPublisher.publish` ignores the
+underlying no-matching-pattern result. On a clean Redis instance this combination
+is therefore not a complete producer-to-worker delivery setup. Validate routing
+and persisted output explicitly; importing both APIs is insufficient.
 
 ## `NotificationsModuleOptions` {#notificationsmoduleoptions}
 
@@ -97,7 +109,7 @@ signals realtime channels (WebSocket / SSE).
 | `rateLimiter`             | `IRateLimiter`                                                                        |
 | `preferenceStore`         | `IPreferenceStore`                                                                    |
 | `channelRouter`           | `IChannelRouter`                                                                      |
-| `defaultChannels`         | `string[]`                                                                            |
+| `defaultChannels`         | `string[]` — declared; `send` does not read it, pass channels in send options                                                                            |
 | `channels`                | `NotificationChannel[]`                                                               |
 | `enableInApp`             | `boolean` (default `true`; needs Redis)                                               |
 | `enableWebhook`           | `boolean` (default `true`)                                                            |
@@ -125,7 +137,7 @@ class NotifyService {
     await this.notify.send(
       { id: user.id, email: user.email },
       { type: 'info', title: 'Welcome', message: `Hello, ${user.name}` },
-      { channels: ['email', 'inapp'] },
+      { channels: ['inApp'] },
     );
   }
 }
@@ -225,21 +237,15 @@ rendered, options)` plus optional `validate()`.
 
 ## Templates {#templates}
 
-```typescript
-NotificationsModule.forRoot({
-  templates: { enabled: true, cacheEnabled: true, cacheTTL: 60_000 },
-})
+`TemplateEngine` is a separate service. Enable it with `templates`, then register
+or render a template and construct the required `{ type, title, message }` payload
+before calling `send`. See the [explicit template example](#templates-are-opt-in-and-caller-driven).
+There is no `template` field on `NotificationPayload` and no implicit rendering
+inside `send`. Recipient objects require `id`, not `userId`.
 
-// Use:
-await this.notify.send(
-  { userId, email },
-  { template: 'welcome', data: { name: 'Ada' } },
-);
-```
-
-`TemplateEngine` supports variable substitution via `{{name}}`
-placeholders. Templates can be passed at boot or registered at
-runtime. `DEFAULT_TEMPLATES` is exported as a starting set.
+`schedule()` delays transport publication; the current `send` path still invokes
+registered local channels immediately. Do not use it as a durable delayed-email
+guarantee. `cancel()` currently returns false and does not cancel queued work.
 
 ## Rate limiting and preferences {#rate-limiting-and-preferences}
 
@@ -255,7 +261,7 @@ rateLimiterConfig: {
 }
 
 preferenceStoreConfig: {
-  defaultPreferences: { channels: { email: true, sms: false, push: true } },
+  defaultPreferences: { channels: { email: { enabled: true }, sms: { enabled: false }, push: { enabled: true } } },
 }
 ```
 
@@ -263,51 +269,53 @@ preferenceStoreConfig: {
 
 ```mermaid
 flowchart LR
-  Api[API pod<br/>NotificationsService.send]
-  Api -- emits notification event --> Rotif[(Rotif / queue)]
-  Worker[Worker pod<br/>NotificationsModule.forWorker]
-  Rotif --> Worker
-  Worker --> Resolver[TargetResolver]
-  Worker --> Persister[Persister<br/>store the notification]
-  Worker --> Channel[Channel.deliver]
-  Worker --> Realtime[RealtimeSignaler<br/>push to WS / SSE]
+  Send[NotificationsService.send] --> Transport[Transport publication]
+  Send --> Local[Registered channels in caller]
+  Publisher[NotificationPublisher] --> Routing[Rotif active-pattern routing]
+  Routing --> Stream[(NotificationEvent stream)]
+  Stream --> Worker[Explicitly started NotificationWorkerService]
+  Worker --> Resolver[Application target resolver]
+  Resolver --> Persister[Application persister]
+  Persister --> Signaler[Application realtime signaler]
 ```
 
-Producer/worker split lets you scale delivery independently from the
-request path and isolate flaky external providers (email, SMS) from
-the API tier.
+These are separate message contracts. The event worker does not render templates,
+run channel delivery or automatically inherit `NotificationsService` preferences
+and rate limits. Its startup also leaves pattern registration to the host, as
+noted above. Use a verified application consumer or the [mailer's outbox worker](./mailer.mdx)
+when external delivery must run outside request handling.
 
 ## `@OnNotification` decorator {#onnotification-decorator}
 
 ```typescript
-import { OnNotification } from '@omnitron-dev/titan-notifications';
+import { OnNotification, NotificationsModule, type MessagingTransport }
+  from '@omnitron-dev/titan-notifications';
 
-@Injectable()
-class AuditListener {
-  @OnNotification('notifications.notification.sent')
-  async onSent(notification: any) { /* … */ }
+class AnnouncementListener {
+  @OnNotification('notifications.announcement.*')
+  async onMessage(notification: unknown) {
+    await persistAnnouncement(notification); // application handler
+  }
+}
 
-  @OnNotification('notifications.notification.failed', { maxRetries: 5, exactlyOnce: true })
-  async onFailed(notification: any) { /* … */ }
+export async function attach(transport: MessagingTransport) {
+  const listener = new AnnouncementListener();
+  await NotificationsModule.registerHandlers(transport, listener);
+  return () => NotificationsModule.unregisterHandlers(listener);
 }
 ```
 
-`OnNotification(pattern, options?)` takes the pattern as the **first
-positional argument**. `options` extends `TransportSubscribeOptions`
-(`groupName`, `consumerName`, `maxRetries`, `retryDelay`,
-`retryStrategy`, `autoAck`, `prefetchCount`, …) plus an `exactlyOnce`
-flag. Patterns are the transport topic names — the lifecycle topics are
-exported as `NOTIFICATIONS_EVENTS` (e.g.
-`NOTIFICATIONS_EVENTS.NOTIFICATION_SENT === 'notifications.notification.sent'`).
-
-Subscribe to delivery lifecycle events for observability, audit,
-metrics.
+The decorator stores metadata; the host must register and unregister handlers.
+Its patterns are transport channels. `NOTIFICATIONS_EVENTS` names are lifecycle
+topics on `titan-events` and are not automatically republished to Rotif. Subscribe
+to that event bus for lifecycle observations. Options such as `exactlyOnce` refer
+to transport deduplication policy, not exactly-once external side effects.
 
 ## Health indicator {#health-indicator}
 
-`NotificationsHealthIndicator` is exported and registers
-automatically with [`titan-health`](./health.mdx) if both modules
-are loaded.
+The module provides `NotificationsHealthIndicator` under `NOTIFICATIONS_HEALTH`.
+Resolve that instance and register it explicitly with `HealthService.registerIndicator`.
+Loading the two modules does not automatically connect their health registries.
 
 Observer failures also appear in the health report. Async lifecycle listeners
 are awaited; failures are logged and retained until the same event succeeds.
@@ -343,15 +351,20 @@ See the [contract, module wiring and outbox bridge](../../omnitron/diagnostics.m
 
 ## Lifecycle {#lifecycle}
 
-The service is registered as a Titan provider; standard lifecycle
-hooks apply. The worker mode (`forWorker`) starts a Rotif consumer
-during the application `onStart` phase and stops it on `onStop`.
+Transport and channel factories initialize dependencies. `NotificationsService.onStart()`
+awaits transport readiness; `onStop()` is empty. `onDestroy()` shuts down channels
+and destroys the transport. The application must stop new sends and await its
+in-flight operations before this point.
+
+`NotificationWorkerService` has explicit `start(rawRedis, options?)` and `stop()`
+methods; `forWorker` does not call them. Its retry policy eventually acknowledges
+poison messages after `maxDeliveries`; this worker path is not the same as the
+transport's configurable DLQ path.
 
 ## Anti-patterns {#anti-patterns}
 
-- **Sending from the request path.** Heavy channels (SMS / email)
-  can take seconds. Send via the worker pattern, not directly in
-  the request handler.
+- **Assuming `send` only queues.** Registered channels can run in the caller.
+  Use an explicit consumer/outbox for slow delivery; for SMTP see `titan-mailer`.
 - **Skipping preferences.** Sending to users who opted out is a
   compliance risk in many jurisdictions. Always wire
   `preferenceStore`.

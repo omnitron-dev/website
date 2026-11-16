@@ -254,8 +254,8 @@ const app = await Application.create({
   backends.
 - **End-to-end typed errors.** Errors travel as classes, not
   status codes.
-- **Smaller dependency footprint.** Ecosystem modules are
-  individually versioned; you install what you use.
+- **Optional module packages.** Install the selected module and its declared
+  dependencies. Titan core itself includes logging, validation and transports.
 
 ## What's different (not better-or-worse, just different) {#whats-different-not-better-or-worse-just-different}
 

@@ -7,12 +7,12 @@ title: titan-cache
 
 # titan-cache
 
-<span class="module-badge">official · @omnitron-dev/titan-cache · stable</span>
+<span class="module-badge">official · @omnitron-dev/titan-cache</span>
 
-Multi-tier (L1/L2) caching with multiple eviction strategies, tag-based
-invalidation, optional compression, atomic `getOrSet`, partition views,
-and warming strategies. Single-tier in-memory by default; pluggable L2
-(typically Redis) for cross-pod sharing.
+LRU/LFU in-memory caches and a multi-tier cache with a caller-supplied L2
+adapter, TTL, tags, optional compression and partition views. Single-flight
+helpers combine concurrent work within one process; they are not distributed
+idempotency or a transaction boundary.
 
 ```bash
 pnpm add @omnitron-dev/titan-cache
@@ -20,16 +20,13 @@ pnpm add @omnitron-dev/titan-cache
 
 ## When you need it {#when-you-need-it}
 
-Three workloads it solves cleanly:
+- Cache expensive reads with a bounded per-process LRU or LFU.
+- Share stored values through an explicitly configured L2 adapter.
+- Reduce repeated concurrent reads with `createCacheGetOrSet` or a multi-tier
+  cache's `getOrSet`. This coordination is local to the instance, not across pods.
 
-1. **Read-heavy services** — a per-process LRU in front of expensive
-   lookups. Cuts database load 10-50× on typical request patterns.
-2. **Cross-pod cache coherence** — L1 in each pod for low latency, L2
-   in Redis for shared invalidation. Tag-based eviction propagates
-   to every pod through L2.
-3. **Idempotency tokens** — `getOrSet` is atomic from the caller's
-   perspective; a thundering herd of identical requests collapses to
-   one factory invocation.
+Measure hit ratio and database load for your workload; the module promises no
+fixed speedup. Cache misses, evictions and backend outages are ordinary cases.
 
 ## Quickstart {#quickstart}
 
@@ -54,21 +51,28 @@ class AppModule {}
 ### Multi-tier (L1 in-memory + L2 Redis) {#multi-tier-l1-in-memory--l2-redis}
 
 ```typescript
-@Module({
-  imports: [
-    TitanRedisModule.forRoot({ host: 'redis-host' }),
-    TitanCacheModule.forRoot({
-      multiTier: true,
-      l1: { maxSize: 1_000, ttl: 60 },        // hot cache, short TTL
-      l2: { client: redisAdapter, ttl: 3600, prefix: 'cache:' },
-    }),
-  ],
-})
-class AppModule {}
+import { TitanCacheModule, type IL2CacheAdapter } from '@omnitron-dev/titan-cache';
+
+export function sharedCache(adapter: IL2CacheAdapter) {
+  return TitanCacheModule.forRoot({
+    multiTier: true,
+    l1: { maxSize: 1_000, ttl: 60 },
+    l2: { client: adapter, ttl: 3600, prefix: 'cache:' },
+    trackL2Tags: true,
+    broadcastInvalidations: true,
+  });
+}
 ```
 
-A read hits L1; a miss falls through to L2 and backfills L1. A write
-populates both tiers. Tag-based invalidation propagates through L2.
+Implement the L2 contract (`get`, `set`, `mget`, `mset`, `delete`, `exists`,
+`keys`, `ttl`, `flush`, etc.) around the chosen backend. A raw Redis connection
+is not that contract. Without an L2 client the multi-tier constructor uses an
+in-memory L2. Broadcast invalidation additionally needs the adapter's optional
+`publishInvalidation` and `subscribeInvalidation` methods.
+
+Reads fall through L1 to L2 and may backfill L1; module-created caches write
+through both tiers. This is not transactional cross-pod coherence: L2 failures
+can be treated as misses or ignored by mutation operations.
 
 ### Async configuration {#async-configuration}
 
@@ -92,18 +96,18 @@ TitanCacheModule.forRootAsync({
 | `l2`                    | `{ client, ttl, prefix }`                                                   | —             |
 | `defaultTtl`            | `number` (seconds)                                                          | `300`         |
 | `maxSize`               | `number`                                                                    | `1_000`       |
-| `evictionPolicy`        | `'lru' \| 'lfu' \| 'fifo' \| 'random' \| 'ttl'`                             | `'lru'`       |
+| `evictionPolicy`        | `'lru' \| 'lfu'` implemented; other declared values select LRU                             | `'lru'`       |
 | `enableStats`           | `boolean`                                                                   | `true`        |
 | `statsInterval`         | `number` (ms)                                                               | —             |
 | `partitions`            | `ICachePartition[]`                                                         | —             |
-| `warmingStrategies`     | `ICacheWarmingStrategy[]`                                                   | —             |
+| `warmingStrategies`     | `ICacheWarmingStrategy[]` — declared option; not automatically run                                                   | —             |
 | `useWeakRef`            | `boolean`                                                                   | `false`       |
 | `compressionThreshold`  | `number` (bytes)                                                            | `1_024`       |
-| `compressionAlgorithm`  | `'none' \| 'gzip' \| 'deflate' \| 'brotli' \| 'lz4'`                        | `'none'`      |
+| `compressionAlgorithm`  | `'none' \| 'gzip' \| 'deflate' \| 'brotli'`; declared `lz4` currently uses deflate                        | `'none'`      |
 | `ttlCleanupInterval`    | `number` (ms — wheel-timer bucket size)                                     | —             |
 | `wheelTimerBuckets`     | `number`                                                                    | —             |
-| `staleWhileRevalidate`  | `number` (seconds — SWR window)                                             | —             |
-| `backgroundRefresh`     | `boolean`                                                                   | —             |
+| `staleWhileRevalidate`  | `number` — declared but not consumed                                             | —             |
+| `backgroundRefresh`     | `boolean` — declared but not consumed                                                                   | —             |
 | `isGlobal`              | `boolean`                                                                   | `false`       |
 
 ## `CacheService` {#cacheservice}
@@ -134,8 +138,11 @@ class UsersService {
 ## `ICache<T>` — the per-cache surface {#icachet--the-per-cache-surface}
 
 ```typescript
-const users = this.cache.getCache<User>('users');
-const user  = await users.getOrSet(`u:${id}`, () => this.repo.findById(id), { ttl: 60 });
+import { createCacheGetOrSet } from '@omnitron-dev/titan-cache';
+
+const users = cacheService.getCache<User>('users');
+const getUser = createCacheGetOrSet(users); // create once; reuse its single-flight map
+const user = await getUser(`u:${id}`, () => repository.findById(id), { ttl: 60 });
 ```
 
 | Method                                              | Purpose                                                       |
@@ -143,7 +150,7 @@ const user  = await users.getOrSet(`u:${id}`, () => this.repo.findById(id), { tt
 | `get(key, options?)`                                | Read; returns `undefined` on miss                             |
 | `set(key, value, options?)`                         | Write with optional TTL / tags / compression                  |
 | `has(key)`                                          | Existence check — **see TOCTOU note below**                   |
-| `getOrSet(key, factory, options?)`                  | Atomic read-through; preferred over `has + get + set`         |
+| `getOrSet(key, factory, options?)`                  | Optional on `ICache`; implemented by `MultiTierCache`, not LRU/LFU         |
 | `delete(key)`                                       | Remove a key                                                  |
 | `clear(pattern?)`                                   | Drop all or by string / RegExp pattern                        |
 | `invalidateByTags(tags[])`                          | Drop every entry tagged with any of these                     |
@@ -157,14 +164,11 @@ const user  = await users.getOrSet(`u:${id}`, () => this.repo.findById(id), { tt
 
 ### TOCTOU note on `has()` {#toctou-note-on-has}
 
-From the source:
-
-> There is a TOCTOU window between `has(key) === true` and a subsequent
-> `get(key)` — the entry can expire or be evicted in between, so
-> `get()` may return `undefined` even when `has()` just returned `true`.
-> If you need to *use* the value, prefer `getOrSet(key, factory)`
-> (atomic from the caller's perspective). Reserve `has()` for fast-path
-> cardinality checks where the value isn't read afterwards.
+A key may expire or be evicted between `has` and `get`. Read with `get` and handle
+`undefined`, or reuse a `createCacheGetOrSet(cache)` wrapper for local
+single-flight. `ICache.getOrSet` is optional: the LRU/LFU instances returned by a
+single-tier `CacheService` do not implement it. No cache method guarantees that a
+side effect runs exactly once across processes.
 
 ## Multi-tier API — `IMultiTierCache<T>` extends `ICache<T>` {#multi-tier-api--imultitiercachet-extends-icachet}
 
@@ -185,7 +189,7 @@ Additional methods on a multi-tier cache:
 | `getL1()` / `getL2()`        | Access per-tier cache for advanced ops       |
 | `promote(key)`               | Force entry into L1 (preload after eviction) |
 | `demote(key)`                | Force entry out of L1 (keep in L2 only)      |
-| `sync()`                     | Pull recently-changed L2 entries into L1     |
+| `sync()`                     | Flush the write-back buffer to L2     |
 | `getTierStats(tier)`         | Stats per tier — useful for hit-ratio tuning |
 
 ## Decorators {#decorators}
@@ -260,47 +264,49 @@ async findById(id: string) { /* … */ }
 async updateProfile(id: string, patch: ProfilePatch) { /* … */ }
 ```
 
-`invalidateByTags(['user:u_42'])` drops every entry tagged
-`user:u_42` regardless of key. In multi-tier deployments, tag
-invalidation goes through L2 and reaches every pod.
+`invalidateByTags(['user:u_42'])` removes matching local entries. For L2 deletion,
+enable `trackL2Tags`; the tag index only knows keys written by that cache instance.
+For other processes' L1 invalidation, also enable `broadcastInvalidations` and
+provide the adapter's pub/sub methods. Tags are not persisted as a global L2
+index, and errors/disconnections can leave stale copies until their TTL expires.
 
 ## Compression {#compression}
 
-For payloads above `compressionThreshold` (default 1 KB), the cache
-optionally compresses with the configured `compressionAlgorithm`.
-`'none'` is the default — turn it on only when payloads are
-demonstrably large and CPU has budget.
+Compression is selected per cache with `compressionAlgorithm` and
+`compressionThreshold`. LRU/LFU serialize as JSON and only retain compressed bytes
+when sufficiently smaller. Use `gzip`, `deflate` or `brotli` when appropriate.
 
 ```typescript
-TitanCacheModule.forRoot({
-  compressionAlgorithm: 'lz4',     // fast, modest ratio
-  compressionThreshold: 4_096,
-})
+import { TitanCacheModule } from '@omnitron-dev/titan-cache';
+
+TitanCacheModule.forRoot({ compressionAlgorithm: 'gzip', compressionThreshold: 4_096 });
 ```
 
-Set `compress: true` on a specific `@Cacheable` to force compression
-regardless of size.
+The type accepts `lz4`, but the current implementation encodes with deflate and
+decodes with inflate. It does not produce LZ4 data. The decorator's `compress`
+option is forwarded but is not honored as a per-write override by LRU/LFU.
 
 ## Warming {#warming}
 
-Pre-populate hot keys at boot, on schedule, or on demand:
+Call `warm(strategies)` explicitly:
 
 ```typescript
-TitanCacheModule.forRoot({
-  warmingStrategies: [
-    { trigger: 'onBoot', loader: async () => loadHotKeys() },
-    { trigger: 'cron',   schedule: '*/5 * * * *', loader: async () => loadRecent() },
-  ],
-})
+import { LRUCache } from '@omnitron-dev/titan-cache';
 
-// Or trigger manually
-await this.cache.getCache('users').warm();
+const cache = new LRUCache<string>({ maxSize: 1_000 });
+await cache.warm([{ name: 'startup', loader: async () => new Map([['status', 'ready']]) }]);
+await cache.dispose();
 ```
+
+The module's `warmingStrategies` option is not wired to boot or cron execution.
+`warm()` with no argument does nothing. Use the scheduler or an application hook
+for timing. Multi-tier `warm` populates L1 only.
 
 ## Partitions {#partitions}
 
-Slice one cache into namespaced views — useful for per-tenant
-isolation without separate caches:
+Partition views prefix ordinary key operations. They are not an authorization
+or complete tenant-isolation boundary: tag invalidation, stats and warming are
+shared with the parent. Multi-tier `partition()` returns an L1 view only:
 
 ```typescript
 const users = this.cache.getCache('users');
@@ -322,7 +328,8 @@ deployment.
 
 - **Caching everything.** Adds invalidation surface for no benefit on
   cold paths. Cache only what you've measured to be hot.
-- **`has + get` pattern.** Race condition (TOCTOU). Use `getOrSet`.
+- **`has + get` pattern.** Handle a miss from `get`, or use the shared
+  `createCacheGetOrSet` wrapper rather than assuming every cache has that method.
 - **Skipping `tags` and relying on `clear()`.** `clear()` is a
   carpet bomb — tags target only what you actually want to drop.
 - **Putting `Request`-scoped keys in a `Singleton` cache.** Per-user

@@ -8,24 +8,19 @@ description: Background-job processing across pods — process manager, distribu
 
 # Worker fleet
 
-The canonical shape for **background work** at scale: scheduled
-jobs that should run exactly-once across a fleet, CPU-bound work
-isolated from the main event loop, and per-job retry / circuit-
-breaking / metrics — all coordinated through Redis.
+Use scheduler dispatch, Redis leases and supervised workers for background work.
+A lease coordinates a time window; it does not make a business effect exactly
+once. Persist idempotency and completion in the store that owns the operation.
 
 ## Shape {#shape}
 
-- **Scheduled jobs.** Cron and intervals via `titan-scheduler`,
-  auto-discovered by decorator.
-- **Exactly-once across pods.** Distributed locks via
-  `titan-lock`, so the same scheduled job doesn't run on every
-  pod.
-- **CPU isolation.** Heavy work in worker processes via
-  `titan-pm`, with pools / restart policies.
-- **Persistence.** Job state survives restarts (Redis-backed
-  scheduler).
-- **Metrics + health.** Per-job execution counts, durations,
-  failures.
+- `titan-scheduler` registers and invokes cron, interval and timeout handlers.
+- `titan-lock` can supply the scheduler's per-fire coordination lease.
+- `titan-pm` creates supervised workers or pools through explicit API calls.
+- `titan-metrics` records explicitly instrumented work and queries committed history.
+
+Register handlers on every boot. Serialized scheduler state cannot reconstruct
+arbitrary function closures. A process restart can interrupt an admitted job.
 
 ## Architecture {#architecture}
 
@@ -57,239 +52,114 @@ flowchart TB
 
 ```typescript
 import { Module } from '@omnitron-dev/titan';
-import { z } from '@omnitron-dev/titan/validation';
-import { ConfigModule } from '@omnitron-dev/titan/module/config';
-import { LoggerModule, ConsoleTransport } from '@omnitron-dev/titan/module/logger';
-
 import { TitanRedisModule } from '@omnitron-dev/titan-redis';
-import { TitanLockModule } from '@omnitron-dev/titan-lock';
-import { SchedulerModule, RedisPersistenceProvider } from '@omnitron-dev/titan-scheduler';
+import { TitanLockModule, LOCK_SERVICE_TOKEN, type IDistributedLockService }
+  from '@omnitron-dev/titan-lock';
+import { SchedulerModule } from '@omnitron-dev/titan-scheduler';
 import { ProcessManagerModule } from '@omnitron-dev/titan-pm';
 import { TitanMetricsModule } from '@omnitron-dev/titan-metrics';
-import { TitanHealthModule } from '@omnitron-dev/titan-health';
-
-const WorkerConfigSchema = z.object({
-  env:   z.enum(['development', 'staging', 'production']),
-  redis: z.object({ url: z.string().url() }),
-  pm:    z.object({
-    maxRestarts:    z.number().int(),
-    maxMemory:      z.string(),
-    poolMinWorkers: z.number().int(),
-    poolMaxWorkers: z.number().int(),
-  }),
-});
 
 @Module({
   imports: [
-    ConfigModule.forRoot({
-      schema:  WorkerConfigSchema,
-      sources: [
-        { type: 'file', path: 'config/default.yaml' },
-        { type: 'env',  prefix: 'WORKER_' },
-      ],
-      validateOnStartup: true,
-    }),
-
-    LoggerModule.forRoot({
-      level:      'info',
-      transports: [new ConsoleTransport()],
-    }),
-
-    // ── Foundation ─────────────────────────────────────────────────────
-    TitanRedisModule.forRootAsync({
-      useFactory: (config: ConfigService) => ({
-        clients: [
-          { namespace: 'default', url: config.get('redis.url'), db: 0 },
-          { namespace: 'lock',    url: config.get('redis.url'), db: 5 },
-          { namespace: 'sched',   url: config.get('redis.url'), db: 6 },
-        ],
-      }),
-      inject: [ConfigService],
-    }),
-
-    // ── Distributed locks (used by scheduler + decorators) ─────────────
-    TitanLockModule.forRoot({
-      defaultTtl:        60_000,                     // 1 min default
-      keyPrefix:         'lock',
-      defaultRetries:    3,
-      defaultRetryDelay: 200,
-      redisClientName:   'lock',
-    }),
-
-    // ── Scheduler with Redis persistence ───────────────────────────────
+    TitanRedisModule.forRoot({ config: { url: process.env.REDIS_URL } }),
+    TitanLockModule.forRoot({ keyPrefix: 'worker-locks', defaultTtl: 60_000 }),
     SchedulerModule.forRootAsync({
-      useFactory: (redis: RedisService) => ({
-        enabled:         true,
-        timezone:        'UTC',
-        persistence:     {
-          enabled:  true,
-          provider: new RedisPersistenceProvider(redis.getClient('sched')),
-        },
-        metrics:         { enabled: true, interval: 5_000 },
-        maxConcurrent:   10,
+      inject: [LOCK_SERVICE_TOKEN],
+      useFactory: (lockProvider: IDistributedLockService) => ({
+        enabled: true,
+        timezone: 'UTC',
+        distributed: { enabled: true, lockTTL: 60_000 },
+        lockProvider,
         shutdownTimeout: 30_000,
       }),
-      inject: [RedisService],
     }),
-
-    // ── Process manager for CPU work ───────────────────────────────────
-    ProcessManagerModule.forRootAsync({
-      useFactory: (config: ConfigService) => ({
-        isolation: 'worker',
-        transport: 'unix',
-        restartPolicy: {
-          enabled:     true,
-          maxRestarts: config.get('pm.maxRestarts'),
-          window:      60_000,
-          delay:       1_000,
-          backoff: { type: 'exponential', initial: 1_000, max: 30_000, factor: 2 },
-        },
-        resources: {
-          maxMemory: config.get('pm.maxMemory'),
-          maxCpu:    1.0,
-          timeout:   60_000,
-        },
-        monitoring: {
-          healthCheck: { interval: 5_000, timeout: 2_000 },
-          metrics:     true,
-          tracing:     false,
-        },
-        advanced: { gracefulShutdownTimeout: 30_000 },
-      }),
-      inject: [ConfigService],
-    }),
-
-    // ── Metrics ────────────────────────────────────────────────────────
-    TitanMetricsModule.forRoot({
-      appName:    'worker-fleet',
-      collection: { enabled: true, interval: 10_000, process: true, system: true, custom: true },
-      storage:    { type: 'sqlite', batchSize: 200, flushInterval: 10_000 },
-      retention:  { maxAge: '14d', cleanupInterval: 3_600_000 },
-    }),
-
-    // ── Health ─────────────────────────────────────────────────────────
-    TitanHealthModule.forRootAsync({
-      useFactory: (redis: RedisService) => ({
-        enableMemoryIndicator:    true,
-        enableEventLoopIndicator: true,
-        enableRedisIndicator:     true,
-        redisClient:              redis.getClient('default'),
-        timeout:                  2_000,
-        enableCaching:            true,
-        version:                  process.env.APP_VERSION,
-      }),
-      inject: [RedisService],
-    }),
-
-    // ── Your task / worker modules ─────────────────────────────────────
-    TasksModule,
-    ReportsModule,
+    ProcessManagerModule.forRoot({ isolation: 'worker', handleSignals: false }),
+    TitanMetricsModule.forRoot({ appName: 'worker-fleet', storage: { type: 'memory' } }),
   ],
 })
 export class AppModule {}
 ```
 
-## A scheduled task (exactly-once) {#a-scheduled-task-exactly-once}
+Add your job providers to a feature module, or `SchedulerModule.forFeature([...])`.
+The example uses volatile metric history deliberately: SQL needs an explicit
+adapter/connection/schema. Redis scheduler persistence also needs an explicitly
+constructed provider and does not turn handlers into durable workflows.
+
+## A coordinated scheduled task {#a-scheduled-task-exactly-once}
 
 ```typescript
-import { Injectable, Inject } from '@omnitron-dev/titan';
+import { Injectable } from '@omnitron-dev/titan';
 import { Schedulable, Cron, CronExpression } from '@omnitron-dev/titan-scheduler';
-import {
-  WithDistributedLock,
-  LOCK_SERVICE_TOKEN,
-  type IDistributedLockService,
-} from '@omnitron-dev/titan-lock';
-import { LOGGER_SERVICE_TOKEN, type ILoggerModule } from '@omnitron-dev/titan/module/logger';
 
 @Injectable()
 @Schedulable()
 class CleanupTasks {
-  constructor(
-    @Inject(LOCK_SERVICE_TOKEN)   private readonly __lockService__: IDistributedLockService,
-    @Inject(LOGGER_SERVICE_TOKEN) private readonly loggerModule:    ILoggerModule,
-  ) {}
-
-  @Cron(CronExpression.EVERY_HOUR, { timezone: 'UTC' })
-  @WithDistributedLock('cleanup:hourly', 30 * 60_000)     // up to 30 min
+  @Cron(CronExpression.EVERY_HOUR, { name: 'cleanup:hourly', timezone: 'UTC' })
   async hourlyCleanup() {
-    // Runs on exactly one pod per hour.
-    await this.deleteExpired();
-  }
-
-  @Cron(CronExpression.EVERY_DAY_AT_3AM)                 // typed; raw strings must match a CronExpression value
-  @WithDistributedLock('cleanup:nightly', 60 * 60_000)   // up to 1 hour
-  async nightlyCleanup() {
-    await this.archiveOldRecords();
+    await deleteExpiredRecords(); // application operation with idempotent effects
   }
 }
 ```
+
+With `distributed.enabled` and `lockProvider` configured above, scheduled fires
+compete for a key derived from the job and time window. The scheduler holds that
+lease until TTL rather than releasing it after a quick handler. A plain
+`@WithDistributedLock` releases on return, so a later pod can acquire it and run
+again in the same hour. Neither approach is an exactly-once guarantee: pauses,
+TTL expiry, failed side effects and a crashed winner still require recovery logic.
+Manual `triggerJob` bypasses scheduled-fire coordination.
 
 ## A CPU-bound worker pool {#a-cpu-bound-worker-pool}
 
+Create a pool once and reuse it across requests. The pool itself is the service
+proxy; call the worker's public method on it:
+
 ```typescript
-import {
-  Process, Public, OnShutdown, Trace, Metric, CircuitBreaker, Idempotent,
-  PM_MANAGER_TOKEN, ProcessManager,
-} from '@omnitron-dev/titan-pm';
-import { Service, Inject } from '@omnitron-dev/titan';
+import { Process, Public, ProcessManager } from '@omnitron-dev/titan-pm';
 
-@Process({ name: 'image-worker' })
-class ImageWorker {
+@Process({ name: 'calculation-worker' })
+export class CalculationWorker {
   @Public()
-  @Trace()
-  @Metric('images.resize')                            // metric name (or omit for default)
-  @CircuitBreaker({ threshold: 5, timeout: 30_000 })  // `threshold`, not `failureThreshold`
-  @Idempotent({ key: 'jobId', ttl: '1h' })            // dedup on input.jobId for 1h
-  async resize(input: { jobId: string; data: Buffer; width: number }): Promise<Buffer> {
-    return sharp(input.data).resize(input.width).toBuffer();
-  }
-
-  @OnShutdown()
-  async cleanup() {
-    // Drain pending tasks before exit
+  sumSquares(limit: number): number {
+    if (!Number.isInteger(limit) || limit < 0 || limit > 100_000) {
+      throw new RangeError('limit must be an integer from 0 to 100000');
+    }
+    let total = 0;
+    for (let i = 0; i < limit; i++) total += i * i;
+    return total;
   }
 }
 
-@Service({ name: 'media' })
-class MediaService {
-  constructor(@Inject(PM_MANAGER_TOKEN) private readonly pm: ProcessManager) {}
-
-  @Public()
-  async resize(input: { jobId: string; data: Buffer; width: number }) {
-    // `size`, not `min`/`max` — the pool is a fixed size (or `'auto'`,
-    // which sizes it to the CPU count). Use `pool.scale(n)` to change it.
-    const pool = await this.pm.pool(ImageWorker, { size: 8 });
-    // The pool IS a service proxy: call the worker's own methods on it.
-    // There is no `.execute(method, …args)`.
-    return pool.resize(input);
-  }
+export async function createCalculationPool(pm: ProcessManager) {
+  return pm.pool(CalculationWorker, { size: 2 });
 }
 ```
 
+Keep worker classes in importable modules following the [PM entry-point
+requirements](../modules/pm.mdx). The host stops admission and awaits
+`pm.shutdown()` while dependencies are still available. `ProcessManagerModule`
+does not install that shutdown bridge; `handleSignals: true` is a separate opt-in.
+Do not create a new pool for each request.
+
 ## Cross-module wiring notes {#cross-module-wiring-notes}
 
-| Concern                        | Wiring detail                                                                                          |
-| ------------------------------ | ------------------------------------------------------------------------------------------------------ |
-| Redis namespaces               | `default`, `lock` (db 5), `sched` (db 6) — separate DBs prevent key collisions and ease debugging       |
-| `@WithDistributedLock` wiring  | Decorator looks up the lock service on the instance under `__lockService__`; inject it there explicitly |
-| Lock TTL > job duration        | `WithDistributedLock('key', ttl)` — `ttl` must exceed the worst-case duration or another pod takes over mid-execution |
-| Scheduler persistence          | `RedisPersistenceProvider` lets jobs resume after pod restart; without it, scheduled state is lost      |
-| PM restart backoff             | `restartPolicy.backoff` with `type: 'exponential'` prevents crash-loop flooding; cap with `max`         |
-| Worker resource limits         | `resources.maxMemory` + `resources.maxCpu` enforce limits; without them, runaway workers can starve peers |
-| Liveness sweep                 | PM's defense-in-depth — even if a worker dies without exit signal, the sweep notices and restarts       |
+| Concern | Required behavior |
+| --- | --- |
+| Scheduler coordination | Supply a lock provider and enable distributed mode; a Redis connection alone is insufficient |
+| Handler recovery | Register callable handlers every boot; persistence cannot restore closures |
+| Business effects | Store idempotency/completion transactionally; lease ownership is not a completion receipt |
+| PM shutdown | Host awaits `shutdown`; signal handlers are opt-in |
+| Resource limits | Verify the chosen spawner's enforcement; `resources.maxCpu` is not a CPU quota implementation |
+| Metrics | Provide custom `app` labels and explicit instrumentation; configure an SQL adapter for persistence |
 
 ## Production checklist {#production-checklist}
 
-- [ ] `SchedulerModule.persistence.enabled: true` — without it, jobs lost on restart
-- [ ] Every scheduled job that mutates shared state uses `@WithDistributedLock`
-- [ ] Lock `ttl` ≥ worst-case job duration × 2
-- [ ] `PM.restartPolicy.backoff` configured to prevent crash-loops
-- [ ] Worker `resources.maxMemory` set — otherwise leaks bring down the pod
-- [ ] `monitoring.metrics: true` on PM — without metrics you can't see worker health
-- [ ] `MetricsModule.storage: 'sqlite'` or `'postgres'` — `'memory'` is lost on restart
-- [ ] Logs shipped off-host — workers crash, logs need to survive
-- [ ] Kubernetes worker pods use `terminationGracePeriodSeconds` ≥ `shutdownTimeout`
-- [ ] Scheduler `shutdownTimeout` ≥ longest job's expected duration
+- Exercise the scheduled-fire path on competing nodes, including a stalled lease holder.
+- Verify restart recovery and idempotency for the business operation itself.
+- Re-register handlers on boot and observe that expected jobs were discovered.
+- Reuse pools, stop admission, await PM shutdown, then close shared connections.
+- Verify metric history through record, flush and query; check storage errors/loss.
+- Set host/container resource limits where an operating-system quota is required.
 
 ## See also {#see-also}
 

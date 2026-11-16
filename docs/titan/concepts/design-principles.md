@@ -15,75 +15,41 @@ build on top of it.
 
 ## 1. Explicitness over magic {#1-explicitness-over-magic}
 
-Every dependency is declared. Every provider is registered. No
-filesystem auto-discovery. No annotation scanning at startup. No
-"convention over configuration" that surprises you a year later when
-you grep the codebase and cannot find why a class is being instantiated.
+Register application providers and imports explicitly:
 
 ```typescript
-// Yes — explicit. The container knows about UsersService because
-// AppModule said so.
+import { Module } from '@omnitron-dev/titan';
+
 @Module({ providers: [UsersService] })
 export class AppModule {}
-
-// No — implicit. Titan does not scan ./services/*.ts at boot.
 ```
 
-The cost: a little more typing. The benefit: a Titan codebase is
-**searchable**. Every wiring decision is a literal string in a literal
-file. New team members can answer "where does this come from?" with
-`grep`, not by reading the framework source.
-
-> **Why this matters.** The most expensive bugs in mature codebases are
-> ambient-state bugs — a function reads a global, the global was set
-> three layers up by an init hook nobody remembers writing, the test
-> doesn't trigger that hook, and the test passes. Titan's container
-> makes ambient state structurally impossible: if a service needs
-> something, it appears in its constructor.
+Some APIs also use discovery and conventions: scheduler/event decorators scan
+registered providers, module discovery can load configured paths, and certain
+method decorators read conventional instance fields or an ambient fallback.
+Inspect each decorator's wiring contract rather than assuming constructor
+injection is the only source of a dependency.
 
 ## 2. Pay only for what you use {#2-pay-only-for-what-you-use}
 
-The base framework imports nothing it does not need. The 14 ecosystem
-modules are independently versioned npm packages; you install the ones
-you use. A Titan app with one service and no opt-in modules has no
-hidden allocator, no ambient tracing, no global instrumentation.
+Titan modules are separate workspace packages, but Titan core already depends on
+Pino, Zod, WebSocket support and other runtime libraries. Config and Logger are
+loaded by default unless core modules are disabled. An unused integration may
+avoid initialization without removing its package from the installation graph.
 
-```typescript
-// A complete Titan service — no modules, no logging, no metrics.
-// This works. It will not pull in pino, redis, or any other dependency.
-@Service('echo@1.0.0')
-export class EchoService {
-  @Public()
-  async ping(msg: string) { return msg; }
-}
-
-@Module({ providers: [EchoService] })
-export class AppModule {}
-
-await (await Application.create(AppModule)).start();
-```
-
-The cost: you assemble what you want. The benefit: small services stay
-small. Large services do not pay the small-service tax of carrying
-features they don't use.
+Use the [module dependency inventory](../modules/module-map.mdx#install-footprint)
+and package manifests to understand installation cost. Package separation alone
+does not establish a smaller runtime footprint or independent version compatibility.
 
 ## 3. The same primitives operate the system {#3-the-same-primitives-operate-the-system}
 
-There is no separate "operator API" that drifts from the runtime API.
-The Omnitron CLI talks to a running Titan app over the same Netron
-protocol your browser uses. The web console reads the same metrics
-your services emit. The orchestrator polls the same `/healthz` your
-load balancer probes.
+Omnitron builds on Titan's lifecycle, DI and Netron RPC. The CLI and Console use
+published daemon services. Standalone Titan services still need their own wiring,
+authentication and instrumentation; they do not acquire the daemon's HTTP metrics
+server or orchestrator bridges by importing a module.
 
-This means three things in practice:
-
-- **You do not learn two languages.** The wire format your frontend
-  speaks is the wire format your CLI speaks.
-- **You do not maintain two surfaces.** Adding an operator action is
-  adding a `@Public` method on the orchestrator service.
-- **Your runtime is debuggable from any client.** A Titan service can
-  be inspected, called, and audited from the same code paths your
-  product uses.
+Health RPC and HTTP probes are different entry points. Trace the actual route
+or service method used by an operator before attributing its behavior to a module.
 
 ## 4. The contract is a TypeScript type {#4-the-contract-is-a-typescript-type}
 

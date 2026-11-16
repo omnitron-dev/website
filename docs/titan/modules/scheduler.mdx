@@ -7,7 +7,7 @@ title: titan-scheduler
 
 # titan-scheduler
 
-<span class="module-badge">official · @omnitron-dev/titan-scheduler · stable</span>
+<span class="module-badge">official · @omnitron-dev/titan-scheduler</span>
 
 Cron, interval, and timeout job scheduling with auto-discovery of
 decorated methods, pluggable persistence (memory / Redis / database),
@@ -23,7 +23,7 @@ pnpm add @omnitron-dev/titan-scheduler
 - **Periodic background work.** Cron-style cleanup, hourly reports,
   nightly aggregations.
 - **Interval polling.** Poll an external system every N seconds.
-- **Delayed actions.** Run something exactly once, N ms after
+- **Delayed actions.** Schedule a one-shot timer N ms after
   registration.
 - **Distributed jobs.** Multi-pod fleet where exactly-one execution
   is required (pair with [`titan-lock`](./lock.mdx) or built-in

@@ -329,15 +329,16 @@ name, version, methods, schemas. Returned by
 **Stack** — Named environment in a project (dev / staging /
 prod). Each may have its own infra overrides.
 
-**Stale-while-revalidate** — Cache strategy: serve stale data,
-refresh in background.
+**Stale-while-revalidate** — Cache strategy: serve stale data and refresh
+in the background. The `titan-cache` options of this name are declared but not
+consumed by its current implementation.
 
 ## T {#t}
 
 **TTL** — Time-to-live. Used for cache entries, session
 records, discovery heartbeats.
 
-**`titan-X`** — Independently versioned official module (e.g.,
+**`titan-X`** — Separately installable official workspace package (e.g.,
 `titan-auth`, `titan-cache`).
 
 **Topology** — Per-process declaration of `expose` /

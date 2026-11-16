@@ -7,12 +7,13 @@ title: titan-events
 
 # titan-events
 
-<span class="module-badge">official · @omnitron-dev/titan-events · stable</span>
+<span class="module-badge">official · @omnitron-dev/titan-events</span>
 
 Typed event bus with wildcard / namespaced patterns, decorator-based
 listeners, async / serial / reduce emit modes, event history with
 replay, transactions, schema validation, delayed and cron-scheduled
-events, and rich metrics.
+events and in-process statistics. History and scheduled event state are volatile;
+there is no database-backed replay or external metrics exporter.
 
 ```bash
 pnpm add @omnitron-dev/titan-events
@@ -258,8 +259,9 @@ With `wildcard: true`:
 @OnEvent({ event: 'order.*.shipped' })  // order.{id}.shipped
 ```
 
-Pattern resolution is cached, so wildcards are O(1) per emit at
-runtime.
+Pattern lookup is cached where supported, but delivery still depends on the
+number of matching subscriptions and handler work. There is no constant-time
+end-to-end emit guarantee.
 
 ## Other services exposed {#other-services-exposed}
 
@@ -275,7 +277,11 @@ runtime.
 | `EVENT_DISCOVERY_SERVICE_TOKEN`| —                                   | Decorator discovery                    |
 
 `EventValidationService.registerSchema(name, schema)` accepts Zod schemas,
-JSON Schema and custom `ISchemaValidator` implementations. Pass Zod objects
+JSON Schema and custom `ISchemaValidator` implementations. The dynamic
+`forRoot` / `forRootAsync` emitter factories currently do not apply the declared
+`schemas` option; register schemas explicitly and invoke validation on your
+chosen path. `forFeature({ events, schemas })` registers values that the current
+discovery/validation services do not consume. Pass Zod objects
 directly; the service adapts their parse results to its validation contract.
 `validateData(name, payload)` returns a boolean; `validate(name, payload)`
 returns the validation result, including field errors.
@@ -283,7 +289,9 @@ returns the validation result, including field errors.
 ## Lifecycle {#lifecycle}
 
 `EventsService` implements `onInit`, `onStart`, `onStop`,
-`onDestroy`. The module honours them via the standard Titan lifecycle.
+`onDestroy`. `onStart` and `onStop` log only; they do not drain in-flight
+handlers. `onDestroy` clears subscriptions and in-memory state. Stop producers
+and await the work you started before container teardown.
 
 ```mermaid
 flowchart LR

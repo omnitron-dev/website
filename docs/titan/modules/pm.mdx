@@ -7,11 +7,11 @@ title: titan-pm
 
 # titan-pm
 
-<span class="module-badge">official · @omnitron-dev/titan-pm · stable</span>
+<span class="module-badge">official · @omnitron-dev/titan-pm</span>
 
 Process supervision with worker pools, IPC (Unix / TCP / WebSocket),
 supervisor patterns, restart policies with exponential backoff,
-resource limits, metrics + health collection, a transparent service
+configurable spawn resources, metrics and health APIs, a transparent service
 proxy that makes every process behave like a local Netron service,
 and decorators for in-process workflows and resilience.
 
@@ -50,7 +50,7 @@ import { ProcessManagerModule } from '@omnitron-dev/titan-pm';
       },
       resources: {
         maxMemory: '512MB',
-        maxCpu:    1.0,
+        maxCpu:    1.0,                          // declared; no CPU quota enforcement
         timeout:   30_000,
       },
       monitoring: {
@@ -78,12 +78,18 @@ Async config via `forRootAsync({ useFactory, inject?, useExisting? })`.
 | `testing`         | `{ useMockSpawner }`                                                                                |
 | `advanced`        | `{ gracefulShutdownTimeout, livenessSweepIntervalMs, handleSignals }`                              |
 
-Defaults are pulled from `DEFAULT_PM_CONFIG`.
+Defaults are pulled from `DEFAULT_PM_CONFIG`. `resources.maxCpu` is declared
+and defaulted but has no runtime consumer; it does not enforce a CPU quota.
+Validate effective resource controls for the chosen spawner and host.
+
+The manager has no Titan shutdown hook. Stop application producers and explicitly
+await `ProcessManager.shutdown()` during owner cleanup. `advanced.handleSignals`
+is false by default; importing the module does not install signal handlers.
 
 ## `ProcessManager` — the API {#processmanager--the-api}
 
 ```typescript
-import { ProcessManager, PM_MANAGER_TOKEN, Process, Public }
+import { ProcessManager, PM_MANAGER_TOKEN, Process, Public, type ServiceProxy }
   from '@omnitron-dev/titan-pm';
 
 @Process({ name: 'image-worker' })
@@ -98,10 +104,18 @@ class ImageWorker {
 class MediaService {
   constructor(@Inject(PM_MANAGER_TOKEN) private readonly pm: ProcessManager) {}
 
+  private pending?: Promise<ServiceProxy<ImageWorker>>;
+  private worker() {
+    return this.pending ??= this.pm.spawn(ImageWorker).catch(error => {
+      this.pending = undefined;
+      throw error;
+    });
+  }
+
   @Public()
   async resize(input: Buffer, width: number) {
-    const worker = await this.pm.spawn(ImageWorker);
-    return worker.resize(input, width);     // transparent RPC call
+    const worker = await this.worker();
+    return worker.resize(input, width);
   }
 }
 ```

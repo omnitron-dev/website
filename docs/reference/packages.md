@@ -31,18 +31,22 @@ No extra package is needed for the server.
 
 ### Backend modules (opt-in) {#backend-modules-opt-in}
 
-Independently versioned. Add only what your app uses.
+Separately installable packages from the same workspace release. Install declared
+peers and optional drivers for the selected backend; do not infer independent
+version compatibility from the package boundary.
 
 | Package | Purpose |
 | ------- | ------- |
 | [`@omnitron-dev/titan-auth`](../titan/modules/auth.mdx) | JWT authentication (HS256 / RS256 / ES256, JWKS, token cache) |
-| [`@omnitron-dev/titan-cache`](../titan/modules/cache.mdx) | Multi-tier caching (L1 LRU/LFU + L2 Redis) |
+| [`@omnitron-dev/titan-cache`](../titan/modules/cache.mdx) | LRU/LFU and optional caller-supplied L2 adapter |
 | [`@omnitron-dev/titan-database`](../titan/modules/database.mdx) | Kysely + migrations + RLS plugin |
 | [`@omnitron-dev/titan-discovery`](../titan/modules/discovery.mdx) | Redis-backed service discovery + heartbeats |
 | [`@omnitron-dev/titan-events`](../titan/modules/events.mdx) | In-process event bus with history |
 | [`@omnitron-dev/titan-health`](../titan/modules/health.mdx) | Health + readiness probes (k8s-shaped) |
 | [`@omnitron-dev/titan-lock`](../titan/modules/lock.mdx) | Distributed Redis locks (Lua scripts, UUID ownership) |
-| [`@omnitron-dev/titan-metrics`](../titan/modules/metrics.mdx) | Counters / gauges / histograms; Prom exposition |
+| [`@omnitron-dev/titan-lumen`](../lumen/overview.md) | Titan-hosted document services, access filtering, live editing and MCP adapter |
+| [`@omnitron-dev/titan-mailer`](../titan/modules/mailer.mdx) | SMTP service, templates and optional durable SQL outbox worker |
+| [`@omnitron-dev/titan-metrics`](../titan/modules/metrics.mdx) | Native counters / gauges / histograms and time-series storage; optional text export |
 | [`@omnitron-dev/titan-notifications`](../titan/modules/notifications.mdx) | Multi-channel delivery + DLQ + rotif messaging |
 | [`@omnitron-dev/titan-pm`](../titan/modules/pm.mdx) | Process manager / worker pools / autoscaling |
 | [`@omnitron-dev/titan-ratelimit`](../titan/modules/ratelimit.mdx) | Token-bucket / sliding-window / fixed-window |
