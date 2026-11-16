@@ -94,10 +94,14 @@ test.describe('font delivery without JavaScript', () => {
           expect(response.headers()['content-type']).toMatch(/^font\/woff2(?:;|$)/);
           expect((await response.body()).byteLength).toBeGreaterThan(20000);
         }
-        await page.unroute(fontPattern);
-        await page.reload();
-        await page.evaluate(() => document.fonts.ready);
-        expect((await actualHeadingFonts(context, page)).some(font => font.isCustomFont && font.familyName.startsWith('Inter'))).toBe(true);
+        // Check successful decoding independently of font selection. With optional,
+        // even a later navigation may keep fallback for its entire lifetime.
+        // Routing also disables HTTP caching, so reload is not a warm-cache oracle.
+        // https://drafts.csswg.org/css-fonts/#valdef-font-face-font-display-optional
+        expect(await page.evaluate(() => [...document.fonts]
+          .filter(font => font.family === 'Inter')
+          .map(font => ({ weight: font.weight, status: font.status }))))
+          .toEqual([{ weight: '400', status: 'loaded' }, { weight: '600 900', status: 'loaded' }]);
       } finally {
         releaseFonts();
         await session.detach();
