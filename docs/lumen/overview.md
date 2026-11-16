@@ -5,17 +5,31 @@ title: Lumen
 ---
 # Lumen
 
-Lumen compiles a document corpus into static HTML, local search, Markdown mirrors and an agent index. The same parsed document graph supplies page rendering and link checks. This manual is a reference consumer of that build path.
+Lumen is Omnitron's document compiler and publishing system. It turns a corpus of Markdown and PDX documents into static HTML, a local search index, Markdown mirrors and agent-readable exports. A typed document tree and a corpus graph connect those outputs to routes, headings, references and access metadata.
+
+Use it for a product documentation site, an engineering knowledge base, or a technical publication that needs both readable pages and structured reuse. React islands add interactive examples where they are useful. This website uses that path with Prism components; an ordinary document remains readable before its interactive controls load.
+
+## Start with the question you need to answer
+
+| Question | Read next |
+| --- | --- |
+| What happens between a source file and the browser? | [Architecture](./architecture.md) follows parsing, checks, projection, rendering and activation |
+| Which parts are ready, and which need application work? | [Use cases](./use-cases.md) separates static publishing from authenticated services |
+| How does it compare with other documentation tools? | [Engineering comparison](./comparison.md) examines rendering, authoring, search and operating costs |
+| What can I actually interact with? | [Showcase](./showcase.md) contains working examples and explains their execution boundaries |
+| How do I write a page? | [Authoring](./authoring.md) covers directives, typed examples, mathematics and playgrounds |
 
 ## Choose the boundary
 
 | Package | Responsibility |
 | --- | --- |
-| `@omnitron-dev/lumen-ast` | Markdown/PDX parsing, typed nodes, HTML and Markdown transformations, code highlighting and diagrams |
+| `@omnitron-dev/lumen-ast` | Markdown/PDX parsing, typed nodes, HTML/Markdown/Typst transformations, highlighting, math and diagram support |
 | `@omnitron-dev/lumen` | Corpus graph, verification gates, static generation and CLI |
-| `@omnitron-dev/lumen-ui` | Documentation layouts, search UI and selective React island hydration |
-| `@omnitron-dev/titan-lumen` | Titan-hosted document services, access policy, live editing and MCP integration |
+| `@omnitron-dev/lumen-ui` | Documentation layouts, local search UI and a shared React context for selectively activated islands |
+| `@omnitron-dev/titan-lumen` | Netron-exposed document services in a Titan application, access projection, revision-aware editing and an HTTP MCP adapter |
 | `@omnitron-dev/lumen-migrate` | Docusaurus content conversion and route/anchor comparison |
+
+Prism supplies the React component system, design tokens and research/document controls; Lumen supplies the document and publication lifecycle. Their roles are complementary.
 
 A static build needs no Titan server. Add Titan-Lumen only when the application needs authenticated document services. A public static artifact is readable by anyone who receives its files; privileged builds require a corresponding hosting boundary.
 
@@ -78,8 +92,18 @@ the AST root and browser entry do not import the server SDK. Diagnostics go to
 stderr, and the transport closes an input exceeding its 1 MiB buffer limit even
 before a newline arrives.
 
-## Continue
+## Current boundaries
 
-- [Author documents and interactive examples](./authoring.md)
-- [Inspect this reference site's build](./this-site.md)
-- [Find exact package exports](../reference/api-index.mdx)
+The CLI has working static generation, corpus checks, public exports, local MCP, PDF export and generated identifier types. Richer services are separate integrations: Titan-Lumen must be configured inside an application, and an editor component does not create a persistence service by itself.
+
+Locale metadata and translation-staleness checks exist, but Lumen does not supply a complete locale-routing, translation-management or documentation-versioning workflow. The current Pagefind builder labels its indexing input with the configured default locale. Validate multilingual retrieval explicitly. Likewise, a code fence is not a tested program: `codeExamplesGate` checks empty top-level examples, while Twoslash analyzes only explicitly marked fences. See the [verification boundaries](./architecture.md#what-checks-prove).
+
+## See also {#continue}
+
+- [Architecture and verification](./architecture.md)
+- [Deployment choices and use cases](./use-cases.md)
+- [Engineering comparison](./comparison.md)
+- [Working showcase](./showcase.md)
+- [Authoring reference](./authoring.md)
+- [This site's build](./this-site.md)
+- [Exact public package exports](../reference/api-index.mdx)

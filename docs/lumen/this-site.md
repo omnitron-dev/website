@@ -93,3 +93,11 @@ The migration records the previous built site's route and anchor inventory in `m
 The website and framework are separate repositories. Use the normal Omnitron SDK workflow for a development checkout and released package versions for distribution. An unpublished SDK candidate must be qualified explicitly; a local dependency link is not evidence of a reproducible registry installation.
 
 See [contributing](../community/contributing.md) for the project workflow and [compatibility](../reference/compatibility.md) for supported versions.
+
+
+## See also
+
+- [Lumen architecture](./architecture.md)
+- [Working showcase](./showcase.md)
+- [Engineering comparison](./comparison.md)
+- [Authoring](./authoring.md)

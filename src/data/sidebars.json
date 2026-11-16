@@ -1027,6 +1027,22 @@
     },
     {
       "type": "doc",
+      "id": "lumen/architecture"
+    },
+    {
+      "type": "doc",
+      "id": "lumen/use-cases"
+    },
+    {
+      "type": "doc",
+      "id": "lumen/comparison"
+    },
+    {
+      "type": "doc",
+      "id": "lumen/showcase"
+    },
+    {
+      "type": "doc",
       "id": "lumen/authoring"
     },
     {

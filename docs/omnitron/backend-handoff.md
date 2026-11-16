@@ -35,9 +35,8 @@ plan intact. Better health alone does not change the review digest. Generation,
 configuration, runtime-role and infrastructure checks still apply; a worker
 rotation can still invalidate the reviewed generation or inventory.
 
-This behavior is implemented in source revision `6f4a820d`. It is a contract of the
-update implementation, not evidence that a node has activated that revision.
-Check the executing update tool and the independently observed runtime roles;
+Verify that the executing update tool implements this contract and inspect the
+independently observed runtime roles;
 preparing or installing an artifact alone does not activate it.
 
 ## Owner compatibility {#owner-compatibility}

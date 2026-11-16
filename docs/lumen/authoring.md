@@ -186,3 +186,11 @@ without client JavaScript.
 ## Verify the result
 
 Run `lumen check` while authoring, then build and inspect the actual output. A parser accepting a widget is not evidence that its registered component loaded; exercise it in the production preview. Check keyboard focus, narrow viewports and both color themes.
+
+
+## See also
+
+- [Architecture and verification boundaries](./architecture.md)
+- [Working showcase](./showcase.md)
+- [Use cases](./use-cases.md)
+- [This site's build](./this-site.md)
