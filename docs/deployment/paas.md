@@ -29,7 +29,7 @@ primary_region = "fra"
 
 [env]
   NODE_ENV = "production"
-  HOME     = "/var/lib/omnitron"   # daemon state → $HOME/.omnitron (no OMNITRON_HOME var)
+  OMNITRON_HOME = "/var/lib/omnitron"   # persistent controller state
 
 [mounts]
   source      = "omnitron_data"

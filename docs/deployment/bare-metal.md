@@ -126,9 +126,8 @@ NODE_ENV=production
 DATABASE_URL=postgres://platform:strongpass@localhost:5432/platform
 REDIS_URL=redis://localhost:6379
 JWT_SECRET=<generated>
-# Daemon state lives at $HOME/.omnitron — with User=omnitron that resolves to
-# /home/omnitron/.omnitron. There is no OMNITRON_HOME override; set HOME to relocate.
-HOME=/home/omnitron
+# Controller state is separate from the service account’s home directory.
+OMNITRON_HOME=/var/lib/omnitron
 ```
 
 Set restrictive perms:

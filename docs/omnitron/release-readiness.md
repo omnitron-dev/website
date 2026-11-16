@@ -196,16 +196,14 @@ This plan supplies delivery order and acceptance gates, not a competing architec
 
 ## Current implementation evidence {#current-implementation-evidence}
 
-CI compares release artifacts from two independent checkouts. Published
-Omnitron 0.4.10 uses registry packages from Xec 0.12.0 and Kysera 0.10.2. Its
-committed lockfile records their resolved versions and integrity. Qualification
-checks the actual archives and installed dependency graph; an earlier release's
-receipt does not qualify a changed candidate.
-
-The upcoming 0.4.11 source requires Xec 0.13 for durable execution-resource
-inspection and termination, retained release production, and the separate
-`@xec-sh/ssh` API. Release preparation checks both declarations and installed
-versions before changing versions or building. The npm delivery path is:
+CI compares release artifacts from two independent checkouts. Omnitron 0.4.12
+uses the published Xec 0.13.0 contracts for durable execution-resource inspection
+and termination, retained release production, and the separate `@xec-sh/ssh` API.
+The committed lockfile records resolved versions and integrity. Release
+preparation checks both declarations and installed versions before changing
+versions or building. Qualification checks actual archives and the installed
+dependency graph; an earlier release's receipt does not qualify a changed
+candidate. The npm delivery path is:
 
 1. Publish and verify the Xec packages that supply those contracts.
 2. Generate the real registry lockfile and verify a frozen Omnitron installation.

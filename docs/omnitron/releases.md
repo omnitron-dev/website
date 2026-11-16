@@ -94,6 +94,38 @@ Equal archive hashes identify delivered bytes. They do not by themselves identif
 a running process, or prove that native dependencies built for macOS will run on
 Linux. Use the launch receipt and the destination's runtime when checking a stack.
 
+### Choose build storage {#choose-build-storage}
+
+The native builder, release catalog, artifact inspection and pruning use the
+same `OMNITRON_RELEASES_DIR`. Without it, releases live in
+`$OMNITRON_HOME/releases` (default: `~/.omnitron/releases`). Set this variable in
+the environment of both the controller and CLI to put source checkouts,
+installed build dependencies, logs and artifacts on a dedicated disk.
+
+Create the directories on a mounted build disk first. For example:
+
+```bash
+df -h /mnt/builds
+mkdir -p /mnt/builds/omnitron-releases /mnt/builds/tmp
+export OMNITRON_RELEASES_DIR=/mnt/builds/omnitron-releases
+export TMPDIR=/mnt/builds/tmp
+```
+
+The release directory must be absolute and already exist. An unavailable disk
+fails the operation; Omnitron does not create a replacement mount path or fall
+back to the system disk. Temporary build outputs use a unique private directory
+under the OS temporary root (`TMPDIR` on macOS/Linux, `TEMP`/`TMP` on Windows).
+Each child receives that private directory; normal completion, failure and
+cancellation remove it. Abrupt termination of the build process can leave
+scratch data behind. Keep the temporary root short when tests create Unix
+sockets. `--keep-source` retains source checkouts, but not temporary files.
+
+Storage selection belongs to the host. Per-build environment overrides cannot
+change these paths. Changing the directory does not migrate an existing catalog:
+preserve its artifacts and registrations, and coordinate any relocation with
+active builds and deployments. A running controller must receive the same
+setting through its normal, reviewed activation.
+
 ### Qualify a separate working copy {#qualify-a-separate-working-copy}
 
 Install dependencies in each checkout using the Node target and the pnpm version

@@ -54,7 +54,8 @@ no shipped node_modules.
 | Variable | Purpose |
 | -------- | ------- |
 | `NODE_ENV` | `'production'` |
-| `HOME` | Daemon state lives under `$HOME/.omnitron/` |
+| `OMNITRON_HOME` | Absolute instance directory; defaults to `$HOME/.omnitron` |
+| `OMNITRON_RELEASES_DIR` | Existing absolute directory for native builds and the release catalog |
 | `DATABASE_URL` | Postgres connection string |
 | `REDIS_URL` | Redis connection string |
 | `JWT_SECRET` | Signing key — long random; from secret manager |
@@ -62,9 +63,9 @@ no shipped node_modules.
 | `OMNITRON_NO_INFRA` | `1` to skip Docker infra provisioning on boot |
 | `<APP>_*` | Per-app overrides (matches the app's `config.envPrefix`) |
 
-The daemon resolves its home directory from `$HOME`
-(`$HOME/.omnitron/`) — there is no `OMNITRON_HOME` override. Set
-`HOME` for the daemon's user to relocate state.
+Set `OMNITRON_HOME` to isolate controller state without changing the OS user’s
+home directory. For a separate build disk, configure
+[release storage](../omnitron/releases.md#choose-build-storage).
 
 Per-environment values flow in through each app's
 `config.sources` / `config.envPrefix` (Titan's config module) —

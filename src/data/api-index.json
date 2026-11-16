@@ -1,5 +1,5 @@
 {
-  "revision": "45a5b66a23be194d616f2cd409d9ce8f18e3e4c7",
+  "revision": "81c7384c47774fbe9fa365263797bac32ce31027",
   "packages": [
     "@omnitron-dev/access",
     "@omnitron-dev/common",
@@ -7884,7 +7884,7 @@
       "name": "LumenSearchDialog",
       "package": "@omnitron-dev/lumen-ui",
       "kind": "function",
-      "source": "packages/lumen-ui/src/search/search-dialog.tsx#L365",
+      "source": "packages/lumen-ui/src/search/search-dialog.tsx#L368",
       "imports": [
         {
           "path": "@omnitron-dev/lumen-ui",
