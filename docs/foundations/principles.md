@@ -3,14 +3,24 @@ id: "foundations/principles"
 slug: "/docs/foundations/principles"
 sidebar_position: 1
 title: Principles
-description: Shared contracts, explicit composition, visible lifecycle, and operational accountability.
+description: Privacy, ownership, shared contracts and accountable operation across the full stack.
 ---
 
 # Principles
 
-Omnitron brings application code and operations into one TypeScript
-toolchain. Its value depends on boundaries that a developer can inspect,
-test and change.
+Omnitron brings application code and operations into one system that you can
+host and inspect. Privacy, security and reliable operation shape its boundaries.
+
+## Keep ownership explicit {#keep-ownership-explicit}
+
+The operator chooses where the system runs, where its data is stored and who
+can control it. There is no required vendor control plane. Operational telemetry
+serves the operator through configured storage and fleet connections.
+
+Document external connections, distinguish application authority from operator
+authority, and keep release and recovery outcomes visible. These are engineering
+contracts, not a promise that self-hosting alone secures a system. The
+[privacy and ownership guide](./privacy.md) describes the boundaries in detail.
 
 ## Share contracts {#share-contracts}
 

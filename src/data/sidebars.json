@@ -68,6 +68,10 @@
       "items": [
         {
           "type": "doc",
+          "id": "foundations/privacy"
+        },
+        {
+          "type": "doc",
           "id": "foundations/principles"
         },
         {
@@ -956,6 +960,18 @@
     {
       "type": "doc",
       "id": "omnitron/agents"
+    },
+    {
+      "type": "doc",
+      "id": "omnitron/studio"
+    },
+    {
+      "type": "doc",
+      "id": "omnitron/workflow-runtime"
+    },
+    {
+      "type": "doc",
+      "id": "omnitron/agent-harness"
     },
     {
       "type": "doc",

@@ -19,6 +19,9 @@ registered.
 Verified against `apps/omnitron/src/cluster/` and
 `apps/omnitron/src/services/{fleet,sync,node-manager}.rpc-service.ts`.
 
+For a visual introduction to the owner, guardian, node topology and Console
+terminology, start with [the architecture guide](./architecture.md).
+
 ## Two roles, two layers {#two-roles-two-layers}
 
 | Layer | Concept | Service id |

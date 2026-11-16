@@ -316,13 +316,13 @@ test('theme menu supports keyboard selection, escape and mobile focus return', a
 
 test('home topology explains platform boundaries without a second brand mark', async ({ page }) => {
   await page.goto('/');
-  const topology = page.getByRole('complementary', { name: 'From interface to service.' });
+  const topology = page.getByRole('complementary', { name: 'Build it. Run it. Own it.' });
   await expect(topology.getByRole('link')).toHaveCount(5);
   await expect(topology.locator('[data-omnitron-mark]')).toHaveCount(0);
   await expect(topology.getByText('Typed RPC', { exact: true })).toBeVisible();
   await expect(topology.getByText('HTTP / WebSocket', { exact: true })).toBeVisible();
-  await expect(topology.getByText('Publishes these contracts')).toBeVisible();
-  await expect(topology.getByText('Supervises these processes')).toBeVisible();
+  await expect(topology.getByText('Publishes your knowledge')).toBeVisible();
+  await expect(topology.getByText('Operates your infrastructure')).toBeVisible();
 });
 
 
@@ -495,11 +495,11 @@ for (const width of [320, 1440]) {
     await page.setViewportSize({ width, height: 1000 });
     await page.goto('/');
     const primary = page.getByRole('link', { name: 'Build your first service', exact: true });
-    const secondary = page.getByRole('link', { name: 'Explore the architecture', exact: true });
+    const secondary = page.getByRole('link', { name: 'Privacy by architecture', exact: true });
     await expect(primary).toHaveClass(/MuiButton-contained/);
     await expect(secondary).toHaveClass(/MuiButton-text/);
     await expect(primary).toHaveAttribute('href', '/docs/getting-started/quickstart');
-    await expect(secondary).toHaveAttribute('href', '/docs/foundations/architecture');
+    await expect(secondary).toHaveAttribute('href', '/docs/foundations/privacy');
     await expect(page.locator('.layer-list > a')).toHaveCount(5);
     for (const tile of await page.locator('.layer-list > a, .start-paths > a').all()) {
       await expect(tile).toHaveClass(/MuiCardActionArea-root/);

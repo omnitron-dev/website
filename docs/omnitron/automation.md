@@ -11,6 +11,11 @@ Use **Pipelines** in Console to create an automation, review its source and targ
 
 This executor is for trusted administrators. A separate child process prevents a script from blocking the daemon's JavaScript event loop, but does **not** sandbox its filesystem, network or operating-system privileges. Do not give an untrusted agent the local daemon socket or this executor. See the [agent integration design](./agents.md).
 
+Visual authoring and durable workflows are specified in the
+[creation and automation design](./studio.md) and
+[workflow runtime contract](./workflow-runtime.md). They are planned extensions of
+this execution path, not features already provided by this release.
+
 ## First automation {#first-automation}
 
 Save this as `inspect.json`, replacing the working directory with an existing project directory:

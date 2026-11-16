@@ -11,6 +11,11 @@ This document specifies the next agent integration. **Embedded provider sessions
 
 Start with the [current access model](./access.md), [Xec automation](./automation.md) and [monitoring interfaces](./observability.md). Keep provider integration optional: installing Omnitron must not require an agent SDK, provider account or inference service.
 
+The [creation and automation design](./studio.md) connects these authority
+contracts to project authoring, visual workflows, federation and mobile clients.
+The [verification harness](./agent-harness.md) specifies protected acceptance,
+model-independent repair and evidence-based completion.
+
 ## Boundaries and ownership {#boundaries-and-ownership}
 
 | Layer | Responsibility |

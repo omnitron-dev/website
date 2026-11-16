@@ -14,15 +14,16 @@ Start with the [Lumen overview](docs/lumen/overview.md),
 [authoring guide](docs/lumen/authoring.md) or
 [explanation of this site's build](docs/lumen/this-site.md).
 
-The site uses the released `@omnitron-dev/lumen`, `@omnitron-dev/lumen-ast`, `@omnitron-dev/lumen-ui` and
-`@omnitron-dev/prism` packages at **0.4.9**. The tracked lockfile records the npm
-dependency graph used by CI and distribution.
+The site uses the published Lumen and Prism packages at **0.4.12**. The tracked
+lockfile is the dependency graph used by CI and GitHub Pages.
 
-The current source theme integration requires the forthcoming Prism
-`PrismThemeScript` and `modeStorageKey` API, and the Lumen server island registry
-prepared for 0.4.11. It is qualified against the development SDK; update the registry dependencies and lockfile after that API is published
-before distributing this revision. The existing 0.4.9 lock is not acceptance of
-these new imports.
+The [privacy guide](docs/foundations/privacy.md) explains data boundaries.
+[Node architecture](docs/omnitron/architecture.md) explains supervision and
+recovery with diagrams and an interactive model. The
+[creation studio](docs/omnitron/studio.md),
+[automation runtime](docs/omnitron/workflow-runtime.md) and
+[agent harness](docs/omnitron/agent-harness.md) are explicitly labelled designs;
+they are not claims about released capabilities.
 
 ## Develop
 

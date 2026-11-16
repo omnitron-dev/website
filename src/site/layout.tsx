@@ -88,7 +88,7 @@ export function SiteLayout({ children, document: doc, documents, config }: Lumen
       <LumenFooter copyright="Omnitron · Open source / MIT" columns={[
         { title: 'Build', items: [{ label: 'Quickstart', href: '/docs/getting-started/quickstart' }, { label: 'Architecture', href: '/docs/foundations/architecture' }] },
         { title: 'Reference', items: [{ label: 'Public APIs', href: '/docs/reference/api-index' }, { label: 'Compatibility', href: '/docs/reference/compatibility' }] },
-        { title: 'Project', items: [{ label: 'Source ↗', href: 'https://github.com/omnitron-dev/omni', external: true }, { label: 'Contributing', href: '/docs/community/contributing' }] },
+        { title: 'Project', items: [{ label: 'Privacy and ownership', href: '/docs/foundations/privacy' }, { label: 'Source ↗', href: 'https://github.com/omnitron-dev/omni', external: true }, { label: 'Contributing', href: '/docs/community/contributing' }] },
       ]} />
       <div className="site-colophon"><span>BUILT WITH LUMEN</span><Link href="/docs/lumen/this-site">How this manual works →</Link></div>
       <div id="lumen-interactive-root" />

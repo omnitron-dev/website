@@ -3,23 +3,33 @@ id: "intro"
 slug: "/docs/intro"
 sidebar_position: 1
 title: Introduction
-description: Choose the Omnitron layers you need, understand their boundaries, and build your first service.
+description: Meet the privacy-first, self-hosted full-stack platform and follow its path from application code to operation.
 ---
 
 # Build the system you control
 
-Omnitron is a TypeScript stack for building and operating services. **Titan**
-provides the application runtime. **Netron** connects services and clients.
-**Prism** supplies React interface components. The **Omnitron supervisor**
-manages applications and infrastructure.
+Omnitron is an open-source, **self-hosted full-stack platform** for engineers
+who want control over both their software and its operation. Build the backend,
+connect services, create the interface, publish documentation and manage the
+machines that run it — within infrastructure and access boundaries you choose.
 
-Start with a Titan application. Add the client, interface and supervision
-layers when your system needs them.
+**Privacy and operational independence are the starting point.** Running the
+platform does not require an Omnitron cloud account or a vendor-hosted control
+plane. Application data and operational records go to your configured storage.
+The [privacy and ownership guide](./foundations/privacy.md) explains the actual
+data flows, external connections and responsibilities.
+
+The name has two scopes: **Omnitron the platform** is the full stack described
+here; **the Omnitron supervisor** is its operations layer. A Titan application
+can run without the supervisor. You can adopt individual packages or use the
+complete system.
 
 ## Choose a starting point {#choose-a-starting-point}
 
 | Your goal | Start here | What you will produce |
 | --- | --- | --- |
+| Understand privacy and data ownership | [Privacy and ownership](./foundations/privacy.md) | A map of storage, access and external connections |
+| See how nodes and processes work | [Node and fleet architecture](./omnitron/architecture.md) | Illustrated roles, update boundaries and Console terminology |
 | Run your first service | [Quickstart](./getting-started/quickstart.md) | A compiled application and a typed HTTP client |
 | Understand the boundaries | [Titan vs Omnitron](./foundations/titan-vs-omnitron.md) | A decision about runtime and supervision |
 | Build a complete application | [Tutorial](./tutorial/index.md) | A backend, authentication, interface and tests |
@@ -38,6 +48,7 @@ routes through the manual, including a verification step for each route.
 | Browser client | `@omnitron-dev/netron-browser` | HTTP and WebSocket RPC; independent of the UI framework |
 | React bindings | `@omnitron-dev/netron-react` | Providers and typed query, mutation and subscription hooks |
 | Interface | `@omnitron-dev/prism` | React components, layouts, themes and forms |
+| Documentation | `@omnitron-dev/lumen` | Static publishing, local search, interactive examples and machine-readable documents |
 | Operations | `@omnitron-dev/omnitron` | Daemon, process supervision, infrastructure, CLI, web console and MCP |
 
 Server-side Netron ships inside Titan. A Titan process can run directly under

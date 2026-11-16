@@ -5,7 +5,7 @@ import sidebars from './src/data/sidebars.json' with { type: 'json' };
 
 export default defineLumenConfig({
   title: 'Omnitron',
-  tagline: 'Build, connect, document and operate TypeScript systems.',
+  tagline: 'A privacy-first, self-hosted full-stack platform. Build and operate systems on infrastructure you control.',
   url: process.env.SITE_URL || 'https://omnitron.dev',
   baseUrl: process.env.SITE_BASE_URL || '/',
   srcDir: 'docs',

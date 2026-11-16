@@ -2,105 +2,106 @@
 id: "foundations/architecture"
 slug: "/docs/foundations/architecture"
 sidebar_position: 2
-title: Architecture
+title: Full-stack architecture
+description: How Omnitron combines backend, communication, interfaces, documentation and operations within infrastructure you control.
 ---
 
-# Architecture
+# One platform, from application to operation
 
-How an Omnitron-based system composes at runtime.
+Omnitron is a full stack with explicit boundaries. You can develop an
+application, connect its clients, document its contracts and operate its
+processes using the same platform. You choose where it runs and where data
+is stored. [Privacy and ownership](./privacy.md) explains why that is the
+starting point of the design.
 
 ## The layers {#the-layers}
 
 ```mermaid
 flowchart TB
-    subgraph Browser["Browser / Mobile"]
-      UI[Prism + React UI]
-      Hooks[netron-react hooks]
-      NetClient[netron-browser client]
-      UI --> Hooks --> NetClient
-    end
-
-    subgraph Service["Titan Service Process"]
-      Netron[Netron RPC plane]
-      App[Application + DI Container]
-      Modules[Titan modules: auth, cache, db, …]
-      Services[User-defined @Service classes]
-      Netron --> App
-      App --> Modules
-      App --> Services
-    end
-
-    subgraph Operate["Omnitron Supervisor"]
-      CLI[omnitron CLI]
-      Console[Web console]
-      Orch[Orchestrator]
-      CLI --> Orch
-      Console --> Orch
-    end
-
-    NetClient -- "HTTP / WS" --> Netron
-    Orch -- "TCP / Unix (Netron)" --> Netron
+  subgraph Product["The application you create"]
+    UI["Prism: React interface"]
+    Client["Netron browser client and React bindings"]
+    Service["Titan: application lifecycle, modules and services"]
+    Data[("Your database and storage")]
+    UI --> Client
+    Client -->|Typed RPC over HTTP or WebSocket| Service
+    Service --> Data
+  end
+  subgraph Knowledge["The knowledge you publish"]
+    Source["Documentation, examples and API references"]
+    Lumen["Lumen: static pages, local search and tool-readable sources"]
+    Source --> Lumen
+  end
+  subgraph Operations["The infrastructure you operate"]
+    Operator["CLI, Console or authorised agent"]
+    Backend["Omnitron backend"]
+    Owner["Application owner"]
+    Operator --> Backend
+    Backend --> Owner
+  end
+  Owner -->|Supervise execution| Service
+  Backend -.->|Provision declared resources| Data
 ```
 
-Three observations:
+**Titan runs inside an application. Omnitron supervises applications.** Netron
+is the communication core used at both levels, with different services and
+permissions. A user's application session does not grant access to the
+management API. Lumen publishes knowledge independently; reading a static
+manual does not require a running supervisor.
 
-1. The browser and the supervisor talk to the service over the **same
-   protocol**, just different transports. The service does not know
-   which one is calling.
-2. The DI container is the only thing that owns service instances. The
-   transport plane (Netron) is a thin adapter from wire format to
-   container-resolved methods.
-3. The supervisor is itself a Titan app. It exposes a Netron service
-   that the CLI and the web console call. The "operator API" is a
-   first-class part of the runtime.
+The operations diagram shows resident execution. The detailed
+[node and fleet architecture](../omnitron/architecture.md) explains the
+backend, owner, guardian, OS supervision and update boundaries.
 
 ## A request, end to end {#a-request-end-to-end}
 
-1. **Browser** — a React component renders, gets the typed
-   service with `const users = useService<UsersService>('users')`,
-   and calls `users.findById.useQuery([id])`.
-2. **Hook** — `netron-react` looks up the cached result; if missing,
-   asks the `netron-browser` client for the call.
-3. **Client** — serialises the call as a Netron packet, sends it over
-   the configured transport (HTTP for queries by default, WS for
-   subscriptions).
-4. **Transport** — the Titan service's `HttpTransport` decodes the
-   packet and routes it to the Netron dispatcher.
-5. **Dispatcher** — looks up the registered `users@1.0.0` service in
-   the container, validates arguments against the method's schema,
-   invokes the method.
-6. **Service method** — runs in the container's scope. Dependencies
-   (`Database`, `Logger`, etc.) are constructor-injected; nothing is
-   pulled from globals.
-7. **Response** — the return value is serialised back through Netron;
-   typed errors are mapped to client-side `NetronError` instances.
-8. **Hook** — caches the result, surfaces it to the React render.
+1. A Prism interface uses the Netron browser client, directly or through React bindings.
+2. The client sends a service call to the application's configured HTTP or WebSocket endpoint.
+3. The service boundary authenticates the caller, authorises the operation and validates inputs according to the registered application contract.
+4. Titan resolves the service and its dependencies; application code performs the work.
+5. Netron returns a result or a structured error. React bindings update the interface.
 
-End to end, the type of `data` in the React component is **the return
-type of the service method**. No translation step.
+A shared TypeScript service interface gives the caller compile-time types.
+Runtime validation and authorisation still need their configured schemas and
+policies. Types alone do not validate an arbitrary network message. The
+[quickstart](../getting-started/quickstart.md) supplies runnable registration
+and transport setup.
 
-## Where each package lives in this picture {#where-each-package-lives-in-this-picture}
+A management request follows a separate path: operator → backend → owner or
+infrastructure provider. Keeping these paths distinct allows application
+permissions and infrastructure permissions to evolve independently.
 
-| Package                   | Responsibility                                                                     |
-| ------------------------- | ---------------------------------------------------------------------------------- |
-| `@omnitron-dev/titan`     | DI container, module system, lifecycle, validation, Netron core, transports        |
-| `@omnitron-dev/netron-browser` | Browser-side Netron client (HTTP + WS), middleware, error mapping            |
-| `@omnitron-dev/netron-react`   | React hooks built on netron-browser; cache and devtools                      |
-| `@omnitron-dev/prism`     | Design system: theme, layouts, blocks, forms, accessibility                        |
-| `@omnitron-dev/omnitron`  | Application supervisor, CLI, web console, observability                            |
-| `titan-*` modules   | Optional Titan modules: auth, cache, db, discovery, events, etc.                   |
-| `@omnitron-dev/common`, `cuid`, `eventemitter`, `msgpack`, `testing` | Shared primitives                       |
+## Package responsibilities {#where-each-package-lives-in-this-picture}
 
-## Cross-cutting concerns {#cross-cutting-concerns}
+| Layer | Package | Owns |
+| --- | --- | --- |
+| Application runtime | `@omnitron-dev/titan` | Modules, dependency injection, lifecycle and server-side Netron |
+| Browser communication | `@omnitron-dev/netron-browser` | Browser RPC transports and client contracts |
+| React integration | `@omnitron-dev/netron-react` | Query, mutation and subscription bindings |
+| Interface | `@omnitron-dev/prism` | Shared components, themes, layouts and interaction patterns |
+| Knowledge | `@omnitron-dev/lumen` and companion packages | Document compilation, navigation, local search, interactive islands and exports |
+| Operations | `@omnitron-dev/omnitron` | Projects, stacks, processes, releases, infrastructure, CLI, Console and MCP |
+| Capabilities | `@omnitron-dev/titan-*` | Optional database, authentication, scheduling, metrics and other modules |
+| Shared primitives | Common, CUID, events, MessagePack and testing packages | Reusable building blocks used across the platform |
 
-- **Configuration** — `ConfigModule` validates against a Zod schema at
-  boot. Misconfiguration is a startup error, not a 3 AM runtime crash.
-- **Logging** — `LoggerModule` produces structured JSON with trace IDs.
-  The Omnitron CLI tails them in real time across multiple services.
-- **Tracing** — Netron propagates a trace context through every call.
-  The supervisor's `telemetry-relay` ships traces to your collector.
-- **Errors** — Typed `NetronError` subclasses carry status, code, and
-  cause across the wire. Client receives the original error type, not
-  a generic `Error`.
+[Xec](https://xec.sh/) provides the execution and automation foundation used
+by Omnitron workflows. Titan's database integration uses
+[Kysera](https://kysera.dev/) for its database abstractions. These related
+projects have their own APIs and release boundaries; they do not require a
+hosted Omnitron control plane.
 
-The [monorepo map](./monorepo.md) locates each layer in the source tree.
+## Cross-cutting contracts {#cross-cutting-concerns}
+
+- **Privacy:** configured destinations determine where data goes; running the
+  control plane does not require vendor analytics or a cloud account.
+- **Security:** typed APIs, input validation, authentication and operation
+  authority work together. A private network alone is not authorisation.
+- **Reliability:** lifecycle ownership, readiness, durable state and observed
+  recovery results have separate contracts. Starting a process is not the same
+  as accepting a healthy deployment.
+- **Reuse:** client interfaces, server modules, operator surfaces and
+  documentation share the same platform components instead of maintaining
+  independent implementations of their contracts.
+
+Use the [monorepo map](./monorepo.md) to locate implementations and
+[Titan vs Omnitron](./titan-vs-omnitron.md) to choose a supervision boundary.

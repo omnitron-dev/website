@@ -14,11 +14,16 @@ description: What Omnitron is, what it solves, and how the pieces fit together.
 > the precise boundary. This page describes what you gain by
 > adding the Omnitron supervisor on top.
 
-**Omnitron is the supervisor, control plane, and operator surface
-for Titan applications.** One long-running daemon manages many
-processes across many apps across many projects, exposes a typed
-RPC plane for inspection, ships a CLI and a web console, and
-provisions the infrastructure your apps need.
+**The Omnitron supervisor is the operations layer of the full-stack platform.**
+It manages projects, application processes, releases and infrastructure on
+machines you control. CLI, Console and agent integrations use its typed API;
+operational records remain in your configured storage. There is no required
+vendor-hosted control service.
+
+In resident mode, backend, owner and guardian have separate jobs. The
+[illustrated architecture](./architecture.md) follows a command through them,
+explains Console's execution fields and shows how nodes form a private fleet.
+The [ownership guide](../foundations/privacy.md) describes data boundaries.
 
 It's itself a Titan app — supervising other Titan apps. Built on
 the same primitives the apps it supervises use.

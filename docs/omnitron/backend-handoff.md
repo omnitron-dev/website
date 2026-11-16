@@ -11,6 +11,9 @@ Resident execution separates the backend from the process that owns applications
 
 Resident execution is opt-in on POSIX. It supports unmanaged operation and separate OS services for the execution owner and backend guardian. A legacy single-service layout is refused: detaching a child does not establish independent service ownership. Replacing the owner or its Node runtime still requires an application maintenance window.
 
+For a visual introduction to the owner, guardian, node topology and Console
+terminology, start with [the architecture guide](./architecture.md).
+
 ## Choose the update mechanism {#choose-the-update-mechanism}
 
 | Purpose | Entry point | Boundary |
