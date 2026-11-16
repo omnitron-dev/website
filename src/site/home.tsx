@@ -41,7 +41,16 @@ export function Home({ serverCode, clientCode }: { serverCode: string; clientCod
       <div className="layer-list">{layers.map(([number,name,role,description,href]) => <CardActionArea component="a" href={href} key={name}><span className="layer-number">{number}</span><h3>{name}<small>{role}</small></h3><p>{description}</p><ArrowUpRightIcon className="layer-arrow" /></CardActionArea>)}</div>
     </section>
     <section className="home-section" aria-labelledby="contract-title"><div className="section-heading"><p className="eyebrow">02 / THE CONTRACT</p><h2 id="contract-title">Declare once. Call directly.</h2><p>A service type connects the server and client. Validate untrusted inputs at the boundary.</p></div>
-      <div className="contract-grid"><div><div className="file-label">SERVER / signals.service.ts</div><div dangerouslySetInnerHTML={{ __html: serverCode }} /></div><div><div className="file-label">CLIENT / client.ts</div><div dangerouslySetInnerHTML={{ __html: clientCode }} /></div></div>
+      <div className="contract-grid">
+        <div className="contract-panel" role="region" aria-labelledby="contract-server">
+          <div className="file-label" id="contract-server">SERVER / signals.service.ts</div>
+          <div className="contract-code" dangerouslySetInnerHTML={{ __html: serverCode }} />
+        </div>
+        <div className="contract-panel" role="region" aria-labelledby="contract-client">
+          <div className="file-label" id="contract-client">CLIENT / client.ts</div>
+          <div className="contract-code" dangerouslySetInnerHTML={{ __html: clientCode }} />
+        </div>
+      </div>
       <p className="section-note">These are service and client excerpts. The <Link href="/docs/getting-started/quickstart">quickstart</Link> includes registration, HTTP setup and runnable files.</p>
     </section>
     <section className="home-section" aria-labelledby="ownership-title"><div className="section-heading"><p className="eyebrow">03 / YOUR BOUNDARY</p><h2 id="ownership-title">Understand what you own.</h2><p>Inspect the paths your commands and data take. Choose the machines, storage and access policies that define your system.</p></div>

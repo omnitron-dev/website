@@ -471,6 +471,79 @@ test('homepage contract uses shared dual-theme syntax highlighting without page 
 });
 
 
+// Test the composed surfaces, not just the individual highlighted fragments.
+for (const width of [320, 768, 1440, 1920]) {
+  for (const mode of ['light', 'dark']) {
+    test(`homepage composition at ${width}px in ${mode}`, async ({ page }, testInfo) => {
+      await page.setViewportSize({ width, height: 1100 });
+      await page.addInitScript(value => localStorage.setItem('omnitron-theme', value), mode);
+      await page.goto('/');
+      await expect(page.locator('html')).toHaveAttribute('data-prism-color-scheme', mode);
+      await page.evaluate(() => document.fonts.ready);
+      const box = locator => locator.evaluate(element => {
+        const rect = element.getBoundingClientRect();
+        const style = getComputedStyle(element);
+        const borders = ['Top', 'Right', 'Bottom', 'Left'].map(side => parseFloat(style[`border${side}Width`]));
+        return {
+          top: rect.top, bottom: rect.bottom, left: rect.left, right: rect.right,
+          contentLeft: rect.left + borders[3] + parseFloat(style.paddingLeft),
+          contentRight: rect.right - borders[1] - parseFloat(style.paddingRight),
+          borders,
+          radii: ['TopLeft', 'TopRight', 'BottomRight', 'BottomLeft'].map(corner => parseFloat(style[`border${corner}Radius`])),
+        };
+      });
+      const near = (actual, expected, message) => expect.soft(Math.abs(actual - expected), message).toBeLessThanOrEqual(1);
+      const hero = await box(page.locator('.home-hero'));
+      for (const selector of ['.site-header', '.home-section', '.lumen-footer', '.site-colophon']) {
+        for (const element of await page.locator(selector).all()) {
+          const bounds = await box(element);
+          near(bounds.contentLeft, hero.contentLeft, `${selector}: shared left alignment`);
+          near(bounds.contentRight, hero.contentRight, `${selector}: shared right alignment`);
+        }
+      }
+      expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(width);
+
+      const grid = page.locator('.contract-grid');
+      const gridBox = await box(grid);
+      expect(gridBox.borders).toEqual([1, 1, 1, 1]);
+      const blocks = await page.locator('.contract-grid pre').all();
+      expect(blocks).toHaveLength(2);
+      const bodies = [];
+      for (const block of blocks) {
+        const bounds = await box(block);
+        bodies.push(bounds);
+        expect.soft(bounds.borders, 'the shared frame owns the code border').toEqual([0, 0, 0, 0]);
+        expect.soft(bounds.radii, 'no nested rounded frames').toEqual([0, 0, 0, 0]);
+        await expect(block).toHaveCSS('overflow-x', 'auto');
+        const panel = await box(block.locator('xpath=../..'));
+        near(bounds.bottom, panel.bottom, 'code surface fills its panel');
+      }
+      if (width > 600) {
+        near(bodies[0].top, bodies[1].top, 'code starts on the same baseline');
+        near(bodies[0].bottom, bodies[1].bottom, 'code surfaces end together');
+      } else {
+        expect(bodies[1].top).toBeGreaterThan(bodies[0].bottom);
+      }
+      for (const group of await page.locator('.start-paths').all()) {
+        expect((await box(group)).borders).toEqual([1, 1, 1, 1]);
+        const cards = await group.locator(':scope > a').all();
+        const arrows = [];
+        for (const [index, card] of cards.entries()) {
+          const bounds = await box(card);
+          expect.soft(bounds.radii, 'only the group has rounded corners').toEqual([0, 0, 0, 0]);
+          expect.soft(bounds.borders, 'exactly one separator between cards').toEqual(
+            index === 0 ? [0, 0, 0, 0] : width > 600 ? [0, 0, 0, 1] : [1, 0, 0, 0]);
+          arrows.push(await box(card.locator('.start-path-arrow')));
+        }
+        if (width > 600) for (const arrow of arrows) near(arrow.bottom, arrows[0].bottom, 'card actions share a baseline');
+      }
+      for (const section of ['contract', 'ownership']) {
+        await page.locator(`section[aria-labelledby="${section}-title"]`).screenshot({ path: testInfo.outputPath(`${section}-${width}-${mode}.png`) });
+      }
+    });
+  }
+}
+
 test('the platform topology renders quoted labels in both themes without literal entities', async ({ page }, testInfo) => {
   const errors = []; page.on('pageerror', error => errors.push(error.message));
   await page.goto('/docs/omnitron/overview');
