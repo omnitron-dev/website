@@ -97,22 +97,82 @@ A waiting review holds no slot, so another project can finish independently.
 Capacity rejection leaves the original request awaiting review; it does not
 create a replacement command or silently enqueue an unbounded task.
 
-This increment recovers retained command receipts. It does not resume arbitrary
-scripts midway, reconcile remote deployments or provide exactly-once business
-effects. Unconfirmed effects stay unconfirmed. Deduplication ends when the
-operator deletes the definition and its terminal run history. The native
-reference test uses two independently sealed local project artifacts, actual
-Netron TCP, Titan authorization and Xec subprocesses; a separate PostgreSQL
-check covers transactional admission under concurrent delivery.
+## Continue an interrupted graph {#continue-an-interrupted-graph}
+
+Development `main` retains the exact admitted definition privately. Changing the
+editable automation does not change an existing run. After an interruption:
+
+```bash
+omnitron pipeline status <run-id> --json
+omnitron pipeline reconcile <run-id> --json
+omnitron pipeline resume <run-id> --expected-digest <recovery-digest> --params-file parameters.json
+```
+
+`omnitron pipeline reconcile` inspects receiver evidence; `omnitron pipeline resume` continues a reviewed checkpoint.
+`recovery` lists `completed`, `pending` and `blocked` steps. Read its current
+`digest` before resuming. Confirmed steps are never run again. Steps without a
+persisted dispatch record continue in the existing Xec graph. Started shell,
+TypeScript and compiled-entry operations with unknown effects block continuation;
+there is no unsafe “force success” operation. Reconciliation is read-only at the
+receiver and updates only the local evidence. Supply the original parameters;
+the saved private commitment rejects different values. Repeating the same resume
+returns its existing receipt. A stale checkpoint is rejected.
+
+Console exposes **Inspect remote receipts** and **Continue remaining steps** in
+run details. MCP uses `pipeline.reconcile` and `pipeline.resume` with the same
+review and authority checks. This is step-boundary recovery, not resumption of
+JavaScript stacks or arbitrary scripts midway. Definition history does not freeze
+an arbitrary working directory. Sealed release steps retain their separate payload
+verification. Deduplication ends when terminal history is deleted.
+
+## Reconcile a remote deployment {#reconcile-a-remote-deployment}
+
+A deployment step invokes the ordinary ProjectService stack lifecycle, including
+its release checks, locks and node transport. Obtain the release manifest digest
+and a preservation review from the normal stack workflow before saving this step:
+
+```json
+{
+  "name": "deploy-test",
+  "kind": "deploy",
+  "target": {
+    "project": "sample",
+    "stack": "test",
+    "releaseId": "candidate",
+    "manifestSha256": "<64-character-manifest-sha256>",
+    "review": "<64-character-stack-preservation-review>"
+  }
+}
+```
+
+Replace both digest placeholders with reviewed values. The target must be a remote
+or cluster stack. Shell, environment, working-directory and retry overrides are
+forbidden: native deployment owns those mechanics. Use the Advanced JSON editor
+or `pipeline save`; the visual editor preserves the target.
+
+Before dispatch the run persists its expected node/application/artifact set.
+After a lost response, reconciliation reads fresh **verified-launch** receipts
+from every expected replica. It checks producer and consumer releases, manifest,
+artifact, installed-tree evidence and live application state. Missing replicas,
+changed placements, modified payloads and unreachable nodes remain unconfirmed.
+The selected release and files on disk alone cannot confirm a running deployment.
+
+A matching observation has basis `observed-target`: the desired release is now
+running, but this does not prove which request caused its launch or that arbitrary
+business effects succeeded. Reconciliation never redeploys. Once every receipt
+matches, review the new recovery digest and continue dependent steps. Cancellation
+stops later steps and waits for an already dispatched native operation to settle;
+it does not reverse the deployment. Cross-controller outbox dispatch, arbitrary
+connector reconciliation and exactly-once business effects remain out of scope.
 
 ## Steps and targets {#steps-and-targets}
 
 | Field | Meaning |
 | --- | --- |
 | `name` | Unique graph key, 1–80 letters, digits, `_`, `.` or `-` |
-| `kind` | `shell` by default; `xec` for TypeScript; `release` for a pinned compiled entry |
-| `run` | Shell source or TypeScript script; absent for a release step |
-| `target` | Release step only: registered project, stack, app, producer artifact and package-relative entry |
+| `kind` | `shell` by default; `xec` for TypeScript; `release` for a pinned compiled entry; `deploy` for a reviewed remote stack |
+| `run` | Shell source or TypeScript script; absent for release/deploy steps |
+| `target` | Release: project, stack, app, artifact and entry; deploy: project, stack, release ID, manifest and preservation review |
 | `args` | Release step only: literal argument strings |
 | `cwd` | Existing working directory; module imports resolve relative to it |
 | `nodeId` | Registered node ID; omission or `local` selects the local machine |
@@ -200,7 +260,7 @@ The run review shows source, target name and ID, working directory, dependencies
 
 The definition carries a SHA-256 `revision`. Console submits the revision displayed for review; the CLI fetches the selected definition immediately before admission. Direct RPC and MCP callers must supply `expectedRevision` for both execution and updates. If source, targets, environment or other stored definition fields changed, admission fails before inserting a run. This is optimistic concurrency control, not a separate multi-person approval workflow.
 
-Per-step history records a digest of the admitted definition, target ID, actor, attempts, timing, outcome and bounded stdout/stderr. It does not yet keep a complete immutable source archive. Do not treat the digest alone as recoverable source.
+Per-step history records a digest of the admitted definition, target ID, actor, attempts, timing, outcome and bounded stdout/stderr. New admissions privately retain the serialized definition for step-boundary recovery. They do not archive arbitrary working directories or resolve unknown external effects.
 
 ## Upgrading existing integrations {#upgrading-existing-integrations}
 
