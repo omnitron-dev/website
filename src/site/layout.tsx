@@ -65,7 +65,6 @@ export function SiteLayout({ children, document: doc, documents, config }: Lumen
       <a className="skip-link" href="#main-content">Skip to content</a>
       <header className="site-header">
         <a href="/" className="brand" aria-label="Omnitron home"><PortalIslandHost islandId="site-brand" component="SiteBrand" hydrate="load" props={{ size: 30 }}><OmnitronBrand size={30} /></PortalIslandHost></a>
-        <span className="site-edition">FIELD MANUAL</span>
         <PortalIslandHost className="lumen-portal-island header-navigation" islandId="main-navigation" component="MainNavigation" hydrate="load" props={{ currentPath: doc.routePath }}><MainNavigation currentPath={doc.routePath} /></PortalIslandHost>
         <div className="header-actions">
           <PortalIslandHost islandId="site-search" component="SearchTrigger" hydrate="load" props={{}}><SearchTrigger /></PortalIslandHost>
