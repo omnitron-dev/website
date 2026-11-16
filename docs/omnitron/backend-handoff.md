@@ -18,6 +18,7 @@ terminology, start with [the architecture guide](./architecture.md).
 
 | Purpose | Entry point | Boundary |
 | --- | --- | --- |
+| Update local supervision, Console and recorded stacks | `runtime update prepare` / `apply` | Reviews the complete local plan and may restart its listed applications; see [local runtime updates](./cli.md#local-runtime-updates). |
 | Replace the local resident backend | `backend upgrade <sealed-dist>` through its local supervisor | Keeps the owner and application processes. The fleet cannot update its initiating controller. |
 | Replace remote managed backends | `fleet rollout` or Console **Nodes → Managed backend updates** | Uses sealed builds and one shared, durable receipt across CLI and Console. |
 | Bootstrap an older independent guardian | Native `backend guardian prepare` and reviewed `apply` | A separate, qualified window before using `kernelHandoff@1`. Retains the selected backend and owner. |
@@ -26,6 +27,18 @@ terminology, start with [the architecture guide](./architecture.md).
 The first transition from a coupled daemon to an independent owner still requires
 an application maintenance window. Neither a fleet plan nor a guardian update
 transfers application ownership to a new owner process.
+
+For a local runtime update, each application's health recorded by `prepare` remains
+the acceptance floor through `apply` and final acceptance. Rechecking worse health
+refuses the update before admission or process changes and leaves the reviewed
+plan intact. Better health alone does not change the review digest. Generation,
+configuration, runtime-role and infrastructure checks still apply; a worker
+rotation can still invalidate the reviewed generation or inventory.
+
+This behavior is implemented in source revision `6f4a820d`. It is a contract of the
+update implementation, not evidence that a node has activated that revision.
+Check the executing update tool and the independently observed runtime roles;
+preparing or installing an artifact alone does not activate it.
 
 ## Owner compatibility {#owner-compatibility}
 

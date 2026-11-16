@@ -233,6 +233,14 @@ locally owned backup attempts that applying the update may cancel. Restores,
 unknown outcomes and operations without confirmed local ownership still block
 admission; they are never treated as successful cancellation.
 
+The prepared application's health remains the acceptance floor through final
+verification. On `apply`, worse health is refused before admission or process
+changes; the reviewed plan is not replaced with a weaker baseline. Improvement
+alone preserves the digest. Other changes, including application generation,
+configuration, roles and infrastructure, still require the existing checks.
+This does not make a worker rotation compatible with an earlier plan. See
+[implementation and activation boundaries](./backend-handoff.md#choose-the-update-mechanism).
+
 Applying the reviewed digest records `draining`, pauses new backups for that
 transaction and cancels only the reviewed attempts through the operation journal.
 An attempt that already finished is observed without replaying it. The controller
