@@ -123,6 +123,8 @@ Source uses a native disclosure and remains readable before hydration. Reset rem
 
 `CodeBlock` adds light and dark syntax colors when its source becomes visible. It uses the browser-safe `@omnitron-dev/lumen-ast/highlight` entry, which exports `highlightCode` and literal token types and loads the requested language grammar on demand. The TypeScript compiler and Twoslash stay outside the client bundle. Unknown languages remain plain text; a failed grammar download shows a status beside the complete source.
 
+From 0.4.12, syntax colors are independent of machine load. Tokenization uses a deterministic input budget: up to 2,500 lines (the first 400 for larger blocks), 2,048 characters per line, and 131,072 characters in total. It stops before the first line that exceeds the budget and keeps that line and all following source as plain text. Copying always retains the full original source and line endings.
+
 ## Inspect inferred types
 
 A `typescript twoslash` fence requests analysis from the actual TypeScript language service. The caret points to the symbol on the preceding line:

@@ -42,7 +42,7 @@ when piped into another process. Check both the JSON result and the exit status.
 | Group | Commands |
 | ----- | -------- |
 | **Daemon lifecycle** | `up`, `down`, `ping`, `kill` |
-| **Backend installation and replacement** | `backend status`, `backend install`, `backend installation`, `backend select`, `backend upgrade`, `backend abort`, `backend recover`, `backend owner-reconcile prepare`, `backend owner-reconcile acknowledge` |
+| **Backend installation and replacement** | `backend status`, `backend install`, `backend installation`, `backend launcher`, `backend select`, `backend upgrade`, `backend abort`, `backend recover`, `backend owner-reconcile prepare`, `backend owner-reconcile acknowledge` |
 | **Controller builds** | `release build --publish --detach`, `release builds [project]`, `release job <id> --follow`, `release stop-build <id>` |
 | **Release admission** | `stack check-release <project> <stack> <id>` |
 | **Development SDK** | `sdk init`, `sdk dev`, `sdk status`, `sdk registry`, `sdk recover` |
@@ -108,6 +108,8 @@ rollback artifact. Without `--check` it replaces only a resident-mode backend.
 `backend recover <checkpoint>` refuses to preempt an unrelated live backend; it can reconcile a verified successor when startup-selection publication was interrupted.
 
 `omnitron backend install <sealed-runtime>` copies a verified release into permanent storage without activation. `omnitron backend installation --json` reports its startup selection and unfinished activation. `omnitron backend select <sha256>` selects an installed release only while the backend and execution owner are stopped. Running installations use `backend upgrade`; it commits the selection after readiness and preserves the rollback. The stable launcher is `$OMNITRON_HOME/runtime/bin/omnitron`.
+
+The launcher follows the selected CLI while retaining the separate management bootstrap for recovery. If a previous update left the launcher on an older release, run `omnitron backend launcher --json` with the current CLI. This verifies the selected installed runtime and atomically refreshes the launcher under the installation lock. It does not select a different backend or restart services or applications, and refuses an unfinished activation. Routine help and version calls read the private selection without repeating full backend artifact admission; backend starts and transitions still verify the complete sealed runtime.
 
 Before scheduling an owner restart, install the candidate, then run its CLI against the instance.
 

@@ -1,5 +1,5 @@
 {
-  "revision": "81c7384c47774fbe9fa365263797bac32ce31027",
+  "revision": "0d5b76b274ce976803acb61b4ef2240c19f7f465",
   "packages": [
     "@omnitron-dev/access",
     "@omnitron-dev/common",
@@ -5424,7 +5424,7 @@
       "name": "getCodeTokenizer",
       "package": "@omnitron-dev/lumen-ast",
       "kind": "function",
-      "source": "packages/lumen-ast/src/highlight/tokenizer.ts#L55",
+      "source": "packages/lumen-ast/src/highlight/tokenizer.ts#L57",
       "imports": [
         {
           "path": "@omnitron-dev/lumen-ast/highlight",
@@ -5460,7 +5460,7 @@
       "name": "highlightCode",
       "package": "@omnitron-dev/lumen-ast",
       "kind": "function",
-      "source": "packages/lumen-ast/src/highlight/tokenizer.ts#L106",
+      "source": "packages/lumen-ast/src/highlight/tokenizer.ts#L121",
       "imports": [
         {
           "path": "@omnitron-dev/lumen-ast/highlight",
@@ -5472,7 +5472,7 @@
       "name": "HighlightedLine",
       "package": "@omnitron-dev/lumen-ast",
       "kind": "interface",
-      "source": "packages/lumen-ast/src/highlight/tokenizer.ts#L38",
+      "source": "packages/lumen-ast/src/highlight/tokenizer.ts#L40",
       "imports": [
         {
           "path": "@omnitron-dev/lumen-ast/highlight",
@@ -5484,7 +5484,7 @@
       "name": "HighlightedSource",
       "package": "@omnitron-dev/lumen-ast",
       "kind": "interface",
-      "source": "packages/lumen-ast/src/highlight/tokenizer.ts#L43",
+      "source": "packages/lumen-ast/src/highlight/tokenizer.ts#L45",
       "imports": [
         {
           "path": "@omnitron-dev/lumen-ast/highlight",
@@ -5496,7 +5496,7 @@
       "name": "HighlightedToken",
       "package": "@omnitron-dev/lumen-ast",
       "kind": "interface",
-      "source": "packages/lumen-ast/src/highlight/tokenizer.ts#L33",
+      "source": "packages/lumen-ast/src/highlight/tokenizer.ts#L35",
       "imports": [
         {
           "path": "@omnitron-dev/lumen-ast/highlight",
@@ -6636,7 +6636,7 @@
       "name": "resolveHighlightLanguage",
       "package": "@omnitron-dev/lumen-ast",
       "kind": "function",
-      "source": "packages/lumen-ast/src/highlight/tokenizer.ts#L49",
+      "source": "packages/lumen-ast/src/highlight/tokenizer.ts#L51",
       "imports": [
         {
           "path": "@omnitron-dev/lumen-ast/highlight",
@@ -6840,7 +6840,7 @@
       "name": "tokenizeCode",
       "package": "@omnitron-dev/lumen-ast",
       "kind": "function",
-      "source": "packages/lumen-ast/src/highlight/tokenizer.ts#L79",
+      "source": "packages/lumen-ast/src/highlight/tokenizer.ts#L81",
       "imports": [
         {
           "path": "@omnitron-dev/lumen-ast/highlight",
