@@ -41,7 +41,7 @@ diffs them against the index table below.
 | `kubernetes.rpc-service.ts` | `OmnitronKubernetes` | 9 | admin |
 | `log-collector.rpc-service.ts` | `OmnitronLogs` | 4 | viewer |
 | `node-manager.rpc-service.ts` | `OmnitronNodes` | 38 | viewer (read), operator (operations), admin (historical repair and managed kernel rollout) |
-| `pipeline.rpc-service.ts` | `OmnitronPipelines` | 9 | admin + live human session / trusted local CLI |
+| `pipeline.rpc-service.ts` | `OmnitronPipelines` | 11 | admin + live human session / trusted local CLI |
 | `project.rpc-service.ts` | `OmnitronProject` | 44 | Viewer reads and reviews, operator starts/stops, administrator manages registrations, machine credentials run the recipient protocol |
 | `release.rpc-service.ts` | `OmnitronRelease` | 12 | viewer (read), operator (build/attest), admin (prune) |
 | `secrets.rpc-service.ts` | `OmnitronSecrets` | 6 | admin |
@@ -333,7 +333,7 @@ green/yellow/red availability bars.
 
 ### `OmnitronPipelines` — `pipeline.rpc-service.ts` {#omnitronpipelines--pipelinerpc-servicets}
 
-Xec and shell automation, shared by Console, CLI and local MCP. All methods require `admin`; a human session is revalidated at the service boundary. Mutations must record an audit intent before taking effect.
+Xec and shell automation, shared by Console, CLI and local MCP. The inventory below follows `main`; `prepareRun`, `startRun` and stable caller-generated run IDs are not included in npm 0.4.12. All methods require `admin`; a human session is revalidated at the service boundary. Mutations must record an audit intent before taking effect.
 
 | Method | Effect |
 | ------ | ------ |
@@ -342,7 +342,9 @@ Xec and shell automation, shared by Console, CLI and local MCP. All methods requ
 | `getPipeline({id})` | Read one pipeline, its revision and conditional-update capability |
 | `listPipelines()` | List all |
 | `deletePipeline({id})` | Drop a pipeline |
-| `executePipeline({id, expectedRevision, params?})` | Admit a reviewed revision; reject a definition changed since review |
+| `prepareRun({runId, id, expectedRevision, params?})` | Main only: persist a stable request without executing it |
+| `startRun({runId, expectedDigest, params?})` | Main only: claim the reviewed request once, or recover its existing receipt |
+| `executePipeline({runId, id, expectedRevision, params?})` | Main: prepare and start through the same contract; 0.4.12 has no stable run-ID contract |
 | `cancelRun({runId})` | Request cancellation and await the owned execution |
 | `getRunStatus({runId})` | One run with bounded per-step output and diagnostics |
 | `listRuns({pipelineId?, limit?})` | Bounded history summaries; excludes step output and parameters |

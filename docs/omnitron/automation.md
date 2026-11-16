@@ -57,6 +57,54 @@ omnitron pipeline save inspect.json --id <pipeline-id> --expected-revision <revi
 
 The update compares that revision inside a database transaction. If another editor changed the definition, the save fails without replacing their work. Console sends the revision loaded when its editor opened and keeps your draft on a conflict. Reopen the current definition and reconcile both edits before saving again. Prefer IDs when names are ambiguous.
 
+## Durable requests in main {#durable-requests}
+
+**Available in the development `main` branch; not included in npm 0.4.12.**
+Update the controller and its clients together before using these commands.
+The new clients require `prepareRun` and `startRun`; they do not silently fall
+back to an older daemon's non-idempotent execution endpoint.
+
+```bash
+omnitron pipeline run <pipeline-id> --prepare --run-id <uuid-v4> --params-file parameters.json --json
+omnitron pipeline start <run-id> --expected-digest <review-digest> --params-file parameters.json
+omnitron pipeline status <run-id> --json
+```
+
+Use `omnitron pipeline start` to admit a saved request. Generate and retain the
+UUID before dispatch. Preparation saves one request in
+`awaiting-review`, bound to the definition revision and a private keyed commitment
+to its parameters. It performs no commands and occupies no worker. Read
+`review.digest` from that record, review the definition, then start the same ID
+with that digest and the same parameters. Parameter values are supplied again;
+they are not copied into the admission record. Another administrator may approve
+it; the receipt distinguishes `triggeredBy` from `startedBy`.
+
+Console uses the same sequence: **Run → Prepare request → Run automation**.
+Closing the dialog retains the pending request in history. Reopen it with
+**Review request**, or cancel it without starting work. MCP exposes the same
+`pipeline.prepare`, `pipeline.start` and `pipeline.status` operations. These
+remain administrative tools, not a sandbox for untrusted agents.
+
+A conditional database update claims a request once. If a reply is lost, query
+its ID or repeat `start` with the same digest and parameters. A completed
+receipt remains recoverable after daemon restart. Repeating a request with
+another pipeline, revision or parameter set is rejected. An edited definition
+invalidates an unstarted review; prepare a new request for the new definition.
+
+Registered release projects have a two-run limit within the daemon's eight-run
+limit. Unscoped shell and TypeScript pipelines share a separate two-run budget.
+A waiting review holds no slot, so another project can finish independently.
+Capacity rejection leaves the original request awaiting review; it does not
+create a replacement command or silently enqueue an unbounded task.
+
+This increment recovers retained command receipts. It does not resume arbitrary
+scripts midway, reconcile remote deployments or provide exactly-once business
+effects. Unconfirmed effects stay unconfirmed. Deduplication ends when the
+operator deletes the definition and its terminal run history. The native
+reference test uses two independently sealed local project artifacts, actual
+Netron TCP, Titan authorization and Xec subprocesses; a separate PostgreSQL
+check covers transactional admission under concurrent delivery.
+
 ## Steps and targets {#steps-and-targets}
 
 | Field | Meaning |
