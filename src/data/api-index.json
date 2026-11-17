@@ -1,5 +1,5 @@
 {
-  "revision": "485449182b4858cbf72fe033bfc8e16da03b9316",
+  "revision": "a0852e0cd021f7de10d6b76fecdc492f09d18b3b",
   "packages": [
     "@omnitron-dev/access",
     "@omnitron-dev/common",
@@ -16636,7 +16636,7 @@
       "name": "AttestStored",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "apps/omnitron/src/shared/dto/services.ts#L920",
+      "source": "apps/omnitron/src/shared/dto/services.ts#L921",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/dto/services",
@@ -18424,7 +18424,7 @@
       "name": "IOmnitronAuditService",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "apps/omnitron/src/shared/dto/services.ts#L661",
+      "source": "apps/omnitron/src/shared/dto/services.ts#L662",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/dto/services",
@@ -18484,7 +18484,7 @@
       "name": "IOmnitronDiscoveryService",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "apps/omnitron/src/shared/dto/services.ts#L649",
+      "source": "apps/omnitron/src/shared/dto/services.ts#L650",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/dto/services",
@@ -18532,7 +18532,7 @@
       "name": "IOmnitronHealthService",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "apps/omnitron/src/shared/dto/services.ts#L641",
+      "source": "apps/omnitron/src/shared/dto/services.ts#L642",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/dto/services",
@@ -18556,7 +18556,7 @@
       "name": "IOmnitronKubernetesService",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "apps/omnitron/src/shared/dto/services.ts#L628",
+      "source": "apps/omnitron/src/shared/dto/services.ts#L629",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/dto/services",
@@ -18580,7 +18580,7 @@
       "name": "IOmnitronMetricsService",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "apps/omnitron/src/shared/dto/services.ts#L832",
+      "source": "apps/omnitron/src/shared/dto/services.ts#L833",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/dto/services",
@@ -18592,7 +18592,7 @@
       "name": "IOmnitronNodesService",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "apps/omnitron/src/shared/dto/services.ts#L692",
+      "source": "apps/omnitron/src/shared/dto/services.ts#L693",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/dto/services",
@@ -18620,7 +18620,7 @@
       "name": "IOmnitronReleaseService",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "apps/omnitron/src/shared/dto/services.ts#L927",
+      "source": "apps/omnitron/src/shared/dto/services.ts#L928",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/dto/services",
@@ -18632,7 +18632,7 @@
       "name": "IOmnitronSecretsService",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "apps/omnitron/src/shared/dto/services.ts#L668",
+      "source": "apps/omnitron/src/shared/dto/services.ts#L669",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/dto/services",
@@ -18660,7 +18660,7 @@
       "name": "IOmnitronTerminalService",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "apps/omnitron/src/shared/dto/services.ts#L957",
+      "source": "apps/omnitron/src/shared/dto/services.ts#L958",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/dto/services",
@@ -20752,7 +20752,7 @@
       "name": "ReleaseDeploymentDto",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "apps/omnitron/src/shared/dto/services.ts#L873",
+      "source": "apps/omnitron/src/shared/dto/services.ts#L874",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/dto/services",
@@ -20824,7 +20824,7 @@
       "name": "ReleasePreflightDto",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "apps/omnitron/src/shared/dto/services.ts#L853",
+      "source": "apps/omnitron/src/shared/dto/services.ts#L854",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/dto/services",
@@ -20836,7 +20836,7 @@
       "name": "ReleasePruneAnswer",
       "package": "@omnitron-dev/omnitron",
       "kind": "type",
-      "source": "apps/omnitron/src/shared/dto/services.ts#L899",
+      "source": "apps/omnitron/src/shared/dto/services.ts#L900",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/dto/services",

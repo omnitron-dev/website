@@ -1002,8 +1002,46 @@ repeating the action.
 A successful reconciliation can return a **failed** backup: that means its stopped
 execution was confirmed, not that an archive was created. An unfinished or unknown
 outcome returns a nonzero exit code and `BACKUP_OUTCOME_UNCONFIRMED`, with the full
-receipt in the JSON error. It retains the resource claim. Neither command promotes
+receipt in the JSON error. An unreviewed attempt retains its resource claim. Neither command promotes
 an incomplete archive or invents a container ID when its creation was not acknowledged.
+
+### Review an unknown backup {#backup-unknown-review}
+
+**Unreleased after 0.4.12.** When executor reconciliation cannot establish the
+outcome of a database backup, an administrator can use `omnitron backup acknowledge`
+to permit a new backup without claiming that the old one succeeded, failed or stopped:
+
+```sh
+omnitron backup acknowledge <operation-uuid> \
+  --revision <inspected-revision> \
+  --reason "Lost execution acknowledgement; permit a new read-only backup" --json
+```
+
+The command records the authenticated actor, reason, timestamp and reviewed
+revision in the original receipt. Its state remains `unknown`; there is no
+completion evidence or certified archive. Existing archives and unresolved staging
+files remain intact. The old operation ID cannot run again. A **new** backup ID may
+claim the database, while restore and other effects on that resource remain blocked
+until native reconciliation confirms the old execution has stopped or is absent.
+The controller refuses review while it still owns the attempt or is preparing a
+runtime handoff. `backup operations` continues to show reviewed unknown attempts.
+
+A zero exit status confirms only that the review was committed. After an interrupted
+response, inspect the original receipt instead of repeating the decision with a
+newer revision. Cancellation and reconciliation retain their own outcome checks.
+
+For a controller predating this RPC, `--offline` uses the same operation journal.
+It requires all managed services to be stopped through the normal lifecycle, the
+recorded owner's clean shutdown and native process evidence, and a selected runtime
+that supports backup review. The command does **not** stop services itself. Prepare
+the maintenance window and rollback before this path; the normal online command
+requires no shutdown on a capable controller.
+
+Once a review is recorded, runtime selection, backend replacement and recovery
+refuse a controller that cannot preserve its history and restore restriction.
+Rollback must retain a compatible backend, even if application releases or the
+execution owner return to their previous versions. This is an admission decision,
+not a repair of the missing execution receipt.
 
 Schedules persist across daemon restarts; they do not run while the daemon is down.
 Active capture, restore and scheduled retention block backend handoff. Preparation
