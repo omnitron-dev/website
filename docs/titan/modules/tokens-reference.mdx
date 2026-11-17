@@ -15,11 +15,15 @@ remember which token you need to inject, or when reviewing the
 external RPC surface of an app for security/audit purposes.
 
 The token list is checked against the packages by a script rather than
-asserted to have been verified — run it yourself:
+asserted to have been verified. From the website repository root, pass the
+absolute path to your separately obtained Omni source checkout:
 
 ```bash
-node scripts/check-titan-inventories.mjs ../omni
+node scripts/check-titan-inventories.mjs "/absolute/path/to/omni-source"
 ```
+
+Replace the sample path with your own; see the
+[source checkout instructions](../../community/contributing.md#work-on-the-documentation).
 
 It exits non-zero if this page names a token no Titan package exports.
 

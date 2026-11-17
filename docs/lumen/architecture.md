@@ -108,11 +108,13 @@ Titan-Lumen exposes `LumenService`, its module factory, access filtering, revisi
 
 In this website repository, the Xec task in `.xec/tasks/lumen-example.js` builds a temporary two-document corpus using public package exports. It runs the real parser, graph, link/anchor gates, audience projection, serializers and Pagefind builder, then captures their results in `src/data/lumen-pipeline.json`.
 
+From the website repository root after its frozen dependency installation:
+
 ```bash
-xec run check-lumen-example
+pnpm exec xec run check-lumen-example
 ```
 
-The check compares the captured result with the installed SDK, including an intentionally broken link and the omission of the example's team note from public outputs. The normal `xec run build` includes this check. Use `xec run update-lumen-example` to regenerate the fixture for review. This is a website demonstration check, not an additional built-in Lumen command. The complete static site still needs its own build and browser verification.
+The check compares the captured result with the installed SDK, including an intentionally broken link and the omission of the example's team note from public outputs. The normal `pnpm build` includes this check. Use `pnpm exec xec run update-lumen-example` to regenerate the fixture for review. This is a website demonstration check, not an additional built-in Lumen command. The complete static site still needs its own build and browser verification.
 
 ## Review the implementation
 

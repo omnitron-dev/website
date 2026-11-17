@@ -28,7 +28,7 @@ they are not claims about released capabilities.
 ## Develop
 
 Use Node **24.13.0** and the pnpm version in [package.json](package.json).
-For a registry checkout:
+Run these commands from the website repository root. For a registry checkout:
 
 ```bash
 pnpm install --frozen-lockfile
@@ -37,11 +37,13 @@ pnpm start
 
 For framework development, use a separate, full
 [Omnitron checkout](https://github.com/omnitron-dev/omni) with its dependencies
-installed. From this repository:
+installed. Set `OMNI_SOURCE_DIR` to its absolute path; the source and website
+repositories may live anywhere. From the website repository root:
 
 ```bash
-node ../omni/apps/omnitron/bin/sdk.js init --project-dir .
-node ../omni/apps/omnitron/bin/sdk.js dev ../omni --project-dir .
+OMNI_SOURCE_DIR="/absolute/path/to/omni-source"
+node "$OMNI_SOURCE_DIR/apps/omnitron/bin/sdk.js" init --project-dir .
+node "$OMNI_SOURCE_DIR/apps/omnitron/bin/sdk.js" dev "$OMNI_SOURCE_DIR" --project-dir .
 ```
 
 The SDK selector builds required packages through Turbo and watches their source.
@@ -52,31 +54,34 @@ change to load updated Node modules.
 
 The path passed to `sdk dev` selects the framework checkout explicitly. Append
 `--no-watch` for one build. Inspect the selection with
-`node ../omni/apps/omnitron/bin/sdk.js status --project-dir .`. The canonical [.pnpmfile.mjs](.pnpmfile.mjs) and private development
+`node "$OMNI_SOURCE_DIR/apps/omnitron/bin/sdk.js" status --project-dir .`. The canonical [.pnpmfile.mjs](.pnpmfile.mjs) and private development
 lock belong to this workflow; do not add another SDK hook or substitute local
 archives into the registry lock. To return from a selected source SDK to the
 locked npm packages, stop any managed preview and run
-`node ../omni/apps/omnitron/bin/sdk.js registry --project-dir .`.
+`node "$OMNI_SOURCE_DIR/apps/omnitron/bin/sdk.js" registry --project-dir .`.
 
-On the development Mac, put `LUMEN_OUT_DIR`, `LUMEN_VIRTUAL_STORE_DIR` and `TMPDIR`
-on the mounted AGI development volume before SDK selection and pnpm commands.
+For custom build and cache locations, set `LUMEN_OUT_DIR`,
+`LUMEN_VIRTUAL_STORE_DIR` and `TMPDIR` to existing writable directories on your
+chosen storage before SDK selection and pnpm commands.
 [pnpm-workspace.yaml](pnpm-workspace.yaml) uses pnpm's isolated linker: the local
 `node_modules` stays a physical directory while package contents use the chosen
-virtual store. Other machines default to `build` and `node_modules/.pnpm`.
+virtual store. Without overrides, output defaults to `build` and the virtual
+store to `node_modules/.pnpm`.
 
 ### Automatic SDK refresh
 
 [omnitron.config.js](omnitron.config.js) declares an optional local `dev/site`
 application on port 4178. Use a development Omnitron owner with file watching
 enabled and the `sourceRefresh@1` capability. Prepare the SDK while the stack is stopped, then
-register and start the project against that owner:
+register and start the project against that owner. From the website root, use
+the source checkout selected above:
 
 ```bash
-node ../omni/apps/omnitron/bin/sdk.js dev ../omni --project-dir . --no-watch
+node "$OMNI_SOURCE_DIR/apps/omnitron/bin/sdk.js" dev "$OMNI_SOURCE_DIR" --project-dir . --no-watch
 omnitron project add omnitron-docs "$PWD"
 omnitron stack start omnitron-docs dev --working-tree
 omnitron health omnitron-docs/dev/site
-node ../omni/apps/omnitron/bin/sdk.js dev ../omni --project-dir . --stack dev
+node "$OMNI_SOURCE_DIR/apps/omnitron/bin/sdk.js" dev "$OMNI_SOURCE_DIR" --project-dir . --stack dev
 ```
 
 Each successful SDK build reconciles the application's source binding; the owner
@@ -90,9 +95,16 @@ and lifecycle details.
 
 ## Build and verify
 
+Run from the website root. Source checks require a separately obtained Omni
+checkout at the revision recorded in `src/data/api-index.json`; the
+[contributing guide](docs/community/contributing.md#work-on-the-documentation)
+shows how to obtain that revision. Replace the sample path with its absolute
+location. Building the website itself uses its locked registry packages.
+
 ```bash
+OMNI_SOURCE_DIR="/absolute/path/to/omni-source"
 pnpm check:content
-pnpm check:source ../omni
+pnpm check:source "$OMNI_SOURCE_DIR"
 pnpm typecheck
 pnpm build
 pnpm exec playwright install chromium --no-shell
@@ -134,8 +146,9 @@ and client activation. Browser-only examples explicitly opt into loading after a
 action; ordinary previews and their source are present in the initial HTML.
 Interactive controls remain disabled until their handlers are mounted.
 
-After public API changes, run `pnpm docs:api ../omni` against a clean, committed
-platform checkout. Review the generated [API index](src/data/api-index.json) and
+After public API changes, set `OMNI_SOURCE_DIR` to the clean, committed platform
+checkout containing those changes and run `pnpm docs:api "$OMNI_SOURCE_DIR"`
+from the website root. Review the generated [API index](src/data/api-index.json) and
 make its source commit available in the public platform repository before pushing
 the website. The index records that commit for CI and for links to declarations.
 Source checks compare package exports, CLI commands and service contracts with their guides.
@@ -147,7 +160,8 @@ ownership and commit/delivery boundaries; do not infer them from a method name o
 dependency. Similar APIs do not establish design provenance: do not describe features
 as borrowed or inspired by another project without attributable evidence. Compare
 capabilities with current sources and reproducible measurements. Typecheck importing
-examples with `node scripts/check-doc-examples.mjs ../omni docs/titan` and exercise
+examples with `node scripts/check-doc-examples.mjs "$OMNI_SOURCE_DIR" docs/titan`
+from the website root, with dependencies installed in the source checkout, and exercise
 the complete changed example when it claims runtime behavior.
 
 ## Distribution

@@ -16,10 +16,16 @@ same socket / TCP / HTTP planes.
 This page is the canonical inventory: service name, registered
 Netron service id, purpose, and key methods.
 
-Re-check this page against the source with
-`node scripts/check-services-reference.mjs <path-to-omni>` — it
-reads `@Service`/`@Public` out of `src/**/*.rpc-service.ts` and
-diffs them against the index table below.
+Re-check this page from the website repository root, replacing the sample path
+with your separately obtained Omni source checkout:
+
+```bash
+node scripts/check-services-reference.mjs "/absolute/path/to/omni-source"
+```
+
+The check reads `@Service`/`@Public` out of `src/**/*.rpc-service.ts` and
+diffs them against the index table below. See the
+[source checkout instructions](../community/contributing.md#work-on-the-documentation).
 
 ## Quick index {#quick-index}
 

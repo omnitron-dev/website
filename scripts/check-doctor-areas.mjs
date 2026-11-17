@@ -17,7 +17,7 @@
  * said. This does, in the one place where the code carries a machine-readable
  * inventory of itself: every finding's `id` begins with its area.
  *
- *   node scripts/check-doctor-areas.mjs ../omni
+ *   node scripts/check-doctor-areas.mjs "/absolute/path/to/omni-source"
  *
  * Exits non-zero on any disagreement, and on its own failure to extract.
  */

@@ -15,8 +15,10 @@ Omnitron maintains two public repositories:
 | [omnitron-dev/omni](https://github.com/omnitron-dev/omni) | Runtime, packages, supervisor, CLI and web console |
 | [omnitron-dev/website](https://github.com/omnitron-dev/website) | This documentation site |
 
-Each repository has its own package manifest and lockfile. Clone them as
-sibling directories when working on documentation that needs source checks.
+Each repository has its own package manifest and lockfile. Choose their locations
+independently. Documentation source checks take the path to a separately obtained
+Omni checkout as an explicit argument; the website does not discover it from a
+parent directory. Replace the sample absolute paths below with your own paths.
 
 ## Work on the runtime {#work-on-the-runtime}
 
@@ -24,8 +26,9 @@ Install Node.js 22+ and the pnpm version declared in `package.json`.
 Docker is needed for tests that use external services.
 
 ```bash
-git clone https://github.com/omnitron-dev/omni.git
-cd omni
+OMNI_SOURCE_DIR="/absolute/path/to/omni-source"
+git clone https://github.com/omnitron-dev/omni.git "$OMNI_SOURCE_DIR"
+cd "$OMNI_SOURCE_DIR"
 pnpm install --frozen-lockfile
 pnpm build
 ```
@@ -149,16 +152,19 @@ release tooling reads the application importer graph across those documents.
 
 ## Work on the documentation {#work-on-the-documentation}
 
-From the parent directory of your source checkout:
+Clone the website into a directory you choose. An Omni checkout is not required
+to install, preview or build the site with its released renderer:
 
 ```bash
-git clone https://github.com/omnitron-dev/website.git
-cd website
+WEBSITE_DIR="/absolute/path/to/omnitron-website"
+git clone https://github.com/omnitron-dev/website.git "$WEBSITE_DIR"
+cd "$WEBSITE_DIR"
 pnpm install --frozen-lockfile
 pnpm start
 ```
 
-The development server prints its local URL. Before submitting a change:
+The development server prints its local URL. Run the following checks from the
+website repository root before submitting a change:
 
 ```bash
 pnpm check:content
@@ -170,22 +176,35 @@ The production build rejects broken page links and anchors. Test search
 against a production build with `pnpm serve`; the local search index is
 generated during the build.
 
-For checks against a sibling source checkout:
+Source-inventory checks additionally need the Omni source revision recorded in
+`src/data/api-index.json`. For a prose-only change, the following commands create
+a separate source checkout at that revision. Run them from the website root and
+choose an unused destination for `OMNI_SOURCE_DIR`; it need not share a parent
+with the website:
 
 ```bash
-pnpm check:source ../omni
+OMNI_SOURCE_DIR="/absolute/path/to/new/omni-source"
+OMNI_REVISION="$(node --input-type=module -e 'import { readFileSync } from "node:fs"; console.log(JSON.parse(readFileSync("src/data/api-index.json", "utf8")).revision)')"
+git clone --no-checkout https://github.com/omnitron-dev/omni.git "$OMNI_SOURCE_DIR"
+git -C "$OMNI_SOURCE_DIR" checkout --detach "$OMNI_REVISION"
+pnpm check:source "$OMNI_SOURCE_DIR"
 ```
+
+These inventory checks do not require installing or building the Omni runtime.
+For an existing source checkout, set `OMNI_SOURCE_DIR` to its absolute path and
+verify its commit with `git -C "$OMNI_SOURCE_DIR" rev-parse HEAD` before running
+`pnpm check:source "$OMNI_SOURCE_DIR"` from the website root.
 
 These checks compare inventories, CLI commands, package subpaths, defaults,
 service names and catalog coverage with source. They also verify the generated
 API index against that checkout's exact commit. They do not establish that every
 documentation example runs; execute the examples you change.
 
-For prose-only changes, use the source revision recorded in
-`src/data/api-index.json`. When documenting newer public APIs, run
-`pnpm docs:api ../omni` against a clean, committed platform checkout and review
-the generated index with the guide changes. Push that exact Omni commit
-before pushing the website: CI checks it out before verifying documentation,
+When documenting newer public APIs, set `OMNI_SOURCE_DIR` to the clean, committed
+platform checkout containing those changes. From the website root, run
+`pnpm docs:api "$OMNI_SOURCE_DIR"` and review the generated index with the guide
+changes. Push that exact Omni commit before pushing the website: CI checks it
+out before verifying documentation,
 and declaration links point to it. An unpublished source revision fails at
 checkout with `upload-pack: not our ref`; push the reviewed source and rerun
 the check without changing the pin. The site renderer and live examples still

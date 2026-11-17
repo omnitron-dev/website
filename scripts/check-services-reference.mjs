@@ -11,7 +11,7 @@
  * it is the one that drifts furthest. This replaces it with something a
  * reader can run.
  *
- *   node scripts/check-services-reference.mjs ../omni
+ *   node scripts/check-services-reference.mjs "/absolute/path/to/omni-source"
  *
  * Exits non-zero on any disagreement.
  */

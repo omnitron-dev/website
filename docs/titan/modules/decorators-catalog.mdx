@@ -16,11 +16,14 @@ across packages (so you don't accidentally import the wrong one).
 
 Every entry below is checked against the packages' real exports by a
 script, not by hand — a hand check is true on the day it is made and
-decays silently afterwards:
+decays silently afterwards. Run this from the website repository root, replacing
+the sample path with your separately obtained Omni source checkout:
 
 ```bash
-node scripts/check-titan-inventories.mjs ../omni
+node scripts/check-titan-inventories.mjs "/absolute/path/to/omni-source"
 ```
+
+See the [source checkout instructions](../../community/contributing.md#work-on-the-documentation).
 
 It exits non-zero if this page names a decorator no package exports, or
 if the set the root re-exports stops being exactly the nine listed

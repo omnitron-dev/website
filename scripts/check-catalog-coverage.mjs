@@ -8,7 +8,7 @@
  * others verify that what the docs SAY is true; this one asks whether what the
  * code DOES is said.
  *
- *   node scripts/check-catalog-coverage.mjs ../omni
+ *   node scripts/check-catalog-coverage.mjs "/absolute/path/to/omni-source"
  *
  * Exits non-zero on an export no page names, and on its own failure to
  * extract.

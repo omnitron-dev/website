@@ -11,7 +11,7 @@
  * three shipped JavaScript, and these pages recommended that form in 55
  * places.
  *
- *   node scripts/check-package-subpaths.mjs ../omni
+ *   node scripts/check-package-subpaths.mjs "/absolute/path/to/omni-source"
  *
  * Scope, chosen deliberately: TABLE ROWS ONLY, not prose. Prose names a
  * subpath in order to say it no longer works — `docs/frontend/prism/index.md`

@@ -23,7 +23,7 @@ if (!fs.existsSync(path.join(ROOT, 'packages/titan/package.json'))) {
   console.error(
     `not an omni checkout: ${ROOT || '(no path given)'}\n` +
       'usage: node scripts/check-doc-examples.mjs <path-to-omni-repo> <doc dirs…>\n' +
-      '   e.g. node scripts/check-doc-examples.mjs ../omni docs/titan docs/auth'
+      '   e.g. node scripts/check-doc-examples.mjs "/absolute/path/to/omni-source" docs/titan docs/auth'
   );
   process.exit(2);
 }
@@ -47,7 +47,7 @@ function parses(code) {
 const DOCS = process.argv.slice(3);
 if (DOCS.length === 0) {
   console.error('usage: node scripts/check-doc-examples.mjs <path-to-omni-repo> <doc dirs…>');
-  console.error('   e.g. node scripts/check-doc-examples.mjs . docs/titan docs/auth');
+  console.error('   e.g. node scripts/check-doc-examples.mjs "/absolute/path/to/omni-source" docs/titan docs/auth');
   process.exit(2);
 }
 

@@ -13,7 +13,7 @@
  * false claim. It works for the same reason as the first: the CLI carries a
  * machine-readable inventory of itself, in the `program.command('…')` calls.
  *
- *   node scripts/check-cli-commands.mjs ../omni
+ *   node scripts/check-cli-commands.mjs "/absolute/path/to/omni-source"
  *
  * Exits non-zero on an undocumented command, and on its own failure to
  * extract.
