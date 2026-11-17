@@ -43,6 +43,11 @@ result. A timed-out or lost observation preserves the unconfirmed receipt; use
 without another restart. See [local runtime updates](./cli.md#local-runtime-updates)
 for the recovery decision and commands.
 
+Local update backup admission follows the durable native receipt across backend
+replacement and restoration. Schedules resume after a terminal receipt is
+persisted, without a separate release notification. Unknown backup operations
+retain their resource claims; a finished runtime update does not resolve them.
+
 Verify that the executing update tool implements this contract and inspect the
 independently observed runtime roles;
 preparing or installing an artifact alone does not activate it.

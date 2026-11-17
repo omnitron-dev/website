@@ -266,6 +266,15 @@ before stopping any process. A new backup attempt or changed active revision
 requires a new review. The serving controller advertises
 `runtimeRestartAdmissionProtocol: 1` for this admission contract.
 
+The pause survives backend replacement: the new controller reads the same native
+update receipt before restoring schedules and admitting backup effects. Saved
+schedules resume after `accepted`, `rolled-back` or `aborted` is persisted, even
+if the CLI response was lost. While held, a single scoped observer rechecks the
+receipt after one second. It never clears unknown backup claims or rewrites the
+operator's schedules. `omnitron backup schedules` reports the pause; its JSON
+`admission` field includes the update digest/phase or an `unconfirmed` reason if
+the evidence is missing or invalid.
+
 If admission fails before shutdown, the update releases its own pause and records
 `aborted`; applications continue without a rollback restart. A lost release
 acknowledgement leaves `draining` in the receipt. Recovering that phase only
