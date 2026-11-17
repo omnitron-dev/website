@@ -7,6 +7,12 @@ title: Lumen showcase
 
 These examples run inside this Lumen publication. Each has a specific boundary: document navigation, browser state, or an isolated worker. They demonstrate components and integration rather than controlling a deployed Omnitron instance.
 
+## Follow the publishing pipeline
+
+Open the [interactive architecture walkthrough](./architecture.md#explore-the-pipeline). Its six stages expose actual captured API results for two documents: parsed nodes, resolved anchors, successful and failed gate runs, anonymous projection, and publication artifacts. The final stage adds a live React control with an explicit static/interactive switch.
+
+This is an explanatory model with reproducible fixtures. It does not pretend to compile a site in the browser. Use **Missing target** to inspect the real diagnostic and compare **HTML**, **Markdown**, **Search** and **Agent index** to see the output boundaries.
+
 ## Navigate a small document
 
 Choose **Prepare** or **Verify**, or use the button to move between them. The selected section is React state inside Prism's `DocLayout` and `DocSidebar`. This is a working component preview; it does not change the website's route. The surrounding sidebar and page links are the actual site's navigation.

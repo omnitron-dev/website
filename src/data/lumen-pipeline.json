@@ -1,0 +1,229 @@
+{
+  "sdkVersion": "0.4.12",
+  "sources": {
+    "start.md": "---\nid: walkthrough/start\nslug: /walkthrough/start\ntitle: Shipping a guide\n---\n# Shipping a guide {#shipping}\n\nRead [verification](./verify.md#acceptance).\n\n:::note{title=\"Team note\" access=\"internal\"}\nCoordinate the draft with the team.\n:::\n",
+    "verify.md": "---\nid: walkthrough/verify\nslug: /walkthrough/verify\ntitle: Verification\n---\n# Verification\n\n## Acceptance {#acceptance}\n\nCheck the published page, its links and its Markdown mirror.\n"
+  },
+  "parsed": {
+    "frontmatter": {
+      "id": "walkthrough/start",
+      "title": "Shipping a guide",
+      "slug": "/walkthrough/start"
+    },
+    "nodes": [
+      {
+        "type": "heading",
+        "depth": 1,
+        "id": "shipping",
+        "children": [
+          {
+            "type": "text",
+            "value": "Shipping a guide"
+          }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "children": [
+          {
+            "type": "text",
+            "value": "Read "
+          },
+          {
+            "type": "link",
+            "title": null,
+            "url": "./verify.md#acceptance",
+            "children": [
+              {
+                "type": "text",
+                "value": "verification"
+              }
+            ]
+          },
+          {
+            "type": "text",
+            "value": "."
+          }
+        ]
+      },
+      {
+        "type": "admonition",
+        "title": "Team note",
+        "access": "internal",
+        "children": [
+          {
+            "type": "paragraph",
+            "children": [
+              {
+                "type": "text",
+                "value": "Coordinate the draft with the team."
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "diagnostics": []
+  },
+  "corpus": [
+    {
+      "id": "walkthrough/start",
+      "path": "docs/start.md",
+      "routePath": "/walkthrough/start",
+      "anchors": [
+        "shipping"
+      ]
+    },
+    {
+      "id": "walkthrough/verify",
+      "path": "docs/verify.md",
+      "routePath": "/walkthrough/verify",
+      "anchors": [
+        "verification",
+        "acceptance"
+      ]
+    }
+  ],
+  "resolution": {
+    "resolved": true,
+    "targetDocId": "walkthrough/verify",
+    "anchor": "acceptance"
+  },
+  "checks": {
+    "valid": {
+      "passed": true,
+      "results": [
+        {
+          "name": "linksGate",
+          "passed": true,
+          "diagnostics": []
+        },
+        {
+          "name": "anchorsGate",
+          "passed": true,
+          "diagnostics": []
+        }
+      ],
+      "diagnostics": [],
+      "totalDiagnosticsCount": 0
+    },
+    "broken": {
+      "passed": false,
+      "results": [
+        {
+          "name": "linksGate",
+          "passed": false,
+          "diagnostics": [
+            {
+              "code": "ERR_BROKEN_LINK",
+              "message": "Target ./missing.md not found from document walkthrough/start",
+              "file": "docs/start.md",
+              "line": 8,
+              "severity": "error"
+            }
+          ]
+        },
+        {
+          "name": "anchorsGate",
+          "passed": false,
+          "diagnostics": [
+            {
+              "code": "ERR_BROKEN_ANCHOR",
+              "message": "Anchor ./missing.md#acceptance does not resolve",
+              "file": "docs/start.md",
+              "severity": "error"
+            }
+          ]
+        }
+      ],
+      "diagnostics": [
+        {
+          "code": "ERR_BROKEN_LINK",
+          "message": "Target ./missing.md not found from document walkthrough/start",
+          "file": "docs/start.md",
+          "line": 8,
+          "severity": "error"
+        },
+        {
+          "code": "ERR_BROKEN_ANCHOR",
+          "message": "Anchor ./missing.md#acceptance does not resolve",
+          "file": "docs/start.md",
+          "severity": "error"
+        }
+      ],
+      "totalDiagnosticsCount": 2
+    },
+    "brokenSource": "---\nid: walkthrough/start\nslug: /walkthrough/start\ntitle: Shipping a guide\n---\n# Shipping a guide {#shipping}\n\nRead [verification](./missing.md#acceptance).\n\n:::note{title=\"Team note\" access=\"internal\"}\nCoordinate the draft with the team.\n:::\n"
+  },
+  "projection": {
+    "original": "# Shipping a guide\n\nRead [verification](./verify.md#acceptance).\n\n> **Team note**\n>\n> Coordinate the draft with the team.",
+    "public": "# Shipping a guide\n\nRead [verification](./verify.md#acceptance).",
+    "beforeNodes": 3,
+    "afterNodes": 2
+  },
+  "outputs": {
+    "html": "<article class=\"lumen-doc\" data-status=\"draft\"><h1 id=\"shipping\">Shipping a guide</h1><p>Read <a href=\"./verify.md#acceptance\">verification</a>.</p></article>",
+    "markdown": "---\nid: \"walkthrough/start\"\ntitle: \"Shipping a guide\"\n---\n\n# Shipping a guide\n\nRead [verification](./verify.md#acceptance).",
+    "search": [
+      {
+        "id": "walkthrough/start",
+        "path": "/walkthrough/start",
+        "url": "/walkthrough/start",
+        "title": "Shipping a guide",
+        "excerpt": "Shipping a guide Read verification .",
+        "tokens": [
+          "shipping",
+          "a",
+          "guide",
+          "docs",
+          "start",
+          "md",
+          "read",
+          "verification"
+        ]
+      },
+      {
+        "id": "walkthrough/verify",
+        "path": "/walkthrough/verify",
+        "url": "/walkthrough/verify",
+        "title": "Verification",
+        "excerpt": "Verification Acceptance Check the published page, its links and its Markdown mirror.",
+        "tokens": [
+          "verification",
+          "docs",
+          "verify",
+          "md",
+          "acceptance",
+          "check",
+          "the",
+          "published",
+          "page",
+          "its",
+          "links",
+          "and",
+          "markdown",
+          "mirror"
+        ]
+      }
+    ],
+    "searchFiles": [
+      "pagefind/fragment/en_2bd6505.pf_fragment",
+      "pagefind/fragment/en_57bb9c9.pf_fragment",
+      "pagefind/index/en_53a61dc.pf_index",
+      "pagefind/pagefind-component-ui.css",
+      "pagefind/pagefind-component-ui.js",
+      "pagefind/pagefind-entry.json",
+      "pagefind/pagefind-highlight.js",
+      "pagefind/pagefind-modular-ui.css",
+      "pagefind/pagefind-modular-ui.js",
+      "pagefind/pagefind-ui.css",
+      "pagefind/pagefind-ui.js",
+      "pagefind/pagefind-worker.js",
+      "pagefind/pagefind.en_6ecb9ebd70.pf_meta",
+      "pagefind/pagefind.js",
+      "pagefind/wasm.en.pagefind",
+      "pagefind/wasm.unknown.pagefind"
+    ],
+    "agentIndex": "# Pipeline example\n\n> A two-document teaching corpus.\n\n## Documentation Index\n- [Shipping a guide](https://example.invalid/walkthrough/start.md): Read verification .\n- [Verification](https://example.invalid/walkthrough/verify.md): Check the published page, its links and its Markdown mirror."
+  }
+}

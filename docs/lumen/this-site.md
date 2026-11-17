@@ -35,6 +35,7 @@ Linux filesystem, with a brief rename gap; Windows publication is not supported.
 
 - The header opens Lumen's local search dialog.
 - Ordinary Prism examples include their initial preview and source in static HTML. Their controls enable when handlers are ready. Immediate examples let asynchronous loading reach Lumen’s outer boundary, which retains the complete static preview; they do not replace it with a loading placeholder. Examples requiring browser-only libraries explicitly offer **Load example**, instead of silently failing during the build.
+- The [Lumen architecture explorer](./architecture.md#explore-the-pipeline) displays reproducible compiler/corpus outputs and a real local React interaction, using the same Prism example registry.
 - The API index filters the generated public symbols by package, import path and kind.
 - The authoring guide runs editable JavaScript inside a bounded QuickJS worker and renders a Mermaid diagram with the actual browser engine.
 - Type annotations and mathematical typesetting are generated during the build and remain readable without JavaScript.

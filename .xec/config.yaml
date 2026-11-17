@@ -2,10 +2,20 @@ version: '1.0'
 name: Omnitron documentation
 tasks:
   build:
-    description: Build the static manual and verify emitted links, assets and fragments.
+    description: Build the static site and verify emitted links, assets and fragments.
     timeout: 12m
     steps:
+      - name: Verify captured Lumen example
+        task: check-lumen-example
       - name: Compile with Lumen
-        command: lumen build
+        command: pnpm exec lumen build
       - name: Verify generated routes
         command: node scripts/check-routes.js
+  check-lumen-example:
+    description: Verify the architecture walkthrough against installed Lumen APIs.
+    script: .xec/tasks/lumen-example.js
+  update-lumen-example:
+    description: Regenerate captured Lumen walkthrough data for review.
+    steps:
+      - script: .xec/tasks/lumen-example.js
+        args: [write]

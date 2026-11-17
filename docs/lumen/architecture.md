@@ -7,6 +7,14 @@ title: Lumen architecture
 
 Lumen separates document meaning, publication and browser behavior. The compiler produces a typed tree; the corpus assigns document identity and resolves references; the publisher emits a selected audience's artifacts. Trusted React components then make selected regions interactive. This separation lets the same document feed a web page, a Markdown client, a search index or a PDF without treating the source as an application module.
 
+## Explore the pipeline
+
+Choose a stage in this working Prism example. Parsing, link resolution, verification, projection and publication panels show results captured from the installed Lumen APIs for a small fictional corpus. The **Activate** stage contains a real React state update. Stage selection itself does not rebuild a site or start a service.
+
+<PrismExample example="lumen-pipeline" hydrate="visible" />
+
+The **Verify** stage compares an accepted link with a missing target; **Project** shows why removing restricted content before publishing differs from hiding it in the browser. **Render** lets you inspect HTML, Markdown, search records and the agent index. The source panel exposes the example component used here.
+
 ## Follow a document
 
 | Stage | Input | Output | Runs in |
@@ -95,6 +103,16 @@ Mermaid is also a distinct browser workload: its actual engine converts diagram 
 PDF export uses a real Typst compiler with bundled fonts and an in-memory source. It has no package-registry or host-font lookup. Unsupported mathematics or missing glyphs fail; diagrams retain source in this output. It is a document export, not a screenshot of the site's React layout.
 
 Titan-Lumen exposes `LumenService`, its module factory, access filtering, revision-aware live editing and `LumenMcpAdapter`. Roles come from the admitted Netron invocation. The HTTP MCP adapter delegates through the host's existing Netron handler; it does not establish another authentication stack or listener. Local file search is distinct from static Pagefind search. An optional configured knowledge base adds a further retrieval dependency.
+
+## Reproduce the walkthrough
+
+In this website repository, the Xec task in `.xec/tasks/lumen-example.js` builds a temporary two-document corpus using public package exports. It runs the real parser, graph, link/anchor gates, audience projection, serializers and Pagefind builder, then captures their results in `src/data/lumen-pipeline.json`.
+
+```bash
+xec run check-lumen-example
+```
+
+The check compares the captured result with the installed SDK, including an intentionally broken link and the omission of the example's team note from public outputs. The normal `xec run build` includes this check. Use `xec run update-lumen-example` to regenerate the fixture for review. This is a website demonstration check, not an additional built-in Lumen command. The complete static site still needs its own build and browser verification.
 
 ## Review the implementation
 
