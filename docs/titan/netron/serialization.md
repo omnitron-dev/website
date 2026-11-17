@@ -8,26 +8,22 @@ description: msgpack as the wire format — types, custom codecs, when to overri
 
 # Serialization
 
-Netron serialises every payload (arguments, return values, errors)
-into a compact binary form via `@omnitron-dev/msgpack` — an in-house,
-`SmartBuffer`-based serializer that follows the msgpack format. It is
-**not** the npm `@msgpack/msgpack` library and is **not**
-wire-compatible with it. The serializer is binary, self-describing, and
-shared across every runtime Titan targets. Netron's wire layer keeps a
-single shared instance, `serializer`, in
-`packages/titan/src/netron/packet/serializer.ts`; the core
-encode/decode and the common-type registrations live in
-`packages/msgpack/src/`.
+Netron encodes RPC arguments, results and errors with `@omnitron-dev/msgpack`.
+Plain values use MessagePack wire formats. JavaScript types and Netron service
+references use extension codes agreed by both peers. Titan and the Netron
+browser client configure the same wire contracts for these values.
+[MessagePack and wire compatibility](../../utilities/msgpack.md#spec-compliance)
 
 ## What the serializer handles natively {#what-the-serializer-handles-natively}
 
 | Type                | Wire form                              |
 | ------------------- | -------------------------------------- |
-| `null` / `undefined`| nil                                    |
+| `null` | nil |
+| `undefined` | extension 0, containing one zero byte |
 | `boolean`           | true / false                           |
 | `number`            | int (8/16/32/64) or float (32/64)      |
 | `string`            | utf-8 with length prefix               |
-| `Buffer` / `Uint8Array` | bin (raw bytes)                    |
+| `Buffer` | bin (raw bytes) |
 | Plain objects       | map                                    |
 | Arrays              | array                                  |
 
@@ -99,7 +95,7 @@ serializer.register(typeCode, constructor, encode, decode)
 `0..127` or `register` throws a `RangeError`; pick one in the
 **`1..99`** user band, since `100..126` are reserved (see the tables
 above). The `encode` callback is `(value, buf) => void` and the
-`decode` callback is `(buf) => value` — neither returns bytes. `buf` is
+`decode` callback returns the reconstructed value. `buf` is
 a `SmartBuffer`: write fields with `serializer.encode(field, buf)` and
 read them back, in the **same order**, with `serializer.decode(buf)`
 (or use the buffer's typed primitives directly, like the built-in
@@ -127,8 +123,8 @@ serializer.register(
 );
 ```
 
-Both peers must register the same constructor against the same code,
-with codecs that agree on field order. If only one side registers it,
+Both peers must agree on the extension code and the order and encoding of
+its fields. Each peer can bind the code to its own constructor. If only one side registers it,
 or the codes differ, the receiver cannot reconstruct the value.
 
 ## When NOT to use a custom codec {#when-not-to-use-a-custom-codec}
@@ -139,8 +135,8 @@ or the codes differ, the receiver cannot reconstruct the value.
 - **For one-off types.** Custom codecs are infrastructure. If only
   one method uses a type, just send a plain object and reconstruct
   on the other side.
-- **When you can't update both sides.** Codec mismatches are
-  silent — the receiver will get raw bytes and not know what to do.
+- **When peers update independently.** A receiver throws on an unknown
+  extension code. Introduce the reader before sending a new extension.
 
 ## Payload limits {#payload-limits}
 
@@ -169,35 +165,21 @@ For larger transfers (file uploads, bulk data), use:
 
 ## Round-trip type fidelity {#round-trip-type-fidelity}
 
-Most types round-trip cleanly:
+The common codecs encode a `Date` as epoch milliseconds, a `BigInt` as decimal
+digits and a `Map` as a pair count followed by encoded keys and values.
+`undefined` has its own extension. A field set to `undefined` stays present
+after decoding and is distinguishable from a missing field or `null`.
 
-- `Date` → encoded as timestamp → decoded as `Date`.
-- `BigInt(123n)` → encoded as string → decoded as `123n`.
-- `new Map([['a', 1]])` → encoded as `[['a', 1]]` → decoded as `Map`.
-
-A few traps:
-
-- **`undefined` in an object.** Encoded as `null`. The receiver
-  cannot distinguish "key was set to undefined" from "key was
-  null". Use `?:` optional fields and omit instead.
-- **Function-valued properties.** Functions cannot be serialised.
-  msgpack throws.
-- **Cyclic references.** msgpack throws on cycles. Don't send
-  graphs with `parent` back-references.
-- **Class methods.** Only data is sent. The receiver gets a plain
-  object unless a custom codec reconstructs.
+Use plain records for application data. A custom class needs a registered
+codec to recreate an instance. Function values and cyclic graphs cannot be
+transferred as ordinary records.
 
 ## Performance {#performance}
 
-For typical service payloads (small objects with primitive fields),
-msgpack encode/decode is under 10 µs per call. For large nested
-payloads with many strings, expect tens of microseconds.
-
-If serialisation is on your hot path, profile. Common wins:
-
-- **Cache encoded payloads** for repeated identical responses.
-- **Trim payloads** — only include fields the client needs.
-- **Use streaming** for large collections.
+Measure the encode and decode costs on representative requests and responses.
+If a response carries unused fields, project the result before encoding it.
+For collections that exceed the transport's packet limit, return a stream.
+[Package benchmarks](../../utilities/msgpack.md#performance)
 
 ## Anti-patterns {#anti-patterns}
 
@@ -206,8 +188,6 @@ If serialisation is on your hot path, profile. Common wins:
   shape on the server.
 - **String IDs as `BigInt`.** msgpack `BigInt` encoding is a
   string conversion both ways. If the value fits in a `Number`
-  (≤ 2^53), use `number`; if it's a 64-bit DB ID, use `string`.
+  (within `Number.isSafeInteger`), use `number`; if it's a 64-bit DB ID, use `string`.
 - **Encoding errors as plain objects.** Strips class identity. Use
   `TitanError` subclasses; the framework's codec preserves them.
-
-→ Back to [Netron Overview](../netron.md).

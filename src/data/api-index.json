@@ -1,5 +1,5 @@
 {
-  "revision": "9356960e90379a4160e035f9b7f28cc913c2e080",
+  "revision": "29e9ce1a274ef9218688eeb7b455f91e6ecd3989",
   "packages": [
     "@omnitron-dev/access",
     "@omnitron-dev/common",
@@ -4196,7 +4196,7 @@
       "name": "buildSearchIndex",
       "package": "@omnitron-dev/lumen",
       "kind": "function",
-      "source": "packages/lumen/src/search/index-builder.ts#L33",
+      "source": "packages/lumen/src/search/index-builder.ts#L34",
       "imports": [
         {
           "path": "@omnitron-dev/lumen",
@@ -4972,7 +4972,7 @@
       "name": "SearchIndexEntry",
       "package": "@omnitron-dev/lumen",
       "kind": "interface",
-      "source": "packages/lumen/src/search/index-builder.ts#L10",
+      "source": "packages/lumen/src/search/index-builder.ts#L11",
       "imports": [
         {
           "path": "@omnitron-dev/lumen",
@@ -4984,7 +4984,7 @@
       "name": "SearchIndexResult",
       "package": "@omnitron-dev/lumen",
       "kind": "interface",
-      "source": "packages/lumen/src/search/index-builder.ts#L19",
+      "source": "packages/lumen/src/search/index-builder.ts#L20",
       "imports": [
         {
           "path": "@omnitron-dev/lumen",
@@ -8532,7 +8532,7 @@
       "name": "tryDecode",
       "package": "@omnitron-dev/msgpack",
       "kind": "value",
-      "source": "packages/msgpack/src/index.ts#L177",
+      "source": "packages/msgpack/src/index.ts#L181",
       "imports": [
         {
           "path": "@omnitron-dev/msgpack",
@@ -21056,7 +21056,7 @@
       "name": "RuntimeUpdatePlan",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "apps/omnitron/src/shared/dto/runtime-update.ts#L126",
+      "source": "apps/omnitron/src/shared/dto/runtime-update.ts#L156",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/operations",
@@ -21068,7 +21068,7 @@
       "name": "RuntimeUpdateReceipt",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "apps/omnitron/src/shared/dto/runtime-update.ts#L177",
+      "source": "apps/omnitron/src/shared/dto/runtime-update.ts#L207",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/operations",
@@ -21080,7 +21080,7 @@
       "name": "RuntimeUpdateStatus",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "apps/omnitron/src/shared/dto/runtime-update.ts#L190",
+      "source": "apps/omnitron/src/shared/dto/runtime-update.ts#L220",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/operations",
@@ -21940,7 +21940,7 @@
       "name": "VerifiedRuntimeReference",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "apps/omnitron/src/shared/dto/runtime-update.ts#L103",
+      "source": "apps/omnitron/src/shared/dto/runtime-update.ts#L133",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/operations",
@@ -26812,7 +26812,7 @@
       "name": "DashboardBlock",
       "package": "@omnitron-dev/prism",
       "kind": "function",
-      "source": "packages/prism/src/blocks/dashboard-block/dashboard-block.tsx#L339",
+      "source": "packages/prism/src/blocks/dashboard-block/dashboard-block.tsx#L343",
       "imports": [
         {
           "path": "@omnitron-dev/prism/blocks",
@@ -26836,7 +26836,7 @@
       "name": "DashboardBlockContent",
       "package": "@omnitron-dev/prism",
       "kind": "function",
-      "source": "packages/prism/src/blocks/dashboard-block/dashboard-block.tsx#L183",
+      "source": "packages/prism/src/blocks/dashboard-block/dashboard-block.tsx#L187",
       "imports": [
         {
           "path": "@omnitron-dev/prism/blocks",
@@ -26848,7 +26848,7 @@
       "name": "DashboardBlockContentProps",
       "package": "@omnitron-dev/prism",
       "kind": "interface",
-      "source": "packages/prism/src/blocks/dashboard-block/types.ts#L65",
+      "source": "packages/prism/src/blocks/dashboard-block/types.ts#L67",
       "imports": [
         {
           "path": "@omnitron-dev/prism/blocks",
@@ -26860,7 +26860,7 @@
       "name": "DashboardBlockContextValue",
       "package": "@omnitron-dev/prism",
       "kind": "interface",
-      "source": "packages/prism/src/blocks/dashboard-block/types.ts#L176",
+      "source": "packages/prism/src/blocks/dashboard-block/types.ts#L180",
       "imports": [
         {
           "path": "@omnitron-dev/prism/blocks",
@@ -26872,7 +26872,7 @@
       "name": "DashboardBlockFooter",
       "package": "@omnitron-dev/prism",
       "kind": "function",
-      "source": "packages/prism/src/blocks/dashboard-block/dashboard-block.tsx#L208",
+      "source": "packages/prism/src/blocks/dashboard-block/dashboard-block.tsx#L212",
       "imports": [
         {
           "path": "@omnitron-dev/prism/blocks",
@@ -26884,7 +26884,7 @@
       "name": "DashboardBlockFooterProps",
       "package": "@omnitron-dev/prism",
       "kind": "interface",
-      "source": "packages/prism/src/blocks/dashboard-block/types.ts#L77",
+      "source": "packages/prism/src/blocks/dashboard-block/types.ts#L79",
       "imports": [
         {
           "path": "@omnitron-dev/prism/blocks",
@@ -26932,7 +26932,7 @@
       "name": "DashboardBlockProps",
       "package": "@omnitron-dev/prism",
       "kind": "interface",
-      "source": "packages/prism/src/blocks/dashboard-block/types.ts#L115",
+      "source": "packages/prism/src/blocks/dashboard-block/types.ts#L117",
       "imports": [
         {
           "path": "@omnitron-dev/prism/blocks",
@@ -40452,7 +40452,7 @@
       "name": "Table",
       "package": "@omnitron-dev/prism",
       "kind": "function",
-      "source": "packages/prism/src/components/table/table.tsx#L174",
+      "source": "packages/prism/src/components/table/table.tsx#L176",
       "imports": [
         {
           "path": "@omnitron-dev/prism",
@@ -40564,7 +40564,7 @@
       "name": "TableProps",
       "package": "@omnitron-dev/prism",
       "kind": "interface",
-      "source": "packages/prism/src/components/table/table.tsx#L55",
+      "source": "packages/prism/src/components/table/table.tsx#L57",
       "imports": [
         {
           "path": "@omnitron-dev/prism",
@@ -40676,7 +40676,7 @@
       "name": "TabPanel",
       "package": "@omnitron-dev/prism",
       "kind": "function",
-      "source": "packages/prism/src/components/tabs/tabs.tsx#L335",
+      "source": "packages/prism/src/components/tabs/tabs.tsx#L338",
       "imports": [
         {
           "path": "@omnitron-dev/prism",
@@ -40696,7 +40696,7 @@
       "name": "TabPanelProps",
       "package": "@omnitron-dev/prism",
       "kind": "interface",
-      "source": "packages/prism/src/components/tabs/tabs.tsx#L304",
+      "source": "packages/prism/src/components/tabs/tabs.tsx#L307",
       "imports": [
         {
           "path": "@omnitron-dev/prism",
@@ -44392,7 +44392,7 @@
       "name": "useTable",
       "package": "@omnitron-dev/prism",
       "kind": "function",
-      "source": "packages/prism/src/components/table/table.tsx#L504",
+      "source": "packages/prism/src/components/table/table.tsx#L508",
       "imports": [
         {
           "path": "@omnitron-dev/prism",
@@ -44412,7 +44412,7 @@
       "name": "UseTableOptions",
       "package": "@omnitron-dev/prism",
       "kind": "interface",
-      "source": "packages/prism/src/components/table/table.tsx#L427",
+      "source": "packages/prism/src/components/table/table.tsx#L431",
       "imports": [
         {
           "path": "@omnitron-dev/prism",
@@ -44432,7 +44432,7 @@
       "name": "UseTableReturn",
       "package": "@omnitron-dev/prism",
       "kind": "interface",
-      "source": "packages/prism/src/components/table/table.tsx#L442",
+      "source": "packages/prism/src/components/table/table.tsx#L446",
       "imports": [
         {
           "path": "@omnitron-dev/prism",
@@ -44452,7 +44452,7 @@
       "name": "useTabs",
       "package": "@omnitron-dev/prism",
       "kind": "function",
-      "source": "packages/prism/src/components/tabs/tabs.tsx#L380",
+      "source": "packages/prism/src/components/tabs/tabs.tsx#L383",
       "imports": [
         {
           "path": "@omnitron-dev/prism",
@@ -44472,7 +44472,7 @@
       "name": "UseTabsOptions",
       "package": "@omnitron-dev/prism",
       "kind": "interface",
-      "source": "packages/prism/src/components/tabs/tabs.tsx#L344",
+      "source": "packages/prism/src/components/tabs/tabs.tsx#L347",
       "imports": [
         {
           "path": "@omnitron-dev/prism",
@@ -44492,7 +44492,7 @@
       "name": "UseTabsReturn",
       "package": "@omnitron-dev/prism",
       "kind": "interface",
-      "source": "packages/prism/src/components/tabs/tabs.tsx#L351",
+      "source": "packages/prism/src/components/tabs/tabs.tsx#L354",
       "imports": [
         {
           "path": "@omnitron-dev/prism",

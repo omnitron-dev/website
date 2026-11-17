@@ -3,7 +3,7 @@ id: "utilities/msgpack"
 slug: "/docs/utilities/msgpack"
 sidebar_position: 5
 title: msgpack
-description: Extensible MessagePack with native JS types + custom extensions + streaming.
+description: Encode binary RPC values, register JavaScript types and read MessagePack frames.
 ---
 
 # @omnitron-dev/msgpack
@@ -12,31 +12,16 @@ description: Extensible MessagePack with native JS types + custom extensions + s
 pnpm add @omnitron-dev/msgpack
 ```
 
-High-performance MessagePack implementation. Full spec
-compliance plus built-in encoders for Date, Map, Set, RegExp,
-BigInt, Error, and a custom type registry. Used as the default
-wire format for Netron RPC.
+Netron uses this package to encode RPC arguments and results. The default
+serializer handles plain data and provides extension codecs for JavaScript
+values such as `Date`, `Map`, `Set` and `BigInt`.
 
-Verified against `packages/msgpack/src/`.
+## Choosing a wire format {#why-messagepack-not-json}
 
-## Why MessagePack (not JSON)? {#why-messagepack-not-json}
-
-| Property | JSON | MessagePack |
-| -------- | :--: | :---------: |
-| Compact binary | ✗ | ✓ |
-| Schema-less | ✓ | ✓ |
-| Binary data (Buffer/ArrayBuffer) | base64 string | native |
-| Date | string (ISO) | native (with this package) |
-| Map / Set | not supported | native (with this package) |
-| Error with stack | partial (manual) | native (with this package) |
-| BigInt | string | native (with this package) |
-| Round-trip fidelity | lossy on edge cases | exact |
-| Throughput | ~500 MB/s parse | ~700 MB/s parse |
-| Wire size | baseline | ~25% smaller typical, ~50% for binary-heavy payloads |
-
-For Netron RPC — where a service call's return value should
-arrive on the client as the same object — MessagePack with
-native types is non-negotiable.
+Use MessagePack when a peer expects binary payloads or both peers share
+extension codecs. JSON is convenient for human-readable configuration, logs
+and HTTP clients. For a cross-language boundary, agree on the representation
+of dates, integers and extension values with the other endpoint.
 
 ## Quick start {#quick-start}
 
@@ -60,7 +45,7 @@ result.roles instanceof Map;               // true
 typeof result.amount === 'bigint';         // true
 ```
 
-Every native type survives the round-trip unchanged.
+The default serializer registers the extension types used in this example.
 
 ## Built-in native types {#built-in-native-types}
 
@@ -73,7 +58,7 @@ Every native type survives the round-trip unchanged.
 | `RegExp` | 121 | Source + flags |
 | `BigInt` | 120 | Arbitrary precision (encoded as string) |
 | `Long` | 119 | 64-bit ints via the `long` library |
-| `Buffer` / `Uint8Array` | bin format | Native — no wrapping |
+| `Buffer` | bin format | Binary input to the encoder. The decoder also reads encoded bytes from a `Uint8Array` view. |
 
 Registered by `registerCommonTypesFor()` on the default `serializer`
 at import time, so `encode`/`decode` handle them out of the box.
@@ -118,44 +103,51 @@ A bare `new Serializer()` starts empty — call `registerCommonTypesFor`
 if you also need the native types. The receiver needs the same
 registration to decode the type correctly.
 
-## Safe decoding — `tryDecode` {#safe-decoding--trydecode}
+## Reading a message {#safe-decoding--trydecode}
 
-A non-throwing decode wrapper:
+`tryDecode` reads the first value. It returns `null` for incomplete input and
+for a decoding error. Use `decode` when you need the error for a complete
+frame. The caller owns the input buffer between calls.
+
+On `main`, `bytesConsumed` is the length of the first encoded value. A caller
+can keep the remaining bytes for its next read. This example uses two complete
+messages so the boundary is visible.
 
 ```typescript
-import { tryDecode } from '@omnitron-dev/msgpack';
+import { encode, tryDecode } from '@omnitron-dev/msgpack';
 
-const result = tryDecode(buf);
-if (result) {
-  const { value, bytesConsumed } = result;
-  handleMessage(value);
+const first = encode({ id: 1 });
+const second = encode({ id: 2 });
+const batch = new Uint8Array(first.length + second.length);
+batch.set(first);
+batch.set(second, first.length);
+
+const message = tryDecode(batch);
+if (message) {
+  console.log(message.value.id); // 1
+  const remaining = batch.subarray(message.bytesConsumed);
+  console.log(tryDecode(remaining)?.value.id); // 2
 }
-// result is null if the buffer could not be decoded
 ```
 
-`tryDecode`:
-- Returns `{ value, bytesConsumed }` on success (`bytesConsumed` is
-  the input buffer length).
-- Returns `null` on any decode failure (it swallows the error rather
-  than throwing).
+With npm `0.4.12`, give `tryDecode` one complete frame at a time. That release
+reports the length of the supplied buffer. On `main` the top-level helpers
+also respect a `SmartBuffer`’s current read offset. Use
+`serializer.decode(cursor)` to advance the cursor as you read.
 
-Note: this is a whole-buffer decode that won't throw — it is **not**
-an incremental parser that resumes across partial network chunks.
-Netron's transports do their own length-prefixed framing and hand a
-complete frame to `decode`.
+## Measuring performance {#performance}
 
-## Performance {#performance}
+Benchmark the payload and runtime you deploy. A short RPC request, a large
+collection and a registered extension exercise different paths. The package
+compares encoding and decoding separately. From a built Omni checkout run
 
-| Benchmark | This package | reference `msgpackr` | JSON.stringify |
-| --------- | :----------: | :------------------: | :------------: |
-| Encode 1 KB object | ~12 μs | ~10 μs | ~30 μs |
-| Decode 1 KB object | ~14 μs | ~11 μs | ~25 μs |
-| Encode 1 MB array | ~3 ms | ~2.5 ms | ~12 ms |
-| Decode 1 MB array | ~4 ms | ~3 ms | ~18 ms |
-| Wire size (typical API response) | ~70% of JSON | ~70% of JSON | baseline |
+```sh
+node packages/msgpack/bench/mixed-workload.js
+node packages/msgpack/bench/large-arrays.js
+```
 
-Slightly slower than `msgpackr` (which uses extension shortcuts
-not in the spec); strictly spec-compliant in exchange.
+Decode measurements on `main` use pre-encoded input. Record the Node version,
+workload and output size when comparing two revisions.
 
 ## Error round-trips {#error-round-trips}
 
@@ -215,60 +207,33 @@ sizing needed.
 
 ## API surface {#api-surface}
 
-```typescript
-// Top-level, from '@omnitron-dev/msgpack' (uses the default `serializer`):
-function encode(obj: any): Uint8Array;            // enhanced Buffer (has .toBuffer())
-function decode(buf: Buffer | SmartBuffer): any;
-function tryDecode(buf: any): { value: any; bytesConsumed: number } | null;
+| Export | Use |
+| --- | --- |
+| `encode(value)` | Encode one value with the shared default serializer. |
+| `decode(bytes)` | Read a value or throw a decoding error. |
+| `tryDecode(bytes)` | Read a value and its consumed length, or return `null`. See [Reading a message](#safe-decoding--trydecode) for release-specific framing. |
+| `serializer` | Access the shared serializer and its registered extensions. |
+| `Serializer` | Create an independent codec registry with this named export. |
+| `registerCommonTypesFor(instance)` | Register the package's common JavaScript extensions on an instance. |
+| `SmartBuffer` | Build or read byte sequences. Import from `@omnitron-dev/msgpack/smart-buffer`. |
 
-const serializer: Serializer;                     // the pre-configured default instance
-function registerCommonTypesFor(s: Serializer): void;   // register native types on a Serializer
+## Where it is used {#where-its-used-in-the-stack}
 
-// Stateful (custom types) — `Serializer` is the default export of the package:
-class Serializer {
-  constructor(initialCapacity?: number);          // starts EMPTY; call registerCommonTypesFor()
-  register(type: number, ctor: any, encode: (obj, buf) => void, decode: (buf) => any): Serializer;
-  registerEncoder(type: number, check: (obj) => boolean, encode: (obj) => Buffer): Serializer;
-  registerDecoder(type: number, decode: (buf) => any): Serializer;
-  encode(x: any): any;                            // → buffer
-  encode(x: any, buf: SmartBuffer): void;         // → writes into buf
-  decode(buf: Buffer | SmartBuffer): any;
-}
+Titan's Netron packet serializer and the Netron browser client each configure a
+`Serializer` with the codecs their peers share. The packet layer also defines
+service references and typed errors. [Netron serialization](../titan/netron/serialization.md)
 
-// Buffer builder, from '@omnitron-dev/msgpack/smart-buffer':
-class SmartBuffer { /* writeXxx / readXxx / toBuffer / static wrap, fromBuffer */ }
-```
+## Wire compatibility {#spec-compliance}
 
-`Serializer` has no `registerError` or `unregister` method, and there is
-no top-level `Encoder` / `Decoder` export.
+Plain objects encode their own enumerable string keys. On `main`, up to 15
+pairs use `fixmap`, 16 through 65,535 use `map16`, and larger objects use
+`map32`. Bidirectional tests cover 65,535, 65,536 and 70,000 pairs with
+`@msgpack/msgpack`. Each Omnitron peer that sends or receives a map above
+65,535 pairs needs the fix from `main`. [MessagePack map formats](https://github.com/msgpack/msgpack/blob/master/spec.md#map-format-family)
 
-`tryDecode` is not a method either — but it **does** exist, as a free
-function from `@omnitron-dev/msgpack`. It returns
-`{ value, bytesConsumed }`, or `null` when the buffer does not yet hold a
-complete value, which is what you want when decoding off a stream:
-
-```typescript
-import { tryDecode } from '@omnitron-dev/msgpack';
-
-const result = tryDecode(buffer);
-if (result) {
-  handle(result.value);
-  buffer = buffer.subarray(result.bytesConsumed);
-}
-```
-
-## Where it's used in the stack {#where-its-used-in-the-stack}
-
-- **Netron RPC** — default wire format on all four transports.
-- **`titan-events`** — payload serialisation for history persistence.
-- **`titan-telemetry-relay`** — WAL on-disk format.
-- **`titan-cache`** L2 (Redis) — encoded payload format.
-
-## Spec compliance {#spec-compliance}
-
-Full compliance with [MessagePack spec v5](https://github.com/msgpack/msgpack/blob/master/spec.md).
-The native-type registry uses ext type ids in the user-defined
-range (0–127); ids ≥ 128 are reserved.
+A JavaScript `Map` uses extension 124 and preserves the types of its keys.
+Peers using another implementation need matching codecs for Omnitron's
+extension values.
 
 ## When to use vs JSON {#when-to-use-vs-json}
 

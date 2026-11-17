@@ -40,13 +40,20 @@ build outputs in `OMNITRON_DEV_CACHE`. This recovery copy is separate from
 application database backups: it allows `sdk recover` to restore the exact
 previous SDK bytes without a rebuild or another dependency resolution. Put the
 cache on a development volume with enough space for the reported retained bytes.
-The command reports inventory, copy, verification and prepared phases with
-elapsed time. An unchanged active selection reuses its existing build state.
+An explicit one-shot rebuild or reviewed start also retains a recovery copy
+when the selection is already active. A Turbo cache hit can still replace files
+in the output directory.
 
-File reads and independent copies run with bounded concurrency. The integrity
-proof still covers content, modes and symbolic links in deterministic order;
-parallel completion does not change its digest. Failed copying drains admitted
-writers before removing the private staging directory. Recovery refuses foreign
+In the development CLI on `main`, each progress line names the next phase and
+gives the duration of the completed phase alongside total elapsed time.
+Inventory measures the selected files. Retention copies them and checks the
+copies. Verification rechecks the original files and saves the recovery proof.
+The reported MiB count covers dependencies and generated outputs.
+
+File reads, input checks and independent copies run with bounded concurrency.
+The proof records content, modes and symbolic links in deterministic order.
+If copying fails, all active writers finish before the private staging directory
+is removed. Recovery refuses foreign
 edits or an interrupted write whose ownership cannot be established. Stop source
 consumers before recovery; a timeout is not proof that an old writer has stopped.
 
