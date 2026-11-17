@@ -78,7 +78,7 @@ The default audience is anonymous. `projectDocumentAst`, `projectCorpusDocument`
 
 A static artifact has no request-time identity check. Anyone who receives a privileged build can read its files, including search shards and Markdown exports. Keep public and privileged artifacts in separate publication boundaries and inspect all output formats. Hiding a navigation item is not an access policy.
 
-Pagefind creates a local index during the build. The browser retrieves its published modules and shards from the site's host; ordinary queries do not require a search SaaS or Titan endpoint. Your hosting logs, custom islands, analytics and additional search providers remain separate privacy decisions. The current index builder uses the configured default locale for indexing input, so document locale metadata alone is insufficient evidence for multilingual search quality.
+Pagefind creates a local index during the build. The browser retrieves its published modules and shards from the site's host; ordinary queries do not require a search SaaS or Titan endpoint. Your hosting logs, custom islands, analytics and additional search providers remain separate privacy decisions. Published 0.4.12 uses the configured default locale for every Pagefind input. The unreleased source fix indexes each document under its canonical locale, with the configured default only for documents without one. Validate the emitted language indexes when adopting that fix.
 
 ## Static HTML and selective React activation
 
@@ -102,7 +102,7 @@ Mermaid is also a distinct browser workload: its actual engine converts diagram 
 
 PDF export uses a real Typst compiler with bundled fonts and an in-memory source. It has no package-registry or host-font lookup. Unsupported mathematics or missing glyphs fail; diagrams retain source in this output. It is a document export, not a screenshot of the site's React layout.
 
-Titan-Lumen exposes `LumenService`, its module factory, access filtering, revision-aware live editing and `LumenMcpAdapter`. Roles come from the admitted Netron invocation. The HTTP MCP adapter delegates through the host's existing Netron handler; it does not establish another authentication stack or listener. Local file search is distinct from static Pagefind search. An optional configured knowledge base adds a further retrieval dependency.
+Titan-Lumen exposes `LumenService`, its module factory, access filtering, revision-aware live editing and `LumenMcpAdapter`. Roles come from the admitted Netron invocation. The HTTP MCP adapter delegates through the host's existing Netron handler; it does not establish another authentication stack or listener. Local file search is distinct from static Pagefind search. An optional configured knowledge base adds a further retrieval dependency. The current server search accepts a `locale` option but does not apply it to either source; do not use that option as an enforced language filter. Correcting this requires a shared filtering contract that applies before result limits, including knowledge-base retrieval.
 
 ## Reproduce the walkthrough
 

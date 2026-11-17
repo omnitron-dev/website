@@ -19,7 +19,7 @@ This comparison uses the implemented Lumen package boundaries and the linked off
 | Authoring and content validation | **Implemented:** Markdown/PDX AST, literal widget props, route/link/anchor checks and configurable gates. **Integration:** behavioral review and importing-example compilation |
 | Typing | **Implemented:** typed AST/configuration, public identifier unions and opt-in Twoslash. **Limit:** code fences are not automatically type-checked against installed SDKs |
 | Search and privacy | **Implemented:** local Pagefind output from the public projection. **Integration:** host access rules, cache policy and any additional providers |
-| Localization and versions | **Implemented:** locale metadata and translation-staleness checks. **Missing workflow:** automatic locale/version routing, release snapshots and selectors. **Limit:** current Pagefind input uses the default locale |
+| Localization and versions | **Implemented:** locale metadata and translation-staleness checks. **Missing workflow:** automatic locale/version routing, release snapshots and selectors. **Published 0.4.12 limit:** Pagefind input uses the default locale. Source correction is described in the architecture guide; server search does not yet enforce its locale option |
 | Interactive demonstrations | **Implemented:** registered components and isolated QuickJS execution. **Integration:** source/preview coupling, SSR compatibility and browser tests in the site |
 | Extension control | **Implemented:** custom gates, trusted layout, island registry and separate parser/renderer APIs. **Integration:** maintain and qualify those extensions |
 | Deployment and evidence | **Implemented:** static publication and separate PDF/type exports. **Integration:** hosting, authenticated Titan services, reproducible dependency installation and artifact verification |
@@ -78,7 +78,7 @@ A local index can keep query processing in the browser, but the host still deliv
 
 | System | Established workflow or integration boundary |
 | --- | --- |
-| Lumen | Locale fields and stale-translation diagnostics exist. Locale routes, translated UI, version snapshots and selectors require application work. The present Pagefind language handling also needs explicit validation |
+| Lumen | Locale fields and stale-translation diagnostics exist. Locale routes, translated UI, version snapshots and selectors require application work. Validate the installed Pagefind language handling; the server search locale option is not yet enforced |
 | Docusaurus 3 | Built-in translation file conventions and versioned document/sidebar snapshots. [i18n](https://docusaurus.io/docs/i18n/introduction), [versioning](https://docusaurus.io/docs/versioning) |
 | Starlight | Built-in multilingual routing, fallback content and RTL support. Its official catalogue lists documentation versioning as a community plugin. [i18n](https://starlight.astro.build/guides/i18n/), [plugins](https://starlight.astro.build/resources/plugins/) |
 | Fumadocs | Documentation i18n coordinates with the host framework; versioned root folders can share a site, or versions can use separate deployments. [i18n integration](https://www.fumadocs.dev/docs/next/internationalization), [version navigation](https://www.fumadocs.dev/docs/next/navigation) |

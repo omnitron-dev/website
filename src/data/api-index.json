@@ -1,5 +1,5 @@
 {
-  "revision": "56e6cd5ea5e90f4482e80f3a0a098fd545bc76ab",
+  "revision": "485449182b4858cbf72fe033bfc8e16da03b9316",
   "packages": [
     "@omnitron-dev/access",
     "@omnitron-dev/common",
@@ -4556,7 +4556,7 @@
       "name": "generateSearchIndex",
       "package": "@omnitron-dev/lumen",
       "kind": "function",
-      "source": "packages/lumen/src/search/index-builder.ts#L127",
+      "source": "packages/lumen/src/search/index-builder.ts#L131",
       "imports": [
         {
           "path": "@omnitron-dev/lumen",

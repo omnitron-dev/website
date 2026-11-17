@@ -978,6 +978,33 @@ The database budget applies to each PostgreSQL dump or restore on this daemon;
 S3 transfers and Tor archives have separate limits. Per-database overrides and
 verified in-container exec termination are not implemented.
 
+### Inspect and reconcile one operation {#backup-operation-recovery}
+
+**Unreleased CLI addition after 0.4.12.** These commands expose the existing
+`OmnitronBackups` operation contract. They use the same receipts as the controller;
+there is no separate CLI job registry.
+
+```sh
+omnitron backup operations --json
+omnitron backup operations <operation-uuid> --json
+omnitron backup reconcile <operation-uuid> --revision <inspected-revision> --json
+omnitron backup cancel <operation-uuid> --revision <inspected-revision> --json
+```
+
+`omnitron backup operations` lists unfinished backup and restore attempts. With a full UUID it
+reads that attempt, including its terminal history. Inspection is read-only.
+Cancellation and reconciliation require an administrator and the exact revision
+that was inspected. A stale revision fails without fetching a newer one and
+repeating the action.
+
+`reconcile` observes the same execution; it never repeats a dump or restore.
+`cancel` asks the owner to stop that attempt and awaits its bounded confirmation.
+A successful reconciliation can return a **failed** backup: that means its stopped
+execution was confirmed, not that an archive was created. An unfinished or unknown
+outcome returns a nonzero exit code and `BACKUP_OUTCOME_UNCONFIRMED`, with the full
+receipt in the JSON error. It retains the resource claim. Neither command promotes
+an incomplete archive or invents a container ID when its creation was not acknowledged.
+
 Schedules persist across daemon restarts; they do not run while the daemon is down.
 Active capture, restore and scheduled retention block backend handoff. Preparation
 pauses schedule admission, and an aborted handoff re-arms persisted schedules.
