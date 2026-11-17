@@ -92,6 +92,16 @@ An island is not a security sandbox. Its trusted component code has the ordinary
 
 Mermaid is also a distinct browser workload: its actual engine converts diagram source into SVG after activation. Without JavaScript, readers retain the source fallback. Syntax highlighting, explicitly requested Twoslash analysis and KaTeX HTML typesetting can happen during the build. These operations have different costs and should not be bundled into a claim that every feature is static.
 
+### Rendering a large corpus
+
+In the development SDK, Lumen renders four documents at a time. Set
+`renderConcurrency` in `lumen.config.ts` to choose a different positive
+integer. A page's 30-second deadline starts when its render begins. If a page
+fails, Lumen cancels the active renders and keeps the previous published
+generation. Routes and manifest entries follow corpus order even when a later
+page finishes first. Published 0.4.12 starts all document renders together.
+[Static renderer](https://github.com/omnitron-dev/omni/blob/ed6f12cb506ebff83aa0bb51326780b4b23e8b87/packages/lumen/src/ssg/ssg-engine.ts)
+
 ## Formats and runtime entry points
 
 | Need | Public entry point or command | Integration boundary |

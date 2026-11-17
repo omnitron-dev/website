@@ -1,5 +1,5 @@
 {
-  "revision": "29e9ce1a274ef9218688eeb7b455f91e6ecd3989",
+  "revision": "4b113978b5f41a7a4702823cfa313930923439ee",
   "packages": [
     "@omnitron-dev/access",
     "@omnitron-dev/common",
@@ -4208,7 +4208,7 @@
       "name": "buildStaticSite",
       "package": "@omnitron-dev/lumen",
       "kind": "function",
-      "source": "packages/lumen/src/ssg/ssg-engine.ts#L91",
+      "source": "packages/lumen/src/ssg/ssg-engine.ts#L93",
       "imports": [
         {
           "path": "@omnitron-dev/lumen",
@@ -4644,7 +4644,7 @@
       "name": "LumenConfig",
       "package": "@omnitron-dev/lumen",
       "kind": "interface",
-      "source": "packages/lumen/src/config/schema.ts#L113",
+      "source": "packages/lumen/src/config/schema.ts#L114",
       "imports": [
         {
           "path": "@omnitron-dev/lumen",
@@ -4788,7 +4788,7 @@
       "name": "LumenUserConfig",
       "package": "@omnitron-dev/lumen",
       "kind": "type",
-      "source": "packages/lumen/src/config/schema.ts#L111",
+      "source": "packages/lumen/src/config/schema.ts#L112",
       "imports": [
         {
           "path": "@omnitron-dev/lumen",
@@ -4996,7 +4996,7 @@
       "name": "SsgBuildOptions",
       "package": "@omnitron-dev/lumen",
       "kind": "interface",
-      "source": "packages/lumen/src/ssg/ssg-engine.ts#L24",
+      "source": "packages/lumen/src/ssg/ssg-engine.ts#L26",
       "imports": [
         {
           "path": "@omnitron-dev/lumen",
@@ -5008,7 +5008,7 @@
       "name": "SsgBuildResult",
       "package": "@omnitron-dev/lumen",
       "kind": "interface",
-      "source": "packages/lumen/src/ssg/ssg-engine.ts#L38",
+      "source": "packages/lumen/src/ssg/ssg-engine.ts#L40",
       "imports": [
         {
           "path": "@omnitron-dev/lumen",
@@ -37028,7 +37028,7 @@
       "name": "PrismProvider",
       "package": "@omnitron-dev/prism",
       "kind": "function",
-      "source": "packages/prism/src/core/provider.tsx#L122",
+      "source": "packages/prism/src/core/provider.tsx#L124",
       "imports": [
         {
           "path": "@omnitron-dev/prism",

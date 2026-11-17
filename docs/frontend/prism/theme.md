@@ -203,11 +203,25 @@ export function App() {
 }
 ```
 
+### Preview a change before saving {#preview-before-saving}
+
+The development SDK adds an `appearance` prop to `PrismProvider`. Use it for a
+form where someone wants to see a color, contrast, preset or font-size change
+before choosing **Save**. Keep the draft in the form. Pass only the fields
+being previewed, and pass `mode` separately when previewing light or dark.
+**Cancel** clears the draft and restores the saved appearance. Reloading the
+page also discards the draft.
+
+To save a remote preference, wait for the server to accept the draft, then
+apply the confirmed values with `useSettingsStore.getState().updateSettings(values)`.
+If saving fails, keep the draft available for retry. The published 0.4.12
+provider supports controlled `mode`. The additional `appearance` fields
+require the development SDK. [Provider implementation](https://github.com/omnitron-dev/omni/blob/4b113978b5f41a7a4702823cfa313930923439ee/packages/prism/src/core/provider.tsx)
+
 ### Flash-of-wrong-theme prevention (SSR) {#flash-of-wrong-theme-prevention-ssr}
 
-**Development API:** `PrismThemeScript` and `modeStorageKey` are implemented in
-Omnitron `main`; they require the next Prism release after 0.4.10. Do not deploy
-them with an older registry lockfile.
+The published Prism 0.4.12 package includes both `PrismThemeScript` and
+`modeStorageKey`.
 
 Use the same provider configuration in the server layout and the client tree.
 Render `PrismThemeScript` before visible content. It uses MUI's
