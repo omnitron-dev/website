@@ -1,5 +1,5 @@
 {
-  "revision": "09047935cfc16e0392df86c4b42fa2e2592b2e21",
+  "revision": "9356960e90379a4160e035f9b7f28cc913c2e080",
   "packages": [
     "@omnitron-dev/access",
     "@omnitron-dev/common",
@@ -18108,7 +18108,7 @@
       "name": "InfrastructureState",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "apps/omnitron/src/infrastructure/types.ts#L306",
+      "source": "apps/omnitron/src/infrastructure/types.ts#L308",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/dto/services",
@@ -21056,7 +21056,7 @@
       "name": "RuntimeUpdatePlan",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "apps/omnitron/src/shared/dto/runtime-update.ts#L113",
+      "source": "apps/omnitron/src/shared/dto/runtime-update.ts#L126",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/operations",
@@ -21068,7 +21068,7 @@
       "name": "RuntimeUpdateReceipt",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "apps/omnitron/src/shared/dto/runtime-update.ts#L153",
+      "source": "apps/omnitron/src/shared/dto/runtime-update.ts#L177",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/operations",
@@ -21080,7 +21080,7 @@
       "name": "RuntimeUpdateStatus",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "apps/omnitron/src/shared/dto/runtime-update.ts#L166",
+      "source": "apps/omnitron/src/shared/dto/runtime-update.ts#L190",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/operations",
@@ -21940,7 +21940,7 @@
       "name": "VerifiedRuntimeReference",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "apps/omnitron/src/shared/dto/runtime-update.ts#L90",
+      "source": "apps/omnitron/src/shared/dto/runtime-update.ts#L103",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/operations",

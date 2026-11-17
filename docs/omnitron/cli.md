@@ -434,7 +434,7 @@ in-progress launch before retrying.
 | `omnitron sdk dev [checkout] --stack <name> --start-stopped --review <digest>` | Build the SDK, start a stopped local working tree on reviewed infrastructure and continue watching. Add `--no-watch` for a single run. |
 | `omnitron sdk status [--stack <name>]` | Verify imports and show the active source. For a stack, compare its SDK outputs and current owner generations with the recorded refresh receipts. Supports global `--json`. |
 | `omnitron sdk registry` | Restore the frozen registry installation |
-| `omnitron sdk recover [--stack <name>]` | Restore retained SDK bytes and dependency bindings without rebuilding or installing (upcoming 0.4.11) |
+| `omnitron sdk recover [--stack <name>]` | Restore retained SDK bytes and dependency bindings without rebuilding or installing |
 
 Each command accepts `--project-dir <path>`. The developer selection is machine-local.
 The watcher runs in the foreground of `sdk dev`; saving the selection does not
@@ -1184,10 +1184,17 @@ passphrase without needing to repeat `--ssh-auth key`.
 | Command | Effect |
 | ------- | ------ |
 | `omnitron webapp build` | Build the React + Vite bundle |
-| `omnitron webapp start [-f]` | Start nginx container serving static + gateway (`-f, --force` recreates a running container) |
-| `omnitron webapp stop` | Stop the webapp nginx container |
-| `omnitron webapp status` | Show webapp status |
-| `omnitron webapp open` | Open the webapp in the system browser |
+| `omnitron webapp start [-f]` | Start Console and enable autostart; `-f, --force` explicitly replaces the container owned by this instance |
+| `omnitron webapp stop` | Stop this instance’s Console and disable autostart |
+| `omnitron webapp status` | Read the container’s state and published address |
+| `omnitron webapp open` | Open Console, starting it temporarily if needed without changing autostart |
+
+The unified lifecycle is implemented in `main` for the next release. Start uses
+the serving daemon’s local administrator socket and its configured ports and
+publication policy. Status and stop inspect Docker independently, so a failed
+backend does not prevent stopping its Console. An active reviewed runtime update
+reserves Console changes until its receipt reaches a terminal state.
+These local lifecycle operations use native macOS/Linux locking.
 
 All five commands support global `--json`. Build output includes `distPath` and
 `durationMs`; the builder's subprocess output is captured. Start reports observed
@@ -1199,7 +1206,7 @@ and whether it started the Console first.
 Lifecycle errors distinguish `outcome: "not-started"` (for example, the daemon
 is absent), `"unknown"` (the container operation failed and may have made partial
 changes), and `"applied"` (the Console action completed, but a subsequent step,
-such as saving autostart preference or opening a browser, failed). An applied
+such as opening the system browser, failed). An applied
 outcome is not a rollback. Inspect `omnitron --json webapp status` before retrying.
 
 

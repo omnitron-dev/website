@@ -50,6 +50,17 @@ remain pending within the shared deadline; unknown transport failures and
 conflicting identities stop acceptance. Missing RPC is never treated as success
 or permission to start another owner.
 
+On current `main`, cold startup owns Console creation through the same lifecycle
+service as explicit CLI commands. The reviewed plan selects the target Console
+for an update and the exact previous Console for restoration, including when the
+temporary recovery backend has another version. A previously disabled Console
+stays disabled. Runtime update observes this result instead of launching a
+competing `webapp start`. Warm backend handoffs retain the serving Console.
+When recovery needs Console assets from a different release, the cold starter
+must advertise `coldConsoleProtocol: 1`. Recovery verifies that capability and the
+retained Console artifact before stopping the candidate; an older unsupported
+starter leaves the receipt and processes available for inspection.
+
 Recovery must also work when the backend never became ready. `xec update local-stage`
 builds and installs a sealed repair CLI without selecting it or requiring a serving
 backend. This CLI can recover an older exact receipt without activating its own runtime. On

@@ -31,7 +31,7 @@ diffs them against the index table below. See the
 
 | File | Service id (Netron) | Methods | Role gate (typical) |
 | ---- | ------------------- | ------- | ------------------- |
-| `daemon/backend.rpc-service.ts` | `OmnitronBackend` | 2 | control-plane read (status); local Unix admin (control address) |
+| `daemon/backend.rpc-service.ts` | `OmnitronBackend` | 3 | control-plane read (status); local Unix admin (control address and Console publication) |
 | `access.rpc-service.ts` | `OmnitronAccess` | 5 | viewer (effective permissions) + admin (accounts) |
 | `terminal.rpc-service.ts` | `OmnitronTerminal` | 9 | admin + live human session / trusted local CLI |
 | `alert.rpc-service.ts` | `OmnitronAlerts` | 8 | viewer (read) + operator (mutate) |
