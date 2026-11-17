@@ -454,6 +454,11 @@ omnitron --json backend guardian prepare /absolute/releases/omnitron-next
 omnitron --json backend guardian apply /absolute/instance/runtime/supervisor-transition-ID.json --check
 ```
 
+Pass the sealed runtime root to `guardian prepare`, not its `packages/0/dist`
+subdirectory. That compiled directory is the input to `backend upgrade`; the
+guardian installer resolves its own files from the runtime manifest. Reviewed
+rollback uses each role's recorded artifact when these releases differ.
+
 Use a management runtime that provides `--check`. It reads the prepared plan and
 rechecks the selected backend, owner, inventory, pending operations, native unit
 and Linux stop boundary without starting the transition. Review `phase: prepared`
