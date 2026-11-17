@@ -20,7 +20,7 @@ Verified against `apps/omnitron/webapp/src/`.
 
 Choose a project and **All stacks** to see its stack cards side by side. Choose a
 stack to see its card, applications, logs, metrics, topology, containers and
-deployment history. Dashboard and Dashboard Builder use the same scope for stack
+deployment history. Overview and Dashboard Builder use the same scope for stack
 data. The workspace badge counts the whole project. The footer counts the
 selected scope. System-wide pages such as Audit and System omit the selector.
 
@@ -28,7 +28,8 @@ Opening a stack from a card or a release link preserves the header selection.
 On a stack detail page, explicitly selecting another stack opens that stack's
 details. Choosing **All stacks** returns to the inventory. Browser Back and
 Forward restore the workspace for each history entry. Reload keeps the current
-choice. Switching projects clears the stack selection.
+choice. Switching projects clears the stack selection. On a narrow screen, the
+header shows the stack name alone. Open the selector to read a long name in full.
 
 Releases keeps the project's artifact catalog visible. The selected stack
 narrows deployment observations and sets the target in the **Deploy a release**
@@ -169,7 +170,7 @@ application that happens to be named `omnitron`.
   - `components/` — shared UI building blocks
   - `hooks/` — custom React hooks
   - `netron/` — Netron client and typed daemon service bindings
-  - `auth/` — AuthGuard, GuestGuard, ProjectGuard, auth store
+  - `auth/` — session, effective permissions and page access
   - `stores/` — zustand state stores
   - `assets/` — icons
   - `utils/`
@@ -180,9 +181,14 @@ application that happens to be named `omnitron`.
 
 All routes other than `/auth/sign-in` are gated by `AuthGuard`.
 A session-keyed access provider retrieves effective RPC permissions, gates page entry and hides unavailable actions. See [Console access](./access.md).
-Routes marked **project-scoped** require an active project (via
-`ProjectGuard`) — selected from the project switcher in the
-sidebar.
+Choose a project in the header to open project-scoped pages. The sidebar and
+command palette share the same destinations and effective permissions.
+**Workspace** contains Overview, Projects, Stacks and Applications. **Delivery**
+contains Releases, Deployments and Pipelines. **Observability** brings together
+logs, metrics, traces, alerts and Dashboard Builder. **Infrastructure** covers
+nodes, containers, topology, SSH and files. **Administration** contains access,
+audit, system information and settings. Direct links enforce the same entry rules.
+
 
 | Path | Page | Scope | Backing RPC |
 | ---- | ---- | ----- | ----------- |
@@ -196,13 +202,14 @@ sidebar.
 | `/system` | `SystemInfoPage` | global | `OmnitronSystemInfo`, `OmnitronNodes.getNodeSystemSnapshot` |
 | `/settings` | `SettingsPage` | global | `OmnitronAuth` + config |
 | `/logs` | `LogsPage` | both | `OmnitronLogs` |
-| `/apps` | `AppsListPage` | project | `OmnitronDaemon.list` |
+| `/apps` | `AppsListPage` | project | `OmnitronProject.getProjectApps` |
 | `/apps/:name` | `AppDetailPage` | both | `OmnitronDaemon.getApp` + many |
 | `/stacks` | `StacksPage` | project | `OmnitronProject.listStacks` |
 | `/stacks/:name` | `StackDetailPage` | project | `OmnitronProject.listStacks` |
 | `/metrics` | `MetricsPage` | project | `OmnitronMetrics` (`querySeries` / `getStorageStatus`) |
 | `/topology` | `TopologyPage` | both | stack deployments, daemon processes and runtime containers |
 | `/containers` | `ContainersPage` | both | `OmnitronInfra.listContainers` for this host, `OmnitronProject.listStacks` for placement and remote observations |
+| `/releases` | `ReleasesPage` | both | `OmnitronRelease.list` |
 | `/deployments` | `DeploymentsPage` | project | `OmnitronProject.getDeployProgress`, `OmnitronRelease.deployments`, `OmnitronDeploy.getHistory` |
 | `/alerts` | `AlertsPage` | global | `OmnitronAlerts` |
 | `/pipelines` | `PipelinesPage` | system | `OmnitronPipelines` |
@@ -212,29 +219,25 @@ sidebar.
 
 ## Page-by-page {#page-by-page}
 
-### Dashboard {#dashboard}
+### Overview {#dashboard}
 
-The landing page shows the selected project's deployments, including remote stacks,
-or this daemon's applications when no project is selected. It provides:
+Choose a project and stack to see its applications, including those observed on a
+remote node. In the system workspace the inventory covers this daemon's processes.
+The summary counts online applications and running stacks and totals the CPU and
+resident memory reported for the selection.
 
-- Online/total application and stack counts, summed process CPU and resident memory.
-- A ranked resource snapshot for the six largest applications, switchable between
-  CPU and memory. The graph compares readings; it does not imply a capacity limit.
-- Compact application cards grouped by stack, with status, CPU, memory, uptime,
-  restarts and process counts. Local application names open their detail pages.
-- Links to metrics and topology from the breadcrumb actions.
+Read **Process** and **Health** together. An application can be online while its
+health probe is failing. **Health unknown** means the controller has no observation.
+Confirmed failures and degraded applications appear first. **Needs attention**
+filters to those rows. The full table also includes uptime and restarts. With the
+appropriate access, a local name opens that application and a remote name opens
+the stack that reported it.
 
-Refreshes retain the last received data on partial failures and name the source
-that failed. CPU may exceed 100% when processes use several cores; resident memory
-has no warning threshold without a known capacity. Zero is a valid measurement;
-invalid negative or non-finite readings render as unknown. Polling pauses while
-the browser tab is hidden.
-
-Pages fetch through the typed Netron client directly (the
-`daemon` / `metrics` proxies from `src/netron/client.ts`) inside
-`useEffect` + polling intervals, and subscribe to a shared
-`zustand` realtime store (`src/stores/realtime.store.ts`) for
-live pushes. There is no TanStack/React Query layer.
+Expand **Resource distribution** to compare the six largest CPU or memory readings
+in the selection. The scale follows the largest reading. CPU can exceed 100% when
+several cores are in use. A failed refresh identifies the source and retains the
+last available readings. Before the first successful inventory read, Console shows
+the error and offers **Retry**. Periodic polling pauses in a hidden tab.
 
 ### Apps list & detail {#apps-list--detail}
 
@@ -261,8 +264,12 @@ complete inventory. Wide tables scroll inside their own keyboard-focusable regio
 `/stacks` shows cards for the current scope, including runtime status, online
 and configured applications, and node count.
 
-`/stacks/:name` — per-stack view: which apps run here, which
-infrastructure, runtime status. Start / stop the whole stack.
+Open a stack to inspect its runtime. The summary shows readiness, coverage and
+any observed failure reasons. **Runtime** lists applications and infrastructure
+together. **Releases & history** loads launch evidence and recorded outcomes
+when opened. **Configuration** shows the declaration and infrastructure policy.
+For an operator with a permitted change, this tab is **Configuration & actions**.
+Start, deploy and stop use the normal review and authorization paths.
 
 A stack with a confirmed signed stop offers **Resume installed apps** to operators. The detail page shows each target's receipt, confirmed applications and failure reason. After a partial recovery or a legacy receipt, **Review new stop…** opens the inventory for a fresh review. See [Resume installed applications](./projects.md#resume-installed-applications).
 
@@ -551,7 +558,7 @@ for artifact staging, CLI commands and recovery.
 ### Projects {#projects}
 
 `/projects` — registered project list. Add / scan / remove
-projects. Project switcher in sidebar mirrors this.
+projects. The header switcher lists these projects.
 
 ### System {#system}
 
@@ -747,21 +754,17 @@ see [CLI output and lifecycle outcomes](./cli.md#webapp-console-ui).
 
 ## Project switcher {#project-switcher}
 
-The sidebar carries a project dropdown — switching projects
-re-scopes every project-scoped page to that project's apps /
-stacks / etc. Stored in the auth context; persists across
-sessions.
+The header shows the current workspace. Select a project to scope application
+inventory, stack operations and observations. The project store remembers the
+selection locally. Browser Back and Forward restore the workspace recorded for
+each history entry.
 
-## Empty / error states {#empty--error-states}
+## Empty and unavailable data {#empty--error-states}
 
-Every page is built around three states:
-
-- **Loading** — skeleton with shimmer (`<LoadingScreen />` from
-  Prism).
-- **Empty** — friendly empty state with the primary action
-  ("Add your first project", "Connect a node", …).
-- **Error** — error card with retry button + JSON of the underlying
-  error (operators love seeing the actual error).
+A completed inventory with zero entries displays an empty state. An initial read
+failure displays its error and a retry action. When a refresh fails after an
+earlier success, pages that retain the last observation label it as stale.
+A missing permission is shown separately from a failed server request.
 
 ## Performance characteristics {#performance-characteristics}
 
@@ -775,21 +778,10 @@ Every page is built around three states:
 
 ## Adding a new page {#adding-a-new-page}
 
-The pattern is mechanical:
-
-1. Add `apps/omnitron/webapp/src/pages/my-page.tsx` exporting a
-   default React component.
-2. Add a lazy import + `<Route path="my-page" ...>` in the router
-   (`src/routes/index.tsx`), wrapping in `<ProjectRoute>` if the
-   page is project-scoped.
-3. Add a nav entry in `src/layouts/console-layout.tsx`.
-4. Import the typed service proxy from `src/netron/client.ts`
-   (e.g. `import { daemon, metrics } from 'src/netron/client'`)
-   and call it from `useEffect`; for live updates, read from the
-   `src/stores/realtime.store.ts` zustand store.
-
-No separate API layer to wire — the daemon already exposes
-everything as typed Netron services.
+1. Put the page under `src/pages/` and register its lazy route in `src/routes/index.tsx`.
+2. Add its title, path, effective RPC permissions, project requirement and stack filter to `src/routes/navigation.tsx`. The sidebar, palette and route guard consume that definition.
+3. Read through the typed Netron service in `src/netron/client.ts`. Reuse shared inventory for project data and `usePolledResource` for independently refreshed readings.
+4. Exercise direct entry, workspace changes and the least-privileged role that can use the page.
 
 ## Anti-patterns {#anti-patterns}
 
@@ -816,7 +808,7 @@ everything as typed Netron services.
 
 Console pages use a single breadcrumb trail for location and navigation. A hidden level-one heading and the browser tab title retain the page name for accessibility. Parent crumbs use client-side routing, so navigating between sections preserves mounted workspaces and their SSH sessions. Page actions remain beside the trail; content headings still identify cards and subsections.
 
-Application cards on the global dashboard open details by their full daemon
+Application links in the system overview open details by their full daemon
 handle, without requiring a project selection. The detail page retains role
 checks and links back to Overview when no project is selected.
 

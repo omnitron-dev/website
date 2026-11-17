@@ -191,6 +191,11 @@ The full namespace (`packages/prism/src/components/field/index.ts`):
 | `Field.Editor` | rich text editor | textarea fallback or custom |
 | `Field.CustomEditor` | headless editor | render-prop |
 
+For narrow headers, give the field a bounded width and an accessible label.
+The Prism theme truncates a long selected value before the chevron in both
+reading directions. The menu still exposes the full option. Keep icons or chips
+for a custom value inside its own child element so the trigger retains its line layout.
+
 (Select / Radio / MultiSelect / Autocomplete take an `options` array;
 they do **not** take `<MenuItem>` children.)
 
