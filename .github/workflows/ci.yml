@@ -38,8 +38,10 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Audit locked dependencies
-        run: pnpm audit --audit-level low
+      - name: Audit locked dependencies and verify installed backports
+        run: |
+          node scripts/check-dependency-audit.js
+          node --test tests/dependency-audit.node.js
 
       - name: Public content boundary
         run: pnpm check:content

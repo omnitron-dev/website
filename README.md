@@ -103,6 +103,7 @@ location. Building the website itself uses its locked registry packages.
 
 ```bash
 OMNI_SOURCE_DIR="/absolute/path/to/omni-source"
+node scripts/check-dependency-audit.js
 pnpm check:content
 pnpm check:source "$OMNI_SOURCE_DIR"
 pnpm typecheck
@@ -173,6 +174,24 @@ Pages. Pull requests never publish; manual publication follows the same checks.
 
 Guides may describe newer platform APIs, but live examples and rendering features
 must work with the locked Lumen and Prism versions.
+
+The site maintains two install-time patches for picomatch 4.0.7. Vite uses one
+copy and the published KB package bundles another inside its archive. Both
+parsers accept repeated extglobs only for nonempty literal words made from ASCII
+letters, digits, underscores, hyphens or dots. Alternatives must have distinct
+initial letters or characters, ignoring case. Other repeated forms raise a
+syntax error during compilation. Ordinary file globs such as `docs/**/*.md`
+keep their usual meaning. [GitHub security advisory](https://github.com/advisories/GHSA-fc5q-39xc-vjpf)
+
+Before running the build tools, CI reads the registry audit and checks every
+file in both installed distributions. An additional finding, a change in either
+copy, or a third installation stops the build. The site uses pnpm 12.21.0 and
+excludes the published KB 0.4.12 from its side-effects cache. This makes a
+frozen install apply the patch to the bundled parser even with a store populated
+by an earlier pnpm. [pnpm build cache settings](https://pnpm.io/settings/build)
+
+When an upstream fix ships or the published KB dependency changes,
+review the lockfile and remove the corresponding patch and audit rule together.
 
 If **Check out documented platform source** fails with `upload-pack: not our ref`,
 compare the requested SHA with `revision` in `src/data/api-index.json`. A local
