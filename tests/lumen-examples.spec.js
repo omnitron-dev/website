@@ -64,3 +64,24 @@ test('public reading formats are durable links with or without interactive tabs'
     } finally { await context.close(); }
   }
 });
+
+test('the Lumen pipeline explorer exposes captured checks and a working React interaction', async ({ page }) => {
+  await page.goto('/docs/lumen/architecture');
+  const explorer = page.locator('[data-example="lumen-pipeline"] [data-lumen-explorer]');
+  await explorer.scrollIntoViewIfNeeded();
+  const stages = explorer.getByRole('tablist', { name: 'Lumen pipeline stage' });
+  await stages.getByRole('tab', { name: '3 · Verify', exact: true }).click();
+  await expect(explorer.getByText('Both gates passed for the captured corpus.', { exact: true })).toBeVisible();
+  await explorer.getByRole('tablist', { name: 'Captured verification case' })
+    .getByRole('tab', { name: 'Missing target', exact: true }).click();
+  await expect(explorer.getByText('The missing document was rejected by the captured gate run.', { exact: true })).toBeVisible();
+
+  await stages.getByRole('tab', { name: '6 · Activate', exact: true }).click();
+  const button = explorer.getByRole('button', { name: 'Record a click', exact: true });
+  await expect(button).toBeDisabled();
+  await explorer.getByRole('tablist', { name: 'Example interaction mode' })
+    .getByRole('tab', { name: 'Interactive component', exact: true }).click();
+  await expect(button).toBeEnabled();
+  await button.click();
+  await expect(explorer.getByRole('status')).toHaveText('Recorded clicks: 1');
+});

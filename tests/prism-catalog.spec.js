@@ -1,21 +1,23 @@
 import { readdir, readFile } from 'node:fs/promises';
+import { resolve, sep } from 'node:path';
 import { expect, test } from '@playwright/test';
 
-const guide = '/docs/frontend/prism/';
-const docs = new URL('../docs/frontend/prism/', import.meta.url);
+const output = resolve(import.meta.dirname, '..', process.env.LUMEN_OUT_DIR || 'build');
 const directory = new URL('../src/site/examples/', import.meta.url);
 
-test('every Prism example mounts from the same module as its displayed source', async ({ page }) => {
+test('every registered example mounts from the same module as its displayed source', async ({ page }) => {
   test.setTimeout(180_000);
   const failures = [];
   page.on('pageerror', error => failures.push(error.message));
   page.on('console', message => { if (message.type() === 'error') failures.push(message.text()); });
   const expected = (await readdir(directory)).filter(file => file.endsWith('.tsx')).sort();
   const shown = new Set();
-  for (const guideFile of (await readdir(docs)).filter(file => file.endsWith('.md'))) {
-    if (!(await readFile(new URL(guideFile, docs), 'utf8')).includes('<PrismExample ')) continue;
-    const route = guideFile === 'index.md' ? '' : guideFile.slice(0, -3);
-    await page.goto(route ? guide + route : guide.slice(0, -1));
+  // Examples also appear outside the Prism guides. Inspect the built HTML
+  // generation so page discovery follows emitted routes, including MDX pages.
+  for (const file of (await readdir(output, { recursive: true })).filter(file => file.endsWith('.html')).sort()) {
+    if (!(await readFile(resolve(output, file), 'utf8')).includes('data-component="PrismExample"')) continue;
+    const route = '/' + file.split(sep).join('/').replace(/\.html$/, '').replace(/\/index$/, '');
+    await page.goto(route === '/index' ? '/' : route);
     const hosts = page.locator('article [data-component="PrismExample"]');
     for (const host of await hosts.all()) {
       const { example } = JSON.parse(await host.getAttribute('data-props'));
