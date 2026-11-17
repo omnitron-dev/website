@@ -91,7 +91,17 @@ The migration records the previous built site's route and anchor inventory in `m
 
 ## Source and distribution
 
-The website and framework are separate repositories. Use the normal Omnitron SDK workflow for a development checkout and released package versions for distribution. An unpublished SDK candidate must be qualified explicitly; a local dependency link is not evidence of a reproducible registry installation.
+The website and framework are separate repositories. CI installs the released
+Lumen and Prism versions from the website lockfile, then verifies documentation
+against the exact Omni commit recorded in `src/data/api-index.json`. That commit
+can include newer platform APIs, but must already be available on GitHub before
+the website is pushed. The API index uses the same revision for declaration
+links. A successful local source check does not establish that CI can fetch it.
+
+Use the normal Omnitron SDK workflow for a development checkout and released
+package versions for distribution. An unpublished SDK candidate must be
+qualified explicitly; a local dependency link is not evidence of a reproducible
+registry installation. Live examples must work with the locked renderer.
 
 See [contributing](../community/contributing.md) for the project workflow and [compatibility](../reference/compatibility.md) for supported versions.
 

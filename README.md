@@ -160,6 +160,13 @@ Pages. Pull requests never publish; manual publication follows the same checks.
 Guides may describe newer platform APIs, but live examples and rendering features
 must work with the locked Lumen and Prism versions.
 
+If **Check out documented platform source** fails with `upload-pack: not our ref`,
+compare the requested SHA with `revision` in `src/data/api-index.json`. A local
+commit is insufficient: that exact commit must be available from
+`omnitron-dev/omni` on GitHub. Push the reviewed platform commit first, then
+rerun the website check. Keep the pin intact; substituting an older commit or
+`main` would check different source and invalidate declaration links.
+
 When updating packages, generate the lock from published npm versions in a clean
 consumer, then verify frozen install, dependency audit, types, build and browser
 interactions. Commit the lock together with its workspace configuration. Pushing

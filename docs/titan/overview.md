@@ -8,10 +8,12 @@ description: A composable TypeScript backend framework — DI, lifecycle, valida
 
 # Titan Framework
 
-Titan is **the backend framework**. It runs standalone — no
-daemon, no supervisor, no extra runtime. Build a backend with
-Titan + the modules you need, then `node dist/main.js`. That's
-the entire production deploy.
+Titan is **the backend framework**. It runs inside your Node.js application
+and can start directly with `node dist/main.js`. Install its runtime
+dependencies and supply the configuration and infrastructure required by your
+chosen modules. Production deployment also needs the application's own
+readiness, security, data-migration and recovery procedures; see
+[production readiness](../deployment/production-readiness.md).
 
 > **Titan is self-sufficient.** [Omnitron](../omnitron/overview.md)
 > is a separate opt-in layer on top — useful for multi-app fleets,
@@ -48,10 +50,12 @@ that compose into the runtime you actually want.
 - **Not opinion-free.** Titan has strong opinions about explicitness:
   declared providers and explicit lifecycle ownership. Request context
   uses AsyncLocalStorage where the transport and authentication APIs require it.
-- **Not a NestJS clone.** Titan shares the decorator-driven aesthetic
-  with NestJS, but the underlying container (Nexus) is a different
-  design — multi-token providers, contextual injection, middleware
-  pipelines, runtime-portable across Node/Bun/Deno/browser.
+- **Not an interchangeable decorator API.** Nexus provides Titan's dependency
+  injection; Titan and Netron define their own module, lifecycle and service
+  contracts. Check those boundaries when migrating an existing application.
+  The [NestJS migration guide](./migrations/from-nestjs.md) maps the APIs;
+  similarities do not establish their design provenance. See
+  [compatibility](../reference/compatibility.md) for runtime support.
 
 ## The mental model {#the-mental-model}
 

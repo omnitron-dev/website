@@ -177,8 +177,19 @@ pnpm check:source ../omni
 ```
 
 These checks compare inventories, CLI commands, package subpaths, defaults,
-service names and catalog coverage with source. They do not establish that
-every documentation example runs; execute the examples you change.
+service names and catalog coverage with source. They also verify the generated
+API index against that checkout's exact commit. They do not establish that every
+documentation example runs; execute the examples you change.
+
+For prose-only changes, use the source revision recorded in
+`src/data/api-index.json`. When documenting newer public APIs, run
+`pnpm docs:api ../omni` against a clean, committed platform checkout and review
+the generated index with the guide changes. Push that exact Omni commit
+before pushing the website: CI checks it out before verifying documentation,
+and declaration links point to it. An unpublished source revision fails at
+checkout with `upload-pack: not our ref`; push the reviewed source and rerun
+the check without changing the pin. The site renderer and live examples still
+use the released Lumen and Prism versions in the website lockfile.
 
 ## Write a useful page {#write-a-useful-page}
 
@@ -196,9 +207,11 @@ they affect the reader.
 
 ## Change the code {#change-the-code}
 
-Follow the package's existing conventions. Preserve public API compatibility
-unless the change deliberately introduces a documented migration. For a bug
-fix, add a regression test that exercises the failed behaviour.
+Follow the package's existing conventions and repository instructions. During
+refactoring, remove superseded implementations, aliases and their callers in
+the same change. Update public exports, tests and documentation together, and
+document the migration when the public contract changes. For a bug fix, add a
+regression test that exercises the failed behaviour.
 
 Keep type-only imports explicit and use `.js` extensions for relative ESM
 imports. Use the repository's lint and formatting configuration.
