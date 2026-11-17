@@ -80,9 +80,13 @@ A static artifact has no request-time identity check. Anyone who receives a priv
 
 Pagefind creates a local index during the build. The browser retrieves its published modules and shards from the site's host; ordinary queries do not require a search SaaS or Titan endpoint. Your hosting logs, custom islands, analytics and additional search providers remain separate privacy decisions. Published 0.4.12 uses the configured default locale for every Pagefind input. The unreleased source fix indexes each document under its canonical locale, with the configured default only for documents without one. Validate the emitted language indexes when adopting that fix.
 
+For a manual hosted at `/manual/`, point a custom `LumenSearchDialog` at `/manual/pagefind/pagefind.js`. Published 0.4.12 can repeat the mount path in a search result. The development version stores routes relative to the index and leaves Pagefind to resolve the deployment prefix. Its public `buildSearchIndex` entries include the full site path and honor `trailingSlash`.
+
 ## Static HTML and selective React activation
 
 `@omnitron-dev/lumen-ui` exports `LumenShell`, island runtime primitives, navigation and search components. Islands share the shell's React provider context. Their `load`, `idle`, `visible` or `interaction` trigger controls activation timing. The runtime preserves the server preview until its replacement commits; source HTML remains available while deferred code loads.
+
+This manual supplies a site-wide client for its header, search and examples. For projects using the default layout and client, the development version loads the client on pages containing document tabs, diagrams or widgets. A manual whose only control is a `:::tabs` group gets keyboard navigation, and plain Markdown pages in the same build need no client script. In published 0.4.12, a tabs-only manual requires a custom client entry for interactive selection. All panels remain readable before activation.
 
 An island is not a security sandbox. Its trusted component code has the ordinary capabilities of your client application. The isolated QuickJS playground is a separate execution mechanism with a different boundary. Do not use an island's delayed loading as an access restriction.
 
