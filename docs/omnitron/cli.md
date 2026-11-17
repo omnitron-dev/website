@@ -245,6 +245,13 @@ phase waits for its admitted I/O before returning a failure, and installation
 publishes only after verification and durability succeed. These bounds reduce
 serial work without changing backup, live-state or rollback admission.
 
+After publishing and verifying a new runtime outside its build checkout, Xec
+runs read-only plan preparation and checkout cleanup concurrently. Both pipeline
+steps finish before the final result is returned. A cleanup failure leaves any
+prepared plan and runtime intact, reports failure and never applies the plan;
+inspect `xec update local-sync --status`. Activation and backend replacement wait
+for cleanup before starting.
+
 Preparation is read-only with respect to running work. Its plan names the exact
 locally owned backup attempts that applying the update may cancel. Restores,
 unknown outcomes and operations without confirmed local ownership still block
