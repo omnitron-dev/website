@@ -35,6 +35,21 @@ to own application reload yourself. Use `--no-watch` to install the profile
 separately. Resume with `omnitron sdk dev --stack dev`. The saved selection persists,
 but the watcher is a foreground process: it stops when that command exits.
 
+Changing the selection first retains the current dependency installation and
+build outputs in `OMNITRON_DEV_CACHE`. This recovery copy is separate from
+application database backups: it allows `sdk recover` to restore the exact
+previous SDK bytes without a rebuild or another dependency resolution. Put the
+cache on a development volume with enough space for the reported retained bytes.
+The command reports inventory, copy, verification and prepared phases with
+elapsed time. An unchanged active selection reuses its existing build state.
+
+File reads and independent copies run with bounded concurrency. The integrity
+proof still covers content, modes and symbolic links in deterministic order;
+parallel completion does not change its digest. Failed copying drains admitted
+writers before removing the private staging directory. Recovery refuses foreign
+edits or an interrupted write whose ownership cannot be established. Stop source
+consumers before recovery; a timeout is not proof that an old writer has stopped.
+
 For an intentionally stopped working-tree stack, first confirm that its last
 stop retained infrastructure. Obtain a fresh start review on that stopped
 state, then give its digest to the SDK watcher:

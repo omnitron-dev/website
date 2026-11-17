@@ -103,6 +103,27 @@ app.unregisterShutdownTask('audit.flush');
 `Normal (50)`, `BelowNormal (70)`, `Low (80)`, `VeryLow (90)`,
 `Last (100)`.
 
+### Completion and deadlines {#completion-and-deadlines}
+
+A shutdown handler that rejects has finished. If it is noncritical, Titan records
+its failure and continues cleanup. A handler whose deadline expires may still be
+writing or using dependencies. That outcome is incomplete shutdown, even when
+`critical` is false: subsequent tasks and disposal phases do not start, and the
+shutdown rejects with `LifecycleTimeoutError`. A standalone controller exits
+with a nonzero code. Failed phases do not emit `phase-finish`.
+
+Already admitted parallel tasks are joined within the phase budget. Critical
+failures preserve their causes; multiple failures are aggregated. Application
+uses the same controller result, without a second timer or an inference from
+telemetry events. Callers receive the same completion contract whether they use
+the standalone controller or Application shutdown tasks.
+
+A deadline cannot terminate arbitrary JavaScript or retract a remote write.
+Embedded hosts must treat incomplete shutdown as a failure and avoid reusing or
+disposing resources that unfinished work may still access. Explicit force-stop
+policy is separate from graceful completion. Do not retry a timed-out business
+effect without receiver evidence or an idempotency contract.
+
 ## The hard-exit guarantee {#the-hard-exit-guarantee}
 
 The coordinator runs a watchdog timer for the whole shutdown:

@@ -1,5 +1,5 @@
 {
-  "revision": "578b10628c982b0439640a51c3865ca5cbe0708b",
+  "revision": "365ce68aed5197482112ab9f2f4be99ae615a9c2",
   "packages": [
     "@omnitron-dev/access",
     "@omnitron-dev/common",
@@ -54348,7 +54348,7 @@
       "name": "LifecycleTimeoutError",
       "package": "@omnitron-dev/titan",
       "kind": "class",
-      "source": "packages/titan/src/lifecycle/lifecycle-controller.ts#L554",
+      "source": "packages/titan/src/lifecycle/lifecycle-controller.ts#L521",
       "imports": [
         {
           "path": "@omnitron-dev/titan/lifecycle",
