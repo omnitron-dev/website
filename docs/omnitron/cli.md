@@ -232,6 +232,19 @@ The bytes are verified locally before use, without another build, archive copy o
 CI request. An invalid selected artifact fails verification instead of silently
 falling back to a different build. Preparation does not activate the runtime.
 
+**Unreleased after 0.4.12:** host preparation retains its verified target's
+process-local filesystem proof. Reuse checks every entry's identity, permissions,
+ownership and change time without rereading the same contents. A changed file,
+link or manifest invalidates that proof; restoring the old bytes cannot revive it.
+A new process or a distinct copy verifies independently. A serialized path and
+SHA-256 never authorize skipping verification.
+
+Packaging copies up to four independent packages together. Installation flushes
+up to 16 regular files together, then directories after their descendants. Each
+phase waits for its admitted I/O before returning a failure, and installation
+publishes only after verification and durability succeed. These bounds reduce
+serial work without changing backup, live-state or rollback admission.
+
 Preparation is read-only with respect to running work. Its plan names the exact
 locally owned backup attempts that applying the update may cancel. Restores,
 unknown outcomes and operations without confirmed local ownership still block
