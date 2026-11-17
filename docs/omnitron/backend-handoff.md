@@ -35,6 +35,14 @@ plan intact. Better health alone does not change the review digest. Generation,
 configuration, runtime-role and infrastructure checks still apply; a worker
 rotation can still invalidate the reviewed generation or inventory.
 
+Final acceptance covers all roles, application readiness, source watches, retained
+launches, Console and native infrastructure under a single observation deadline.
+Transient startup readiness differs from conflicting ownership and an unknown
+result. A timed-out or lost observation preserves the unconfirmed receipt; use
+`runtime update reconcile <digest>` to accept a fully observed serving candidate
+without another restart. See [local runtime updates](./cli.md#local-runtime-updates)
+for the recovery decision and commands.
+
 Verify that the executing update tool implements this contract and inspect the
 independently observed runtime roles;
 preparing or installing an artifact alone does not activate it.

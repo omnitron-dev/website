@@ -466,10 +466,14 @@ pnpm exec xec update local-sync --status
 
 Preparation returns a review of supervision, Console and the exact local stack
 selections. Applying the digest may restart those applications; review the scope
-and recovery limitations first. After interruption, inspect status before
-requesting recovery with `local-sync --review <sha256> --rollback`. Set
+and recovery limitations first. After interruption, inspect status. If the
+candidate already serves the reviewed state, use
+`local-sync --review <sha256> --reconcile`; it observes full acceptance without
+restarting anything. Request restoration with
+`local-sync --review <sha256> --rollback` when needed. An expired acceptance
+observation remains unconfirmed and does not itself authorize another restart. Set
 `OMNITRON_DEV_CACHE` or use `--cache-dir` to retain verified builds between batches.
-The status and recovery paths reuse retained evidence and do not start a build.
+Status, reconciliation and recovery reuse retained evidence and do not start a build.
 
 For a backend-only transition, the separate commands below preserve the execution
 owner. Xec runs the sealed candidate's own Node and CLI so admission checks

@@ -207,6 +207,7 @@ owns a reviewed transition of local supervision, Console and the recorded stacks
 | `omnitron runtime update prepare <runtime>` | Install the verified candidate and record the current installation, stack selections, infrastructure and recovery plan |
 | `omnitron runtime update apply <digest>` | Recheck and apply that exact SHA-256 plan once |
 | `omnitron runtime update status [digest]` | Read the durable receipt and verify its candidate without connecting to the daemon |
+| `omnitron runtime update reconcile <digest>` | Accept a fully observed serving candidate without stopping, starting or replaying an operation |
 | `omnitron runtime update recover <digest>` | Release interrupted admission before shutdown, or restore and inspect the previous installation after a process transition |
 
 From a clean Omnitron checkout, Xec prepares the same public operation:
@@ -220,8 +221,9 @@ Review the returned scope, readiness conditions and recovery limitations before
 applying it. `pnpm exec xec update local-sync --review <digest>` performs the
 transition and may restart the listed applications. Inspect
 `pnpm exec xec update local-sync --status` after an interrupted response; do not
-repeat an uncertain operation. Recovery uses
-`pnpm exec xec update local-sync --review <digest> --rollback`.
+repeat an uncertain operation. If the candidate already serves the reviewed
+state, use `pnpm exec xec update local-sync --review <digest> --reconcile`.
+Restoration uses `pnpm exec xec update local-sync --review <digest> --rollback`.
 The cache directory must be private to the current user. Xec reuses a verified
 runtime for the same commit and native Node producer; a changed checkout requires
 a new preparation. In the development checkout, it also discovers the completed
@@ -243,10 +245,23 @@ configuration, roles and infrastructure, still require the existing checks.
 This does not make a worker rotation compatible with an earlier plan. See
 [implementation and activation boundaries](./backend-handoff.md#choose-the-update-mechanism).
 
+The private restart snapshot retains its full integrity digest. Comparing its
+restart intent excludes only project `loadedAt` timestamps, so reloading identical
+definitions does not invalidate a plan. Configuration, launch order, environment,
+release selections and owner/inventory identities remain bound.
+
+Final acceptance observes roles, applications, health, source watches, retained
+launch definitions, Console and native containers under one 15-minute deadline.
+An explicitly pending startup or readiness observation can settle within that
+budget. Changed intent or foreign ownership refuses immediately. A lost read or
+expired observation records `recovery-required` without automatically retiring a
+possibly healthy candidate. Inspect the receipt and reconcile the complete
+serving state, or request recovery; neither operation repeats an uncertain start.
+
 Applying the reviewed digest records `draining`, pauses new backups for that
 transaction and cancels only the reviewed attempts through the operation journal.
 An attempt that already finished is observed without replaying it. The controller
-then requires a fresh recovery certificate and an unchanged configuration digest
+then requires a fresh recovery certificate and unchanged restart intent
 before stopping any process. A new backup attempt or changed active revision
 requires a new review. The serving controller advertises
 `runtimeRestartAdmissionProtocol: 1` for this admission contract.
