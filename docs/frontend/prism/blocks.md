@@ -173,9 +173,11 @@ function RequestsPanel({ loading, series }) {
 | `error` | `boolean` | Shows the error state (`errorConfig`) |
 | `collapsible` | `boolean` | Enables collapse controls; default `false` |
 | `defaultCollapsed` | `boolean` | Initial state for an uncontrolled block |
-| `mountOnEnter` | `boolean` | Mount the body on first expansion and retain its state on subsequent collapses |
+| `mountOnEnter` | `boolean` | Mount on first expansion and retain state on later collapses |
 | `slotProps.header.headingComponent` | `h1` through `h6` | Choose the semantic heading level independently of its visual size |
 | `collapsed` / `onCollapseChange` | `boolean` / callback | Controlled state and requested changes |
+
+The development version after 0.4.12 adds `mountOnEnter` and `slotProps.header.headingComponent`.
 
 `DashboardBlockHeader`, `DashboardBlockContent`, and
 `DashboardBlockFooter` are exported for fully custom composition,

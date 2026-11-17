@@ -388,7 +388,7 @@ import { Table } from '@omnitron-dev/prism';
   rowKey="id"
   data={users}
   columns={[
-    { id: 'name', label: 'Name', rowHeader: true },
+    { id: 'name', label: 'Name' },
     { id: 'email', label: 'Email' },
     { id: 'karma', label: 'Karma', align: 'right',
       render: (u) => u.karma },
@@ -396,7 +396,7 @@ import { Table } from '@omnitron-dev/prism';
 />
 ```
 
-Use `rowHeader: true` for the column that identifies each record. Its cells become native row headers, so a screen reader can identify the record while reading a measurement in another column.
+In the development version after 0.4.12, set `rowHeader: true` on the column that identifies each record. Its cells become native row headers, so a screen reader can identify the record while reading a measurement in another column.
 The component also supports `selectable`, `sortable`, `paginated`,
 and `loading` props (see `TableProps`). Both `Table` and `AdminDataTable` use a
 bounded, keyboard-focusable `TableViewport` with a localisable `scrollLabel`.

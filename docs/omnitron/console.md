@@ -14,7 +14,7 @@ React 19 + Vite + MUI SPA that talks to the daemon via the
 `@omnitron-dev/prism/netron` client — the same Netron RPC surface
 the CLI uses.
 
-Verified against `apps/omnitron/webapp/src/`.
+The navigation, application table and stack tabs described here are available on the development branch after 0.4.12. The packaged 0.4.12 Console displays its earlier overview.
 
 ## Workspace and stack scope {#workspace-and-stack-scope}
 

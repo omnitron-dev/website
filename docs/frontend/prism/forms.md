@@ -192,7 +192,8 @@ The full namespace (`packages/prism/src/components/field/index.ts`):
 | `Field.CustomEditor` | headless editor | render-prop |
 
 For narrow headers, give the field a bounded width and an accessible label.
-The Prism theme truncates a long selected value before the chevron in both
+The Prism theme on the development branch after 0.4.12 truncates a long
+selected value before the chevron in both
 reading directions. The menu still exposes the full option. Keep icons or chips
 for a custom value inside its own child element so the trigger retains its line layout.
 
