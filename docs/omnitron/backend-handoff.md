@@ -387,6 +387,15 @@ A compatibility runtime accepts future migration history only when a private rec
 
 To return to the retained bridge, use `backend upgrade <bridge-dist> --schema-plan <same-plan>`. The schema stays expanded. Both upgrade and rollback revalidate the applied plan and database; `--schema-plan` is not a general compatibility override. Keep its plan, receipt, receipt index and both sealed releases for as long as rollback remains required.
 
+In development `main`, a stopped managed instance can select an installed runtime using the same applied evidence:
+
+```bash
+omnitron backend select <installed-sha256> --schema-plan /private/applied-plan.json --check
+omnitron backend select <installed-sha256> --schema-plan /private/applied-plan.json
+```
+
+The database is inspected through the private managed environment. The original rollback binary stays pinned; a corrected candidate must retain the target’s complete master and node migration tree. Published approval, database identity, registry order, checksums and history are revalidated. Inspection uses read-only PostgreSQL sessions. No DDL or new approval is implied. The normal stopped-service requirement and infrastructure review still apply. Other persisted formats, such as a reviewed unknown backup, can independently forbid an older backend even when its SQL schema is compatible.
+
 After an application-level rollback, the additive schema may already be committed.
 For a corrected candidate with **identical migration definitions**, prepare a new
 binding from the retained, applied plan:
