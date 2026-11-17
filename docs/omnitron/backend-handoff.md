@@ -43,6 +43,23 @@ result. A timed-out or lost observation preserves the unconfirmed receipt; use
 without another restart. See [local runtime updates](./cli.md#local-runtime-updates)
 for the recovery decision and commands.
 
+Native service installation returns before backend RPC is ready. During the
+reviewed startup observation, JSON `status` reports `DAEMON_UNAVAILABLE` and a
+structured absence (`stopped`, `stale`, `silent`, or `unknown`). The first three
+remain pending within the shared deadline; unknown transport failures and
+conflicting identities stop acceptance. Missing RPC is never treated as success
+or permission to start another owner.
+
+Recovery must also work when the backend never became ready. `xec update local-stage`
+builds and installs a sealed repair CLI without selecting it or requiring a serving
+backend. This CLI can recover an older exact receipt without activating its own runtime. On
+macOS, a narrow recovery path independently verifies an empty, idle, unclaimed
+candidate owner, its guardian, the selected artifact and native process evidence.
+It records that retiring owner before stopping its services, then uses the
+original plan's restoration. A living backend, application, worker, pending
+operation or unknown process identity refuses this path. The receipt is never
+edited manually, and the normal serving-backend recovery checks remain in place.
+
 Local update backup admission follows the durable native receipt across backend
 replacement and restoration. Schedules resume after a terminal receipt is
 persisted, without a separate release notification. Unknown backup operations
