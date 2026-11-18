@@ -105,10 +105,10 @@ not runtime requirements for applications.
 
 `pnpm check:packages` packs every public workspace and verifies that all declared
 exports, types and command entry points exist in the archive. CI runs it after
-building. Its `--install-consumer /absolute/new/directory` option also installs the
-real archives with npm, replays the consumer's generated lockfile with `npm ci`
-and audits the resulting production dependencies. Both minimal and all-package
-installations must pass.
+building. Add `--install-consumer /absolute/new/directory` to test the archives
+in three independent installations. The CLI runtime and Lumen each use ordinary
+`npm install`. The complete SDK installs from a fresh lockfile with `npm ci`.
+Each installation verifies the archives and audits its production dependencies.
 Release preparation requires that audit and the public runtime checks, including
 TypeScript extraction and a SQLite journal write/read. An unavailable audit or a
 reported vulnerability fails preparation; a clean workspace audit cannot substitute
@@ -364,18 +364,16 @@ reports publication readiness, not runtime activation readiness.
 
 Native CI retains the actual tested Linux runtimes. Xec downloads them, verifies
 their source, run, attempt, archive checksum and runtime digest, and extracts them
-with Omnitron's existing archive validator. Evidence and artifacts live under
-`.release-artifacts/`. Use an external development volume for large builds and
-set `TMPDIR` and package manager cache directories before the command if required
-by your machine.
+with Omnitron's archive validator. To use an external build volume, put the
+release checkout, temporary directory and package manager caches on that volume.
+On Unix, Xec requires `.release-artifacts` and its version directory to be real
+directories owned by the release operator with mode `0700`. Finish from that
+checkout with `origin` pointing to the project repository.
 
-Package preparation verifies exports and three ordinary npm consumers without
-workspace overrides: a minimal CLI/Netron runtime, every public package together
-and Lumen on its own, including optional dependencies. The runtime runs one
-ordinary `npm install`; the other two resolve fresh lockfiles and install once
-through `npm ci`. All profiles verify installed archive integrity and run an audit.
-The independent Lumen consumer also runs its installed-package SSR, MCP and browser checks.
-Inspect `release.json`, SHA-512 digests and `NOTES.md` under `.release-artifacts/<version>/<commit>/`.
+Package preparation exercises the CLI and Netron React together, the complete
+public SDK and Lumen on its own. Lumen's SSR, MCP and browser checks use the
+installed package and its optional dependencies. Inspect `release.json`, the
+SHA-512 digests and `NOTES.md` under `.release-artifacts/<version>/<commit>/`.
 
 Publish the sealed batch:
 
