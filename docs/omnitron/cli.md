@@ -951,6 +951,13 @@ All pipeline RPC methods require `admin`. Parameters are data, not source substi
 | `omnitron backup schedules` | Show configured schedules, their latest outcome and next run |
 | `omnitron backup unschedule <target>` | Remove a schedule |
 
+To omit one local database from a recurring `all` or `full` pass, configure a
+[scheduled database exclusion](./configuration.md#scheduled-database-exclusions)
+on the daemon that owns its schedule. `omnitron backup schedules` identifies
+databases available for manual backup only. Its JSON output includes the loaded
+`scheduledDatabaseExclusions` and each pass's `excludedDatabases`. A manual
+`omnitron backup create catalog/dev/cache` still captures the selected database.
+
 Use the explicit project and stack for resource backups. Infrastructure retained
 while application writers are stopped remains addressable. The daemon verifies
 container ownership and uses its immutable ID. The archive index records the

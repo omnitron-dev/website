@@ -212,7 +212,7 @@ audit, system information and settings. Direct links enforce the same entry rule
 | `/releases` | `ReleasesPage` | both | `OmnitronRelease.list` |
 | `/deployments` | `DeploymentsPage` | project | `OmnitronProject.getDeployProgress`, `OmnitronRelease.deployments`, `OmnitronDeploy.getHistory` |
 | `/alerts` | `AlertsPage` | global | `OmnitronAlerts` |
-| `/pipelines` | `PipelinesPage` | system | `OmnitronPipelines` |
+| `/pipelines` | `PipelinesPage` | both | `OmnitronPipelines` |
 | `/traces` | `TracesPage` | project | `OmnitronTraces` |
 | `/dashboard-builder` | `DashboardBuilderPage` | both | scoped application inventory, retained metric series and controller alerts |
 | `*` | redirect to `/` | — | — |
@@ -527,8 +527,7 @@ rule each require the corresponding permission.
 
 ### Pipelines {#pipelines}
 
-`/pipelines` — CI/CD pipeline list, definition editor, run
-history, live run view.
+Open **Pipelines** to edit definitions and **Runs** to inspect the steps of a recorded run. In the 0.4.13 source, the selected workspace filters definitions by their current targets and runs by the targets saved at admission. A definition with targets in several stacks appears in each matching workspace. A legacy receipt with only a project appears under **All stacks** for that project. From an interrupted run, use **Inspect remote receipts** to check the target or **Continue remaining steps** to resume the reviewed work.
 
 ### Traces {#traces}
 

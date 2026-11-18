@@ -47,7 +47,7 @@ diffs them against the index table below. See the
 | `kubernetes.rpc-service.ts` | `OmnitronKubernetes` | 9 | admin |
 | `log-collector.rpc-service.ts` | `OmnitronLogs` | 4 | viewer |
 | `node-manager.rpc-service.ts` | `OmnitronNodes` | 38 | viewer (read), operator (operations), admin (historical repair and managed kernel rollout) |
-| `pipeline.rpc-service.ts` | `OmnitronPipelines` | 13 | admin + live human session / trusted local CLI |
+| `pipeline.rpc-service.ts` | `OmnitronPipelines` | 14 | admin + live human session / trusted local CLI |
 | `project.rpc-service.ts` | `OmnitronProject` | 44 | Viewer reads and reviews, operator starts/stops, administrator manages registrations, machine credentials run the recipient protocol |
 | `release.rpc-service.ts` | `OmnitronRelease` | 12 | viewer (read), operator (build/attest), admin (prune) |
 | `secrets.rpc-service.ts` | `OmnitronSecrets` | 6 | admin |
@@ -349,7 +349,8 @@ Xec and shell automation, shared by Console, CLI and local MCP. The inventory be
 | `createPipeline(definition)` | Define a pipeline |
 | `updatePipeline({id, definition, expectedRevision})` | Conditionally replace the reviewed definition, preserving its ID and run history |
 | `getPipeline({id})` | Read one pipeline, its revision and conditional-update capability |
-| `listPipelines()` | List all |
+| `listPipelines()` | List all registered definitions |
+| `listWorkspace({project, stack?, limit?})` | Return the definitions and historical run summaries for the selected workspace. Definitions use their current targets and runs use the targets recorded at admission. |
 | `deletePipeline({id})` | Drop a pipeline |
 | `prepareRun({runId, id, expectedRevision, params?})` | Main only: persist a stable request without executing it |
 | `startRun({runId, expectedDigest, params?})` | Main only: claim the reviewed request once, or recover its existing receipt |

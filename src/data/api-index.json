@@ -1,5 +1,5 @@
 {
-  "revision": "4b113978b5f41a7a4702823cfa313930923439ee",
+  "revision": "7a37cf16ed460da669590b8cecc498b56ad2d7ad",
   "packages": [
     "@omnitron-dev/access",
     "@omnitron-dev/common",
@@ -16112,7 +16112,7 @@
       "name": "AggregatedHealthDto",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "apps/omnitron/src/config/types.ts#L1109",
+      "source": "apps/omnitron/src/config/types.ts#L1111",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron",
@@ -16132,7 +16132,7 @@
       "name": "AggregatedMetricsDto",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "apps/omnitron/src/config/types.ts#L1072",
+      "source": "apps/omnitron/src/config/types.ts#L1074",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron",
@@ -16384,7 +16384,7 @@
       "name": "AppDiagnosticsDto",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "apps/omnitron/src/config/types.ts#L1228",
+      "source": "apps/omnitron/src/config/types.ts#L1230",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron",
@@ -16512,7 +16512,7 @@
       "name": "AppStatus",
       "package": "@omnitron-dev/omnitron",
       "kind": "type",
-      "source": "apps/omnitron/src/config/types.ts#L977",
+      "source": "apps/omnitron/src/config/types.ts#L979",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron",
@@ -16636,7 +16636,7 @@
       "name": "AttestStored",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "apps/omnitron/src/shared/dto/services.ts#L921",
+      "source": "apps/omnitron/src/shared/dto/services.ts#L922",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/dto/services",
@@ -16720,7 +16720,7 @@
       "name": "ChildDiagnosticsDto",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "apps/omnitron/src/config/types.ts#L1178",
+      "source": "apps/omnitron/src/config/types.ts#L1180",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/config",
@@ -17056,7 +17056,7 @@
       "name": "DaemonStatusDto",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "apps/omnitron/src/config/types.ts#L1051",
+      "source": "apps/omnitron/src/config/types.ts#L1053",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron",
@@ -17900,7 +17900,7 @@
       "name": "IAlertSink",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "apps/omnitron/src/config/types.ts#L880",
+      "source": "apps/omnitron/src/config/types.ts#L882",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/config",
@@ -17980,7 +17980,7 @@
       "name": "IEcosystemConfig",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "apps/omnitron/src/config/types.ts#L894",
+      "source": "apps/omnitron/src/config/types.ts#L896",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron",
@@ -18424,7 +18424,7 @@
       "name": "IOmnitronAuditService",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "apps/omnitron/src/shared/dto/services.ts#L662",
+      "source": "apps/omnitron/src/shared/dto/services.ts#L663",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/dto/services",
@@ -18460,7 +18460,7 @@
       "name": "IOmnitronBackupsService",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "apps/omnitron/src/shared/dto/services.ts#L607",
+      "source": "apps/omnitron/src/shared/dto/services.ts#L608",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/dto/services",
@@ -18484,7 +18484,7 @@
       "name": "IOmnitronDiscoveryService",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "apps/omnitron/src/shared/dto/services.ts#L650",
+      "source": "apps/omnitron/src/shared/dto/services.ts#L651",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/dto/services",
@@ -18532,7 +18532,7 @@
       "name": "IOmnitronHealthService",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "apps/omnitron/src/shared/dto/services.ts#L642",
+      "source": "apps/omnitron/src/shared/dto/services.ts#L643",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/dto/services",
@@ -18556,7 +18556,7 @@
       "name": "IOmnitronKubernetesService",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "apps/omnitron/src/shared/dto/services.ts#L629",
+      "source": "apps/omnitron/src/shared/dto/services.ts#L630",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/dto/services",
@@ -18580,7 +18580,7 @@
       "name": "IOmnitronMetricsService",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "apps/omnitron/src/shared/dto/services.ts#L833",
+      "source": "apps/omnitron/src/shared/dto/services.ts#L834",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/dto/services",
@@ -18592,7 +18592,7 @@
       "name": "IOmnitronNodesService",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "apps/omnitron/src/shared/dto/services.ts#L693",
+      "source": "apps/omnitron/src/shared/dto/services.ts#L694",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/dto/services",
@@ -18620,7 +18620,7 @@
       "name": "IOmnitronReleaseService",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "apps/omnitron/src/shared/dto/services.ts#L928",
+      "source": "apps/omnitron/src/shared/dto/services.ts#L929",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/dto/services",
@@ -18632,7 +18632,7 @@
       "name": "IOmnitronSecretsService",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "apps/omnitron/src/shared/dto/services.ts#L669",
+      "source": "apps/omnitron/src/shared/dto/services.ts#L670",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/dto/services",
@@ -18648,7 +18648,7 @@
       "name": "IOmnitronSystemInfoService",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "apps/omnitron/src/shared/dto/services.ts#L593",
+      "source": "apps/omnitron/src/shared/dto/services.ts#L594",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/dto/services",
@@ -18660,7 +18660,7 @@
       "name": "IOmnitronTerminalService",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "apps/omnitron/src/shared/dto/services.ts#L958",
+      "source": "apps/omnitron/src/shared/dto/services.ts#L959",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/dto/services",
@@ -18672,7 +18672,7 @@
       "name": "IOmnitronTracesService",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "apps/omnitron/src/shared/dto/services.ts#L584",
+      "source": "apps/omnitron/src/shared/dto/services.ts#L585",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/dto/services",
@@ -19072,7 +19072,7 @@
       "name": "LastExitDto",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "apps/omnitron/src/config/types.ts#L1150",
+      "source": "apps/omnitron/src/config/types.ts#L1152",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/config",
@@ -19180,7 +19180,7 @@
       "name": "LogEntryDto",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "apps/omnitron/src/config/types.ts#L1136",
+      "source": "apps/omnitron/src/config/types.ts#L1138",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron",
@@ -19224,7 +19224,7 @@
       "name": "LogPathsDto",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "apps/omnitron/src/config/types.ts#L1221",
+      "source": "apps/omnitron/src/config/types.ts#L1223",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/config",
@@ -20060,7 +20060,7 @@
       "name": "Pipeline",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "apps/omnitron/src/shared/dto/pipelines.ts#L132",
+      "source": "apps/omnitron/src/shared/dto/pipelines.ts#L137",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/dto/services",
@@ -20084,7 +20084,7 @@
       "name": "PipelineDeploymentEvidence",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "apps/omnitron/src/shared/dto/pipelines.ts#L59",
+      "source": "apps/omnitron/src/shared/dto/pipelines.ts#L64",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/dto/services",
@@ -20096,7 +20096,7 @@
       "name": "PipelineDeploymentTarget",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "apps/omnitron/src/shared/dto/pipelines.ts#L51",
+      "source": "apps/omnitron/src/shared/dto/pipelines.ts#L56",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/dto/services",
@@ -20108,7 +20108,7 @@
       "name": "PipelineRecoveryReview",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "apps/omnitron/src/shared/dto/pipelines.ts#L43",
+      "source": "apps/omnitron/src/shared/dto/pipelines.ts#L48",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/dto/services",
@@ -20120,7 +20120,7 @@
       "name": "PipelineReleaseExecution",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "apps/omnitron/src/shared/dto/pipelines.ts#L110",
+      "source": "apps/omnitron/src/shared/dto/pipelines.ts#L115",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/dto/services",
@@ -20132,7 +20132,7 @@
       "name": "PipelineReleaseTarget",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "apps/omnitron/src/shared/dto/pipelines.ts#L82",
+      "source": "apps/omnitron/src/shared/dto/pipelines.ts#L87",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/dto/services",
@@ -20144,7 +20144,7 @@
       "name": "PipelineRun",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "apps/omnitron/src/shared/dto/pipelines.ts#L166",
+      "source": "apps/omnitron/src/shared/dto/pipelines.ts#L171",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/dto/services",
@@ -20156,7 +20156,7 @@
       "name": "PipelineRunReview",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "apps/omnitron/src/shared/dto/pipelines.ts#L19",
+      "source": "apps/omnitron/src/shared/dto/pipelines.ts#L24",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/dto/services",
@@ -20168,7 +20168,7 @@
       "name": "PipelineRunStepResult",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "apps/omnitron/src/shared/dto/pipelines.ts#L146",
+      "source": "apps/omnitron/src/shared/dto/pipelines.ts#L151",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/dto/services",
@@ -20180,7 +20180,7 @@
       "name": "PipelineRunSummary",
       "package": "@omnitron-dev/omnitron",
       "kind": "type",
-      "source": "apps/omnitron/src/shared/dto/pipelines.ts#L182",
+      "source": "apps/omnitron/src/shared/dto/pipelines.ts#L187",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/dto/services",
@@ -20192,7 +20192,19 @@
       "name": "PipelineStep",
       "package": "@omnitron-dev/omnitron",
       "kind": "type",
-      "source": "apps/omnitron/src/shared/dto/pipelines.ts#L91",
+      "source": "apps/omnitron/src/shared/dto/pipelines.ts#L96",
+      "imports": [
+        {
+          "path": "@omnitron-dev/omnitron/dto/services",
+          "guide": "/docs/omnitron/services-reference"
+        }
+      ]
+    },
+    {
+      "name": "PipelineWorkspace",
+      "package": "@omnitron-dev/omnitron",
+      "kind": "interface",
+      "source": "apps/omnitron/src/shared/dto/pipelines.ts#L18",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/dto/services",
@@ -20252,7 +20264,7 @@
       "name": "PoolDiagnosticsDto",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "apps/omnitron/src/config/types.ts#L1202",
+      "source": "apps/omnitron/src/config/types.ts#L1204",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/config",
@@ -20336,7 +20348,7 @@
       "name": "PreparePipelineRun",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "apps/omnitron/src/shared/dto/pipelines.ts#L28",
+      "source": "apps/omnitron/src/shared/dto/pipelines.ts#L33",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/dto/services",
@@ -20348,7 +20360,7 @@
       "name": "ProcessInfoDto",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "apps/omnitron/src/config/types.ts#L995",
+      "source": "apps/omnitron/src/config/types.ts#L997",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron",
@@ -20752,7 +20764,7 @@
       "name": "ReleaseDeploymentDto",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "apps/omnitron/src/shared/dto/services.ts#L874",
+      "source": "apps/omnitron/src/shared/dto/services.ts#L875",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/dto/services",
@@ -20824,7 +20836,7 @@
       "name": "ReleasePreflightDto",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "apps/omnitron/src/shared/dto/services.ts#L854",
+      "source": "apps/omnitron/src/shared/dto/services.ts#L855",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/dto/services",
@@ -20836,7 +20848,7 @@
       "name": "ReleasePruneAnswer",
       "package": "@omnitron-dev/omnitron",
       "kind": "type",
-      "source": "apps/omnitron/src/shared/dto/services.ts#L900",
+      "source": "apps/omnitron/src/shared/dto/services.ts#L901",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/dto/services",
@@ -21032,7 +21044,7 @@
       "name": "RuntimeReleaseEvidence",
       "package": "@omnitron-dev/omnitron",
       "kind": "type",
-      "source": "apps/omnitron/src/config/types.ts#L980",
+      "source": "apps/omnitron/src/config/types.ts#L982",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/config",
@@ -21512,7 +21524,7 @@
       "name": "StartPipelineRun",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "apps/omnitron/src/shared/dto/pipelines.ts#L36",
+      "source": "apps/omnitron/src/shared/dto/pipelines.ts#L41",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/dto/services",
@@ -21584,7 +21596,7 @@
       "name": "SubProcessInfoDto",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "apps/omnitron/src/config/types.ts#L1017",
+      "source": "apps/omnitron/src/config/types.ts#L1019",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron",
@@ -26812,7 +26824,7 @@
       "name": "DashboardBlock",
       "package": "@omnitron-dev/prism",
       "kind": "function",
-      "source": "packages/prism/src/blocks/dashboard-block/dashboard-block.tsx#L343",
+      "source": "packages/prism/src/blocks/dashboard-block/dashboard-block.tsx#L383",
       "imports": [
         {
           "path": "@omnitron-dev/prism/blocks",
@@ -26836,7 +26848,7 @@
       "name": "DashboardBlockContent",
       "package": "@omnitron-dev/prism",
       "kind": "function",
-      "source": "packages/prism/src/blocks/dashboard-block/dashboard-block.tsx#L187",
+      "source": "packages/prism/src/blocks/dashboard-block/dashboard-block.tsx#L227",
       "imports": [
         {
           "path": "@omnitron-dev/prism/blocks",
@@ -26860,7 +26872,7 @@
       "name": "DashboardBlockContextValue",
       "package": "@omnitron-dev/prism",
       "kind": "interface",
-      "source": "packages/prism/src/blocks/dashboard-block/types.ts#L180",
+      "source": "packages/prism/src/blocks/dashboard-block/types.ts#L181",
       "imports": [
         {
           "path": "@omnitron-dev/prism/blocks",
@@ -26872,7 +26884,7 @@
       "name": "DashboardBlockFooter",
       "package": "@omnitron-dev/prism",
       "kind": "function",
-      "source": "packages/prism/src/blocks/dashboard-block/dashboard-block.tsx#L212",
+      "source": "packages/prism/src/blocks/dashboard-block/dashboard-block.tsx#L252",
       "imports": [
         {
           "path": "@omnitron-dev/prism/blocks",
@@ -26896,7 +26908,7 @@
       "name": "DashboardBlockHeader",
       "package": "@omnitron-dev/prism",
       "kind": "function",
-      "source": "packages/prism/src/blocks/dashboard-block/dashboard-block.tsx#L95",
+      "source": "packages/prism/src/blocks/dashboard-block/dashboard-block.tsx#L96",
       "imports": [
         {
           "path": "@omnitron-dev/prism/blocks",
@@ -26932,7 +26944,7 @@
       "name": "DashboardBlockProps",
       "package": "@omnitron-dev/prism",
       "kind": "interface",
-      "source": "packages/prism/src/blocks/dashboard-block/types.ts#L117",
+      "source": "packages/prism/src/blocks/dashboard-block/types.ts#L118",
       "imports": [
         {
           "path": "@omnitron-dev/prism/blocks",
@@ -27488,7 +27500,7 @@
       "name": "DEFAULT_EDITOR_LABELS",
       "package": "@omnitron-dev/prism",
       "kind": "value",
-      "source": "packages/prism/src/components/editor/types.ts#L164",
+      "source": "packages/prism/src/components/editor/types.ts#L162",
       "imports": [
         {
           "path": "@omnitron-dev/prism",
@@ -27984,7 +27996,7 @@
       "name": "DocSidebar",
       "package": "@omnitron-dev/prism",
       "kind": "function",
-      "source": "packages/prism/src/components/doc-layout/doc-sidebar.tsx#L46",
+      "source": "packages/prism/src/components/doc-layout/doc-sidebar.tsx#L80",
       "imports": [
         {
           "path": "@omnitron-dev/prism",
@@ -28252,7 +28264,7 @@
       "name": "EditorLabels",
       "package": "@omnitron-dev/prism",
       "kind": "type",
-      "source": "packages/prism/src/components/editor/types.ts#L126",
+      "source": "packages/prism/src/components/editor/types.ts#L124",
       "imports": [
         {
           "path": "@omnitron-dev/prism",
@@ -28364,7 +28376,7 @@
       "name": "EditorToolbarItemProps",
       "package": "@omnitron-dev/prism",
       "kind": "type",
-      "source": "packages/prism/src/components/editor/types.ts#L211",
+      "source": "packages/prism/src/components/editor/types.ts#L209",
       "imports": [
         {
           "path": "@omnitron-dev/prism",
@@ -28384,7 +28396,7 @@
       "name": "EditorToolbarProps",
       "package": "@omnitron-dev/prism",
       "kind": "type",
-      "source": "packages/prism/src/components/editor/types.ts#L203",
+      "source": "packages/prism/src/components/editor/types.ts#L201",
       "imports": [
         {
           "path": "@omnitron-dev/prism",
@@ -31412,7 +31424,7 @@
       "name": "HeaderSection",
       "package": "@omnitron-dev/prism",
       "kind": "function",
-      "source": "packages/prism/src/layouts/core/header-section.tsx#L220",
+      "source": "packages/prism/src/layouts/core/header-section.tsx#L229",
       "imports": [
         {
           "path": "@omnitron-dev/prism",
@@ -31428,7 +31440,7 @@
       "name": "HeaderSectionProps",
       "package": "@omnitron-dev/prism",
       "kind": "interface",
-      "source": "packages/prism/src/layouts/core/header-section.tsx#L162",
+      "source": "packages/prism/src/layouts/core/header-section.tsx#L166",
       "imports": [
         {
           "path": "@omnitron-dev/prism",
@@ -31460,7 +31472,7 @@
       "name": "HeaderToolbar",
       "package": "@omnitron-dev/prism",
       "kind": "function",
-      "source": "packages/prism/src/layouts/core/header-section.tsx#L309",
+      "source": "packages/prism/src/layouts/core/header-section.tsx#L327",
       "imports": [
         {
           "path": "@omnitron-dev/prism",
@@ -31476,7 +31488,7 @@
       "name": "HeaderToolbarProps",
       "package": "@omnitron-dev/prism",
       "kind": "interface",
-      "source": "packages/prism/src/layouts/core/header-section.tsx#L298",
+      "source": "packages/prism/src/layouts/core/header-section.tsx#L316",
       "imports": [
         {
           "path": "@omnitron-dev/prism",
@@ -39736,7 +39748,7 @@
       "name": "SponsoredSlot",
       "package": "@omnitron-dev/prism",
       "kind": "function",
-      "source": "packages/prism/src/components/sponsored-slot/sponsored-slot.tsx#L27",
+      "source": "packages/prism/src/components/sponsored-slot/sponsored-slot.tsx#L28",
       "imports": [
         {
           "path": "@omnitron-dev/prism",
@@ -40736,7 +40748,7 @@
       "name": "Tabs",
       "package": "@omnitron-dev/prism",
       "kind": "value",
-      "source": "packages/prism/src/ui/index.ts#L57",
+      "source": "packages/prism/src/ui/index.ts#L61",
       "imports": [
         {
           "path": "@omnitron-dev/prism/ui",
@@ -40872,7 +40884,7 @@
       "name": "TextField",
       "package": "@omnitron-dev/prism",
       "kind": "value",
-      "source": "packages/prism/src/ui/index.ts#L58",
+      "source": "packages/prism/src/ui/index.ts#L57",
       "imports": [
         {
           "path": "@omnitron-dev/prism/ui",
@@ -41340,7 +41352,7 @@
       "name": "Tooltip",
       "package": "@omnitron-dev/prism",
       "kind": "value",
-      "source": "packages/prism/src/ui/index.ts#L59",
+      "source": "packages/prism/src/ui/index.ts#L58",
       "imports": [
         {
           "path": "@omnitron-dev/prism/ui",
@@ -41552,7 +41564,7 @@
       "name": "Typography",
       "package": "@omnitron-dev/prism",
       "kind": "value",
-      "source": "packages/prism/src/ui/index.ts#L60",
+      "source": "packages/prism/src/ui/index.ts#L59",
       "imports": [
         {
           "path": "@omnitron-dev/prism/ui",
@@ -42552,7 +42564,7 @@
       "name": "useDashboardBlockContext",
       "package": "@omnitron-dev/prism",
       "kind": "function",
-      "source": "packages/prism/src/blocks/dashboard-block/dashboard-block.tsx#L49",
+      "source": "packages/prism/src/blocks/dashboard-block/dashboard-block.tsx#L50",
       "imports": [
         {
           "path": "@omnitron-dev/prism/blocks",

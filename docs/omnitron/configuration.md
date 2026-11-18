@@ -681,6 +681,33 @@ it does not reserve disk space or prove the archive can be restored. An expired
 restore does not undo SQL already applied; see the
 [backup and restore boundaries](./cli.md#backups).
 
+#### Exclude local databases from scheduled dumps {#scheduled-database-exclusions}
+
+The 0.4.13 source adds `backups.scheduledDatabaseExclusions` to the daemon's
+`config.json`. Set it to a list of exact
+`project/stack/database` targets. An entry naming `project/stack` covers every
+PostgreSQL database in that stack on this host. For example, a developer can
+exclude a reproducible cache and a scratch environment while the existing hourly
+schedule continues to protect the other databases.
+
+```json
+{
+  "backups": {
+    "scheduledDatabaseExclusions": ["catalog/dev/cache", "catalog/scratch"]
+  }
+}
+```
+
+An omitted or empty list includes every eligible database. The daemon applies
+the policy at startup to scheduled `all`, `full` and single-database passes.
+Control-plane, daemon-state and other resource backups keep their normal scope.
+After a reviewed restart or backend replacement, `omnitron backup schedules --json`
+shows the loaded exclusions, the reachable databases they cover, and exclusions
+recorded by each pass. Manual backup and restore still use the recorded database
+origin. Scheduled rotation keeps archives belonging to an excluded database. It
+also preserves older archives when their recorded origin could match an exclusion.
+Other databases keep their normal rotation.
+
 ## Runtime DTOs (returned by RPC) {#runtime-dtos-returned-by-rpc}
 
 These shapes appear in `omnitron status` JSON output and in

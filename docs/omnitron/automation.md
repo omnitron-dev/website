@@ -7,7 +7,7 @@ description: Author, review, execute and inspect bounded Xec pipelines through C
 
 # Xec automation
 
-Use **Pipelines** in Console to create an automation, review its source and targets, run it with parameters, and inspect each step. Definitions belong to the daemon; the section is available in the system workspace without selecting a project. A workspace selection does not restrict execution targets or provide an authorization scope. The CLI calls the same `OmnitronPipelines` service. Omnitron owns authority, persistent run state and presentation; `@xec-sh/ops` owns the execution graph, retries and cancellation; `@xec-sh/core` owns local and SSH process execution.
+Use **Pipelines** in Console to create an automation, review its source and targets, run it with parameters, and inspect each step. Definitions belong to the daemon. In the 0.4.13 source, selecting a project or stack shows definitions whose release or deployment steps target it. Runs use the targets captured at admission. The Omnitron workspace includes shell-only definitions and older runs with no recorded targets. The backend checks operator authorization on every operation. The CLI calls the same `OmnitronPipelines` service. Omnitron owns authority, persistent run state and presentation; `@xec-sh/ops` owns the execution graph, retries and cancellation; `@xec-sh/core` owns local and SSH process execution.
 
 This executor is for trusted administrators. A separate child process prevents a script from blocking the daemon's JavaScript event loop, but does **not** sandbox its filesystem, network or operating-system privileges. Do not give an untrusted agent the local daemon socket or this executor. See the [agent integration design](./agents.md).
 
