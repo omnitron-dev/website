@@ -134,26 +134,26 @@ are exported for inline checks.
 
 ## `<DashboardBlock>` — collapsible content panel {#dashboardblock--collapsible-content-panel}
 
-`<DashboardBlock>` is a flexible **panel/card** primitive — a
-titled, optionally-collapsible container with header, content,
-and footer slots, plus built-in loading and error states. It is
-the building block you compose dashboards *from* (it does not
-itself render stat tiles or charts — drop those in as children):
+Use `DashboardBlock` for a titled section that loads, fails, or folds independently of its neighbours. Supply the content and put secondary commands in `actions`.
 
 ```tsx
+import Button from '@mui/material/Button';
 import { DashboardBlock } from '@omnitron-dev/prism/blocks';
 
-function RequestsPanel({ loading, series }) {
+function RequestsPanel({ count, loading, onRefresh }: {
+  count: number;
+  loading: boolean;
+  onRefresh: () => void;
+}) {
   return (
     <DashboardBlock
-      title="Requests / min"
-      subtitle="last 24h"
-      icon={<ActivityIcon />}
-      actions={<IconButton><RefreshIcon /></IconButton>}
+      title="Requests"
+      subtitle="Last 24 hours"
+      actions={<Button onClick={onRefresh}>Refresh</Button>}
       loading={loading}
       collapsible
     >
-      <Chart series={series} type="area" />
+      {count.toLocaleString()} requests
     </DashboardBlock>
   );
 }
@@ -177,7 +177,7 @@ function RequestsPanel({ loading, series }) {
 | `slotProps.header.headingComponent` | `h1` through `h6` | Choose the semantic heading level independently of its visual size |
 | `collapsed` / `onCollapseChange` | `boolean` / callback | Controlled state and requested changes |
 
-The development version after 0.4.12 adds `mountOnEnter` and `slotProps.header.headingComponent`.
+On `main` after 0.4.12, the title and chevron form one button. Click either, tap the heading row, or focus it with Tab and press Enter or Space. Tab then moves to secondary actions such as **Refresh**, which keep the panel in its current state. Screen readers announce the title and expanded state. The same development version adds `mountOnEnter` and `slotProps.header.headingComponent`.
 
 `DashboardBlockHeader`, `DashboardBlockContent`, and
 `DashboardBlockFooter` are exported for fully custom composition,

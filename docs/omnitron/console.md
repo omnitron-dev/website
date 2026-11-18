@@ -234,7 +234,7 @@ appropriate access, a local name opens that application and a remote name opens
 the stack that reported it.
 
 Expand **Resource distribution** to compare the six largest CPU or memory readings
-in the selection. The scale follows the largest reading. CPU can exceed 100% when
+in the selection. In the development Console after 0.4.12, the title and chevron share one toggle. Keyboard users can focus it with Tab and toggle with Enter or Space. The scale follows the largest reading. CPU can exceed 100% when
 several cores are in use. A failed refresh identifies the source and retains the
 last available readings. Before the first successful inventory read, Console shows
 the error and offers **Retry**. Periodic polling pauses in a hidden tab.
