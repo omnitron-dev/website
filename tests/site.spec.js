@@ -450,7 +450,7 @@ test('shared sidebar preserves current links and keyboard-operated category stat
     const sidebar = page.getByRole('navigation', { name: 'Documentation sections', exact: true });
     const active = sidebar.locator('a[aria-current=page]');
     await expect(active).toHaveCount(1);
-    await active.scrollIntoViewIfNeeded();
+    await expect(active).toBeInViewport({ ratio: 1 });
     await expect(active).toHaveClass(/MuiListItemButton-root/);
     await expect(active).toHaveAttribute('href', route);
     await active.focus(); await expect(active).toBeFocused();
@@ -463,6 +463,41 @@ test('shared sidebar preserves current links and keyboard-operated category stat
     expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(1440);
   }
   await page.screenshot({ path: testInfo.outputPath('shared-sidebar-1440.png') });
+});
+
+test('desktop documentation links retain the reader’s sidebar position across reload and history', async ({ page }, testInfo) => {
+  await page.setViewportSize({ width: 1280, height: 720 });
+  const rail = page.locator('.lumen-doc-sidebar');
+  const current = rail.locator('a[aria-current="page"]');
+  const position = () => rail.evaluate(owner => owner.scrollTop);
+  const assertPage = async (route, offset) => {
+    await expect(current).toHaveAttribute('href', route);
+    await expect(current).toBeInViewport({ ratio: 1 });
+    if (offset !== undefined) await expect.poll(position).toBeCloseTo(offset, 0);
+    expect(await page.evaluate(() => window.scrollY)).toBe(0);
+  };
+  const kb = '/docs/utilities/kb', msgpack = '/docs/utilities/msgpack';
+  await page.goto(kb);
+  await assertPage(kb);
+  await rail.evaluate(owner => {
+    const active = owner.querySelector('a[aria-current="page"]');
+    owner.scrollTop += active.getBoundingClientRect().top - owner.getBoundingClientRect().top - 160;
+  });
+  const first = await position();
+  const neighbor = rail.locator(`a[href="${msgpack}"]`);
+  await expect(neighbor).toBeInViewport({ ratio: 1 });
+  await neighbor.click();
+  await assertPage(msgpack, first);
+  await rail.evaluate(owner => { owner.scrollTop += 32; });
+  const second = await position();
+  await page.reload();
+  await assertPage(msgpack, second);
+  await page.goBack();
+  await assertPage(kb, first);
+  await page.screenshot({ path: testInfo.outputPath('kb-after-back.png') });
+  await testInfo.attach('sidebar-positions', { contentType: 'application/json', body: JSON.stringify({ kb: first, msgpack: second }) });
+  await page.goForward();
+  await assertPage(msgpack, second);
 });
 
 test('homepage contract uses shared dual-theme syntax highlighting without page overflow', async ({ page }, testInfo) => {

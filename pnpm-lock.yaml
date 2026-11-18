@@ -182,6 +182,7 @@ pnpmfileChecksum: sha256-GPiH+9SYWa34MY/8416FnDD2zCJ/JoF0kXiN3gnRGWM=
 
 patchedDependencies:
   '@omnitron-dev/kb@0.4.12': df935feeca7a4140255ed9c3be983e8360f55f4d9c960efdf949706579ca3997
+  '@omnitron-dev/prism@0.4.12': ebdbfea1b0761d9aaaca8c0eb3a32d29c287faaab54a3fda5626eace23d30608
   picomatch@4.0.7: e50e41c2439b51584c9bd7ed875ec1fca8e3bd9af25b04db02611c45d252a878
 
 importers:
@@ -199,7 +200,7 @@ importers:
         version: 0.4.12(@floating-ui/dom@1.8.0)(@surrealdb/node-native@4.0.1)(@tiptap/extension-code-block@3.34.0(@tiptap/core@3.34.0(@tiptap/pm@3.34.0))(@tiptap/pm@3.34.0))(@tiptap/extension-list@3.34.0(@tiptap/core@3.34.0(@tiptap/pm@3.34.0))(@tiptap/pm@3.34.0))(@tiptap/extensions@3.34.0(@tiptap/core@3.34.0(@tiptap/pm@3.34.0))(@tiptap/pm@3.34.0))(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(apexcharts@8.8.2)(highlight.js@11.11.2)(react-apexcharts@2.2.1(apexcharts@8.8.2)(react@19.3.1))(react-dom@19.3.1(react@19.3.1))(react@19.3.1)(surrealdb@2.2.2(@typescript/typescript6@6.0.2)(tslib@2.9.1))(use-sync-external-store@1.7.0(react@19.3.1))
       '@omnitron-dev/prism':
         specifier: 0.4.12
-        version: 0.4.12(@floating-ui/dom@1.8.0)(@tiptap/extension-code-block@3.34.0(@tiptap/core@3.34.0(@tiptap/pm@3.34.0))(@tiptap/pm@3.34.0))(@tiptap/extension-list@3.34.0(@tiptap/core@3.34.0(@tiptap/pm@3.34.0))(@tiptap/pm@3.34.0))(@tiptap/extensions@3.34.0(@tiptap/core@3.34.0(@tiptap/pm@3.34.0))(@tiptap/pm@3.34.0))(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(apexcharts@8.8.2)(highlight.js@11.11.2)(react-apexcharts@2.2.1(apexcharts@8.8.2)(react@19.3.1))(react-dom@19.3.1(react@19.3.1))(react@19.3.1)(use-sync-external-store@1.7.0(react@19.3.1))
+        version: 0.4.12(patch_hash=ebdbfea1b0761d9aaaca8c0eb3a32d29c287faaab54a3fda5626eace23d30608)(@floating-ui/dom@1.8.0)(@tiptap/extension-code-block@3.34.0(@tiptap/core@3.34.0(@tiptap/pm@3.34.0))(@tiptap/pm@3.34.0))(@tiptap/extension-list@3.34.0(@tiptap/core@3.34.0(@tiptap/pm@3.34.0))(@tiptap/pm@3.34.0))(@tiptap/extensions@3.34.0(@tiptap/core@3.34.0(@tiptap/pm@3.34.0))(@tiptap/pm@3.34.0))(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(apexcharts@8.8.2)(highlight.js@11.11.2)(react-apexcharts@2.2.1(apexcharts@8.8.2)(react@19.3.1))(react-dom@19.3.1(react@19.3.1))(react@19.3.1)(use-sync-external-store@1.7.0(react@19.3.1))
       apexcharts:
         specifier: 8.8.2
         version: 8.8.2
@@ -3767,7 +3768,7 @@ snapshots:
       '@mui/material': 9.5.0(@emotion/react@11.14.0(@types/react@19.3.0)(react@19.3.1))(@emotion/styled@11.14.1(@emotion/react@11.14.0(@types/react@19.3.0)(react@19.3.1))(@types/react@19.3.0)(react@19.3.1))(@types/react@19.3.0)(react-dom@19.3.1(react@19.3.1))(react@19.3.1)
       '@omnitron-dev/kb': 0.4.12(patch_hash=df935feeca7a4140255ed9c3be983e8360f55f4d9c960efdf949706579ca3997)(@surrealdb/node-native@4.0.1)(surrealdb@2.2.2(@typescript/typescript6@6.0.2)(tslib@2.9.1))
       '@omnitron-dev/lumen-ast': 0.4.12
-      '@omnitron-dev/prism': 0.4.12(@floating-ui/dom@1.8.0)(@tiptap/extension-code-block@3.34.0(@tiptap/core@3.34.0(@tiptap/pm@3.34.0))(@tiptap/pm@3.34.0))(@tiptap/extension-list@3.34.0(@tiptap/core@3.34.0(@tiptap/pm@3.34.0))(@tiptap/pm@3.34.0))(@tiptap/extensions@3.34.0(@tiptap/core@3.34.0(@tiptap/pm@3.34.0))(@tiptap/pm@3.34.0))(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(apexcharts@8.8.2)(highlight.js@11.11.2)(react-apexcharts@2.2.1(apexcharts@8.8.2)(react@19.3.1))(react-dom@19.3.1(react@19.3.1))(react@19.3.1)(use-sync-external-store@1.7.0(react@19.3.1))
+      '@omnitron-dev/prism': 0.4.12(patch_hash=ebdbfea1b0761d9aaaca8c0eb3a32d29c287faaab54a3fda5626eace23d30608)(@floating-ui/dom@1.8.0)(@tiptap/extension-code-block@3.34.0(@tiptap/core@3.34.0(@tiptap/pm@3.34.0))(@tiptap/pm@3.34.0))(@tiptap/extension-list@3.34.0(@tiptap/core@3.34.0(@tiptap/pm@3.34.0))(@tiptap/pm@3.34.0))(@tiptap/extensions@3.34.0(@tiptap/core@3.34.0(@tiptap/pm@3.34.0))(@tiptap/pm@3.34.0))(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(apexcharts@8.8.2)(highlight.js@11.11.2)(react-apexcharts@2.2.1(apexcharts@8.8.2)(react@19.3.1))(react-dom@19.3.1(react@19.3.1))(react@19.3.1)(use-sync-external-store@1.7.0(react@19.3.1))
       clsx: 2.1.1
       katex: 0.19.1
       react: 19.3.1
@@ -3832,7 +3833,7 @@ snapshots:
       '@omnitron-dev/common': 0.4.12
       '@omnitron-dev/lumen-ast': 0.4.12
       '@omnitron-dev/lumen-ui': 0.4.12(@floating-ui/dom@1.8.0)(@surrealdb/node-native@4.0.1)(@tiptap/extension-code-block@3.34.0(@tiptap/core@3.34.0(@tiptap/pm@3.34.0))(@tiptap/pm@3.34.0))(@tiptap/extension-list@3.34.0(@tiptap/core@3.34.0(@tiptap/pm@3.34.0))(@tiptap/pm@3.34.0))(@tiptap/extensions@3.34.0(@tiptap/core@3.34.0(@tiptap/pm@3.34.0))(@tiptap/pm@3.34.0))(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(apexcharts@8.8.2)(highlight.js@11.11.2)(react-apexcharts@2.2.1(apexcharts@8.8.2)(react@19.3.1))(react-dom@19.3.1(react@19.3.1))(react@19.3.1)(surrealdb@2.2.2(@typescript/typescript6@6.0.2)(tslib@2.9.1))(use-sync-external-store@1.7.0(react@19.3.1))
-      '@omnitron-dev/prism': 0.4.12(@floating-ui/dom@1.8.0)(@tiptap/extension-code-block@3.34.0(@tiptap/core@3.34.0(@tiptap/pm@3.34.0))(@tiptap/pm@3.34.0))(@tiptap/extension-list@3.34.0(@tiptap/core@3.34.0(@tiptap/pm@3.34.0))(@tiptap/pm@3.34.0))(@tiptap/extensions@3.34.0(@tiptap/core@3.34.0(@tiptap/pm@3.34.0))(@tiptap/pm@3.34.0))(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(apexcharts@8.8.2)(highlight.js@11.11.2)(react-apexcharts@2.2.1(apexcharts@8.8.2)(react@19.3.1))(react-dom@19.3.1(react@19.3.1))(react@19.3.1)(use-sync-external-store@1.7.0(react@19.3.1))
+      '@omnitron-dev/prism': 0.4.12(patch_hash=ebdbfea1b0761d9aaaca8c0eb3a32d29c287faaab54a3fda5626eace23d30608)(@floating-ui/dom@1.8.0)(@tiptap/extension-code-block@3.34.0(@tiptap/core@3.34.0(@tiptap/pm@3.34.0))(@tiptap/pm@3.34.0))(@tiptap/extension-list@3.34.0(@tiptap/core@3.34.0(@tiptap/pm@3.34.0))(@tiptap/pm@3.34.0))(@tiptap/extensions@3.34.0(@tiptap/core@3.34.0(@tiptap/pm@3.34.0))(@tiptap/pm@3.34.0))(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(apexcharts@8.8.2)(highlight.js@11.11.2)(react-apexcharts@2.2.1(apexcharts@8.8.2)(react@19.3.1))(react-dom@19.3.1(react@19.3.1))(react@19.3.1)(use-sync-external-store@1.7.0(react@19.3.1))
       commander: 15.1.0
       hast-util-to-jsx-runtime: 2.3.7
       import-meta-resolve: 4.2.0
@@ -3935,7 +3936,7 @@ snapshots:
       react: 19.3.1
       react-dom: 19.3.1(react@19.3.1)
 
-  '@omnitron-dev/prism@0.4.12(@floating-ui/dom@1.8.0)(@tiptap/extension-code-block@3.34.0(@tiptap/core@3.34.0(@tiptap/pm@3.34.0))(@tiptap/pm@3.34.0))(@tiptap/extension-list@3.34.0(@tiptap/core@3.34.0(@tiptap/pm@3.34.0))(@tiptap/pm@3.34.0))(@tiptap/extensions@3.34.0(@tiptap/core@3.34.0(@tiptap/pm@3.34.0))(@tiptap/pm@3.34.0))(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(apexcharts@8.8.2)(highlight.js@11.11.2)(react-apexcharts@2.2.1(apexcharts@8.8.2)(react@19.3.1))(react-dom@19.3.1(react@19.3.1))(react@19.3.1)(use-sync-external-store@1.7.0(react@19.3.1))':
+  '@omnitron-dev/prism@0.4.12(patch_hash=ebdbfea1b0761d9aaaca8c0eb3a32d29c287faaab54a3fda5626eace23d30608)(@floating-ui/dom@1.8.0)(@tiptap/extension-code-block@3.34.0(@tiptap/core@3.34.0(@tiptap/pm@3.34.0))(@tiptap/pm@3.34.0))(@tiptap/extension-list@3.34.0(@tiptap/core@3.34.0(@tiptap/pm@3.34.0))(@tiptap/pm@3.34.0))(@tiptap/extensions@3.34.0(@tiptap/core@3.34.0(@tiptap/pm@3.34.0))(@tiptap/pm@3.34.0))(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(apexcharts@8.8.2)(highlight.js@11.11.2)(react-apexcharts@2.2.1(apexcharts@8.8.2)(react@19.3.1))(react-dom@19.3.1(react@19.3.1))(react@19.3.1)(use-sync-external-store@1.7.0(react@19.3.1))':
     dependencies:
       '@emotion/cache': 11.14.0
       '@emotion/react': 11.14.0(@types/react@19.3.0)(react@19.3.1)

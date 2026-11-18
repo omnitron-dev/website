@@ -44,3 +44,4 @@ sideEffectsCache:
 patchedDependencies:
   "picomatch@4.0.7": patches/picomatch@4.0.7.patch
   "@omnitron-dev/kb@0.4.12": patches/@omnitron-dev__kb@0.4.12.patch
+  "@omnitron-dev/prism@0.4.12": patches/@omnitron-dev__prism@0.4.12.patch
