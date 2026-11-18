@@ -196,8 +196,8 @@ This plan supplies delivery order and acceptance gates, not a competing architec
 
 ## Current implementation evidence {#current-implementation-evidence}
 
-CI compares release artifacts from two independent checkouts. Omnitron 0.4.12
-uses the published Xec 0.13.0 contracts for durable execution-resource inspection
+CI compares release artifacts from two independent checkouts. Omnitron 0.4.13
+uses the published Xec 0.13.2 contracts for durable execution-resource inspection
 and termination, retained release production, and the separate `@xec-sh/ssh` API.
 The committed lockfile records resolved versions and integrity. Release
 preparation checks both declarations and installed versions before changing

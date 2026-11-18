@@ -57,9 +57,9 @@ omnitron pipeline save inspect.json --id <pipeline-id> --expected-revision <revi
 
 The update compares that revision inside a database transaction. If another editor changed the definition, the save fails without replacing their work. Console sends the revision loaded when its editor opened and keeps your draft on a conflict. Reopen the current definition and reconcile both edits before saving again. Prefer IDs when names are ambiguous.
 
-## Durable requests in main {#durable-requests}
+## Durable requests {#durable-requests}
 
-**Available in the development `main` branch; not included in npm 0.4.12.**
+**Available from Omnitron 0.4.13.**
 Update the controller and its clients together before using these commands.
 The new clients require `prepareRun` and `startRun`; they do not silently fall
 back to an older daemon's non-idempotent execution endpoint.

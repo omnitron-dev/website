@@ -6,8 +6,8 @@ import { createRequire } from 'node:module';
 import { basename, dirname, join, relative, resolve, sep } from 'node:path';
 
 const advisoryId = 'GHSA-fc5q-39xc-vjpf';
-const paths = ['.>@omnitron-dev/lumen>vite', '.>vite'].flatMap(vite =>
-  ['>picomatch', '>tinyglobby>fdir>picomatch', '>tinyglobby>picomatch'].map(suffix => vite + suffix)).sort();
+const paths = ['>picomatch', '>tinyglobby>fdir>picomatch', '>tinyglobby>picomatch']
+  .map(suffix => '.>vite' + suffix).sort();
 const permittedAdvisory = {
   id: 1247710, title: 'picomatch vulnerable to ReDoS through single-branch repeated extglobs',
   module_name: 'picomatch', github_advisory_id: advisoryId, url: 'https://github.com/advisories/' + advisoryId,
@@ -32,20 +32,30 @@ const files = {
 };
 
 export function checkReport(report, exitCode) {
-  assert.equal(exitCode, 1, 'pnpm audit must report the reviewed finding');
   assert.deepEqual(Object.keys(report).sort(), ['advisories', 'metadata']);
-  assert.deepEqual(Object.keys(report.advisories), [String(permittedAdvisory.id)]);
-  const actual = report.advisories[permittedAdvisory.id];
-  const findings = actual.findings.map(finding => ({ ...finding, paths: [...finding.paths].sort() }));
-  assert.deepEqual({ ...actual, findings }, permittedAdvisory);
-  assert.deepEqual(report.metadata.vulnerabilities, counts);
-  const total = ['dependencies', 'devDependencies', 'optionalDependencies'].reduce((sum, key) => {
+  if (Object.keys(report.advisories).length === 0) {
+    assert.equal(exitCode, 0, 'An empty audit must have a successful exit status');
+    assert.deepEqual(report.advisories, {});
+    assert.deepEqual(report.metadata.vulnerabilities,
+      { info: 0, low: 0, moderate: 0, high: 0, critical: 0 });
+  } else {
+    assert.equal(exitCode, 1, 'A finding must have the audit failure exit status');
+    assert.deepEqual(Object.keys(report.advisories), [String(permittedAdvisory.id)]);
+    const actual = report.advisories[permittedAdvisory.id];
+    const findings = actual.findings.map(finding => ({ ...finding, paths: [...finding.paths].sort() }));
+    assert.deepEqual({ ...actual, findings }, permittedAdvisory);
+    assert.deepEqual(report.metadata.vulnerabilities, counts);
+  }
+  const categories = ['dependencies', 'devDependencies', 'optionalDependencies'].map(key => {
     const count = report.metadata[key];
     assert.ok(Number.isSafeInteger(count) && count >= 0, 'Invalid audit package count (' + key + ')');
-    return sum + count;
-  }, 0);
-  assert.ok(total > 0);
-  assert.equal(report.metadata.totalDependencies, total);
+    return count;
+  });
+  // Dependency categories can overlap; their sum is not the unique package count.
+  const total = report.metadata.totalDependencies;
+  assert.ok(Number.isSafeInteger(total) && total > 0, 'Invalid total audit package count');
+  assert.ok(total >= Math.max(...categories) && total <= categories.reduce((sum, count) => sum + count, 0),
+    'Total audit package count is outside its category bounds');
 }
 
 function from(parent, name) {
@@ -89,11 +99,9 @@ function installedMatchers(modules) {
 export function checkInstalled(root) {
   const loader = createRequire(resolve(root, 'package.json'));
   const vite = matcherRoot(from(loader, 'vite'));
-  assert.equal(matcherRoot(from(from(loader, '@omnitron-dev/lumen'), 'vite')), vite);
-  const kb = from(from(loader, '@omnitron-dev/lumen-ui'), '@omnitron-dev/kb');
-  const bundled = matcherRoot(from(from(from(kb, 'ts-morph'), '@ts-morph/common'), 'tinyglobby'));
+  const bundled = matcherRoot(from(from(loader, '@omnitron-dev/lumen'), 'vite'));
   const expected = new Set([vite, bundled]);
-  assert.equal(expected.size, 2, 'Expected separate Vite and bundled KB copies');
+  assert.equal(expected.size, 2, 'Expected separate site Vite and bundled Lumen copies');
   assert.deepEqual(installedMatchers(realpathSync(join(root, 'node_modules'))), expected);
   for (const directory of expected) {
     const actual = {};

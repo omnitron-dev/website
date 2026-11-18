@@ -11,8 +11,6 @@ const known = {
     findings: [{
       version: '4.0.7', dev: false, optional: false, bundled: false, paths: [
         '.>vite>tinyglobby>picomatch', '.>vite>tinyglobby>fdir>picomatch', '.>vite>picomatch',
-        '.>@omnitron-dev/lumen>vite>picomatch', '.>@omnitron-dev/lumen>vite>tinyglobby>fdir>picomatch',
-        '.>@omnitron-dev/lumen>vite>tinyglobby>picomatch',
       ],
     }],
     id: 1247710, title: 'picomatch vulnerable to ReDoS through single-branch repeated extglobs',
@@ -41,6 +39,44 @@ test('recognizes only the reported version, advisory, paths and severity counts'
   assert.throws(() => checkReport({ error: { code: 'ENOTFOUND' } }, 1));
   assert.throws(() => checkReport({ advisories: {}, metadata: {} }, 0));
   assert.throws(() => checkReport(known, 2));
+});
+
+test('a clean audit requires zero findings, zero counts and a successful exit status', () => {
+  const clean = structuredClone(known);
+  clean.advisories = {};
+  clean.metadata.vulnerabilities.high = 0;
+  checkReport(clean, 0);
+  for (const change of [
+    report => { report.advisories = []; },
+    report => { report.advisories['99'] = { severity: 'low', module_name: 'another-package' }; },
+    report => { report.metadata.vulnerabilities.low = 1; },
+    report => { delete report.metadata.vulnerabilities.high; },
+    report => { report.metadata.totalDependencies++; },
+  ]) {
+    const report = structuredClone(clean);
+    change(report);
+    assert.throws(() => checkReport(report, 0));
+  }
+  assert.throws(() => checkReport(clean, 1));
+  assert.throws(() => checkReport(clean, 2));
+  assert.throws(() => checkReport(known, 0));
+});
+
+test('package inventory accepts overlapping categories but rejects impossible counts', () => {
+  const overlapping = structuredClone(known);
+  overlapping.metadata = { ...overlapping.metadata, dependencies: 538, devDependencies: 61,
+    optionalDependencies: 86, totalDependencies: 659 };
+  checkReport(overlapping, 1);
+  for (const totalDependencies of [0, -1, 537, 686, 659.5]) {
+    const report = structuredClone(overlapping);
+    report.metadata.totalDependencies = totalDependencies;
+    assert.throws(() => checkReport(report, 1));
+  }
+  for (const key of ['dependencies', 'devDependencies', 'optionalDependencies']) {
+    const report = structuredClone(overlapping);
+    report.metadata[key] = -1;
+    assert.throws(() => checkReport(report, 1));
+  }
 });
 
 test('both installed distributions support the site glob syntax after verification', () => {
@@ -76,12 +112,10 @@ function fixture(t) {
   const outer = join(store, 'picomatch@4.0.7', 'node_modules', 'picomatch');
   cpSync(seed, outer, { recursive: true });
   symlinkSync(outer, join(dirname(vite), 'picomatch'), 'dir');
-  pkg(modules, '@omnitron-dev/lumen');
-  pkg(modules, '@omnitron-dev/lumen-ui');
+  const lumen = pkg(modules, '@omnitron-dev/lumen');
   symlinkSync(vite, join(modules, 'vite'), 'dir');
-  const kb = pkg(modules, '@omnitron-dev/kb');
-  const deps = join(kb, 'node_modules');
-  for (const name of ['ts-morph', '@ts-morph/common', 'tinyglobby']) pkg(deps, name);
+  const deps = join(lumen, 'node_modules');
+  pkg(deps, 'vite');
   const bundled = join(deps, 'picomatch');
   cpSync(seed, bundled, { recursive: true });
   writeFileSync(join(modules, '.modules.yaml'), JSON.stringify({ nodeLinker: 'isolated', virtualStoreDir: '../../external-store' }));

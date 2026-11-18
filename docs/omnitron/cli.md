@@ -133,7 +133,7 @@ For supported independent services, `omnitron backend guardian prepare <sealed-r
 
 `omnitron backend schema prepare <sealed-runtime>` reads the master database and saves a plan for explicitly reviewed compatible additions. `omnitron backend schema apply <plan>` applies or resumes it under the shared migration lock. After rollback, `prepare <sealed-runtime> --from-plan <applied-plan>` binds the same already-applied expansion to a corrected candidate, checking the original runtimes and exact database history. `omnitron backend upgrade <sealed-dist> --schema-plan <plan>` requires that exact applied plan for an upgrade or rollback between its two sealed releases. Legacy bridges, changed definitions, foreign databases and local node schema transitions are refused.
 
-**Unreleased after 0.4.12:** `backend select <installed-sha256> --schema-plan <applied-plan>` admits a cold selection after an already-applied master expansion. It checks the private published receipt, original sealed releases, the actual database and complete migration history. A later candidate must have the exact same master and node migration tree as the plan’s target. The command only inspects the database; it neither applies migrations nor approves a new expansion. Actual selection still requires a stopped backend and owner. `--check` also performs the ordinary infrastructure review and can refuse while another operation remains unresolved.
+**From Omnitron 0.4.13:** `backend select <installed-sha256> --schema-plan <applied-plan>` admits a cold selection after an already-applied master expansion. It checks the private published receipt, original sealed releases, the actual database and complete migration history. A later candidate must have the exact same master and node migration tree as the plan’s target. The command only inspects the database; it neither applies migrations nor approves a new expansion. Actual selection still requires a stopped backend and owner. `--check` also performs the ordinary infrastructure review and can refuse while another operation remains unresolved.
 
 Use the candidate's CLI for `backend upgrade --check`. It checks the owner's declared lifecycle contracts before draining or delegating; an incompatible owner requires a planned owner transition. `backend status --json` includes `execution.ownerCapabilities` when the backend reports them.
 
@@ -232,7 +232,7 @@ The bytes are verified locally before use, without another build, archive copy o
 CI request. An invalid selected artifact fails verification instead of silently
 falling back to a different build. Preparation does not activate the runtime.
 
-**Unreleased after 0.4.12:** host preparation retains its verified target's
+**From Omnitron 0.4.13:** host preparation retains its verified target's
 process-local filesystem proof. Reuse checks every entry's identity, permissions,
 ownership and change time without rereading the same contents. A changed file,
 link or manifest invalidates that proof; restoring the old bytes cannot revive it.
@@ -1033,7 +1033,7 @@ verified in-container exec termination are not implemented.
 
 ### Inspect and reconcile one operation {#backup-operation-recovery}
 
-**Unreleased CLI addition after 0.4.12.** These commands expose the existing
+**Available from Omnitron 0.4.13.** These commands expose the existing
 `OmnitronBackups` operation contract. They use the same receipts as the controller;
 there is no separate CLI job registry.
 
@@ -1060,7 +1060,7 @@ an incomplete archive or invents a container ID when its creation was not acknow
 
 ### Review an unknown backup {#backup-unknown-review}
 
-**Unreleased after 0.4.12.** When executor reconciliation cannot establish the
+**Available from Omnitron 0.4.13.** When executor reconciliation cannot establish the
 outcome of a database backup, an administrator can use `omnitron backup acknowledge`
 to permit a new backup without claiming that the old one succeeded, failed or stopped:
 
@@ -1196,7 +1196,7 @@ passphrase without needing to repeat `--ssh-auth key`.
 | `omnitron webapp status` | Read the container’s state and published address |
 | `omnitron webapp open` | Open Console, starting it temporarily if needed without changing autostart |
 
-The unified lifecycle is implemented in `main` for the next release. Start uses
+Omnitron 0.4.13 provides one Console lifecycle for CLI and daemon. Start uses
 the serving daemon’s local administrator socket and its configured ports and
 publication policy. Status and stop inspect Docker independently, so a failed
 backend does not prevent stopping its Console. An active reviewed runtime update

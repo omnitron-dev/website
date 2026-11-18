@@ -44,7 +44,7 @@ An explicit one-shot rebuild or reviewed start also retains a recovery copy
 when the selection is already active. A Turbo cache hit can still replace files
 in the output directory.
 
-In the development CLI on `main`, each progress line names the next phase and
+From Omnitron 0.4.13, each SDK progress line names the next phase and
 gives the duration of the completed phase alongside total elapsed time.
 Inventory measures the selected files. Retention copies them and checks the
 copies. Verification rechecks the original files and saves the recovery proof.

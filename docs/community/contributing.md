@@ -128,20 +128,20 @@ artifacts and state snapshot for rollback. An immutable experiment that pins
 an older runtime needs a separate registration for an upgraded environment;
 replacing its recorded hashes changes the experiment rather than reproducing it.
 
-Published Omnitron 0.4.10 uses Xec 0.12.0 packages. Package manifests and the
+Omnitron 0.4.13 uses Xec 0.13.2 packages. Package manifests and the
 committed lockfile select their versions and integrity; workspace overrides and
 patches are declared in `pnpm-workspace.yaml`. No third-party package source is
 currently stored under `vendor/`. Run the dependency and package-consumer checks
 when updating these inputs; do not add a second SSH transport to Omnitron.
 
-The current unreleased backup-recovery implementation requires the Xec Core
-0.13 execution-ownership contract. Release preparation checks both the declared
+Backup recovery in Omnitron 0.4.13 requires the Xec Core 0.13.2
+execution-ownership contract. Release preparation checks both the declared
 application dependency and the installed package before changing versions or
 starting a build. Local isolated builds repeat that check after frozen install.
-Until the required Xec package is published and the lockfile is updated, preparation
-fails explicitly. Existing sealed archives can still be inspected or published
+When updating that contract, publish the required Xec package and update the
+lockfile before preparation; a missing contract fails explicitly. Existing sealed archives can still be inspected or published
 without rebuilding them. The repository driver remains the pinned published CLI;
-a locally built Xec binary is not a substitute for the missing runtime contract.
+a locally built Xec binary is not a substitute for a required published runtime contract.
 
 A consumer that develops against Omnitron source can use relative `link:`
 dependencies into one checkout. Keep its manifests and workspace overrides in

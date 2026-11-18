@@ -78,15 +78,15 @@ The default audience is anonymous. `projectDocumentAst`, `projectCorpusDocument`
 
 A static artifact has no request-time identity check. Anyone who receives a privileged build can read its files, including search shards and Markdown exports. Keep public and privileged artifacts in separate publication boundaries and inspect all output formats. Hiding a navigation item is not an access policy.
 
-Pagefind creates a local index during the build. The browser retrieves its published modules and shards from the site's host; ordinary queries do not require a search SaaS or Titan endpoint. Your hosting logs, custom islands, analytics and additional search providers remain separate privacy decisions. Published 0.4.12 uses the configured default locale for every Pagefind input. The unreleased source fix indexes each document under its canonical locale, with the configured default only for documents without one. Validate the emitted language indexes when adopting that fix.
+Pagefind creates a local index during the build. The browser retrieves its published modules and shards from the site's host; ordinary queries do not require a search SaaS or Titan endpoint. Your hosting logs, custom islands, analytics and additional search providers remain separate privacy decisions. From Lumen 0.4.13, Pagefind indexes each document under its canonical locale, with the configured default only for documents without one. Validate the emitted language indexes when publishing a multilingual site.
 
-For a manual hosted at `/manual/`, point a custom `LumenSearchDialog` at `/manual/pagefind/pagefind.js`. Published 0.4.12 can repeat the mount path in a search result. The development version stores routes relative to the index and leaves Pagefind to resolve the deployment prefix. Its public `buildSearchIndex` entries include the full site path and honor `trailingSlash`.
+For a manual hosted at `/manual/`, point a custom `LumenSearchDialog` at `/manual/pagefind/pagefind.js`. Lumen 0.4.13 stores routes relative to the index and leaves Pagefind to resolve the deployment prefix. Its public `buildSearchIndex` entries include the full site path and honor `trailingSlash`.
 
 ## Static HTML and selective React activation
 
 `@omnitron-dev/lumen-ui` exports `LumenShell`, island runtime primitives, navigation and search components. Islands share the shell's React provider context. Their `load`, `idle`, `visible` or `interaction` trigger controls activation timing. The runtime preserves the server preview until its replacement commits; source HTML remains available while deferred code loads.
 
-This manual supplies a site-wide client for its header, search and examples. For projects using the default layout and client, the development version loads the client on pages containing document tabs, diagrams or widgets. A manual whose only control is a `:::tabs` group gets keyboard navigation, and plain Markdown pages in the same build need no client script. In published 0.4.12, a tabs-only manual requires a custom client entry for interactive selection. All panels remain readable before activation.
+This manual supplies a site-wide client for its header, search and examples. For projects using the default layout and client, Lumen 0.4.13 loads the client on pages containing document tabs, diagrams or widgets. A manual whose only control is a `:::tabs` group gets keyboard navigation, and plain Markdown pages in the same build need no client script. All panels remain readable before activation.
 
 An island is not a security sandbox. Its trusted component code has the ordinary capabilities of your client application. The isolated QuickJS playground is a separate execution mechanism with a different boundary. Do not use an island's delayed loading as an access restriction.
 
@@ -94,12 +94,12 @@ Mermaid is also a distinct browser workload: its actual engine converts diagram 
 
 ### Rendering a large corpus
 
-In the development SDK, Lumen renders four documents at a time. Set
+From Lumen 0.4.13, the renderer processes four documents at a time by default. Set
 `renderConcurrency` in `lumen.config.ts` to choose a different positive
 integer. A page's 30-second deadline starts when its render begins. If a page
 fails, Lumen cancels the active renders and keeps the previous published
 generation. Routes and manifest entries follow corpus order even when a later
-page finishes first. Published 0.4.12 starts all document renders together.
+page finishes first.
 [Static renderer](https://github.com/omnitron-dev/omni/blob/ed6f12cb506ebff83aa0bb51326780b4b23e8b87/packages/lumen/src/ssg/ssg-engine.ts)
 
 ## Formats and runtime entry points

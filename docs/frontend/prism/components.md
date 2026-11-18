@@ -396,7 +396,7 @@ import { Table } from '@omnitron-dev/prism';
 />
 ```
 
-In the development version after 0.4.12, set `rowHeader: true` on the column that identifies each record. Its cells become native row headers, so a screen reader can identify the record while reading a measurement in another column.
+From Prism 0.4.13, set `rowHeader: true` on the column that identifies each record. Its cells become native row headers, so a screen reader can identify the record while reading a measurement in another column.
 The component also supports `selectable`, `sortable`, `paginated`,
 and `loading` props (see `TableProps`). Both `Table` and `AdminDataTable` use a
 bounded, keyboard-focusable `TableViewport` with a localisable `scrollLabel`.
@@ -803,6 +803,12 @@ import { Tabs, TabPanel } from '@omnitron-dev/prism';
 
 The `useTabs` hook manages active-value state for you when you
 need it outside the component.
+
+Uncontrolled tabs select an enabled item. If every item is disabled, there is no
+active panel. For a read-only preview or a view waiting for hydration, keep the
+selection in controlled `value` and `onChange` state. The selected content stays
+readable while `disabled` prevents input; enabling the tabs then preserves that
+selection.
 
 For individually closable tabs, set `closable: true` on each item and supply
 `onClose(value)`. The close icon is part of that tab, and **Delete** requests

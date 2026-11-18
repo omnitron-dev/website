@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { useIsClient } from '@omnitron-dev/prism/core';
 import { Tabs } from '@omnitron-dev/prism/components/tabs';
 import { Box, Chip, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography } from '@omnitron-dev/prism/ui';
@@ -20,11 +21,12 @@ const scenarios: { id: string; label: string; description: string; states: State
 /** An illustrative model, never a control or a live status source. */
 export function RuntimeArchitecture() {
   const interactive = useIsClient();
+  const [selected, setSelected] = useState('normal');
   return <Box component="section" aria-label="Resident execution scenarios" sx={{ border: 1, borderColor: 'divider', borderRadius: 1, minWidth: 0, overflow: 'hidden', my: 3 }}>
     <Box sx={{ px: 2, pt: 2 }}>
       <Typography variant="overline" color="text.secondary">ILLUSTRATED MODEL · NOT LIVE STATUS</Typography>
     </Box>
-    <Tabs defaultValue="normal" variant="scrollable" scrollButtons="auto" aria-label="Execution scenario" tabs={scenarios.map(scenario => ({
+    <Tabs value={selected} onChange={setSelected} variant="scrollable" scrollButtons="auto" aria-label="Execution scenario" tabs={scenarios.map(scenario => ({
       value: scenario.id, label: scenario.label, disabled: !interactive,
       content: <Box sx={{ px: { xs: 1, sm: 2 }, pb: 1 }}>
         <Typography variant="body2" sx={{ minHeight: { xs: 144, sm: 88 }, pb: 2, lineHeight: 1.7 }}>{scenario.description}</Typography>

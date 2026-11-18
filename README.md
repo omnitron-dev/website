@@ -14,7 +14,7 @@ Start with the [Lumen overview](docs/lumen/overview.md),
 [authoring guide](docs/lumen/authoring.md) or
 [explanation of this site's build](docs/lumen/this-site.md).
 
-The site uses the published Lumen and Prism packages at **0.4.12**. The tracked
+The site uses the published Lumen and Prism packages at **0.4.13**. The tracked
 lockfile is the dependency graph used by CI and GitHub Pages.
 
 The [privacy guide](docs/foundations/privacy.md) explains data boundaries.
@@ -175,23 +175,31 @@ Pages. Pull requests never publish; manual publication follows the same checks.
 Guides may describe newer platform APIs, but live examples and rendering features
 must work with the locked Lumen and Prism versions.
 
-The site maintains two install-time patches for picomatch 4.0.7. Vite uses one
-copy and the published KB package bundles another inside its archive. Both
-parsers accept repeated extglobs only for nonempty literal words made from ASCII
-letters, digits, underscores, hyphens or dots. Alternatives must have distinct
-initial letters or characters, ignoring case. Other repeated forms raise a
-syntax error during compilation. Ordinary file globs such as `docs/**/*.md`
-keep their usual meaning. [GitHub security advisory](https://github.com/advisories/GHSA-fc5q-39xc-vjpf)
+The site maintains one install-time patch for picomatch 4.0.7 used by its direct
+Vite dependency. Lumen 0.4.13 includes the same reviewed parser fix in its bundled
+Vite distribution. KB is outside the website dependency graph, and Prism includes
+the documentation sidebar's scroll restoration. The former KB and Prism client
+patches and the KB side-effects cache exclusion have been removed.
 
-Before running the build tools, CI reads the registry audit and checks every
-file in both installed distributions. An additional finding, a change in either
-copy, or a third installation stops the build. The site uses pnpm 12.21.0 and
-excludes the published KB 0.4.12 from its side-effects cache. This makes a
-frozen install apply the patch to the bundled parser even with a store populated
-by an earlier pnpm. [pnpm build cache settings](https://pnpm.io/settings/build)
+Both parsers accept repeated extglobs only for nonempty literal words made from
+ASCII letters, digits, underscores, hyphens or dots. Alternatives must have distinct
+initial letters or characters, ignoring case. Other repeated forms raise a syntax
+error during compilation. Ordinary file globs such as `docs/**/*.md` retain their
+usual meaning. [GitHub security advisory](https://github.com/advisories/GHSA-fc5q-39xc-vjpf)
 
-When an upstream fix ships or the published KB dependency changes,
-review the lockfile and remove the corresponding patch and audit rule together.
+Before running build tools, CI checks the registry audit and every file in both
+installed parser distributions. An additional finding, changed bytes, or an
+unexpected third installation stops the build. The registry audit covers the
+direct Vite dependency; the separate file inventory also covers Lumen's bundled
+copy. A clean report must have a successful exit status and zero vulnerability
+counts; the installed-file verification still runs. A report with findings must
+match only the reviewed advisory. The 13 framework packages at exactly 0.4.13
+have explicit reviewed age exceptions, backed by the public archive integrity;
+other package-age rules remain unchanged.
+
+When an upstream fix ships or Lumen's bundled dependency changes, review the
+lockfile, installed files and audit policy together before removing the remaining
+site patch.
 
 If **Check out documented platform source** fails with `upload-pack: not our ref`,
 compare the requested SHA with `revision` in `src/data/api-index.json`. A local

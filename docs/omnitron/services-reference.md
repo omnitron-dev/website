@@ -175,7 +175,7 @@ Database backup, restore, scheduling.
 | `getOperation({id})` | Read a retained operation receipt, or `null` when absent |
 | `cancelOperation({id, revision})` | Request cancellation of the exact reviewed operation revision |
 | `reconcileOperation({id, revision})` | Inspect retained execution evidence after backend ownership was lost; never replay the effect |
-| `acknowledgeUnknownBackup({id, revision, reason})` | Record an administrator’s decision to allow a new backup while preserving the unknown outcome and restore restriction; unreleased after 0.4.12 |
+| `acknowledgeUnknownBackup({id, revision, reason})` | Record an administrator’s decision to allow a new backup while preserving the unknown outcome and restore restriction; available from 0.4.13 |
 
 Driven by `omnitron backup` commands. Reads (`listBackups`, `getSchedule`,
 `listSchedules`, `getBackupStatus`, `listOperations`, `getOperation`) gate on
@@ -342,7 +342,7 @@ green/yellow/red availability bars.
 
 ### `OmnitronPipelines` — `pipeline.rpc-service.ts` {#omnitronpipelines--pipelinerpc-servicets}
 
-Xec and shell automation, shared by Console, CLI and local MCP. The inventory below follows `main`; `prepareRun`, `startRun`, `resumeRun`, `reconcileRun` and stable caller-generated run IDs are not included in npm 0.4.12. All methods require `admin`; a human session is revalidated at the service boundary. Mutations must record an audit intent before taking effect.
+Xec and shell automation, shared by Console, CLI and local MCP. From Omnitron 0.4.13, `prepareRun`, `startRun`, `resumeRun`, `reconcileRun` and stable caller-generated run IDs share one durable execution contract. All methods require `admin`; a human session is revalidated at the service boundary. Mutations must record an audit intent before taking effect.
 
 | Method | Effect |
 | ------ | ------ |
@@ -352,11 +352,11 @@ Xec and shell automation, shared by Console, CLI and local MCP. The inventory be
 | `listPipelines()` | List all registered definitions |
 | `listWorkspace({project, stack?, limit?})` | Return the definitions and historical run summaries for the selected workspace. Definitions use their current targets and runs use the targets recorded at admission. |
 | `deletePipeline({id})` | Drop a pipeline |
-| `prepareRun({runId, id, expectedRevision, params?})` | Main only: persist a stable request without executing it |
-| `startRun({runId, expectedDigest, params?})` | Main only: claim the reviewed request once, or recover its existing receipt |
-| `resumeRun({runId, expectedDigest, params?})` | Main: continue the reviewed checkpoint, preserving completed work and blocking uncertain effects |
-| `reconcileRun({runId})` | Main: inspect remote launch receipts without dispatch, retaining target convergence or unknown outcome |
-| `executePipeline({runId, id, expectedRevision, params?})` | Main: prepare and start through the same contract; 0.4.12 has no stable run-ID contract |
+| `prepareRun({runId, id, expectedRevision, params?})` | Persist a stable request without executing it |
+| `startRun({runId, expectedDigest, params?})` | Claim the reviewed request once, or recover its existing receipt |
+| `resumeRun({runId, expectedDigest, params?})` | Continue the reviewed checkpoint, preserving completed work and blocking uncertain effects |
+| `reconcileRun({runId})` | Inspect remote launch receipts without dispatch, retaining target convergence or unknown outcome |
+| `executePipeline({runId, id, expectedRevision, params?})` | Prepare and start through the same stable run-ID contract |
 | `cancelRun({runId})` | Request cancellation and await the owned execution |
 | `getRunStatus({runId})` | One run with bounded per-step output and diagnostics |
 | `listRuns({pipelineId?, limit?})` | Bounded history summaries; excludes step output and parameters |

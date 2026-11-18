@@ -205,7 +205,7 @@ export function App() {
 
 ### Preview a change before saving {#preview-before-saving}
 
-The development SDK adds an `appearance` prop to `PrismProvider`. Use it for a
+Prism 0.4.13 adds an `appearance` prop to `PrismProvider`. Use it for a
 form where someone wants to see a color, contrast, preset or font-size change
 before choosing **Save**. Keep the draft in the form. Pass only the fields
 being previewed, and pass `mode` separately when previewing light or dark.
@@ -214,9 +214,8 @@ page also discards the draft.
 
 To save a remote preference, wait for the server to accept the draft, then
 apply the confirmed values with `useSettingsStore.getState().updateSettings(values)`.
-If saving fails, keep the draft available for retry. The published 0.4.12
-provider supports controlled `mode`. The additional `appearance` fields
-require the development SDK. [Provider implementation](https://github.com/omnitron-dev/omni/blob/4b113978b5f41a7a4702823cfa313930923439ee/packages/prism/src/core/provider.tsx)
+If saving fails, keep the draft available for retry. Controlled `mode` and
+`appearance` are both available in the published Prism 0.4.13 package. [Provider implementation](https://github.com/omnitron-dev/omni/blob/4b113978b5f41a7a4702823cfa313930923439ee/packages/prism/src/core/provider.tsx)
 
 ### Flash-of-wrong-theme prevention (SSR) {#flash-of-wrong-theme-prevention-ssr}
 

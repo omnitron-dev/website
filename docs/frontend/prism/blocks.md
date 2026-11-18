@@ -177,7 +177,7 @@ function RequestsPanel({ count, loading, onRefresh }: {
 | `slotProps.header.headingComponent` | `h1` through `h6` | Choose the semantic heading level independently of its visual size |
 | `collapsed` / `onCollapseChange` | `boolean` / callback | Controlled state and requested changes |
 
-On `main` after 0.4.12, the title and chevron form one button. Click either, tap the heading row, or focus it with Tab and press Enter or Space. Tab then moves to secondary actions such as **Refresh**, which keep the panel in its current state. Screen readers announce the title and expanded state. The same development version adds `mountOnEnter` and `slotProps.header.headingComponent`.
+From Prism 0.4.13, the title and chevron form one button. Click either, tap the heading row, or focus it with Tab and press Enter or Space. Tab then moves to secondary actions such as **Refresh**, which keep the panel in its current state. Screen readers announce the title and expanded state. The same version adds `mountOnEnter` and `slotProps.header.headingComponent`.
 
 `DashboardBlockHeader`, `DashboardBlockContent`, and
 `DashboardBlockFooter` are exported for fully custom composition,

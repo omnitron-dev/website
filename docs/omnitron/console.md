@@ -14,7 +14,7 @@ React 19 + Vite + MUI SPA that talks to the daemon via the
 `@omnitron-dev/prism/netron` client — the same Netron RPC surface
 the CLI uses.
 
-The navigation, application table and stack tabs described here are available on the development branch after 0.4.12. The packaged 0.4.12 Console displays its earlier overview.
+The navigation, application table and stack tabs described here are available from Omnitron 0.4.13.
 
 ## Workspace and stack scope {#workspace-and-stack-scope}
 
@@ -234,7 +234,7 @@ appropriate access, a local name opens that application and a remote name opens
 the stack that reported it.
 
 Expand **Resource distribution** to compare the six largest CPU or memory readings
-in the selection. In the development Console after 0.4.12, the title and chevron share one toggle. Keyboard users can focus it with Tab and toggle with Enter or Space. The scale follows the largest reading. CPU can exceed 100% when
+in the selection. From Console 0.4.13, the title and chevron share one toggle. Keyboard users can focus it with Tab and toggle with Enter or Space. The scale follows the largest reading. CPU can exceed 100% when
 several cores are in use. A failed refresh identifies the source and retains the
 last available readings. Before the first successful inventory read, Console shows
 the error and offers **Retry**. Periodic polling pauses in a hidden tab.
