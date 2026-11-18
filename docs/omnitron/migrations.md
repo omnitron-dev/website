@@ -248,6 +248,12 @@ the older explicitly invoked `infra migrate` path still runs workspace package
 `migrate` scripts in dependency order. An explicit false policy never falls through
 to those scripts.
 
+In Omnitron 0.4.12 and 0.4.13, selecting a declared stack does not make the
+owner's resolved application environment available to this standalone command.
+If the database URL exists only in that managed environment, planning refuses
+before any migration SQL runs. The declared migration owner and the CLI's ability
+to resolve its connection are separate checks.
+
 Console and CLI stack diagnosis show owners and program availability without executing
 configs or opening a database connection. Database access, schema compatibility and
 migration completion remain separate evidence. Runtime workers should inspect their
