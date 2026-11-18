@@ -2,11 +2,12 @@ import React from 'react';
 import { renderCodeBlockHtml } from '@omnitron-dev/lumen-ast';
 import { PrismProvider, PrismThemeScript } from '@omnitron-dev/prism/core';
 import { Link } from '@omnitron-dev/prism/ui';
-import { DocSidebar, type DocSidebarItem } from '@omnitron-dev/prism/components/doc-layout';
+import { DocSidebar } from '@omnitron-dev/prism/components/doc-layout';
 import { OmnitronBrand, omnitronTheme } from '@omnitron-dev/prism/identity';
 import { DocLayout, DocSectionNav, DocPagination } from '@omnitron-dev/lumen-ui';
 import type { LumenPageLayoutProps, LumenSidebarItem } from '@omnitron-dev/lumen';
 import { PortalIslandHost } from '@omnitron-dev/lumen-ui/runtime';
+import { documentNavigation } from './document-navigation.ts';
 import { SearchTrigger } from './search-trigger.tsx';
 import { Home, serviceExample, clientExample } from './home.tsx';
 import { ThemeSelectorPlaceholder } from './theme-selector.tsx';
@@ -39,40 +40,11 @@ export function SiteLayout({ children, document: doc, documents, config }: Lumen
       (item.href === doc.routePath || contains(item.items)));
   const group = Object.entries(config.sidebars).find(([, items]) => contains(items));
   const items = group?.[1] ?? [];
-  const flatten = (items: LumenSidebarItem[]): string[] => items.flatMap(item => {
-    if (item.type === 'doc') return [item.id];
-    if (item.type !== 'category') return [];
-    const landing = item.href ? byRoute.get(item.href) : undefined;
-    return [...(landing ? [landing.id] : []), ...flatten(item.items)];
-  });
-  const ordered = [...new Set(flatten(items))].map(id => byId.get(id)).filter(Boolean);
-  const index = ordered.findIndex(item => item?.id === doc.id);
-  const previous = index < 0 ? undefined : ordered[index - 1];
-  const next = index < 0 ? undefined : ordered[index + 1];
-  const adjacent = (item: typeof previous) => {
-    if (!item) return undefined;
-    if (!item.routePath) throw new Error(`Adjacent document has no public route: ${item.id}`);
-    return { href: item.routePath, label: item.title };
-  };
   const home = doc.frontmatter?.layout === 'home';
   const homeProps = home ? { serverCode: renderCodeBlockHtml(serviceExample, 'typescript'), clientCode: renderCodeBlockHtml(clientExample, 'typescript') } : null;
   const headings = (doc.headers ?? []).filter(h => h.depth === 2 || h.depth === 3).map(h => ({ ...h, level: h.depth }));
-  const sidebarItems = (entries: LumenSidebarItem[], parent = 'root'): DocSidebarItem[] => entries.map((item, index) => {
-    const id = `${parent}/${index}`;
-    if (item.type === 'category') {
-      const landing = item.href ? byRoute.get(item.href) : undefined;
-      return { id, label: item.label, children: [
-        ...(item.href ? [{ id: landing?.id ?? `${id}/overview`, label: 'Overview', href: item.href }] : []),
-        ...sidebarItems(item.items, id),
-      ] };
-    }
-    const target = item.type === 'doc' ? byId.get(item.id) : undefined;
-    const href = item.type === 'link' ? item.href : target?.routePath;
-    if (!href) throw new Error(`Sidebar target is unavailable: ${JSON.stringify(item)}`);
-    return { id: target?.id ?? id, href, label: item.label || target?.title || href };
-  });
-  const navigation = sidebarItems(items);
   const navigationTitle = sections.find(section => section.id === group?.[0])?.label ?? 'Documentation';
+  const { navigation, pagination } = documentNavigation(items, byId, byRoute, doc.id, navigationTitle);
   const sidebarProps = { items: navigation, activeId: doc.id, title: navigationTitle };
   return <PrismProvider modeStorageKey="omnitron-theme" themeOverrides={omnitronTheme}>
     <link rel="icon" type="image/svg+xml" href="/img/logo.svg" />
@@ -97,8 +69,8 @@ export function SiteLayout({ children, document: doc, documents, config }: Lumen
         <DocLayout sidebar={items.length ? <nav aria-label="Documentation sections"><PortalIslandHost islandId="documentation-navigation" component="DocSidebar" hydrate="load" props={sidebarProps}><DocSidebar {...sidebarProps} /></PortalIslandHost></nav> : undefined}
           sectionNav={<><p className="sidebar-label">On this page</p><PortalIslandHost islandId="page-sections" component="DocSectionNav" hydrate="load" props={{ headings }}><DocSectionNav headings={headings} /></PortalIslandHost><div className="page-exports"><Link target="_blank" rel="noopener noreferrer" href={`${doc.routePath === '/' ? '/index' : doc.routePath}.md`}>Read as Markdown ↗</Link><Link href="/llms.txt" target="_blank" rel="noopener noreferrer">Agent index ↗</Link></div></>}>
           <div id="main-content" tabIndex={-1}>{children}</div>
-          {(previous || next) && <div id={next ? 'next' : undefined}>
-            <DocPagination className="page-pagination" prev={adjacent(previous)} next={adjacent(next)} />
+          {(pagination.prev || pagination.next) && <div id={pagination.next ? 'next' : undefined}>
+            <DocPagination className="page-pagination" {...pagination} />
           </div>}
         </DocLayout>
       </>}

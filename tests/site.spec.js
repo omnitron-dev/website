@@ -213,6 +213,23 @@ for (const width of [320, 1440]) {
   });
 }
 
+test('reading order identifies the destination category at a boundary', async ({ page }) => {
+  await page.setViewportSize({ width: 320, height: 700 });
+  await page.goto('/docs/utilities/kb');
+  const pager = page.getByRole('navigation', { name: 'Docs pagination' });
+  await expect(pager.getByRole('link', { name: 'Previous msgpack', exact: true })).toHaveAttribute('href', '/docs/utilities/msgpack');
+  const next = pager.getByRole('link', { name: 'Next · Testing Overview', exact: true });
+  await expect(next).toHaveAttribute('href', '/docs/testing');
+  await next.click();
+  await expect(page).toHaveURL(/\/docs\/testing$/);
+  const previous = pager.getByRole('link', { name: 'Previous · Utilities kb', exact: true });
+  await expect(previous).toHaveAttribute('href', '/docs/utilities/kb');
+  await expect(pager.getByRole('link', { name: 'Next @omnitron-dev/testing', exact: true })).toHaveAttribute('href', '/docs/testing/testing-package');
+  expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(320);
+  await previous.click();
+  await expect(page).toHaveURL(/\/docs\/utilities\/kb$/);
+});
+
 test('category landing pages sit between their previous document and first child', async ({ page }) => {
   for (const [route, previous, firstChild] of [
     ['/docs/tutorial', '/docs/getting-started/project-structure', '/docs/tutorial/scaffold'],
