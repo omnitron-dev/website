@@ -298,6 +298,45 @@ adapter. Internal communication remains Netron. Provider tokens, transport
 sessions and Omnitron capabilities are distinct credentials; none is passed
 through as a substitute for another.
 
+### Flow review on another controller (design target) {#peer-flow-review}
+
+A controller can already monitor a fleet worker and record its observations in
+the controller's flow history. The proposed handoff would deliver an inactive
+graph to a peer that runs its own Flows service, stores its own drafts and has
+a local administrator to review them. [Monitor a mesh from one controller](./flows.md#mesh)
+
+1. A Studio room owner selects one of their proposals, or a source administrator
+   selects an exact saved revision. The source Console shows the recipient and
+   graph parameters before sharing. The source controller records the selected
+   graph and its transfer ID before contacting the peer. The initial request
+   carries the ID, a digest of the graph and a public key for verifying the sender
+   of this particular transfer.
+2. A destination administrator issues a short-lived, single-use invitation bound to
+   that request, the receiving installation and the registered destination workspace.
+   Before sending the graph, the source checks the enrolled node, management
+   endpoint and approved SSH host key, then verifies the receiving installation's
+   proof on the same authenticated Netron connection. At admission the destination
+   checks the sender's proof, digest, invitation expiry and workspace registration.
+   The shared document contains the flow name, format version, nodes, component
+   parameters and connections. Studio room history and provider credentials are private.
+3. The destination validates the graph against its installed components and
+   computes a local revision. One transaction consumes the invitation, creates the
+   inactive draft and records its ID and revision. The local administrator previews
+   the draft, selects destination-local bindings for any node, pipeline or Studio
+   room references, and separately approves activation under their own session.
+
+After a lost reply, a sender with receipt access can confirm that exact transfer
+even after the invitation expires. A duplicate returns the first draft ID and
+revision, including after a restart or a later edit. Different graph content
+under the same ID is a conflict. An unavailable receipt leaves delivery
+unconfirmed. A changed registration or receiving installation requires a new
+review before sharing with the replacement.
+
+The first acceptance test would use manual input and a local notification. It
+would drop the reply immediately after the destination commits, restart both
+controllers and verify one inactive draft. Replacing the peer at the same endpoint
+must leave the replacement with zero graph data.
+
 ## Privacy belongs to each edge {#privacy-on-each-edge}
 
 Source, logs, screenshots, model context and generated artifacts carry an
