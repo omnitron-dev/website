@@ -26,7 +26,7 @@ Connect the installed adapters with the commands shown in Studio. Run `omnitron 
 
 A lead can inspect connected model catalogs and ask the controller to enlist a qualified specialist. Model choice respects the room's provider and price limits. A connector's advertised model name alone gives no information about its cost or skill. When assigned workers finish, their results become available to the lead for a synthesis in its original provider conversation.
 
-Only explicitly shared turns and notes are available to teammates. The controller keeps the local subscriptions, provider continuations and operator session separate. A flow proposal is a draft. The administrator reviews its actual effects in the editor. [Build a disk-space flow](./flows.md)
+Teammates can read explicitly shared turns and notes. Local subscriptions, provider conversations and the operator session stay private. To hand a proposal to a different administrator, choose **Submit for administrator review** in the room and copy the review link. It opens the shared graph in the project workspace. The administrator can inspect its parameters and sample effects before activation. [Build a disk-space flow](./flows.md)
 
 ## Try Agent Studio {#try-agent-studio}
 
@@ -60,7 +60,7 @@ obtain basic quality.
 
 Reviewed against [Omnitron `ea166e5a`](https://github.com/omnitron-dev/omni/commit/ea166e5af56e462941363729ebf381d7412adfa2)
 and [Xec `b2b6aab4`](https://github.com/xec-sh/xec/commit/b2b6aab4b4b0d321996ca26cd10f7b7fb92aff78)
-on 16 November 2026. The table records that baseline. The table records the historical implementation at those commits. The current team room and event-flow guide above describe later work on main, including turn-scoped MCP and the controller’s persistent flow inbox.
+on 16 November 2026. The table describes that historical implementation. The current team room and event-flow guide above describe later work on main, including turn-scoped MCP and the controller’s persistent flow inbox.
 
 | Existing implementation | Reuse | Gap before this design can ship |
 | --- | --- | --- |

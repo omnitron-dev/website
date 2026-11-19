@@ -29,7 +29,7 @@ flowchart LR
   Test -->|low| Task["Assign a Studio member"]
 ```
 
-Choose the source, enter a sample event and inspect the highlighted connections. The preview lists the data and effects that would reach each destination. Save the draft, check the target workspace and activate its reviewed revision. The controller records subsequent observations and deliveries in its local history. A project operator can open and preview a team proposal. Saving and activating a graph requires an administrator.
+Choose the source, enter a sample event and inspect the highlighted connections. The preview lists the data and effects that would reach each destination. Save the draft, check the target workspace and activate its reviewed revision. The controller records subsequent observations and deliveries in its local history. A project operator can preview a team proposal and use **Submit for administrator review** to send its definition to the project's administrators. The operator receives a receipt for that revision. The private room, provider conversations and connectors stay with the team. An administrator opens the submitted draft in the target workspace and reviews it before activation.
 
 ## Choose an action {#actions}
 
@@ -54,7 +54,19 @@ Choose **Enrolled node** as the disk source. Pick the node from the fleet regist
 
 A disconnected peer, a missing mount or a changed host key appears as a source error. The previous threshold state stays in place until a valid sample arrives. Replacing the registration or changing its trusted identity requires a new review. Multiple flows on the same controller share a peer snapshot during a sampling pass.
 
-The local pipeline output runs in the activating controller's reviewed project and stack. Monitoring a second node does not move that output there. Existing fleet operations have their own target-specific receipts. Studio rooms and provider conversations belong to the controller that hosts them. [Node and fleet architecture](./architecture.md)
+```mermaid
+flowchart LR
+  Disk["Volume on enrolled peer"] -->|Authenticated observation| Reader["Workspace controller"]
+  Team["Private Studio room"] -->|Submit graph for review| Draft["Project draft"]
+  Human["Administrator"] -->|Approve revision| Draft
+  Draft --> Reader
+  Reader --> Journal["Observation and delivery history"]
+  Reader --> Effect["Notification or approved local action"]
+```
+
+Open **Recent events** on a saved flow to see **Sampling interrupted** and **Sampling resumed**. The first failed observation opens a gap. Repeated failures keep that gap open. When a controller restarts after skipping an interval, history also identifies the missed deadline. The next valid measurement drives the decision. Historical values inside a gap are unknown.
+
+Place a disk monitor and its qualified cleanup pipeline on the volume's own controller when cleanup must continue through a network partition. For central oversight, select the enrolled peer as the source and keep notifications on the operator's controller. Fleet deployment and recovery have their own target-specific receipts. Each Studio room and flow journal has one owning controller. [Node and fleet architecture](./architecture.md)
 
 ## Extend a controller {#components}
 
