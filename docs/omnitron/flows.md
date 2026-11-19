@@ -29,7 +29,7 @@ flowchart LR
   Test -->|low| Task["Assign a Studio member"]
 ```
 
-Choose the source, enter a sample event and inspect the highlighted connections. The preview lists the data and effects that would reach each destination. Save the draft, check the target workspace and activate its reviewed revision. The controller records subsequent observations and deliveries in its local history. A project operator can preview a team proposal and use **Submit for administrator review** to send its definition to the project's administrators. The operator receives a receipt for that revision. The private room, provider conversations and connectors stay with the team. An administrator opens the submitted draft in the target workspace and reviews it before activation.
+Choose the source, enter a sample event and inspect the highlighted connections. The preview lists the data and effects that would reach each destination. Save the draft, check the target workspace and activate its reviewed revision. The controller records subsequent observations and deliveries in its local history. A project operator can preview a team proposal and use **Submit for administrator review** to share its definition with administrators of this controller. The project and stack determine where the draft appears and which actions it can target. The operator receives a receipt for that revision. The private room, provider conversations and connectors stay with the team. An administrator opens the submitted draft in the target workspace and reviews it before activation.
 
 ## Choose an action {#actions}
 
