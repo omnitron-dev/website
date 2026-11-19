@@ -10,7 +10,7 @@ description: Observe a host, model decisions and dispatch a notification, a revi
 A flow turns an observation into a decision on the controller that owns the workspace. An administrator can draw it in **Flows**. A Studio lead can propose the same graph in a team room. Both open in the same editor, with the same component catalog, validator and sample-event preview.
 
 :::info{title="Availability"}
-The flow editor and controller runtime are on Omnitron main after 0.4.14.
+The flow editor and controller runtime are on Omnitron `main` after the npm release `0.4.14`.
 :::
 
 ## Build a disk-space monitor {#disk-space}
@@ -67,6 +67,8 @@ flowchart LR
 Open **Recent events** on a saved flow to see **Sampling interrupted** and **Sampling resumed**. The first failed observation opens a gap. Repeated failures keep that gap open. When a controller restarts after skipping an interval, history also identifies the missed deadline. The next valid measurement drives the decision. Historical values inside a gap are unknown.
 
 Place a disk monitor and its qualified cleanup pipeline on the volume's own controller when cleanup must continue through a network partition. For central oversight, select the enrolled peer as the source and keep notifications on the operator's controller. Fleet deployment and recovery have their own target-specific receipts. Each Studio room and flow journal has one owning controller. [Node and fleet architecture](./architecture.md)
+
+To let a second controller own a manual notification flow, send it an inactive draft for local review. The destination administrator chooses whether to activate it. [Send a flow to another controller](./studio.md#peer-flow-review)
 
 ## Extend a controller {#components}
 

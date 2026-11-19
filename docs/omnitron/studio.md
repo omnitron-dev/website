@@ -8,7 +8,7 @@ description: Create a team with a lead model, connect local adapters, share work
 # Create, automate and operate one system
 
 :::info{title="Availability"}
-Team rooms, local subscription connectors, the visual flow editor and reviewed project starters are available on Omnitron `main` after 0.4.14. Federation, native mobile clients and device operations in the architecture sections are development targets.
+Team rooms, local subscription connectors, the visual flow editor and reviewed project starters are available on Omnitron `main` after 0.4.14. Agent delegation between controllers, native mobile clients and device operations in the architecture sections are development targets.
 :::
 
 ## Work with a team {#team-room}
@@ -40,6 +40,19 @@ Teammates can read explicitly shared turns and notes. Local subscriptions, provi
 For an existing registered project, select its workspace and open a conversation there. The connector discovers models from the installed provider CLI. Pick a model explicitly, or supply a qualified policy for automatic routing by task and budget. Each completed turn records the token counts the provider reports. A private temporary working directory separates the conversation from the project files. **Attach text** adds selected text to the editable prompt. The provider receives the submitted text through the subscriber's account.
 
 [Choosing Xec, Kysera and a service](./projects.md#choose-a-project) explains exactly what each starter runs.
+
+## Send a flow to another controller for review {#peer-flow-review}
+
+This workflow is available in local Omnitron `main` from `87744011`. The npm release `0.4.14` predates it. Both controllers must host **Flows**, and the sending controller must have enrolled the receiver and approved its SSH host key.
+
+The transfer accepts saved graphs up to 64 KiB containing **Manual input** and **Local notification** nodes. It shares the flow name, nodes, notification text and connections. Studio messages, memory and provider credentials stay on the originating controller. For a private Studio proposal, use **Submit for administrator review** first so a local administrator can open the saved revision.
+
+1. **Sending administrator.** Open the saved flow in its project and choose **Share with a controller**. Select the receiving node, review the graph, then choose **Prepare public offer**. Give the public offer to the receiving administrator through your established channel.
+2. **Receiving administrator.** Open **Flows** in the project with the same name and select the same stack if the source uses one. Choose **Receive a flow**, paste the offer and verify the transfer ID, source registration and graph digest with the sender. Choose **Issue invitation** and return the public invitation. It is valid for ten minutes and can be withdrawn with **Revoke invitation** until the draft arrives.
+3. **Sending administrator.** Paste the invitation, verify the receiving registration and choose **Send reviewed graph**. The sender verifies the issuing installation on the authenticated Netron connection before sending the encrypted graph. Each side checks its own project registration.
+4. **Receiving administrator.** Use the original offer with **Check incoming transfer**, then **Open received draft**. The destination records one inactive draft and its receipt together. Preview the graph and separately approve activation under a local session. Each controller can now edit and operate its own copy independently.
+
+If the reply is lost, reopen the original saved flow, select the same node, paste the original invitation and choose **Check receipt**. Once accepted, a transfer returns its first destination draft ID and revision across restarts, invitation expiry and later edits. If delivery is still unconfirmed, keep the original invitation for the next check. A revoked or expired unused invitation requires a new offer.
 
 ## Workflows and their current limits {#the-everyday-experience}
 
@@ -297,45 +310,6 @@ can provide external task interoperability. They terminate at a policy-aware
 adapter. Internal communication remains Netron. Provider tokens, transport
 sessions and Omnitron capabilities are distinct credentials; none is passed
 through as a substitute for another.
-
-### Flow review on another controller (design target) {#peer-flow-review}
-
-A controller can already monitor a fleet worker and record its observations in
-the controller's flow history. The proposed handoff would deliver an inactive
-graph to a peer that runs its own Flows service, stores its own drafts and has
-a local administrator to review them. [Monitor a mesh from one controller](./flows.md#mesh)
-
-1. A Studio room owner selects one of their proposals, or a source administrator
-   selects an exact saved revision. The source Console shows the recipient and
-   graph parameters before sharing. The source controller records the selected
-   graph and its transfer ID before contacting the peer. The initial request
-   carries the ID, a digest of the graph and a public key for verifying the sender
-   of this particular transfer.
-2. A destination administrator issues a short-lived, single-use invitation bound to
-   that request, the receiving installation and the registered destination workspace.
-   Before sending the graph, the source checks the enrolled node, management
-   endpoint and approved SSH host key, then verifies the receiving installation's
-   proof on the same authenticated Netron connection. At admission the destination
-   checks the sender's proof, digest, invitation expiry and workspace registration.
-   The shared document contains the flow name, format version, nodes, component
-   parameters and connections. Studio room history and provider credentials are private.
-3. The destination validates the graph against its installed components and
-   computes a local revision. One transaction consumes the invitation, creates the
-   inactive draft and records its ID and revision. The local administrator previews
-   the draft, selects destination-local bindings for any node, pipeline or Studio
-   room references, and separately approves activation under their own session.
-
-After a lost reply, a sender with receipt access can confirm that exact transfer
-even after the invitation expires. A duplicate returns the first draft ID and
-revision, including after a restart or a later edit. Different graph content
-under the same ID is a conflict. An unavailable receipt leaves delivery
-unconfirmed. A changed registration or receiving installation requires a new
-review before sharing with the replacement.
-
-The first acceptance test would use manual input and a local notification. It
-would drop the reply immediately after the destination commits, restart both
-controllers and verify one inactive draft. Replacing the peer at the same endpoint
-must leave the replacement with zero graph data.
 
 ## Privacy belongs to each edge {#privacy-on-each-edge}
 
