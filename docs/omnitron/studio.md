@@ -17,6 +17,8 @@ Open **Agent Studio → New team** in the project workspace. Give the room a nam
 
 Connect the installed adapters with the commands shown in Studio. Run `omnitron studio doctor` on the controller to inspect their availability. Codex and supported signed-in Claude Code installations can lead a room. Antigravity can complete an assignment using its strict headless adapter. Studio reports Kimi's qualification status through the same doctor.
 
+To connect your own inference service, run a connector on the controller under its administrator's authority. The connector calls `OmnitronStudio.connectAdapter` and advertises its models for one Console account and project under a name such as `example.org/research`. Select it as the lead when it supplies room tools, or enable it under **Team limits → Allowed adapters** before assigning it work. Existing teams keep their approved providers as new connectors arrive.
+
 | You want to | Where to do it | What you can verify |
 | --- | --- | --- |
 | Send a question to one member | Select the recipient in **Chat** | The journal names the sender, recipient and provider result |
