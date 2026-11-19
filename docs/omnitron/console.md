@@ -14,27 +14,17 @@ React 19 + Vite + MUI SPA that talks to the daemon via the
 `@omnitron-dev/prism/netron` client — the same Netron RPC surface
 the CLI uses.
 
-The navigation, application table and stack tabs described here are available from Omnitron 0.4.13.
+The project-qualified URLs and Agent Studio on this page describe Omnitron `main` after 0.4.14. The published 0.4.14 Console uses an earlier workspace selector.
 
 ## Workspace and stack scope {#workspace-and-stack-scope}
 
-Choose a project and **All stacks** to see its stack cards side by side. Choose a
-stack to see its card, applications, logs, metrics, topology, containers and
-deployment history. Overview and Dashboard Builder use the same scope for stack
-data. The workspace badge counts the whole project. The footer counts the
-selected scope. System-wide pages such as Audit and System omit the selector.
+**Omnitron** shows the controller and its local processes. **Projects** opens the registry. Choose a project to work with its stacks, applications and deployments. Pages such as **Logs** and **Topology** are available in both workspaces and show the corresponding inventory.
 
-Opening a stack from a card or a release link preserves the header selection.
-On a stack detail page, explicitly selecting another stack opens that stack's
-details. Choosing **All stacks** returns to the inventory. Browser Back and
-Forward restore the workspace for each history entry. Reload keeps the current
-choice. Switching projects clears the stack selection. On a narrow screen, the
-header shows the stack name alone. Open the selector to read a long name in full.
+For example, suppose the `reports` and `billing` projects both run an application named `api` in a `dev` stack. From the system **Overview**, open the `reports/dev/api` row. The destination is `/projects/reports/apps/dev/api`. The header identifies the project and **Applications** is active in the sidebar. With inventory access, the parent breadcrumb opens the application list. A shared link, a new tab and a reload all identify the same application. Browser Back returns to the workspace you came from.
 
-Releases keeps the project's artifact catalog visible. The selected stack
-narrows deployment observations and sets the target in the **Deploy a release**
-dialog. A successful inventory refresh clears a stack that was removed or
-renamed. If the refresh fails, the last selection is marked stale.
+Choose **All stacks** for a project's full inventory. Choose a stack to narrow the lists, for example `/projects/reports/apps?stack=dev`. Stack details have their own address, such as `/projects/reports/stacks/dev`. A release belongs to its build project and can have observations from several stacks. Selecting a stack narrows those observations and sets the initial deployment target.
+
+The workspace badge counts the project's stacks. The footer summarizes the current scope. On narrow screens the header shows the stack name alone. Open the selector to read a long name in full.
 
 ## Consistent action placement {#consistent-action-placement}
 
@@ -179,43 +169,15 @@ application that happens to be named `omnitron`.
 
 ## Route map {#route-map}
 
-All routes other than `/auth/sign-in` are gated by `AuthGuard`.
-A session-keyed access provider retrieves effective RPC permissions, gates page entry and hides unavailable actions. See [Console access](./access.md).
-Choose a project in the header to open project-scoped pages. The sidebar and
-command palette share the same destinations and effective permissions.
-**Workspace** contains Overview, Projects, Stacks and Applications. **Delivery**
-contains Releases, Deployments and Pipelines. **Observability** brings together
-logs, metrics, traces, alerts and Dashboard Builder. **Infrastructure** covers
-nodes, containers, topology, SSH and files. **Administration** contains access,
-audit, system information and settings. Direct links enforce the same entry rules.
+The sidebar and command palette use the same destinations and permissions. The daemon checks each read or action when the Console calls it. After sign-in, open a resource by its workspace and public name.
 
+| Where | Sections | Example URLs |
+| --- | --- | --- |
+| System | Projects, Nodes, SSH workspace, Files, Traces, Alerts, Access, Audit, System and Settings | `/projects`, `/nodes`, `/audit` |
+| Project | Applications and Stacks | `/projects/reports/apps`, `/projects/reports/stacks/dev` |
+| Both | Overview, Agent Studio, Releases, Deployments, Pipelines, Logs, Metrics, Topology, Containers and Dashboard Builder | `/` and `/projects/reports`, `/metrics` and `/projects/reports/metrics?stack=dev` |
 
-| Path | Page | Scope | Backing RPC |
-| ---- | ---- | ----- | ----------- |
-| `/access` | `AccessPage` | daemon | `OmnitronAccess` |
-| `/files` | `FilesPage` | daemon | `OmnitronFiles`, `OmnitronNodes` |
-| `/terminal` | `TerminalPage` | daemon | `OmnitronTerminal`, `OmnitronNodes` |
-| `/auth/sign-in` | `SignInPage` | guest | `OmnitronAuth.signIn` |
-| `/` | `DashboardPage` | global | aggregate from many services |
-| `/nodes` | `NodesPage` | global | `OmnitronNodes` |
-| `/projects` | `ProjectsPage` | global | `OmnitronProject` |
-| `/system` | `SystemInfoPage` | global | `OmnitronSystemInfo`, `OmnitronNodes.getNodeSystemSnapshot` |
-| `/settings` | `SettingsPage` | global | `OmnitronAuth` + config |
-| `/logs` | `LogsPage` | both | `OmnitronLogs` |
-| `/apps` | `AppsListPage` | project | `OmnitronProject.getProjectApps` |
-| `/apps/:name` | `AppDetailPage` | both | `OmnitronDaemon.getApp` + many |
-| `/stacks` | `StacksPage` | project | `OmnitronProject.listStacks` |
-| `/stacks/:name` | `StackDetailPage` | project | `OmnitronProject.listStacks` |
-| `/metrics` | `MetricsPage` | project | `OmnitronMetrics` (`querySeries` / `getStorageStatus`) |
-| `/topology` | `TopologyPage` | both | stack deployments, daemon processes and runtime containers |
-| `/containers` | `ContainersPage` | both | `OmnitronInfra.listContainers` for this host, `OmnitronProject.listStacks` for placement and remote observations |
-| `/releases` | `ReleasesPage` | both | `OmnitronRelease.list` |
-| `/deployments` | `DeploymentsPage` | project | `OmnitronProject.getDeployProgress`, `OmnitronRelease.deployments`, `OmnitronDeploy.getHistory` |
-| `/alerts` | `AlertsPage` | global | `OmnitronAlerts` |
-| `/pipelines` | `PipelinesPage` | both | `OmnitronPipelines` |
-| `/traces` | `TracesPage` | project | `OmnitronTraces` |
-| `/dashboard-builder` | `DashboardBuilderPage` | both | scoped application inventory, retained metric series and controller alerts |
-| `*` | redirect to `/` | — | — |
+A local project application opens in its project's **Applications** section. A remote deployment opens the stack that reports it. A standalone process belongs to the controller and can be inspected from system **Overview**. An account's permission to inspect a process and its permission to start or stop it are checked separately.
 
 ## Page-by-page {#page-by-page}
 
@@ -241,27 +203,13 @@ the error and offers **Retry**. Periodic polling pauses in a hidden tab.
 
 ### Apps list & detail {#apps-list--detail}
 
-`/apps` — table view of every managed app: status, instances,
-CPU, memory, restart count, mode (classic vs bootstrap),
-critical flag. Search matches application and stack names; the status filter and
-result count share Prism’s `FilterToolbar`. Reset restores the current stack’s
-complete inventory. Wide tables scroll inside their own keyboard-focusable region.
+Open **Applications** in a project. Each row identifies one deployment and its stack, process state, observed health, instances, PID, uptime, CPU and memory. Search by application or stack name, or filter by process state. Clearing those filters restores the inventory within the selected stack.
 
-`/apps/:name` — single-app deep dive:
-- Live status with restart history timeline.
-- Per-process breakdown (sub-processes for bootstrap mode).
-- The Metrics tab loads interactive history on demand. The application overview and categorical resource rankings load independently of the chart engine.
-- Health probes summary.
-- DI dependency graph (renders Mermaid via daemon's
-  `getDependencyGraph`).
-- Log stream with filter (level, grep).
-- Resolved environment variables.
-- Action buttons: Start / Stop / Restart / Reload / Scale.
-- Inspect button → drills into `OmnitronDaemon.inspect`.
+For a local application, **Overview** shows its process measurements and health checks. **Logs** shows its log entries and level filters. **Metrics** loads its history when opened. Operators with the corresponding permissions can start a stopped application, restart or stop a running one, or refresh the observations. Remote lifecycle actions belong to the target stack.
 
 ### Stacks {#stacks}
 
-`/stacks` shows cards for the current scope, including runtime status, online
+**Stacks** shows cards for the current scope, including runtime status, online
 and configured applications, and node count.
 
 Open a stack to inspect its runtime. The summary shows readiness, coverage and
@@ -372,13 +320,12 @@ included in that base command; CLI `--grep` is a regular expression.
 
 ### Metrics {#metrics}
 
-`/metrics` uses Prism charts for CPU and resident memory, with 5-minute,
+**Metrics** uses Prism charts for CPU and resident memory, with 5-minute,
 15-minute and 1-hour windows. Buckets are 10-second, 30-second and 1-minute
 averages respectively. Time labels use the browser's local timezone; byte values
 use binary units (KiB, MiB, GiB). CPU is not capped at 100%.
 
-The cards count applications in the selected project and stack, from the same
-inventory as the applications page. Histories preserve metric, application and
+In the system workspace, the cards summarize the controller’s processes. In a project, they count the applications in its selected stacks, using the same inventory as **Applications**. Histories preserve metric, application and
 reporting-node identity. Remote stack aliases are resolved from stack deployments
 and the node registry; a matching application name on another machine is not
 included. Application totals are the default; child-process lines are opt-in and
@@ -397,7 +344,7 @@ must not be added to the parent totals.
   Its store scan runs only while expanded, at most once per minute automatically.
 
 Use [Dashboard Builder](#dashboard-builder) in either workspace to compose panels.
-Its CPU and memory charts use the same retained observations as `/metrics`.
+Its CPU and memory charts use the same retained observations as the project's **Metrics** page.
 
 ### Topology {#topology}
 
@@ -485,10 +432,7 @@ explains cluster or platform restrictions; focus it to inspect the reason.
 
 ### Deployments {#deployments}
 
-`/deployments` follows transfer observations and recorded stack starts in the
-selected workspace. **Releases** selects a build and its target stack;
-**Stacks** shows configuration and observed execution; **Deployments** explains
-what operations were recorded; **Audit** retains the full event trail.
+Open **Deployments** in the system workspace to see transfers and recorded starts across projects. Choose a project or stack to narrow the table. A recorded stack with a known owner links to that project's stack. Open **Stacks** to inspect its current state, **Releases** to select a build, or **Audit** for the full event history.
 
 The default table shows the latest recorded start per stack, including its
 source, actor and release when recorded. It does not prove what is running now.
@@ -753,10 +697,7 @@ see [CLI output and lifecycle outcomes](./cli.md#webapp-console-ui).
 
 ## Project switcher {#project-switcher}
 
-The header shows the current workspace. Select a project to scope application
-inventory, stack operations and observations. The project store remembers the
-selection locally. Browser Back and Forward restore the workspace recorded for
-each history entry.
+The header shows the workspace named by the current URL. Use the workspace menu to revisit a project. Opening a link to another project takes you to the owner of the resource, even in a new tab. Browser Back returns to the previous address and its stack filter.
 
 ## Empty and unavailable data {#empty--error-states}
 
@@ -778,7 +719,7 @@ A missing permission is shown separately from a failed server request.
 ## Adding a new page {#adding-a-new-page}
 
 1. Put the page under `src/pages/` and register its lazy route in `src/routes/index.tsx`.
-2. Add its title, path, effective RPC permissions, project requirement and stack filter to `src/routes/navigation.tsx`. The sidebar, palette and route guard consume that definition.
+2. Declare the page's system or project scope, required RPC permissions and stack-filter support in `src/routes/navigation.tsx`. The sidebar, command palette and route guard read the same definition. Use the shared workspace URL builder for links to resources.
 3. Read through the typed Netron service in `src/netron/client.ts`. Reuse shared inventory for project data and `usePolledResource` for independently refreshed readings.
 4. Exercise direct entry, workspace changes and the least-privileged role that can use the page.
 
@@ -807,9 +748,7 @@ A missing permission is shown separately from a failed server request.
 
 Console pages use a single breadcrumb trail for location and navigation. A hidden level-one heading and the browser tab title retain the page name for accessibility. Parent crumbs use client-side routing, so navigating between sections preserves mounted workspaces and their SSH sessions. Page actions remain beside the trail; content headings still identify cards and subsections.
 
-Application links in the system overview open details by their full daemon
-handle, without requiring a project selection. The detail page retains role
-checks and links back to Overview when no project is selected.
+The active sidebar item identifies the section that owns the open resource. Parent breadcrumbs link to inventories the operator can read. Browser Back restores the referring page with its original workspace and filter.
 
 The application shell occupies the available viewport. Its header, navigation and status bar stay within the window, while ordinary pages scroll in the main region. SSH panes and the topology canvas own their internal scrolling. The status bar progressively hides secondary details on narrow screens while retaining connection and application health. Prism theme tokens supply terminal background, text, cursor and selection colors.
 
@@ -914,16 +853,13 @@ Run all Console tests with `pnpm --dir apps/omnitron/webapp test`. This command
 includes both `test/webapp` and colocated `webapp/src` tests using the same aliases
 as the package suite, including real topology node connection points.
 
-`src/theme.ts` defines Console’s light and dark surfaces through `PrismProvider`
-`themeOverrides`. Component geometry and interaction remain in Prism rather than
-being reimplemented in each page. For frontend-only changes, rebuild the Console
-assets and reload the browser; a daemon or application restart is unnecessary.
+The Console passes the shared `omnitronTheme` from Prism to `PrismProvider`. The theme supplies the light and dark surfaces, component geometry and interaction states.
 
 ## Automation workspace {#automation-workspace}
 
-The [Pipelines workspace](./automation.md) uses Prism tabs and data tables with responsive MUI editors and a run-details drawer. Step controls include local/registered-node selection, working directory, dependencies, timeout and advanced retry/environment settings. Execution requires review of the displayed source and targets. Run history loads summaries; step output is fetched only for the opened run, with stale-data and truncation indicators.
+Administrators use **Pipelines** to edit task dependencies, select execution targets and review an exact definition before starting a run. Open a recorded run to inspect its steps and output. [Pipeline execution and recovery](./automation.md)
 
-This workspace is restricted to administrators because its scripts execute with infrastructure privileges. Embedded provider sessions and delegated agent controls are specified in the [agent architecture](./agents.md); they are not live Console features yet.
+**Agent Studio** connects an operator to a model through a local subscription connector. In the system workspace an interview can recommend a project starter. In a project workspace the conversation belongs to that project and can be limited to one stack. The operator reviews the proposal. File creation and deployment use the permissions and review process of their respective services. [Try Agent Studio](./studio.md#try-agent-studio)
 
 ## Watch configuration {#watch-configuration}
 

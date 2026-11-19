@@ -248,18 +248,11 @@ interface LayoutNavItem {
 }
 ```
 
-Active-state rules (implemented in `isNavItemActive`):
+The sidebar and top navigation highlight the section for the current pathname. On `main` after 0.4.14, an internal link can carry a filter or fragment and still mark its section active. For example, a link to `/projects/reports/apps?stack=dev` stays highlighted on `/projects/reports/apps/dev/api`.
 
-- **Exact match** — `path` equals the current pathname (query/hash and
-  trailing slashes are stripped first).
-- **`selectionPrefix`** — active when the path starts with any listed
-  prefix. Accepts a string or an array (any prefix wins) so one entry
-  can span two URL spaces, e.g.
-  `selectionPrefix: ['/communities', '/c/']`.
-- **`deepMatch`** (default `true`) — active when `path` is a
-  segment-aligned prefix of the pathname (`/admin/orgs` stays
-  highlighted on `/admin/orgs/list`, but `/product` does **not** match
-  `/products`). Set `deepMatch: false` to require an exact match.
+- **Exact match** compares the path segments after removing the query, fragment and trailing slash.
+- **`deepMatch`** also matches child paths by default. Use `deepMatch: false` on a workspace overview so that opening a child section moves the highlight there.
+- **`selectionPrefix`** adds a literal prefix for an alternate URL. An entry at `/communities` can use `selectionPrefix: '/c/'` to stay active on `/c/opensource`. The final slash distinguishes this prefix from `/calendar`.
 
 Items with `children` render as inline-expandable groups; a parent
 stays highlighted when one of its descendants is active.
