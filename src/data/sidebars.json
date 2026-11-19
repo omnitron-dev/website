@@ -959,6 +959,10 @@
     },
     {
       "type": "doc",
+      "id": "omnitron/flows"
+    },
+    {
+      "type": "doc",
       "id": "omnitron/agents"
     },
     {

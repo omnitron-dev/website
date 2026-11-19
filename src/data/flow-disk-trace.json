@@ -1,0 +1,77 @@
+[
+  {
+    "gib": 14,
+    "low": false,
+    "effect": null,
+    "path": [
+      "disk",
+      "threshold"
+    ]
+  },
+  {
+    "gib": 10,
+    "low": false,
+    "effect": null,
+    "path": [
+      "disk",
+      "threshold"
+    ]
+  },
+  {
+    "gib": 9,
+    "low": true,
+    "effect": "Disk space is low",
+    "path": [
+      "disk",
+      "threshold",
+      "low"
+    ]
+  },
+  {
+    "gib": 8,
+    "low": true,
+    "effect": null,
+    "path": [
+      "disk",
+      "threshold"
+    ]
+  },
+  {
+    "gib": 11,
+    "low": true,
+    "effect": null,
+    "path": [
+      "disk",
+      "threshold"
+    ]
+  },
+  {
+    "gib": 12,
+    "low": false,
+    "effect": "Disk space recovered",
+    "path": [
+      "disk",
+      "threshold",
+      "restored"
+    ]
+  },
+  {
+    "gib": 13,
+    "low": false,
+    "effect": null,
+    "path": [
+      "disk",
+      "threshold"
+    ]
+  },
+  {
+    "gib": 9,
+    "low": true,
+    "effect": "Disk space is low",
+    "path": [
+      "disk",
+      "threshold",
+      "low"
+    ]
+  }
+]

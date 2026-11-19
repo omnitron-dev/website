@@ -859,7 +859,9 @@ The Console passes the shared `omnitronTheme` from Prism to `PrismProvider`. The
 
 Administrators use **Pipelines** to edit task dependencies, select execution targets and review an exact definition before starting a run. Open a recorded run to inspect its steps and output. [Pipeline execution and recovery](./automation.md)
 
-**Agent Studio** connects an operator to a model through a local subscription connector. In the system workspace an interview can recommend a project starter. In a project workspace the conversation belongs to that project and can be limited to one stack. The operator reviews the proposal. File creation and deployment use the permissions and review process of their respective services. [Try Agent Studio](./studio.md#try-agent-studio)
+**Flows** connects sources, decisions and outputs. An administrator can test a sample event and inspect a proposed effect before activating the graph in the selected workspace. [Build an event flow](./flows.md)
+
+**Agent Studio** connects an operator to a team through local subscription connectors. In the system workspace an interview can recommend a project starter. In a project workspace the conversation belongs to that project and can be limited to one stack. The operator reviews the proposal. File creation and deployment use the permissions and review process of their respective services. [Try Agent Studio](./studio.md#try-agent-studio)
 
 ## Watch configuration {#watch-configuration}
 

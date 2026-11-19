@@ -13,6 +13,8 @@ This executor is for trusted administrators. A separate child process prevents a
 
 In Omnitron `main` after 0.4.14, the Console dependency editor lets you connect pipeline steps and review their predecessors with the keyboard. It saves the same `dependsOn` edges the CLI reads, and the server checks the graph before it is saved. Acceptance criteria for additional workflow operations and durable waits are in the [workflow runtime contract](./workflow-runtime.md).
 
+For disk-space events, thresholds, local notifications and handing a task to a Studio member, open **Flows**. A flow can request review or start an already approved release-only pipeline. [Event flows](./flows.md)
+
 ## First automation {#first-automation}
 
 Save this as `inspect.json`, replacing the working directory with an existing project directory:

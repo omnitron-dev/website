@@ -2,14 +2,31 @@
 id: "omnitron/studio"
 slug: "/docs/omnitron/studio"
 title: Agent Studio and automation
-description: Plan a project with a local Codex or Antigravity connection, review the generated starter and explore the design for delegated work and visual automation.
+description: Create a team with a lead model, connect local adapters, share work and review live automation proposals in the flow editor.
 ---
 
 # Create, automate and operate one system
 
 :::info{title="Availability"}
-The project interview, reviewed starters, subscription connectors and pipeline dependency editor described here are on Omnitron `main` after 0.4.14. The sections on federation, device operations and durable arbitrary workflows describe the architecture under development.
+Team rooms, local subscription connectors, the visual flow editor and reviewed project starters are available on Omnitron `main` after 0.4.14. Federation, native mobile clients and device operations in the architecture sections are development targets.
 :::
+
+## Work with a team {#team-room}
+
+Open **Agent Studio → New team** in the project workspace. Give the room a name. Select a lead with room tool support and choose which other providers may participate. Set a maximum member count, delegation count and cost tier. You can inspect the empty team before sending the first message.
+
+Connect the installed adapters with the commands shown in Studio. Run `omnitron studio doctor` on the controller to inspect their availability. Codex and supported signed-in Claude Code installations can lead a room. Antigravity can complete an assignment using its strict headless adapter. Studio reports Kimi's qualification status through the same doctor.
+
+| You want to | Where to do it | What you can verify |
+| --- | --- | --- |
+| Send a question to one member | Select the recipient in **Chat** | The journal names the sender, recipient and provider result |
+| Split work between two models | **Members → Add member**, then **Tasks**, or ask the lead to delegate | Independent assignments, status and returned results |
+| Retain an agreed constraint | **Memory → Add note** | Author and revision, including a conflict if someone edited the note first |
+| Turn a suggestion into an automation | **Flows → Open in flow editor** | Original workspace, editable graph, sample event and proposed deliveries |
+
+A lead can inspect connected model catalogs and ask the controller to enlist a qualified specialist. Model choice respects the room's provider and price limits. A connector's advertised model name alone gives no information about its cost or skill. When assigned workers finish, their results become available to the lead for a synthesis in its original provider conversation.
+
+Only explicitly shared turns and notes are available to teammates. The controller keeps the local subscriptions, provider continuations and operator session separate. A flow proposal is a draft. The administrator reviews its actual effects in the editor. [Build a disk-space flow](./flows.md)
 
 ## Try Agent Studio {#try-agent-studio}
 
@@ -43,7 +60,7 @@ obtain basic quality.
 
 Reviewed against [Omnitron `ea166e5a`](https://github.com/omnitron-dev/omni/commit/ea166e5af56e462941363729ebf381d7412adfa2)
 and [Xec `b2b6aab4`](https://github.com/xec-sh/xec/commit/b2b6aab4b4b0d321996ca26cd10f7b7fb92aff78)
-on 16 November 2026. The table records that baseline. The interview, project form and dependency editor described above extend it in the source version after 0.4.14.
+on 16 November 2026. The table records that baseline. The table records the historical implementation at those commits. The current team room and event-flow guide above describe later work on main, including turn-scoped MCP and the controller’s persistent flow inbox.
 
 | Existing implementation | Reuse | Gap before this design can ship |
 | --- | --- | --- |
@@ -61,13 +78,16 @@ identity. The [agent security design](./agents.md) remains the authority for
 delegation and isolation; this document adds creation, federation and workflow
 semantics without defining a second permissions system.
 
-## Learn from other systems without inheriting their boundaries {#reference-systems}
+## Coordination and automation references {#reference-systems}
 
 | Reference | Useful design input | Omnitron decision |
 | --- | --- | --- |
 | [T3 Code architecture](https://github.com/pingdotgg/t3code/blob/0a842b222d5732e12451484098e035429dc0f315/docs/internals/overview.md) | Server-owned workspaces, shared client state, transactional intent and effect handling | Keep these boundaries; use Netron/Titan and the existing operation model |
 | [T3 connection runtime](https://github.com/pingdotgg/t3code/blob/0a842b222d5732e12451484098e035429dc0f315/docs/internals/connection-runtime.md) | One connection lifecycle per environment; separate transport health from data freshness | Put shared synchronization in the Netron client layer, not individual views |
 | [Impeccable](https://impeccable.style/docs/) | Product context, design-system context, focused critique and deterministic design checks | Built-in versioned quality guidance plus independent checks; subjective critique remains labelled judgment |
+| [Claude Code teams](https://code.claude.com/docs/en/agent-teams) | One lead, named teammates, a task list and addressed messages | Each room member can use a different local adapter and provider conversation |
+| [OpenAI agent orchestration](https://openai.github.io/openai-agents-python/multi_agent/) | A manager can retain responsibility while specialists work | Collect the results of an assignment group into one follow-up for the same lead |
+| [AutoGen selector teams](https://microsoft.github.io/autogen/stable/user-guide/agentchat-user-guide/selector-group-chat.html) and [Google ADK](https://google.github.io/adk-docs/agents/multi-agents/) | Role selection and explicit termination | Bind participation to verified catalogs and bound child work per operator request |
 | [Node-RED concepts](https://nodered.org/docs/user-guide/concepts) | Message-driven flows, reusable subflows and understandable composition | Typed ports and explicit persistence, backpressure and effect policy |
 | [n8n queue mode](https://docs.n8n.io/hosting/scaling/queue-mode/) | Separate ingress, queued work and workers | Bounded project queues and explicit admission; execution remains in Xec |
 | [Flowise Agentflow](https://docs.flowiseai.com/using-flowise/agentflowv2) | Explicit agent steps, flow state and human decisions | Agent steps use the same task contract and verifier as other entry points |
