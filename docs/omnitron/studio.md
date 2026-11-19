@@ -15,7 +15,7 @@ Team rooms, local subscription connectors, the visual flow editor and reviewed p
 
 Open **Agent Studio → New team** in the project workspace. Give the room a name. Select a lead with room tool support and choose which other providers may participate. Set a maximum member count, delegation count and cost tier. You can inspect the empty team before sending the first message.
 
-Connect the installed adapters with the commands shown in Studio. Run `omnitron studio doctor` on the controller to inspect their availability. Codex and supported signed-in Claude Code installations can lead a room. Antigravity can complete an assignment using its strict headless adapter. Studio reports Kimi's qualification status through the same doctor.
+Connect the installed adapters with the commands shown in Studio. Run `omnitron studio doctor` on the controller to inspect their availability. Codex and supported signed-in Claude Code installations can lead a room. Antigravity can complete an assignment using its strict headless adapter. The built-in Kimi check reports whether an installation is available. Running Kimi in a room requires a connector qualified for that installation.
 
 To connect your own inference service, run a connector on the controller under its administrator's authority. The connector calls `OmnitronStudio.connectAdapter` and advertises its models for one Console account and project under a name such as `example.org/research`. Select it as the lead when it supplies room tools, or enable it under **Team limits → Allowed adapters** before assigning it work. Existing teams keep their approved providers as new connectors arrive.
 
@@ -41,22 +41,15 @@ For an existing registered project, select its workspace and open a conversation
 
 [Choosing Xec, Kysera and a service](./projects.md#choose-a-project) explains exactly what each starter runs.
 
-## The everyday experience {#the-everyday-experience}
+## Workflows and their current limits {#the-everyday-experience}
 
-| Intent | Experience | Durable result |
+| Workflow | Available on main | What still needs implementation |
 | --- | --- | --- |
-| Create a project | Describe users and outcomes; review the proposed contracts and preview | Project specification, source, checks and an accepted artifact |
-| Change an existing system | Select project and environment; review the affected behavior and patch | Scoped change with evidence and a deployable revision |
-| Automate a process | Connect typed operations visually or edit their source | One versioned executable definition |
-| Delegate work | Choose allowed targets, data destinations and budget | A task with a responsible human and bounded child grants |
-| Follow from a phone | Resume the same run, inspect evidence, answer a pending decision | A server-recorded decision bound to the current operation |
-| Operate a device | Enroll it and use its declared, consented capabilities | Device-specific operation receipts; unsupported actions remain unavailable |
-
-The target experience asks about outcomes, data ownership and necessary
-permissions. It discovers the project structure, selects compatible tools and
-loads relevant engineering guidance. Engineers can inspect and pin that
-selection; they should not have to assemble a collection of skill folders to
-obtain basic quality.
+| Start a project | Discuss requirements, inspect the starter's files and dependencies, and approve creation in Projects | Agent edits in an isolated checkout with independent acceptance |
+| Change an existing project | Open its Studio room, attach selected text, assign a reviewer and record the result | Applying an agent's proposed patch to the working tree |
+| Automate an operation | Draw a graph, preview a sample, review the revision and follow delivery receipts | Editing and activating another controller's graph from the same editor |
+| Observe a mesh | Select an enrolled node and mount, observe free space and inspect gaps after reconnecting | Replaying samples that were never received by the monitoring controller |
+| Work from a phone | Use the responsive Console to follow tasks and review proposals | Native mobile clients and consented device operations |
 
 ## Foundations and remaining work {#implementation-baseline}
 
