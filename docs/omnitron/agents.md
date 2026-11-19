@@ -7,7 +7,9 @@ description: Architecture and acceptance criteria for provider adapters, delegat
 
 # Agents and delegated operations
 
-This document specifies the next agent integration. **Embedded provider sessions, delegated agent identities, custom role editing, isolated agent workers and approval grants are not implemented in this release.** Existing MCP tools and administrator Xec automation are useful building blocks, but do not provide this security boundary.
+The [Agent Studio walkthrough](./studio.md#try-agent-studio) covers the Codex and Antigravity subscription adapters in Omnitron `main` after 0.4.14. A Studio role specifies the work product expected from a conversation. Infrastructure permissions still belong to the authenticated operator and are checked when an operation is requested.
+
+This design specifies delegated infrastructure identities, isolated workers, custom role editing and scoped approval grants. Those capabilities have separate implementation and acceptance criteria.
 
 Start with the [current access model](./access.md), [Xec automation](./automation.md) and [monitoring interfaces](./observability.md). Keep provider integration optional: installing Omnitron must not require an agent SDK, provider account or inference service.
 

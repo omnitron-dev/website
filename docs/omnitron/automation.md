@@ -11,10 +11,7 @@ Use **Pipelines** in Console to create an automation, review its source and targ
 
 This executor is for trusted administrators. A separate child process prevents a script from blocking the daemon's JavaScript event loop, but does **not** sandbox its filesystem, network or operating-system privileges. Do not give an untrusted agent the local daemon socket or this executor. See the [agent integration design](./agents.md).
 
-Visual authoring and durable workflows are specified in the
-[creation and automation design](./studio.md) and
-[workflow runtime contract](./workflow-runtime.md). They are planned extensions of
-this execution path, not features already provided by this release.
+In Omnitron `main` after 0.4.14, the Console dependency editor lets you connect pipeline steps and review their predecessors with the keyboard. It saves the same `dependsOn` edges the CLI reads, and the server checks the graph before it is saved. Acceptance criteria for additional workflow operations and durable waits are in the [workflow runtime contract](./workflow-runtime.md).
 
 ## First automation {#first-automation}
 

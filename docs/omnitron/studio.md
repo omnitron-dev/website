@@ -1,28 +1,26 @@
 ---
 id: "omnitron/studio"
 slug: "/docs/omnitron/studio"
-title: Creation and automation — design
-description: Design for a private project studio, federated agents, visual automation and shared web, desktop and mobile clients on Omnitron.
+title: Agent Studio and automation
+description: Plan a project with a local Codex or Antigravity connection, review the generated starter and explore the design for delegated work and visual automation.
 ---
 
 # Create, automate and operate one system
 
-:::info{title="Design proposal — 16 November 2026"}
-This is a development contract, not a released feature list. The existing
-supervisor, Xec automation, Netron services and Prism interfaces are foundations.
-A project-creation studio, isolated agent federation, durable visual workflows
-and native mobile clients still require implementation and acceptance.
+:::info{title="Availability"}
+The project interview, reviewed starters, subscription connectors and pipeline dependency editor described here are on Omnitron `main` after 0.4.14. The sections on federation, device operations and durable arbitrary workflows describe the architecture under development.
 :::
 
-Omnitron should let an engineer describe a product, inspect its design, build
-it with agents, verify the result and operate it on their own infrastructure.
-The same platform should let that engineer automate a recurring process as a
-visual flow or a versioned program. Human and agent clients must share the same
-operation contracts, authority and evidence.
+## Try Agent Studio {#try-agent-studio}
 
-The product promise is **a private full-stack engineering environment**, from
-creation through operation. A chat interface is one input method. A canvas is
-one editor. Neither owns execution or decides that work has succeeded.
+1. Open **Workspace → Agent Studio** as an operator or administrator. Select Codex or Antigravity. Under **Connection details**, copy the connection command and run it on the daemon host as the OS user who owns the subscription. Leave that process running.
+2. Choose **Plan a project** in the system workspace. Describe the work and one result you could observe. For example, “Record the result of a local check so I can inspect it tomorrow.” The analyst asks for missing details such as whether the check runs on demand or needs a resident service.
+3. Open **Review project starter** when the recommendation is ready. The form shows the workspace destination, exact dependencies, commands, effects and source files. You can change any selection. The server derives a new review when the plan changes.
+4. An administrator can select **Create project** to write and register the reviewed files. The generated README gives the installation and first-run commands. The same form is available directly in **Projects**.
+
+For an existing registered project, select its workspace and open a conversation there. The connector discovers models from the installed provider CLI. Pick a model explicitly, or supply a qualified policy for automatic routing by task and budget. Each completed turn records the token counts the provider reports. A private temporary working directory separates the conversation from the project files. **Attach text** adds selected text to the editable prompt. The provider receives the submitted text through the subscriber's account.
+
+[Choosing Xec, Kysera and a service](./projects.md#choose-a-project) explains exactly what each starter runs.
 
 ## The everyday experience {#the-everyday-experience}
 
@@ -35,17 +33,17 @@ one editor. Neither owns execution or decides that work has succeeded.
 | Follow from a phone | Resume the same run, inspect evidence, answer a pending decision | A server-recorded decision bound to the current operation |
 | Operate a device | Enroll it and use its declared, consented capabilities | Device-specific operation receipts; unsupported actions remain unavailable |
 
-The normal interface asks about outcomes, data ownership and necessary
+The target experience asks about outcomes, data ownership and necessary
 permissions. It discovers the project structure, selects compatible tools and
 loads relevant engineering guidance. Engineers can inspect and pin that
 selection; they should not have to assemble a collection of skill folders to
 obtain basic quality.
 
-## What the current code actually provides {#implementation-baseline}
+## Foundations and remaining work {#implementation-baseline}
 
 Reviewed against [Omnitron `ea166e5a`](https://github.com/omnitron-dev/omni/commit/ea166e5af56e462941363729ebf381d7412adfa2)
 and [Xec `b2b6aab4`](https://github.com/xec-sh/xec/commit/b2b6aab4b4b0d321996ca26cd10f7b7fb92aff78)
-on 16 November 2026:
+on 16 November 2026. The table records that baseline. The interview, project form and dependency editor described above extend it in the source version after 0.4.14.
 
 | Existing implementation | Reuse | Gap before this design can ship |
 | --- | --- | --- |
@@ -54,9 +52,9 @@ on 16 November 2026:
 | Omnitron release and backup operations | Scoped plans, artifact identities, selected operation journals and reconciliation | No universal exactly-once contract for arbitrary external effects |
 | Netron, Titan and Access | Communication, lifecycle, principal and policy primitives | Run-scoped agent delegation and enforcement at every tool boundary |
 | [MCP bridge](https://github.com/omnitron-dev/omni/blob/ea166e5af56e462941363729ebf381d7412adfa2/apps/omnitron/src/mcp/mcp-bridge.ts) | Existing local operator tools | Protocol lifecycle, validation, cancellation and bounded concurrency need qualification before use as a restricted agent broker |
-| Prism and Lumen | Shared UI, interactive documentation, local search and static publication | Accessible workflow authoring, agent workbench and native mobile renderers |
+| Prism and Lumen | Shared UI, interactive documentation, local search and static publication | Native mobile renderers and visual authoring for additional workflow operations |
 
-The current MCP bridge advertises a fixed older protocol and version, sends
+The MCP bridge at that revision advertises a fixed older protocol and version, sends
 initialization notification itself and ignores cancellation notifications.
 Existing local operator access must not be represented as a sandboxed agent
 identity. The [agent security design](./agents.md) remains the authority for

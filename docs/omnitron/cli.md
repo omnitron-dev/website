@@ -585,9 +585,11 @@ that guarantee.
 | `omnitron list` (alias `ls`) | One row per app, then one per topology process |
 | `omnitron status` | Daemon-wide overview (apps, uptime, leader, infra) |
 | `omnitron config [--json]` | Print the resolved ecosystem config |
-| `omnitron init [--force]` | Scaffold `omnitron.config.ts` in the CWD. Existing files require confirmation or explicit `--force`; symbolic links are refused |
+| `omnitron init [--force]` | Write a starter in the current directory. Overwriting an existing configuration requires confirmation or explicit `--force`. |
+| `omnitron init --existing --check` | On `main` after 0.4.14, preview the framework declarations and configuration for an existing package or workspace. |
+| `omnitron init --existing` | Write an empty application and stack configuration for registration. |
 
-Cancelling the overwrite prompt preserves the original file and exits with status `130`. An existing file in a noninteractive session requires `--force`; a new file needs no confirmation.
+Cancelling the overwrite prompt with Ctrl+C preserves the existing configuration and exits with status `130`. Noninteractive replacement requires `--force`. On the source version after 0.4.14, `--automation`, `--database` and `--service` select independent capabilities for a new [project starter](./projects.md#choose-a-project). For existing workspaces, follow the [registration walkthrough](./projects.md#bring-an-existing-project).
 
 **Reading the child rows of `omnitron list`.** Each indented row is
 one entry of the app's process topology, and two of its columns say

@@ -2,7 +2,7 @@
 id: "omnitron/projects"
 slug: "/docs/omnitron/projects"
 title: Projects and stacks
-description: One monorepo owns its applications and libraries; named stacks express deployment environments without duplicating projects.
+description: Create or register Xec and Kysera projects, operate one-shot commands and supervise applications in named environments.
 ---
 
 # Projects and stacks
@@ -23,6 +23,43 @@ and explicitly configured external services.
 Keep shared internal code in workspace packages. Fetch independently versioned libraries
 from the npm registry and lock their versions. A development checkout is an explicit
 local override, not a production dependency on another repository's filesystem.
+
+## Choose a project from its workload {#choose-a-project}
+
+The source version of Omnitron after 0.4.14 offers three independent choices in **Projects → Create project**. Start with the job you need to run.
+
+| Requirement | Choose | First observable result |
+| --- | --- | --- |
+| Run a repeatable command on demand | Xec automation | `npm run automation` checks the generated programs and exits. |
+| Store and read data from a script | Kysera with SQLite, PostgreSQL or MySQL | `npm run data` creates the example table if needed, inserts one event and reads it back. |
+| Run a task and retain its result | Xec and Kysera | The Xec task runs the data command. One execution records one event. |
+| Keep an application running | A Node or Titan service | Omnitron can start the process in its `dev` stack and observe its readiness. Automation and storage remain independent choices. |
+
+For example, an on-demand local report needs a command and a database. Run these commands in an empty directory.
+
+```bash
+omnitron init --name weekly-report --automation --database sqlite --service none
+npm install
+npm run automation
+```
+
+This creates a starter that demonstrates persistence. The report's queries and schedule are yours to define. Its manifest contains Xec, the Kysera executor, Kysely and the SQLite driver. Both Xec and Kysera can also run independently. A command-only project has zero stacks.
+
+To operate the task through the controller, generate its definition in the project directory with `npm run --silent pipeline`. The generated README takes you through checking, saving, reviewing and starting that exact definition. Its run and output appear under **Pipelines** in the system workspace. The review pins the graph and working directory. Execution uses the source and dependencies present there when the run starts.
+
+The [Studio interview](./studio.md#try-agent-studio) offers a guided way to choose the same capabilities and inspect their effects before creating files.
+
+## Bring an existing Xec or Kysera project {#bring-an-existing-project}
+
+From the repository or workspace member you want to manage, inspect the detected package declarations, generate the configuration, then register the directory.
+
+```bash
+omnitron init --existing --check
+omnitron init --existing
+omnitron project add reports "$PWD"
+```
+
+The preview reads package manifests and declared npm, Yarn or pnpm workspace members. The write adds only `omnitron.config.ts` with empty `apps` and `stacks`. Your existing scripts, dependencies, lockfile and database keep their current lifecycle. If the repository already has a configuration, review it and go directly to registration.
 
 ## Start with one configuration {#start-with-one-configuration}
 
