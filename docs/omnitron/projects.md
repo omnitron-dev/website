@@ -26,16 +26,33 @@ local override, not a production dependency on another repository's filesystem.
 
 ## Choose a project from its workload {#choose-a-project}
 
-The source version of Omnitron after 0.4.14 offers three independent choices in **Projects → Create project**. Start with the job you need to run.
+Omnitron `main` after 0.4.14 offers independent choices for automation, storage and supervision in **Projects → Create project**. Choose a job below to see the corresponding CLI command. Run each example in its own empty directory.
 
-| Requirement | Choose | First observable result |
-| --- | --- | --- |
-| Run a repeatable command on demand | Xec automation | `npm run automation` checks the generated programs and exits. |
-| Store and read data from a script | Kysera with SQLite, PostgreSQL or MySQL | `npm run data` creates the example table if needed, inserts one event and reads it back. |
-| Run a task and retain its result | Xec and Kysera | The Xec task runs the data command. One execution records one event. |
-| Keep an application running | A Node or Titan service | Omnitron can start the process in its `dev` stack and observe its readiness. Automation and storage remain independent choices. |
+:::tabs{label="Choose a standalone project"}
+:::tab{label="Xec" value="xec"}
+Use Xec for an on-demand repository check. The starter has one runtime dependency, `@xec-sh/core`.
 
-For example, an on-demand local report needs a command and a database. Run these commands in an empty directory.
+```bash
+omnitron init --name repo-check --automation --service none
+npm install
+npm run automation
+```
+
+The command checks the generated programs with Node, prints the filenames and exits. Extend `starter-task.js` with the work your check should perform.
+:::
+:::tab{label="Kysera" value="kysera"}
+Use Kysera when a script needs to store and retrieve data. SQLite lets you try the whole path on your machine.
+
+```bash
+omnitron init --name observations --database sqlite --service none
+npm install
+npm run data
+```
+
+The command creates `starter_events` in `starter.sqlite`, inserts one event through the Kysera executor and reads it back by its ID. For an existing PostgreSQL or MySQL database, select `--database postgresql` or `--database mysql` at creation and supply `PROJECT_OBSERVATIONS_DATABASE_URL` when running the command. Use a database where the example may create a table and write a row.
+:::
+:::tab{label="Xec + Kysera" value="xec-kysera"}
+Combine them for a job that must leave a durable result, such as recording the outcome of a local check.
 
 ```bash
 omnitron init --name weekly-report --automation --database sqlite --service none
@@ -43,7 +60,11 @@ npm install
 npm run automation
 ```
 
-This creates a starter that demonstrates persistence. The report's queries and schedule are yours to define. Its manifest contains Xec, the Kysera executor, Kysely and the SQLite driver. Both Xec and Kysera can also run independently. A command-only project has zero stacks.
+Xec checks the programs and invokes the data command. The output includes the saved event ID. Each fresh invocation writes one row. The manifest includes Xec, the Kysera executor, Kysely and the SQLite driver. Add your report queries and schedule when the workload calls for them.
+:::
+:::
+
+Each example runs to completion and declares zero stacks. If a process needs to stay online, select `--service node` for a plain worker or `--service titan` for Titan's application lifecycle. Omnitron then declares a `dev` stack and observes the worker's readiness. You can combine either service with the same automation and storage choices.
 
 To operate the task through the controller, generate its definition in the project directory with `npm run --silent pipeline`. The generated README takes you through checking, saving, reviewing and starting that exact definition. Its run and output appear under **Pipelines** in the system workspace. The review pins the graph and working directory. Execution uses the source and dependencies present there when the run starts.
 
