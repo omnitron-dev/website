@@ -251,12 +251,16 @@ phase waits for its admitted I/O before returning a failure, and installation
 publishes only after verification and durability succeed. These bounds reduce
 serial work without changing backup, live-state or rollback admission.
 
-After publishing and verifying a new runtime outside its build checkout, Xec
-runs read-only plan preparation and checkout cleanup concurrently. Both pipeline
-steps finish before the final result is returned. A cleanup failure leaves any
-prepared plan and runtime intact, reports failure and never applies the plan;
-inspect `xec update local-sync --status`. Activation and backend replacement wait
-for cleanup before starting.
+In Omnitron repository builds containing `1ffcb13c`, `local-stage` returns the
+installation receipt as soon as the sealed runtime is installed. `local-sync`
+returns the prepared plan for review. A separate process reclaims the temporary
+build directory. Keep the same `OMNITRON_DEV_CACHE` when inspecting cleanup.
+
+Run `pnpm exec xec update local-cleanup --status` to see each registered
+workspace, its last removal attempt and any error. After an interruption, run
+`pnpm exec xec update local-cleanup` to resume. The worker checks the directory's
+identity and the build lock before removal. The installed runtime and update
+receipt remain available throughout cleanup.
 
 Preparation is read-only with respect to running work. Its plan names the exact
 locally owned backup attempts that applying the update may cancel. Restores,

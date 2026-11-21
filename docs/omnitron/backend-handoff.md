@@ -252,10 +252,24 @@ The replacement proceeds through these boundaries:
 
 1. Reject active SSH sessions, file transfers, pipelines and release builds. Drain admitted RPC calls, property operations, Netron tasks and infrastructure reconciliation through their replies.
 2. Verify and install candidate/rollback artifacts; validate native container identity and specifications. Capture project ownership, retry backoff, monitoring configuration and application identities in a private checkpoint.
-3. Pause metric polling, wait for any child batch already in flight, and flush accepted samples to the configured storage. A failed or timed-out flush refuses the transfer and the incumbent resumes polling. Fence execution mutations with a new controller epoch. Persist the grant before enabling the new controller; stale controllers cannot write or acknowledge observations.
+3. Pause metric polling and alert evaluation. Finish collecting any requested child samples and persist the accepted batch. Wait for alert work already in flight to settle. Once these steps succeed, record the new controller grant before allowing its first mutation. The owner checks the epoch on writes and acknowledgements.
 4. Retire only backend services. The owner continues running applications and capturing logs.
 5. Start the candidate and adopt existing infrastructure. Open public RPC and resume metric polling once the candidate is ready.
 6. Verify public readiness, owner identity, epoch, application PIDs, start times and restart counts. Only then complete retirement.
+
+**If the handoff times out before retirement.** The serving backend resumes polling.
+Check `omnitron --json backend installation` for an unfinished activation and
+`omnitron --json status` for the owner and application generations.
+`omnitron --json metrics` shows the last committed write, queued samples and
+the count dropped in this process.
+
+A serving backend built from `0f4b697b` or a descendant reports what it was
+waiting for at the 30-second deadline. For example, `child metric sampling` identifies an
+outstanding pull, `metric storage flush` identifies persistence, and
+`writing the firing delivery receipt` identifies a database write after an alert
+was sent. `pendingSamples` and `writing` show the metric queue at that instant.
+Metric persistence can finish while a notification is still being delivered.
+Older builds reported a single metric timeout for all of these waits.
 
 A pool can replace a worker after the handoff under its normal recycling policy. Compare the inventory captured at transfer time first. For a later PID change, match the worker ID in the owner log to its recycling reason (for example, `max_lifetime`) and its exit code.
 
