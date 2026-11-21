@@ -649,7 +649,7 @@ interface IDaemonConfig {
   auth?:       { jwtSecret? };
   healthMonitor?: { intervalMs?, concurrency?, offlineTimeoutMs?, ...retentionDays? };
   applicationReadiness?: Record<string, AppReadinessConfig>; // qualified app names, HTTP fallback
-  backups?: { databaseTimeoutMs?: number }; // PostgreSQL dump/restore, default 1800000
+  backups?: { databaseTimeoutMs?: number; scheduledDatabaseExclusions?: string[] };
 }
 ```
 
@@ -672,14 +672,15 @@ PostgreSQL dump and restore, including streams, compression and durable file
 publication. Invalid values refuse startup before backup RPC and schedules become
 available. S3 object transfers and Tor archives do not use this setting.
 
-A running daemon retains its current policy. Apply a reviewed
-[backend replacement](./backend-handoff.md) or planned restart to load a change;
-editing the file alone does not reconfigure it. After activation,
-`omnitron backup schedules --json` exposes the effective `databaseTimeoutMs`,
-schedules and stack coverage. A larger budget allows a large database more time;
-it does not reserve disk space or prove the archive can be restored. An expired
-restore does not undo SQL already applied; see the
-[backup and restore boundaries](./cli.md#backups).
+Load a changed policy through a planned restart or a reviewed
+[backend replacement](./backend-handoff.md). Read the effective
+`databaseTimeoutMs` and the last scheduled pass with
+`omnitron backup schedules --json`. The deadline includes time spent writing a
+growing archive. At expiry, the diagnostic reports the phase and archive bytes
+processed. For a gzip dump this count is compressed bytes. PostgreSQL reports
+uncompressed transfer progress separately. Confirm that storage has room for
+the whole archive when increasing the budget. SQL applied before a restore
+expires can remain in the database. See [backup and restore](./cli.md#backups).
 
 #### Exclude local databases from scheduled dumps {#scheduled-database-exclusions}
 

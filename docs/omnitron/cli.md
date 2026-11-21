@@ -284,6 +284,13 @@ expired observation records `recovery-required` without automatically retiring a
 possibly healthy candidate. Inspect the receipt and reconcile the complete
 serving state, or request recovery; neither operation repeats an uncertain start.
 
+A CLI built with `af43c7e3` reports the expired budget in `details.timeoutMs`.
+When a subsystem supplied a pending observation, `details.lastObservation`
+identifies its stage, reason and any reported PID. The same reason appears in
+`receipt.error` when you inspect the update offline. A `console` observation
+can identify a pending Console publication. An `applications` observation can
+name the application waiting for a new process generation.
+
 Applying the reviewed digest first records `draining`. In builds containing
 `d52ccdde`, a plan with `consolePublication` allocates the new nginx container
 while the current Console and applications are serving. Its native ID, port,
@@ -291,6 +298,22 @@ configuration and mounted build must match the plan. The receipt records when
 allocation started and finished in `consoleAllocation.target`. Once the old
 Console releases its address, the controller starts that same container and reads
 its build stamp over HTTP. A lost Docker reply is reconciled against the recorded ID.
+
+On a macOS instance running `d52ccdde`, launchd can finish stopping the service
+while its original nginx container still owns the Console name and port. In
+that case the update reports `The canonical Console belongs to another
+allocation` and holds application startup. The same error can block recovery
+on this build. Inspect the original ID in `plan.consolePublication.containerId`,
+the allocation receipt and the build served over HTTP before scheduling
+operator-assisted recovery. Preserve the existing container and its configuration
+until the serving identity has been established.
+
+The coordinator built with `d1068168` verifies which container holds the
+public name after supervised shutdown. It releases the reviewed predecessor
+by its full Docker ID before starting the selected controller. If Docker loses
+the reply, recovery observes that ID using the same retirement receipt. A
+different container at the public name blocks the operation. Rechecking a ready
+allocation preserves the time it first became ready.
 
 On admission, the controller pauses new backups and can cancel the unfinished
 attempts listed in the plan. An attempt that already finished is observed without
@@ -1073,6 +1096,14 @@ execution was confirmed, not that an archive was created. An unfinished or unkno
 outcome returns a nonzero exit code and `BACKUP_OUTCOME_UNCONFIRMED`, with the full
 receipt in the JSON error. An unreviewed attempt retains its resource claim. Neither command promotes
 an incomplete archive or invents a container ID when its creation was not acknowledged.
+
+In a backend built with `982499fb`, an expired database transfer carries the
+code `BACKUP_DEADLINE_EXCEEDED`. Read its `state` before acting. A `failed`
+receipt confirms that execution ended. An `unknown` receipt means the deadline
+elapsed and execution still needs reconciliation. The operation UUID links the
+receipt to the daemon diagnostic with the transfer phase and archive byte
+count. On earlier builds, look up the matching scheduled pass or daemon error
+when a receipt only reports `BACKUP_FAILED`.
 
 ### Review an unknown backup {#backup-unknown-review}
 

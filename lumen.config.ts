@@ -15,6 +15,7 @@ export default defineLumenConfig({
   clientEntry: 'src/site/client.ts',
   islands: documentIslands,
   trailingSlash: false,
+  renderConcurrency: 2,
   onBrokenLinks: 'throw',
   onBrokenAnchors: 'throw',
   sidebars,
