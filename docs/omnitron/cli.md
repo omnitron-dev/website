@@ -206,11 +206,17 @@ owns a reviewed transition of local supervision, Console and the recorded stacks
 | `omnitron runtime verify <directory>` | Verify the sealed files, links, executable bits and host compatibility without executing the candidate |
 | `omnitron runtime update prepare <runtime>` | Install the verified candidate and record the current installation, stack selections, infrastructure and recovery plan |
 | `omnitron runtime update apply <digest>` | Recheck and apply that exact SHA-256 plan once |
-| `omnitron runtime update status [digest]` | Read the durable receipt and verify its candidate without connecting to the daemon |
+| `omnitron runtime update status [digest]` | Read the durable receipt offline. Supplying a digest also checks the installed candidate. |
 | `omnitron runtime update reconcile <digest>` | Accept a fully observed serving candidate without stopping, starting or replaying an operation |
 | `omnitron runtime update recover <digest>` | Release interrupted admission before shutdown, or restore and inspect the previous installation after a process transition |
 
-From a clean Omnitron checkout, Xec prepares the same public operation:
+For progress during a local update, run `omnitron runtime update status`.
+In builds containing `d52ccdde`, agents can use `omnitron --json runtime update status --journal`
+to read the receipt even while the daemon is down or the candidate is unavailable.
+`receipt.phaseEnteredAt` records the first time the updater entered each phase.
+For a verified executable path, request `omnitron --json runtime update status <digest>`.
+
+Run Xec from a clean Omnitron checkout to prepare the update.
 
 ```bash
 export OMNITRON_DEV_CACHE=/path/to/private/development-cache
@@ -278,9 +284,17 @@ expired observation records `recovery-required` without automatically retiring a
 possibly healthy candidate. Inspect the receipt and reconcile the complete
 serving state, or request recovery; neither operation repeats an uncertain start.
 
-Applying the reviewed digest records `draining`, pauses new backups for that
-transaction and cancels only the reviewed attempts through the operation journal.
-An attempt that already finished is observed without replaying it. The controller
+Applying the reviewed digest first records `draining`. In builds containing
+`d52ccdde`, a plan with `consolePublication` allocates the new nginx container
+while the current Console and applications are serving. Its native ID, port,
+configuration and mounted build must match the plan. The receipt records when
+allocation started and finished in `consoleAllocation.target`. Once the old
+Console releases its address, the controller starts that same container and reads
+its build stamp over HTTP. A lost Docker reply is reconciled against the recorded ID.
+
+On admission, the controller pauses new backups and can cancel the unfinished
+attempts listed in the plan. An attempt that already finished is observed without
+replaying it. The controller
 then requires a fresh recovery certificate and unchanged restart intent
 before stopping any process. A new backup attempt or changed active revision
 requires a new review. The serving controller advertises
