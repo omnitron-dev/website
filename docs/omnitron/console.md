@@ -507,6 +507,8 @@ projects. The header switcher lists these projects.
 
 Open `/system` to inspect the host that runs a daemon. **Host** selects the connected daemon or a registered mesh node when your role permits remote reads. The selected node and detail tab are in the URL. Each reading identifies the reporting host, collection time and duration. **Live** polls every five seconds while the tab is visible. Pause it to compare numbers or use **Refresh system snapshot** for one observation.
 
+On Omnitron main after 0.4.14, **Inspect storage** opens the hardware readings when the selected host reports a fault. On the **Storage** tab, hardware state and filesystem capacity remain visible independently. You can see how many mirror members are in sync even when a filesystem has ample free space. See [Diagnose a degraded mirror](diagnostics.md#host-storage-health).
+
 The controller asks the selected node for its own snapshot over the authenticated mesh. Both ends must support this read. If an older node refuses the mesh credential, the page names the node and permission to check. A viewer can select a node. The node credential can answer for its own host only.
 
 CPU load, committed memory, the fullest mount and network throughput share a compact summary. **Overview** includes host and daemon uptime, process memory, the reported build and expandable per-core load. **Storage** lists all reported mounts by utilization with their available bytes. **Network** lists the reported external interfaces with both IP families and link speed. On updated peers the rate aggregates active external interfaces once samples are available. Older peers report their original network sampling scope.

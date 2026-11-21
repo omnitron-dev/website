@@ -65,6 +65,24 @@ does not prove application correctness: register domain health checks and
 monitor their coverage. Older daemons without the runtime indicator appear as
 unexamined coverage in `doctor`.
 
+## A running host with a failed disk {#host-storage-health}
+
+*Available on Omnitron main after 0.4.14.*
+
+A server can keep answering requests after losing one side of a two-disk mirror. The remaining disk serves reads and writes, but another failure can take the array offline. A free-space chart or a successful application health check cannot tell you how many copies of the data remain.
+
+Each Linux daemon reads its own kernel storage inventory on the monitoring interval. The built-in **Linux storage degraded** rule opens a critical alert on the first confirmed fault. For a RAID1 mirror, these three observations can appear in the same incident.
+
+| Kernel observation | Operator interpretation |
+| --- | --- |
+| `md0` reports `degraded=1` and one of two members in sync | The mirror has lost redundancy. |
+| `nvme1` reports `state=dead` | Linux can no longer use that controller. |
+| `nvme1n1` reports `sectors=0` | The namespace currently exposes no usable capacity. |
+
+Open **Alerts** to identify the reporting node. With system-read access, **Inspect storage** takes you directly to that host’s **Storage** tab. Use `omnitron --json system --node <node-id>` for the same data over the authenticated mesh. A kernel fault identifies the affected devices. A hardware technician can use those observations to distinguish a failed drive from problems with the slot, controller or power supply.
+
+Repeated samples update the same incident. A disconnected node, an unreadable device or a mirror still rebuilding cannot confirm recovery. Once the daemon observes restoration of the affected devices or their associated mirrors, it records a resolved transition. The originating daemon delivers critical transitions through its configured alert sink. The controller shows the incident when the node synchronizes. Update the controller first, followed by the monitored nodes. Older daemons can report free space without reporting hardware health.
+
 ## Process, health and start prerequisites {#process-health-and-start-prerequisites}
 
 `stack list`, `stack status` and Console show process lifecycle separately from
