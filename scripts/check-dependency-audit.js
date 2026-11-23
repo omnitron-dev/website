@@ -102,7 +102,13 @@ export function checkInstalled(root) {
   const bundled = matcherRoot(from(from(loader, '@omnitron-dev/lumen'), 'vite'));
   const expected = new Set([vite, bundled]);
   assert.equal(expected.size, 2, 'Expected separate site Vite and bundled Lumen copies');
-  assert.deepEqual(installedMatchers(realpathSync(join(root, 'node_modules'))), expected);
+  const installed = installedMatchers(realpathSync(join(root, 'node_modules')));
+  for (const directory of installed) {
+    assert.ok(expected.has(directory), 'Unexpected picomatch installation: ' + directory);
+  }
+  for (const directory of expected) {
+    assert.ok(installed.has(directory), 'Missing picomatch installation: ' + directory);
+  }
   for (const directory of expected) {
     const actual = {};
     for (const entry of readdirSync(directory, { recursive: true, withFileTypes: true })) {

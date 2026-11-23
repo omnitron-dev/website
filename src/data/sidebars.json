@@ -878,128 +878,158 @@
       "id": "omnitron/overview"
     },
     {
-      "type": "doc",
-      "id": "omnitron/projects"
+      "type": "category",
+      "label": "Projects and deployment",
+      "items": [
+        {
+          "type": "doc",
+          "id": "omnitron/projects"
+        },
+        {
+          "type": "doc",
+          "id": "omnitron/orchestrator"
+        },
+        {
+          "type": "doc",
+          "id": "omnitron/infrastructure"
+        },
+        {
+          "type": "doc",
+          "id": "omnitron/migrations"
+        },
+        {
+          "type": "doc",
+          "id": "omnitron/releases"
+        },
+        {
+          "type": "doc",
+          "id": "omnitron/release-readiness"
+        }
+      ]
     },
     {
-      "type": "doc",
-      "id": "omnitron/architecture"
+      "type": "category",
+      "label": "Nodes and recovery",
+      "items": [
+        {
+          "type": "doc",
+          "id": "omnitron/architecture"
+        },
+        {
+          "type": "doc",
+          "id": "omnitron/daemon"
+        },
+        {
+          "type": "doc",
+          "id": "omnitron/topology"
+        },
+        {
+          "type": "doc",
+          "id": "omnitron/cluster"
+        },
+        {
+          "type": "doc",
+          "id": "omnitron/backend-handoff"
+        },
+        {
+          "type": "doc",
+          "id": "omnitron/resilient-control-plane"
+        }
+      ]
     },
     {
-      "type": "doc",
-      "id": "omnitron/resilient-control-plane"
+      "type": "category",
+      "label": "Agents and automation",
+      "items": [
+        {
+          "type": "doc",
+          "id": "omnitron/studio"
+        },
+        {
+          "type": "doc",
+          "id": "omnitron/flows"
+        },
+        {
+          "type": "doc",
+          "id": "omnitron/automation"
+        },
+        {
+          "type": "doc",
+          "id": "omnitron/agents"
+        },
+        {
+          "type": "doc",
+          "id": "omnitron/workflow-runtime"
+        },
+        {
+          "type": "doc",
+          "id": "omnitron/agent-harness"
+        }
+      ]
     },
     {
-      "type": "doc",
-      "id": "omnitron/release-readiness"
+      "type": "category",
+      "label": "Operate and diagnose",
+      "items": [
+        {
+          "type": "doc",
+          "id": "omnitron/console"
+        },
+        {
+          "type": "doc",
+          "id": "omnitron/observability"
+        },
+        {
+          "type": "doc",
+          "id": "omnitron/diagnostics"
+        },
+        {
+          "type": "doc",
+          "id": "omnitron/terminal"
+        },
+        {
+          "type": "doc",
+          "id": "omnitron/files"
+        },
+        {
+          "type": "doc",
+          "id": "omnitron/best-practices"
+        },
+        {
+          "type": "doc",
+          "id": "omnitron/recipes"
+        }
+      ]
     },
     {
-      "type": "doc",
-      "id": "omnitron/cli"
-    },
-    {
-      "type": "doc",
-      "id": "omnitron/daemon"
-    },
-    {
-      "type": "doc",
-      "id": "omnitron/backend-handoff"
-    },
-    {
-      "type": "doc",
-      "id": "omnitron/orchestrator"
-    },
-    {
-      "type": "doc",
-      "id": "omnitron/releases"
-    },
-    {
-      "type": "doc",
-      "id": "omnitron/services-reference"
-    },
-    {
-      "type": "doc",
-      "id": "omnitron/configuration"
-    },
-    {
-      "type": "doc",
-      "id": "omnitron/infrastructure"
-    },
-    {
-      "type": "doc",
-      "id": "omnitron/cluster"
-    },
-    {
-      "type": "doc",
-      "id": "omnitron/observability"
-    },
-    {
-      "type": "doc",
-      "id": "omnitron/diagnostics"
-    },
-    {
-      "type": "doc",
-      "id": "omnitron/migrations"
-    },
-    {
-      "type": "doc",
-      "id": "omnitron/console"
-    },
-    {
-      "type": "doc",
-      "id": "omnitron/topology"
-    },
-    {
-      "type": "doc",
-      "id": "omnitron/access"
-    },
-    {
-      "type": "doc",
-      "id": "omnitron/automation"
-    },
-    {
-      "type": "doc",
-      "id": "omnitron/flows"
-    },
-    {
-      "type": "doc",
-      "id": "omnitron/agents"
-    },
-    {
-      "type": "doc",
-      "id": "omnitron/studio"
-    },
-    {
-      "type": "doc",
-      "id": "omnitron/workflow-runtime"
-    },
-    {
-      "type": "doc",
-      "id": "omnitron/agent-harness"
-    },
-    {
-      "type": "doc",
-      "id": "omnitron/terminal"
-    },
-    {
-      "type": "doc",
-      "id": "omnitron/files"
-    },
-    {
-      "type": "doc",
-      "id": "omnitron/auth-rbac"
-    },
-    {
-      "type": "doc",
-      "id": "omnitron/mcp"
-    },
-    {
-      "type": "doc",
-      "id": "omnitron/best-practices"
-    },
-    {
-      "type": "doc",
-      "id": "omnitron/recipes"
+      "type": "category",
+      "label": "Configuration and reference",
+      "items": [
+        {
+          "type": "doc",
+          "id": "omnitron/configuration"
+        },
+        {
+          "type": "doc",
+          "id": "omnitron/access"
+        },
+        {
+          "type": "doc",
+          "id": "omnitron/auth-rbac"
+        },
+        {
+          "type": "doc",
+          "id": "omnitron/cli"
+        },
+        {
+          "type": "doc",
+          "id": "omnitron/services-reference"
+        },
+        {
+          "type": "doc",
+          "id": "omnitron/mcp"
+        }
+      ]
     }
   ],
   "reference": [

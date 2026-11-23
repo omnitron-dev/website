@@ -15,8 +15,6 @@ export default defineLumenConfig({
   clientEntry: 'src/site/client.ts',
   islands: documentIslands,
   trailingSlash: false,
-  // On Lumen 0.4.13, other pages can block the event loop while a preview waits for its SSR imports.
-  renderConcurrency: 1,
   onBrokenLinks: 'throw',
   onBrokenAnchors: 'throw',
   sidebars,

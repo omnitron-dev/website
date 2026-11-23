@@ -14,16 +14,12 @@ Start with the [Lumen overview](docs/lumen/overview.md),
 [authoring guide](docs/lumen/authoring.md) or
 [explanation of this site's build](docs/lumen/this-site.md).
 
-The site uses the published Lumen and Prism packages at **0.4.13**. The tracked
-lockfile is the dependency graph used by CI and GitHub Pages.
+The site uses Lumen and Prism **0.4.16**. CI and GitHub Pages install the tracked lockfile. Table semantics, syntax colors, navigation and breadcrumb theming come from the published framework.
 
 The [privacy guide](docs/foundations/privacy.md) explains data boundaries.
 [Node architecture](docs/omnitron/architecture.md) explains supervision and
 recovery with diagrams and an interactive model. The
-[creation studio](docs/omnitron/studio.md),
-[automation runtime](docs/omnitron/workflow-runtime.md) and
-[agent harness](docs/omnitron/agent-harness.md) are explicitly labelled designs;
-they are not claims about released capabilities.
+[Agent Studio](docs/omnitron/studio.md) and [event flows](docs/omnitron/flows.md) guides cover workflows available since 0.4.15. The [durable workflow runtime](docs/omnitron/workflow-runtime.md) and [verification harness](docs/omnitron/agent-harness.md) are design proposals.
 
 ## Develop
 
@@ -106,6 +102,7 @@ OMNI_SOURCE_DIR="/absolute/path/to/omni-source"
 node scripts/check-dependency-audit.js
 pnpm check:content
 pnpm check:source "$OMNI_SOURCE_DIR"
+node scripts/check-doc-examples.mjs "$OMNI_SOURCE_DIR" docs pages
 pnpm typecheck
 pnpm build
 pnpm exec playwright install chromium --no-shell
@@ -152,7 +149,7 @@ checkout containing those changes and run `pnpm docs:api "$OMNI_SOURCE_DIR"`
 from the website root. Review the generated [API index](src/data/api-index.json) and
 make its source commit available in the public platform repository before pushing
 the website. The index records that commit for CI and for links to declarations.
-Source checks compare package exports, CLI commands and service contracts with their guides.
+Source checks compare package exports, CLI commands and service contracts with their guides. The API check also parses published code examples and verifies their named framework imports against the pinned source.
 Titan inventories also compare package coverage, static factory methods and declared external
 runtime dependencies. An inventory entry or interface field is not proof of implemented
 behavior: trace the public factory through DI and the operation that consumes an option.
@@ -161,7 +158,7 @@ ownership and commit/delivery boundaries; do not infer them from a method name o
 dependency. Similar APIs do not establish design provenance: do not describe features
 as borrowed or inspired by another project without attributable evidence. Compare
 capabilities with current sources and reproducible measurements. Typecheck importing
-examples with `node scripts/check-doc-examples.mjs "$OMNI_SOURCE_DIR" docs/titan`
+TypeScript and React examples with `node scripts/check-doc-examples.mjs "$OMNI_SOURCE_DIR" docs pages`
 from the website root, with dependencies installed in the source checkout, and exercise
 the complete changed example when it claims runtime behavior.
 
@@ -175,8 +172,8 @@ Pages. Pull requests never publish; manual publication follows the same checks.
 Guides may describe newer platform APIs, but live examples and rendering features
 must work with the locked Lumen and Prism versions.
 
-The site maintains one install-time patch for picomatch 4.0.7 used by its direct
-Vite dependency. Lumen 0.4.13 includes the same reviewed parser fix in its bundled
+The site maintains a separate install-time dependency security patch for picomatch 4.0.7 used by its direct
+Vite dependency. Lumen 0.4.16 includes the same reviewed parser fix in its bundled
 Vite distribution. KB is outside the website dependency graph, and Prism includes
 the documentation sidebar's scroll restoration. The former KB and Prism client
 patches and the KB side-effects cache exclusion have been removed.
@@ -193,9 +190,12 @@ unexpected third installation stops the build. The registry audit covers the
 direct Vite dependency; the separate file inventory also covers Lumen's bundled
 copy. A clean report must have a successful exit status and zero vulnerability
 counts; the installed-file verification still runs. A report with findings must
-match only the reviewed advisory. The 13 framework packages at exactly 0.4.13
-have explicit reviewed age exceptions, backed by the public archive integrity;
-other package-age rules remain unchanged.
+match only the reviewed advisory. The lockfile records the verified npm SHA-512
+for each of the 13 Omnitron packages admitted at exactly 0.4.16.
+
+For release verification, use a clean checkout and a dedicated project virtual store.
+An upgrade can leave an earlier Lumen bundle in a reused store. The inventory
+reports the extra parser even after the lockfile selects the new release.
 
 When an upstream fix ships or Lumen's bundled dependency changes, review the
 lockfile, installed files and audit policy together before removing the remaining

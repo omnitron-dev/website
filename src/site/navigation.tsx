@@ -13,14 +13,21 @@ export const sections = [
   { id: 'reference', label: 'Reference', href: '/docs/reference/api-index' },
 ];
 
-export function MainNavigation({ currentPath }: { currentPath: string }) {
+type NavigationLocation = { currentPath: string; sectionId: string | null };
+
+function currentLocation(href: string, id: string, { currentPath, sectionId }: NavigationLocation) {
+  if (href === currentPath) return 'page';
+  if (id === sectionId) return 'location';
+}
+
+export function MainNavigation(location: NavigationLocation) {
   return <nav aria-label="Main navigation" className="main-navigation">
-    {sections.map(({ label, href }) => <Button key={href} href={href} variant="text" color="inherit" size="small"
-      aria-current={currentPath === href ? 'page' : undefined}>{label}</Button>)}
+    {sections.map(({ id, label, href }) => <Button key={id} href={href} variant="text" color="inherit" size="small"
+      aria-current={currentLocation(href, id, location)}>{label}</Button>)}
   </nav>;
 }
 
-export function MobileNavigation({ currentPath, disabled = false }: { currentPath: string; disabled?: boolean }) {
+export function MobileNavigation({ disabled = false, ...location }: NavigationLocation & { disabled?: boolean }) {
   const [open, setOpen] = useState(false);
   return <>
     <IconButton type="button" aria-label="Open navigation" aria-haspopup="dialog" aria-expanded={open}
@@ -28,10 +35,12 @@ export function MobileNavigation({ currentPath, disabled = false }: { currentPat
     <Drawer open={open} onClose={() => setOpen(false)} title="Navigation" closeIcon={<CloseIcon />}
       width="min(320px, 100vw)" PaperProps={{ role: 'dialog', 'aria-label': 'Navigation', 'aria-modal': true }}>
       <nav aria-label="Mobile navigation"><List disablePadding>
-        {sections.map(({ label, href }) => <ListItemButton key={href} component="a" href={href}
-          selected={currentPath === href} aria-current={currentPath === href ? 'page' : undefined}>
-          <ListItemText primary={label} />
-        </ListItemButton>)}
+        {sections.map(({ id, label, href }) => {
+          const current = currentLocation(href, id, location);
+          return <ListItemButton key={id} component="a" href={href} selected={Boolean(current)} aria-current={current}>
+            <ListItemText primary={label} />
+          </ListItemButton>;
+        })}
       </List></nav>
     </Drawer>
   </>;

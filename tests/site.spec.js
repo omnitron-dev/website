@@ -377,16 +377,72 @@ test('documentation remains readable without JavaScript using the system palette
     await expect(page.locator('.omnitron-site')).toHaveCSS('background-color', 'rgb(243, 246, 247)');
     await expect(page.locator('.brand .MuiTypography-root')).toHaveCSS('color', 'rgb(22, 32, 38)');
     await expect(page.locator('h1')).toBeVisible();
-    await expect(page.getByRole('button', { name: 'Choose color theme' })).toBeDisabled();
-    await expect(page.getByRole('button', { name: /^Search/ })).toBeDisabled();
-    await expect(page.getByRole('button', { name: 'In this section', exact: true })).toBeDisabled();
-    await expect(page.getByRole('navigation', { name: 'Mobile documentation sections' })).toBeVisible();
+    await expect(page.getByRole('heading', { level: 1 })).toBeInViewport();
+    await expect(page.getByRole('button', { name: 'Choose color theme' })).toHaveCount(0);
+    await expect(page.getByRole('button', { name: /^Search/ })).toHaveCount(0);
+    const fallback = page.locator('.static-section');
+    await fallback.locator('summary').press('Enter');
+    await expect(fallback.getByRole('navigation', { name: 'Mobile documentation sections' })).toBeVisible();
+    await fallback.locator('summary').press('Enter');
+    await page.locator('.static-navigation summary').press('Enter');
     await page.locator('.static-navigation').getByRole('link', { name: 'Operations', exact: true }).click();
     await expect(page).toHaveURL(/\/docs\/omnitron\/overview$/);
     await expect(page.locator('h1')).toBeVisible();
+    const crumbs = page.getByRole('navigation', { name: 'Breadcrumb' });
+    await page.emulateMedia({ colorScheme: 'dark' });
+    await expect(crumbs.locator('[aria-current="page"]')).toHaveCSS('color', 'rgb(230, 237, 240)');
+    await expect(crumbs.getByText('Documentation', { exact: true })).toHaveCSS('color', 'rgb(165, 181, 189)');
   } finally { await context.close(); }
 });
 
+
+test('deep pages identify the active section and link only to real ancestor pages', async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await page.goto('/docs/titan/di/scopes');
+  const siteNav = page.getByRole('navigation', { name: 'Main navigation' });
+  const crumbs = page.getByRole('navigation', { name: 'Breadcrumb' });
+  await expect(siteNav.locator('[aria-current]')).toHaveCount(1);
+  await expect(siteNav.getByRole('link', { name: 'Titan', exact: true })).toHaveAttribute('aria-current', 'location');
+  expect(await crumbs.getByRole('link').evaluateAll(links => links.map(link => link.getAttribute('href'))))
+    .toEqual(['/docs/intro', '/docs/titan/overview', '/docs/titan/di']);
+  const current = crumbs.locator('[aria-current="page"]');
+  await expect(current).toHaveText('Scopes');
+  for (const [mode, foreground, ancestor] of [
+    ['Dark', 'rgb(230, 237, 240)', 'rgb(165, 181, 189)'],
+    ['Light', 'rgb(22, 32, 38)', 'rgb(83, 100, 109)'],
+  ]) {
+    await chooseTheme(page, mode);
+    await expect(current).toHaveCSS('color', foreground);
+    await expect(crumbs.getByText('Dependency Injection', { exact: true })).toHaveCSS('color', ancestor);
+  }
+  await crumbs.getByRole('link', { name: 'Titan', exact: true }).click();
+  await expect(siteNav.getByRole('link', { name: 'Titan', exact: true })).toHaveAttribute('aria-current', 'page');
+  await page.goto('/search');
+  await expect(crumbs.getByRole('link')).toHaveCount(1);
+  await expect(crumbs.getByRole('link', { name: 'Home' })).toHaveAttribute('href', '/');
+  await expect(crumbs.locator('[aria-current="page"]')).toHaveText('Search the documentation');
+  const footer = await page.locator('.site-colophon').boundingBox();
+  expect(Math.abs(footer.y + footer.height - await page.evaluate(() => document.documentElement.scrollHeight))).toBeLessThan(2);
+});
+
+test('mobile section, outline and export navigate the same published document', async ({ page, request }) => {
+  await page.setViewportSize({ width: 320, height: 900 });
+  await page.goto('/docs/omnitron/flows');
+  await page.getByRole('button', { name: 'Open navigation' }).click();
+  const drawer = page.getByRole('dialog', { name: 'Navigation' });
+  await expect(drawer.getByRole('link', { name: 'Operations' })).toHaveAttribute('aria-current', 'location');
+  await drawer.getByRole('button', { name: 'Close drawer' }).click();
+  const outline = page.locator('details.page-outline');
+  await outline.locator('summary').press('Enter');
+  const mirror = outline.getByRole('link', { name: /Read as Markdown/ });
+  await expect(mirror).toHaveAttribute('href', '/docs/omnitron/flows.md');
+  const response = await request.get(await mirror.getAttribute('href'));
+  expect(response.ok()).toBe(true);
+  expect(await response.text()).toContain('# Event flows');
+  await outline.locator('a[href="#disk-space"]').click();
+  await expect(page).toHaveURL(/#disk-space$/);
+  await expect(page.locator('#disk-space')).toBeInViewport();
+});
 
 test('the current section follows native anchors and the final short section below the fixed header', async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 900 });

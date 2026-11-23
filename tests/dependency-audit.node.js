@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import { appendFileSync, cpSync, mkdirSync, mkdtempSync, rmSync, symlinkSync, writeFileSync } from 'node:fs';
+import { appendFileSync, cpSync, mkdirSync, mkdtempSync, realpathSync, rmSync, symlinkSync, writeFileSync } from 'node:fs';
 import { createRequire } from 'node:module';
 import { tmpdir } from 'node:os';
 import { dirname, join, resolve } from 'node:path';
@@ -130,7 +130,7 @@ test('custom virtual store, nested bundle and third unreferenced or aliased copi
     join(bundled, 'fixtures', 'node_modules', 'alternate-name'),
   ]) {
     cpSync(outer, destination, { recursive: true });
-    assert.throws(() => checkInstalled(site));
+    assert.throws(() => checkInstalled(site), { message: 'Unexpected picomatch installation: ' + realpathSync(destination) });
     rmSync(destination, { recursive: true });
   }
 });

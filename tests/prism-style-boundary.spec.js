@@ -35,8 +35,14 @@ for (const width of [1440, 390]) {
     // The same stylesheet must still format ordinary Markdown tables.
     await page.goto('/docs/frontend/prism/state');
     const proseTable = page.locator('article > table').first();
+    await expect(proseTable.getByRole('columnheader').first()).toHaveAttribute('scope', 'col');
+    await expect(proseTable.locator('tbody tr').first().getByRole('cell').first()).toBeVisible();
     await expect(proseTable).toHaveCSS('display', 'block');
     await expect(proseTable).toHaveCSS('overflow-x', 'auto');
+    await page.goto('/docs/reference/packages');
+    const coreTable = page.getByRole('table').filter({ has: page.getByRole('columnheader', { name: 'Required?', exact: true }) });
+    await expect(coreTable.getByRole('columnheader', { name: 'Required?', exact: true })).toHaveCSS('text-align', 'center');
+    await expect(coreTable.getByRole('cell', { name: '✓', exact: true })).toHaveCSS('text-align', 'center');
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
   });
 }

@@ -12,7 +12,7 @@ export function documentNavigation(
   byRoute: ReadonlyMap<string | undefined, Document>,
   activeId: string,
   section: string,
-): { navigation: DocSidebarItem[]; pagination: DocPaginationProps } {
+): { navigation: DocSidebarItem[]; pagination: DocPaginationProps; parents: readonly Category[] } {
   const pages = new Map<string, Page>();
 
   function addPage(doc: Document, categories: readonly Category[]) {
@@ -44,7 +44,7 @@ export function documentNavigation(
 
   const navigation = visit(entries, [], 'root');
   const current = pages.get(activeId);
-  if (!current) return { navigation, pagination: {} };
+  if (!current) return { navigation, pagination: {}, parents: [] };
   const order = [...pages.values()];
   const index = order.indexOf(current);
   const currentPath = current.categories;
@@ -66,6 +66,7 @@ export function documentNavigation(
 
   return {
     navigation,
+    parents: currentPath,
     pagination: {
       prev, next,
       labels: { previous: direction('Previous', prev), next: direction('Next', next) },
