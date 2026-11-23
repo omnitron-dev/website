@@ -8,7 +8,8 @@ import {execFileSync} from 'node:child_process';
 import {readFileSync, writeFileSync, readdirSync, existsSync} from 'node:fs';
 import {resolve, join, relative, sep} from 'node:path';
 import ts from 'typescript';
-import catalog from './api-guides.mjs';
+import { platformExamples } from './platform-examples.mjs';
+import { platformEntries } from './platform-entries.mjs';
 
 const root = resolve(import.meta.dirname, '..');
 const repoArgument = process.argv.slice(2).find(argument => !argument.startsWith('--'));
@@ -24,49 +25,7 @@ if (!/^[a-f0-9]{40}$/.test(revision) || git('status', '--porcelain', '--untracke
   throw new Error('Use a clean Omnitron source checkout so that indexed files and line numbers belong to its commit.');
 }
 const sourcePath = file => relative(repo, file).split(sep).join('/');
-const entries = [];
-const packages = [];
-for (const folder of ['packages', 'apps']) {
-  for (const dir of readdirSync(join(repo, folder), {withFileTypes: true})) {
-    if (!dir.isDirectory()) continue;
-    const base = join(repo, folder, dir.name);
-    if (!existsSync(join(base, 'package.json'))) continue;
-    const pkg = JSON.parse(readFileSync(join(base, 'package.json'), 'utf8'));
-    if (pkg.private || !pkg.name?.startsWith('@omnitron-dev/')) continue;
-    const guides = catalog[pkg.name];
-    if (!guides) throw new Error(`Package needs a guide mapping: ${pkg.name}`);
-    const exports = pkg.exports ?? {'.': {types: pkg.types ?? pkg.main}};
-    const publicKeys = Object.keys(exports).filter(key => !key.endsWith('.json'));
-    for (const key of Object.keys(guides)) {
-      if (!publicKeys.includes(key)) throw new Error(`Stale guide mapping: ${pkg.name}/${key}`);
-    }
-    for (const key of publicKeys) {
-      const mapping = guides[key];
-      const guide = typeof mapping === 'string' ? mapping : mapping?.guide;
-      if (!guide || !existsSync(join(root, 'docs', guide))) throw new Error(`Missing guide: ${pkg.name}${key} → ${guide}`);
-      const entry = exports[key];
-      const target = typeof entry === 'string' ? entry : entry.types ?? entry.import?.types ?? entry.import ?? entry.default;
-      if (typeof target !== 'string') throw new Error(`Unrecognised export target: ${pkg.name}${key}`);
-      // Stylesheets are public entry points too, but not TypeScript modules.
-      // A bundled asset needs an explicit source mapping: guessing index.css's
-      // source would confuse generated output with the authored stylesheet.
-      if (target.endsWith('.css')) {
-        const source = mapping?.assetSource && resolve(base, mapping.assetSource);
-        if (!source || !source.startsWith(base + '/') || !source.endsWith('.css') || !existsSync(source)) {
-          throw new Error(`Missing stylesheet source for ${pkg.name}${key}`);
-        }
-        entries.push({package: pkg.name, path: `${pkg.name}/${key.slice(2)}`, source, guide, kind: 'stylesheet'});
-        continue;
-      }
-      const stem = target.replace(/^(?:\.\/)?dist\//, './src/').replace(/\.d\.ts$/, '.ts').replace(/\.js$/, '.ts');
-      const source = [stem, stem.replace(/\.ts$/, '.tsx')].map(p => join(base, p)).find(existsSync);
-      if (!source) throw new Error(`No source for ${pkg.name}${key}: ${target}`);
-      entries.push({package: pkg.name, path: key === '.' ? pkg.name : `${pkg.name}/${key.slice(2)}`, source, guide});
-    }
-    packages.push(pkg.name);
-  }
-}
-for (const pkg of Object.keys(catalog)) if (!packages.includes(pkg)) throw new Error(`Stale package: ${pkg}`);
+const { entries, packages } = platformEntries(repo, root);
 const modules = entries.filter(entry => entry.kind !== 'stylesheet');
 const paths = Object.fromEntries(modules.map(entry => [entry.path, [entry.source]]));
 const compilerOptions = {
@@ -92,15 +51,13 @@ host.getSourceFile = (file, languageVersion) => {
 const program = ts.createProgram(modules.map(entry => entry.source), compilerOptions, host);
 const checker = program.getTypeChecker();
 const rows = new Map();
-const corpus = [];
-function readDocs(dir) {
-  for (const file of readdirSync(dir, {withFileTypes: true})) {
-    if (file.isDirectory()) readDocs(join(dir, file.name));
-    else if (/\.mdx?$/.test(file.name)) corpus.push(readFileSync(join(dir, file.name), 'utf8'));
+const corpus = new Map();
+for (const directory of ['docs', 'pages']) {
+  for (const path of readdirSync(join(root, directory), { recursive: true })) {
+    if (/\.mdx?$/.test(path)) corpus.set(join(directory, path), readFileSync(join(root, directory, path), 'utf8'));
   }
 }
-readDocs(join(root, 'docs'));
-const namedInProse = new Set(corpus.join('\n').match(/[A-Za-z_$][\w$]*/g));
+const namedInProse = new Set([...corpus.values()].join('\n').match(/[A-Za-z_$][\w$]*/g));
 function docRoute(guide) {
   const source = readFileSync(join(root, 'docs', guide), 'utf8');
   const frontmatter = source.startsWith('---\n') ? source.split('---', 3)[1] : '';
@@ -146,6 +103,37 @@ const data = {
   entryPoints: entries.map(({path, guide, kind, source}) => ({path, guide: docRoute(guide), ...(kind ? {kind, source: sourcePath(source)} : {})})).sort((a, b) => a.path.localeCompare(b.path, 'en')),
   symbols,
 };
+// Read the same code blocks that Lumen publishes, including nested directives.
+const publicNames = new Map(entries.map(entry => [entry.path, new Set()]));
+for (const symbol of symbols) {
+  for (const entry of symbol.imports) publicNames.get(entry.path).add(symbol.name);
+}
+const imports = new Set();
+const examplePages = new Set();
+const problems = [];
+for (const [file, text] of corpus) {
+  for (const example of platformExamples(text, file)) {
+    for (const statement of example.imports) {
+      const path = statement.moduleSpecifier.text;
+      const line = example.line + example.source.getLineAndCharacterOfPosition(statement.getStart()).line;
+      const exported = publicNames.get(path);
+      examplePages.add(file);
+      if (!exported) {
+        problems.push(`${file}:${line} — missing entry point ${path}`);
+        continue;
+      }
+      const bindings = statement.importClause?.namedBindings;
+      const names = bindings && ts.isNamedImports(bindings) ? bindings.elements.map(name => (name.propertyName ?? name.name).text) : [];
+      if (statement.importClause?.name) names.push('default');
+      for (const name of names) {
+        if (exported.has(name)) imports.add(`${path}:${name}`);
+        else problems.push(`${file}:${line} — ${path} does not export ${name}`);
+      }
+    }
+  }
+}
+if (problems.length) throw Error(problems.join('\n'));
+console.log(`${imports.size} distinct example imports verified across ${examplePages.size} published pages`);
 const serialized = `${JSON.stringify(data, null, 2)}\n`;
 const output = join(root, 'src/data/api-index.json');
 if (process.argv.includes('--check')) {

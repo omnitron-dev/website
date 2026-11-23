@@ -3,7 +3,7 @@ id: "omnitron/cli"
 slug: "/docs/omnitron/cli"
 sidebar_position: 3
 title: CLI reference
-description: Every command, every flag, every command group.
+description: Look up commands by task, inspect what a review authorizes and find the matching operator guide.
 ---
 
 # CLI reference
@@ -13,7 +13,7 @@ through `~/.omnitron/daemon.sock`. Local build, configuration and migration
 commands execute in the CLI process; application migrations can run without a
 running daemon.
 
-Verified against `src/cli/omnitron.ts` and `src/commands/*`.
+Use the index to choose a command group. Run `omnitron <group> <command> --help` for the options your installed version accepts. This reference follows the [0.4.16 CLI](https://github.com/omnitron-dev/omni/blob/v0.4.16/apps/omnitron/src/cli/omnitron.ts).
 
 ## Global options {#global-options}
 
@@ -426,6 +426,8 @@ separate responsibilities.
 | `omnitron service install` | Register OS supervision; resident mode requires a stopped backend and owner |
 | `omnitron service install --prepare` | Prepare independent owner/backend service definitions without stopping processes |
 | `omnitron service install --prepare --owner-runtime <sha256>` | Prepare an installed owner version separately from the selected guardian/backend |
+| `omnitron service publish-system-plan <previous-record> <target-record>` | The dedicated Linux service account publishes its checked supervision record and retains the predecessor. |
+| `omnitron service system-pair <action>` | The host administrator reviews, installs or starts the dedicated systemd pair. Install and start require the exact review. |
 | `omnitron service uninstall` | Stop the supervised daemon and remove the service |
 | `omnitron service status` | Whether the OS is supervising, and what it reports |
 
@@ -474,6 +476,9 @@ in-progress launch before retrying.
 | `omnitron sdk dev [checkout]` | Select a local SDK and watch it; `--stack <name>` enables refresh of watched local applications |
 | `omnitron sdk dev [checkout] --stack <name> --start-stopped --review <digest>` | Build the SDK, start a stopped local working tree on reviewed infrastructure and continue watching. Add `--no-watch` for a single run. |
 | `omnitron sdk status [--stack <name>]` | Verify imports and show the active source. For a stack, compare its SDK outputs and current owner generations with the recorded refresh receipts. Supports global `--json`. |
+| `omnitron sdk prepare [checkout] --check` | Find out whether the next development selection needs a recovery snapshot. Omit `--check` to retain it while consumers are serving. |
+| `omnitron sdk reconcile --stack <name> --check` | Inspect a recorded SDK launch against the owner. Omit `--check` to confirm an acknowledged launch. |
+| `omnitron sdk adopt --stack <name> --check` | With consumers stopped, review current files. `--review <digest>` accepts the reviewed state and keeps the earlier uncertain attempt in history. |
 | `omnitron sdk registry` | Restore the frozen registry installation |
 | `omnitron sdk recover [--stack <name>]` | Restore retained SDK bytes and dependency bindings without rebuilding or installing |
 
@@ -591,7 +596,22 @@ Remote target-host checks remain explicitly incomplete; `infra inspect` and
 `node check` provide complementary evidence. Project configuration is the daemon's
 loaded configuration; reload it after editing project configuration files.
 
+### Move a stopped stack to a reviewed node {#move-a-stopped-stack}
+
+| Command | What it establishes |
+| --- | --- |
+| `omnitron release capture-source <project> <stack> <release>` | Capture portable deployment declarations on the qualified build machine. |
+| `omnitron stack review-host-bindings <project> <stack>` | Read the public host configuration and unit digests for the release and recipient. |
+| `omnitron host-config attest <profile>` and `omnitron host-config receive <ticket>` | Attest an installed private configuration and authorize a short-lived passive installation on the Linux recipient. |
+| `omnitron stack install-host-configs <project> <stack>` | Install the reviewed host configurations using the recipient’s ticket. |
+| `omnitron stack verify-wallet-addresses <project> <stack>` | Check issued Monero mainnet subaddresses against a wallet using salted fingerprints read from standard input. |
+| `omnitron stack select-placement <project> <stack>` | Review a stopped stack’s release and recipient. Passing the returned digest to `--review` records that placement. |
+
+A placement decision identifies the destination. Verify runtime health and application data after launch. [Release lifecycle](./releases.md)
+
 ## App lifecycle {#app-lifecycle}
+
+`omnitron watch` controls source observation for one application. Use `omnitron watch status <app>` to inspect its registration, `omnitron watch suspend <app>` to hold it while the process runs, and `omnitron watch resume <app> <receipt>` to restore that registration for future changes.
 
 These commands accept an `[app]` argument. With no app, they
 operate on **all** managed apps.
@@ -627,10 +647,10 @@ that guarantee.
 | `omnitron status` | Daemon-wide overview (apps, uptime, leader, infra) |
 | `omnitron config [--json]` | Print the resolved ecosystem config |
 | `omnitron init [--force]` | Write a starter in the current directory. Overwriting an existing configuration requires confirmation or explicit `--force`. |
-| `omnitron init --existing --check` | On `main` after 0.4.14, preview the framework declarations and configuration for an existing package or workspace. |
+| `omnitron init --existing --check` | Preview the framework declarations and configuration for an existing package or workspace. |
 | `omnitron init --existing` | Write an empty application and stack configuration for registration. |
 
-Cancelling the overwrite prompt with Ctrl+C preserves the existing configuration and exits with status `130`. Noninteractive replacement requires `--force`. On the source version after 0.4.14, `--automation`, `--database` and `--service` select independent capabilities for a new [project starter](./projects.md#choose-a-project). For existing workspaces, follow the [registration walkthrough](./projects.md#bring-an-existing-project).
+Cancelling the overwrite prompt with Ctrl+C preserves the existing configuration and exits with status `130`. Noninteractive replacement requires `--force`. From Omnitron 0.4.15, `--automation`, `--database` and `--service` select independent capabilities for a new [project starter](./projects.md#choose-a-project). For existing workspaces, follow the [registration walkthrough](./projects.md#bring-an-existing-project).
 
 **Reading the child rows of `omnitron list`.** Each indented row is
 one entry of the app's process topology, and two of its columns say
@@ -762,6 +782,7 @@ came from, so this table is the same list the output uses:
 | ---- | ---------------- |
 | `daemon` | Whether it answers, how fast, whether it restarted recently, whether it is aggregating metrics |
 | `app` | Managed apps and their sub-processes, and the ports they claim against the ports they answer on |
+| `disk` | Free space on the instance filesystem and Linux RAID or NVMe health. [Inspect a storage alert](./diagnostics.md#host-storage-health). |
 | `infra` | Infrastructure containers, their health, their published ports, and containers detached from the stack |
 | `db` | Reachability, the tables the daemon needs, pending migrations, and a table that is bloated rather than merely large |
 | `build` | Sources newer than their build output, sources never built, and a daemon older than the build it is running |
@@ -972,6 +993,7 @@ Direct infrastructure mutations require a standalone installation. For projects 
 
 | Command | Effect |
 | ------- | ------ |
+| `omnitron pipeline check <file>` | Validate a JSON definition and its dependency graph offline. |
 | `omnitron pipeline list` | List all pipelines |
 | `omnitron pipeline save <file> [--id <id> --expected-revision <sha256>]` | Create a JSON definition, or replace its reviewed revision without overwriting concurrent edits |
 | `omnitron pipeline run <id> [--params-file <file>]` | Read the current revision and submit it for execution |

@@ -67,6 +67,13 @@ jobs:
       - name: Verify documentation inventories
         run: pnpm check:source .source/omni
 
+      - name: Install documented source dependencies
+        working-directory: .source/omni
+        run: pnpm install --frozen-lockfile --ignore-scripts
+
+      - name: Typecheck published TypeScript and React examples
+        run: node scripts/check-doc-examples.mjs .source/omni docs pages
+
       - name: TypeScript check
         run: pnpm typecheck
 

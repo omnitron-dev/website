@@ -2,11 +2,12 @@
 id: "page:/docs/titan/logging"
 slug: "/docs/titan/logging"
 title: "Logging"
+description: "Create structured log records, add context, process them and choose their destination."
 ---
 
 # Logging
 
-Follow these guides in order, or open the reference for the part of your application you are changing.
+Follow a record from a child logger through processors to its transport. Use a child logger to attach request context and a transport to choose where the records go.
 
 - [Overview](/docs/titan/logging/overview)
 - [Transports](/docs/titan/logging/transports)

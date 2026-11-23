@@ -138,7 +138,7 @@ const invite = users.invite.useMutation({
 
 ## Server-side validation errors {#server-side-validation-errors}
 
-When the server's `@Validate(schema)` rejects, the error
+When the server's `@Validate({ input: schema })` rejects, the error
 carries field-level details:
 
 ```typescript
@@ -308,18 +308,18 @@ for form submissions.
 For synchronous render errors (rare with proper data fetching):
 
 ```tsx
-import { ErrorBoundary } from '@omnitron-dev/prism';
+import Button from '@mui/material/Button';
+import { EmptyContent, ErrorBoundary } from '@omnitron-dev/prism';
 
 <ErrorBoundary
-  fallback={(error, reset) => (
+  fallback={({ error, resetErrorBoundary }) => (
     <EmptyContent
-      illustration="error-500"
       title="Something broke"
       description={error.message}
-      action={<Button onClick={reset}>Reload section</Button>}
+      action={<Button onClick={resetErrorBoundary}>Reload section</Button>}
     />
   )}
-  onError={(error, info) => reportToSentry(error, info)}
+  onError={(error, info) => recordRenderFailure(error, info)}
 >
   <SuspectComponent />
 </ErrorBoundary>

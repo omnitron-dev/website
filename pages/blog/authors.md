@@ -2,18 +2,11 @@
 id: "page:/blog/authors"
 slug: "/blog/authors"
 title: "Authors"
+description: "Find the maintainers who write the Omnitron engineering notes."
 ---
 
 # Authors
 
-Omnitron documentation is maintained by the project contributors.
+[Omnitron team](/blog/authors/omnitron-team) — the contributors who build and document the platform. Their author page lists the engineering notes they have published.
 
-## 2026
-
-- [Welcome to Omnitron](/blog/welcome) — 15 May 2026. The first public documentation preview.
-
-## Current project
-
-- [Release notes](/docs/community/changelog)
-- [Compatibility](/docs/reference/compatibility)
-- [Contributing](/docs/community/contributing)
+[Contribute to the documentation](/docs/community/contributing#work-on-the-documentation)

@@ -3,6 +3,7 @@ id: "auth/permissions"
 slug: "/docs/auth/permissions"
 title: Permissions
 sidebar_position: 1
+description: "Check how permission patterns match in the shared access core and where an application must enforce the result."
 ---
 
 # Permissions

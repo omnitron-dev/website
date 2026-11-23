@@ -193,7 +193,7 @@ interface UIState {
 }
 
 // Immer middleware is enabled — mutate `state` directly in `set`.
-export const useUIStore = createPrismStore<UIState>((set) => ({
+export const useUIStore = createPrismStore<UIState, Pick<UIState, 'sidebarOpen'>>((set) => ({
   sidebarOpen:   true,
   toggleSidebar: () => set((s) => { s.sidebarOpen = !s.sidebarOpen; }),
 }), {

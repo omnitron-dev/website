@@ -3,6 +3,7 @@ id: "auth/audit-trail"
 slug: "/docs/auth/audit-trail"
 title: Audit Trail
 sidebar_position: 5
+description: "Design proposal for recording who authorized an application action and how to trace it to an audit entry."
 ---
 
 # Audit Trail

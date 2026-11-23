@@ -17,6 +17,8 @@ import path from 'node:path';
 import { tmpdir } from 'node:os';
 import { execFileSync } from 'node:child_process';
 import { createRequire } from 'node:module';
+import { platformExamples } from './platform-examples.mjs';
+import { platformEntries } from './platform-entries.mjs';
 
 const ROOT = path.resolve(process.argv[2] ?? '');
 if (!fs.existsSync(path.join(ROOT, 'packages/titan/package.json'))) {
@@ -30,18 +32,26 @@ if (!fs.existsSync(path.join(ROOT, 'packages/titan/package.json'))) {
 
 const ts = createRequire(import.meta.url)('typescript');
 
-/**
- * Does this snippet parse at all?
- *
- * Doc examples are fragments — a bare decorator at top level, an elided body,
- * a `…` placeholder. tsc reports their syntax errors and then STOPS: a program
- * with any parse error gets no semantic checking at all. So a single malformed
- * snippet silenced the type checking of all 292, and the probe called that
- * "no problems found". Drop the unparseable ones and check the rest.
- */
-function parses(code) {
-  const sf = ts.createSourceFile('s.ts', code, ts.ScriptTarget.Latest, false, ts.ScriptKind.TS);
-  return (sf.parseDiagnostics ?? []).length === 0;
+function checkableSource(source) {
+  const { text, scriptKind, parseDiagnostics } = source;
+  if (!parseDiagnostics.length) {
+    const hasDeclaration = source.statements.some(statement => ts.isClassDeclaration(statement)
+      || ts.isFunctionDeclaration(statement) || statement.modifiers?.some(mod => mod.kind === ts.SyntaxKind.ExportKeyword));
+    return hasDeclaration ? text : wrapMethodBody(text);
+  }
+  const parses = code => !ts.createSourceFile('snippet', code, ts.ScriptTarget.Latest, false, scriptKind).parseDiagnostics.length;
+  // Tutorials often show adjacent JSX components as separate alternatives.
+  if (scriptKind === ts.ScriptKind.TSX && parseDiagnostics.every(error => error.code === 2657)) {
+    let code = text;
+    for (const { start, length } of [...parseDiagnostics].reverse()) {
+      code = code.slice(0, start) + '<>' + code.slice(start, start + length) + '</>' + code.slice(start + length);
+    }
+    if (parses(code)) return code;
+  }
+  // Method, field and constructor excerpts keep their decorators and parameter types.
+  const end = source.statements.filter(ts.isImportDeclaration).at(-1)?.end ?? 0;
+  const member = text.slice(0, end) + '\nclass Example { [member: string]: any;\n' + text.slice(end) + '\n}';
+  if (parses(member)) return member;
 }
 
 const DOCS = process.argv.slice(3);
@@ -53,6 +63,8 @@ if (DOCS.length === 0) {
 
 const OUT = fs.mkdtempSync(path.join(tmpdir(), 'omnitron-doc-typecheck-'));
 process.on('exit', () => fs.rmSync(OUT, { recursive: true, force: true }));
+// Use the source installation for the same JSX and test-library resolution as a consumer.
+fs.symlinkSync(path.join(ROOT, 'node_modules'), path.join(OUT, 'node_modules'), 'dir');
 
 const files = [];
 for (const root of DOCS) {
@@ -121,29 +133,19 @@ function wrapMethodBody(code) {
 
 // Only blocks that import from the packages — those are the checkable ones.
 const cases = [];
-let skipped = 0;
-for (const f of files) {
-  const text = fs.readFileSync(f, 'utf8');
-  let i = 0;
-  for (const m of text.matchAll(/```(?:ts|typescript)(?:[ \t][^\n]*)?\n([\s\S]*?)```/g)) {
-    const code = m[1];
-    if (!/from '@omnitron-dev\//.test(code)) continue;
-    if (/^\s*\/\/\s*…|\.\.\./m.test(code) && code.split('\n').length < 6) continue;
-    const line = text.slice(0, m.index).split('\n').length;
-    if (!parses(code)) { skipped++; continue; }
-    // Name from the FULL relative path, not the basename. With basenames,
-    // titan/application/index.md and testing/index.md both produced
-    // "index__0.ts": the second write clobbered the first (so one snippet was
-    // never checked while the count still claimed it was), and findings were
-    // attributed by `cases.find(name)` to whichever page came first. Eleven
-    // basenames collide in this docs tree.
-    const name = `${path.relative(process.cwd(), f).replace(/\.mdx?$/, '').replace(/[^A-Za-z0-9]+/g, '_')}__${i++}.ts`;
-    if (cases.some((c) => c.name === name)) {
-      console.error(`NAME COLLISION: ${name} — two snippets would share one file. Aborting.`);
-      process.exit(2);
+const skipped = [];
+for (const file of files) {
+  const text = fs.readFileSync(file, 'utf8');
+  for (const { source, line } of platformExamples(text, file)) {
+    if (source.scriptKind !== ts.ScriptKind.TS && source.scriptKind !== ts.ScriptKind.TSX) continue;
+    const code = checkableSource(source);
+    if (code === undefined) {
+      skipped.push(`${file}:${line}`);
+      continue;
     }
-    cases.push({ file: f, line, name, code });
-    fs.writeFileSync(path.join(OUT, name), wrapMethodBody(code));
+    const name = `example_${cases.length}.${source.scriptKind === ts.ScriptKind.TSX ? 'tsx' : 'ts'}`;
+    cases.push({ file, line, name, code });
+    fs.writeFileSync(path.join(OUT, name), code);
   }
 }
 
@@ -155,7 +157,7 @@ if (cases.length === 0) {
 fs.writeFileSync(path.join(OUT, 'tsconfig.json'), JSON.stringify({
   compilerOptions: {
     target: 'ES2022', module: 'ESNext', moduleResolution: 'bundler',
-    lib: ['ES2022', 'DOM'], strict: false, noEmit: true, skipLibCheck: true,
+    lib: ['ES2022', 'DOM'], jsx: 'react-jsx', strict: false, noEmit: true, skipLibCheck: true,
     experimentalDecorators: true, emitDecoratorMetadata: true,
     allowJs: false, noUnusedLocals: false, noImplicitAny: false,
     // No `baseUrl`: TypeScript 7 removed it, and leaving it in is a HARD
@@ -164,70 +166,29 @@ fs.writeFileSync(path.join(OUT, 'tsconfig.json'), JSON.stringify({
     // relative to this tsconfig without it.
     types: [], paths: buildPaths(),
   },
-  include: ['*.ts'],
+  include: ['*.ts', '*.tsx'],
 }, null, 2));
 
-/**
- * One path entry per real entry point, read from each package's `exports`.
- *
- * The first version used a single wildcard entry mapping every specifier to
- * the package's own index, which sends `@omnitron-dev/titan/errors` to a
- * nested path under the package that does not exist. Every import failed to
- * resolve, everything downstream became `any`, and the probe reported zero
- * problems across 292 examples while checking nothing at all. The
- * fail-on-empty guard did not catch it because the EXAMPLES extracted fine;
- * what was empty was the resolved API surface. Guard the thing you measure,
- * not the thing you read.
- */
 function buildPaths() {
-  const paths = {};
-  const pkgRoot = path.join(ROOT, 'packages');
-  for (const dir of fs.readdirSync(pkgRoot)) {
-    const pjPath = path.join(pkgRoot, dir, 'package.json');
-    if (!fs.existsSync(pjPath)) continue;
-    let pj;
-    try { pj = JSON.parse(fs.readFileSync(pjPath, 'utf8')); } catch { continue; }
-    if (!pj.name || !pj.exports) continue;
-    for (const [sub, val] of Object.entries(pj.exports)) {
-      const cands = [];
-      const push = (v) => { if (typeof v === 'string') cands.push(v); };
-      if (typeof val === 'string') push(val);
-      else if (val && typeof val === 'object') {
-        for (const k of ['types', 'import', 'require', 'default']) push(val[k]);
-        if (val.import && typeof val.import === 'object') for (const k of ['types', 'default']) push(val.import[k]);
-      }
-      for (const c of cands) {
-        const asSrc = path.join(pkgRoot, dir,
-          c.replace(/^\.\//, '').replace(/^dist\//, 'src/').replace(/\.(d\.ts|js|mjs|cjs)$/, '.ts'));
-        const cand = fs.existsSync(asSrc) ? asSrc
-          : fs.existsSync(asSrc.replace(/\.ts$/, '/index.ts')) ? asSrc.replace(/\.ts$/, '/index.ts')
-          : null;
-        if (cand) {
-          paths[sub === '.' ? pj.name : `${pj.name}/${sub.slice(2)}`] = [cand];
-          break;
-        }
-      }
-    }
+  const reactTypes = path.dirname(createRequire(import.meta.url).resolve('@types/react/package.json'));
+  const paths = { react: [path.join(reactTypes, 'index.d.ts')], 'react/jsx-runtime': [path.join(reactTypes, 'jsx-runtime.d.ts')] };
+  const styles = [];
+  for (const entry of platformEntries(ROOT, path.resolve(import.meta.dirname, '..')).entries) {
+    if (entry.kind === 'stylesheet') styles.push(`declare module '${entry.path}';`);
+    else paths[entry.path] = [entry.source];
   }
+  fs.writeFileSync(path.join(OUT, 'styles.d.ts'), styles.join('\n'));
   return paths;
 }
 
-/**
- * A control file with two deliberate API errors. If the compiler does not
- * report both, the probe is not resolving the packages and every "clean"
- * result below is meaningless — so that is a hard failure, not a warning.
- */
-const CONTROL = '__control__.ts';
+// Fail independently when method names, arity or JSX props stop resolving.
+const CONTROL = '__control__.tsx';
 fs.writeFileSync(path.join(OUT, CONTROL), [
   "import { Errors } from '@omnitron-dev/titan/errors';",
-  "export const a = Errors.badRequest('m', {}, 'extra', 'args');",
-  // Was `(Errors as { noSuchFactory?: () => void }).noSuchFactory!()`, which the
-  // cast and the `!` made perfectly legal — a control line that could not fail,
-  // so the control only ever proved that ARITY checking worked. Member
-  // existence is the other half of what this probe looks for, and it was
-  // unguarded. Written plainly, it reports TS2339.
-  'export const b = Errors.noSuchFactory();',
-  '',
+  "import { ProviderStack } from '@omnitron-dev/prism/core';",
+  "export const arity = Errors.badRequest('m', {}, 'extra', 'args');",
+  'export const member = Errors.noSuchFactory();',
+  'export const props = <ProviderStack providers={123}><div /></ProviderStack>;',
 ].join('\n'));
 
 // Use the compiler installed by the source checkout's lockfile, including aliases.
@@ -246,7 +207,7 @@ try {
   raw = (e.stdout || '') + (e.stderr || '');
 }
 
-// Errors that mean "the example is a fragment", not "the API is wrong".
+// A fragment can refer to application code and globals supplied by its surrounding project.
 const FRAGMENT = new Set([
   '2304', // Cannot find name — an undeclared local from the prose
   '2307', // Cannot find module — a made-up app path like '../src/app.module.js'
@@ -263,11 +224,7 @@ const FRAGMENT = new Set([
   // documentation style, not a defect.
   '2390', // Constructor implementation is missing
   '2391', // Function implementation is missing
-  // Snippets legitimately use Node globals; the harness has no @types/node.
-  '2591', // Cannot find name 'Buffer'
-  '2580', // Cannot find name 'process'
-  '2868', // Cannot find name 'Bun' — same class as the two above, for the
-          // runtime-specific snippets on the cross-runtime pages.
+  '2591', // Node globals in fragments without @types/node
   // A fragment's locals are frequently `unknown` because the prose, not the
   // code, said what they were.
   '2571', // Object is of type 'unknown'
@@ -283,7 +240,7 @@ for (const line of raw.split('\n')) {
   const m = line.match(/^(.+?)\((\d+),(\d+)\): error TS(\d+): (.*)$/);
   if (!m) continue;
   const [, file, ln, , code, msg] = m;
-  if (FRAGMENT.has(code)) continue;
+  if (FRAGMENT.has(code) && !(code === '2307' && msg.includes("'@omnitron-dev/"))) continue;
   // TS1xxx are syntax errors. A doc snippet is a fragment — a bare decorator
   // at top level, an elided body — so these say the extraction produced
   // non-compiling text, not that the API is wrong. Only semantic errors
@@ -314,19 +271,7 @@ for (const line of raw.split('\n')) {
 const controlErrors = raw
   .split('\n')
   .filter((l) => l.includes(CONTROL) && /error TS2\d+/.test(l));
-// The control file carries exactly this many deliberate errors. Accepting "at
-// least one" is how one of the two went unnoticed for as long as it existed:
-// the run printed "1 deliberate error(s) detected" on every invocation, next to
-// a file with two lines in it, and nobody — including the people maintaining
-// this script — read that number as a claim. A control that reports a bare "ok"
-// cannot be contradicted; one that prints what it got beside what it expected
-// can be.
-// Checked by CODE, not by count. The two control lines exercise different
-// things — TS2554 is arity, TS2339 is member existence — and a count alone
-// passes when one of them stops firing while some unrelated error takes its
-// place. That is not hypothetical: this control already spent its whole life
-// reporting "1 deliberate error(s)" beside a file with two in it.
-const CONTROL_EXPECTED = ['TS2554', 'TS2339'];
+const CONTROL_EXPECTED = ['TS2554', 'TS2339', 'TS2322'];
 const controlCodes = [...new Set(controlErrors.map((l) => (l.match(/error (TS\d+)/) ?? [])[1]).filter(Boolean))].sort();
 const controlMissing = CONTROL_EXPECTED.filter((c) => !controlCodes.includes(c));
 if (controlMissing.length > 0) {
@@ -346,14 +291,6 @@ for (const { c, errors } of [...byCase.values()].sort((a, b) => a.c.file.localeC
   for (const e of errors.slice(0, 6)) console.log(e);
   reported += errors.length;
 }
-// Findings are REVIEWED, not gated on. Roughly two thirds of what survives
-// the filters is still an artefact of a snippet being a fragment — a local the
-// prose typed, a helper the reader is expected to supply — and a check that
-// always fails is a check people learn to skip. The one hard failure is the
-// control above: if the deliberate errors stop being reported, the packages
-// are not resolving and a clean run means nothing.
-if (byCase.size > 0) {
-  console.log('\nEach finding needs a look: a wrong option name or arity is real,');
-  console.log('a missing helper the example deliberately elided is not.');
-}
-console.log(`\n${cases.length} importing examples typechecked (${skipped} skipped as unparseable fragments); ${byCase.size} with API-shaped errors (${reported} total)`);
+if (reported || skipped.length) process.exitCode = 1;
+if (skipped.length) console.log('Incomplete fragments:', skipped.join(', '));
+console.log(`\n${cases.length} importing examples typechecked (${skipped.length} incomplete fragments); ${byCase.size} with API-shaped errors (${reported} total)`);

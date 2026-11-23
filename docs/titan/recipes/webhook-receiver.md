@@ -177,7 +177,7 @@ class StripePaymentHandler {
 
 | Concern                  | Wiring detail                                                                                       |
 | ------------------------ | --------------------------------------------------------------------------------------------------- |
-| Signature on raw body    | Read the raw request body *before* JSON parsing — `@Validate(Schema)` runs after deserialise        |
+| Signature on raw body    | Read the raw request body *before* JSON parsing — `@Validate({ input: schema })` runs after deserialise        |
 | Deduplication key TTL    | Match or exceed the sender's max retry window (e.g. Stripe = 3 days, GitHub = 8 hours)              |
 | Rate limit per sender    | Use a key that includes the sender ID — otherwise one sender saturates the bucket for all of them   |
 | Idempotency on writes    | Downstream handlers should also be idempotent — webhooks at-least-once even with dedup              |

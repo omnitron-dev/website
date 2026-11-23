@@ -2,6 +2,7 @@
 id: "lumen/comparison"
 slug: "/docs/lumen/comparison"
 title: Lumen engineering comparison
+description: "Compare Lumen with other documentation systems by authoring model, rendering, search and publication needs."
 ---
 # Lumen engineering comparison
 

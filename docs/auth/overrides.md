@@ -3,6 +3,7 @@ id: "auth/overrides"
 slug: "/docs/auth/overrides"
 title: Per-User Overrides
 sidebar_position: 2
+description: "Design proposal for granting or denying an individual permission alongside role defaults."
 ---
 
 # Per-User Overrides

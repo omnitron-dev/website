@@ -2,6 +2,7 @@
 id: "lumen/architecture"
 slug: "/docs/lumen/architecture"
 title: Lumen architecture
+description: "Follow a document through parsing, access projection, static rendering, local search and browser activation."
 ---
 # Lumen architecture
 
@@ -99,8 +100,8 @@ From Lumen 0.4.13, the renderer processes four documents at a time by default. S
 integer. A page's 30-second deadline starts when its render begins. If a page
 fails, Lumen cancels the active renders and keeps the previous published
 generation. Routes and manifest entries follow corpus order even when a later
-page finishes first.
-[Static renderer](https://github.com/omnitron-dev/omni/blob/ed6f12cb506ebff83aa0bb51326780b4b23e8b87/packages/lumen/src/ssg/ssg-engine.ts)
+page finishes first. In 0.4.15 the renderer yields between pages so that suspended React previews can finish loading during a parallel build.
+[Static renderer](https://github.com/omnitron-dev/omni/blob/v0.4.15/packages/lumen/src/ssg/ssg-engine.ts)
 
 ## Formats and runtime entry points
 

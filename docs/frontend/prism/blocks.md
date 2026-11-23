@@ -220,9 +220,11 @@ directly via the `rows` prop:
 ```tsx
 import { DataGridBlock } from '@omnitron-dev/prism/blocks';
 
-function UsersPage({ users, loading }) {
+type UserRow = { id: string; email: string; role: string; status: string; createdAt: string };
+
+function UsersPage({ users, loading }: { users: UserRow[]; loading: boolean }) {
   return (
-    <DataGridBlock
+    <DataGridBlock<UserRow>
       rows={users}
       getRowId={(row) => row.id}
       loading={loading}

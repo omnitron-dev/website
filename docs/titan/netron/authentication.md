@@ -52,8 +52,7 @@ flowchart LR
   Authz -->|denied| F2[TitanError<br/>FORBIDDEN / 403]
 ```
 
-These are wired by the `titan-auth` ecosystem module (or by your own
-integration). You rarely construct them directly.
+At application startup, pass the authentication and authorization managers to `netron.configureAuth`. The [session tutorial](../../tutorial/03-auth.md#wire-the-module) connects the shared-session preset to PostgreSQL and attaches both managers before the HTTP listener starts.
 
 ## One invocation decision across transports {#one-invocation-decision-across-transports}
 
@@ -201,8 +200,10 @@ const IsResourceOwner: PolicyDefinition = {
   description: 'Caller must own the resource referenced by the first argument',
   evaluate: async (context) => {
     const resourceId = context.method?.args?.[0];      // method args live here
-    const resource   = await ordersRepo.findById(resourceId);  // close over your deps
-    const allowed    = resource?.userId === context.auth?.userId;
+    const userId = context.auth?.userId;
+    if (!userId || typeof resourceId !== 'string') return { allowed: false, reason: 'Missing identity or resource' };
+    const resource = await ordersRepo.findById(resourceId);
+    const allowed = resource?.userId === userId;
     return {
       allowed,
       reason: allowed ? 'Owner' : 'Not owner',
@@ -212,10 +213,11 @@ const IsResourceOwner: PolicyDefinition = {
 
 policyEngine.registerPolicies([IsResourceOwner]);
 
-// Then in your service:
-@Public()
-@Auth({ policies: ['resource:owner'] })
-async getOrder(orderId: string) { /* … */ }
+class Orders {
+  @Public()
+  @Auth({ policies: ['resource:owner'] })
+  async getOrder(orderId: string) { return ordersRepo.findById(orderId); }
+}
 ```
 
 The context passed to `evaluate` is an `ExecutionContext`

@@ -2,6 +2,7 @@
 id: "lumen/showcase"
 slug: "/docs/lumen/showcase"
 title: Lumen showcase
+description: "Try working Lumen examples and see which parts render during the build or run in the browser."
 ---
 # Lumen showcase
 

@@ -36,7 +36,7 @@ constructor dependencies first.
 container.register(LOGGER, {
   useClass: ConsoleLogger,
   scope:    Scope.Singleton,
-  inject:   [],                // optional; auto-detected from metadata
+  inject:   [],                // explicit dependency list for this provider
   multi:    false,             // single token
 });
 ```

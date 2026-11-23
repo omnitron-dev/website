@@ -88,13 +88,15 @@ export interface User {
   createdAt: Date;
 }
 
+const publicUserColumns = ['id', 'email', 'name', 'createdAt'] as const;
+
 @Injectable()
 export class UserRepo {
   constructor(@Inject(DATABASE_CONNECTION) private db: Kysely<Database>) {}
 
   async findById(id: string): Promise<User | null> {
     const row = await this.db.selectFrom('users')
-      .selectAll()
+      .select(publicUserColumns)
       .where('id', '=', id)
       .executeTakeFirst();
     return row ?? null;
@@ -103,13 +105,13 @@ export class UserRepo {
   async create(input: { email: string; name: string }): Promise<User> {
     return await this.db.insertInto('users')
       .values({ id: cuid(), ...input })
-      .returningAll()
+      .returning(publicUserColumns)
       .executeTakeFirstOrThrow();
   }
 
   async list(): Promise<User[]> {
     return await this.db.selectFrom('users')
-      .selectAll()
+      .select(publicUserColumns)
       .orderBy('createdAt', 'desc')
       .limit(100)
       .execute();
@@ -122,7 +124,7 @@ export class UserRepo {
 `apps/api/src/users/users.service.ts`:
 
 ```typescript
-import { Service } from '@omnitron-dev/titan';
+import { Inject, Service } from '@omnitron-dev/titan';
 import { Public, Validate } from '@omnitron-dev/titan/decorators';
 import { Errors } from '@omnitron-dev/titan/errors';
 import { z } from 'zod';
@@ -136,7 +138,7 @@ type CreateUser = z.infer<typeof CreateUserSchema>;
 
 @Service('users@1.0.0')
 export class UsersService {
-  constructor(private readonly repo: UserRepo) {}
+  constructor(@Inject(UserRepo) private readonly repo: UserRepo) {}
 
   @Public()
   async findById(id: string): Promise<User> {
@@ -146,7 +148,7 @@ export class UsersService {
   }
 
   @Public()
-  @Validate(CreateUserSchema)
+  @Validate({ input: CreateUserSchema })
   async create(input: CreateUser): Promise<User> {
     return this.repo.create(input);
   }
@@ -202,7 +204,7 @@ if (!app.netron) throw new Error('Netron is unavailable');
 app.netron.registerTransport('http', () => new HttpTransport());
 app.netron.registerTransportServer('http', {
   name: 'api',
-  options: { host: '127.0.0.1', port: 3001 },
+  options: { host: process.env.API_HOST ?? '127.0.0.1', port: 3001 },
 });
 await app.start();
 console.log('api ready');
@@ -250,7 +252,7 @@ The round trip exercises the database through the HTTP transport. Use a typed se
 | `@Inject(DATABASE_CONNECTION) db: Kysely<Database>` | DI the typed query builder |
 | `UserRepo` | Database access layer — repos handle SQL |
 | `UsersService` | Business layer — services compose repos + cross-cutting concerns |
-| `@Validate(schema)` | Zod schema runs as input validation; bad input throws `Errors.validation` |
+| `@Validate({ input: schema })` | Validates the first argument against the schema before executing the method |
 | `Errors.notFound(...)` | Returns a typed `NOT_FOUND` over the wire — the client sees a `TitanError` with `code: 'NOT_FOUND'` |
 
 Repo + service split is the canonical pattern — easier to test,

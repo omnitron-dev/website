@@ -2,6 +2,7 @@
 id: "titan/modules/cache"
 slug: "/docs/titan/modules/cache"
 title: titan-cache
+description: "Choose a cache store and inspect key expiry, eviction and invalidation in Titan."
 ---
 
 
@@ -48,7 +49,7 @@ import { TitanCacheModule } from '@omnitron-dev/titan-cache';
 class AppModule {}
 ```
 
-### Multi-tier (L1 in-memory + L2 Redis) {#multi-tier-l1-in-memory--l2-redis}
+### Multi-tier cache with an L2 adapter {#multi-tier-l1-in-memory--l2-redis}
 
 ```typescript
 import { TitanCacheModule, type IL2CacheAdapter } from '@omnitron-dev/titan-cache';

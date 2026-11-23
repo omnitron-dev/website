@@ -2,122 +2,68 @@
 id: "community/changelog"
 slug: "/docs/community/changelog"
 sidebar_position: 3
-title: Changelog
-description: Versioning policy + how to find release notes per package.
+title: Release notes
+description: What shipped in Omnitron, where to find the matching source and how to plan an upgrade.
 ---
 
-# Changelog
+# Release notes
 
-## Where to find release notes {#where-to-find-release-notes}
+Omnitron publishes its public workspace packages together. The tag fixes the source, the repository changelog explains the changes, and npm holds the installable packages. This manual’s API reference follows the tagged source for **0.4.16**. [GitHub release](https://github.com/omnitron-dev/omni/releases/tag/v0.4.16) · [Tagged changelog](https://github.com/omnitron-dev/omni/blob/v0.4.16/CHANGELOG.md)
 
-Each package versions independently and publishes its own
-changelog. Release notes live in three places:
+## What shipped in 0.4.16 {#where-to-find-release-notes}
 
-1. **GitHub Releases** —
-   [github.com/omnitron-dev/omni/releases](https://github.com/omnitron-dev/omni/releases).
-   One entry per release across the monorepo; lists every
-   package version bumped and what changed.
+| Area | What changes for you |
+| --- | --- |
+| Remote deployments | When a connection drops, the controller can use the receiving node's startup result and checked files to retry. A partial start reports the applications already online. [Deployment recovery](../omnitron/releases.md) |
+| Documentation | Lumen preserves table headers and column alignment across HTML, Markdown and PDF. Code comments remain legible in both themes. Breadcrumbs follow the active theme from the first rendered page. [Lumen](../lumen/architecture.md) |
+| React applications | Prism keeps child state when a provider list is rebuilt. Netron isolates default memory sessions per client and honors explicit browser storage in its React client and authentication provider. [Netron for React](../frontend/netron/multi-backend.md) |
+| Notifications | Closing Rotif during startup releases waiting publishers. Multi-process subscriptions preserve complete channel patterns. [Titan notifications](../titan/modules/notifications.mdx) |
 
-2. **`CHANGELOG.md` per package** — committed to the repo, e.g.,
-   `packages/titan-cache/CHANGELOG.md`. Maintained by
-   [Changesets](https://github.com/changesets/changesets).
+## What shipped in 0.4.15 {#release-0-4-15}
 
-3. **npm versions** — `pnpm view @omnitron-dev/titan versions`
-   for the version history of any package.
+| If you want to… | Start here |
+| --- | --- |
+| Work with several agents in one project | Create a room, choose a lead and connect local adapters. Members can share notes and take assignments. [Agent Studio](../omnitron/studio.md#team-room) |
+| Automate an operation | Draw a flow, preview a sample event and review its next revision before activation. Another enrolled controller can receive an inactive draft for its own review. [Event flows](../omnitron/flows.md) |
+| Find out why a node raised a storage alert | Inspect the reporting Linux node’s RAID and NVMe observations in Console. [Host storage health](../omnitron/diagnostics.md#host-storage-health) |
+| Build a documentation site | Lumen yields between pages during parallel rendering and can serve a published generation without loading its renderer. [Rendering a large corpus](../lumen/architecture.md#rendering-a-large-corpus) |
 
-## Versioning policy {#versioning-policy}
+The release also covers controller updates, release retention, Netron React and Prism. For the complete list and earlier releases, read the [repository changelog](https://github.com/omnitron-dev/omni/blob/v0.4.15/CHANGELOG.md).
 
-We follow **strict semver**:
+## Match an installation to its source {#versioning-policy}
 
-| Bump | When |
-| ---- | ---- |
-| **MAJOR** (`1.0.0 → 2.0.0`) | Any breaking change to the public API. Includes: removed exports, renamed methods, changed method signatures, behaviour changes that break valid prior code. |
-| **MINOR** (`1.0.0 → 1.1.0`) | New feature or non-breaking improvement. New module, new option with a safe default, performance improvement. |
-| **PATCH** (`1.0.0 → 1.0.1`) | Bug fix. No API change. |
+1. Check the installed package with `npm ls @omnitron-dev/titan`, or substitute the package your application uses.
+2. Open the matching Git tag. Its manifests declare the supported runtimes and peer dependency ranges.
+3. For changes described as **main**, check the named commit before depending on them. **Design proposal** identifies a specification with work still to implement.
 
-### Pre-1.0 exception {#pre-10-exception}
+### How package versions line up {#per-package-versioning}
 
-Packages with version `0.x.y` may have breaks in minor versions
-(`0.1.0 → 0.2.0` may break). Once a package hits `1.0.0`, full
-semver applies.
+The Xec release workflow promotes the authored **Unreleased** notes into the versioned section when it prepares a release. The repository uses one release version for the published set. Independent projects such as Xec and Kysera have their own release histories. [Release process](./contributing.md#release-process)
 
-This matches semver's [definition](https://semver.org/#spec-item-4)
-for pre-1.0 packages.
+### Pre-1.0 compatibility {#pre-10-exception}
 
-### Per-package versioning {#per-package-versioning}
+A pre-1.0 minor release can change public contracts. Check your client and server together when upgrading independently deployed services.
 
-Each `@omnitron-dev/*` package versions independently. This means:
+## Plan an upgrade {#upgrade-guides}
 
-- `titan` can be at v1.2.0 while `titan-cache` is at v0.8.4.
-- Upgrading one package doesn't force upgrading others — as
-  long as peer-dependency ranges are satisfied.
-- Breaking change in `titan-cache` doesn't bump `titan`'s
-  version.
+Read the intervening changelog entries, pin your dependency graph and exercise the paths your project uses. A runtime update also needs a compatible application build and a tested recovery path. [Compatibility](../reference/compatibility.md) · [Runtime updates](../omnitron/cli.md#local-runtime-updates)
 
-Peer-dependency relationships make this manageable; each module
-declares which `titan` versions it supports.
+### Identify breaking changes {#breaking-change-communication}
 
-## Support windows {#support-windows}
+Compare the two tagged changelogs, public declarations and migration notes for the paths your application uses. The [migration guides](../titan/migrations/index.md) describe specific transitions and identify proposed designs.
 
-We aim for:
+### Check support {#support-windows}
 
-- **Current major**: full support — bug fixes, security
-  patches, new features.
-- **Previous major**: security fixes only for **12 months**
-  after the next major's release.
-- **Older majors**: unsupported; upgrade.
+For runtime requirements, consult [Compatibility](../reference/compatibility.md). The [security policy](./security.md#supported-versions) identifies supported release lines for vulnerability reports.
 
-Pre-1.0 packages are best-effort.
+## Follow releases {#subscribe-to-releases}
 
-## Breaking change communication {#breaking-change-communication}
+### Publication dates {#release-cadence}
 
-Breaking changes get:
+Use the date of the tag and the npm version you plan to install. The registry records when each package became available.
 
-1. **A deprecation warning** in the previous minor release (at
-   least one).
-2. **Documentation** of the migration path in the release
-   notes.
-3. **A migration guide** for substantial changes.
+GitHub provides the [release archive](https://github.com/omnitron-dev/omni/releases) and [Atom feed](https://github.com/omnitron-dev/omni/releases.atom). To check a package independently, run `npm view @omnitron-dev/titan version`.
 
-We aim to avoid surprise breaks. If you depend on undocumented
-internals, expect them to break without notice.
+### Related references {#see-also}
 
-## Release cadence {#release-cadence}
-
-Roughly:
-
-- **Patch releases**: as needed (often weekly across the
-  monorepo).
-- **Minor releases**: 2–4 per quarter per actively-developed
-  package.
-- **Major releases**: 1–2 per year per package, more for early
-  packages.
-
-There is no fixed schedule — releases ship when they're ready.
-
-## Upgrade guides {#upgrade-guides}
-
-When a major version requires non-trivial migration, an upgrade
-guide is added to the docs:
-
-| From → To | Guide |
-| --------- | ----- |
-| *(none yet — published once first major upgrades land)* | |
-
-For specific packages, the package's `CHANGELOG.md` has the
-detail.
-
-## Subscribe to releases {#subscribe-to-releases}
-
-| Channel | URL |
-| ------- | --- |
-| GitHub Releases RSS | https://github.com/omnitron-dev/omni/releases.atom |
-| Watch the repo | github.com/omnitron-dev/omni → Watch → Custom → Releases |
-| npm package | `npm info @omnitron-dev/<pkg>` |
-| Blog | [/blog](/blog) (significant releases get a post) |
-
-## See also {#see-also}
-
-- [Contributing / Release process](./contributing.md#release-process)
-- [Security policy](./security.md) — security-fix SLA
-- [Packages](../reference/packages.md) — per-package index
+Find a package by its role in the [package index](../reference/packages.md), or inspect a public symbol in the [API index](../reference/api-index.mdx).

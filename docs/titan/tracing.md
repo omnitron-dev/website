@@ -105,7 +105,7 @@ import { startSpan, withTrace } from '@omnitron-dev/titan/tracing';
 const span = startSpan();
 
 await withTrace(span, async () => {
-  await this.db.query(...);
+  await db.query('SELECT 1');
 });
 ```
 

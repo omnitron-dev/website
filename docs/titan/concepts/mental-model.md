@@ -43,7 +43,8 @@ export class OrdersService {
   ) {}
 
   @Public()
-  async findById(@Validate(IdSchema) id: string): Promise<Order> {
+  @Validate({ input: IdSchema })
+  async findById(id: string): Promise<Order> {
     this.logger.debug({ id }, 'findById');
     const cache = this.cache.getCache<Order>();
     const key = `order:${id}`;

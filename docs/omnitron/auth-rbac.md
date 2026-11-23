@@ -275,26 +275,21 @@ export function createRlsInvocationWrapper() {
   return async (metadata: Map<string, unknown>, fn: () => Promise<unknown>) => {
     const authCtx = metadata.get('authContext') as AuthContext | undefined;
     if (authCtx) {
-      const rlsCtx = mapAuthToRLSContext(authCtx, {
-        defaultTenantId: (authCtx.metadata as any)?.tenantId ?? 'default',
-      });
+      const rlsCtx = mapAuthToRLSContext(authCtx);
       return rlsContext.runAsync(rlsCtx, fn);
     }
     return fn();
   };
 }
 
-// In every app's bootstrap:
-auth: {
+// Supply this object as the auth option in the application's Netron configuration.
+const auth = {
   jwt: { enabled: true, tokenCacheTtl: 60_000 },
   invocationWrapper: createRlsInvocationWrapper(),
-},
+};
 ```
 
-Now every database query — from any `@Service` method, over any
-transport — runs inside an AsyncLocalStorage scope that exposes
-`user_id`, `is_system`, `tenant_id` to RLS policies. Repositories
-pick this up automatically via the kysera RLS plugin.
+An authenticated invocation installs its RLS context for the duration of the call. Repositories configured with the Kysera RLS plugin read that context. This wrapper passes calls without an authentication context through to the application's public-method and database policies.
 
 :::note{title="One wrapper, two places that apply it"}
 `transport/http/server.ts` applies it per request. Every socket

@@ -238,13 +238,13 @@ async findById(id: string) { /* … */ }
 
 → [titan-cache](../modules/cache.mdx)
 
-### `@Validate(schema, options?)` and `@Contract(contract)` {#validateschema-options-and-contractcontract}
+### `@Validate({ input, output })` and `@Contract(contract)` {#validateschema-options-and-contractcontract}
 
 Validate input (and optionally output) against Zod schemas.
 
 ```typescript
 import { z } from '@omnitron-dev/titan/validation';
-import { Validate, ValidateInput, Contract } from '@omnitron-dev/titan/decorators';
+import { Validate, ValidateInput } from '@omnitron-dev/titan/decorators';
 
 @Public()
 @Validate({ input: CreateUserSchema })
@@ -258,8 +258,8 @@ async create(input: z.infer<typeof CreateUserSchema>) {
 async createAlt(input: z.infer<typeof CreateUserSchema>) { /* … */ }
 
 @Public()
-@Contract(FindByIdContract)
-async findById(input: { id: string }) { /* input + output validated */ }
+@Validate({ input: FindByIdInput, output: UserSchema })
+async findById(input: { id: string }) { /* input and output validated */ }
 ```
 
 `@Validate` is a **method** decorator. It takes a `MethodContract`

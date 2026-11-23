@@ -3,136 +3,132 @@ id: "tutorial/auth"
 slug: "/docs/tutorial/auth"
 sidebar_position: 4
 title: 3. Auth
-description: JWT sign-in, sessions, role-gated methods.
+description: Issue a short-lived access token, bind it to a database session and enforce roles on Netron calls.
 ---
 
-# Step 3 — Auth
+# Step 3 — Sign in and authorize requests
 
-By the end: users can sign in, get a JWT, and the `UsersService.list`
-method is admin-only.
+A user signs in once and presents a bearer token on subsequent requests. PostgreSQL owns the session and the current roles. Signing out revokes that session, including requests made with a previously issued token.
 
-## Add the auth module + Redis {#add-the-auth-module--redis}
+## Add authentication {#add-the-auth-module--redis}
+
+From the workspace root, install the verifier, the password hasher and the token issuer in the API application.
 
 ```bash
-cd apps/api
-pnpm add @omnitron-dev/titan-auth
-docker run -d --name redis -p 6379:6379 redis:7-alpine
+pnpm --dir apps/api add @omnitron-dev/titan-auth argon2 jose
+export JWT_SECRET="$(openssl rand -hex 32)"
 ```
+
+Keep this value in the environment of the API process. The issuer and verifier in this tutorial use the same secret. Generating a new secret invalidates previously signed tokens.
 
 ## Schema additions {#schema-additions}
 
-`apps/api/migrations/002_auth.sql`:
+Apply `apps/api/migrations/002_auth.sql` to the tutorial database.
 
 ```sql
-ALTER TABLE users ADD COLUMN password_hash TEXT NOT NULL DEFAULT '';
+ALTER TABLE users ADD COLUMN password_hash TEXT;
 ALTER TABLE users ADD COLUMN roles TEXT[] NOT NULL DEFAULT ARRAY['user'];
 
 CREATE TABLE sessions (
-  id           TEXT PRIMARY KEY,
-  user_id      TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-  expires_at   TIMESTAMPTZ NOT NULL,
-  is_revoked   BOOLEAN NOT NULL DEFAULT FALSE,
-  created_at   TIMESTAMPTZ NOT NULL DEFAULT now()
+  id         TEXT PRIMARY KEY,
+  user_id    TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  expires_at TIMESTAMPTZ NOT NULL,
+  is_revoked BOOLEAN NOT NULL DEFAULT FALSE,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
-
 CREATE INDEX sessions_user_id_idx ON sessions(user_id);
 ```
 
 ```bash
-psql -U postgres -h localhost -d platform < apps/api/migrations/002_auth.sql
+PGPASSWORD=dev psql -v ON_ERROR_STOP=1 -U postgres -h localhost -d platform -f apps/api/migrations/002_auth.sql
 ```
 
-Update `apps/api/src/db/schema.ts`:
+Extend `apps/api/src/db/schema.ts`. Existing users can sign in after a password has been set. The repository from step 2 continues to return only its four public columns.
 
 ```typescript
 import type { Generated } from 'kysely';
 
 export interface UsersTable {
-  id:            Generated<string>;
-  email:         string;
-  name:          string;
-  passwordHash:  string;
-  roles:         string[];
-  createdAt:     Generated<Date>;
+  id: Generated<string>;
+  email: string;
+  name: string;
+  passwordHash: string | null;
+  roles: Generated<string[]>;
+  createdAt: Generated<Date>;
 }
 
 export interface SessionsTable {
-  id:         string;
-  userId:     string;
-  expiresAt:  Date;
-  isRevoked:  Generated<boolean>;
-  createdAt:  Generated<Date>;
+  id: string;
+  userId: string;
+  expiresAt: Date;
+  isRevoked: Generated<boolean>;
+  createdAt: Generated<Date>;
 }
 
 export interface Database {
-  users:    UsersTable;
+  users: UsersTable;
   sessions: SessionsTable;
 }
 ```
 
 ## Auth service {#auth-service}
 
-`apps/api/src/auth/auth.service.ts`:
+In `apps/api/src/auth/settings.ts`, read the signing configuration once at startup.
 
 ```typescript
-import { Injectable, Inject, Service } from '@omnitron-dev/titan';
+const secret = process.env.JWT_SECRET;
+if (!secret || Buffer.byteLength(secret) < 32) throw new Error('JWT_SECRET requires at least 32 bytes');
+export const authSettings = { algorithm: 'HS256', jwtSecret: secret, issuer: 'my-platform', audience: 'my-platform' } as const;
+```
+
+In `apps/api/src/auth/auth.service.ts`, issue a 15-minute token and record its session before returning it. A password hash stays in the API process. The server obtains the session to revoke from the verified invocation.
+
+```typescript
+import { Inject, Service } from '@omnitron-dev/titan';
 import { Public, Validate } from '@omnitron-dev/titan/decorators';
 import { Errors } from '@omnitron-dev/titan/errors';
-import { JWT_SERVICE_TOKEN, type IJWTService } from '@omnitron-dev/titan-auth';
+import { getCurrentInvocationContext } from '@omnitron-dev/titan/netron';
 import { DATABASE_CONNECTION } from '@omnitron-dev/titan-database';
-import type { Kysely } from 'kysely';
 import { cuid } from '@omnitron-dev/cuid';
-import * as argon2 from 'argon2';
+import { SignJWT } from 'jose';
+import { verify } from 'argon2';
+import type { Kysely } from 'kysely';
 import { z } from 'zod';
 import type { Database } from '../db/schema.js';
+import { authSettings } from './settings.js';
 
-const SignInSchema = z.object({
-  email:    z.string().email(),
-  password: z.string().min(8),
-});
-type SignIn = z.infer<typeof SignInSchema>;
+const SignIn = z.object({ email: z.string().email(), password: z.string().min(8) });
 
 @Service('auth@1.0.0')
 export class AuthService {
-  constructor(
-    @Inject(JWT_SERVICE_TOKEN)    private jwt: IJWTService,
-    @Inject(DATABASE_CONNECTION)  private db:  Kysely<Database>,
-  ) {}
+  constructor(@Inject(DATABASE_CONNECTION) private readonly db: Kysely<Database>) {}
 
   @Public({ auth: { allowAnonymous: true } })
-  @Validate(SignInSchema)
-  async signIn({ email, password }: SignIn) {
-    const user = await this.db.selectFrom('users')
-      .selectAll()
-      .where('email', '=', email)
-      .executeTakeFirst();
-
-    if (!user || !(await argon2.verify(user.passwordHash, password))) {
-      throw Errors.unauthorized('invalid credentials');
+  @Validate({ input: SignIn })
+  async signIn({ email, password }: z.infer<typeof SignIn>) {
+    const user = await this.db.selectFrom('users').select(['id', 'email', 'passwordHash', 'roles'])
+      .where('email', '=', email).executeTakeFirst();
+    if (!user?.passwordHash || !await verify(user.passwordHash, password)) {
+      throw Errors.unauthorized('Invalid credentials');
     }
 
-    const sessionId = cuid();
-    const expiresAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000); // 30 days
-
-    await this.db.insertInto('sessions')
-      .values({ id: sessionId, userId: user.id, expiresAt })
-      .execute();
-
-    const token = await this.jwt.sign({
-      sub:   user.id,
-      sid:   sessionId,
-      roles: user.roles,
-    });
-
+    const id = cuid();
+    const exp = Math.floor(Date.now() / 1000) + 15 * 60;
+    const token = await new SignJWT({ sid: id, roles: user.roles })
+      .setProtectedHeader({ alg: authSettings.algorithm }).setSubject(user.id)
+      .setIssuer(authSettings.issuer).setAudience(authSettings.audience)
+      .setIssuedAt().setExpirationTime(exp).sign(new TextEncoder().encode(authSettings.jwtSecret));
+    await this.db.insertInto('sessions').values({ id, userId: user.id, expiresAt: new Date(exp * 1000) }).execute();
     return { token, user: { id: user.id, email: user.email, roles: user.roles } };
   }
 
-  @Public()
-  async signOut({ sessionId }: { sessionId: string }) {
-    await this.db.updateTable('sessions')
-      .set({ isRevoked: true })
-      .where('id', '=', sessionId)
-      .execute();
+  @Public({ auth: true })
+  async signOut() {
+    const auth = getCurrentInvocationContext()?.auth;
+    const sid = auth?.claims?.sid;
+    if (!auth || typeof sid !== 'string') throw Errors.unauthorized('Missing session');
+    await this.db.updateTable('sessions').set({ isRevoked: true })
+      .where('id', '=', sid).where('userId', '=', auth.userId).execute();
     return { success: true };
   }
 }
@@ -140,162 +136,124 @@ export class AuthService {
 
 ## Wire the module {#wire-the-module}
 
-Update `apps/api/src/app.module.ts`:
+Keep the `TitanDatabaseModule` configuration from step 2, including `camelCase: true`. In `AppModule`, add `TitanAuthModule.forRoot(authSettings)` to `imports` and `AuthService` to `providers`.
 
 ```typescript
-import { Module }                from '@omnitron-dev/titan';
-import { ConfigModule }          from '@omnitron-dev/titan/module/config';
-import { TitanDatabaseModule }   from '@omnitron-dev/titan-database';
-import { TitanRedisModule }      from '@omnitron-dev/titan-redis';
-import { TitanAuthModule }       from '@omnitron-dev/titan-auth';
-
-import { UserRepo }     from './users/user.repo.js';
-import { UsersService } from './users/users.service.js';
-import { AuthService }  from './auth/auth.service.js';
-
-@Module({
-  imports: [
-    ConfigModule.forRoot({ sources: [{ type: 'env', prefix: 'API_' }] }),
-    TitanRedisModule.forRoot({ config: { url: process.env.REDIS_URL ?? 'redis://localhost:6379' } }),
-    TitanDatabaseModule.forRoot({
-      // `connection` is the whole connection, not just its URL — dialect and
-      // DSN travel together, which is what lets `connections: { … }` name
-      // several of them.
-      connection: {
-        dialect: 'postgres',
-        connection: process.env['DATABASE_URL'] ?? 'postgres://postgres:dev@localhost:5432/platform',
-      },
-    }),
-    TitanAuthModule.forRoot({
-      algorithm:  'HS256',
-      jwtSecret:  process.env.JWT_SECRET ?? 'dev-secret-do-not-use-in-prod',
-      issuer:     'my-platform',
-      audience:   'my-platform',
-    }),
-  ],
-  providers: [UserRepo, UsersService, AuthService],
-})
-export class AppModule {}
+import { TitanAuthModule } from '@omnitron-dev/titan-auth';
+import { AuthService } from './auth/auth.service.js';
+import { authSettings } from './auth/settings.js';
 ```
 
-## Gate UsersService.list to admins {#gate-usersservicelist-to-admins}
-
-Update `apps/api/src/users/users.service.ts`:
+Add `apps/api/src/auth/configure.ts`. The shared-session preset verifies the JWT and calls `sessionAuthority` for each protected request. One query reads the session and the user's current roles together.
 
 ```typescript
-import { Service } from '@omnitron-dev/titan';
-import { Public } from '@omnitron-dev/titan/decorators';
-import { RequireAuth, RequireRole } from '@omnitron-dev/titan-auth';
-// ...
+import type { Application } from '@omnitron-dev/titan';
+import { AuthorizationManager } from '@omnitron-dev/titan/netron/auth';
+import { JWT_SERVICE_TOKEN, type IJWTService } from '@omnitron-dev/titan-auth';
+import { createSharedSessionAuthManager } from '@omnitron-dev/titan-auth/preset/shared-session';
+import { DATABASE_CONNECTION } from '@omnitron-dev/titan-database';
+import type { Kysely } from 'kysely';
+import type { Database } from '../db/schema.js';
+import { authSettings } from './settings.js';
 
-@Service('users@1.0.0')
-export class UsersService {
-  // ...
-
-  @Public()
-  @RequireAuth()                                        // any logged-in user
-  async findById(id: string): Promise<User> {
-    // ...
-  }
-
-  @Public()
-  @RequireRole(['admin'])                                // admin only
-  async list(): Promise<User[]> {
-    return this.repo.list();
-  }
+export async function configureAuth(app: Application) {
+  const { netron, logger } = app;
+  if (!netron || !logger) throw new Error('Netron and the application logger are required');
+  const jwtService = await app.container.resolveAsync<IJWTService>(JWT_SERVICE_TOKEN);
+  const db = await app.container.resolveAsync<Kysely<Database>>(DATABASE_CONNECTION);
+  const verifier = createSharedSessionAuthManager({
+    logger, jwtService, expectedIssuer: authSettings.issuer,
+    async sessionAuthority(id, userId) {
+      const row = await db.selectFrom('sessions').innerJoin('users', 'users.id', 'sessions.userId')
+        .select(['sessions.userId', 'sessions.expiresAt', 'sessions.isRevoked', 'users.roles'])
+        .where('sessions.id', '=', id).where('sessions.userId', '=', userId).executeTakeFirst();
+      return row && { ...row, permissions: [] };
+    },
+  });
+  netron.configureAuth(verifier, new AuthorizationManager(logger));
 }
 ```
 
+In `main.ts`, import `configureAuth` and call `await configureAuth(app)` before `await app.start()`. Keep the HTTP transport registration from step 2.
+
+## Gate UsersService.list to admins {#gate-usersservicelist-to-admins}
+
+In `UsersService`, require a signed-in user for `findById` and the admin role for `list` and `create`. Keep the method bodies and validation from step 2.
+
+| Method | Exposure |
+| --- | --- |
+| `findById` | `@Public({ auth: true })` |
+| `list` and `create` | `@Public({ auth: { roles: ['admin'] } })` |
+
 ## Seed an admin user {#seed-an-admin-user}
 
-```bash
-node -e "
-const argon2 = require('argon2');
-const { Pool } = require('pg');
-const { cuid } = require('@omnitron-dev/cuid');
+Set `TUTORIAL_PASSWORD` privately for the local example. These commands run from `apps/api`. Seeding an existing email fails, so the example cannot overwrite an existing account's credentials or roles.
 
-(async () => {
-  const pool = new Pool({ connectionString: 'postgres://postgres:dev@localhost:5432/platform' });
-  const hash = await argon2.hash('correct-horse-battery-staple');
-  await pool.query(
-    'INSERT INTO users (id, email, name, password_hash, roles) VALUES (\$1, \$2, \$3, \$4, \$5)',
-    [cuid(), 'admin@example.com', 'Admin', hash, ['admin']]
-  );
-  console.log('admin@example.com / correct-horse-battery-staple');
+```bash
+cd apps/api
+node --input-type=module <<'JS'
+import { hash } from 'argon2';
+import pg from 'pg';
+import { cuid } from '@omnitron-dev/cuid';
+const password = process.env.TUTORIAL_PASSWORD;
+if (!password || password.length < 12) throw new Error('Set TUTORIAL_PASSWORD to at least 12 characters');
+const pool = new pg.Pool({ connectionString: process.env.DATABASE_URL ?? 'postgres://postgres:dev@localhost:5432/platform' });
+try {
+  await pool.query('INSERT INTO users (id,email,name,password_hash,roles) VALUES ($1,$2,$3,$4,$5)',
+    [cuid(), 'admin@example.com', 'Admin', await hash(password), ['admin']]);
+} finally {
   await pool.end();
-})();
-"
+}
+JS
 ```
 
 ## Verify {#verify}
 
-```bash
-JWT_SECRET=dev-secret-do-not-use-in-prod pnpm dev
-```
+Start the API with `pnpm dev` in the shell with `JWT_SECRET` set. From a second shell in `apps/api` with the same tutorial password, exercise sign-in, the protected method and revocation.
 
 ```bash
-node -e "
-const { createClient } = require('@omnitron-dev/netron-browser');
-(async () => {
-  const c = createClient({ url: 'http://localhost:3001' });
-  await c.connect();
-
-  // Sign in:
-  const { token, user } = await c.invoke('auth', 'signIn',
-    [{ email: 'admin@example.com', password: 'correct-horse-battery-staple' }]);
-  console.log('signed in:', user);
-
-  // List (admin-only) with the token:
-  const all = await c.invoke('users', 'list', [],
-    { headers: { authorization: 'Bearer ' + token } });
-  console.log('users:', all);
-})();
-"
-```
-
-Try without the token:
-
-```bash
-node -e "
-const { createClient } = require('@omnitron-dev/netron-browser');
-(async () => {
-  const c = createClient({ url: 'http://localhost:3001' });
-  await c.connect();
+node --input-type=module <<'JS'
+import { AuthenticationClient, HttpClient } from '@omnitron-dev/netron-browser';
+const auth = new AuthenticationClient();
+const client = new HttpClient({ url: 'http://127.0.0.1:3001', auth });
+try {
+  await client.connect();
+  const { token } = await client.invoke('auth@1.0.0', 'signIn',
+    [{ email: 'admin@example.com', password: process.env.TUTORIAL_PASSWORD }]);
+  auth.setToken(token);
+  const users = await client.invoke('users@1.0.0', 'list', []);
+  console.log('Visible users:', users.length);
+  await client.invoke('auth@1.0.0', 'signOut', []);
   try {
-    await c.invoke('users', 'list', []);
-  } catch (e) {
-    console.log('rejected:', e.code, e.message);  // → UNAUTHORIZED
+    await client.invoke('users@1.0.0', 'list', []);
+    throw new Error('A revoked session was accepted');
+  } catch (error) {
+    if (error.code !== 'UNAUTHORIZED' && error.statusCode !== 401 && error.status !== 401) throw error;
+    console.log('Revoked session refused');
   }
-})();
-"
+} finally {
+  await client.disconnect();
+  auth.destroy();
+}
+JS
 ```
 
-## What's new {#whats-new}
+## What changed {#whats-new}
 
-| Piece | What it does |
-| ----- | ------------ |
-| `TitanAuthModule.forRoot({...})` | Wires JWT signing + verification |
-| `IJWTService` | Inject to sign / verify tokens manually |
-| `@RequireAuth()` | Method-level: any logged-in user |
-| `@RequireRole(['admin'])` | Method-level: specific roles |
-| `@Public({ auth: { allowAnonymous: true } })` | Method-level: explicit anonymous |
-
-For multi-app fan-out (one identity app + N specialists sharing
-the same JWT + Redis session registry), see
-[Best practices / Shared auth](../omnitron/best-practices.md#shared-authentication-across-apps).
+The API owns token issuance. Titan verifies each credential, resolves the current database session and supplies Netron with the caller's roles. The same policy applies to the web client in step 4. For several cooperating backends, see [Shared authentication](../omnitron/best-practices.md#shared-authentication-across-apps).
 
 ## Commit {#commit}
 
 ```bash
 git add .
-git commit -m "step 3: JWT auth + role-gated methods"
+git commit -m "Add session authentication to the tutorial API"
 ```
 
 ## Troubleshooting {#troubleshooting}
 
-| Symptom | Fix |
-| ------- | --- |
-| `Cannot find module 'argon2'` | `pnpm add argon2` in apps/api |
-| `JWT_SECRET is required` | Export it: `export JWT_SECRET=dev-secret-do-not-use-in-prod` |
-| `UNAUTHORIZED` with valid token | Check JWT signing key matches verification key |
-| `FORBIDDEN` (403) | Token is valid but role insufficient |
+| Result | Check |
+| --- | --- |
+| Startup rejects `JWT_SECRET` | Set the secret in the API process environment. |
+| A request returns 401 | Check the bearer token's issuer, audience, expiration and live session. |
+| A valid session receives 403 | Check the method policy and the current roles in PostgreSQL. |
+| The authority returns 503 | Check the database connection and logs. Retry the request after recovery. |

@@ -40,7 +40,7 @@ explicitly so you don't fight the framework.
 | `BullModule` / `BullMQModule`       | `SchedulerModule` (cron) + `NotificationsModule` (rotif) | Different decomposition       |
 | Guards (`@UseGuards`)               | `@Auth(...)` or middleware via Netron              | Auth-specific surface                |
 | Interceptors                        | RPC middleware (per-call) + DI middleware (per-resolution) | Two distinct layers          |
-| Pipes (`@UsePipes`)                 | `@Validate(schema)` / `@Contract(...)`             | Zod schemas, not class-validator     |
+| Pipes (`@UsePipes`)                 | `@Validate({ input: schema })` / `@Contract(...)`             | Zod schemas, not class-validator     |
 | Filters (`@UseFilters`)             | Error class hierarchy + middleware                 | Errors are values, not events        |
 
 ## The biggest delta — controllers vs services {#the-biggest-delta--controllers-vs-services}

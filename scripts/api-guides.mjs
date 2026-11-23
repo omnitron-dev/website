@@ -90,6 +90,8 @@ export default {
     ".": "frontend/prism/index.md",
     "./ui": "frontend/prism/theme.md",
     "./icons": "frontend/prism/theme.md",
+    "./components/content-renderer": "frontend/prism/components.md",
+    "./components/content-renderer/styles.css": {guide: "frontend/prism/components.md", assetSource: "src/components/content-renderer/code-highlight.css"},
     "./components/doc-layout": "frontend/prism/components.md",
     "./theme": "frontend/prism/theme.md",
     "./core": "frontend/prism/theme.md",
@@ -219,6 +221,8 @@ export default {
     ".": "titan/modules/telemetry-relay.mdx"
   },
   "@omnitron-dev/omnitron": {
+    "./flows": "omnitron/flows.md",
+    "./studio/mcp": "omnitron/studio.md",
     "./readiness": "titan/modules/database.mdx",
     ".": "omnitron/services-reference.md",
     "./config": "omnitron/configuration.md",

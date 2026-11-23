@@ -26,19 +26,11 @@ complete system.
 
 ## Choose a starting point {#choose-a-starting-point}
 
-| Your goal | Start here | What you will produce |
-| --- | --- | --- |
-| Understand privacy and data ownership | [Privacy and ownership](./foundations/privacy.md) | A map of storage, access and external connections |
-| See how nodes and processes work | [Node and fleet architecture](./omnitron/architecture.md) | Illustrated roles, update boundaries and Console terminology |
-| Run your first service | [Quickstart](./getting-started/quickstart.md) | A compiled application and a typed HTTP client |
-| Understand the boundaries | [Titan vs Omnitron](./foundations/titan-vs-omnitron.md) | A decision about runtime and supervision |
-| Build a complete application | [Tutorial](./tutorial/index.md) | A backend, authentication, interface and tests |
-| Connect an existing interface | [Browser client](./frontend/netron/browser.md) | HTTP calls or WebSocket connections |
-| Prepare a deployment | [Production readiness](./deployment/production-readiness.md) | A release and recovery plan |
-| Find an API | [API index](./reference/api-index.mdx) | A symbol, supported import path, guide and implementation |
-
-Use the [developer map](./getting-started/developer-map.md) for task-based
-routes through the manual, including a verification step for each route.
+- **Build a service.** Compile a Titan service and call it over HTTP in the [quickstart](./getting-started/quickstart.md). To add authentication, a React interface and tests, follow the [application tutorial](./tutorial/index.md).
+- **Operate your own infrastructure.** Trace a request from Console to a supervised process in the [node architecture explorer](./omnitron/architecture.md). The [privacy guide](./foundations/privacy.md) shows where data travels and which connections you control.
+- **Create a project or work with agents.** Choose Xec, Kysera or a supervised service in the [project starter](./omnitron/projects.md#choose-a-project). Connect local adapters and share work in an [Agent Studio room](./omnitron/studio.md#team-room).
+- **Automate a host.** Draw and preview a working [disk-space flow](./omnitron/flows.md#disk-space), then review the actions your controller can take.
+- **Look up a contract.** The [API index](./reference/api-index.mdx) links package exports to the matching declarations. The [developer map](./getting-started/developer-map.md) pairs common tasks with a way to verify them.
 
 ## The stack {#the-stack}
 

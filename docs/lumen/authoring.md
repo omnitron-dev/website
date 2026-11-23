@@ -2,6 +2,7 @@
 id: "lumen/authoring"
 slug: "/docs/lumen/authoring"
 title: Authoring with Lumen
+description: "Write a Lumen page with links, tabs, runnable examples, mathematics and diagrams."
 ---
 # Authoring with Lumen
 
@@ -182,6 +183,8 @@ changing the layout. Touch and high-contrast modes retain native visibility.
 Use Tab to reach a code block, table or diagram, then arrow keys to scroll; file
 trees use their existing disclosure controls. The static HTML remains usable
 without client JavaScript.
+
+In a Markdown table, the line of dashes marks the column headers. Add a trailing colon to right-align a numeric column, or colons on both ends to center it. This manual carries the Lumen renderer fix that preserves those choices in HTML and PDF. Its Markdown mirror retains the original alignment. You can inspect the table in [the package list](../reference/packages.md).
 
 ## Verify the result
 

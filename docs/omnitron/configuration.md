@@ -30,19 +30,20 @@ define-system.ts, defaults.ts).
 ## `defineEcosystem(config)` — `omnitron.config.ts` {#defineecosystemconfig--omnitronconfigts}
 
 ```typescript
+import { fileURLToPath } from 'node:url';
 import { defineEcosystem } from '@omnitron-dev/omnitron';
 
 export default defineEcosystem({
   project: 'my-monorepo',
-  apps:    [/* IEcosystemAppEntry[] */],
-  stacks:  { /* StackName → IStackConfig */ },
-  infrastructure: { /* ... */ },
-  gateway: { /* ... */ },
-  supervision: { /* ... */ },
-  monitoring:  { /* ... */ },
-  logging:     { /* ... */ },
+  apps: [{
+    name: 'api',
+    cwd: fileURLToPath(new URL('./apps/api/', import.meta.url)),
+    bootstrap: fileURLToPath(new URL('./apps/api/dist/bootstrap.js', import.meta.url)),
+  }],
 });
 ```
+
+The supervisor, monitoring and logging use their defaults when their configuration sections are omitted.
 
 ### Factories and fresh configuration reads {#factories-and-fresh-configuration-reads}
 

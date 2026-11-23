@@ -62,7 +62,7 @@ import { OnStart, OnStop }     from '@omnitron-dev/titan/application';
 
 // Server-side Netron API. The auth managers live under their own
 // subpath — `netron` itself does not re-export them:
-import { Netron, ServiceDescriptor }        from '@omnitron-dev/titan/netron';
+import { Netron } from '@omnitron-dev/titan/netron';
 import { AuthenticationManager, AuthorizationManager }
   from '@omnitron-dev/titan/netron/auth';
 
@@ -101,7 +101,9 @@ import { Public, Validate, Memoize, Retry, Timeout }
   from '@omnitron-dev/titan/decorators';
 ```
 
-Full subpath list (from `titan/package.json` exports):
+For a descriptor shared with browser or React clients, add `@omnitron-dev/netron-protocol` to the contract package and import `ServiceDescriptor` from it. The descriptor pairs the wire name and version with the service interface. [Service contracts](../titan/netron/services.md)
+
+Public Titan entry points include the following.
 
 | Subpath | Contains |
 | ------- | -------- |
@@ -130,29 +132,15 @@ Full subpath list (from `titan/package.json` exports):
 Tree-shaking works on every subpath. Production bundles import
 the smallest scope they need.
 
-## Backend modules (optional, 14 packages) {#backend-modules-optional-14-packages}
+## Optional backend modules {#backend-modules-optional-14-packages}
 
-Independently versioned. Add only the ones your app uses.
+Install the modules your application uses and keep them on the release selected for Titan. For example, an application that exposes readiness probes and records time series can install the health and metrics modules together.
 
 ```bash
-# Pick what you need (any subset):
-pnpm add @omnitron-dev/titan-auth          # JWT auth
-pnpm add @omnitron-dev/titan-cache         # multi-tier cache (L1 + L2 Redis)
-pnpm add @omnitron-dev/titan-database      # Kysely + migrations + RLS
-pnpm add @omnitron-dev/titan-discovery     # service discovery
-pnpm add @omnitron-dev/titan-events        # event bus
-pnpm add @omnitron-dev/titan-health        # health probes
-pnpm add @omnitron-dev/titan-lock          # distributed locks
-pnpm add @omnitron-dev/titan-metrics       # Native metrics and time-series storage
-pnpm add @omnitron-dev/titan-notifications # multi-channel delivery
-pnpm add @omnitron-dev/titan-pm            # worker pools, autoscaling
-pnpm add @omnitron-dev/titan-ratelimit     # rate limiting
-pnpm add @omnitron-dev/titan-redis         # Redis client
-pnpm add @omnitron-dev/titan-scheduler     # cron / interval / timeout
-pnpm add @omnitron-dev/titan-telemetry-relay  # store-and-forward telemetry
+pnpm add @omnitron-dev/titan-health @omnitron-dev/titan-metrics
 ```
 
-→ Full module reference: [Titan modules](../titan/modules).
+The [Titan module catalog](../titan/modules) lists the published packages, their integration points and any additional drivers they require.
 
 ## Browser client — `@omnitron-dev/netron-browser` {#browser-client--omnitron-devnetron-browser}
 

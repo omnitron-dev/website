@@ -45,6 +45,15 @@ the reference needed when the application becomes more complex.
 | Diagnose a deployment | [CLI](../omnitron/cli.md) · [Observability](../omnitron/observability.md) | Inspect the actual runtime and its diagnostic findings |
 | Prepare production | [Readiness](../deployment/production-readiness.md) | Exercise failure and recovery procedures |
 
+## Create projects and automate work {#projects-and-automation}
+
+| Task | Guide | Verify |
+| --- | --- | --- |
+| Choose a starter | [Projects and stacks](../omnitron/projects.md#choose-a-project) | Run the generated service, database operation or Xec task |
+| Connect an agent team | [Agent Studio](../omnitron/studio.md#team-room) | Assign a bounded task and inspect its result in the project room |
+| Respond to a host event | [Event flows](../omnitron/flows.md#disk-space) | Preview normal, low-space and recovery readings before activation |
+| Inspect an interrupted run | [Pipelines](../omnitron/automation.md) | Compare step results with remote receipts before resuming |
+
 ## Find the exact API {#find-the-exact-api}
 
 Use the [package index](../reference/packages.md) to choose a dependency

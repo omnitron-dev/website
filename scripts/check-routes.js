@@ -23,6 +23,8 @@ function scan(dir) {
       }
       let route = '/' + relative(output, file).replace(/\\/g, '/').replace(/\.html$/, '').replace(/\/index$/, '');
       if (route === '/index') route = '/';
+      const description = /<meta name="description" content="([^"]*)"/.exec(html)?.[1];
+      if (!description?.trim()) failures.push(`${route}: missing page description`);
       const ids = [...html.matchAll(/\sid="([^"]+)"/g)].map(match => match[1]);
       const duplicates = ids.filter((id, i) => ids.indexOf(id) !== i);
       if (duplicates.length) failures.push(`${route}: duplicate ids ${[...new Set(duplicates)].join(', ')}`);

@@ -3,6 +3,7 @@ id: "auth/index"
 slug: "/docs/auth"
 title: Authentication & Authorisation
 sidebar_position: 0
+description: "Find the implemented access and token APIs, then explore the proposed application authorization model."
 ---
 
 # Authentication & Authorisation

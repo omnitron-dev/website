@@ -36,12 +36,7 @@ Include:
 5. Suggested mitigation, if known.
 6. Your name + affiliation (optional — for credit).
 
-Encrypt with our PGP key if the report contains exploit
-details:
-
-```
-[PGP key fingerprint published at omnitron.dev/.well-known/security.txt]
-```
+For sensitive material, use the initial email to arrange a private channel and verify the recipient’s encryption key before sharing attachments.
 
 ## What happens next {#what-happens-next}
 
@@ -126,14 +121,11 @@ Operator-side hardening:
 
 ## Past advisories {#past-advisories}
 
-None published. When a security advisory is published, it
-will be linked here with the CVE, severity, affected versions,
-and fix version.
+Consult the [project security advisories](https://github.com/omnitron-dev/omni/security/advisories) for published reports and affected versions.
 
 ## Contact {#contact}
 
 - **Vulnerability reports**: security@omnitron.dev (PGP optional)
 - **General security questions**: discuss in GitHub Discussions
-- **PGP key**: published at `omnitron.dev/.well-known/security.txt`
 
 Thank you for helping keep the platform secure.

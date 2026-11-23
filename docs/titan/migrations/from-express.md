@@ -32,7 +32,7 @@ trade is worth it.
 | `process.env`                        | `ConfigModule.forRoot({ schema, sources })`          |
 | `console.log` / `winston` / `pino`   | Built-in `LoggerService` (pino under the hood)       |
 | `helmet` / `cors` / `compression`    | Transport-level options or per-method middleware     |
-| `joi` / `ajv` / `class-validator`    | Zod schemas + `@Validate(schema)`                    |
+| `joi` / `ajv` / `class-validator`    | Zod schemas + `@Validate({ input: schema })`                    |
 | `error-handler` middleware           | `TitanError` subclasses (auto-serialised)            |
 | `node-cron`                          | `titan-scheduler` `@Cron(...)` decorator             |
 | `prom-client`                        | `titan-metrics` counters / gauges / histograms       |

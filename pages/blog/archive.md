@@ -2,18 +2,13 @@
 id: "page:/blog/archive"
 slug: "/blog/archive"
 title: "Archive"
+description: "Browse Omnitron engineering notes in publication order."
 ---
 
 # Archive
 
-All published engineering notes, ordered by publication date.
-
 ## 2026
 
-- [Welcome to Omnitron](/blog/welcome) — 15 May 2026. The first public documentation preview.
+- **15 May** · [Welcome to Omnitron](/blog/welcome). The first public documentation preview, by the [Omnitron team](/blog/authors/omnitron-team).
 
-## Current project
-
-- [Release notes](/docs/community/changelog)
-- [Compatibility](/docs/reference/compatibility)
-- [Contributing](/docs/community/contributing)
+[Browse by topic](/blog/tags)

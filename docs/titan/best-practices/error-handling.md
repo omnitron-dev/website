@@ -84,33 +84,37 @@ const BillingCodes = defineDomainCodes('BILLING', {
   ACCOUNT_FROZEN:     { status: 403, message: 'Account frozen'    },
 });
 
-@Public()
-async transfer(from: string, to: string, amount: number) {
-  const fromAcct = await this.repo.find(from);
-  if (!fromAcct) throw Errors.notFound('account', from);
+class BillingAccounts {
+  constructor(private readonly repo: AccountRepository) {}
 
-  const toAcct = await this.repo.find(to);
-  if (!toAcct) throw Errors.notFound('account', to);
+  @Public()
+  async transfer(from: string, to: string, amount: number) {
+    const fromAcct = await this.repo.find(from);
+    if (!fromAcct) throw Errors.notFound('account', from);
 
-  if (fromAcct.balance < amount) {
-    throw new DomainError({
-      domainCode: BillingCodes.INSUFFICIENT_FUNDS,
-      httpStatus: 409,
-      message:    'Insufficient funds',
-      details:    { available: fromAcct.balance, required: amount },
-    });
+    const toAcct = await this.repo.find(to);
+    if (!toAcct) throw Errors.notFound('account', to);
+
+    if (fromAcct.balance < amount) {
+      throw new DomainError({
+        domainCode: BillingCodes.INSUFFICIENT_FUNDS,
+        httpStatus: 409,
+        message:    'Insufficient funds',
+        details:    { available: fromAcct.balance, required: amount },
+      });
+    }
+
+    if (fromAcct.frozen) {
+      throw new DomainError({
+        domainCode: BillingCodes.ACCOUNT_FROZEN,
+        httpStatus: 403,
+        message:    'Account frozen',
+        details:    { accountId: from },
+      });
+    }
+
+    return this.repo.transfer(from, to, amount);
   }
-
-  if (fromAcct.frozen) {
-    throw new DomainError({
-      domainCode: BillingCodes.ACCOUNT_FROZEN,
-      httpStatus: 403,
-      message:    'Account frozen',
-      details:    { accountId: from },
-    });
-  }
-
-  return this.repo.transfer(from, to, amount);
 }
 ```
 

@@ -7,8 +7,7 @@ description: Runtime requirements, package boundaries, versioning, and the disti
 
 # Compatibility and status
 
-Use the package manifests for exact dependency ranges. The table below
-describes the current source tree; pin the versions you deploy.
+The [API index](./api-index.mdx) follows the public exports of **Omnitron 0.4.16**. Use the matching tag and package manifests to check an import or runtime requirement. The [release notes](../community/changelog.md) link to the shipped features and their guides.
 
 | Surface | Requirement or boundary |
 | --- | --- |
@@ -24,8 +23,7 @@ describes the current source tree; pin the versions you deploy.
 
 ## Implemented API versus design {#implemented-api-versus-design}
 
-The module references document exported APIs. **Design RFC** callouts mark
-proposed composition or application-level behaviour. The
+[Agent Studio](../omnitron/studio.md#team-room) and [Event flows](../omnitron/flows.md) include workflows you can use in 0.4.15. Pages marked **Design proposal** or **Design RFC** describe additional guarantees or application-level behaviour. The
 [authorisation section](../auth/index.md) includes such designs; it is not
 a switch that installs a complete permissions system.
 

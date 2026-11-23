@@ -3,6 +3,7 @@ id: "titan/migrations/auth-1-to-2"
 slug: "/docs/titan/migrations/auth-1-to-2"
 title: Auth v1 → v2 Migration
 sidebar_position: 50
+description: "Design proposal for moving an application to the planned authorization model."
 ---
 
 # Migration: Auth v1 → v2

@@ -16,109 +16,43 @@ the cross-cutting ones.
 
 ### Why decorators? {#why-decorators}
 
-Decorators describe **intent** declaratively. The container
-reads the metadata and wires the rest. Alternatives (factory
-functions, builder APIs, configuration files) move the same
-information to a less discoverable place. Decorators put the
-contract next to the code it controls.
-
-Trade-off: decorator-based DI requires
-`experimentalDecorators` + `emitDecoratorMetadata` in
-`tsconfig.json`. Everyone shipping production TypeScript has
-this enabled anyway; new projects can use TC39 stage-3
-decorators (also supported).
+Titan reads service, module and injection declarations from TypeScript decorators. For the published configuration, enable `experimentalDecorators` and `emitDecoratorMetadata` and import `reflect-metadata` before bootstrapping. Explicit tokens identify interfaces at runtime. [Quickstart](./getting-started/quickstart.md) · [Dependency injection](./titan/di/overview.md)
 
 ### Why a custom DI container (Nexus)? {#why-a-custom-di-container-nexus}
 
-InversifyJS, TypeDI, tsyringe — each has its own ergonomics
-constraint. Nexus needed:
-- Class tokens **and** symbol tokens **and** factory tokens.
-- Scopes (singleton, transient, request, scoped).
-- **Contextual injection** — one token, different providers per
-  request context (multi-tenant, multi-environment).
-- Cycle detection at startup.
-- Lifecycle hooks tied to dependency order.
-
-No existing container does all five. Nexus does.
+Nexus manages providers inside Titan. A token identifies what to resolve, a provider describes how to construct it, and the scope controls how long the instance lives. A database pool can live for the application’s lifetime while a request context belongs to one call. [Provider declarations](./titan/di/providers.md) · [Scopes](./titan/di/scopes.md)
 
 ### Why MessagePack over JSON for the wire? {#why-messagepack-over-json-for-the-wire}
 
-RPC must round-trip types exactly. JSON loses Date, Map, Set,
-BigInt, Error, Buffer; MessagePack with the package's extensions
-preserves all of them — and the wire is ~25% smaller. For
-service-to-service calls this is non-negotiable.
-
-For human-readable APIs (debugger, curl), JSON over HTTP still
-works via a separate REST gateway.
+Netron’s binary protocol uses MessagePack. Both ends must agree on extension types when a value needs more than a plain number, string, object or array. Titan registers codecs for values such as `Date`, `Map` and `BigInt`. Encoded size depends on the actual messages. [Wire types and extension codes](./titan/netron/serialization.md)
 
 ### Why one daemon, not per-app sidecars? {#why-one-daemon-not-per-app-sidecars}
 
-Sidecar-per-app multiplies operator overhead by N. Omnitron's
-single daemon:
-- Owns one Unix socket; CLI calls cost nothing.
-- Aggregates metrics / logs across all apps in one ring buffer.
-- Survives app crashes — the daemon stays up, apps restart.
-- Hosts the web console + MCP server at the same address.
-
-For multi-tenant strict isolation, run one daemon per
-`~/.omnitron/` home directory.
+Each node exposes one control plane for registered applications. The CLI and Console use Netron to read status and request lifecycle operations. With resident execution, the owner holds application processes and the guardian supervises the backend. This lets a backend replacement preserve running applications. [Illustrated node architecture](./omnitron/architecture.md) · [Backend replacement](./omnitron/backend-handoff.md)
 
 ### Why monorepo? {#why-monorepo}
 
-The stack's value comes from cross-layer typing. A monorepo
-with TypeScript references lets the frontend's `useService<T>`
-import the backend's `interface T` directly — no codegen, no
-publish step.
-
-Polyrepo works (publish the shared interfaces as a package), but
-costs an extra round-trip on every contract change.
+The workspace lets maintainers change a service contract, its client and their tests together. Applications in separate repositories can publish their shared types as a package. Either layout still needs a compatibility plan when the client and server deploy independently. [Workspace layout](./foundations/monorepo.md)
 
 ### Is Titan production-ready? {#is-titan-production-ready}
 
-Yes. The stack runs production workloads at meaningful scale.
-The modules ship with anti-patterns docs because production
-shaped them.
-
-If "production-ready" means "wide adoption + many StackOverflow
-answers" — not yet at the NestJS level. The reference is the
-docs you're reading.
+Evaluate the paths your application depends on. Exercise startup, graceful shutdown, failed dependencies, migrations and recovery under representative load. The readiness guide lists the checks, and the compatibility page identifies supported runtimes. [Production readiness](./deployment/production-readiness.md) · [Compatibility](./reference/compatibility.md)
 
 ### Why isn't there X module? {#why-isnt-there-x-module}
 
-Because the work-set was deliberate. We shipped the modules
-that show up in **every** backend (cache, auth, db, queue,
-scheduler, …). For everything else, the [authoring guide](./titan/modules-system/authoring-modules.md)
-describes how to publish a `@your-scope/titan-*` package that
-plugs into the same DI grammar.
-
-Domain-specific modules (e-commerce, ML, telecom, …) belong
-outside the core to keep the ecosystem focused.
+The [module map](./titan/modules/module-map.mdx) lists the published integrations and their responsibilities. For an application-specific capability, declare its providers, dependencies and lifecycle as a Titan module. [Author a module](./titan/modules-system/authoring-modules.md)
 
 ### Can I use Bun or Deno? {#can-i-use-bun-or-deno}
 
-- **Apps**: yes, where the runtime matches your dependencies.
-  The utility packages (`common`, `cuid`, `eventemitter`,
-  `msgpack`) are explicitly cross-runtime tested.
-- **Omnitron daemon**: Node only — uses Node's `child_process`
-  in a way Bun and Deno don't fully match.
-- **Tests**: see [Cross-runtime testing](./testing/cross-runtime.md).
+The Omnitron daemon runs on Node.js. Some library packages also test selected APIs on Bun and Deno. Check the package and runtime pair your application imports. [Cross-runtime coverage](./testing/cross-runtime.md) · [Compatibility](./reference/compatibility.md)
 
 ### How does pricing / licensing work? {#how-does-pricing--licensing-work}
 
-MIT across every package. No commercial fork, no enterprise
-tier, no support contracts. Use at any scale.
+The public Omnitron repository is MIT-licensed. Its license grants the terms for using and distributing the code. Hosting, domains and any external services you enable are separate costs. [License](https://github.com/omnitron-dev/omni/blob/v0.4.16/LICENSE)
 
 ### When should I NOT use this stack? {#when-should-i-not-use-this-stack}
 
-- **Static sites / marketing pages** — overkill. Use Astro / Next.
-- **Single-script automation** — overkill. Use plain TypeScript.
-- **Languages other than TS** — the value is end-to-end TS. If
-  the team writes Go on the backend, this gives nothing over a
-  protobuf pipeline.
-- **Edge-only workloads** — Workers / Pages don't run the Node
-  process model Titan assumes.
-- **You hate decorators** — the DI grammar is decorator-first.
-  Alternatives (Hono, Fastify, raw Node) work fine.
+Choose the packages your project needs. Lumen can publish a static site to an ordinary web host. Xec can run a single automation independently. A browser can call Netron through `netron-browser` without React. The supervisor is relevant when you want a persistent control plane for processes and infrastructure. [Lumen use cases](./lumen/use-cases.md) · [Project starters](./omnitron/projects.md#choose-a-project) · [Compatibility](./reference/compatibility.md)
 
 ## Troubleshooting {#troubleshooting}
 
@@ -130,7 +64,7 @@ The container couldn't find a provider for token `X`. Causes:
 | ----- | --- |
 | Module not imported | Add it to `imports: [...]` of the parent module |
 | Provider missing | Add `{provide: TOKEN, useClass: ...}` to `providers: [...]` |
-| Circular dependency | Restructure or use `@Optional()` + lazy resolution |
+| Circular dependency | Inspect the dependency path and extract the shared provider or introduce an explicit boundary |
 | Two `@omnitron-dev/titan` versions installed | `pnpm why @omnitron-dev/titan` — should report one resolved version |
 | Wrong module reference (e.g., importing app `Foo` when service is in `Bar`) | Use `app.resolve(TOKEN)` to introspect, then trace declarations |
 
@@ -206,24 +140,11 @@ claiming that backend source watching is enabled.
 
 ### "Daemon already running" {#daemon-already-running}
 
-The PID file at `~/.omnitron/daemon.pid` exists and points to a
-live PID. Either:
-
-- Daemon is up: `omnitron status` to confirm; use it.
-- Stale lock: previous daemon crashed without cleanup. `omnitron
-  kill` removes the lock; then `omnitron up`.
+Run `omnitron backend status` and `omnitron status` to identify the serving backend, its owner and the running applications. A process identifier alone cannot establish ownership after a restart. For an interrupted runtime update, inspect the saved plan with `omnitron runtime update status`; its receipt identifies the supported recovery action. [Daemon lifecycle](./omnitron/daemon.md) · [Runtime updates](./omnitron/cli.md#local-runtime-updates)
 
 ### Heartbeat / discovery flapping {#heartbeat--discovery-flapping}
 
-Nodes briefly disappear from `omnitron node check`.
-
-Causes:
-- `heartbeatInterval` too short (default 5 s is usually fine).
-- Network briefly slow (TLS handshake to managed Redis).
-- Redis cluster failover.
-
-Fix: bump `heartbeatTTL` to `5 × heartbeatInterval` (default is
-3×). See [titan-discovery / TTL tuning](./titan/modules/discovery.mdx#ttl-tuning-guide).
+Identify the layer that reported the loss. `omnitron node check` tests the registered node connection. An application using Titan Discovery maintains its own heartbeat and TTL in its registry. Compare actual heartbeat gaps, registry latency and the configured TTL before changing its thresholds. [Discovery TTL tuning](./titan/modules/discovery.mdx#ttl-tuning-guide)
 
 ### Build fails with "broken anchor" {#build-fails-with-broken-anchor}
 
@@ -236,32 +157,13 @@ shows the resolved path.
 
 ### React component re-renders too often {#react-component-re-renders-too-often}
 
-Most common cause: `useQuery` running every render because args
-change identity.
+First distinguish a React render from a network request using the browser’s Network panel. Netron React derives the cache key from the service, method and serialized arguments. A newly allocated array containing the same values can still identify the same query.
 
-```tsx
-// BAD — new array every render → cache miss every time
-const { data } = users.getUser.useQuery([id, { include: ['profile'] }]);
-
-// GOOD — memoise the args
-const args = useMemo(() => [id, { include: ['profile'] }] as const, [id]);
-const { data } = users.getUser.useQuery(args);
-```
-
-Or extract the options:
-
-```tsx
-const opts = useMemo(() => ({ include: ['profile'] }), []);
-const { data } = users.getUser.useQuery([id, opts]);
-```
+If a request repeats, check the key, component remounts, `staleTime`, invalidation and refetch settings. If the key and request count are stable, use the React profiler to find the state or parent render that changed. [Query cache and refetch options](./frontend/netron/caching.md#cache-key)
 
 ### TypeScript "Type X is not assignable to type Y" after server change {#typescript-type-x-is-not-assignable-to-type-y-after-server-change}
 
-Symptom of the win. The contract is the type — when the server
-signature changes, every caller must update.
-
-Fix: update the caller. Don't `as any` to silence — that's
-exactly the bug end-to-end types are designed to catch.
+Compare the caller’s arguments and return type with the new service declaration. Update the consumer and its tests against the intended contract. If clients and servers deploy separately, introduce a compatible transition before requiring the new shape. [Service contracts](./titan/netron/services.md)
 
 ### "Maximum call stack exceeded" in middleware {#maximum-call-stack-exceeded-in-middleware}
 
@@ -291,18 +193,9 @@ The infrastructure container isn't up. Either:
 
 ### Database migration locked {#database-migration-locked}
 
-Symptom: `MigrationLockError`. Cause: a previous deploy left the
-advisory lock held — usually because the migration runner
-crashed.
+The runner could not acquire its migration lock. Check the deployment already in progress and inspect migration status for the same database. In PostgreSQL, `pg_locks` identifies advisory lock holders and `pg_stat_activity` identifies their sessions. Session-level advisory locks are released when the holding connection ends. `pg_advisory_unlock_all()` affects only the session that calls it.
 
-Fix:
-
-```sql
-SELECT pg_advisory_unlock_all();
-```
-
-Then re-run the migration. Investigate why it crashed before
-running again in prod.
+Let the active migration finish or use the owning deployment’s recovery procedure. Once the holder has finished, verify migration history and checksums before retrying. [Omnitron migrations](./omnitron/migrations.md) · [PostgreSQL advisory locks](https://www.postgresql.org/docs/current/explicit-locking.html#ADVISORY-LOCKS)
 
 ### "Health probe times out" {#health-probe-times-out}
 
@@ -319,14 +212,7 @@ Fix: pre-cache the health result; set per-indicator timeouts.
 
 ### "JWT expired" but I just signed in {#jwt-expired-but-i-just-signed-in}
 
-Clock skew between server and client > `clockTolerance`
-(default 5 s).
-
-Fix:
-- Sync NTP on both.
-- For pathological cases, bump `clockTolerance` to 30 s. Wider
-  windows enable replay-after-expiry; don't go above 60 s in
-  prod.
+Check the verifier’s time against the issuing service and compare the token’s expiry and start-of-validity claims with the configured skew tolerance. Keep the token in the application’s trusted tools. Correct clock drift first, then review access-token lifetime and refresh handling. [Token issuance and rotation](./auth/token-issuance.md)
 
 ### CLI command returns nothing {#cli-command-returns-nothing}
 

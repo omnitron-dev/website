@@ -3,6 +3,7 @@ id: "auth/rls-bridge"
 slug: "/docs/auth/rls-bridge"
 title: RLS Bridge
 sidebar_position: 4
+description: "Design proposal for carrying application permissions into a PostgreSQL row-level security policy."
 ---
 
 # RLS Bridge

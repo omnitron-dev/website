@@ -10,8 +10,10 @@ description: Observe a host, model decisions and dispatch a notification, a revi
 A flow turns an observation into a decision on the controller that owns the workspace. An administrator can draw it in **Flows**. A Studio lead can propose the same graph in a team room. Both open in the same editor, with the same component catalog, validator and sample-event preview.
 
 :::info{title="Availability"}
-The flow editor and controller runtime are on Omnitron `main` after the npm release `0.4.14`.
+Omnitron 0.4.15 ships the editor and controller runtime. Try the disk monitor below with a sample event before activating it on a host.
 :::
+
+The public `@omnitron-dev/omnitron/flows` entry point exposes the graph types, validation, registry and preview evaluator used by the editor. A preview computes visited nodes and proposed effects. Activation authorizes the controller to deliver them. [API index](../reference/api-index.mdx)
 
 ## Build a disk-space monitor {#disk-space}
 

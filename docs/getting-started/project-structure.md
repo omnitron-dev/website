@@ -3,6 +3,7 @@ id: "getting-started/project-structure"
 slug: "/docs/getting-started/project-structure"
 sidebar_position: 3
 title: Project Structure
+description: "Organize a Titan application, its service contracts, clients and tests in a project workspace."
 ---
 
 # Project Structure

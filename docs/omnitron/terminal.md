@@ -13,11 +13,7 @@ The service runs on a master with PostgreSQL-backed authentication and audit. Th
 
 ## Integration boundary {#integration-boundary}
 
-Published Omnitron 0.4.10 uses Xec 0.12.0. The upcoming 0.4.11 source integrates
-Xec 0.13's `SSHClient` from `@xec-sh/ssh`; its registry dependency and packed
-consumer checks must pass before publication. This source change does not update
-an installed daemon. See the [release checklist](./release-readiness.md) for the
-qualification and activation gates.
+The published Omnitron CLI uses Xec’s `SSHClient` from `@xec-sh/ssh`. Omnitron 0.4.15 declares `^0.13.2` for both the SSH and core Xec packages. The [release checklist](./release-readiness.md) explains how to qualify a runtime update before activating it on a controller.
 
 The terminal driver uses the shared client's host-key probe, `connect` and
 `requestShell` APIs. Its connection reference exposes lifecycle events; raw

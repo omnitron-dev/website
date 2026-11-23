@@ -2,11 +2,12 @@
 id: "page:/docs/titan/di"
 slug: "/docs/titan/di"
 title: "Dependency Injection"
+description: "Choose providers, tokens and lifetimes and diagnose dependency-resolution problems in Titan."
 ---
 
 # Dependency Injection
 
-Follow these guides in order, or open the reference for the part of your application you are changing.
+A token names a dependency, a provider supplies it and its scope determines how long it lives. Start with these three guides before using contextual resolution or middleware.
 
 - [Overview](/docs/titan/di/overview)
 - [Providers](/docs/titan/di/providers)

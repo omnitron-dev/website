@@ -5,19 +5,8 @@ title: API index
 description: Search public exports by symbol, package or import path, then open the relevant guide or implementation.
 ---
 
-
 # API index
 
-Find an exported symbol, its declared import path, the relevant guide and
-its implementation. This index is generated from package manifests and
-TypeScript exports, including re-exports.
-
-An indexed symbol is a declared entry point. An exported type or option does not
-prove that a runtime path consumes it, that a backend is wired, or that shutdown
-and delivery are automatic. The generated index preserves the source declarations;
-behavioral limitations belong in the linked guides. Start with the linked guide for behaviour
-and lifecycle; use your installed declarations for exact signatures.
-Source links open the exact Omnitron commit used to build this index. Check
-[compatibility](./compatibility.md) before using it with an older release.
+Search the public exports of **Omnitron 0.4.16** by symbol or import path. Each result links to its declaration in the tagged source and to a guide covering its behavior and lifecycle. For a different installed version, check its own declarations and the [compatibility guide](./compatibility.md).
 
 <ApiExplorer hydrate="load" />

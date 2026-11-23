@@ -398,6 +398,14 @@ be attested. After start, the owner verifies the application entry point, runtim
 installed file tree. The launch receipt lets CLI and Console distinguish delivery
 history from the release a process is actually running.
 
+### Interpret a remote start after a lost reply {#remote-start-evidence}
+
+An interrupted connection leaves two separate questions. Did the receiving node start the application? Can the controller confirm which release is running? Check the receiver’s launch receipt, the online application count and application health before repeating a start.
+
+**Available in 0.4.16.** The controller can read the receiver’s scoped diagnostic after an SSH reply is lost. It distinguishes a pending result, a timeout, a lost daemon connection and a changed configuration. A partial start can include the number of online applications. Raw CLI output stays on the receiving node. [Implementation](https://github.com/omnitron-dev/omni/commit/bc75156d7ab224a21a0b126370b38d207a3a7e07)
+
+In the same source revision, provisioning can wait up to two minutes when the only unfinished checks are the first Docker health probes. It checks the same container identities and the complete provisioning result before application installation. [Provisioning change](https://github.com/omnitron-dev/omni/commit/f7966e3b)
+
 ### Pin a local stack {#pin-a-local-stack}
 
 A local stack can keep its application code separate from the developer checkout.

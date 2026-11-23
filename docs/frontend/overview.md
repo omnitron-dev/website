@@ -41,25 +41,26 @@ flowchart LR
 A typical screen:
 
 ```tsx
-import { DataGridBlock }   from '@omnitron-dev/prism/blocks';
-import { useService }      from '@omnitron-dev/netron-react';
+import { DataGridBlock } from '@omnitron-dev/prism/blocks';
+import { useService } from '@omnitron-dev/netron-react';
 
+type User = { id: string; email: string; role: string };
 interface UserService {
-  list(filter: UserFilter): Promise<User[]>;
+  list(): Promise<User[]>;
 }
 
 function UsersPage() {
   const users = useService<UserService>('users');
+  const { data, isLoading, error } = users.list.useQuery([]);
+  if (error) return <p role="alert">{error.message}</p>;
   return (
-    <DataGridBlock
-      title="Users"
+    <DataGridBlock<User>
+      rows={data ?? []}
+      loading={isLoading}
       columns={[
-        { field: 'email',  header: 'Email' },
-        { field: 'role',   header: 'Role'  },
+        { field: 'email', headerName: 'Email', flex: 1 },
+        { field: 'role', headerName: 'Role' },
       ]}
-      query={({ page, sort, filter }) =>
-        users.list.useQuery([{ page, sort, filter }])
-      }
     />
   );
 }
@@ -100,31 +101,23 @@ const client = new NetronReactClient({
   transport: 'http',
 });
 
-// `AuthProvider` takes a `config` (refreshEndpoint?, logoutEndpoint?,
-// storage?: 'local' | 'session' | 'memory', autoRefresh?, refreshThreshold?)
-// and an `onLogin` handler that performs the actual sign-in and returns
-// an AuthResult.
+// signIn calls the project's authentication service and returns an AuthResult.
 function App() {
   return (
     <ProviderStack
       providers={[
         [NetronProvider, { client }],
-        [AuthProvider,   {
-          config:  { storage: 'local', autoRefresh: true, refreshEndpoint: '/auth/refresh' },
-          onLogin: (credentials) => signIn(client, credentials),
-        }],
-        [PrismProvider,  { defaultSettings: { mode: 'dark', primaryColor: '#7c4dff' } }],
-        [RouterProvider, { router }],
+        [AuthProvider, { config: { storage: 'memory' }, onLogin: signIn }],
+        [PrismProvider, { defaultSettings: { mode: 'dark' } }],
       ]}
     >
-      <Outlet />
+      <RouterProvider router={router} />
     </ProviderStack>
   );
 }
 ```
 
-Four providers, one app. Anything Titan-side becomes
-discoverable through `useService`. The auth API is `login` / `logout`
+The router renders the selected page inside the network, authentication and theme providers. `useService` calls services published by the connected backend. The auth API is `login` / `logout`
 (from `useAuth()`) with `<AuthGuard>` / `<GuestGuard>` /
 `<RoleGuard>` / `<PermissionGuard>` route guards — see
 [netron-react / Auth](./netron/auth.md) for the full surface.

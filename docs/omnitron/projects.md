@@ -26,7 +26,7 @@ local override, not a production dependency on another repository's filesystem.
 
 ## Choose a project from its workload {#choose-a-project}
 
-Omnitron `main` after 0.4.14 offers independent choices for automation, storage and supervision in **Projects → Create project**. Choose a job below to see the corresponding CLI command. Run each example in its own empty directory.
+Omnitron 0.4.15 offers independent choices for automation, storage and supervision in **Projects → Create project**. Choose a job below to see the corresponding CLI command. Run each example in its own empty directory.
 
 :::tabs{label="Choose a standalone project"}
 :::tab{label="Xec" value="xec"}

@@ -3,6 +3,7 @@ id: "auth/token-issuance"
 slug: "/docs/auth/token-issuance"
 title: Token issuance & transports
 sidebar_position: 8
+description: "Choose how a signed token reaches a Netron client and how the server verifies it on subsequent requests."
 ---
 
 # Token issuance & transports

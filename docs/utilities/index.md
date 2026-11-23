@@ -3,48 +3,38 @@ id: "utilities/index"
 slug: "/docs/utilities"
 sidebar_position: 1
 title: Overview
-description: Five utility packages the rest of the stack is built on.
+description: Choose a utility for promises, IDs, events, binary data or a searchable knowledge base.
 ---
 
 # Utilities
 
-Five small, focused packages that every other package in the
-ecosystem depends on. Each is independently versioned, has zero
-peer-dependencies on the rest of the stack, and is usable in
-non-Omnitron projects.
+These packages can be installed individually and share the Omnitron release version. Choose the one that fits your application.
 
-| Package | Purpose | Footprint |
-| ------- | ------- | --------- |
-| [`@omnitron-dev/common`](./common.md) | Type predicates, promise helpers, object tools, data structures | ~12 kB gz |
-| [`@omnitron-dev/cuid`](./cuid.md) | Collision-resistant URL-safe IDs | <1 kB gz |
-| [`@omnitron-dev/eventemitter`](./eventemitter.md) | Async event emitter with parallel/serial/reduce patterns | ~3 kB gz |
-| [`@omnitron-dev/msgpack`](./msgpack.md) | Extensible MessagePack with native JS types + a custom type registry | ~8 kB gz |
-| [`@omnitron-dev/kb`](./kb.md) | Knowledge-base framework for code intelligence | server-side |
+| Task | Package | What it provides |
+| --- | --- | --- |
+| Coordinate asynchronous work | [Common](./common.md) | Promise helpers, bounded concurrency, type predicates and data structures |
+| Generate a URL-safe identifier | [Cuid](./cuid.md) | Collision-resistant string IDs |
+| Deliver an event inside a process | [EventEmitter](./eventemitter.md) | Listeners with parallel, serial and reduction modes |
+| Encode a value for storage or transport | [MessagePack](./msgpack.md) | Binary serialization with registered extensions for additional types |
+| Index a codebase for search | [KB](./kb.md) | Source extraction, indexing and queries |
 
 ## Where they're used {#where-theyre-used}
 
-- **`common`** — anywhere primitives are needed. `isPlainObject`,
-  `delay`, `omit` show up in every module.
-- **`cuid`** — Omnitron's IDs (process IDs, run IDs, request IDs)
-  + `titan-database` repository defaults.
-- **`eventemitter`** — `titan-events`'s emitter base,
-  `titan-telemetry-relay` internal bus, Omnitron daemon's
-  scheduler.
-- **`msgpack`** — Netron's default wire format. Why your typed
-  errors survive the wire.
-- **`kb`** — backs `omnitron kb mcp` MCP server + KB index used
-  by AI agents.
+Titan Events uses EventEmitter for its event bus. Netron's packet serializer uses MessagePack for binary RPC. The Omnitron CLI exposes KB search and indexing to agents through `omnitron kb mcp`.
 
 ## Standalone use {#standalone-use}
 
-Each works without the rest of the stack:
+To round-trip a value in a Node.js project, install the codec and import its two operations.
 
-```typescript
-import { delay, retry, isPlainObject } from '@omnitron-dev/common';
-import { cuid }                          from '@omnitron-dev/cuid';
-import { EventEmitter }                  from '@omnitron-dev/eventemitter';
-import { encode, decode }                from '@omnitron-dev/msgpack';
+```bash
+pnpm add @omnitron-dev/msgpack
 ```
 
-Pick the one you need; ignore the rest. No transitive Omnitron
-runtime gets pulled in.
+```typescript
+import { encode, decode } from '@omnitron-dev/msgpack';
+
+const bytes = encode({ status: 'ready' });
+const record = decode(bytes);
+```
+
+The package manager installs the codec's runtime dependencies, including Common. The [package index](../reference/packages.md) lists the other platform packages and their roles.

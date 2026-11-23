@@ -87,11 +87,13 @@ typed error with the same payload.
 // Server — typed failure.
 import { Errors, ErrorCode, TitanError } from '@omnitron-dev/titan/errors';
 
-@Public()
-async findById(id: string): Promise<User> {
-  const user = await this.repo.findById(id);
-  if (!user) throw Errors.notFound('user', id);
-  return user;
+class Users {
+  @Public()
+  async findById(id: string): Promise<User> {
+    const user = await usersRepo.findById(id);
+    if (!user) throw Errors.notFound('user', id);
+    return user;
+  }
 }
 
 // Client — discriminate by code (or by class for AuthError /

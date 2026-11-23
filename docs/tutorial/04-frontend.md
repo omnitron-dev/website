@@ -28,8 +28,7 @@ pnpm add @omnitron-dev/netron-browser @omnitron-dev/netron-react @omnitron-dev/p
 
 ## Share the service types {#share-the-service-types}
 
-The frontend imports the backend's service interfaces directly.
-Easiest way: a workspace package.
+Share the application contracts in a workspace package. The list view needs each user's id, name and email. The sign-in response additionally carries the caller's roles.
 
 ```bash
 mkdir -p packages/api-contracts/src
@@ -54,15 +53,14 @@ export interface User {
   id:    string;
   email: string;
   name:  string;
-  roles: string[];
 }
 
 export interface AuthService {
   signIn(input: { email: string; password: string }): Promise<{
     token: string;
-    user:  Pick<User, 'id' | 'email' | 'roles'>;
+    user:  { id: string; email: string; roles: string[] };
   }>;
-  signOut(input: { sessionId: string }): Promise<{ success: boolean }>;
+  signOut(): Promise<{ success: boolean }>;
 }
 
 export interface UsersService {
@@ -95,14 +93,13 @@ pnpm add @my-platform/api-contracts@workspace:*
 
 ```typescript
 import { NetronReactClient } from '@omnitron-dev/netron-react';
+import { AuthenticationClient } from '@omnitron-dev/netron-browser';
 
+export const auth = new AuthenticationClient();
 export const client = new NetronReactClient({
   url:       import.meta.env.VITE_API_URL ?? 'http://localhost:3001',
   transport: 'http',
-  auth: {
-    // 'local' | 'session' | 'memory' — not the Web Storage API's names.
-    storage: 'local',
-  },
+  auth: { client: auth },
 });
 ```
 
@@ -118,13 +115,22 @@ import { PrismProvider } from '@omnitron-dev/prism/core';
 import { NetronProvider } from '@omnitron-dev/netron-react';
 import { AuthProvider }   from '@omnitron-dev/netron-react/auth';
 
-import { client } from './client.js';
+import { auth, client } from './client.js';
+import type { AuthService } from '@my-platform/api-contracts';
 import App        from './App.js';
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
     <NetronProvider client={client}>
-      <AuthProvider onLogin={(credentials) => client.invoke('auth', 'signIn', [credentials])}>
+      <AuthProvider client={auth} onLogin={async (credentials) => {
+        const { token, user }: Awaited<ReturnType<AuthService['signIn']>> =
+          await client.invoke('auth@1.0.0', 'signIn', [credentials]);
+        return {
+          success: true,
+          context: { userId: user.id, roles: user.roles, permissions: [], metadata: { email: user.email } },
+          metadata: { accessToken: token },
+        };
+      }}>
         <PrismProvider defaultSettings={{ mode: 'dark', primaryColor: '#7c4dff' }}>
           <BrowserRouter>
             <App />
@@ -204,7 +210,7 @@ export function UsersPage() {
     <ul>
       {data?.map(u => (
         <li key={u.id}>
-          {u.name} — {u.email} — [{u.roles.join(', ')}]
+          {u.name} — {u.email}
         </li>
       ))}
     </ul>
@@ -243,7 +249,7 @@ In two terminals:
 
 ```bash
 # api:
-cd apps/api && JWT_SECRET=dev-secret-do-not-use-in-prod pnpm dev
+cd apps/api && pnpm dev  # use the JWT_SECRET from step 3
 
 # web:
 cd apps/web && pnpm dev
@@ -252,7 +258,7 @@ cd apps/web && pnpm dev
 Open `http://localhost:5173/`:
 
 1. Redirected to `/sign-in`.
-2. Enter `admin@example.com` / `correct-horse-battery-staple`.
+2. Enter `admin@example.com` and the password you seeded in step 3.
 3. Redirected to `/` — users list renders.
 
 ## Note the type flow {#note-the-type-flow}
@@ -290,7 +296,7 @@ git commit -m "step 4: React UI with end-to-end types"
 
 | Symptom | Fix |
 | ------- | --- |
-| CORS error | Add `cors: true` to api's `netron.http` config |
+| CORS error | Serve both clients and API from one origin or configure the HTTP transport's `cors.origin` for the web application's exact origin. |
 | `data` typed as `unknown` | Verify `@my-platform/api-contracts` is installed in `apps/web` |
 | `useService` undefined | Check `<NetronProvider client={client}>` wraps `<App>` |
 | Sign-in succeeds but list 401s | Auth manager not attaching token; check `AuthProvider` order in providers |

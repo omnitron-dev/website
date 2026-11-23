@@ -3,6 +3,7 @@ id: "foundations/monorepo"
 slug: "/docs/foundations/monorepo"
 sidebar_position: 3
 title: Monorepo Layout
+description: "Locate the supervisor, public packages, build tasks and tests in the Omnitron source repository."
 ---
 
 # Monorepo Layout

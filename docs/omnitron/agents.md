@@ -7,7 +7,7 @@ description: Architecture and acceptance criteria for provider adapters, delegat
 
 # Agents and delegated operations
 
-The [Agent Studio walkthrough](./studio.md#try-agent-studio) covers the Codex and Antigravity subscription adapters in Omnitron `main` after 0.4.14. A Studio role specifies the work product expected from a conversation. Infrastructure permissions still belong to the authenticated operator and are checked when an operation is requested.
+The [Agent Studio walkthrough](./studio.md#try-agent-studio) covers the Codex and Antigravity subscription adapters in Omnitron 0.4.15. A Studio role specifies the work product expected from a conversation. Infrastructure permissions still belong to the authenticated operator and are checked when an operation is requested.
 
 This design specifies delegated infrastructure identities, isolated workers, custom role editing and scoped approval grants. Those capabilities have separate implementation and acceptance criteria.
 

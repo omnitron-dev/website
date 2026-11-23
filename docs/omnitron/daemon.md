@@ -302,6 +302,7 @@ loaded it. Application health probes remain separate from the refresh receipt.
 | `inspect({ name })`                                             | `AppDiagnosticsDto`              |
 | `inspectInstalledArtifacts({ names })`                          | Installed artifact evidence per application |
 | `getDependencyGraph({ name })`                                  | Graph object                     |
+| `inspectSourceWatch({ name })` | The application’s current source observation and last owner receipt |
 | `getWatchStatus()`                                              | `{ enabled, watching, apps: WatchedApplication[] }` |
 
 #### Owner and environment inspection {#owner-and-environment-inspection}
@@ -321,6 +322,8 @@ confirms the write. A node without audit storage can still return redacted value
 | Method                                                          | Returns                          |
 | --------------------------------------------------------------- | -------------------------------- |
 | `enableWatch({ apps? })`                                        | `{ watching: WatchedApplication[] }` |
+| `suspendSourceWatch` | Holds observation for one application and returns its receipt |
+| `resumeSourceWatch` | Restores the registration identified by that receipt |
 | `disableWatch()`                                                | `{ success: boolean }`           |
 
 #### Admin (`admin`) {#admin-admin}

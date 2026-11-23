@@ -3,6 +3,7 @@ id: "auth/abac-conditions"
 slug: "/docs/auth/abac-conditions"
 title: ABAC Conditions
 sidebar_position: 3
+description: "Design proposal for evaluating contextual access rules such as time windows, network conditions and fresh authentication."
 ---
 
 # ABAC Conditions
@@ -82,9 +83,12 @@ export const requireRecentMfa = (maxAgeSeconds: number): PolicyDefinition => ({
 // app bootstrap
 policyEngine.registerPolicy(requireRecentMfa(300));
 
-// service
-@Auth({ policies: ['recent-mfa:300s'] })
-async transferLargeAmount(...) { … }
+class Transfers {
+  @Auth({ policies: ['recent-mfa:300s'] })
+  async transferLargeAmount(request: TransferRequest) {
+    return ledger.submit(request);
+  }
+}
 ```
 
 ## Composition {#composition}

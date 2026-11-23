@@ -2,6 +2,7 @@
 id: "page:/docs/category/community"
 slug: "/docs/category/community"
 title: "Community"
+description: "Find contribution instructions, the private security reporting channel and package release notes."
 ---
 
 # Community

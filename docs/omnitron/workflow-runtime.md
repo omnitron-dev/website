@@ -8,11 +8,7 @@ description: A proposed execution contract for typed visual automation, durable 
 # One automation system, from intent to recovery
 
 :::info{title="Design proposal — 16 November 2026"}
-This specifies work to implement and evaluate. Current Omnitron Pipelines are
-bounded administrator automation, not this durable workflow runtime. Read
-[current behavior](./automation.md) before using them. The
-[studio design](./studio.md) defines shared identities and authority;
-[this runtime contract](#execution-contract) defines execution semantics.
+For a working automation in 0.4.15, start with [Event flows](./flows.md) or [Pipelines](./automation.md). This proposal covers durable waits, replay and other execution guarantees beyond those shipped features. [Agent Studio](./studio.md) explains how a team proposes work for a controller.
 :::
 
 A useful automation system connects events, data, code and human decisions.

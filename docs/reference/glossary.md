@@ -360,7 +360,7 @@ in the webapp.
 
 ## V {#v}
 
-**`@Validate(schema)`** — Decorator running a zod schema before
+**`@Validate({ input: schema })`** — Decorator running a zod schema before
 the method body. Bad input throws `Errors.validation`.
 
 **Viewer** — Lowest RBAC role. Read-only: list / inspect /

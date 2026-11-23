@@ -2,7 +2,10 @@
 id: "omnitron/migrations"
 slug: "/docs/omnitron/migrations"
 title: Database migrations
+description: "Define, inspect and execute database migrations through the shared Omnitron API and CLI."
 ---
+
+# Database migrations
 
 Use `@omnitron-dev/omnitron/migration` for migration definitions, execution and
 inspection. `omnitron migrate` uses that same API. Applications do not need a

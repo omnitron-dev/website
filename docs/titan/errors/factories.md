@@ -84,12 +84,14 @@ subclasses) so `instanceof HttpError` works:
 ```typescript
 import { HttpErrors, HttpError } from '@omnitron-dev/titan/errors';
 
-throw HttpErrors.notFound('User not found', { userId });
-
-catch (e) {
+try {
+  const user = await users.findById(userId);
+  if (!user) throw HttpErrors.notFound('User not found', { userId });
+} catch (e) {
   if (e instanceof HttpError) {
-    console.log(e.httpStatus);  // typed as number
+    console.log(e.httpStatus);
   }
+  throw e;
 }
 ```
 

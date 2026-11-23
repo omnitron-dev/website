@@ -243,10 +243,12 @@ stack details).
 import { LinearProgress, CircularProgress, ProgressBar, CountdownRing }
   from '@omnitron-dev/prism';
 
-<ProgressBar segments={[{ value: 75, color: 'success' }, { value: 25, color: 'info' }]} />
-<LinearProgress />                         {/* indeterminate */}
-<CircularProgress variant="determinate" value={50} />
-<CountdownRing deadline={expiresAt} totalMs={30_000} />  {/* timed ring */}
+<>
+  <ProgressBar segments={[{ value: 75, color: 'success' }, { value: 25, color: 'info' }]} />
+  <LinearProgress />
+  <CircularProgress variant="determinate" value={50} />
+  <CountdownRing deadline={expiresAt} totalMs={30_000} />
+</>
 ```
 
 Linear and circular variants; determinate and indeterminate
@@ -384,7 +386,10 @@ a MUI-style composition of `<TableRow>` / `<TableCell>`):
 ```tsx
 import { Table } from '@omnitron-dev/prism';
 
-<Table
+type UserRow = { id: string; name: string; email: string; karma: number };
+declare const users: UserRow[];
+
+<Table<UserRow>
   rowKey="id"
   data={users}
   columns={[
@@ -598,7 +603,7 @@ import { Breadcrumbs } from '@omnitron-dev/prism';
 | `linkComponent` | `ElementType` | — | Router `Link` for client-side nav |
 
 Pass `linkComponent` (e.g. react-router's `Link`) to keep
-breadcrumb links client-side.
+breadcrumb links client-side. Give ancestor items real destinations and leave the current page without an `href`. The current page is announced with `aria-current="page"`. This site includes the Prism correction that keeps both levels readable in the active theme before hydration.
 
 ### `<Menu>` {#menu}
 
@@ -782,8 +787,7 @@ receives the new value directly.
 ```tsx
 import { Tabs, TabPanel } from '@omnitron-dev/prism';
 
-// Config-driven:
-<Tabs
+const configuredTabs = <Tabs
   defaultValue="overview"
   onChange={(value) => console.log(value)}
   tabs={[
@@ -793,8 +797,7 @@ import { Tabs, TabPanel } from '@omnitron-dev/prism';
   ]}
 />
 
-// Or with <TabPanel> children:
-<Tabs defaultValue="overview">
+const composedTabs = <Tabs defaultValue="overview">
   <TabPanel value="overview" label="Overview"><Overview /></TabPanel>
   <TabPanel value="logs"     label="Logs"><Logs /></TabPanel>
   <TabPanel value="metrics"  label="Metrics"><Metrics /></TabPanel>
@@ -1118,11 +1121,12 @@ edit/view, indexable for full-text search, safer than raw HTML.
 
 <PrismExample example="content" hydrate="visible" />
 
-Renders mixed content (TipTap JSON, markdown string, or HTML
-string) with consistent typography — it auto-detects the format
-from the content shape:
+Use the dedicated entry point to display saved TipTap documents, Markdown or HTML. Import the stylesheet once in the application entry if the content includes highlighted code. The renderer selects the format from the content it receives.
 
 ```tsx
+import { ContentRenderer } from '@omnitron-dev/prism/components/content-renderer';
+import '@omnitron-dev/prism/components/content-renderer/styles.css';
+
 <ContentRenderer content={post.body} />
 ```
 
@@ -1457,21 +1461,13 @@ The same migration applies to Tabs (`TabIndicatorProps` →
 (`BackdropProps` → `slotProps.backdrop`), and Autocomplete
 (`componentsProps` → `slotProps`).
 
-## Per-component subpaths {#per-component-subpaths}
+## Component imports {#per-component-subpaths}
 
-Each component is also importable from its own subpath:
+Use the component barrel for the controls below. The [package index](../../reference/api-index.mdx) lists dedicated entry points for larger features, such as the map and research editor.
 
 ```tsx
-// Convenience (bigger bundle):
-import { Card, Table, Drawer } from '@omnitron-dev/prism';
-
-// Tree-shaken (smaller bundle):
-import { Card }   from '@omnitron-dev/prism';
-import { Table }  from '@omnitron-dev/prism';
-import { Drawer } from '@omnitron-dev/prism';
+import { Card, Table, Drawer } from '@omnitron-dev/prism/components';
 ```
-
-Use subpaths in production for the leanest payload.
 
 ## Also exported {#also-exported}
 

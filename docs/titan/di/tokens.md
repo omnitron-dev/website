@@ -170,7 +170,7 @@ class UsersService {
   constructor(
     @Inject(LOGGER)     private readonly logger:     ILogger,
     @Inject(VALIDATORS) private readonly validators: IValidator[],
-    private readonly db: Database,        // class token; no @Inject needed
+    @Inject(Database) private readonly db: Database,  // class token
   ) {}
 }
 ```

@@ -2,6 +2,7 @@
 id: "page:/docs/category/getting-started"
 slug: "/docs/category/getting-started"
 title: "Getting Started"
+description: "Install the tools, run a first service and find a guide for your next development task."
 ---
 
 # Getting Started

@@ -14,7 +14,7 @@ React 19 + Vite + MUI SPA that talks to the daemon via the
 `@omnitron-dev/prism/netron` client — the same Netron RPC surface
 the CLI uses.
 
-The project-qualified URLs and Agent Studio on this page describe Omnitron `main` after 0.4.14. The published 0.4.14 Console uses an earlier workspace selector.
+This guide follows the project workspaces and Agent Studio shipped with Omnitron 0.4.15. Console 0.4.14 uses the earlier workspace selector.
 
 ## Workspace and stack scope {#workspace-and-stack-scope}
 
@@ -471,7 +471,7 @@ rule each require the corresponding permission.
 
 ### Pipelines {#pipelines}
 
-Open **Pipelines** to edit definitions and **Runs** to inspect the steps of a recorded run. In the 0.4.13 source, the selected workspace filters definitions by their current targets and runs by the targets saved at admission. A definition with targets in several stacks appears in each matching workspace. A legacy receipt with only a project appears under **All stacks** for that project. From an interrupted run, use **Inspect remote receipts** to check the target or **Continue remaining steps** to resume the reviewed work.
+Open **Pipelines** to edit definitions and **Runs** to inspect the steps of a recorded run. Since 0.4.13, the selected workspace filters definitions by their current targets and runs by the targets saved at admission. A definition with targets in several stacks appears in each matching workspace. A legacy receipt with only a project appears under **All stacks** for that project. From an interrupted run, use **Inspect remote receipts** to check the target or **Continue remaining steps** to resume the reviewed work.
 
 ### Traces {#traces}
 
@@ -507,7 +507,7 @@ projects. The header switcher lists these projects.
 
 Open `/system` to inspect the host that runs a daemon. **Host** selects the connected daemon or a registered mesh node when your role permits remote reads. The selected node and detail tab are in the URL. Each reading identifies the reporting host, collection time and duration. **Live** polls every five seconds while the tab is visible. Pause it to compare numbers or use **Refresh system snapshot** for one observation.
 
-On Omnitron main after 0.4.14, **Inspect storage** opens the hardware readings when the selected host reports a fault. On the **Storage** tab, hardware state and filesystem capacity remain visible independently. You can see how many mirror members are in sync even when a filesystem has ample free space. See [Diagnose a degraded mirror](diagnostics.md#host-storage-health).
+In Omnitron 0.4.15, **Inspect storage** opens the hardware readings when the selected host reports a fault. On the **Storage** tab, hardware state and filesystem capacity remain visible independently. You can see how many mirror members are in sync even when a filesystem has ample free space. See [Diagnose a degraded mirror](diagnostics.md#host-storage-health).
 
 The controller asks the selected node for its own snapshot over the authenticated mesh. Both ends must support this read. If an older node refuses the mesh credential, the page names the node and permission to check. A viewer can select a node. The node credential can answer for its own host only.
 

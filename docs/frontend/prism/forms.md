@@ -204,20 +204,30 @@ For inputs without a `Field.*` wrapper, drop to `<Controller>` (or
 `useController`) and wire the field manually:
 
 ```tsx
-import { Controller } from 'react-hook-form';
-import { DateRangePicker } from '@omnitron-dev/prism';
+import Button from '@mui/material/Button';
+import { useController, type Control } from 'react-hook-form';
+import { DateRangePicker, formatDateString, parseDateString, useDateRangePicker } from '@omnitron-dev/prism';
 
-<Controller
-  name="range"
-  control={form.control}
-  render={({ field, fieldState }) => (
-    <DateRangePicker
-      value={field.value}
-      onChange={field.onChange}
-      error={fieldState.error?.message}
-    />
-  )}
-/>
+type Filters = { range: { start: string | null; end: string | null } };
+
+function RangeField({ control }: { control: Control<Filters> }) {
+  const { field } = useController({ control, name: 'range', defaultValue: { start: null, end: null } });
+  const picker = useDateRangePicker();
+  function open() {
+    picker.setStartDate(parseDateString(field.value.start));
+    picker.setEndDate(parseDateString(field.value.end));
+    picker.onOpen();
+  }
+  return (
+    <>
+      <Button onClick={open}>Choose dates</Button>
+      <DateRangePicker {...picker} onSubmit={() => {
+        field.onChange({ start: formatDateString(picker.startDate) || null, end: formatDateString(picker.endDate) || null });
+        field.onBlur();
+      }} />
+    </>
+  );
+}
 ```
 
 ## Validation modes {#validation-modes}

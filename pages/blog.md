@@ -2,18 +2,15 @@
 id: "page:/blog"
 slug: "/blog"
 title: "Engineering notes"
+description: "Read project announcements and engineering notes from Omnitron maintainers."
 ---
 
 # Engineering notes
 
-Release announcements and implementation notes from the Omnitron project.
+[Welcome to Omnitron](/blog/welcome) · 15 May 2026
 
-## 2026
+The Omnitron team introduced the first public manual for Titan, Netron, Prism and the supervisor.
 
-- [Welcome to Omnitron](/blog/welcome) — 15 May 2026. The first public documentation preview.
+[Browse the archive](/blog/archive) · [Topics](/blog/tags) · [Authors](/blog/authors)
 
-## Current project
-
-- [Release notes](/docs/community/changelog)
-- [Compatibility](/docs/reference/compatibility)
-- [Contributing](/docs/community/contributing)
+For package changes and upgrade guidance, read the [release notes](/docs/community/changelog).

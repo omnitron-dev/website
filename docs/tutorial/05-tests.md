@@ -261,8 +261,8 @@ export default defineConfig({
   use: { baseURL: 'http://localhost:5173' },
   webServer: [
     {
-      command: 'cd ../api && JWT_SECRET=test-secret pnpm dev',
-      url:     'http://localhost:3001/healthz',
+      command: 'cd ../api && pnpm dev',
+      url:     'http://localhost:3001/health',
       reuseExistingServer: !process.env.CI,
     },
     {
@@ -286,7 +286,9 @@ test('signs in and sees users', async ({ page }) => {
   await expect(page).toHaveURL(/\/sign-in$/);
 
   await page.getByPlaceholder('Email').fill('admin@example.com');
-  await page.getByPlaceholder('Password').fill('correct-horse-battery-staple');
+  const password = process.env.TUTORIAL_PASSWORD;
+  if (!password) throw new Error('Set TUTORIAL_PASSWORD for the seeded test account');
+  await page.getByPlaceholder('Password').fill(password);
   await page.getByRole('button', { name: /sign in/i }).click();
 
   // Lands on home
@@ -359,7 +361,8 @@ jobs:
         env:
           DATABASE_URL: postgres://postgres:dev@localhost:5432/platform_test
           REDIS_URL:    redis://localhost:6379
-          JWT_SECRET:   test-secret
+          JWT_SECRET:   ${{ secrets.TEST_JWT_SECRET }}
+          TUTORIAL_PASSWORD: ${{ secrets.TUTORIAL_PASSWORD }}
 ```
 
 ## What we covered {#what-we-covered}

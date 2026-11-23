@@ -2,26 +2,15 @@
 id: "page:/blog/tags"
 slug: "/blog/tags"
 title: "Topics"
+description: "Browse Omnitron engineering notes by topic."
 ---
 
 # Topics
 
-Browse the project introduction and release announcements.
-
-## 2026
-
-- [Welcome to Omnitron](/blog/welcome) — 15 May 2026. The first public documentation preview.
-
-## Current project
-
-- [Release notes](/docs/community/changelog)
-- [Compatibility](/docs/reference/compatibility)
-- [Contributing](/docs/community/contributing)
-
 ## Introduction {#I}
 
-[Project introduction](/blog/tags/intro)
+[Project introductions](/blog/tags/intro) explain why the platform and its documentation exist.
 
 ## Releases {#R}
 
-[Release announcements](/blog/tags/release)
+[Release announcements](/blog/tags/release) record public milestones. Package versions and upgrade notes are in the [changelog](/docs/community/changelog).

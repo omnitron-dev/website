@@ -2,6 +2,7 @@
 id: "lumen/use-cases"
 slug: "/docs/lumen/use-cases"
 title: Lumen use cases
+description: "Choose a publication workflow for a manual, an interactive reference or an authenticated document service."
 ---
 # Lumen use cases
 

@@ -3,6 +3,7 @@ id: "auth/mental-model"
 slug: "/docs/auth/mental-model"
 title: Mental Model
 sidebar_position: 6
+description: "Trace a proposed application access decision from an authenticated actor to a permission and resource."
 ---
 
 # Mental Model

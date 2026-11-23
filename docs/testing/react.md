@@ -158,6 +158,8 @@ it('shows error on NOT_FOUND', async () => {
 
 ```tsx
 import { createTestClient, createMockService } from '@omnitron-dev/netron-react/test';
+import { render, screen, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 
 it('calls invite on submit', async () => {
   const user   = userEvent.setup();
@@ -193,6 +195,7 @@ service whose method returns an async iterable with
 
 ```tsx
 import { createTestClient, createMockService } from '@omnitron-dev/netron-react/test';
+import { render, screen } from '@testing-library/react';
 
 it('updates on stream events', async () => {
   const orders = createMockService<OrderService>({

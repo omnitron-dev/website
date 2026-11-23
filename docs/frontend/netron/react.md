@@ -544,7 +544,7 @@ function UserMenu() {
   if (!isAuthenticated) return <Button onClick={() => login({ /* creds */ })}>Sign in</Button>;
   return (
     <Menu>
-      <Avatar src={user!.avatarUrl} />
+      <MenuItem disabled>{user?.name ?? user?.id}</MenuItem>
       <MenuItem onClick={() => logout()}>Sign out</MenuItem>
     </Menu>
   );
@@ -650,51 +650,23 @@ function Component() {
 
 ### Backend-aware components {#backend-aware-components}
 
-```tsx
-// Only render children when this backend is connected:
-<RequireBackendConnection backend="media">
-  <UploadForm />
-</RequireBackendConnection>
-
-// Branch based on connection:
-<BackendConnectionAware backend="analytics">
-  {({ isConnected, isConnecting, error }) =>
-    isConnected ? <Reports /> :
-    isConnecting ? <Spinner /> :
-    <ErrorCard error={error} />
-  }
-</BackendConnectionAware>
-
-// Render only when ALL listed backends are connected:
-<RequireAllBackends backends={['auth', 'media']}>
-  <Dashboard />
-</RequireAllBackends>
-
-// Or ANY:
-<RequireAnyBackend backends={['auth-primary', 'auth-backup']}>
-  <SignInButton />
-</RequireAnyBackend>
-
-// Status indicator:
-<BackendStatus backend="analytics" />
-```
+See [connection-aware rendering](./multi-backend.md#connection-aware-rendering) for a working example with a single named backend, a group of required backends and a failover pair.
 
 ## Connection-aware rendering (single backend) {#connection-aware-rendering-single-backend}
 
 ```tsx
 import { ConnectionAware, RequireConnection } from '@omnitron-dev/netron-react';
 
-<ConnectionAware>
-  {({ isConnected, isConnecting, error, reconnect }) =>
-    isConnected ? <App /> :
-    isConnecting ? <Spinner /> :
-    <Disconnected error={error} onReconnect={reconnect} />
-  }
-</ConnectionAware>
-
-<RequireConnection fallback={<OfflineBanner />}>
-  <SensitivePage />
-</RequireConnection>
+function Dashboard() {
+  return (
+    <ConnectionAware connecting={<Spinner />} disconnected={<OfflineBanner />}
+      error={(cause, reconnect) => <Disconnected error={cause} onReconnect={reconnect} />}>
+      <RequireConnection fallback={<OfflineBanner />}>
+        <SensitivePage />
+      </RequireConnection>
+    </ConnectionAware>
+  );
+}
 ```
 
 ## Cache management {#cache-management}
@@ -808,6 +780,7 @@ provider + mock helpers (no real WebSocket / fetch):
 
 ```tsx
 import { TestNetronProvider } from '@omnitron-dev/netron-react/test';
+import { render, screen } from '@testing-library/react';
 
 render(
   <TestNetronProvider

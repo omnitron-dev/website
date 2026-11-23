@@ -8,13 +8,7 @@ description: Every RPC service exposed by the daemon — names, methods, roles.
 
 # Services reference
 
-The Omnitron daemon exposes the RPC services below. Some are conditional
-on enabled modules or daemon configuration. All share the same auth model
-(see [Daemon / Auth flow](./daemon.md#auth-flow)) and address the
-same socket / TCP / HTTP planes.
-
-This page is the canonical inventory: service name, registered
-Netron service id, purpose, and key methods.
+Look up the service id and public method count for Omnitron 0.4.16 below. Roles, transport restrictions and enabled modules determine which calls a client can make. A local administrator and an enrolled peer use different services to review a flow transfer. [Daemon authentication](./daemon.md#auth-flow)
 
 Re-check this page from the website repository root, replacing the sample path
 with your separately obtained Omni source checkout:
@@ -23,8 +17,7 @@ with your separately obtained Omni source checkout:
 node scripts/check-services-reference.mjs "/absolute/path/to/omni-source"
 ```
 
-The check reads `@Service`/`@Public` out of `src/**/*.rpc-service.ts` and
-diffs them against the index table below. See the
+The check reads each service class and its own `@Public` methods from the daemon and the imported Titan health service, then compares them with the table. See the
 [source checkout instructions](../community/contributing.md#work-on-the-documentation).
 
 ## Quick index {#quick-index}
@@ -42,14 +35,19 @@ diffs them against the index table below. See the
 | `discovery.rpc-service.ts` | `OmnitronDiscovery` | 3 | viewer |
 | `event-broadcaster.rpc-service.ts` | `OmnitronEvents` | 3 | viewer (subscribe, unsubscribe, stats) |
 | `fleet.rpc-service.ts` | `OmnitronFleet` | 7 | Viewer reads and operator inventory changes |
+| `flows/flows.rpc-service.ts` | `OmnitronFlows` | 12 | Operators preview graphs and submit room proposals. Administrators manage activations and deliveries. |
+| `flows/peer-review.rpc-service.ts` | `OmnitronFlowReviews` | 5 | Administrator prepares, invites, revokes, delivers and checks the receiving controller’s receipt. |
+| `flows/peer-review.rpc-service.ts` | `OmnitronFlowReviewPeer` | 2 | Enrolled service identity and transfer admission for peer probe and receipt. |
 | `health-check.rpc-service.ts` | `OmnitronHealth` | 4 | viewer |
 | `infrastructure.rpc-service.ts` | `OmnitronInfra` | 19 | viewer (read) + operator (start/stop/remove) |
 | `kubernetes.rpc-service.ts` | `OmnitronKubernetes` | 9 | admin |
 | `log-collector.rpc-service.ts` | `OmnitronLogs` | 4 | viewer |
 | `node-manager.rpc-service.ts` | `OmnitronNodes` | 38 | viewer (read), operator (operations), admin (historical repair and managed kernel rollout) |
 | `pipeline.rpc-service.ts` | `OmnitronPipelines` | 14 | admin + live human session / trusted local CLI |
-| `project.rpc-service.ts` | `OmnitronProject` | 44 | Viewer reads and reviews, operator starts/stops, administrator manages registrations, machine credentials run the recipient protocol |
+| `project.rpc-service.ts` | `OmnitronProject` | 60 | Viewer reads and reviews, operator starts/stops, administrator manages registrations, machine credentials run the recipient protocol |
 | `release.rpc-service.ts` | `OmnitronRelease` | 12 | viewer (read), operator (build/attest), admin (prune) |
+| `services/retained-bindings.rpc-service.ts` | `OmnitronRetainedBindings` | 4 | Instance administrator over the private local Unix socket. |
+| `studio/studio.rpc-service.ts` | `OmnitronStudio` | 18 | Operator room actions, turn-scoped tools and locally connected adapters. |
 | `secrets.rpc-service.ts` | `OmnitronSecrets` | 6 | admin |
 | `sync.rpc-service.ts` | `OmnitronSync` | 5 | authenticated control plane; historical repair excludes operators |
 | `system-info.rpc-service.ts` | `OmnitronSystemInfo` | 1 | viewer |
@@ -66,7 +64,7 @@ Plus the core supervisor:
 
 | File | Service id | Methods | Role gate |
 | ---- | ---------- | ------- | --------- |
-| `daemon/daemon.rpc-service.ts` | `OmnitronDaemon` | 29 | mixed — see [Daemon](./daemon.md#rpc-surface--omnitrondaemon-service) |
+| `daemon/daemon.rpc-service.ts` | `OmnitronDaemon` | 32 | mixed — see [Daemon](./daemon.md#rpc-surface--omnitrondaemon-service) |
 
 The daemon exposes its role-protected metrics facade and imports the Titan health service:
 

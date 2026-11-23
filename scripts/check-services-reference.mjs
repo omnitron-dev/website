@@ -18,6 +18,7 @@
 
 import fs from 'node:fs';
 import path from 'node:path';
+import ts from 'typescript';
 
 const repo = process.argv[2];
 if (!repo) {
@@ -31,81 +32,57 @@ if (!fs.existsSync(srcRoot)) {
   process.exit(2);
 }
 
-/**
- * Not every service the daemon exposes lives in apps/omnitron.
- * `OmnitronMetrics` is declared in `packages/titan-metrics` and registered by
- * its module, so a checker reading only the app's own tree misses it — and
- * this one did, while reporting "ok — 21 services": the right count with the
- * wrong set. It had gained `OmnitronCluster`, which is registered only when
- * clustering is enabled, and lost `OmnitronMetrics`. Two errors of opposite
- * sign summing to a clean total is exactly what a count cannot detect.
- *
- * Caught by reading `availableServices` out of a running daemon's log, which
- * is the only ground truth here. Short of that, scan everywhere a
- * *.rpc-service.ts can live.
- */
-const scanRoots = [srcRoot, path.join(repo, 'packages')].filter((d) => fs.existsSync(d));
+// Omnitron registers its own metrics facade and imports the Titan health service.
+const scanRoots = [srcRoot, path.join(repo, 'packages/titan-health/src')];
 
-/**
- * A service file is `<something>.rpc-service.ts` — or just `rpc-service.ts`.
- *
- * `titan-metrics` uses the bare name, and matching on `.rpc-service.ts` alone
- * skips it: the string is shorter than the suffix. Widening the SEARCH ROOTS
- * to `packages/` therefore did not find `OmnitronMetrics`, though the comment
- * added alongside that change said it had. Two fixes were needed and one was
- * written down as done — the same defect the page itself documents, in the
- * checker built to catch it.
- */
-function isRpcServiceFile(name) {
-  return name === 'rpc-service.ts' || name.endsWith('.rpc-service.ts');
+function parse(file) {
+  return ts.createSourceFile(file, fs.readFileSync(file, 'utf8'), ts.ScriptTarget.Latest, true);
 }
 
-/**
- * `@Service({ name: X })` where X is a constant, not a literal —
- * `DAEMON_SERVICE_ID` is declared in config/defaults.ts. Reading only string
- * literals made the daemon's own service look unregistered, i.e. the checker
- * reporting the page as wrong about the one row that was right.
- */
-function constants() {
-  const out = new Map();
-  const walk = (dir) => {
-    for (const e of fs.readdirSync(dir, { withFileTypes: true })) {
-      const p = path.join(dir, e.name);
-      if (e.isDirectory()) {
-        if (e.name !== 'node_modules' && e.name !== 'dist' && e.name !== 'test') walk(p);
-      } else if (e.name.endsWith('.ts')) {
-        for (const m of fs.readFileSync(p, 'utf8').matchAll(/export const (\w+)(?::\s*string)?\s*=\s*['"]([^'"]+)['"]/g)) {
-          out.set(m[1], m[2]);
-        }
+function decorator(node, name) {
+  return ts.getDecorators(node)?.map(item => item.expression).find(call =>
+    ts.isCallExpression(call) && ts.isIdentifier(call.expression) && call.expression.text === name);
+}
+
+function serviceName(declaration, source) {
+  if (declaration && ts.isStringLiteralLike(declaration)) return declaration.text;
+  if (declaration && ts.isIdentifier(declaration)) {
+    for (const imp of source.statements.filter(ts.isImportDeclaration)) {
+      const bindings = imp.importClause?.namedBindings;
+      if (!bindings || !ts.isNamedImports(bindings)) continue;
+      const binding = bindings.elements.find(item => item.name.text === declaration.text);
+      if (!binding || !imp.moduleSpecifier.text.startsWith('.')) continue;
+      const file = path.resolve(path.dirname(source.fileName), imp.moduleSpecifier.text.replace(/\.js$/, '.ts'));
+      const name = (binding.propertyName ?? binding.name).text;
+      for (const stmt of parse(file).statements.filter(ts.isVariableStatement)) {
+        const variable = stmt.declarationList.declarations.find(item => ts.isIdentifier(item.name) && item.name.text === name);
+        if (variable?.initializer && ts.isStringLiteralLike(variable.initializer)) return variable.initializer.text;
       }
     }
-  };
-  for (const root of scanRoots) walk(root);
-  return out;
+  }
+  throw Error('Unresolved Netron service name in ' + source.fileName);
 }
 
-/** Every *.rpc-service.ts under src/, with its Netron id and @Public methods. */
 function realServices() {
-  const consts = constants();
-  const out = new Map();
-  const walk = (dir) => {
-    for (const e of fs.readdirSync(dir, { withFileTypes: true })) {
-      const p = path.join(dir, e.name);
-      if (e.isDirectory()) {
-        if (e.name !== 'node_modules' && e.name !== 'dist' && e.name !== 'test') walk(p);
-      } else if (isRpcServiceFile(e.name)) {
-        const src = fs.readFileSync(p, 'utf8');
-        const decl = src.match(/@Service\(\s*\{\s*name:\s*(?:['"]([^'"]+)['"]|(\w+))/);
-        const id = decl?.[1] ?? (decl?.[2] ? consts.get(decl[2]) : undefined);
-        const methods = new Set(
-          [...src.matchAll(/@Public\([^)]*\)[\s\S]{0,400}?\n\s+(?:async\s+)?(\w+)\s*\(/g)].map((m) => m[1])
-        );
-        if (id) out.set(id, { file: path.relative(srcRoot, p), methods: [...methods].sort() });
+  const services = new Map();
+  for (const root of scanRoots) {
+    for (const file of fs.readdirSync(root, { recursive: true })) {
+      if (!/(^|[/.])rpc-service\.ts$/.test(file)) continue;
+      const source = parse(path.join(root, file));
+      for (const type of source.statements.filter(ts.isClassDeclaration)) {
+        const service = decorator(type, 'Service');
+        if (!service) continue;
+        const options = service.arguments[0];
+        const name = options && ts.isObjectLiteralExpression(options)
+          && options.properties.find(prop => ts.isPropertyAssignment(prop) && prop.name.getText(source) === 'name');
+        const id = serviceName(name?.initializer, source);
+        if (services.has(id)) throw Error('Duplicate daemon service id: ' + id);
+        const methods = type.members.filter(method => ts.isMethodDeclaration(method) && decorator(method, 'Public'));
+        services.set(id, { file: path.relative(repo, source.fileName), methods: methods.map(method => method.name.getText(source)).sort() });
       }
     }
-  };
-  for (const root of scanRoots) walk(root);
-  return out;
+  }
+  return services;
 }
 
 /** Index-table rows: service id → declared method count. */
@@ -122,6 +99,7 @@ function documentedServices() {
   // this script. A pattern that cannot match a real value fails closed and
   // looks like a finding about the page.
   for (const m of md.matchAll(/\|\s*`[^`]*rpc-service\.ts`\s*\|\s*`([\w@.-]+)`\s*\|\s*(\d+)\s*\|/g)) {
+    if (rows.has(m[1])) throw Error('Duplicate service in the reference table: ' + m[1]);
     rows.set(m[1], Number(m[2]));
   }
   return rows;

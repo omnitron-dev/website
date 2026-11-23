@@ -248,7 +248,7 @@ interface LayoutNavItem {
 }
 ```
 
-The sidebar and top navigation highlight the section for the current pathname. On `main` after 0.4.14, an internal link can carry a filter or fragment and still mark its section active. For example, a link to `/projects/reports/apps?stack=dev` stays highlighted on `/projects/reports/apps/dev/api`.
+The sidebar and top navigation highlight the section for the current pathname. From Prism 0.4.15, an internal link can carry a filter or fragment and still mark its section active. For example, a link to `/projects/reports/apps?stack=dev` stays highlighted on `/projects/reports/apps/dev/api`.
 
 - **Exact match** compares the path segments after removing the query, fragment and trailing slash.
 - **`deepMatch`** also matches child paths by default. Use `deepMatch: false` on a workspace overview so that opening a child section moves the highlight there.

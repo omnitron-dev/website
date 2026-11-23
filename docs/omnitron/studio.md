@@ -5,17 +5,19 @@ title: Agent Studio and automation
 description: Create a team with a lead model, connect local adapters, share work and review live automation proposals in the flow editor.
 ---
 
-# Create, automate and operate one system
+# Agent Studio and automation
 
 :::info{title="Availability"}
-Team rooms, local subscription connectors, the visual flow editor and reviewed project starters are available on Omnitron `main` after 0.4.14. Agent delegation between controllers, native mobile clients and device operations in the architecture sections are development targets.
+Omnitron 0.4.15 includes team rooms, local subscription connectors, the visual flow editor and project starters you can review before creation. Cross-controller agent delegation, native mobile clients and device operations are design targets. [Release notes](../community/changelog.md)
 :::
+
+The `@omnitron-dev/omnitron/studio/mcp` entry point exposes `openStudioMcp` for a turn-scoped local tool endpoint. The connector supplies the invocation function and abort signal. The room and its delegated turn determine which requests are authorized. [API index](../reference/api-index.mdx)
 
 ## Work with a team {#team-room}
 
 Open **Agent Studio → New team** in the project workspace. Give the room a name. Select a lead with room tool support and choose which other providers may participate. Set a maximum member count, delegation count and cost tier. You can inspect the empty team before sending the first message.
 
-Connect the installed adapters with the commands shown in Studio. Run `omnitron studio doctor` on the controller to inspect their availability. Codex and supported signed-in Claude Code installations can lead a room. Antigravity can complete an assignment using its strict headless adapter. The built-in Kimi check reports whether an installation is available. Running Kimi in a room requires a connector qualified for that installation.
+Connect an installed adapter with `omnitron studio connect <project> --account <id> --provider <name>`. Studio shows the command for the selected account and workspace. Run `omnitron studio doctor` on the controller to inspect their availability. Codex and supported signed-in Claude Code installations can lead a room. Antigravity can complete an assignment using its strict headless adapter. The built-in Kimi check reports whether an installation is available. Running Kimi in a room requires a connector qualified for that installation.
 
 To connect your own inference service, run a connector on the controller under its administrator's authority. The connector calls `OmnitronStudio.connectAdapter` and advertises its models for one Console account and project under a name such as `example.org/research`. Select it as the lead when it supplies room tools, or enable it under **Team limits → Allowed adapters** before assigning it work. Existing teams keep their approved providers as new connectors arrive.
 
@@ -43,7 +45,7 @@ For an existing registered project, select its workspace and open a conversation
 
 ## Send a flow to another controller for review {#peer-flow-review}
 
-This workflow is available in local Omnitron `main` from `87744011`. The npm release `0.4.14` predates it. Both controllers must host **Flows**, and the sending controller must have enrolled the receiver and approved its SSH host key.
+Omnitron 0.4.15 includes this workflow. Both controllers must host **Flows**, and the sending controller must have enrolled the receiver and approved its SSH host key.
 
 The transfer accepts saved graphs up to 64 KiB containing **Manual input** and **Local notification** nodes. It shares the flow name, nodes, notification text and connections. Studio messages, memory and provider credentials stay on the originating controller. For a private Studio proposal, use **Submit for administrator review** first so a local administrator can open the saved revision.
 
@@ -56,7 +58,7 @@ If the reply is lost, reopen the original saved flow, select the same node, past
 
 ## Workflows and their current limits {#the-everyday-experience}
 
-| Workflow | Available on main | What still needs implementation |
+| Workflow | Available in 0.4.15 | What still needs implementation |
 | --- | --- | --- |
 | Start a project | Discuss requirements, inspect the starter's files and dependencies, and approve creation in Projects | Agent edits in an isolated checkout with independent acceptance |
 | Change an existing project | Open its Studio room, attach selected text, assign a reviewer and record the result | Applying an agent's proposed patch to the working tree |
@@ -68,7 +70,7 @@ If the reply is lost, reopen the original saved flow, select the same node, past
 
 Reviewed against [Omnitron `ea166e5a`](https://github.com/omnitron-dev/omni/commit/ea166e5af56e462941363729ebf381d7412adfa2)
 and [Xec `b2b6aab4`](https://github.com/xec-sh/xec/commit/b2b6aab4b4b0d321996ca26cd10f7b7fb92aff78)
-on 16 November 2026. The table describes that historical implementation. The current team room and event-flow guide above describe later work on main, including turn-scoped MCP and the controller’s persistent flow inbox.
+on 16 November 2026. The table describes that historical implementation. The walkthroughs above describe the subsequently released team rooms, turn-scoped MCP and persistent flow inbox.
 
 | Existing implementation | Reuse | Gap before this design can ship |
 | --- | --- | --- |

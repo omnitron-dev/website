@@ -2,11 +2,12 @@
 id: "page:/docs/titan/errors"
 slug: "/docs/titan/errors"
 title: "Errors"
+description: "Create and classify application errors and follow them across service boundaries."
 ---
 
 # Errors
 
-Follow these guides in order, or open the reference for the part of your application you are changing.
+Choose an error class for the failure, then use its classification to decide how the caller should respond. The factories show how to create consistent errors at different boundaries.
 
 - [Overview](/docs/titan/errors/overview)
 - [Hierarchy](/docs/titan/errors/hierarchy)

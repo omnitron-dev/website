@@ -2,7 +2,10 @@
 id: "omnitron/diagnostics"
 slug: "/docs/omnitron/diagnostics"
 title: Operational diagnostics
+description: "Interpret a diagnostic finding, trace its evidence and verify recovery in the CLI or Console."
 ---
+
+# Operational diagnostics
 
 A diagnostic must say what failed, what was observed, and what can restore
 service. Omnitron uses the same finding contract in commands, runtime health and
@@ -67,7 +70,7 @@ unexamined coverage in `doctor`.
 
 ## A running host with a failed disk {#host-storage-health}
 
-*Available on Omnitron main after 0.4.14.*
+*Available from Omnitron 0.4.15.*
 
 A server can keep answering requests after losing one side of a two-disk mirror. The remaining disk serves reads and writes, but another failure can take the array offline. A free-space chart or a successful application health check cannot tell you how many copies of the data remain.
 

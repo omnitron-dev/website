@@ -3,45 +3,62 @@ id: "tutorial/deploy"
 slug: "/docs/tutorial/deploy"
 sidebar_position: 7
 title: 6. Deploy
-description: Package everything into Docker; ship to a server.
+description: Package the tutorial API and portal, apply database migrations and serve both over one HTTPS origin.
 ---
 
 # Step 6 — Deploy
 
-By the end: a `docker-compose.yml` running the api + webapp +
-Postgres + Redis on a single server, with TLS via nginx.
+Run the API and portal on one host. Caddy terminates TLS and routes requests under `/api` to Netron. Nginx serves the static React application. PostgreSQL keeps the application data and migration history in a named volume.
 
-## Build the api {#build-the-api}
+## Build the API {#build-the-api}
 
-`apps/api/Dockerfile`:
+Pin pnpm in the root `package.json` with `"packageManager": "pnpm@12.21.0"`. Set `injectWorkspacePackages: true` in `pnpm-workspace.yaml`, add the migration CLI with `pnpm --dir apps/api add @omnitron-dev/omnitron@0.4.16` and commit the refreshed lockfile. In `.dockerignore`, exclude `.git`, `**/node_modules`, `**/dist`, `.env` and `**/.env*`.
+
+`apps/api/Dockerfile` packages the application with its production dependencies.
 
 ```dockerfile
 FROM node:22-alpine AS build
-WORKDIR /app
-RUN corepack enable && corepack prepare pnpm@latest --activate
-COPY pnpm-lock.yaml pnpm-workspace.yaml package.json ./
-COPY apps     apps
+WORKDIR /workspace
+RUN corepack enable
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml tsconfig.json ./
+COPY apps apps
 COPY packages packages
 RUN pnpm install --frozen-lockfile
-RUN pnpm -F api build
+RUN pnpm --filter api build && pnpm --filter api deploy --prod /out
 
 FROM node:22-alpine
 WORKDIR /app
-RUN apk add --no-cache tini && corepack enable && corepack prepare pnpm@latest --activate
-COPY --from=build /app/node_modules         ./node_modules
-COPY --from=build /app/apps/api/dist        ./apps/api/dist
-COPY --from=build /app/apps/api/package.json ./apps/api/
-COPY --from=build /app/packages              ./packages
-COPY --from=build /app/apps/api/migrations  ./apps/api/migrations
-
-RUN addgroup -S app && adduser -S app -G app
-USER app
-
+RUN apk add --no-cache tini
+COPY --from=build --chown=node:node /out/ ./
+USER node
 ENV NODE_ENV=production
 EXPOSE 3001
-ENTRYPOINT ['/sbin/tini', '--']
-CMD ['node', '/app/apps/api/dist/main.js']
+ENTRYPOINT ["/sbin/tini", "--"]
+CMD ["node", "dist/main.js"]
 ```
+
+Create `apps/api/omnitron.migrations.js` next to `migrations/`. Set `"files": ["dist", "migrations", "omnitron.migrations.js"]` in `apps/api/package.json` so `pnpm deploy` includes the compiled server, SQL and runner configuration. Each SQL file has a stable name and checksum. The runner records its completion in the application database.
+
+```javascript
+import { readFile } from 'node:fs/promises';
+import pg from 'pg';
+import { createPostgresMigrationDatabase, defineMigrationConfig, defineSqlMigration } from '@omnitron-dev/omnitron/migration';
+
+const migrations = await Promise.all(['001_users', '002_auth'].map(async name =>
+  defineSqlMigration(name, await readFile(new URL(`./migrations/${name}.sql`, import.meta.url), 'utf8'))));
+
+export default defineMigrationConfig({
+  name: 'platform',
+  migrations,
+  async connect() {
+    const pool = new pg.Pool({ connectionString: process.env.DATABASE_URL, max: 1 });
+    const db = createPostgresMigrationDatabase(pool);
+    return { db, close: async () => { try { await db.destroy(); } finally { await pool.end(); } } };
+  },
+});
+```
+
+Use a fresh application volume for this deployment. For an existing database, reconcile its recorded migration history before adopting the runner. [Adopt an existing database](../omnitron/migrations.md#adopt-an-existing-application)
 
 ## Build the webapp {#build-the-webapp}
 
@@ -50,13 +67,13 @@ CMD ['node', '/app/apps/api/dist/main.js']
 ```dockerfile
 FROM node:22-alpine AS build
 WORKDIR /app
-RUN corepack enable && corepack prepare pnpm@latest --activate
-COPY pnpm-lock.yaml pnpm-workspace.yaml package.json ./
+RUN corepack enable
+COPY pnpm-lock.yaml pnpm-workspace.yaml package.json tsconfig.json ./
 COPY apps     apps
 COPY packages packages
 RUN pnpm install --frozen-lockfile
 
-ARG VITE_API_URL=https://api.example.com
+ARG VITE_API_URL
 ENV VITE_API_URL=$VITE_API_URL
 RUN pnpm -F web build
 
@@ -80,7 +97,8 @@ server {
   }
 
   # Static-asset caching
-  location ~* \.(?:js|css|woff2?|svg|png|jpg|jpeg|webp)$ {
+  location /assets/ {
+    try_files $uri =404;
     expires 1y;
     add_header Cache-Control "public, immutable";
   }
@@ -90,8 +108,6 @@ server {
 ## docker-compose.yml {#docker-composeyml}
 
 ```yaml
-version: '3.9'
-
 services:
   api:
     build:
@@ -101,15 +117,14 @@ services:
     environment:
       NODE_ENV:     production
       DATABASE_URL: postgres://platform:${DB_PASS}@postgres:5432/platform
-      REDIS_URL:    redis://redis:6379
+      API_HOST:     0.0.0.0
       JWT_SECRET:   ${JWT_SECRET}
       API_LOG_LEVEL: info
     depends_on:
       postgres: { condition: service_healthy }
-      redis:    { condition: service_healthy }
       migrate:  { condition: service_completed_successfully }
     healthcheck:
-      test:     ['CMD', 'wget', '-qO-', 'http://localhost:3001/healthz']
+      test:     ['CMD', 'wget', '-qO-', 'http://localhost:3001/health']
       interval: 30s
       timeout:  10s
       retries:  3
@@ -118,7 +133,7 @@ services:
     build:
       context:    .
       dockerfile: apps/api/Dockerfile
-    command: ['sh', '-c', 'cat /app/apps/api/migrations/*.sql | psql ${DATABASE_URL}']
+    command: ['node_modules/.bin/omnitron', 'migrate', 'up', '--config', 'omnitron.migrations.js']
     environment:
       DATABASE_URL: postgres://platform:${DB_PASS}@postgres:5432/platform
     depends_on:
@@ -130,7 +145,7 @@ services:
       context:    .
       dockerfile: apps/web/Dockerfile
       args:
-        VITE_API_URL: https://api.example.com
+        VITE_API_URL: https://${APP_DOMAIN}/api
     restart: unless-stopped
 
   postgres:
@@ -148,23 +163,16 @@ services:
       timeout:  5s
       retries:  5
 
-  redis:
-    image: redis:7-alpine
-    restart: unless-stopped
-    healthcheck:
-      test:     ['CMD', 'redis-cli', 'ping']
-      interval: 10s
-      timeout:  5s
-      retries:  5
-
   caddy:
-    image: caddy:alpine
+    image: caddy:2-alpine
     restart: unless-stopped
+    environment:
+      APP_DOMAIN: ${APP_DOMAIN:?set APP_DOMAIN}
     ports:
       - '80:80'
       - '443:443'
     volumes:
-      - ./Caddyfile:/etc/caddy/Caddyfile
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
       - caddy-data:/data
       - caddy-config:/config
     depends_on:
@@ -179,147 +187,80 @@ volumes:
 
 ## Caddyfile (TLS auto-provisioned) {#caddyfile-tls-auto-provisioned}
 
-```
-api.example.com {
-  reverse_proxy api:3001
+```caddyfile
+{$APP_DOMAIN} {
   encode gzip
-}
-
-app.example.com {
-  reverse_proxy web:80
-  encode gzip
+  handle_path /api/* {
+    reverse_proxy api:3001
+  }
+  handle {
+    reverse_proxy web:80
+  }
 }
 ```
-
-Caddy auto-provisions Let's Encrypt certs on first start —
-no certbot setup needed.
 
 ## .env (gitignored) {#env-gitignored}
 
-```bash
-DB_PASS=$(openssl rand -hex 32)
-JWT_SECRET=$(openssl rand -hex 48)
-```
+Set `APP_DOMAIN`, `DB_PASS` and `JWT_SECRET` on the deployment host. Generate each secret separately with `openssl rand -hex 32`. A Compose `.env` file holds literal values. Protect it with mode `0600` and retain the same values when restarting the stack.
 
-## Deploy script {#deploy-script}
+## Deploy {#deploy-script}
 
-```bash
-#!/bin/bash
-# deploy.sh
-set -euo pipefail
-
-SERVER="${1:?usage: deploy.sh user@host}"
-
-echo "→ Building images locally..."
-docker compose build
-
-echo "→ Saving images..."
-docker save \
-  $(docker compose config --images) \
-  | gzip > /tmp/images.tar.gz
-
-echo "→ Shipping to $SERVER..."
-ssh "$SERVER" 'mkdir -p /srv/platform'
-scp /tmp/images.tar.gz docker-compose.yml Caddyfile "$SERVER:/srv/platform/"
-scp .env "$SERVER:/srv/platform/.env"
-
-echo "→ Loading + deploying..."
-ssh "$SERVER" '
-  cd /srv/platform
-  docker load < images.tar.gz
-  docker compose up -d --remove-orphans
-'
-
-echo "✓ Deployed."
-```
-
-Use:
+From the checked-out application revision on the target host, validate the Compose file, build and start the services. Its migration job must succeed before the API starts.
 
 ```bash
-chmod +x deploy.sh
-./deploy.sh admin@your-server.example.com
+docker compose config --quiet
+docker compose up -d --build
+docker compose ps --all
+docker compose logs migrate
 ```
+
+For centrally managed releases on enrolled nodes, Omnitron can build a pinned application, transfer verified artifacts and record startup receipts. [Deploy a qualified release](../omnitron/releases.md#deploy-a-qualified-release)
 
 ## DNS {#dns}
 
-Point `api.example.com` and `app.example.com` to your server's
-IP. Caddy will auto-provision Let's Encrypt certificates on
-first request.
+Point the domain in `APP_DOMAIN` to this host and allow inbound connections on ports 80 and 443. Caddy obtains and renews the certificate using its retained data volume.
 
 ## Verify {#verify}
 
-After ~1 minute (TLS cert acquisition):
+Replace the example hostname with your configured domain. Check HTTP readiness, sign in through the portal, fetch the users list and sign out. Use a dedicated test account for this walkthrough.
 
 ```bash
-curl https://api.example.com/healthz
-# {"status":"healthy"}
-
-open https://app.example.com
-# Webapp loads; sign in works.
+curl --fail https://app.example.com/api/health
+docker compose run --rm migrate node_modules/.bin/omnitron migrate verify --config omnitron.migrations.js
 ```
+
+The session checks from [step 3](./03-auth.md#verify) exercise the same Netron endpoints under the public `/api` path.
 
 ## Updates {#updates}
 
-```bash
-./deploy.sh admin@your-server.example.com
-```
-
-Re-runs the deploy. Docker Compose detects new images and
-recreates the api/web containers; Postgres + Redis stay up.
-
-For zero-downtime API updates use:
-
-```bash
-ssh admin@your-server.example.com 'cd /srv/platform && docker compose exec api kill -USR2 1'
-```
-
-If your api had multiple workers (via `instances > 1`), they'd
-cycle one-by-one without dropping traffic.
+Review new migration checksums and test the candidate against a disposable copy. Retain the currently deployed application revision. Apply the candidate with the same Compose project name, secrets and named volumes, then repeat the health and session checks. A single API container briefly interrupts requests while Compose replaces it. When new writes are incompatible with the preceding application, use a forward correction or a compatible recovery build.
 
 ## Backups {#backups}
 
-Daily Postgres dump:
+Take a PostgreSQL custom-format dump before schema changes. Use a private destination on storage independent of the application volume. Restore it into a separate database and run the application checks there.
 
 ```bash
-# /etc/cron.d/platform-backup
-30 2 * * *  admin  docker exec platform-postgres-1 pg_dump -U platform platform | gzip > /backups/platform-$(date +\%Y\%m\%d).sql.gz
+umask 077
+docker compose exec -T postgres pg_dump -U platform -Fc platform > platform-before-update.dump
+docker compose exec -T postgres pg_restore --list < platform-before-update.dump
 ```
-
-For object storage of backups, push to S3 (or any S3-compatible)
-in a follow-up step.
 
 ## Monitoring {#monitoring}
 
-- **Logs** — `docker compose logs -f --tail 100`. For real
-  aggregation, ship to Loki via the docker logging driver.
-- **Metrics** — configure application instrumentation and query its chosen metric
-  store. To use a text scraper, first implement and secure an HTTP route for
-  `getPrometheusText()`; importing `titan-metrics` does not create that endpoint.
-- **Uptime** — external ping of `/healthz`.
+- **Readiness.** Monitor the public `/api/health` endpoint and the API container's health check.
+- **Logs.** Inspect recent startup and application events with `docker compose logs --tail 100 api migrate`.
+- **Metrics.** Titan Metrics records application measurements. To expose its text format to a scraper, register and authorize an HTTP route that calls `getPrometheusText()`. [Titan Metrics](../titan/modules/metrics.mdx)
 
-## What you've shipped {#what-youve-shipped}
+## What you have deployed {#what-youve-shipped}
 
-| Layer | Implementation |
-| ----- | -------------- |
-| Backend | Titan app with auth + Postgres + Redis |
-| Frontend | React + Prism + netron-react |
-| Wire | Netron HTTP with MessagePack + JWT |
-| Persistence | Postgres + Redis |
-| Reverse proxy | Caddy with auto-TLS |
-| Container orchestration | Docker Compose |
-| Tests | Unit + integration + E2E with Vitest + Playwright |
-| Deploy | One-command shell script |
+The portal calls Netron through a single HTTPS origin. The API reads PostgreSQL, validates the session and applies role requirements. Database migrations and their history survive replacing the application containers.
 
 ## Where to go from here {#where-to-go-from-here}
 
-| Want | Where |
-| ---- | ----- |
-| Multi-app supervision | Add `@omnitron-dev/omnitron` daemon — [Omnitron overview](../omnitron/overview.md) |
-| Web console UI | [Console](../omnitron/console.md) |
-| Multi-node fleet | [Cluster + Fleet](../omnitron/cluster.md) |
-| K8s deployment | [Kubernetes guide](../deployment/kubernetes.md) |
-| More modules | [Module catalogue](../titan/modules) |
-| Production patterns | [Best practices](../omnitron/best-practices.md) + [Recipes](../omnitron/recipes.md) |
+- [Run application processes under supervision](../omnitron/overview.md)
+- [Inspect a project in Console](../omnitron/console.md)
+- [Operate a fleet of nodes](../omnitron/cluster.md)
+- [Check production readiness](../deployment/production-readiness.md)
 
 ## Commit {#commit}
 
@@ -331,7 +272,4 @@ git tag v0.1.0
 
 ## Congratulations {#congratulations}
 
-Six steps, ~2.5 hours, full-stack production-shaped TypeScript
-app with zero codegen. Now go build something real with it.
-
-→ [Reference docs](../intro.md)
+You have exercised the same API from a service, a browser and a deployed portal. The [reference](../intro.md) links to the contracts behind each step.

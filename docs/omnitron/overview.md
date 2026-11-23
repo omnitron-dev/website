@@ -2,31 +2,18 @@
 id: "omnitron/overview"
 slug: "/docs/omnitron/overview"
 sidebar_position: 1
-title: Overview
-description: What Omnitron is, what it solves, and how the pieces fit together.
+title: Operations overview
+description: Use the supervisor to run projects, manage nodes, automate work and recover applications on infrastructure you control.
 ---
 
-# Omnitron
+# Operating with Omnitron
 
-> **Omnitron is opt-in.** Titan apps run perfectly well without
-> it as plain Node processes — see
-> [Titan vs Omnitron](../foundations/titan-vs-omnitron.md) for
-> the precise boundary. This page describes what you gain by
-> adding the Omnitron supervisor on top.
-
-**The Omnitron supervisor is the operations layer of the full-stack platform.**
-It manages projects, application processes, releases and infrastructure on
-machines you control. CLI, Console and agent integrations use its typed API;
-operational records remain in your configured storage. There is no required
-vendor-hosted control service.
+Omnitron’s supervisor manages projects, processes, releases and infrastructure on machines you control. Its CLI, Console and agent integrations use the same control plane. A Titan application can also run directly under Node.js. [Runtime and supervisor responsibilities](../foundations/titan-vs-omnitron.md)
 
 In resident mode, backend, owner and guardian have separate jobs. The
 [illustrated architecture](./architecture.md) follows a command through them,
 explains Console's execution fields and shows how nodes form a private fleet.
 The [ownership guide](../foundations/privacy.md) describes data boundaries.
-
-It's itself a Titan app — supervising other Titan apps. Built on
-the same primitives the apps it supervises use.
 
 ```bash
 pnpm add -g @omnitron-dev/omnitron
@@ -45,29 +32,18 @@ omnitron webapp open                 # open the web console
 | **Orchestrator** | Per-app launch pipeline: TS compile / module load / fork process / wire DI / start lifecycle / watch files in dev |
 | **Process tree** | One OS process per `IProcessEntry` you declare; ≥ 1 instances per process; auto-restart with exponential backoff |
 | **Services** | Role-protected daemon RPC for authentication, deployment, fleet inventory, secrets, infrastructure and diagnostics. Availability depends on daemon role. |
+| **Agent Studio** | Connect adapters to a project room, assign work and retain shared notes. [Work with a team](./studio.md#team-room) |
+| **Flows** | Preview events, review a graph revision and inspect its deliveries. [Build a disk-space monitor](./flows.md#disk-space) |
 | **Webapp** | React + Vite single-page console — same RPC surface; lives at `apps/omnitron/webapp/` |
 | **Infrastructure** | Provisions Postgres / Redis / S3-compatible / custom containers via Docker (dev) or bare-metal hooks (prod) |
 | **MCP** | Built-in Model Context Protocol surface — let agents (IDE assistants, CI bots) read state and trigger operations |
 
 ## When you reach for Omnitron {#when-you-reach-for-omnitron}
 
-- **You have ≥ 2 Titan apps** and want one place to start, watch,
-  inspect, and shut them down together.
-- **You need a typed control plane**, not bash scripts. Every
-  operator action goes through Netron RPC with auth, RBAC, and
-  audit.
-- **You want dev / staging / prod parity** with declarative infra
-  — the same `omnitron.config.ts` boots Docker locally and
-  bare-metal remote, with secrets resolved per environment.
-- **You operate a fleet** — multiple nodes, leader election,
-  remote daemons addressed by alias, cross-node health and
-  metrics.
-- **You want the console UI for free** — `omnitron webapp open`
-  serves the React console talking to the same daemon.
-
-If you only ever run **one** Titan app on **one** machine, `node
-my-app.js` may be enough. Omnitron starts to pay back at two apps
-or two machines.
+- **Run a project.** Register a repository, choose its applications and declare a stack for each environment. [Projects and stacks](./projects.md)
+- **Manage a node or a fleet.** Follow a lifecycle command through the backend and owner, then inspect the host that actually ran it. [Node architecture](./architecture.md)
+- **Delegate or automate work.** Give a project team a bounded task in [Studio](./studio.md#team-room), or connect a host event to an explicitly reviewed [flow](./flows.md).
+- **Investigate a failure.** Check application health, runtime observations and the last recorded operation. [Operational diagnostics](./diagnostics.md)
 
 ## The mental model {#the-mental-model}
 
@@ -170,7 +146,6 @@ export default defineEcosystem({
       bootstrap:   path.join(__dirname, 'apps/api/dist/bootstrap.js'),
       cwd:         path.join(__dirname, 'apps/api'),
       env:         { NODE_ENV: 'production' },
-      watch:       { enabled: true, paths: ['src/**/*.ts'] },
     },
     {
       name:        'worker',

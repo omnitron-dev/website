@@ -2,6 +2,7 @@
 id: "lumen/overview"
 slug: "/docs/lumen/overview"
 title: Lumen
+description: "Build a static documentation site with Lumen and choose the packages your publication needs."
 ---
 # Lumen
 

@@ -76,19 +76,13 @@ await delay(60_000, undefined, { unref: true });    // doesn't block event loop
 ```typescript
 import { defer } from '@omnitron-dev/common';
 
-const d = defer<User>();
+const { promise, resolve } = defer<string>();
 
-// somewhere else, once the value is known:
-d.resolve(currentUser);
-// or:
-d.reject(new Error('cancelled'));
-
-// wherever it is needed:
-const user = await d.promise;
+queueMicrotask(() => resolve('connected'));
+console.log(await promise); // connected
 ```
 
-Useful when you need to expose `.resolve` / `.reject` to code
-that isn't inside the promise's executor.
+Use `defer<T>()` when one callback settles a promise that another part of the application awaits. The handle provides `promise`, `resolve` and `reject` immediately.
 
 ### `timeout(promise, ms, opts?)` {#timeoutpromise-ms-opts}
 

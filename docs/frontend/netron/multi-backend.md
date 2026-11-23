@@ -138,52 +138,32 @@ the contract.
 
 ```tsx
 import {
-  BackendConnectionAware,
-  RequireBackendConnection,
-  RequireAllBackends,
-  RequireAnyBackend,
-  BackendStatus,
-  MultiBackendConnectionAware,
+  BackendConnectionAware, BackendStatus, MultiBackendConnectionAware, RequireBackendConnection,
 } from '@omnitron-dev/netron-react';
 
-// Render only when this backend is connected:
-<RequireBackendConnection backend="media" fallback={<MediaOffline />}>
-  <UploadForm />
-</RequireBackendConnection>
-
-// Branch based on connection state:
-<BackendConnectionAware backend="reports">
-  {({ isConnected, isConnecting, error }) =>
-    isConnected   ? <Reports /> :
-    isConnecting  ? <Spinner /> :
-                    <ErrorCard error={error} />
-  }
-</BackendConnectionAware>
-
-// Require ALL listed backends:
-<RequireAllBackends backends={['auth', 'media']}>
-  <Dashboard />
-</RequireAllBackends>
-
-// Or ANY (failover scenarios):
-<RequireAnyBackend backends={['auth-primary', 'auth-backup']}>
-  <SignInButton />
-</RequireAnyBackend>
-
-// Status indicator:
-<BackendStatus backend="streams" showLabel />
-
-// All backends at once:
-<MultiBackendConnectionAware>
-  {(states) => (
-    <Stack direction="row">
-      {Object.entries(states).map(([name, s]) => (
-        <Chip key={name} label={name} color={s.isConnected ? 'success' : 'error'} />
-      ))}
-    </Stack>
-  )}
-</MultiBackendConnectionAware>
+function Operations() {
+  return (
+    <>
+      <RequireBackendConnection backend="media" fallback={<MediaOffline />}>
+        <UploadForm />
+      </RequireBackendConnection>
+      <BackendConnectionAware backend="reports" connecting={<Spinner />}
+        disconnected={<OfflineBanner />} error={(cause, retry) => <ErrorCard error={cause} onRetry={retry} />}>
+        <Reports />
+      </BackendConnectionAware>
+      <MultiBackendConnectionAware backends={['auth', 'media']} requireAll disconnected={<OfflineBanner />}>
+        <Dashboard />
+      </MultiBackendConnectionAware>
+      <MultiBackendConnectionAware backends={['auth-primary', 'auth-backup']} requireAll={false} disconnected={<OfflineBanner />}>
+        <SignInButton />
+      </MultiBackendConnectionAware>
+      <BackendStatus backend="streams" showError />
+    </>
+  );
+}
 ```
+
+Use `RequireAllBackends` or `RequireAnyBackend` to check every backend in the provider. For a named subset, pass `backends` and `requireAll` to `MultiBackendConnectionAware`. Its children render once the selected condition is satisfied when you supply a disconnected fallback.
 
 ## Per-backend auth {#per-backend-auth}
 
@@ -191,9 +171,9 @@ A backend's `auth` takes an `AuthenticationClient` you already
 built, or `AuthOptions` for the client to build one:
 
 ```tsx
-import { AuthenticationClient } from '@omnitron-dev/netron-browser';
+import { AuthenticationClient, createMultiBackendClient } from '@omnitron-dev/netron-browser';
 
-const jwtAuth = new AuthenticationClient({ storage: 'local' });
+const jwtAuth = new AuthenticationClient();
 
 const client = createMultiBackendClient({
   baseUrl: 'https://api.example.com',
@@ -208,10 +188,7 @@ const client = createMultiBackendClient({
 Omitting `auth` is how a backend goes unauthenticated; there is
 no `auth: false`.
 
-For most setups **one shared `AuthenticationClient`** across all
-backends is right — the same JWT verifies everywhere in a
-fan-out architecture, and passing the same instance is what makes
-one refresh serve every backend.
+Share an `AuthenticationClient` between backends only when they accept the same credentials. Assign separate clients to separate identities. The example keeps the token in memory. Use an explicit `LocalTokenStorage` adapter when the application requires browser persistence.
 
 ## Health checks {#health-checks}
 

@@ -8,10 +8,7 @@ description: A model-independent design for scoped engineering tasks, protected 
 # Make correctness a property of the workflow
 
 :::info{title="Design proposal — 16 November 2026"}
-This specifies the harness required by the proposed [project studio](./studio.md).
-It is not a claim that the current release can autonomously produce arbitrary
-correct systems. The [agent access contract](./agents.md) owns permissions and
-worker isolation; the harness does not override it.
+[Agent Studio](./studio.md#team-room) ships project rooms, shared notes and bounded assignments in 0.4.15. This proposal describes how independent verification could qualify the work those agents produce. The [agent access contract](./agents.md) defines permissions and isolation.
 :::
 
 A model proposes changes. The platform supplies relevant context, constrains

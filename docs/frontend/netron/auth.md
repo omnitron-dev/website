@@ -283,7 +283,7 @@ function UserMenu() {
   }
   return (
     <Menu>
-      <MenuItem disabled>{user?.userId}</MenuItem>
+      <MenuItem disabled>{user?.id}</MenuItem>
       <MenuDivider />
       <MenuItem onClick={() => logout()}>Sign out</MenuItem>
     </Menu>

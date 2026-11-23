@@ -16,6 +16,7 @@ without a real backend.
 
 ```tsx
 import { TestNetronProvider } from '@omnitron-dev/netron-react/test';
+import { render, screen } from '@testing-library/react';
 
 render(
   <TestNetronProvider
@@ -275,6 +276,7 @@ For time-sensitive behaviour (`refetchInterval`, retries,
 debounce):
 
 ```tsx
+import { render, screen } from '@testing-library/react';
 import { createTestClient, advanceTimersAndFlush }
   from '@omnitron-dev/netron-react/test';
 

@@ -2,11 +2,12 @@
 id: "page:/blog/welcome"
 slug: "/blog/welcome"
 title: "Welcome to Omnitron"
+description: "The May 2026 announcement of the first public Omnitron documentation site."
 ---
 
 # Welcome to Omnitron
 
-Published 15 May 2026 · Omnitron team
+Published 15 May 2026 · [Omnitron team](/blog/authors/omnitron-team)
 
 The Omnitron documentation site goes live today at
 [omnitron.dev](https://omnitron.dev). This is the v0.1 public preview of

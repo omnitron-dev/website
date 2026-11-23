@@ -2,6 +2,7 @@
 id: "lumen/this-site"
 slug: "/docs/lumen/this-site"
 title: How this manual is built
+description: "See how omnitron.dev builds, verifies and publishes its pages, local search and Markdown exports."
 ---
 # How this manual is built
 
@@ -45,6 +46,7 @@ Linux filesystem, with a brief rename gap; Windows publication is not supported.
 - The header mark unfolds on hover or keyboard focus and returns afterward.
   It remains still when reduced motion is requested.
 - The API inventory is fetched only when its island is present on the page.
+- The active section follows the document on desktop and mobile. Breadcrumbs link to published parent pages. On a narrow screen, **On this page** opens the section links and the Markdown export. Pages with no sections offer **Page options**.
 - Previous and Next follow the left menu in reading order. When a link crosses a category boundary, the direction line names the destination category.
 - Navigation and page contents remain ordinary links and static HTML. Theme and
   search controls enable after their client handlers are ready; the document and

@@ -36,7 +36,7 @@ above.
 | Mark a class as DI-injectable                 | `@Injectable()` *(core)*                                 |
 | Expose a class as RPC service                 | `@Service('name@version')` *(core)*                      |
 | Expose a method on the wire                   | `@Public()` *(core)*                                     |
-| Validate a method's args / return             | `@Validate(schema)` *(core)*                             |
+| Validate a method's args / return             | `@Validate({ input: schema })` *(core)*                             |
 | Require authenticated caller                  | `@RequireAuth()` *(titan-auth)*                          |
 | Skip auth for one method                      | `@Public()` *(titan-auth — opts out of auth)*            |
 | Memoise an idempotent method                  | `@Cacheable()` *(titan-cache)*                           |
