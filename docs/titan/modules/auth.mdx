@@ -41,6 +41,12 @@ pnpm add @omnitron-dev/titan-auth
 - **Zero-downtime key rotation.** Roll signing keys without forcing
   re-login via the `kid` header registry.
 
+## Owner recovery for a paired application {#owner-recovery-protocol}
+
+Use the signed protocol types and verification functions from `@omnitron-dev/titan-auth/owner-recovery` when integrating an application with a commissioned controller. A `RecoveryIntent` identifies the installation, application, account and operation. Check the grant against the paired authority, the original intent and the account's current credential revision.
+
+Keep the credential update, session revocation and final receipt in one database transaction shared by all application replicas. When a reply is lost, look up the receipt using the original operation. Netron omits recovery payloads from its audit trail. Browser-facing handlers can use `readRequestOrigin` from `@omnitron-dev/titan/netron/auth` to check the actual request origin. [Owner workflow](../../omnitron/auth-rbac.md#installation-owner-recovery) · [Protocol and acceptance criteria](https://github.com/omnitron-dev/omni/blob/v0.4.17/apps/omnitron/OWNER-ACCESS-RECOVERY.md)
+
 ## Quickstart {#quickstart}
 
 ### HS256 (symmetric — simplest) {#hs256-symmetric--simplest}

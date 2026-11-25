@@ -1,5 +1,5 @@
 {
-  "sdkVersion": "0.4.16",
+  "sdkVersion": "0.4.17",
   "sources": {
     "start.md": "---\nid: walkthrough/start\nslug: /walkthrough/start\ntitle: Shipping a guide\n---\n# Shipping a guide {#shipping}\n\nRead [verification](./verify.md#acceptance).\n\n:::note{title=\"Team note\" access=\"internal\"}\nCoordinate the draft with the team.\n:::\n",
     "verify.md": "---\nid: walkthrough/verify\nslug: /walkthrough/verify\ntitle: Verification\n---\n# Verification\n\n## Acceptance {#acceptance}\n\nCheck the published page, its links and its Markdown mirror.\n"

@@ -7,7 +7,7 @@ description: Runtime requirements, package boundaries, versioning, and the disti
 
 # Compatibility and status
 
-The [API index](./api-index.mdx) follows the public exports of **Omnitron 0.4.16**. Use the matching tag and package manifests to check an import or runtime requirement. The [release notes](../community/changelog.md) link to the shipped features and their guides.
+The [API index](./api-index.mdx) follows the public exports of **Omnitron 0.4.17**. Use the matching tag and package manifests to check an import or runtime requirement. The [release notes](../community/changelog.md) link to the shipped features and their guides.
 
 | Surface | Requirement or boundary |
 | --- | --- |

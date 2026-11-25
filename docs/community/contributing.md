@@ -128,7 +128,7 @@ artifacts and state snapshot for rollback. An immutable experiment that pins
 an older runtime needs a separate registration for an upgraded environment;
 replacing its recorded hashes changes the experiment rather than reproducing it.
 
-Omnitron 0.4.16 uses Xec 0.13.2. Package manifests and the committed lockfile identify each dependency and its integrity. The workspace configuration declares overrides and patches. Check the tagged release when reproducing older builds, including any archives recorded under `vendor/`. Run the dependency and package-consumer checks
+Omnitron 0.4.17 uses Xec 0.13.2. Package manifests and the committed lockfile identify each dependency and its integrity. The workspace configuration declares overrides and patches. Check the tagged release when reproducing older builds, including any archives recorded under `vendor/`. Run the dependency and package-consumer checks
 when updating these inputs; do not add a second SSH transport to Omnitron.
 
 Since Omnitron 0.4.13, backup recovery requires the Xec Core 0.13.2

@@ -157,6 +157,7 @@ export default {
     "./tracing": "titan/tracing.md"
   },
   "@omnitron-dev/titan-auth": {
+    "./owner-recovery": "titan/modules/auth.mdx",
     ".": "titan/modules/auth.mdx",
     "./preset/shared-session": "titan/modules/shared-session.md",
     "./preset/session-authority": "titan/modules/shared-session.md",

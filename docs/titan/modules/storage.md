@@ -52,6 +52,8 @@ Keep persistent data outside sealed application and execution-owner runtimes.
 
 ## Operations {#operations}
 
+Pass the original object key to the S3 adapter when copying. A key such as `каталог/a b%20.png` retains both its space and its literal `%20`. The adapter encodes the copy header.
+
 | Surface | Methods |
 | --- | --- |
 | Object bytes and metadata | `put`, `get`, `head`, `exists` |

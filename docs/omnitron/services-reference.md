@@ -8,7 +8,7 @@ description: Every RPC service exposed by the daemon — names, methods, roles.
 
 # Services reference
 
-Look up the service id and public method count for Omnitron 0.4.16 below. Roles, transport restrictions and enabled modules determine which calls a client can make. A local administrator and an enrolled peer use different services to review a flow transfer. [Daemon authentication](./daemon.md#auth-flow)
+Look up the service id and public method count for Omnitron 0.4.17 below. Roles, transport restrictions and enabled modules determine which calls a client can make. A local administrator and an enrolled peer use different services to review a flow transfer. [Daemon authentication](./daemon.md#auth-flow)
 
 Re-check this page from the website repository root, replacing the sample path
 with your separately obtained Omni source checkout:
@@ -43,6 +43,7 @@ The check reads each service class and its own `@Public` methods from the daemon
 | `kubernetes.rpc-service.ts` | `OmnitronKubernetes` | 9 | admin |
 | `log-collector.rpc-service.ts` | `OmnitronLogs` | 4 | viewer |
 | `node-manager.rpc-service.ts` | `OmnitronNodes` | 38 | viewer (read), operator (operations), admin (historical repair and managed kernel rollout) |
+| `owner-recovery/rpc-service.ts` | `OmnitronOwnerRecovery` | 9 | Each operation checks its enrolled identity, signature or ceremony-specific proof. [Owner recovery](./auth-rbac.md#installation-owner-recovery) |
 | `pipeline.rpc-service.ts` | `OmnitronPipelines` | 14 | admin + live human session / trusted local CLI |
 | `project.rpc-service.ts` | `OmnitronProject` | 60 | Viewer reads and reviews, operator starts/stops, administrator manages registrations, machine credentials run the recipient protocol |
 | `release.rpc-service.ts` | `OmnitronRelease` | 12 | viewer (read), operator (build/attest), admin (prune) |

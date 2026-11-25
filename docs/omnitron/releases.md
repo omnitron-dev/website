@@ -75,13 +75,14 @@ a single reviewed start.
 `omnitron --json sdk status` reports the active origin and verified import count.
 Add `--stack dev` to check existing receipts against the owner's current
 generations.
-After stopping source applications, `omnitron sdk registry` restores the normal
-frozen installation. A release can be built while a developer uses a local SDK:
-the builder installs the lockfile from the selected Git commit in a clean clone.
-To enforce this input policy, set `omnitron.release.frameworkInput` to
-`"registry"` in the workspace package.json. For an external deployment publish
-changed platform packages first, update their catalog and lockfile together in
-a registry checkout, then build and deploy the resulting project commit.
+After stopping the applications that use the dev SDK, choose the command that matches the distribution in the project lockfile.
+
+| Project distribution | Return from development | Verification |
+| --- | --- | --- |
+| npm packages | `omnitron sdk registry` | Installed versions and SHA-512 match the frozen registry lockfile. |
+| Committed SDK archives | `omnitron sdk vendored` | Archive Git blobs, lockfile hashes, installed package files and transitive framework dependencies match. |
+
+Set `omnitron.release.frameworkInput` in the root package manifest to `"registry"` or `"vendored"` to require that input for release builds. For a vendored release, supply the full framework revision with `--omni-commit` and the source repository for reproduction. The builder checks the archives before installing the project. Use `omnitron sdk recover` if a distribution switch was interrupted.
 
 ## Rebuilding an artifact {#rebuilding-an-artifact}
 
@@ -1041,7 +1042,7 @@ audit APIs without provisioning, starting, stopping or deploying anything.
 
 ## Dependency identity {#dependency-identity}
 
-For local SDK development, run `omnitron sdk init` to install or upgrade the managed pnpm hook. Relative `file:` and `link:` overrides resolve from the consumer workspace in the development profile, including transitive dependencies. `omnitron sdk registry` restores the distribution lockfile.
+For local SDK development, run `omnitron sdk init` to install or upgrade the managed pnpm hook. Relative `file:` and `link:` overrides resolve from the consumer workspace in the development profile, including transitive dependencies. Use `omnitron sdk registry` for published packages or `omnitron sdk vendored` for committed archives.
 
 The local bundle carries workspace packages and local `file:` archive overrides.
 It asks pnpm for the effective overrides, validates each archive's package name,

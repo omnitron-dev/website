@@ -8,7 +8,7 @@ description: Every package shipped from the monorepo, grouped by role.
 
 # Package Index
 
-Choose a package by the part of the system you are building. The [API index](./api-index.mdx) lists the public entry points and symbol declarations in Omnitron 0.4.16. For a source SDK or a mixed-version application, check the [compatibility guide](./compatibility.md) and [composition boundaries](../foundations/composition.md).
+Choose a package by the part of the system you are building. The [API index](./api-index.mdx) lists the public entry points and symbol declarations in Omnitron 0.4.17. For a source SDK or a mixed-version application, check the [compatibility guide](./compatibility.md) and [composition boundaries](../foundations/composition.md).
 
 ## Server-side / Backend {#server-side--backend}
 

@@ -14,7 +14,7 @@ Start with the [Lumen overview](docs/lumen/overview.md),
 [authoring guide](docs/lumen/authoring.md) or
 [explanation of this site's build](docs/lumen/this-site.md).
 
-The site uses Lumen and Prism **0.4.16**. CI and GitHub Pages install the tracked lockfile. Table semantics, syntax colors, navigation and breadcrumb theming come from the published framework.
+The site uses Lumen and Prism **0.4.17**. CI and GitHub Pages install the tracked lockfile. Table semantics, syntax colors, navigation and breadcrumb theming come from the published framework.
 
 The [privacy guide](docs/foundations/privacy.md) explains data boundaries.
 [Node architecture](docs/omnitron/architecture.md) explains supervision and
@@ -173,7 +173,7 @@ Guides may describe newer platform APIs, but live examples and rendering feature
 must work with the locked Lumen and Prism versions.
 
 The site maintains a separate install-time dependency security patch for picomatch 4.0.7 used by its direct
-Vite dependency. Lumen 0.4.16 includes the same reviewed parser fix in its bundled
+Vite dependency. Lumen 0.4.17 includes the same reviewed parser fix in its bundled
 Vite distribution. KB is outside the website dependency graph, and Prism includes
 the documentation sidebar's scroll restoration. The former KB and Prism client
 patches and the KB side-effects cache exclusion have been removed.
@@ -191,7 +191,7 @@ direct Vite dependency; the separate file inventory also covers Lumen's bundled
 copy. A clean report must have a successful exit status and zero vulnerability
 counts; the installed-file verification still runs. A report with findings must
 match only the reviewed advisory. The lockfile records the verified npm SHA-512
-for each of the 13 Omnitron packages admitted at exactly 0.4.16.
+for each of the 13 Omnitron packages admitted at exactly 0.4.17.
 
 For release verification, use a clean checkout and a dedicated project virtual store.
 An upgrade can leave an earlier Lumen bundle in a reused store. The inventory

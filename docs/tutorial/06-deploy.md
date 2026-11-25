@@ -12,7 +12,7 @@ Run the API and portal on one host. Caddy terminates TLS and routes requests und
 
 ## Build the API {#build-the-api}
 
-Pin pnpm in the root `package.json` with `"packageManager": "pnpm@12.21.0"`. Set `injectWorkspacePackages: true` in `pnpm-workspace.yaml`, add the migration CLI with `pnpm --dir apps/api add @omnitron-dev/omnitron@0.4.16` and commit the refreshed lockfile. In `.dockerignore`, exclude `.git`, `**/node_modules`, `**/dist`, `.env` and `**/.env*`.
+Pin pnpm in the root `package.json` with `"packageManager": "pnpm@12.21.0"`. Set `injectWorkspacePackages: true` in `pnpm-workspace.yaml`, add the migration CLI with `pnpm --dir apps/api add @omnitron-dev/omnitron@0.4.17` and commit the refreshed lockfile. In `.dockerignore`, exclude `.git`, `**/node_modules`, `**/dist`, `.env` and `**/.env*`.
 
 `apps/api/Dockerfile` packages the application with its production dependencies.
 

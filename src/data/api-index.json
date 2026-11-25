@@ -1,5 +1,5 @@
 {
-  "revision": "4c9b2782d029e6bc77b41efb3e625b71d5928d12",
+  "revision": "789ccb4368706b18b7f49e8dd950fd0a2559ca66",
   "packages": [
     "@omnitron-dev/access",
     "@omnitron-dev/common",
@@ -619,6 +619,10 @@
     {
       "path": "@omnitron-dev/titan-auth/access",
       "guide": "/docs/auth/access-policy"
+    },
+    {
+      "path": "@omnitron-dev/titan-auth/owner-recovery",
+      "guide": "/docs/titan/modules/auth"
     },
     {
       "path": "@omnitron-dev/titan-auth/preset/session-authority",
@@ -16130,7 +16134,7 @@
       "name": "AggregatedHealthDto",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "apps/omnitron/src/config/types.ts#L1113",
+      "source": "apps/omnitron/src/config/types.ts#L1115",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron",
@@ -16150,7 +16154,7 @@
       "name": "AggregatedMetricsDto",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "apps/omnitron/src/config/types.ts#L1076",
+      "source": "apps/omnitron/src/config/types.ts#L1078",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron",
@@ -16402,7 +16406,7 @@
       "name": "AppDiagnosticsDto",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "apps/omnitron/src/config/types.ts#L1232",
+      "source": "apps/omnitron/src/config/types.ts#L1234",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron",
@@ -16530,7 +16534,7 @@
       "name": "AppStatus",
       "package": "@omnitron-dev/omnitron",
       "kind": "type",
-      "source": "apps/omnitron/src/config/types.ts#L979",
+      "source": "apps/omnitron/src/config/types.ts#L981",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron",
@@ -16666,7 +16670,7 @@
       "name": "AttestStored",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "apps/omnitron/src/shared/dto/services.ts#L970",
+      "source": "apps/omnitron/src/shared/dto/services.ts#L971",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/dto/services",
@@ -16778,7 +16782,7 @@
       "name": "ChildDiagnosticsDto",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "apps/omnitron/src/config/types.ts#L1182",
+      "source": "apps/omnitron/src/config/types.ts#L1184",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/config",
@@ -17142,7 +17146,7 @@
       "name": "DaemonStatusDto",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "apps/omnitron/src/config/types.ts#L1055",
+      "source": "apps/omnitron/src/config/types.ts#L1057",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron",
@@ -17330,7 +17334,7 @@
       "name": "DeployProgressRecord",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "apps/omnitron/src/shared/dto/services.ts#L363",
+      "source": "apps/omnitron/src/shared/dto/services.ts#L364",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/dto/services",
@@ -17842,7 +17846,7 @@
       "name": "FleetStatusDto",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "apps/omnitron/src/shared/dto/services.ts#L299",
+      "source": "apps/omnitron/src/shared/dto/services.ts#L300",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/dto/services",
@@ -18494,7 +18498,7 @@
       "name": "IAlertSink",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "apps/omnitron/src/config/types.ts#L882",
+      "source": "apps/omnitron/src/config/types.ts#L884",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/config",
@@ -18546,7 +18550,7 @@
       "name": "IDaemonService",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "apps/omnitron/src/shared/dto/services.ts#L94",
+      "source": "apps/omnitron/src/shared/dto/services.ts#L95",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/dto/services",
@@ -18574,7 +18578,7 @@
       "name": "IEcosystemConfig",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "apps/omnitron/src/config/types.ts#L896",
+      "source": "apps/omnitron/src/config/types.ts#L898",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron",
@@ -18630,7 +18634,7 @@
       "name": "IInfraService",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "apps/omnitron/src/shared/dto/services.ts#L305",
+      "source": "apps/omnitron/src/shared/dto/services.ts#L306",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/dto/services",
@@ -19030,7 +19034,7 @@
       "name": "IOmnitronAlertsService",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "apps/omnitron/src/shared/dto/services.ts#L514",
+      "source": "apps/omnitron/src/shared/dto/services.ts#L515",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/dto/services",
@@ -19042,7 +19046,7 @@
       "name": "IOmnitronAuditService",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "apps/omnitron/src/shared/dto/services.ts#L711",
+      "source": "apps/omnitron/src/shared/dto/services.ts#L712",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/dto/services",
@@ -19054,7 +19058,7 @@
       "name": "IOmnitronAuthService",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "apps/omnitron/src/shared/dto/services.ts#L209",
+      "source": "apps/omnitron/src/shared/dto/services.ts#L210",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/dto/services",
@@ -19078,7 +19082,7 @@
       "name": "IOmnitronBackupsService",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "apps/omnitron/src/shared/dto/services.ts#L656",
+      "source": "apps/omnitron/src/shared/dto/services.ts#L657",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/dto/services",
@@ -19090,7 +19094,7 @@
       "name": "IOmnitronDeployService",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "apps/omnitron/src/shared/dto/services.ts#L538",
+      "source": "apps/omnitron/src/shared/dto/services.ts#L539",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/dto/services",
@@ -19102,7 +19106,7 @@
       "name": "IOmnitronDiscoveryService",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "apps/omnitron/src/shared/dto/services.ts#L699",
+      "source": "apps/omnitron/src/shared/dto/services.ts#L700",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/dto/services",
@@ -19138,7 +19142,7 @@
       "name": "IOmnitronFleetService",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "apps/omnitron/src/shared/dto/services.ts#L600",
+      "source": "apps/omnitron/src/shared/dto/services.ts#L601",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/dto/services",
@@ -19162,7 +19166,7 @@
       "name": "IOmnitronHealthService",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "apps/omnitron/src/shared/dto/services.ts#L691",
+      "source": "apps/omnitron/src/shared/dto/services.ts#L692",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/dto/services",
@@ -19174,7 +19178,7 @@
       "name": "IOmnitronInfraService",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "apps/omnitron/src/shared/dto/services.ts#L556",
+      "source": "apps/omnitron/src/shared/dto/services.ts#L557",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/dto/services",
@@ -19186,7 +19190,7 @@
       "name": "IOmnitronKubernetesService",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "apps/omnitron/src/shared/dto/services.ts#L678",
+      "source": "apps/omnitron/src/shared/dto/services.ts#L679",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/dto/services",
@@ -19198,7 +19202,7 @@
       "name": "IOmnitronLogsService",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "apps/omnitron/src/shared/dto/services.ts#L254",
+      "source": "apps/omnitron/src/shared/dto/services.ts#L255",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/dto/services",
@@ -19210,7 +19214,7 @@
       "name": "IOmnitronMetricsService",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "apps/omnitron/src/shared/dto/services.ts#L882",
+      "source": "apps/omnitron/src/shared/dto/services.ts#L883",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/dto/services",
@@ -19222,7 +19226,19 @@
       "name": "IOmnitronNodesService",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "apps/omnitron/src/shared/dto/services.ts#L742",
+      "source": "apps/omnitron/src/shared/dto/services.ts#L743",
+      "imports": [
+        {
+          "path": "@omnitron-dev/omnitron/dto/services",
+          "guide": "/docs/omnitron/services-reference"
+        }
+      ]
+    },
+    {
+      "name": "IOmnitronOwnerRecoveryService",
+      "package": "@omnitron-dev/omnitron",
+      "kind": "interface",
+      "source": "apps/omnitron/src/shared/dto/owner-recovery.ts#L37",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/dto/services",
@@ -19234,7 +19250,7 @@
       "name": "IOmnitronPipelinesService",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "apps/omnitron/src/shared/dto/services.ts#L615",
+      "source": "apps/omnitron/src/shared/dto/services.ts#L616",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/dto/services",
@@ -19250,7 +19266,7 @@
       "name": "IOmnitronReleaseService",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "apps/omnitron/src/shared/dto/services.ts#L977",
+      "source": "apps/omnitron/src/shared/dto/services.ts#L978",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/dto/services",
@@ -19262,7 +19278,7 @@
       "name": "IOmnitronSecretsService",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "apps/omnitron/src/shared/dto/services.ts#L718",
+      "source": "apps/omnitron/src/shared/dto/services.ts#L719",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/dto/services",
@@ -19290,7 +19306,7 @@
       "name": "IOmnitronSystemInfoService",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "apps/omnitron/src/shared/dto/services.ts#L642",
+      "source": "apps/omnitron/src/shared/dto/services.ts#L643",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/dto/services",
@@ -19302,7 +19318,7 @@
       "name": "IOmnitronTerminalService",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "apps/omnitron/src/shared/dto/services.ts#L1007",
+      "source": "apps/omnitron/src/shared/dto/services.ts#L1008",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/dto/services",
@@ -19314,7 +19330,7 @@
       "name": "IOmnitronTracesService",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "apps/omnitron/src/shared/dto/services.ts#L633",
+      "source": "apps/omnitron/src/shared/dto/services.ts#L634",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/dto/services",
@@ -19406,7 +19422,7 @@
       "name": "IProjectRpcService",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "apps/omnitron/src/shared/dto/services.ts#L380",
+      "source": "apps/omnitron/src/shared/dto/services.ts#L381",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/dto/services",
@@ -19514,7 +19530,7 @@
       "name": "isLostRpcAcknowledgement",
       "package": "@omnitron-dev/omnitron",
       "kind": "function",
-      "source": "apps/omnitron/src/shared/dto/services.ts#L82",
+      "source": "apps/omnitron/src/shared/dto/services.ts#L83",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/dto/services",
@@ -19838,7 +19854,7 @@
       "name": "LastExitDto",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "apps/omnitron/src/config/types.ts#L1154",
+      "source": "apps/omnitron/src/config/types.ts#L1156",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/config",
@@ -19946,7 +19962,7 @@
       "name": "LogEntryDto",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "apps/omnitron/src/config/types.ts#L1140",
+      "source": "apps/omnitron/src/config/types.ts#L1142",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron",
@@ -19990,7 +20006,7 @@
       "name": "LogPathsDto",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "apps/omnitron/src/config/types.ts#L1225",
+      "source": "apps/omnitron/src/config/types.ts#L1227",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/config",
@@ -20026,7 +20042,7 @@
       "name": "LONG_REQUEST_TIMEOUT",
       "package": "@omnitron-dev/omnitron",
       "kind": "value",
-      "source": "apps/omnitron/src/shared/dto/services.ts#L42",
+      "source": "apps/omnitron/src/shared/dto/services.ts#L43",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/dto/services",
@@ -20811,6 +20827,30 @@
       ]
     },
     {
+      "name": "OwnerPairingProof",
+      "package": "@omnitron-dev/omnitron",
+      "kind": "interface",
+      "source": "apps/omnitron/src/shared/dto/owner-recovery.ts#L21",
+      "imports": [
+        {
+          "path": "@omnitron-dev/omnitron/dto/services",
+          "guide": "/docs/omnitron/services-reference"
+        }
+      ]
+    },
+    {
+      "name": "OwnerRecoveryReview",
+      "package": "@omnitron-dev/omnitron",
+      "kind": "interface",
+      "source": "apps/omnitron/src/shared/dto/owner-recovery.ts#L2",
+      "imports": [
+        {
+          "path": "@omnitron-dev/omnitron/dto/services",
+          "guide": "/docs/omnitron/services-reference"
+        }
+      ]
+    },
+    {
       "name": "parseArtifactIdentity",
       "package": "@omnitron-dev/omnitron",
       "kind": "function",
@@ -21058,7 +21098,7 @@
       "name": "PoolDiagnosticsDto",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "apps/omnitron/src/config/types.ts#L1206",
+      "source": "apps/omnitron/src/config/types.ts#L1208",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/config",
@@ -21154,7 +21194,7 @@
       "name": "ProcessInfoDto",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "apps/omnitron/src/config/types.ts#L997",
+      "source": "apps/omnitron/src/config/types.ts#L999",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron",
@@ -21630,7 +21670,7 @@
       "name": "ReleaseDeploymentDto",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "apps/omnitron/src/shared/dto/services.ts#L923",
+      "source": "apps/omnitron/src/shared/dto/services.ts#L924",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/dto/services",
@@ -21702,7 +21742,7 @@
       "name": "ReleasePreflightDto",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "apps/omnitron/src/shared/dto/services.ts#L903",
+      "source": "apps/omnitron/src/shared/dto/services.ts#L904",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/dto/services",
@@ -21714,7 +21754,7 @@
       "name": "ReleasePruneAnswer",
       "package": "@omnitron-dev/omnitron",
       "kind": "type",
-      "source": "apps/omnitron/src/shared/dto/services.ts#L949",
+      "source": "apps/omnitron/src/shared/dto/services.ts#L950",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/dto/services",
@@ -21810,7 +21850,7 @@
       "name": "ResumeSourceWatch",
       "package": "@omnitron-dev/omnitron",
       "kind": "type",
-      "source": "apps/omnitron/src/shared/dto/services.ts#L73",
+      "source": "apps/omnitron/src/shared/dto/services.ts#L74",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/dto/services",
@@ -21922,7 +21962,7 @@
       "name": "RuntimeReleaseEvidence",
       "package": "@omnitron-dev/omnitron",
       "kind": "type",
-      "source": "apps/omnitron/src/config/types.ts#L982",
+      "source": "apps/omnitron/src/config/types.ts#L984",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/config",
@@ -22030,7 +22070,7 @@
       "name": "ServerInfoDto",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "apps/omnitron/src/shared/dto/services.ts#L290",
+      "source": "apps/omnitron/src/shared/dto/services.ts#L291",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/dto/services",
@@ -22078,7 +22118,7 @@
       "name": "SourceChangeRequest",
       "package": "@omnitron-dev/omnitron",
       "kind": "type",
-      "source": "apps/omnitron/src/shared/dto/services.ts#L52",
+      "source": "apps/omnitron/src/shared/dto/services.ts#L53",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/dto/services",
@@ -22090,7 +22130,7 @@
       "name": "SourceRefreshReceipt",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "apps/omnitron/src/shared/dto/services.ts#L76",
+      "source": "apps/omnitron/src/shared/dto/services.ts#L77",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/dto/services",
@@ -22102,7 +22142,7 @@
       "name": "SourceWatchObservation",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "apps/omnitron/src/shared/dto/services.ts#L64",
+      "source": "apps/omnitron/src/shared/dto/services.ts#L65",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/dto/services",
@@ -22114,7 +22154,7 @@
       "name": "SourceWatchReceipt",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "apps/omnitron/src/shared/dto/services.ts#L55",
+      "source": "apps/omnitron/src/shared/dto/services.ts#L56",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/dto/services",
@@ -23110,7 +23150,7 @@
       "name": "SubProcessInfoDto",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "apps/omnitron/src/config/types.ts#L1021",
+      "source": "apps/omnitron/src/config/types.ts#L1023",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron",
@@ -23142,7 +23182,7 @@
       "name": "SuspendSourceWatch",
       "package": "@omnitron-dev/omnitron",
       "kind": "type",
-      "source": "apps/omnitron/src/shared/dto/services.ts#L72",
+      "source": "apps/omnitron/src/shared/dto/services.ts#L73",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/dto/services",
@@ -23546,7 +23586,7 @@
       "name": "WatchedApplication",
       "package": "@omnitron-dev/omnitron",
       "kind": "interface",
-      "source": "apps/omnitron/src/shared/dto/services.ts#L45",
+      "source": "apps/omnitron/src/shared/dto/services.ts#L46",
       "imports": [
         {
           "path": "@omnitron-dev/omnitron/dto/services",
@@ -49766,7 +49806,7 @@
       "name": "AuditLogger",
       "package": "@omnitron-dev/titan",
       "kind": "class",
-      "source": "packages/titan/src/netron/auth/audit-logger.ts#L404",
+      "source": "packages/titan/src/netron/auth/audit-logger.ts#L406",
       "imports": [
         {
           "path": "@omnitron-dev/titan/netron/auth",
@@ -50498,7 +50538,7 @@
       "name": "clearCookie",
       "package": "@omnitron-dev/titan",
       "kind": "function",
-      "source": "packages/titan/src/netron/auth/token-issuance.ts#L219",
+      "source": "packages/titan/src/netron/auth/token-issuance.ts#L225",
       "imports": [
         {
           "path": "@omnitron-dev/titan/netron/auth",
@@ -50510,7 +50550,7 @@
       "name": "clearTokens",
       "package": "@omnitron-dev/titan",
       "kind": "function",
-      "source": "packages/titan/src/netron/auth/token-issuance.ts#L145",
+      "source": "packages/titan/src/netron/auth/token-issuance.ts#L151",
       "imports": [
         {
           "path": "@omnitron-dev/titan/netron/auth",
@@ -55626,7 +55666,7 @@
       "name": "issueCookie",
       "package": "@omnitron-dev/titan",
       "kind": "function",
-      "source": "packages/titan/src/netron/auth/token-issuance.ts#L188",
+      "source": "packages/titan/src/netron/auth/token-issuance.ts#L194",
       "imports": [
         {
           "path": "@omnitron-dev/titan/netron/auth",
@@ -55662,7 +55702,7 @@
       "name": "issueTokens",
       "package": "@omnitron-dev/titan",
       "kind": "function",
-      "source": "packages/titan/src/netron/auth/token-issuance.ts#L125",
+      "source": "packages/titan/src/netron/auth/token-issuance.ts#L131",
       "imports": [
         {
           "path": "@omnitron-dev/titan/netron/auth",
@@ -58243,6 +58283,18 @@
       "package": "@omnitron-dev/titan",
       "kind": "function",
       "source": "packages/titan/src/netron/auth/token-issuance.ts#L75",
+      "imports": [
+        {
+          "path": "@omnitron-dev/titan/netron/auth",
+          "guide": "/docs/titan/netron/authentication"
+        }
+      ]
+    },
+    {
+      "name": "readRequestOrigin",
+      "package": "@omnitron-dev/titan",
+      "kind": "function",
+      "source": "packages/titan/src/netron/auth/token-issuance.ts#L107",
       "imports": [
         {
           "path": "@omnitron-dev/titan/netron/auth",
@@ -61595,6 +61647,30 @@
       ]
     },
     {
+      "name": "parseRecoveryIntent",
+      "package": "@omnitron-dev/titan-auth",
+      "kind": "function",
+      "source": "packages/titan-auth/src/owner-recovery.ts#L75",
+      "imports": [
+        {
+          "path": "@omnitron-dev/titan-auth/owner-recovery",
+          "guide": "/docs/titan/modules/auth"
+        }
+      ]
+    },
+    {
+      "name": "parseRecoveryReceipt",
+      "package": "@omnitron-dev/titan-auth",
+      "kind": "function",
+      "source": "packages/titan-auth/src/owner-recovery.ts#L146",
+      "imports": [
+        {
+          "path": "@omnitron-dev/titan-auth/owner-recovery",
+          "guide": "/docs/titan/modules/auth"
+        }
+      ]
+    },
+    {
       "name": "PermissionDefinition",
       "package": "@omnitron-dev/titan-auth",
       "kind": "interface",
@@ -61698,6 +61774,102 @@
       "imports": [
         {
           "path": "@omnitron-dev/titan-auth",
+          "guide": "/docs/titan/modules/auth"
+        }
+      ]
+    },
+    {
+      "name": "RECOVERY_LIFETIME_MS",
+      "package": "@omnitron-dev/titan-auth",
+      "kind": "value",
+      "source": "packages/titan-auth/src/owner-recovery.ts#L6",
+      "imports": [
+        {
+          "path": "@omnitron-dev/titan-auth/owner-recovery",
+          "guide": "/docs/titan/modules/auth"
+        }
+      ]
+    },
+    {
+      "name": "RECOVERY_METHOD",
+      "package": "@omnitron-dev/titan-auth",
+      "kind": "value",
+      "source": "packages/titan-auth/src/owner-recovery.ts#L5",
+      "imports": [
+        {
+          "path": "@omnitron-dev/titan-auth/owner-recovery",
+          "guide": "/docs/titan/modules/auth"
+        }
+      ]
+    },
+    {
+      "name": "RecoveryDomain",
+      "package": "@omnitron-dev/titan-auth",
+      "kind": "type",
+      "source": "packages/titan-auth/src/owner-recovery.ts#L45",
+      "imports": [
+        {
+          "path": "@omnitron-dev/titan-auth/owner-recovery",
+          "guide": "/docs/titan/modules/auth"
+        }
+      ]
+    },
+    {
+      "name": "RecoveryEnvelope",
+      "package": "@omnitron-dev/titan-auth",
+      "kind": "interface",
+      "source": "packages/titan-auth/src/owner-recovery.ts#L37",
+      "imports": [
+        {
+          "path": "@omnitron-dev/titan-auth/owner-recovery",
+          "guide": "/docs/titan/modules/auth"
+        }
+      ]
+    },
+    {
+      "name": "RecoveryGrant",
+      "package": "@omnitron-dev/titan-auth",
+      "kind": "interface",
+      "source": "packages/titan-auth/src/owner-recovery.ts#L23",
+      "imports": [
+        {
+          "path": "@omnitron-dev/titan-auth/owner-recovery",
+          "guide": "/docs/titan/modules/auth"
+        }
+      ]
+    },
+    {
+      "name": "RecoveryIntent",
+      "package": "@omnitron-dev/titan-auth",
+      "kind": "interface",
+      "source": "packages/titan-auth/src/owner-recovery.ts#L8",
+      "imports": [
+        {
+          "path": "@omnitron-dev/titan-auth/owner-recovery",
+          "guide": "/docs/titan/modules/auth"
+        }
+      ]
+    },
+    {
+      "name": "recoveryIntentDigest",
+      "package": "@omnitron-dev/titan-auth",
+      "kind": "function",
+      "source": "packages/titan-auth/src/owner-recovery.ts#L119",
+      "imports": [
+        {
+          "path": "@omnitron-dev/titan-auth/owner-recovery",
+          "guide": "/docs/titan/modules/auth"
+        }
+      ]
+    },
+    {
+      "name": "RecoveryReceipt",
+      "package": "@omnitron-dev/titan-auth",
+      "kind": "interface",
+      "source": "packages/titan-auth/src/owner-recovery.ts#L27",
+      "imports": [
+        {
+          "path": "@omnitron-dev/titan-auth/owner-recovery",
           "guide": "/docs/titan/modules/auth"
         }
       ]
@@ -61919,6 +62091,18 @@
       ]
     },
     {
+      "name": "signRecoveryEnvelope",
+      "package": "@omnitron-dev/titan-auth",
+      "kind": "function",
+      "source": "packages/titan-auth/src/owner-recovery.ts#L129",
+      "imports": [
+        {
+          "path": "@omnitron-dev/titan-auth/owner-recovery",
+          "guide": "/docs/titan/modules/auth"
+        }
+      ]
+    },
+    {
       "name": "TitanAuthModule",
       "package": "@omnitron-dev/titan-auth",
       "kind": "class",
@@ -61950,6 +62134,18 @@
       "imports": [
         {
           "path": "@omnitron-dev/titan-auth",
+          "guide": "/docs/titan/modules/auth"
+        }
+      ]
+    },
+    {
+      "name": "verifyRecoveryEnvelope",
+      "package": "@omnitron-dev/titan-auth",
+      "kind": "function",
+      "source": "packages/titan-auth/src/owner-recovery.ts#L134",
+      "imports": [
+        {
+          "path": "@omnitron-dev/titan-auth/owner-recovery",
           "guide": "/docs/titan/modules/auth"
         }
       ]
@@ -76426,7 +76622,7 @@
       "name": "S3Adapter",
       "package": "@omnitron-dev/titan-storage",
       "kind": "class",
-      "source": "packages/titan-storage/src/s3.adapter.ts#L61",
+      "source": "packages/titan-storage/src/s3.adapter.ts#L62",
       "imports": [
         {
           "path": "@omnitron-dev/titan-storage",

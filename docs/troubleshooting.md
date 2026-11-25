@@ -48,7 +48,7 @@ The Omnitron daemon runs on Node.js. Some library packages also test selected AP
 
 ### How does pricing / licensing work? {#how-does-pricing--licensing-work}
 
-The public Omnitron repository is MIT-licensed. Its license grants the terms for using and distributing the code. Hosting, domains and any external services you enable are separate costs. [License](https://github.com/omnitron-dev/omni/blob/v0.4.16/LICENSE)
+The public Omnitron repository is MIT-licensed. Its license grants the terms for using and distributing the code. Hosting, domains and any external services you enable are separate costs. [License](https://github.com/omnitron-dev/omni/blob/v0.4.17/LICENSE)
 
 ### When should I NOT use this stack? {#when-should-i-not-use-this-stack}
 

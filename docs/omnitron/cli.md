@@ -13,7 +13,7 @@ through `~/.omnitron/daemon.sock`. Local build, configuration and migration
 commands execute in the CLI process; application migrations can run without a
 running daemon.
 
-Use the index to choose a command group. Run `omnitron <group> <command> --help` for the options your installed version accepts. This reference follows the [0.4.16 CLI](https://github.com/omnitron-dev/omni/blob/v0.4.16/apps/omnitron/src/cli/omnitron.ts).
+Use the index to choose a command group. Run `omnitron <group> <command> --help` for the options your installed version accepts. This reference follows the [0.4.17 CLI](https://github.com/omnitron-dev/omni/blob/v0.4.17/apps/omnitron/src/cli/omnitron.ts).
 
 ## Global options {#global-options}
 
@@ -45,7 +45,7 @@ when piped into another process. Check both the JSON result and the exit status.
 | **Backend installation and replacement** | `backend status`, `backend install`, `backend installation`, `backend launcher`, `backend select`, `backend upgrade`, `backend abort`, `backend recover`, `backend owner-reconcile prepare`, `backend owner-reconcile acknowledge` |
 | **Controller builds** | `release build --publish --detach`, `release builds [project]`, `release job <id> --follow`, `release stop-build <id>` |
 | **Release admission** | `stack check-release <project> <stack> <id>` |
-| **Development SDK** | `sdk init`, `sdk dev`, `sdk status`, `sdk registry`, `sdk recover` |
+| **Development SDK** | `sdk init`, `sdk dev`, `sdk status`, `sdk registry`, `sdk vendored`, `sdk recover` |
 | **Project** | `project add`, `project list`, `project remove`, `project scan`, `project topology` |
 | **Topology** | `topology refresh`, `topology show`, `topology export`, `topology draft`, `topology plan`, `topology apply` |
 | **Stack** | `stack list`, `stack create`, `stack delete`, `stack status`, `stack progress`, `stack diagnose`, `stack prepare-release`, `stack start`, `stack stop`, `stack resume`, `stack runtime` |
@@ -480,6 +480,7 @@ in-progress launch before retrying.
 | `omnitron sdk reconcile --stack <name> --check` | Inspect a recorded SDK launch against the owner. Omit `--check` to confirm an acknowledged launch. |
 | `omnitron sdk adopt --stack <name> --check` | With consumers stopped, review current files. `--review <digest>` accepts the reviewed state and keeps the earlier uncertain attempt in history. |
 | `omnitron sdk registry` | Restore the frozen registry installation |
+| `omnitron sdk vendored` | Restore the committed SDK archives and verify their lockfile integrity, installed files and transitive packages |
 | `omnitron sdk recover [--stack <name>]` | Restore retained SDK bytes and dependency bindings without rebuilding or installing |
 
 Each command accepts `--project-dir <path>`. The developer selection is machine-local.
@@ -1419,6 +1420,7 @@ See [Console access](./access.md) for password input, account pagination and ato
 
 | Command | Result |
 | --- | --- |
+| `omnitron access sign-owner-recovery <manifest>` | Sign the reviewed enrollment on the offline commissioning host. Supply `--key-file` and `--output` to write the public signed enrollment. [Owner recovery](./auth-rbac.md#installation-owner-recovery) |
 | `omnitron access show` | Effective RPC permissions from the running daemon |
 | `omnitron access users` | Safe account directory, with continuation cursor |
 | `omnitron access create` | Create an account with a password read from a hidden prompt or stdin |

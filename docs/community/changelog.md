@@ -8,9 +8,17 @@ description: What shipped in Omnitron, where to find the matching source and how
 
 # Release notes
 
-Omnitron publishes its public workspace packages together. The tag fixes the source, the repository changelog explains the changes, and npm holds the installable packages. This manual’s API reference follows the tagged source for **0.4.16**. [GitHub release](https://github.com/omnitron-dev/omni/releases/tag/v0.4.16) · [Tagged changelog](https://github.com/omnitron-dev/omni/blob/v0.4.16/CHANGELOG.md)
+Omnitron 0.4.17 is available on npm. This manual follows the source at the release tag. [Tagged source](https://github.com/omnitron-dev/omni/tree/v0.4.17) · [Changelog](https://github.com/omnitron-dev/omni/blob/v0.4.17/CHANGELOG.md)
 
-## What shipped in 0.4.16 {#where-to-find-release-notes}
+## What shipped in 0.4.17 {#where-to-find-release-notes}
+
+| Area | What changes for you |
+| --- | --- |
+| Access recovery | An installation owner can enroll a passkey and keep single-use codes offline. A paired application can then replace the owner's password and revoke previous sessions. [Owner recovery](../omnitron/auth-rbac.md#installation-owner-recovery) |
+| Project SDK | A release can require SDK archives committed with the application. After local development, restore that distribution with `omnitron sdk vendored` and verify the installed files with `omnitron sdk status`. [SDK selection](../omnitron/releases.md) |
+| Object storage | S3 copies preserve keys containing Unicode, spaces and literal percent escapes. [Storage operations](../titan/modules/storage.md#operations) |
+
+## What shipped in 0.4.16 {#release-0-4-16}
 
 | Area | What changes for you |
 | --- | --- |

@@ -429,6 +429,12 @@ WebAuthn / passkeys are stronger; same flow shape.
 
 Console currently has no MFA enrollment or verification flow. The stored `totpEnabled` / `pgpEnabled` fields do not implement one. `requiresMfa` is not an enforced Titan RPC option. A future second-factor gate must verify proof server-side, bind it to the current session and enforce it in the shared authorization path before a UI can advertise it.
 
+## Recover a paired account as the installation owner {#installation-owner-recovery}
+
+Before access is lost, commission the installation, pair the application account and enroll the owner in Console. Keep the offline recovery codes separate from the passkey. Recovery is available for that specific installation and paired account.
+
+During recovery, the owner reviews the account and operation in Console and confirms with the passkey and one unused code. The application receives the replacement password, revokes the account's existing sessions and records the outcome in the same transaction. After a lost reply, application replicas can read the signed receipt for the original operation. Cancellation must account for a change the application has already committed. [Application integration](../titan/modules/auth.mdx#owner-recovery-protocol) · [Commissioning and recovery protocol](https://github.com/omnitron-dev/omni/blob/v0.4.17/apps/omnitron/OWNER-ACCESS-RECOVERY.md)
+
 ## Auth in WebSockets {#auth-in-websockets}
 
 WS auth is verified on the **upgrade request** only:
